@@ -279,16 +279,19 @@ function walletDisplayId(id: number | null): string {
     <template v-else-if="focusMode === 'process-end'">
       <div class="focus-bar__col focus-bar__col--main">
         <div class="focus-bar__kicker">Конец процесса</div>
-        <div v-for="(s, i) in terminalStates" :key="i" class="focus-bar__entry">
-          <div class="focus-bar__title-row">
+        <div class="focus-bar__title-row">
+          <template v-for="(s, i) in terminalStates" :key="i">
+            <span v-if="i > 0" class="focus-bar__sep">·</span>
             <code class="focus-bar__code focus-bar__code--state">{{ s.name }}</code>
             <span v-if="s.human" class="focus-bar__human">{{ s.human }}</span>
-            <span class="focus-bar__badge">финал</span>
-          </div>
-          <p class="focus-bar__desc">{{ s.description }}</p>
+          </template>
+          <span class="focus-bar__badge">финал</span>
         </div>
-        <p v-if="relatedCount > 0" class="focus-bar__desc focus-bar__desc--hint">
-          Связанные стандарты см. ниже ({{ relatedCount }}).
+        <p class="focus-bar__desc focus-bar__desc--hint">
+          Подробности финального статуса — в карточке этого статуса на графе.
+          <template v-if="relatedCount > 0">
+            Связанные стандарты см. ниже ({{ relatedCount }}).
+          </template>
         </p>
       </div>
     </template>
@@ -653,6 +656,7 @@ function walletDisplayId(id: number | null): string {
   color: var(--edge-focus); font-weight: 600;
 }
 .focus-bar__op-sep { color: var(--text-subtle); }
+.focus-bar__sep { color: var(--text-subtle); }
 
 /* ── CSS-tooltip, надёжный (title часто блокируется) ─────────────────────── */
 .tooltip { position: relative; display: inline-flex; align-items: center; gap: 4px; cursor: help; }

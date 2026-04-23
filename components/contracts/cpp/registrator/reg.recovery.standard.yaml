@@ -89,9 +89,9 @@ related:
   - process_type: reg.adduser
     relation: provides
     note: >
-      После ручного добавления пайщика (reg.adduser) приглашение на
-      установку ключа отправляется автоматически — off-chain часть
-      этого сценария.
+      После «Приглашения пайщика» (reg.adduser) ссылка на установку ЭЦП
+      отправляется исторически принятому пайщику автоматически — on-chain
+      часть установки ключа проходит здесь.
 
   - process_type: reg.regist
     relation: affects
