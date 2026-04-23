@@ -1,21 +1,17 @@
 import { randomUUID } from 'crypto';
 import { create } from 'xmlbuilder2';
 import { ReportType } from '../../domain/enums/report-type.enum';
-import type { IReportGenerator, ReportInput, ReportOutput } from '../../domain/interfaces/report-generator.interface';
+import type {
+  IReportGenerator,
+  ReportOutput,
+} from '../../domain/interfaces/report-generator.interface';
+import type { ZeroReportEditsShape } from '../../domain/edits-shapes/zero-report-edits.shape';
 
 /**
- * ЕФС-1 (заменил 4-ФСС с 2023 г.) — отчёт в СФР, нулевой вариант.
- *
- * Эталон: `reports-standarts/ВОСХОД/СФР_<рег>_ЕФС-1_*.xml`.
- *
- * Формат принципиально другой, чем у ФНС-форм:
- *   - кодировка UTF-8 (не windows-1251);
- *   - корневой `<ЭДСФР>` с множеством namespace'ов (АФ8, УТ8, ВС8, ЕФС8 + ns1/sig);
- *   - нет привычных <Файл>/<Документ>, подписант другой (<Руководитель>);
- *   - регистрационный номер страхователя СФР (не ИНН/КПП/ОГРН) — вводится отдельно.
- *
- * Квартальные коды СФР отличаются от ФНС:
- *   1 квартал → "03", 2 → "06", 3 → "09", год (IV) → "0".
+ * ЕФС-1 (ex-4ФСС) — отчёт в СФР, нулевой вариант.
+ * Eфс-1 принципиально отличается от ФНС-форм (UTF-8, ns'ы, <ЭДСФР>,
+ * <Руководитель> вместо <Подписант>). Квартальные коды СФР:
+ *   1 → "03", 2 → "06", 3 → "09", год (IV) → "0".
  */
 const EFS_NS = {
   default: 'http://пф.рф/ЕФС-1/2026-01-01',
@@ -30,7 +26,7 @@ const EFS_NS = {
 const ZERO = '0.00';
 const ZERO_INT = '0';
 
-function sfrPeriodCode(quarter?: number): string {
+function sfrPeriodCode(quarter: number | null): string {
   switch (quarter) {
     case 1: return '03';
     case 2: return '06';
@@ -42,16 +38,17 @@ function sfrPeriodCode(quarter?: number): string {
 
 function sfrDateTime(now: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
-  // Хардкодим Московское время (+03:00). СФР принимает отчёты в московском
-  // часовом поясе вне зависимости от того, где физически стоит backend.
-  // Раньше брался локальный TZ → если контейнер backend в UTC, writingось
-  // `+00:00`, что расходилось с ожиданием СФР и могло ломать сверку.
   const MSK_OFFSET_MIN = 3 * 60;
   const mskTime = new Date(now.getTime() + MSK_OFFSET_MIN * 60_000 + now.getTimezoneOffset() * 60_000);
   return `${mskTime.getUTCFullYear()}-${pad(mskTime.getUTCMonth() + 1)}-${pad(mskTime.getUTCDate())}T${pad(mskTime.getUTCHours())}:${pad(mskTime.getUTCMinutes())}:${pad(mskTime.getUTCSeconds())}+03:00`;
 }
 
-function addMonthlyZeroTuple(parent: any, name: string): void {
+// xmlbuilder2 `ele()` возвращает XMLBuilder, но строгий тип экспортируется
+// как generic-интерфейс, который сложно заимпортить без раздутия импортов.
+// В пределах этого файла используем узкий псевдоним.
+type XmlBuilder = ReturnType<ReturnType<typeof create>['ele']>;
+
+function addMonthlyZeroTuple(parent: XmlBuilder, name: string): void {
   const el = parent.ele(name);
   el.ele('ЕФС8:ВсегоСНачала').txt(ZERO).up();
   el.ele('ЕФС8:НаКонец').txt(ZERO).up();
@@ -64,17 +61,16 @@ function addMonthlyZeroTuple(parent: any, name: string): void {
 export class Fss4Generator implements IReportGenerator {
   readonly reportType = ReportType.FSS4;
 
-  generate(input: ReportInput): ReportOutput {
-    // Кэшируем filename — он же идёт в XML как ИдФайл (через guid внутри buildXml
-    // мы НЕ генерируем отдельный UUID, используем hash из имени файла).
-    const fileName = this.generateFileName(input);
+  generate(input: unknown): ReportOutput {
+    const edits = input as ZeroReportEditsShape;
+    const fileName = edits.header.idFile;
     const errors: string[] = [];
-    if (!input.sfrRegNumber) {
-      errors.push('Для ЕФС-1 обязательно поле sfrRegNumber (регистрационный номер страхователя в СФР)');
+    if (!edits.signer.sfrRegNumber) {
+      errors.push('Для ЕФС-1 обязателен рег. номер страхователя в СФР (поле signer.sfrRegNumber)');
       return { reportType: this.reportType, xml: '', fileName, errors, isValid: false };
     }
     try {
-      const xml = this.buildXml(input);
+      const xml = this.buildXml(edits);
       return { reportType: this.reportType, xml, fileName, errors, isValid: true };
     } catch (e) {
       errors.push(`Ошибка генерации ЕФС-1: ${e instanceof Error ? e.message : String(e)}`);
@@ -82,18 +78,12 @@ export class Fss4Generator implements IReportGenerator {
     }
   }
 
-  generateFileName(input: ReportInput): string {
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-    const reg = input.sfrRegNumber ?? '0000000000';
-    return `СФР_${reg}_ЕФС-1_${dateStr}_${randomUUID()}`;
-  }
-
-  private buildXml(input: ReportInput): string {
+  private buildXml(edits: ZeroReportEditsShape): string {
+    const { header, organization, signer } = edits;
     const now = new Date();
     const guid = randomUUID();
-    const periodCode = sfrPeriodCode(input.period);
-    const corrNum = String(input.correctionNumber ?? 0).padStart(3, '0');
+    const periodCode = sfrPeriodCode(header.period);
+    const corrNum = String(header.correctionNumber).padStart(3, '0');
 
     const doc = create({ version: '1.0', encoding: 'utf-8' });
     const edsfr = doc.ele('ЭДСФР', {
@@ -109,19 +99,19 @@ export class Fss4Generator implements IReportGenerator {
     const efs1 = edsfr.ele('ЕФС-1');
 
     const strah = efs1.ele('Страхователь');
-    strah.ele('ЕФС8:РегНомер').txt(input.sfrRegNumber!).up();
-    strah.ele('ЕФС8:Наименование').txt(input.orgName).up();
-    strah.ele('УТ8:ИНН').txt(input.inn).up();
-    strah.ele('УТ8:КПП').txt(input.kpp).up();
-    if (input.okved) strah.ele('УТ8:КодПоОКВЭД').txt(input.okved).up();
-    if (input.ogrn) strah.ele('ЕФС8:ОГРН').txt(input.ogrn).up();
+    strah.ele('ЕФС8:РегНомер').txt(signer.sfrRegNumber!).up();
+    strah.ele('ЕФС8:Наименование').txt(organization.orgName).up();
+    strah.ele('УТ8:ИНН').txt(organization.inn).up();
+    strah.ele('УТ8:КПП').txt(organization.kpp).up();
+    if (organization.okved) strah.ele('УТ8:КодПоОКВЭД').txt(organization.okved).up();
+    if (organization.ogrn) strah.ele('ЕФС8:ОГРН').txt(organization.ogrn).up();
     strah.up();
 
     const oss = efs1.ele('ОСС');
     oss.ele('НомерКорректировки').txt(corrNum).up();
     const per = oss.ele('Период');
     per.ele('Код').txt(periodCode).up();
-    per.ele('Год').txt(String(input.year)).up();
+    per.ele('Год').txt(String(header.reportYear)).up();
     per.up();
 
     const chisl = oss.ele('Численность');
@@ -164,15 +154,13 @@ export class Fss4Generator implements IReportGenerator {
 
     const ruk = efs1.ele('Руководитель');
     const fio = ruk.ele('УТ8:ФИО');
-    fio.ele('УТ8:Фамилия').txt(input.signerFio.lastName).up();
-    fio.ele('УТ8:Имя').txt(input.signerFio.firstName).up();
-    if (input.signerFio.middleName) fio.ele('УТ8:Отчество').txt(input.signerFio.middleName).up();
+    fio.ele('УТ8:Фамилия').txt(signer.lastName).up();
+    fio.ele('УТ8:Имя').txt(signer.firstName).up();
+    if (signer.middleName) fio.ele('УТ8:Отчество').txt(signer.middleName).up();
     fio.up();
-    ruk.ele('УТ8:Должность').txt(input.chairmanPosition ?? 'Председатель Совета').up();
+    ruk.ele('УТ8:Должность').txt(signer.chairmanPosition ?? 'Председатель Совета').up();
     ruk.up();
 
-    // ДатаЗаполнения: xs:date + pattern \d{4}-\d{2}-\d{2} по XSD ЕФС-1.
-    // Эталон КОНТУР-ЭКСТЕРН оставляет её пустой, но тогда XSD-валидация падает.
     const dPad = (n: number) => String(n).padStart(2, '0');
     const fillDate = `${now.getFullYear()}-${dPad(now.getMonth() + 1)}-${dPad(now.getDate())}`;
     efs1.ele('ДатаЗаполнения').txt(fillDate).up();
@@ -181,7 +169,7 @@ export class Fss4Generator implements IReportGenerator {
     const sluzh = edsfr.ele('СлужебнаяИнформация');
     sluzh.ele('АФ8:GUID').txt(guid).up();
     sluzh.ele('АФ8:ДатаВремя').txt(sfrDateTime(now)).up();
-    sluzh.ele('АФ8:ПрограммаПодготовки').txt('Платформа отчётности кооператива 1.0').up();
+    sluzh.ele('АФ8:ПрограммаПодготовки').txt(header.versProgram).up();
     sluzh.up();
 
     edsfr.up();

@@ -37,9 +37,12 @@ const HISTORY_DEFAULT_LIMIT = 20;
 /**
  * Типы отчётов вне MVP (скрываются через feature-flag).
  * Генераторы существуют и работают, но в UI/availableReports пока не светятся.
+ *
+ * MVP-5 (подтверждено Восходом): BUHOTCH, NDFL6, RSV, PSV, FSS4.
+ * DUSN/UUSN/UV_VZNOSY — специфичны для кооперативов на УСН, в MVP не входят.
  */
 const HIDDEN_IN_MVP: ReadonlySet<ReportType> = new Set([
-  ReportType.PSV,
+  ReportType.DUSN,
   ReportType.UV_VZNOSY,
   ReportType.UUSN,
 ]);

@@ -40,10 +40,18 @@ q-dialog(
           @dirty='onDirty'
         )
 
-        .stub-other(v-else-if='!isLoading && reportType !== "BUHOTCH"')
-          q-icon(name='fa-solid fa-hammer' size='48px' color='grey-5')
-          .text-subtitle1.q-mt-md Редактор этой формы в разработке
-          .text-caption.text-grey Поддержка {{ reportTitle }} — в Sprint 2 (stories 2-5..2-7)
+        ZeroReportEditor(
+          v-else-if='reportType && reportType !== "BUHOTCH" && edits'
+          :report-type='reportType'
+          :edits='zeroEdits'
+          :field-errors='fieldErrors'
+          @update:edits='onZeroEditsUpdate'
+          @dirty='onDirty'
+        )
+
+        .stub-other(v-else-if='!isLoading && !reportType')
+          q-icon(name='fa-solid fa-triangle-exclamation' size='48px' color='warning')
+          .text-subtitle1.q-mt-md Тип отчёта не задан
 
       //- Правая панель действий
       .action-panel.column.q-pa-md.no-wrap
@@ -70,13 +78,14 @@ q-dialog(
           color='grey-7'
           icon='fa-solid fa-file-pdf'
           label='Скачать PDF'
-          :disable='!canGenerate'
+          :disable='!canGenerate || reportType !== "BUHOTCH"'
           :loading='pdfLoading'
           @click='downloadPdf'
           no-caps
           stack
         )
-          q-tooltip Заполненный отчёт в PDF (из бумажного вида)
+          q-tooltip(v-if='reportType !== "BUHOTCH"') PDF-экспорт для {{ reportTitle }} будет в Sprint 3
+          q-tooltip(v-else) Заполненный отчёт в PDF (из бумажного вида)
 
         q-separator.q-my-md
 
@@ -135,6 +144,7 @@ import {
   type IReportType,
 } from 'src/entities/Report'
 import BuhotchEditor from 'extensions/reports/widgets/report-forms/BuhotchEditor.vue'
+import ZeroReportEditor from 'extensions/reports/widgets/report-forms/ZeroReportEditor.vue'
 import BuhotchForm from 'extensions/reports/widgets/report-forms/BuhotchForm.vue'
 import { exportFormToPdf, makePdfFileName } from 'extensions/reports/widgets/report-forms/pdf-export'
 
@@ -248,12 +258,47 @@ const {
 
 const buhotchEdits = computed(() => edits.value as BuhotchEdits | null)
 
+interface ZeroReportEdits {
+  header: {
+    idFile: string
+    versProgram: string
+    docDate: string
+    reportYear: number
+    period: number | null
+    correctionNumber: number
+  }
+  organization: {
+    orgName: string
+    inn: string
+    kpp: string
+    oktmo: string | null
+    okved: string | null
+    okfs: string | null
+    okopf: string | null
+    okpo: string | null
+    ogrn: string | null
+    address: string | null
+  }
+  signer: {
+    type: 'chairman' | 'representative'
+    lastName: string
+    firstName: string
+    middleName: string | null
+    repDoc: string | null
+    snils: string | null
+    sfrRegNumber: string | null
+    chairmanPosition: string | null
+  }
+}
+
+const zeroEdits = computed(() => edits.value as ZeroReportEdits | null)
+
 const reportTitle = computed(() =>
   props.reportType ? (REPORT_TITLES[props.reportType] ?? props.reportType) : '',
 )
 
 const canGenerate = computed(() =>
-  props.reportType === 'BUHOTCH' && edits.value !== null && !isLoading.value,
+  props.reportType !== null && edits.value !== null && !isLoading.value,
 )
 
 const errorsCount = computed(() => {
@@ -292,7 +337,7 @@ watch(
     generationErrors.value = []
     lastGeneratedXml.value = null
     lastGeneratedFileName.value = null
-    if (props.reportType !== 'BUHOTCH') return
+    if (!props.reportType) return
     try {
       await load()
       if (!requisites.value) {
@@ -307,6 +352,10 @@ watch(
 
 function onBuhotchEditsUpdate(next: BuhotchEdits): void {
   edits.value = next
+}
+
+function onZeroEditsUpdate(next: ZeroReportEdits): void {
+  edits.value = next as unknown as BuhotchEdits  // useReportDraft дженерик с TEdits; внешнее хранение — один ref.
 }
 
 function onDirty(path: string): void {

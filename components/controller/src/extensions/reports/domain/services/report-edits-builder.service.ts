@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotImplementedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ReportType } from '../enums/report-type.enum';
 import { ReportRequisitesService } from './report-requisites.service';
@@ -10,6 +10,8 @@ import {
 import { toThousands } from '../../infrastructure/generators/buhotch.generator';
 import { formatDate } from '../../infrastructure/generators/xml-utils';
 import type { BuhotchEditsShape } from '../edits-shapes/buhotch-edits.shape';
+import type { ZeroReportEditsShape } from '../edits-shapes/zero-report-edits.shape';
+import { REPORT_CONFIG } from '../enums/report-type.enum';
 
 /**
  * Строит «дефолтное» редактируемое состояние формы отчёта из:
@@ -58,17 +60,16 @@ export class ReportEditsBuilderService {
   async build(
     reportType: ReportType,
     year: number,
-    _period: number | null | undefined,
+    period: number | null | undefined,
     coopname: string,
   ): Promise<unknown> {
-    switch (reportType) {
-      case ReportType.BUHOTCH:
-        return this.buildBuhotch(coopname, year);
-      default:
-        throw new NotImplementedException(
-          `buildInitialReportEdits: форма ${reportType} пока не поддержана (ждём STORY-2-5).`,
-        );
+    if (reportType === ReportType.BUHOTCH) {
+      return this.buildBuhotch(coopname, year);
     }
+    // Остальные 6 форм — нулёвки через общий ZeroReportEditsShape.
+    // Per-type отличается только генерируемый XML (хардкод КНД/ВерсФорм/
+    // periodCode), но edits-состояние одинаковое по структуре.
+    return this.buildZeroReport(reportType, coopname, year, period ?? null);
   }
 
   private async buildBuhotch(coopname: string, year: number): Promise<BuhotchEditsShape> {
@@ -183,6 +184,80 @@ export class ReportEditsBuilderService {
         explanationFileName: '-',
       },
     };
+  }
+
+  /**
+   * Дефолты для 6 нулёвок: NDFL6 / RSV / PSV / DUSN / UUSN / FSS4.
+   * Все поля реквизитов — из requisitesService.getMerged. Период приходит
+   * параметром (1..4 для кварталов, 1..12 для ПСВ, null для годовой ДУСН).
+   */
+  private async buildZeroReport(
+    reportType: ReportType,
+    coopname: string,
+    year: number,
+    period: number | null,
+  ): Promise<ZeroReportEditsShape> {
+    const merged = await this.requisitesService.getMerged(coopname);
+    const signerTypeValue: ZeroReportEditsShape['signer']['type'] =
+      merged.signerType === 'representative' ? 'representative' : 'chairman';
+
+    return {
+      header: {
+        idFile: this.generateGenericFileName(reportType, merged.inn.value ?? '', merged.kpp.value ?? ''),
+        versProgram: 'Платформа отчётности кооператива 1.0',
+        docDate: formatDate(new Date()),
+        reportYear: year,
+        period: this.defaultPeriodFor(reportType, period),
+        correctionNumber: 0,
+      },
+      organization: {
+        orgName: merged.orgName.value ?? '',
+        inn: merged.inn.value ?? '',
+        kpp: merged.kpp.value ?? '',
+        oktmo: merged.oktmo.value,
+        okved: merged.okved.value,
+        okfs: merged.okfs.value,
+        okopf: merged.okopf.value,
+        okpo: merged.okpo.value,
+        ogrn: merged.ogrn.value,
+        address: merged.address.value,
+      },
+      signer: {
+        type: signerTypeValue,
+        lastName: merged.signerLastName.value ?? '',
+        firstName: merged.signerFirstName.value ?? '',
+        middleName: merged.signerMiddleName.value,
+        repDoc: merged.signerRepDoc.value,
+        snils: merged.signerSnils.value,
+        sfrRegNumber: merged.sfrRegNumber.value,
+        chairmanPosition:
+          merged.chairmanPosition.value || merged.chairmanPositionFromOrg.value,
+      },
+    };
+  }
+
+  private defaultPeriodFor(reportType: ReportType, requested: number | null): number | null {
+    // ДУСН — годовая форма, period=null.
+    if (REPORT_CONFIG[reportType]?.period === 'yearly') return null;
+    if (requested !== null && requested !== undefined) return requested;
+    return 1;
+  }
+
+  private generateGenericFileName(reportType: ReportType, inn: string, kpp: string): string {
+    // Упрощённый префикс по типу отчёта — точный формат имени зависит от
+    // формы (NO_NDFL6.2_..., СФР_..._ЕФС-1_...), но для предварительного
+    // idFile достаточно. Генератор сам перезапишет его при необходимости.
+    const xsd = REPORT_CONFIG[reportType]?.xsdFile ?? 'REPORT';
+    const prefix = xsd.split('_')[0] ?? 'REPORT';
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const unit = `${inn}${kpp}`;
+    const tax = kpp.substring(0, 4);
+    const uuid = randomUUID();
+    if (reportType === ReportType.FSS4) {
+      return `СФР_0000000000_ЕФС-1_${dateStr}_${uuid}`;
+    }
+    return `${prefix}_${tax}_${tax}_${unit}_${dateStr}_${uuid}`;
   }
 
   private rowOrNull(row: BalanceRowEdits): BalanceRowEdits | null {

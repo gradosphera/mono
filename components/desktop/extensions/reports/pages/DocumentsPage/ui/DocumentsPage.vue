@@ -146,7 +146,7 @@ import {
 } from 'src/entities/Report'
 import ReportEditorDialog from './ReportEditorDialog.vue'
 
-const MVP_REPORT_TYPES = ['BUHOTCH', 'NDFL6', 'RSV', 'DUSN', 'FSS4'] as IReportType[]
+const MVP_REPORT_TYPES = ['BUHOTCH', 'NDFL6', 'RSV', 'PSV', 'FSS4'] as IReportType[]
 
 const REPORT_TYPE_LABELS: Record<string, string> = {
   BUHOTCH: 'Бухотчётность',

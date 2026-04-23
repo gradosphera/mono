@@ -1,5 +1,5 @@
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { BadRequestException, Inject, NotFoundException, NotImplementedException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Inject, NotFoundException, UseGuards } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate, type ValidationError } from 'class-validator';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
@@ -24,6 +24,7 @@ import { ReportEditsBuilderService } from '../../domain/services/report-edits-bu
 import { applyDirtyOverrides } from '../../domain/utils/dirty-merge';
 import { BuhotchEditsInputDTO } from '../dto/buhotch-edits.dto';
 import { FieldErrorDTO } from '../dto/field-error.dto';
+import { ZeroReportEditsInputDTO } from '../dto/zero-report-edits.dto';
 
 @Resolver()
 export class ReportDraftResolver {
@@ -186,14 +187,15 @@ export class ReportDraftResolver {
    * plainToInstance применяет @Type-трансформы для вложенных объектов.
    */
   private buildEditsInputDto(reportType: ReportType, parsed: unknown): object {
-    switch (reportType) {
-      case ReportType.BUHOTCH:
-        return plainToInstance(BuhotchEditsInputDTO, parsed ?? {});
-      default:
-        throw new NotImplementedException(
-          `validateReportEdits: валидатор для ${reportType} появится в STORY-2-5 (per-type EditsDTO).`,
-        );
+    if (reportType === ReportType.BUHOTCH) {
+      return plainToInstance(BuhotchEditsInputDTO, parsed ?? {});
     }
+    // Остальные 6 форм — общий ZeroReportEditsInputDTO. Per-type отличия
+    // (обязательность СНИЛС для ПСВ, sfrRegNumber для ЕФС-1) проверяет
+    // сам генератор в runtime — DTO-валидация для них помечает
+    // соответствующие поля как @IsOptional(), и если поле пустое,
+    // generator бросит с понятным сообщением.
+    return plainToInstance(ZeroReportEditsInputDTO, parsed ?? {});
   }
 
   /**

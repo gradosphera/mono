@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { create } from 'xmlbuilder2';
 import type { ReportInput } from '../../domain/interfaces/report-generator.interface';
+import type { ZeroReportSignerShape } from '../../domain/edits-shapes/zero-report-edits.shape';
 
 export function formatDate(d: Date): string {
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
@@ -90,4 +91,50 @@ export function getMonthPeriodCode(month?: number): string {
 
 export function getTaxOfficeCode(kpp: string): string {
   return kpp.substring(0, 4);
+}
+
+/**
+ * <Подписант ПрПодп="1|2"> для ZeroReportEditsShape.
+ * `options.svPredNaimOrg` — добавить НаимОрг в <СвПред> (нужно для РСВ).
+ */
+export function addFlexibleSignerFromShape(
+  parent: any,
+  signer: ZeroReportSignerShape,
+  options?: { svPredNaimOrg?: boolean; orgName?: string },
+): any {
+  const prPodp = signer.type === 'representative' ? '2' : '1';
+  const sig = parent.ele('Подписант').att('ПрПодп', prPodp);
+  const fio = sig.ele('ФИО')
+    .att('Фамилия', signer.lastName)
+    .att('Имя', signer.firstName);
+  if (signer.middleName) fio.att('Отчество', signer.middleName);
+  fio.up();
+  if (signer.type === 'representative') {
+    const svPred = sig.ele('СвПред').att('НаимДок', signer.repDoc ?? '');
+    if (options?.svPredNaimOrg && options?.orgName) {
+      svPred.att('НаимОрг', options.orgName);
+    }
+    svPred.up();
+  }
+  return sig.up();
+}
+
+export interface HeaderMeta {
+  docDate: string;
+  period: string;
+  year: number;
+  kodNO: string;
+  correctionNumber: number;
+  poMestu: string;
+}
+
+/** Проставить общий набор атрибутов в <Документ>. */
+export function addHeaderMeta(docEl: any, meta: HeaderMeta): void {
+  docEl
+    .att('ДатаДок', meta.docDate)
+    .att('НомКорр', String(meta.correctionNumber))
+    .att('Период', meta.period)
+    .att('ОтчетГод', String(meta.year))
+    .att('КодНО', meta.kodNO)
+    .att('ПоМесту', meta.poMestu);
 }
