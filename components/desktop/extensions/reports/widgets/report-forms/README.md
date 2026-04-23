@@ -55,10 +55,12 @@ defineEmits<{
 | UUSN / UV_VZNOSY | `UusnForm.vue` | 1110355 | 5.03 |
 | FSS4 (ЕФС-1) | `Efs1Form.vue` | — (СФР) | — |
 
-Используют `useReportXml` + `_printable-form.scss`. В Sprint 1 для BUHOTCH
-применяются в скрытом DOM `ReportEditorDialog` для PDF-экспорта через
-html2pdf; для остальных 4 MVP-форм PDF-кнопка пока отключена — будет в
-Sprint 3 (перевод paper-view на edits-source).
+Используют `useReportXml` + `_printable-form.scss`. Все 5 MVP-форм
+(BUHOTCH/NDFL6/RSV/PSV/FSS4) имеют общий контракт
+`{ xml, requisites?, year? }` и `.printable-form`-root, поэтому
+`ReportEditorDialog` рендерит нужную в скрытом DOM по `reportType`
+и экспортирует в PDF через `html2pdf`. DUSN/UUSN/UV_VZNOSY скрыты
+через `HIDDEN_IN_MVP`, их paper-view оставлены для будущего.
 
 ## Как корректно править форму
 

@@ -103,13 +103,13 @@ q-dialog(
           color='grey-7'
           icon='fa-solid fa-file-pdf'
           label='Скачать PDF'
-          :disable='!canGenerate || reportType !== "BUHOTCH"'
+          :disable='!canGenerate || !hasPdfPaperView'
           :loading='pdfLoading'
           @click='downloadPdf'
           no-caps
           stack
         )
-          q-tooltip(v-if='reportType !== "BUHOTCH"') PDF-экспорт для {{ reportTitle }} будет в Sprint 3
+          q-tooltip(v-if='!hasPdfPaperView') PDF-экспорт для {{ reportTitle }} пока не поддерживается
           q-tooltip(v-else) Заполненный отчёт в PDF (из бумажного вида)
 
         q-separator.q-my-md
@@ -216,10 +216,36 @@ q-dialog(
           no-caps
         )
 
-    //- Скрытый paper-render для PDF-экспорта (рендерится по требованию)
+    //- Скрытый paper-render для PDF-экспорта (рендерится по требованию).
+    //- Все paper-views имеют общий контракт (xml, requisites?, year?)
+    //- и root .printable-form — для экспорта берём querySelector('.printable-form').
     .hidden-pdf-source(v-show='false' ref='pdfSource')
       BuhotchForm(
         v-if='lastGeneratedXml && reportType === "BUHOTCH"'
+        :xml='lastGeneratedXml'
+        :requisites='requisites'
+        :year='year'
+      )
+      Ndfl6Form(
+        v-else-if='lastGeneratedXml && reportType === "NDFL6"'
+        :xml='lastGeneratedXml'
+        :requisites='requisites'
+        :year='year'
+      )
+      RsvForm(
+        v-else-if='lastGeneratedXml && reportType === "RSV"'
+        :xml='lastGeneratedXml'
+        :requisites='requisites'
+        :year='year'
+      )
+      PsvForm(
+        v-else-if='lastGeneratedXml && reportType === "PSV"'
+        :xml='lastGeneratedXml'
+        :requisites='requisites'
+        :year='year'
+      )
+      Efs1Form(
+        v-else-if='lastGeneratedXml && reportType === "FSS4"'
         :xml='lastGeneratedXml'
         :requisites='requisites'
         :year='year'
@@ -240,7 +266,19 @@ import {
 import BuhotchEditor from 'extensions/reports/widgets/report-forms/BuhotchEditor.vue'
 import ZeroReportEditor from 'extensions/reports/widgets/report-forms/ZeroReportEditor.vue'
 import BuhotchForm from 'extensions/reports/widgets/report-forms/BuhotchForm.vue'
+import Ndfl6Form from 'extensions/reports/widgets/report-forms/Ndfl6Form.vue'
+import RsvForm from 'extensions/reports/widgets/report-forms/RsvForm.vue'
+import PsvForm from 'extensions/reports/widgets/report-forms/PsvForm.vue'
+import Efs1Form from 'extensions/reports/widgets/report-forms/Efs1Form.vue'
 import { exportFormToPdf, makePdfFileName } from 'extensions/reports/widgets/report-forms/pdf-export'
+
+// Набор типов отчётов, для которых у нас есть paper-view для PDF-экспорта.
+// 5 MVP-форм; ДУСН/УУСН/УВ_Взносы скрыты в HIDDEN_IN_MVP и сюда не попадают.
+// Сравниваем через строковое представление IReportType (Zeus-enum тип
+// нестыкуется с литералами напрямую).
+const PDF_SUPPORTED_TYPES: ReadonlySet<string> = new Set<string>([
+  'BUHOTCH', 'NDFL6', 'RSV', 'PSV', 'FSS4',
+])
 
 interface BalanceRow {
   otch: number
@@ -425,6 +463,10 @@ const reportTitle = computed(() =>
 
 const canGenerate = computed(() =>
   props.reportType !== null && edits.value !== null && !isLoading.value,
+)
+
+const hasPdfPaperView = computed(() =>
+  props.reportType !== null && PDF_SUPPORTED_TYPES.has(String(props.reportType)),
 )
 
 const errorsCount = computed(() => {
