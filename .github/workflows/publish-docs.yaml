@@ -84,6 +84,20 @@ jobs:
           mkdocs build
         working-directory: ./components/docs
 
+      # ── standards-site → /standards/ на docs.coopenomics.world ───────
+      # Отдельный Vue-сайт с BPMN-графом кооперативных стандартов,
+      # публикуется как поддиректория на том же домене. Vite собирает
+      # с base='/standards/' (см. vite.config.ts), относительные пути
+      # внутри dist/ и hash-router работают корректно.
+      - name: Build standards-site
+        run: pnpm run build
+        working-directory: ./components/contracts/standards-site
+
+      - name: Copy standards-site into docs site/standards
+        run: |
+          mkdir -p ./components/docs/site/standards
+          cp -r ./components/contracts/standards-site/dist/* ./components/docs/site/standards/
+
       - name: Remove specific large file before publishing
         run: |
           # Удаляем конкретный большой файл sdk/typedoc.json
