@@ -147,8 +147,17 @@ sprints:
         checkpoint: 16
         title: "E2E happy-path BuhotchForm"
         points: 1
-        status: "deferred"
-        note: "Перенесено в debt (STORY-4-6). Playwright-инфраструктуру под reports-экстеншн ещё не поднимали."
+        status: "rejected"
+        rejected_at: "2026-04-23"
+        rejection_reason: |
+          Отклонено до стабилизации MVP. Reasoning:
+            - UI активно переделывается каждый спринт — E2E-тесты, написанные сейчас, будут ломаться от
+              рефакторингов и обрастать .skip().
+            - Один разработчик + визуальный QA ловят регрессии быстрее, чем заведётся playwright-инфра
+              (baseURL, auth-bypass, seed-данные, isolation).
+            - Возврат запланирован как отдельный спринт «QA/автоматизация», когда стабилизируется интерфейс,
+              подключится второй разработчик или первый реальный бухгалтер сдаст отчёт на проде.
+            - Не «недоделка Sprint 3», а осознанный скоуп-каттинг.
       - story_id: "STORY-3-5"
         checkpoint: 17
         title: "Typecheck + lint + docs"
@@ -162,7 +171,8 @@ sprints:
     capacity_points: 10
     committed_points: 10
     completed_points: 10
-    status: "in_progress"
+    status: "completed"
+    completed_at: "2026-04-23"
     goal: "Header-инжекция навигации, отметки «не надо сдавать» и «сдано сторонне», production-календарь РФ, организация debt"
     stories:
       - story_id: "STORY-4-1"
@@ -230,10 +240,10 @@ sprints:
         status: "completed"
         completed_at: "2026-04-23"
         acceptance_criteria:
-          - "STORY-3-4 E2E happy-path — debt (нужна Playwright-инфра)"
-          - "PDF-экспорт 4 нулёвок — debt (перевод paper-view на edits-source, отдельный заход)"
-          - "Blago-server sync 989-9 — debt (ждёт прод-деплоя fact-схемы)"
-          - "Секция «Debt» актуализирована в 989-9.md"
+          - "STORY-3-4 E2E happy-path — отклонено (см. rejection_reason в STORY-3-4)"
+          - "PDF-экспорт 4 нулёвок — выполнено post-sprint (подключили paper-view в ReportEditorDialog)"
+          - "Blago-server sync 989-9 — подтверждено актуальным (pull без расхождений)"
+          - "Prod-календарь РФ — расширен до 2029 (BASE_RU_HOLIDAYS)"
 
 velocity:
   sprint_1: 10
