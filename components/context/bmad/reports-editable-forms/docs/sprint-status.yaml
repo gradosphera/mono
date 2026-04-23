@@ -244,6 +244,7 @@ sprints:
           - "PDF-экспорт 4 нулёвок — выполнено post-sprint (подключили paper-view в ReportEditorDialog)"
           - "Blago-server sync 989-9 — подтверждено актуальным (pull без расхождений)"
           - "Prod-календарь РФ — расширен до 2029 (BASE_RU_HOLIDAYS)"
+          - "Unit-тесты генераторов — 68 живых тестов переписаны на edits-shapes (ранее были describe.skip)"
 
 velocity:
   sprint_1: 10
