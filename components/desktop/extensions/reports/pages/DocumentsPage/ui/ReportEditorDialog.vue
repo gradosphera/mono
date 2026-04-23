@@ -9,7 +9,7 @@ q-dialog(
 )
   q-card.column.no-wrap
     q-bar.bg-primary.text-white
-      .text-subtitle1
+      .text-subtitle1.ellipsis
         | {{ reportTitle }} за {{ year }}{{ period ? ` · период ${period}` : '' }}
       q-space
       q-chip(
@@ -17,6 +17,14 @@ q-dialog(
         text-color='white'
         dense
       ) {{ saveStatusLabel }}
+      //- Mobile-only: открыть панель действий (на десктопе она всегда видна справа).
+      q-btn.q-ml-xs(
+        v-if='$q.screen.lt.md'
+        flat dense
+        icon='fa-solid fa-sliders'
+        @click='showActionsPanel = true'
+      )
+        q-tooltip Действия
       q-btn(flat dense icon='fa-solid fa-xmark' @click='close')
         q-tooltip Закрыть
 
@@ -51,8 +59,27 @@ q-dialog(
           q-icon(name='fa-solid fa-triangle-exclamation' size='48px' color='warning')
           .text-subtitle1.q-mt-md Тип отчёта не задан
 
-      //- Правая панель действий
-      .action-panel.column.q-pa-md.no-wrap
+      //- Backdrop за панелью действий (только на mobile, закрывает панель по тапу).
+      .action-backdrop(
+        v-if='$q.screen.lt.md && showActionsPanel'
+        @click='showActionsPanel = false'
+      )
+
+      //- Правая панель действий. На ≥md — inline-колонка справа (всегда видна).
+      //- На <md — slide-in overlay справа, открывается кнопкой-слайдером в шапке.
+      .action-panel.column.q-pa-md.no-wrap(
+        :class='{ "action-panel--mobile": $q.screen.lt.md, "action-panel--open": showActionsPanel }'
+      )
+        q-btn.mobile-close.q-mb-sm(
+          v-if='$q.screen.lt.md'
+          flat dense
+          icon='fa-solid fa-chevron-right'
+          label='Скрыть'
+          align='between'
+          @click='showActionsPanel = false'
+          no-caps
+        )
+
         //- Валидация
         .validation-badge.q-mb-sm(:class='{ ok: isValid, bad: !isValid }')
           q-icon(:name='isValid ? "fa-solid fa-check" : "fa-solid fa-triangle-exclamation"')
@@ -201,6 +228,7 @@ q-dialog(
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useQuasar } from 'quasar'
 import { Zeus } from '@coopenomics/sdk'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import {
@@ -284,6 +312,21 @@ const emit = defineEmits<{
 }>()
 
 const reportStore = useReportStore()
+const $q = useQuasar()
+
+// Видимость action-panel. На desktop (≥md) — всегда true; на mobile
+// по-умолчанию false, открывается кнопкой-слайдером в q-bar. При ресайзе
+// возврат на desktop автоматически «разоткроет» панель (она там не overlay).
+const showActionsPanel = ref(!$q.screen.lt.md)
+watch(
+  () => $q.screen.lt.md,
+  (isMobile) => {
+    // Desktop → всегда видна; mobile → прячем (если только пользователь
+    // не открыл вручную непосредственно перед этим).
+    if (!isMobile) showActionsPanel.value = true
+    else showActionsPanel.value = false
+  },
+)
 
 const requisites = ref<IReportRequisitesView | null>(null)
 const lastGeneratedXml = ref<string | null>(null)
@@ -598,6 +641,44 @@ function close(): void {
   flex: 0 0 260px;
   border-left: 1px solid rgba(0, 0, 0, 0.08);
   background: var(--q-neutral-2, #fafafa);
+}
+
+// Mobile: панель становится slide-in overlay справа. Без action-panel--open
+// полностью ушла за край экрана — editor-container занимает все 100% ширины.
+.action-panel--mobile {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(85vw, 320px);
+  flex: none;
+  z-index: 6001; // выше q-dialog (которое ~6000); иначе поверх не ложится
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.18);
+  transform: translateX(100%);
+  transition: transform 0.22s ease-out;
+  overflow-y: auto;
+}
+
+.action-panel--mobile.action-panel--open {
+  transform: translateX(0);
+}
+
+.action-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 6000;
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobile-close {
+  align-self: flex-end;
+  width: 100%;
 }
 
 .stub-other {

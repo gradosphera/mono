@@ -30,22 +30,23 @@
   q-inner-loading(:showing='loading')
     q-spinner(size='40px' color='primary')
 
-  .calendar-grid(v-if='rows.length')
-    .ch-corner
-    .ch-month(v-for='(m, i) in MONTH_LABELS' :key='i') {{ m }}
+  .calendar-scroll(v-if='rows.length')
+    .calendar-grid
+      .ch-corner
+      .ch-month(v-for='(m, i) in MONTH_LABELS' :key='i') {{ m }}
 
-    template(v-for='row in rows' :key='row.reportType')
-      .cell-name
-        .rt-short {{ row.shortName }}
-        .rt-kind {{ kindLabel(row.periodKind) }}
+      template(v-for='row in rows' :key='row.reportType')
+        .cell-name
+          .rt-short {{ row.shortName }}
+          .rt-kind {{ kindLabel(row.periodKind) }}
 
-      template(v-for='month in 12' :key='month')
-        CalendarCell(
-          :row='row'
-          :month='month'
-          :entry='periodAtMonth(row, month)'
-          @click='onCellClick(row, month)'
-        )
+        template(v-for='month in 12' :key='month')
+          CalendarCell(
+            :row='row'
+            :month='month'
+            :entry='periodAtMonth(row, month)'
+            @click='onCellClick(row, month)'
+          )
 
   .empty-state(v-else-if='!loading')
     q-icon(name='fa-solid fa-calendar-xmark' size='32px' color='grey-5')
@@ -136,14 +137,23 @@ defineExpose({ reload })
   margin-bottom: 12px;
 }
 
+// На мобильнике 5×12 не влезает по ширине — оборачиваем грид в горизонтальный
+// скролл. Фиксированная min-width у грида гарантирует, что ячейки не «спрессуются»
+// до нечитаемости; пользователь свайпает горизонтально.
+.calendar-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .calendar-grid {
   display: grid;
-  grid-template-columns: 180px repeat(12, 1fr);
+  grid-template-columns: 180px repeat(12, minmax(54px, 1fr));
   gap: 2px;
   background: #e0e0e0;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 2px;
+  min-width: 900px;
 }
 
 .ch-corner {
