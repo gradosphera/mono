@@ -37,10 +37,11 @@ import {
  *
  * Приоритет статусов (сверху — сильнее):
  *   1. submitted (есть валидный XML в архиве);
- *   2. draft (есть черновик);
- *   3. not_required (кооператив поставил отметку «не надо сдавать»);
- *   4. overdue (dueDate < today);
- *   5. empty.
+ *   2. submitted_externally (отметка «сдано вне платформы»);
+ *   3. draft (есть черновик);
+ *   4. not_required (отметка «не надо сдавать»);
+ *   5. overdue (dueDate < today);
+ *   6. empty.
  */
 @Resolver()
 export class ReportCalendarResolver {
@@ -140,6 +141,8 @@ export class ReportCalendarResolver {
       let status: CalendarEntryStatus;
       if (arch?.isValid) {
         status = CalendarEntryStatus.SUBMITTED;
+      } else if (mark === ReportSubmissionMark.SUBMITTED_EXTERNALLY) {
+        status = CalendarEntryStatus.SUBMITTED_EXTERNALLY;
       } else if (drafts.has(key)) {
         status = CalendarEntryStatus.DRAFT;
       } else if (mark === ReportSubmissionMark.NOT_REQUIRED) {

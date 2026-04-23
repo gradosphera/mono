@@ -115,22 +115,70 @@ q-dialog(
 
         q-separator.q-my-md
 
-        //- Отметка «не надо сдавать» — сохраняется в ReportSubmissionMark (coop-wide).
-        .mark-hint.q-mb-sm(v-if='notRequiredMark')
-          q-icon(name='fa-solid fa-circle-xmark' color='grey-7' size='14px')
-          |  Этот период отмечен как «не надо сдавать»
-        q-btn(
-          :color='notRequiredMark ? "grey-7" : "secondary"'
-          :outline='!notRequiredMark'
-          :icon='notRequiredMark ? "fa-solid fa-rotate-left" : "fa-solid fa-ban"'
-          :label='notRequiredMark ? "Снять отметку" : "Не надо сдавать"'
-          :loading='markLoading'
-          @click='toggleNotRequiredMark'
-          no-caps
-          stack
-        )
-          q-tooltip(v-if='notRequiredMark') Вернуть обычный статус периода
-          q-tooltip(v-else) Отметить, что этот период не нужно сдавать — ячейка станет серой
+        //- Отметки на ячейке календаря (ReportSubmissionMark, coop-wide).
+        //- Состояния:
+        //-   SUBMITTED (реальный XML) → mark-кнопок нет, баннер «уже сдан»
+        //-   NOT_REQUIRED             → «Снять отметку»
+        //-   SUBMITTED_EXTERNALLY     → «Снять отметку»
+        //-   null                     → две кнопки: «Не надо сдавать» + «Отметить сданным»
+
+        .mark-hint.q-mb-sm(v-if='isRealSubmitted')
+          q-icon(name='fa-solid fa-circle-check' color='positive' size='14px')
+          |  Отчёт за этот период уже сдан (XML в архиве)
+
+        template(v-else-if='currentMark === "NOT_REQUIRED"')
+          .mark-hint.q-mb-sm
+            q-icon(name='fa-solid fa-circle-xmark' color='grey-7' size='14px')
+            |  Период отмечен как «не надо сдавать»
+          q-btn(
+            color='grey-7'
+            icon='fa-solid fa-rotate-left'
+            label='Снять отметку'
+            :loading='markLoading'
+            @click='clearMark'
+            no-caps
+            stack
+          )
+            q-tooltip Вернуть обычный статус периода
+
+        template(v-else-if='currentMark === "SUBMITTED_EXTERNALLY"')
+          .mark-hint.q-mb-sm
+            q-icon(name='fa-solid fa-circle-check' color='positive' size='14px')
+            |  Период отмечен как «сдан вне платформы»
+          q-btn(
+            color='grey-7'
+            icon='fa-solid fa-rotate-left'
+            label='Снять отметку'
+            :loading='markLoading'
+            @click='clearMark'
+            no-caps
+            stack
+          )
+            q-tooltip Вернуть обычный статус периода
+
+        template(v-else)
+          q-btn.q-mb-sm(
+            outline
+            color='positive'
+            icon='fa-solid fa-circle-check'
+            label='Отметить сданным'
+            :loading='markLoading'
+            @click='markSubmittedExternally'
+            no-caps
+            stack
+          )
+            q-tooltip Если отчёт уже сдан в бумаге / через стороннюю систему. В архив XML не попадает, но ячейка станет зелёной.
+          q-btn(
+            outline
+            color='grey-8'
+            icon='fa-solid fa-ban'
+            label='Не надо сдавать'
+            :loading='markLoading'
+            @click='markNotRequired'
+            no-caps
+            stack
+          )
+            q-tooltip Отметить, что этот период сдавать не нужно — ячейка станет серой
 
         q-space
 
@@ -246,11 +294,14 @@ const generationErrors = ref<string[]>([])
 const isGenerating = ref(false)
 const pdfLoading = ref(false)
 const pdfSource = ref<HTMLElement | null>(null)
-// notRequiredMark — текущее наличие отметки «не надо сдавать» для (type, year, period).
-// Подтягивается из календаря лениво при open; здесь храним только derivative-флаг,
-// сам mark обновляется оптимистично после markReportPeriod() и refresh через календарь
-// происходит на уровне родителя (DocumentsCalendarPage.onMarked).
-const notRequiredMark = ref(false)
+// Текущая отметка на ячейке. Три состояния:
+//   null                   — отметки нет, показываем две кнопки «Не надо сдавать» / «Отметить сданным»
+//   'NOT_REQUIRED'         — ячейка серая, показываем «Снять отметку»
+//   'SUBMITTED_EXTERNALLY' — ячейка зелёная (как сдано), «Снять отметку»
+// Когда status=SUBMITTED (реальный XML) — не показываем mark-кнопок вообще.
+type CurrentMark = 'NOT_REQUIRED' | 'SUBMITTED_EXTERNALLY' | null
+const currentMark = ref<CurrentMark>(null)
+const isRealSubmitted = ref(false)
 const markLoading = ref(false)
 
 // useReportDraft требует фиксированного reportType — вводить per-open
@@ -364,20 +415,27 @@ watch(
     generationErrors.value = []
     lastGeneratedXml.value = null
     lastGeneratedFileName.value = null
-    notRequiredMark.value = false
+    currentMark.value = null
+    isRealSubmitted.value = false
     if (!props.reportType) return
     try {
       await load()
       if (!requisites.value) {
         requisites.value = (await reportStore.loadRequisites()) ?? null
       }
-      // Подтягиваем текущий статус mark'а через календарь года. Календарь
-      // и так нужен для UI — берём его одним запросом, вытягиваем запись
-      // по (reportType, period).
+      // Подтягиваем текущий статус ячейки из календаря (один запрос,
+      // он и так нужен странице).
       const cal = await reportStore.loadCalendar(props.year)
       const row = cal.find((r) => r.reportType === props.reportType)
       const entry = row?.periods.find((p) => (p.periodCode ?? null) === (props.period ?? null))
-      notRequiredMark.value = entry?.status === Zeus.CalendarEntryStatus.NOT_REQUIRED
+      if (entry?.status === Zeus.CalendarEntryStatus.SUBMITTED) {
+        isRealSubmitted.value = true
+        currentMark.value = null
+      } else if (entry?.status === Zeus.CalendarEntryStatus.SUBMITTED_EXTERNALLY) {
+        currentMark.value = 'SUBMITTED_EXTERNALLY'
+      } else if (entry?.status === Zeus.CalendarEntryStatus.NOT_REQUIRED) {
+        currentMark.value = 'NOT_REQUIRED'
+      }
     } catch (e) {
       FailAlert(e, 'Ошибка загрузки формы')
     }
@@ -482,29 +540,48 @@ async function clearDraft(): Promise<void> {
   }
 }
 
-async function toggleNotRequiredMark(): Promise<void> {
+async function applyMark(nextMark: CurrentMark, confirmMsg: string): Promise<void> {
   if (!props.reportType || markLoading.value) return
-  const shouldMark = !notRequiredMark.value
-  const confirmMsg = shouldMark
-    ? 'Отметить период как «не надо сдавать»? В календаре ячейка станет серой.'
-    : 'Снять отметку «не надо сдавать»? Статус вернётся к обычному.'
   if (!window.confirm(confirmMsg)) return
   markLoading.value = true
   try {
+    const sdkMark =
+      nextMark === 'NOT_REQUIRED' ? Zeus.ReportSubmissionMark.NOT_REQUIRED :
+      nextMark === 'SUBMITTED_EXTERNALLY' ? Zeus.ReportSubmissionMark.SUBMITTED_EXTERNALLY :
+      null
     await reportStore.markPeriod({
       reportType: props.reportType,
       year: props.year,
       period: props.period ?? null,
-      mark: shouldMark ? Zeus.ReportSubmissionMark.NOT_REQUIRED : null,
+      mark: sdkMark,
     })
-    notRequiredMark.value = shouldMark
-    SuccessAlert(shouldMark ? 'Отметка поставлена' : 'Отметка снята')
+    currentMark.value = nextMark
+    SuccessAlert(nextMark ? 'Отметка поставлена' : 'Отметка снята')
     emit('marked')
   } catch (e) {
     FailAlert(e, 'Ошибка установки отметки')
   } finally {
     markLoading.value = false
   }
+}
+
+function markNotRequired(): void {
+  void applyMark(
+    'NOT_REQUIRED',
+    'Отметить период как «не надо сдавать»? В календаре ячейка станет серой.',
+  )
+}
+
+function markSubmittedExternally(): void {
+  void applyMark(
+    'SUBMITTED_EXTERNALLY',
+    'Отметить период как сданный вне платформы? В календаре ячейка станет зелёной ' +
+      '(с обводкой — отличие от фактически сгенерированного XML).',
+  )
+}
+
+function clearMark(): void {
+  void applyMark(null, 'Снять отметку? Статус периода вернётся к обычному.')
 }
 
 function close(): void {

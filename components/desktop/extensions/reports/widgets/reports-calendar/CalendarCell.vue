@@ -2,9 +2,10 @@
 .cell-month(:class='classes' @click='onClick')
   .cell-inner(v-if='entry')
     .ci-label {{ entry.label }}
-    //- Для submitted — кружок-точка (зелёный dot), не заливаем фон агрессивным.
+    //- Submitted (реальный XML) + submitted_externally (отметка о внешней сдаче) —
+    //- оба рендерим как зелёную точку; различие только в тултипе.
     //- Для остальных статусов — семантическая иконка, фон красится через класс.
-    span.ci-dot(v-if='entry.status === SUBMITTED')
+    span.ci-dot(v-if='isSubmittedLike(entry.status)')
     q-icon.ci-icon(v-else :name='statusIcon(entry.status)')
     q-tooltip {{ tooltip }}
 </template>
@@ -22,12 +23,10 @@ const props = defineProps<{
 
 const emit = defineEmits<(e: 'click') => void>()
 
-// wire-значения enum'а — на шине GraphQL KEYS uppercase (Zeus так типизирует).
-// Zeus-литерал: защищённый источник правды при регенерации SDK.
-const SUBMITTED = Zeus.CalendarEntryStatus.SUBMITTED
+// Wire-значения enum'а — на шине GraphQL KEYS uppercase (Zeus так типизирует).
 
 // Для CSS-класса и словаря подписей используем строковое представление
-// status как есть (`DRAFT`/`OVERDUE`/`NOT_REQUIRED`/`EMPTY`/`SUBMITTED`).
+// status как есть (`DRAFT`/`OVERDUE`/`NOT_REQUIRED`/`EMPTY`/`SUBMITTED`/`SUBMITTED_EXTERNALLY`).
 const classes = computed<Record<string, boolean>>(() => ({
   active: !!props.entry,
   [`status-${props.entry?.status ?? 'EMPTY'}`]: !!props.entry,
@@ -35,6 +34,7 @@ const classes = computed<Record<string, boolean>>(() => ({
 
 const STATUS_RU: Record<string, string> = {
   [Zeus.CalendarEntryStatus.SUBMITTED]: 'Сдан',
+  [Zeus.CalendarEntryStatus.SUBMITTED_EXTERNALLY]: 'Сдан (отметка)',
   [Zeus.CalendarEntryStatus.DRAFT]: 'Черновик',
   [Zeus.CalendarEntryStatus.OVERDUE]: 'Просрочен',
   [Zeus.CalendarEntryStatus.NOT_REQUIRED]: 'Не надо сдавать',
@@ -46,6 +46,13 @@ const tooltip = computed(() => {
   const s = STATUS_RU[props.entry.status] ?? props.entry.status
   return `${props.row.shortName}: ${props.entry.label}\nСрок: ${props.entry.dueDate}\nСтатус: ${s}`
 })
+
+function isSubmittedLike(status: string): boolean {
+  return (
+    status === Zeus.CalendarEntryStatus.SUBMITTED ||
+    status === Zeus.CalendarEntryStatus.SUBMITTED_EXTERNALLY
+  )
+}
 
 function statusIcon(status: string): string {
   switch (status) {
@@ -100,10 +107,24 @@ function onClick() {
     &:hover { background: #e3f2fd; }
   }
 
-  // Submitted: фон не заливаем. Только зелёная точка внутри — как в СБИС/Контуре.
+  // Submitted и submitted_externally: фон не заливаем, только зелёная точка
+  // внутри — как в СБИС/Контуре. Оба состояния визуально одинаковы,
+  // различие только в тултипе; но submitted_externally рендерим чуть
+  // с меньшей насыщенностью (opacity), чтобы глаз отличал при сравнении.
   &.status-SUBMITTED .cell-inner {
     color: #1b5e20;
     background: transparent;
+  }
+  &.status-SUBMITTED_EXTERNALLY .cell-inner {
+    color: #1b5e20;
+    background: transparent;
+    opacity: 0.85;
+  }
+  &.status-SUBMITTED_EXTERNALLY .ci-dot {
+    // точка — с обводкой-кольцом, чтобы визуально отличалась от «настоящей» сдачи
+    background: #fff;
+    border: 2px solid #2e7d32;
+    box-shadow: 0 0 0 2px #c8e6c9;
   }
 
   // Draft: мягкий оранжевый, сигнал «в работе».

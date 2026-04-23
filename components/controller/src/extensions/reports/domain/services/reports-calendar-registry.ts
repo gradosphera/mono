@@ -11,10 +11,11 @@ import { ReportType } from '../enums/report-type.enum';
  * - БУХОТЧ: ст.18 402-ФЗ — не позднее 3 месяцев после окончания года.
  * - ЕФС-1 ОСС: приказ СФР №1462 от 17.11.2025 — ежеквартально до 25-го.
  *
- * Перенос выходных реализован в `shiftToBusinessDay` — Sat/Sun сдвигаются
- * на ближайший понедельник. Производственный календарь РФ (праздничные
- * дни) пока НЕ учитывается: если 25-е — 1 января, календарь покажет
- * 1 января, а законный срок — 9-е. Это debt, см. 989-9 «Debt».
+ * `shiftToBusinessDay` переносит выходные И праздничные дни РФ на
+ * ближайший рабочий день. Источник праздников — RU_HOLIDAYS_BY_YEAR
+ * (2026–2027 захардкожены; для более ранних/поздних лет срабатывает
+ * только Sat/Sun-перенос — это графически безопасно, но формально
+ * не отражает регламентные переносы).
  */
 
 export type PeriodKind = 'yearly' | 'quarterly' | 'monthly';
@@ -134,21 +135,65 @@ export const REPORTS_CALENDAR_REGISTRY: CalendarFormEntry[] = [
 ];
 
 /**
- * Перенос даты с субботы/воскресенья на ближайший понедельник.
- * Производственный календарь РФ (праздники) не учитывается —
- * только Sat/Sun. Для 1 января и т.п. срок может быть показан
- * неправильно, но регламентно ФНС продлевает его сама.
+ * Производственный календарь РФ — множество праздничных дат в формате 'MM-DD'.
+ * Набор — по 875-ФЗ / постановлениям Правительства о переносе выходных.
+ * Для 2026: 1-8 января (новогодние + Рождество), 23 февраля, 8 марта,
+ * 1 и 9 мая, 12 июня, 4 ноября. Добавочные выходные от переносов
+ * (напр. 3 мая из-за 1 мая в пятницу) для MVP не моделируем —
+ * они не влияют на 25-е числа сдачи.
+ *
+ * Когда наступит 2027 — допишем RU_HOLIDAYS_BY_YEAR[2027]. Для годов
+ * вне таблицы применяется только Sat/Sun-перенос.
  */
-function shiftToBusinessDay(year: number, month1to12: number, day: number): { year: number; month: number; day: number } {
-  // JS Date: month 0..11, getUTCDay() — 0=Sun, 6=Sat.
+const RU_HOLIDAYS_BY_YEAR: Record<number, Set<string>> = {
+  2026: new Set([
+    '01-01', '01-02', '01-03', '01-04', '01-05', '01-06', '01-07', '01-08',
+    '02-23',
+    '03-08',
+    '05-01', '05-09',
+    '06-12',
+    '11-04',
+  ]),
+  2027: new Set([
+    '01-01', '01-02', '01-03', '01-04', '01-05', '01-06', '01-07', '01-08',
+    '02-23',
+    '03-08',
+    '05-01', '05-09',
+    '06-12',
+    '11-04',
+  ]),
+};
+
+function isNonBusinessDay(year: number, month1to12: number, day: number): boolean {
   const d = new Date(Date.UTC(year, month1to12 - 1, day));
   const dow = d.getUTCDay();
-  let shift = 0;
-  if (dow === 6) shift = 2; // Sat → Mon
-  else if (dow === 0) shift = 1; // Sun → Mon
-  if (shift === 0) return { year, month: month1to12, day };
-  d.setUTCDate(d.getUTCDate() + shift);
-  return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() };
+  if (dow === 0 || dow === 6) return true;
+  const holidays = RU_HOLIDAYS_BY_YEAR[year];
+  if (!holidays) return false;
+  const key = `${String(month1to12).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  return holidays.has(key);
+}
+
+/**
+ * Перенос даты на ближайший рабочий день: пропускаем Sat/Sun + праздничные
+ * дни РФ (для известных лет). Защита от бесконечного цикла — max 14 итераций
+ * (самый длинный подряд-выходной в РФ — 1-8 января = 8 дней + возможные
+ * субботы/воскресенья после = до 10-12 подряд; 14 с запасом).
+ */
+function shiftToBusinessDay(year: number, month1to12: number, day: number): { year: number; month: number; day: number } {
+  const d = new Date(Date.UTC(year, month1to12 - 1, day));
+  for (let i = 0; i < 14; i++) {
+    const y = d.getUTCFullYear();
+    const m = d.getUTCMonth() + 1;
+    const dd = d.getUTCDate();
+    if (!isNonBusinessDay(y, m, dd)) {
+      return { year: y, month: m, day: dd };
+    }
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  // Защита: если за 14 дней не нашли рабочий — возвращаем исходную дату
+  // (лучше показать правильный вид, чем падать).
+  return { year, month: month1to12, day };
 }
 
 /**

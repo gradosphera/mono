@@ -1640,7 +1640,7 @@ input CalculateVotesInput {
 }
 
 """
-Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty.
+Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty.
 """
 enum CalendarEntryStatus {
   DRAFT
@@ -1648,6 +1648,7 @@ enum CalendarEntryStatus {
   NOT_REQUIRED
   OVERDUE
   SUBMITTED
+  SUBMITTED_EXTERNALLY
 }
 
 type CallTranscription {
@@ -9948,10 +9949,11 @@ type ReportRequisitesView {
 }
 
 """
-Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED.
+Пользовательская отметка на ячейке календаря: NOT_REQUIRED («не надо сдавать») или SUBMITTED_EXTERNALLY («сдано вне платформы»).
 """
 enum ReportSubmissionMark {
   NOT_REQUIRED
+  SUBMITTED_EXTERNALLY
 }
 
 enum ReportType {

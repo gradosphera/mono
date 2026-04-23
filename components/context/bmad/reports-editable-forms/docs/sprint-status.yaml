@@ -159,17 +159,18 @@ sprints:
   - sprint_number: 4
     start_date: "2026-04-23"
     end_date: "2026-04-30"
-    capacity_points: 8
-    committed_points: 8
-    completed_points: 0
+    capacity_points: 10
+    committed_points: 10
+    completed_points: 10
     status: "in_progress"
-    goal: "Header-инжекция навигации, отметка «не надо сдавать», перенос выходных, организация debt"
+    goal: "Header-инжекция навигации, отметки «не надо сдавать» и «сдано сторонне», production-календарь РФ, организация debt"
     stories:
       - story_id: "STORY-4-1"
         checkpoint: 18
         title: "DocumentsPage → router-view + хедер-кнопки через useHeaderActions"
         points: 3
-        status: "in_progress"
+        status: "completed"
+        completed_at: "2026-04-23"
         acceptance_criteria:
           - "reports-documents становится родительским маршрутом с 3 children: reports-documents-calendar/forms/archive"
           - "DocumentsPage — shell с <router-view/>, регистрирует 3 RouteMenuButton в onMounted через useHeaderActions, чистит в onBeforeUnmount"
@@ -177,62 +178,69 @@ sprints:
           - "При переключении между calendar/forms/archive URL и подсветка активной кнопки шапки — через route.name"
       - story_id: "STORY-4-2"
         checkpoint: 19
-        title: "ReportSubmissionMarkEntity + markReportPeriod (NOT_REQUIRED mark)"
+        title: "ReportSubmissionMarkEntity + markReportPeriod (NOT_REQUIRED + SUBMITTED_EXTERNALLY)"
         points: 2
-        status: "not_started"
+        status: "completed"
+        completed_at: "2026-04-23"
         acceptance_criteria:
           - "Новая TypeORM-сущность ReportSubmissionMarkEntity UNIQUE(coopname, report_type, year, period)"
-          - "Enum ReportSubmissionMark = { NOT_REQUIRED } (расширяемый)"
-          - "Мутация markReportPeriod(reportType, year, period?, mark: ReportSubmissionMark | null) — null снимает отметку"
-          - "CalendarEntryStatus расширен NOT_REQUIRED; приоритет: submitted > draft > not_required > overdue > empty"
+          - "Enum ReportSubmissionMark = { NOT_REQUIRED, SUBMITTED_EXTERNALLY }"
+          - "Мутация markReportPeriod(...) — null снимает отметку"
+          - "CalendarEntryStatus расширен NOT_REQUIRED + SUBMITTED_EXTERNALLY"
+          - "Приоритет: SUBMITTED > SUBMITTED_EXTERNALLY > DRAFT > NOT_REQUIRED > OVERDUE > EMPTY"
           - "SDK: mutation + regen"
       - story_id: "STORY-4-3"
         checkpoint: 20
-        title: "CalendarCell визуальный редизайн (submitted=зелёная точка, overdue=красный fill, not_required=серый ⊘)"
+        title: "CalendarCell визуальный редизайн (SUBMITTED/SUBMITTED_EXTERNALLY/OVERDUE/NOT_REQUIRED/DRAFT/EMPTY)"
         points: 1
-        status: "not_started"
+        status: "completed"
+        completed_at: "2026-04-23"
         acceptance_criteria:
-          - "Submitted: ячейка с зелёной точкой/галкой, не красит фон в agress. зелёный"
-          - "Overdue: насыщенный красный fill — видно издалека, что просрочено"
-          - "NOT_REQUIRED: нейтральный серый фон + иконка circle-xmark; клик всё ещё открывает диалог"
-          - "Tooltip'ы актуализированы под новые статусы"
+          - "SUBMITTED: зелёная точка без заливки"
+          - "SUBMITTED_EXTERNALLY: зелёная точка с обводкой-кольцом — отличается от реальной сдачи"
+          - "Overdue: насыщенный красный fill"
+          - "NOT_REQUIRED: нейтральный серый + circle-xmark"
+          - "Tooltip'ы актуализированы"
       - story_id: "STORY-4-4"
         checkpoint: 21
-        title: "Кнопка «Не надо сдавать» / «Снять отметку» в ReportEditorDialog"
-        points: 1
-        status: "not_started"
+        title: "Mark-кнопки в ReportEditorDialog: «Не надо сдавать» + «Отметить сданным» + «Снять отметку»"
+        points: 2
+        status: "completed"
+        completed_at: "2026-04-23"
         acceptance_criteria:
-          - "В ReportEditorDialog внизу — секция с текущим mark-статусом и кнопкой"
-          - "Если mark отсутствует — кнопка «Не надо сдавать» (confirm → markReportPeriod(NOT_REQUIRED))"
-          - "Если mark=NOT_REQUIRED — кнопка «Снять отметку» (markReportPeriod(null))"
-          - "После успеха — reload-календаря и закрытие диалога"
+          - "Если статус=SUBMITTED (реальный XML) — mark-кнопок нет, показан баннер"
+          - "Если mark=null: показываем «Отметить сданным» и «Не надо сдавать»"
+          - "Если mark=NOT_REQUIRED или SUBMITTED_EXTERNALLY: показываем «Снять отметку» + баннер-подсказку"
+          - "Confirm перед каждой операцией"
+          - "После успеха — reload-календаря на родителе + закрытие диалога"
       - story_id: "STORY-4-5"
         checkpoint: 22
-        title: "addBusinessDays (Sat/Sun) в reports-calendar-registry.ts"
+        title: "shiftToBusinessDay + производственный календарь РФ 2026-2027"
         points: 1
-        status: "not_started"
+        status: "completed"
+        completed_at: "2026-04-23"
         acceptance_criteria:
-          - "calcDueDate переносит dueDate на ближайший рабочий день если попадает на Sat/Sun"
-          - "Производственный календарь РФ (праздники) не учитывается — debt в STORY-4-6"
-          - "Комментарий рядом с функцией описывает ограничение"
+          - "calcDueDate переносит dueDate на ближайший рабочий день (Sat/Sun)"
+          - "RU_HOLIDAYS_BY_YEAR[2026/2027] — 1-8 янв, 23 фев, 8 мар, 1 и 9 мая, 12 июн, 4 ноя"
+          - "Двойной перенос работает: если Mon — праздник, едем дальше (max 14 итераций — защита от цикла)"
       - story_id: "STORY-4-6"
         checkpoint: "debt"
         title: "Organize debt & docs"
         points: 0
-        status: "not_started"
+        status: "completed"
+        completed_at: "2026-04-23"
         acceptance_criteria:
-          - "STORY-3-4 E2E happy-path — зафиксирован как самостоятельный тикет/issue в 989-9"
-          - "PDF-экспорт 4 нулёвок — отдельный follow-up"
-          - "Production calendar (праздники РФ) — отдельный follow-up"
-          - "Blago-server sync эпика 989-9 после прод-деплоя fact-схемы"
-          - "Все пункты выше — секция «Debt» в 989-9.md"
+          - "STORY-3-4 E2E happy-path — debt (нужна Playwright-инфра)"
+          - "PDF-экспорт 4 нулёвок — debt (перевод paper-view на edits-source, отдельный заход)"
+          - "Blago-server sync 989-9 — debt (ждёт прод-деплоя fact-схемы)"
+          - "Секция «Debt» актуализирована в 989-9.md"
 
 velocity:
   sprint_1: 10
   sprint_2: 10
   sprint_3: 7
-  sprint_4: null
-  rolling_average: 9.0
+  sprint_4: 10
+  rolling_average: 9.25
 
 team:
   size: 1

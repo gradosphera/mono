@@ -7,6 +7,7 @@ export enum CalendarEntryStatus {
   EMPTY = 'empty',
   DRAFT = 'draft',
   SUBMITTED = 'submitted',
+  SUBMITTED_EXTERNALLY = 'submitted_externally',
   OVERDUE = 'overdue',
   NOT_REQUIRED = 'not_required',
 }
@@ -14,15 +15,16 @@ export enum CalendarEntryStatus {
 registerEnumType(CalendarEntryStatus, {
   name: 'CalendarEntryStatus',
   description:
-    'Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), ' +
-    'submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), ' +
-    'not_required (кооператив отметил, что сдавать не надо). ' +
-    'Приоритет: submitted > draft > not_required > overdue > empty.',
+    'Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), ' +
+    'submitted_externally (отметка «сдано сторонне»), overdue, not_required. ' +
+    'Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty.',
 });
 
 registerEnumType(ReportSubmissionMark, {
   name: 'ReportSubmissionMark',
-  description: 'Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED.',
+  description:
+    'Пользовательская отметка на ячейке календаря: NOT_REQUIRED («не надо сдавать») ' +
+    'или SUBMITTED_EXTERNALLY («сдано вне платформы»).',
 });
 
 @InputType('MarkReportPeriodInput')

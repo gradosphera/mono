@@ -2307,7 +2307,7 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
+	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
 ["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -7931,7 +7931,7 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 		__typename?: boolean | `@${string}`,
 	['...on ReportRequisitesView']?: Omit<ValueTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 }>;
-	/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+	/** Пользовательская отметка на ячейке календаря: NOT_REQUIRED («не надо сдавать») или SUBMITTED_EXTERNALLY («сдано вне платформы»). */
 ["ReportSubmissionMark"]:ReportSubmissionMark;
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
@@ -10457,7 +10457,7 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
+	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
 ["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -15926,7 +15926,7 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	signerType?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
-	/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+	/** Пользовательская отметка на ячейке календаря: NOT_REQUIRED («не надо сдавать») или SUBMITTED_EXTERNALLY («сдано вне платформы»). */
 ["ReportSubmissionMark"]:ReportSubmissionMark;
 	["ReportType"]:ReportType;
 	["RepresentedBy"]: AliasType<{
@@ -26421,7 +26421,7 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
+	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
 ["CalendarEntryStatus"]: CalendarEntryStatus;
 	["CallTranscription"]: {
 	__typename: "CallTranscription",
@@ -32310,7 +32310,7 @@ export type GraphQLTypes = {
 	signerType: string,
 	['...on ReportRequisitesView']: Omit<GraphQLTypes["ReportRequisitesView"], "...on ReportRequisitesView">
 };
-	/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+	/** Пользовательская отметка на ячейке календаря: NOT_REQUIRED («не надо сдавать») или SUBMITTED_EXTERNALLY («сдано вне платформы»). */
 ["ReportSubmissionMark"]: ReportSubmissionMark;
 	["ReportType"]: ReportType;
 	["RepresentedBy"]: {
@@ -33690,13 +33690,14 @@ export enum BuhotchSignerType {
 	CHAIRMAN = "CHAIRMAN",
 	REPRESENTATIVE = "REPRESENTATIVE"
 }
-/** Статус ячейки календаря: empty (не трогали), draft (черновик есть, не сдано), submitted (сгенерирован валидный XML), overdue (срок прошёл, не сдано), not_required (кооператив отметил, что сдавать не надо). Приоритет: submitted > draft > not_required > overdue > empty. */
+/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
 export enum CalendarEntryStatus {
 	DRAFT = "DRAFT",
 	EMPTY = "EMPTY",
 	NOT_REQUIRED = "NOT_REQUIRED",
 	OVERDUE = "OVERDUE",
-	SUBMITTED = "SUBMITTED"
+	SUBMITTED = "SUBMITTED",
+	SUBMITTED_EXTERNALLY = "SUBMITTED_EXTERNALLY"
 }
 export enum CandidateStatus {
 	FAILED = "FAILED",
@@ -33953,9 +33954,10 @@ export enum ProjectStatus {
 	UNDEFINED = "UNDEFINED",
 	VOTING = "VOTING"
 }
-/** Пользовательская отметка на ячейке календаря. Пока только NOT_REQUIRED. */
+/** Пользовательская отметка на ячейке календаря: NOT_REQUIRED («не надо сдавать») или SUBMITTED_EXTERNALLY («сдано вне платформы»). */
 export enum ReportSubmissionMark {
-	NOT_REQUIRED = "NOT_REQUIRED"
+	NOT_REQUIRED = "NOT_REQUIRED",
+	SUBMITTED_EXTERNALLY = "SUBMITTED_EXTERNALLY"
 }
 export enum ReportType {
 	BUHOTCH = "BUHOTCH",
