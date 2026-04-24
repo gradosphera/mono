@@ -4,7 +4,7 @@ div.page-shell
   q-card.q-mt-md(flat)
     q-card-section
       .row.q-gutter-sm.items-center.q-mb-sm(
-        v-if='filters.accountId !== null || filters.processHash'
+        v-if='filters.accountId !== null || filters.processHash || filters.username'
       )
         q-chip(
           v-if='filters.accountId !== null'
@@ -23,6 +23,14 @@ div.page-shell
           @remove='clearProcessHashFilter'
           class='font-monospace'
         ) Операция {{ filters.processHash.slice(0, 8) }}
+        q-chip(
+          v-if='filters.username'
+          removable
+          color='primary'
+          text-color='white'
+          icon='fa-solid fa-user'
+          @remove='clearUsernameFilter'
+        ) Пайщик {{ fioCache.get(filters.username) || filters.username }}
       .row.q-gutter-sm.items-end
         q-input.col-md-2.col-12(
           v-model='filters.dateFrom'
@@ -355,6 +363,7 @@ const filters = reactive<{
   accountKind: 'wallet' | 'account' | null
   accountName: string
   processHash: string | null
+  username: string | null
 }>({
   dateFrom: '',
   dateTo: '',
@@ -362,6 +371,7 @@ const filters = reactive<{
   accountKind: null,
   accountName: '',
   processHash: null,
+  username: null,
 })
 
 const accountFilterLabel = computed(() => {
@@ -388,6 +398,14 @@ async function clearProcessHashFilter() {
   filters.processHash = null
   const q = { ...route.query }
   delete q.process_hash
+  await router.replace({ query: q })
+  reload()
+}
+
+async function clearUsernameFilter() {
+  filters.username = null
+  const q = { ...route.query }
+  delete q.username
   await router.replace({ query: q })
   reload()
 }
@@ -485,7 +503,8 @@ const hasAnyFilter = computed(
     !!filters.dateFrom ||
     !!filters.dateTo ||
     filters.accountId !== null ||
-    !!filters.processHash,
+    !!filters.processHash ||
+    !!filters.username,
 )
 
 async function resetFilters() {
@@ -495,10 +514,12 @@ async function resetFilters() {
   filters.accountKind = null
   filters.accountName = ''
   filters.processHash = null
+  filters.username = null
   const q = { ...route.query }
   delete q.wallet_id
   delete q.account_id
   delete q.process_hash
+  delete q.username
   await router.replace({ query: q })
   reload()
 }
@@ -556,6 +577,7 @@ async function load() {
     }
     if (filters.accountId !== null) input.accountId = filters.accountId
     if (filters.processHash) input.processHash = filters.processHash
+    if (filters.username) input.username = filters.username
     if (filters.dateFrom) input.dateFrom = new Date(filters.dateFrom)
     if (filters.dateTo) {
       const to = new Date(filters.dateTo)
@@ -626,6 +648,9 @@ onMounted(async () => {
     }
     if (route.query.process_hash) {
       filters.processHash = String(route.query.process_hash)
+    }
+    if (route.query.username) {
+      filters.username = String(route.query.username)
     }
     await load()
 
