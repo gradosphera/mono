@@ -47,8 +47,16 @@ div.page-shell
           :label='f.label'
           :value='manualInput[f.key]'
           :placeholder='f.placeholder'
+          :mask='f.mask'
+          :digits-only='f.digitsOnly'
+          :digits-dots-only='f.digitsDotsOnly'
+          :max-length='f.maxLength'
+          :exact-lengths='f.exactLengths'
+          :pattern='f.pattern'
+          :pattern-message='f.patternMessage'
           required
-          @update:value='v => onManualChange(f.key, v)'
+          @update:value='v => (manualInput[f.key] = v)'
+          @blur='scheduleSave'
         )
 
   //- СФР (ЕФС-1)
@@ -68,15 +76,18 @@ div.page-shell
           placeholder='XXX-XXX-XXXXXX'
           mask='###-###-######'
           required
-          @update:value='v => onManualChange("sfrRegNumber", v)'
+          @update:value='v => (manualInput.sfrRegNumber = v)'
+          @blur='scheduleSave'
         )
         RequisiteField.col-md-6.col-12(
           id='field-chairmanPosition'
           label='Должность председателя'
           :value='manualInput.chairmanPosition'
           placeholder='Председатель'
+          :max-length='100'
           required
-          @update:value='v => onManualChange("chairmanPosition", v)'
+          @update:value='v => (manualInput.chairmanPosition = v)'
+          @blur='scheduleSave'
         )
 
   //- Подписант
@@ -105,7 +116,8 @@ div.page-shell
           placeholder='XXX-XXX-XXX XX'
           mask='###-###-### ##'
           required
-          @update:value='v => onManualChange("signerSnils", v)'
+          @update:value='v => (manualInput.signerSnils = v)'
+          @blur='scheduleSave'
         )
         RequisiteField.col-12(
           v-if='signerType === "representative"'
@@ -113,8 +125,10 @@ div.page-shell
           label='Документ представителя'
           :value='manualInput.signerRepDoc'
           placeholder='Доверенность № X от DD.MM.YYYY'
+          :max-length='200'
           required
-          @update:value='v => onManualChange("signerRepDoc", v)'
+          @update:value='v => (manualInput.signerRepDoc = v)'
+          @blur='scheduleSave'
         )
 
 
@@ -199,12 +213,66 @@ const orgFields: { key: keyof IReportRequisitesView; label: string }[] = [
   { key: 'signerMiddleName', label: 'Отчество подписанта' },
 ]
 
-const classifierFields: { key: ManualKey; label: string; placeholder?: string }[] = [
-  { key: 'okved', label: 'ОКВЭД', placeholder: '94.99' },
-  { key: 'okfs', label: 'ОКФС', placeholder: '16' },
-  { key: 'okopf', label: 'ОКОПФ', placeholder: '20200' },
-  { key: 'oktmo', label: 'ОКТМО', placeholder: '8 или 11 цифр' },
-  { key: 'okpo', label: 'ОКПО', placeholder: '10 цифр' },
+interface ClassifierField {
+  key: ManualKey
+  label: string
+  placeholder?: string
+  mask?: string
+  digitsOnly?: boolean
+  digitsDotsOnly?: boolean
+  maxLength?: number
+  exactLengths?: number[]
+  pattern?: RegExp
+  patternMessage?: string
+}
+
+// ОКВЭД разрешает дробные уровни (NN.NN.NN); фиксированной маски нет.
+// ОКОПФ — ровно 5 цифр (mask ##### подставит слоты).
+// ОКФС/ОКТМО/ОКПО — фиксированные варианты длины; используем digitsOnly + exactLengths.
+const classifierFields: ClassifierField[] = [
+  {
+    key: 'okved',
+    label: 'ОКВЭД',
+    placeholder: '94.99',
+    digitsDotsOnly: true,
+    maxLength: 8,
+    pattern: /^\d{2}(\.\d{1,2}){0,2}$/,
+    patternMessage: 'Формат: 94.99 или 46.73.7',
+  },
+  {
+    key: 'okfs',
+    label: 'ОКФС',
+    placeholder: '16',
+    digitsOnly: true,
+    maxLength: 3,
+    pattern: /^\d{1,3}$/,
+    patternMessage: '1–3 цифры',
+  },
+  {
+    key: 'okopf',
+    label: 'ОКОПФ',
+    placeholder: '20200',
+    mask: '#####',
+    digitsOnly: true,
+    maxLength: 5,
+    exactLengths: [5],
+  },
+  {
+    key: 'oktmo',
+    label: 'ОКТМО',
+    placeholder: '8 или 11 цифр',
+    digitsOnly: true,
+    maxLength: 11,
+    exactLengths: [8, 11],
+  },
+  {
+    key: 'okpo',
+    label: 'ОКПО',
+    placeholder: '8 или 10 цифр',
+    digitsOnly: true,
+    maxLength: 10,
+    exactLengths: [8, 10],
+  },
 ]
 
 const signerTypeOptions = [
@@ -242,9 +310,11 @@ async function loadRequisites() {
   }
 }
 
-// Debounced-автосохранение: после правки ждём тишину и пишем на сервер.
-// Валидацию «representative без доверенности» не блокирует — пустое поле
-// покажется красным благодаря :required, бэк хранит пустоту до заполнения.
+// Автосохранение по blur: каждый RequisiteField эмитит `blur` после потери
+// фокуса, мы коалесцируем несколько подряд blur-ов коротким debounce (600ms),
+// чтобы при быстром tab-переходе между полями не бить серверу 5 запросами.
+// Во время ввода сохранение не запускается — иначе валидация срабатывает
+// на частично набранное значение.
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 let savedStatusTimer: ReturnType<typeof setTimeout> | null = null
 const DEBOUNCE_MS = 600
@@ -278,12 +348,8 @@ async function persist() {
   }
 }
 
-function onManualChange(key: ManualKey, v: string) {
-  manualInput[key] = v
-  scheduleSave()
-}
-
 function onSignerTypeChange() {
+  // q-select эмитит один раз при выборе — сохраняем сразу после debounce.
   scheduleSave()
 }
 

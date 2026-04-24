@@ -46,17 +46,19 @@ q-dialog(
         //- заблуждение (пустые значения в подписанте/классификаторах).
         .stub-requisites(v-if='!readinessLoading && notReady')
           q-icon(name='fa-solid fa-circle-info' size='56px' color='orange')
-          .text-h6.q-mt-md.q-mb-xs Сначала заполните реквизиты
+          .text-h6.q-mt-md.q-mb-sm Сначала заполните реквизиты
           .text-body2.text-grey-8.q-mb-md
-            | Для отчёта «{{ reportTitle }}» не хватает обязательных полей.
-            | Заполните их в разделе «Реквизиты», после чего вернитесь сюда.
-          q-list.missing-list.q-mb-md(dense bordered separator)
-            q-item(v-for='m in readiness?.missingFields' :key='m.key')
-              q-item-section.q-pr-sm(avatar)
-                q-icon(name='fa-solid fa-triangle-exclamation' color='orange' size='xs')
-              q-item-section
-                q-item-label {{ m.label }}
-                q-item-label.text-grey-7(caption v-if='m.reason') {{ m.reason }}
+            | Для отчёта «{{ reportTitle }}» не хватает обязательных полей. Заполните их в разделе «Реквизиты», после чего вернитесь сюда.
+          .missing-chips.q-mb-lg
+            q-chip(
+              v-for='m in readiness?.missingFields'
+              :key='m.key'
+              square
+              dense
+              color='orange-1'
+              text-color='orange-10'
+              icon='fa-solid fa-triangle-exclamation'
+            ) {{ m.label }}
           q-btn(
             color='primary'
             icon='fa-solid fa-pen-to-square'
@@ -804,11 +806,11 @@ function goToRequisites(): void {
   text-align: center;
   color: #333;
 
-  .missing-list {
-    width: 100%;
-    text-align: left;
-    border-radius: 6px;
-    background: #fff;
+  .missing-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
   }
 }
 
