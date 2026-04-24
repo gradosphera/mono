@@ -3,6 +3,7 @@ import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 
 export const rawReportCalendarPeriodEntrySelector = {
   periodCode: true,
+  reportYear: true,
   label: true,
   dueMonth: true,
   dueDate: true,

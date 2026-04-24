@@ -7842,6 +7842,7 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	dueMonth?:boolean | `@${string}`,
 	label?:boolean | `@${string}`,
 	periodCode?:boolean | `@${string}`,
+	reportYear?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on ReportCalendarPeriodEntry']?: Omit<ValueTypes["ReportCalendarPeriodEntry"], "...on ReportCalendarPeriodEntry">
@@ -15848,6 +15849,7 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	dueMonth?:boolean | `@${string}`,
 	label?:boolean | `@${string}`,
 	periodCode?:boolean | `@${string}`,
+	reportYear?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -23671,7 +23673,7 @@ export type ModelTypes = {
 	getRegistrationConfig: ModelTypes["RegistrationConfig"],
 	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
 	getReport: ModelTypes["GeneratedReport"],
-	/** Матрица отчётов × периодов для календарного виджета на странице отчётности */
+	/** Матрица отчётов × периодов для календарного виджета. year = календарный год сдачи (когда приходит дедлайн). Для ячеек с dueYearOffset=1 (годовая БУХОТЧ, Q4 кварталок, декабрь ПСВ) reportYear = year - 1 — именно он возвращается в периоде. */
 	getReportCalendar: Array<ModelTypes["ReportCalendarRow"]>,
 	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует) */
 	getReportDraft?: ModelTypes["ReportDraft"] | undefined | null,
@@ -23860,6 +23862,7 @@ export type ModelTypes = {
 	dueMonth: number,
 	label: string,
 	periodCode?: number | undefined | null,
+	reportYear: number,
 	status: ModelTypes["CalendarEntryStatus"]
 };
 	["ReportCalendarRow"]: {
@@ -32036,7 +32039,7 @@ export type GraphQLTypes = {
 	getRegistrationConfig: GraphQLTypes["RegistrationConfig"],
 	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
 	getReport: GraphQLTypes["GeneratedReport"],
-	/** Матрица отчётов × периодов для календарного виджета на странице отчётности */
+	/** Матрица отчётов × периодов для календарного виджета. year = календарный год сдачи (когда приходит дедлайн). Для ячеек с dueYearOffset=1 (годовая БУХОТЧ, Q4 кварталок, декабрь ПСВ) reportYear = year - 1 — именно он возвращается в периоде. */
 	getReportCalendar: Array<GraphQLTypes["ReportCalendarRow"]>,
 	/** Получить черновик формы отчёта по типу+году+периоду (null если не существует) */
 	getReportDraft?: GraphQLTypes["ReportDraft"] | undefined | null,
@@ -32237,6 +32240,7 @@ export type GraphQLTypes = {
 	dueMonth: number,
 	label: string,
 	periodCode?: number | undefined | null,
+	reportYear: number,
 	status: GraphQLTypes["CalendarEntryStatus"],
 	['...on ReportCalendarPeriodEntry']: Omit<GraphQLTypes["ReportCalendarPeriodEntry"], "...on ReportCalendarPeriodEntry">
 };

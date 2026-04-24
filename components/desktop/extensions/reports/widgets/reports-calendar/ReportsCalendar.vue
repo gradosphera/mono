@@ -112,11 +112,13 @@ function kindLabel(kind: string): string {
 function onCellClick(row: IReportCalendarRow, month: number): void {
   const entry = periodAtMonth(row, month)
   if (!entry) return
-  // reportYear в календаре — это год «ЗА который» отчитываемся, он совпадает
-  // с текущим year виджета (dueMonth/dueYearOffset учитываются только для UI).
+  // year виджета — это календарный год СДАЧИ. entry.reportYear — год,
+  // ЗА который отчитываемся (для Q4/годовых/декабря ПСВ он = year-1).
+  // В форму шлём именно reportYear из ячейки, а не year виджета —
+  // иначе в 2026 БУХОТЧ откроется за 2026 вместо 2025.
   emit('select', {
     reportType: row.reportType as IReportType,
-    year: year.value,
+    year: entry.reportYear,
     period: entry.periodCode ?? null,
   })
 }

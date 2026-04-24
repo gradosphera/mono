@@ -4134,6 +4134,7 @@ export const ReturnTypes: Record<string,any> = {
 		dueMonth:"Int",
 		label:"String",
 		periodCode:"Int",
+		reportYear:"Int",
 		status:"CalendarEntryStatus"
 	},
 	ReportCalendarRow:{

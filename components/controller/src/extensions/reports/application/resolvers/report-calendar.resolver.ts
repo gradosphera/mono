@@ -56,7 +56,11 @@ export class ReportCalendarResolver {
 
   @Query(() => [ReportCalendarRowDTO], {
     name: 'getReportCalendar',
-    description: 'Матрица отчётов × периодов для календарного виджета на странице отчётности',
+    description:
+      'Матрица отчётов × периодов для календарного виджета. ' +
+      'year = календарный год сдачи (когда приходит дедлайн). Для ячеек с ' +
+      'dueYearOffset=1 (годовая БУХОТЧ, Q4 кварталок, декабрь ПСВ) ' +
+      'reportYear = year - 1 — именно он возвращается в периоде.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman'])
@@ -68,26 +72,32 @@ export class ReportCalendarResolver {
     const ownerUsername = currentUser.username;
     const todayIso = toIsoDate(new Date());
 
-    const [archive, drafts, marks] = await Promise.all([
-      this.reportRepo.list({ coopname, year }, 500, 0),
-      this.draftRepo.list({ coopname, owner_username: ownerUsername, year }),
-      this.markRepo.list({ coopname, year }),
-    ]);
+    // Ячейки календаря ссылаются на reportYear = year или year-1 (по offset).
+    // Тянем состояние обоих годов, ключ в Map — (reportType, period, reportYear).
+    const [archivePrev, archiveCur, draftsPrev, draftsCur, marksPrev, marksCur] =
+      await Promise.all([
+        this.reportRepo.list({ coopname, year: year - 1 }, 500, 0),
+        this.reportRepo.list({ coopname, year }, 500, 0),
+        this.draftRepo.list({ coopname, owner_username: ownerUsername, year: year - 1 }),
+        this.draftRepo.list({ coopname, owner_username: ownerUsername, year }),
+        this.markRepo.list({ coopname, year: year - 1 }),
+        this.markRepo.list({ coopname, year }),
+      ]);
 
     const archiveByKey = new Map<string, { isValid: boolean }>();
-    for (const r of archive.items) {
-      const key = makeKey(r.report_type, r.period ?? null);
+    for (const r of [...archivePrev.items, ...archiveCur.items]) {
+      const key = makeKey(r.report_type, r.period ?? null, r.year);
       if (!archiveByKey.has(key)) {
         archiveByKey.set(key, { isValid: r.is_valid });
       }
     }
     const draftKeys = new Set<string>();
-    for (const d of drafts) {
-      draftKeys.add(makeKey(d.report_type, d.period ?? null));
+    for (const d of [...draftsPrev, ...draftsCur]) {
+      draftKeys.add(makeKey(d.report_type, d.period ?? null, d.year));
     }
     const marksByKey = new Map<string, ReportSubmissionMark>();
-    for (const m of marks) {
-      marksByKey.set(makeKey(m.report_type, m.period ?? null), m.mark);
+    for (const m of [...marksPrev, ...marksCur]) {
+      marksByKey.set(makeKey(m.report_type, m.period ?? null, m.year), m.mark);
     }
 
     return REPORTS_CALENDAR_REGISTRY.map((row) =>
@@ -126,15 +136,19 @@ export class ReportCalendarResolver {
 
   private toRow(
     form: CalendarFormEntry,
-    reportYear: number,
+    displayYear: number,
     todayIso: string,
     archive: Map<string, { isValid: boolean }>,
     drafts: Set<string>,
     marks: Map<string, ReportSubmissionMark>,
   ): ReportCalendarRowDTO {
     const periods: ReportCalendarPeriodEntryDTO[] = form.periods.map((p) => {
+      // dueYearOffset=0 — отчёт ЗА displayYear сдаётся в displayYear.
+      // dueYearOffset=1 — отчёт ЗА displayYear-1 сдаётся в displayYear
+      // (Q4 кварталок, годовая БУХОТЧ, декабрь ПСВ).
+      const reportYear = displayYear - p.dueYearOffset;
       const dueDate = calcDueDate(reportYear, p);
-      const key = makeKey(form.reportType, p.periodCode);
+      const key = makeKey(form.reportType, p.periodCode, reportYear);
       const arch = archive.get(key);
       const mark = marks.get(key);
 
@@ -154,6 +168,7 @@ export class ReportCalendarResolver {
       }
       return {
         periodCode: p.periodCode,
+        reportYear,
         label: p.label,
         dueMonth: p.dueMonth,
         dueDate,
@@ -170,8 +185,8 @@ export class ReportCalendarResolver {
   }
 }
 
-function makeKey(reportType: ReportType, period: number | null): string {
-  return `${reportType}|${period ?? '_'}`;
+function makeKey(reportType: ReportType, period: number | null, year: number): string {
+  return `${reportType}|${period ?? '_'}|${year}`;
 }
 
 function toIsoDate(d: Date): string {

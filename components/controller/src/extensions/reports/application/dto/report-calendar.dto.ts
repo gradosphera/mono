@@ -59,6 +59,15 @@ export class ReportCalendarPeriodEntryDTO {
   @Field(() => Int, { nullable: true })
   periodCode!: number | null;
 
+  /**
+   * Год, ЗА который отчитывается эта ячейка. В общем случае не совпадает
+   * с отображаемым годом календаря: для yearly БУХОТЧ и Q4/декабрьских
+   * ячеек (dueYearOffset=1) reportYear = displayYear - 1.
+   * Именно это значение нужно слать в форму редактора.
+   */
+  @Field(() => Int)
+  reportYear!: number;
+
   /** Человекочитаемая метка: «I кв.», «Январь», «Год». */
   @Field(() => String)
   label!: string;

@@ -9550,7 +9550,7 @@ type Query {
   getReport(id: String!): GeneratedReport!
 
   """
-  Матрица отчётов × периодов для календарного виджета на странице отчётности
+  Матрица отчётов × периодов для календарного виджета. year = календарный год сдачи (когда приходит дедлайн). Для ячеек с dueYearOffset=1 (годовая БУХОТЧ, Q4 кварталок, декабрь ПСВ) reportYear = year - 1 — именно он возвращается в периоде.
   """
   getReportCalendar(year: Int!): [ReportCalendarRow!]!
 
@@ -9853,6 +9853,7 @@ type ReportCalendarPeriodEntry {
   dueMonth: Int!
   label: String!
   periodCode: Int
+  reportYear: Int!
   status: CalendarEntryStatus!
 }
 
