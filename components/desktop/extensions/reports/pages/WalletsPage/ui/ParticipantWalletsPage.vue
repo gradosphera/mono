@@ -1,92 +1,115 @@
 <template lang="pug">
-.participant-wallets.page-shell
-  q-inner-loading(:showing='loading')
-    q-spinner(size='40px' color='primary')
+div.page-shell
+  q-card.q-mt-md(flat)
+    q-table.full-height.pw-table(
+      flat
+      :grid='isMobile'
+      :rows='rows'
+      :columns='columns'
+      row-key='username'
+      :pagination='pagination'
+      :loading='loading'
+      :no-data-label='"Нет пайщиков (status=accepted)"'
+    )
+      template(#header='props')
+        q-tr(:props='props')
+          q-th(v-for='col in props.cols' :key='col.name' :props='props')
+            template(v-if='col.name.startsWith("prog_")')
+              .prog-title {{ col.label }}
+              .prog-type.text-grey-6 {{ programTypeFor(col.name) }}
+            template(v-else)
+              | {{ col.label }}
 
-  .empty-state(v-if='!loading && data.participants.length === 0')
-    q-icon(name='fa-solid fa-users-slash' size='32px' color='grey-5')
-    .text-caption.q-mt-sm Нет пайщиков (status=accepted)
+      template(#body='props')
+        q-tr(:key='`pw_${props.row.username}`' :props='props')
+          q-td.col-user(auto-width)
+            .name {{ getName(props.row) || '—' }}
+            .username.text-grey-6 {{ props.row.username }}
 
-  q-card.q-mt-md(v-else-if='!loading' flat)
-    .table-scroll
-      table.pw-table
-        thead
-          tr
-            th.col-user Пайщик
-            th.col-prog(v-for='prog in data.programs' :key='prog.id')
-              .prog-title {{ prog.title }}
-              .prog-type.text-grey-6 {{ prog.program_type }}
-            th.col-total Итого
-            th.col-action
-
-        tbody
-          tr.row-participant(
-            v-for='p in data.participants'
-            :key='p.username'
+          q-td.text-right(
+            v-for='prog in data.programs'
+            :key='`${props.row.username}_${prog.id}`'
+            :class='cellClass(data.matrix[props.row.username]?.[prog.id])'
           )
-            td.col-user
-              .username {{ p.username }}
-              .type.text-grey-6 {{ typeLabel(p.type) }}
+            WalletCell(:cell='data.matrix[props.row.username]?.[prog.id]')
 
-            td.col-prog(
-              v-for='prog in data.programs'
-              :key='`${p.username}_${prog.id}`'
-              :class='cellClass(data.matrix[p.username]?.[prog.id])'
+          q-td.text-right
+            WalletCell(:cell='totalFor(props.row.username)' bold)
+
+          q-td.text-right(auto-width)
+            q-btn(
+              flat dense round size='sm' color='primary'
+              icon='fa-solid fa-arrow-right'
+              :to='{ name: "reports-operations", query: { username: props.row.username } }'
             )
-              WalletCell(:cell='data.matrix[p.username]?.[prog.id]')
+              q-tooltip К операциям пайщика
 
-            td.col-total
-              WalletCell(:cell='totalFor(p.username)' bold)
+      template(#bottom-row)
+        q-tr.row-totals
+          q-td.text-weight-bold Σ по программе
+          q-td.text-right(
+            v-for='prog in data.programs'
+            :key='`total_${prog.id}`'
+          )
+            WalletCell(:cell='data.totals[prog.id]' bold)
+          q-td.text-right
+            WalletCell(:cell='grandTotal' bold)
+          q-td
 
-            td.col-action
-              q-btn(
-                flat dense round size='sm' color='primary'
-                icon='fa-solid fa-arrow-right'
-                :to='{ name: "reports-operations", query: { username: p.username } }'
-              )
-                q-tooltip К операциям пайщика
-
-        tfoot
-          tr.row-totals
-            td.col-user.text-weight-bold Σ по программе
-            td.col-prog(
-              v-for='prog in data.programs'
-              :key='`total_${prog.id}`'
-            )
-              WalletCell(:cell='data.totals[prog.id]' bold)
-            td.col-total
-              WalletCell(:cell='grandTotal' bold)
-            td.col-action
+      template(#item='props')
+        .col-12
+          q-card.q-pa-md.q-mb-sm
+            .row.items-center.q-gutter-x-md
+              .col
+                .text-body1 {{ getName(props.row) || '—' }}
+                .text-caption.text-grey-6 {{ props.row.username }}
+              .col-auto
+                q-btn(
+                  flat dense size='sm' color='primary'
+                  icon='fa-solid fa-arrow-right'
+                  label='Операции'
+                  :to='{ name: "reports-operations", query: { username: props.row.username } }'
+                )
+            .row.q-mt-sm(v-for='prog in data.programs' :key='`m_${props.row.username}_${prog.id}`')
+              .col-6.text-caption.text-grey-6 {{ prog.title }}
+              .col-6.text-right
+                WalletCell(:cell='data.matrix[props.row.username]?.[prog.id]')
+            .row.q-mt-sm
+              .col-6.text-weight-bold Итого
+              .col-6.text-right
+                WalletCell(:cell='totalFor(props.row.username)' bold)
 </template>
 
 <script setup lang="ts">
 import { computed, h, onMounted, ref } from 'vue'
 import { FailAlert } from 'src/shared/api'
 import { useSystemStore } from 'src/entities/System/model'
-import { formatAsset2Digits } from 'src/shared/lib/utils'
+import { useAccountStore } from 'src/entities/Account/model'
+import { useWindowSize } from 'src/shared/hooks'
+import { formatAsset2Digits, getName } from 'src/shared/lib/utils'
+import type { IAccount } from 'src/entities/Account/types'
 import {
-  loadParticipantWalletsMatrix,
-  type IParticipantWalletsMatrix,
+  loadProgramsAndWallets,
+  type IProgramsAndWallets,
   type IWalletCell,
 } from './participant-wallets-api'
 
 const { info } = useSystemStore()
+const accountStore = useAccountStore()
+const { isMobile } = useWindowSize()
 
 const loading = ref(false)
-const data = ref<IParticipantWalletsMatrix>({
-  participants: [],
+const pagination = ref({ rowsPerPage: 0 })
+const data = ref<IProgramsAndWallets>({
   programs: [],
   matrix: {},
   totals: {},
 })
+const rows = ref<IAccount[]>([])
 
-function typeLabel(t: string): string {
-  switch (t) {
-    case 'individual': return 'Физ. лицо'
-    case 'organization': return 'Юр. лицо'
-    case 'entrepreneur': return 'ИП'
-    default: return t
-  }
+function programTypeFor(colName: string): string {
+  const id = Number(colName.replace('prog_', ''))
+  return data.value.programs.find((p) => p.id === id)?.program_type ?? ''
 }
 
 function totalFor(username: string): IWalletCell {
@@ -115,8 +138,51 @@ function cellClass(cell?: IWalletCell): string {
   return 'cell-has-value'
 }
 
-// Inline-рендер ячейки «available / blocked с иконками». Вынесен в h-function
-// чтобы не таскать ещё одну SFC (в шаблоне используем как компонент).
+// Колонки собираем динамически: одна колонка на активную программу плюс
+// фиксированные «Пайщик / Итого / действия». sortable=true везде где поле
+// сводится к числу — q-table сортирует по возвращаемому field()-у.
+const columns = computed(() => {
+  const progCols = data.value.programs.map((prog) => ({
+    name: `prog_${prog.id}`,
+    align: 'right' as const,
+    label: prog.title,
+    field: (row: IAccount) => {
+      const c = data.value.matrix[row.username]?.[prog.id]
+      return c ? c.available + c.blocked : 0
+    },
+    sortable: true,
+  }))
+  return [
+    {
+      name: 'name',
+      align: 'left' as const,
+      label: 'ФИО / Наименование',
+      field: (row: IAccount) => getName(row) || row.username,
+      sortable: true,
+    },
+    ...progCols,
+    {
+      name: 'total',
+      align: 'right' as const,
+      label: 'Итого',
+      field: (row: IAccount) => {
+        const t = totalFor(row.username)
+        return t.available + t.blocked
+      },
+      sortable: true,
+    },
+    {
+      name: 'actions',
+      align: 'right' as const,
+      label: '',
+      field: 'username',
+      sortable: false,
+    },
+  ]
+})
+
+// Inline-рендер ячейки «available / blocked с иконками». Вынесен в h-function,
+// чтобы не таскать ещё одну SFC.
 const WalletCell = {
   name: 'WalletCell',
   props: {
@@ -133,19 +199,11 @@ const WalletCell = {
       const bClass = ['cell-line', c.blocked > 0 ? 'value-blocked' : 'value-zero', props.bold ? 'bold' : '']
       return h('div', { class: 'wallet-cell' }, [
         h('div', { class: aClass.join(' ') }, [
-          h('q-icon', {
-            name: 'fa-solid fa-coins',
-            size: '12px',
-            class: 'cell-icon',
-          }),
+          h('q-icon', { name: 'fa-solid fa-coins', size: '12px', class: 'cell-icon' }),
           h('span', { class: 'cell-value' }, formatAsset2Digits(`${c.available.toFixed(4)} RUB`)),
         ]),
         h('div', { class: bClass.join(' ') }, [
-          h('q-icon', {
-            name: 'fa-solid fa-lock',
-            size: '12px',
-            class: 'cell-icon',
-          }),
+          h('q-icon', { name: 'fa-solid fa-lock', size: '12px', class: 'cell-icon' }),
           h('span', { class: 'cell-value' }, formatAsset2Digits(`${c.blocked.toFixed(4)} RUB`)),
         ]),
       ])
@@ -156,7 +214,19 @@ const WalletCell = {
 async function reload(): Promise<void> {
   loading.value = true
   try {
-    data.value = await loadParticipantWalletsMatrix(info.coopname)
+    await Promise.all([
+      loadProgramsAndWallets(info.coopname).then((d) => { data.value = d }),
+      accountStore.getAccounts({ options: { page: 1, limit: 1000, sortOrder: 'DESC' } }),
+    ])
+    // accounts: только accepted-пайщики, сортировка по ФИО/username для читаемости.
+    rows.value = accountStore.accounts.items
+      .filter((a) => a.participant_account?.status === 'accepted')
+      .slice()
+      .sort((a, b) => {
+        const an = (getName(a) || a.username).toLowerCase()
+        const bn = (getName(b) || b.username).toLowerCase()
+        return an.localeCompare(bn, 'ru')
+      })
   } catch (e) {
     FailAlert(e, 'Не удалось загрузить кошельки пайщиков')
   } finally {
@@ -170,111 +240,56 @@ onMounted(() => void reload())
 </script>
 
 <style scoped lang="scss">
-.participant-wallets {
-  position: relative;
-  min-height: 200px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 48px 16px;
-  color: #888;
-}
-
-.table-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
 .pw-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  min-width: 640px;
+  :deep(thead th) {
+    font-weight: 600;
+    white-space: nowrap;
+    vertical-align: bottom;
 
-  thead {
-    background: #fafafa;
-
-    th {
-      text-align: left;
-      padding: 10px 12px;
-      border-bottom: 2px solid #e0e0e0;
-      font-weight: 600;
-      white-space: nowrap;
-
-      &.col-prog,
-      &.col-total {
-        text-align: right;
-      }
-
-      .prog-title {
-        font-size: 13px;
-        line-height: 1.2;
-      }
-      .prog-type {
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-      }
+    .prog-title {
+      font-size: 13px;
+      line-height: 1.2;
+    }
+    .prog-type {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
   }
 
-  tbody tr {
-    border-bottom: 1px solid #f0f0f0;
+  :deep(.row-totals) {
+    background: #f5f6f8;
+    font-weight: 600;
 
-    &:hover {
-      background: #f7f8fa;
-    }
-  }
-
-  td {
-    padding: 8px 12px;
-    vertical-align: middle;
-
-    &.col-prog,
-    &.col-total {
-      text-align: right;
-    }
-    &.col-action {
-      text-align: right;
-      width: 36px;
+    td {
+      border-top: 2px solid #e0e0e0;
     }
   }
 
   .col-user {
-    .username {
+    .name {
       font-size: 14px;
       font-weight: 500;
       color: #222;
+      line-height: 1.25;
     }
-    .type {
-      font-size: 12px;
+    .username {
+      font-size: 11px;
       margin-top: 2px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      letter-spacing: 0.02em;
     }
-  }
-
-  .cell-empty :deep(.cell-dash) {
-    color: #ccc;
-    text-align: right;
   }
 
   .cell-zero :deep(.wallet-cell) {
     opacity: 0.4;
   }
-
-  tfoot {
-    background: #f5f6f8;
-    border-top: 2px solid #e0e0e0;
-
-    td {
-      padding: 10px 12px;
-      font-size: 14px;
-    }
+  .cell-empty :deep(.cell-dash) {
+    color: #ccc;
   }
 }
 
-// «available + blocked» — вертикально, с иконками. Стили через :deep
-// потому что это render-функция, scoped не пройдёт автоматически.
+// «available + blocked» — вертикально, с иконками. :deep потому что render-функция.
 :deep(.wallet-cell) {
   display: flex;
   flex-direction: column;
@@ -290,19 +305,10 @@ onMounted(() => void reload())
     font-size: 14px;
     font-weight: 500;
 
-    &.value-avail {
-      color: #2e7d32;
-    }
-    &.value-blocked {
-      color: #8d6e63;
-    }
-    &.value-zero {
-      color: #bbb;
-      font-weight: 400;
-    }
-    &.bold {
-      font-weight: 700;
-    }
+    &.value-avail { color: #2e7d32; }
+    &.value-blocked { color: #8d6e63; }
+    &.value-zero { color: #bbb; font-weight: 400; }
+    &.bold { font-weight: 700; }
   }
 
   .cell-icon {

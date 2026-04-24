@@ -1,20 +1,16 @@
 /**
  * Загрузка исходных данных для таба «Пайщики» на странице Кошельки.
  *
- * Читаем напрямую из blockchain через fetchTable (паттерн
- * `src/entities/Wallet/api` — но там только per-user, а нам нужен весь
- * scope=coopname). Клиентская агрегация в pivot «пайщик × программа».
+ * Программы и progwallets тянем напрямую из blockchain через fetchTable
+ * (scope=coopname). Пайщиков (ФИО + username + статус) грузит страница
+ * отдельно через useAccountStore.getAccounts — чтобы получить private_account
+ * с ФИО, что через чтение таблицы `participants` по контракту недоступно.
  *
- * Возвращаем сразу собранный pivot-срез — страница только рендерит.
+ * Возвращаем собранный pivot-срез «program_id → username → cell» — страница
+ * только рендерит.
  */
 import { fetchTable } from 'src/shared/api'
 import { SovietContract } from 'cooptypes'
-
-export interface IParticipantRow {
-  username: string
-  type: string           // 'individual' | 'organization' | 'entrepreneur'
-  status: string         // 'accepted' | 'blocked' | ...
-}
 
 export interface IProgramColumn {
   id: number
@@ -28,12 +24,11 @@ export interface IWalletCell {
   blocked: number
 }
 
-export interface IParticipantWalletsMatrix {
-  participants: IParticipantRow[]
+export interface IProgramsAndWallets {
   programs: IProgramColumn[]
   /** matrix[username][program_id] → {available, blocked}. Отсутствие ключа = кошелька нет. */
   matrix: Record<string, Record<number, IWalletCell>>
-  /** Сумма по каждой программе (по всем accepted-пайщикам). */
+  /** Сумма по каждой программе (по всем кошелькам). */
   totals: Record<number, IWalletCell>
 }
 
@@ -46,13 +41,12 @@ function parseAsset(s: unknown): number {
 }
 
 /**
- * Тянем 3 таблицы scope=coopname и строим pivot-срез.
+ * Тянем 2 таблицы scope=coopname (programs + progwallets) и строим pivot-срез.
  */
-export async function loadParticipantWalletsMatrix(
+export async function loadProgramsAndWallets(
   coopname: string,
-): Promise<IParticipantWalletsMatrix> {
-  // Программы, progwallets, participants — все scope=coopname.
-  const [programsRaw, walletsRaw, participantsRaw] = await Promise.all([
+): Promise<IProgramsAndWallets> {
+  const [programsRaw, walletsRaw] = await Promise.all([
     fetchTable(
       SovietContract.contractName.production,
       coopname,
@@ -63,14 +57,8 @@ export async function loadParticipantWalletsMatrix(
       coopname,
       SovietContract.Tables.ProgramWallets.tableName,
     ),
-    fetchTable(
-      SovietContract.contractName.production,
-      coopname,
-      'participants',
-    ),
   ])
 
-  // Типизируем и фильтруем только активные программы.
   const programs: IProgramColumn[] = (programsRaw as Array<Record<string, unknown>>)
     .filter((p) => Number(p.is_active) === 1)
     .map((p) => ({
@@ -81,17 +69,6 @@ export async function loadParticipantWalletsMatrix(
     }))
     .sort((a, b) => a.id - b.id)
 
-  // Пайщики — только accepted, остальные не релевантны для миграции/учёта.
-  const participants: IParticipantRow[] = (participantsRaw as Array<Record<string, unknown>>)
-    .filter((p) => String(p.status) === 'accepted')
-    .map((p) => ({
-      username: String(p.username),
-      type: String(p.type ?? ''),
-      status: String(p.status ?? ''),
-    }))
-    .sort((a, b) => a.username.localeCompare(b.username))
-
-  // Pivot: username → program_id → {avail, blocked}
   const matrix: Record<string, Record<number, IWalletCell>> = {}
   const totals: Record<number, IWalletCell> = {}
   for (const p of programs) totals[p.id] = { available: 0, blocked: 0 }
@@ -110,5 +87,5 @@ export async function loadParticipantWalletsMatrix(
     }
   }
 
-  return { participants, programs, matrix, totals }
+  return { programs, matrix, totals }
 }
