@@ -602,11 +602,13 @@ describe('ЕФС-1 (Fss4Generator, СФР)', () => {
     expect(result.xml).toContain('<СлужебнаяИнформация>');
   });
 
-  it('квартальные коды СФР: 03/06/09/0', () => {
+  it('квартальные коды СФР (месяц окончания квартала): 03/06/09/12', () => {
+    // XSD efs1.xsd ограничивает <Период><Код> enum'ом {03, 06, 09, 12} —
+    // код = последний месяц квартала. Q4 = декабрь = "12" (а не "0").
     expect(gen.generate(withPeriod(1)).xml).toContain('<Код>03</Код>');
     expect(gen.generate(withPeriod(2)).xml).toContain('<Код>06</Код>');
     expect(gen.generate(withPeriod(3)).xml).toContain('<Код>09</Код>');
-    expect(gen.generate(withPeriod(4)).xml).toContain('<Код>0</Код>');
+    expect(gen.generate(withPeriod(4)).xml).toContain('<Код>12</Код>');
   });
 
   it('является well-formed XML', () => {
@@ -617,12 +619,15 @@ describe('ЕФС-1 (Fss4Generator, СФР)', () => {
     expect(gen.generate(withPeriod(1)).xml).toMatch(/<ДатаЗаполнения>\d{4}-\d{2}-\d{2}<\/ДатаЗаполнения>/);
   });
 
-  it('проходит XSD-валидацию по efs1/efs1.xsd (patched 2024→2026)', () => {
-    const result = gen.generate(withPeriod(1));
-    const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.FSS4].xsdFile);
-    if (!v.isValid) console.error('FSS4 XSD errors:', v.errors.slice(0, 10));
-    expect(v.isValid).toBe(true);
-  });
+  it.each([1, 2, 3, 4])(
+    'проходит XSD-валидацию по efs1/efs1.xsd для Q%d',
+    (quarter) => {
+      const result = gen.generate(withPeriod(quarter));
+      const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.FSS4].xsdFile);
+      if (!v.isValid) console.error(`FSS4 Q${quarter} XSD errors:`, v.errors.slice(0, 10));
+      expect(v.isValid).toBe(true);
+    },
+  );
 });
 
 describe('Уведомление о взносах (UvVznosyGenerator)', () => {

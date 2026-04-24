@@ -10,8 +10,9 @@ import type { ZeroReportEditsShape } from '../../domain/edits-shapes/zero-report
 /**
  * ЕФС-1 (ex-4ФСС) — отчёт в СФР, нулевой вариант.
  * Eфс-1 принципиально отличается от ФНС-форм (UTF-8, ns'ы, <ЭДСФР>,
- * <Руководитель> вместо <Подписант>). Квартальные коды СФР:
- *   1 → "03", 2 → "06", 3 → "09", год (IV) → "0".
+ * <Руководитель> вместо <Подписант>). Коды <Период>/<Код> по XSD —
+ * номер месяца окончания квартала (03 | 06 | 09 | 12):
+ *   Q1 → "03", Q2 → "06", Q3 → "09", Q4 → "12".
  */
 const EFS_NS = {
   default: 'http://пф.рф/ЕФС-1/2026-01-01',
@@ -31,7 +32,7 @@ function sfrPeriodCode(quarter: number | null): string {
     case 1: return '03';
     case 2: return '06';
     case 3: return '09';
-    case 4: return '0';
+    case 4: return '12';
     default: return '03';
   }
 }
