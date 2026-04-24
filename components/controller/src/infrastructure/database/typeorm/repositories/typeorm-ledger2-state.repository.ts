@@ -133,7 +133,7 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       // Ограничиваем siblings (walletop/debit/credit) диапазоном global_sequence
       // между текущим apply и следующим apply того же processHash — чтобы
       // раскрытие одного apply не цепляло сибсов соседних apply в multi-effect
-      // процессах (cap.act2res: две пары action_code внутри одного processHash).
+      // процессах (p.cap.rid: две пары operation_code внутри одного processHash).
       // global_sequence хранится как varchar(32), для числового сравнения
       // кастим обе стороны к bigint.
       clauses.push(`a.global_sequence::bigint > $${pIdx}::bigint`);
@@ -158,9 +158,9 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       params.push(filter.actionNames);
       pIdx += 1;
     }
-    if (filter.actionCodes && filter.actionCodes.length > 0) {
-      clauses.push(`a.data ->> 'action_code' = ANY($${pIdx})`);
-      params.push(filter.actionCodes);
+    if (filter.operationCodes && filter.operationCodes.length > 0) {
+      clauses.push(`a.data ->> 'operation_code' = ANY($${pIdx})`);
+      params.push(filter.operationCodes);
       pIdx += 1;
     }
     if (filter.username) {
@@ -198,7 +198,7 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
          a.block_num                             AS "blockNum",
          (a.data ->> 'coopname')                 AS "coopname",
          a.name                                  AS "action",
-         (a.data ->> 'action_code')              AS "actionCode",
+         (a.data ->> 'operation_code')           AS "operationCode",
          LOWER(a.data ->> 'process_hash')        AS "processHash",
          (a.data ->> 'username')                 AS "username",
          COALESCE(
@@ -230,7 +230,7 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       blockNum: Number(r.blockNum ?? 0),
       coopname: String(r.coopname ?? ''),
       action: String(r.action ?? ''),
-      actionCode: (r.actionCode as string | null) ?? null,
+      operationCode: (r.operationCode as string | null) ?? null,
       processHash: (r.processHash as string | null) ?? null,
       username: (r.username as string | null) ?? null,
       accountId: r.accountId !== null && r.accountId !== undefined ? Number(r.accountId) : null,

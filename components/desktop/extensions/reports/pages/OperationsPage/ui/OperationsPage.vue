@@ -120,9 +120,9 @@ div.page-shell
             q-chip(
               dense
               square
-              :color='processChipBg(props.row.actionCode)'
-              :text-color='processChipText(props.row.actionCode)'
-            ) {{ actionLabel(props.row.actionCode) }}
+              :color='processChipBg(props.row.operationCode)'
+              :text-color='processChipText(props.row.operationCode)'
+            ) {{ actionLabel(props.row.operationCode) }}
           q-td.text-right.font-monospace.text-weight-bold.text-grey-10 {{ formatAmount(props.row.quantity) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
@@ -136,13 +136,13 @@ div.page-shell
             .q-pa-md
               //- Шапка: цветная полоска + название + action_code + ID + memo
               .op-header.q-mb-md(
-                :style='{ borderLeftColor: processAccentColor(props.row.actionCode) }'
+                :style='{ borderLeftColor: processAccentColor(props.row.operationCode) }'
               )
-                .text-h6.text-weight-medium {{ actionLabel(props.row.actionCode) }}
-                .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.actionCode')
+                .text-h6.text-weight-medium {{ actionLabel(props.row.operationCode) }}
+                .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.operationCode')
                   .text-caption.text-grey-7 Тип процесса:
                   EntityIdBadge(
-                    :rawId='props.row.actionCode'
+                    :rawId='props.row.operationCode'
                     copy-on-click
                   )
                     q-tooltip Клик — копировать
@@ -220,8 +220,8 @@ div.page-shell
             .row.items-center.q-gutter-x-md
               .col
                 .text-caption.text-grey-6 {{ formatDate(props.row.createdAt) }}
-                .text-body2.text-weight-medium {{ actionLabel(props.row.actionCode) }}
-                .text-caption.text-grey-6.font-monospace {{ props.row.actionCode || '-' }}
+                .text-body2.text-weight-medium {{ actionLabel(props.row.operationCode) }}
+                .text-caption.text-grey-6.font-monospace {{ props.row.operationCode || '-' }}
               .col-auto.text-right
                 .text-caption.text-grey-6 Сумма
                 .text-body1.text-weight-bold.font-monospace {{ formatAmount(props.row.quantity) }}
@@ -246,6 +246,7 @@ import {
 import { useAccountStore } from 'src/entities/Account'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { DirectionCell, WalletIdCell, AccountIdCell } from '../../../shared/ui'
+import { Ledger2 } from 'cooptypes'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
@@ -254,53 +255,38 @@ const router = useRouter()
 const ledger2Store = useLedger2Store()
 const accountStore = useAccountStore()
 
-// Реестр русских названий ACTION_REGISTRY кодов
-const ACTION_LABELS: Record<string, string> = {
-  'reg.entrfee':  'Вступительный взнос',
-  'reg.minshare': 'Минимальный паевой взнос',
-  'wall.depcpl':  'Пополнение паевого счёта',
-  'wall.wthcpl':  'Возврат паевого взноса',
-  'cap.import':   'Импорт пайщика',
-  'cap.invest':   'Инвестиция',
-  'cap.commit':   'Коммит РИД',
-  'cap.accept':   'Приём РИД в паевой фонд',
-  'cap.act2prp':  'Имущественный паевой взнос',
-  'cap.lnissue':  'Выдача займа',
-  'cap.lnrepay':  'Возврат займа',
-  'sov.axncnv':   'Конвертация в членский взнос',
-  'mkt.supplcnf': 'Подтверждение поставки',
-  'mkt.recvcnf':  'Подтверждение получения',
-  'mig.minshr':   'Миграция: минимальный паевой взнос',
-  'mig.share':    'Миграция: паевые взносы',
-  'mig.entry':    'Миграция: вступительные взносы',
-  'mig.rid':      'Миграция: РИД в НМА',
-}
-
+// Человекочитаемые названия операций — источник правды в
+// `cooptypes/src/ledger2/operations.ts` (LEDGER2_OPERATION_REGISTRY),
+// зеркалит C++-реестр `OPERATION_REGISTRY`. Никаких локальных копий.
 function actionLabel(code: string | null | undefined): string {
   if (!code) return '—'
-  return ACTION_LABELS[code] ?? code
+  return Ledger2.getOperationHumanName(code) ?? code
 }
 
-// Цветовая схема по префиксу action_code — пастельный chip + accent-полоска
+// Цветовая схема по контракту-источнику operation_code — пастельный chip +
+// accent-полоска. operation_code имеет формат `o.<contract>.<verb>`, контракт
+// лежит во втором сегменте (parts[1]).
 interface ProcessColorEntry {
   accent: string  // CSS hex/color для border-left полоски шапки
   chipBg: string  // Quasar-цвет для q-chip background (pastel)
   chipText: string  // Quasar-цвет для q-chip text-color (deep)
 }
 const PROCESS_COLORS: Record<string, ProcessColorEntry> = {
-  reg:  { accent: '#1976d2', chipBg: 'blue-1',        chipText: 'blue-9' },
-  wall: { accent: '#00796b', chipBg: 'teal-1',        chipText: 'teal-9' },
-  cap:  { accent: '#5e35b1', chipBg: 'deep-purple-1', chipText: 'deep-purple-9' },
-  mkt:  { accent: '#ef6c00', chipBg: 'orange-1',      chipText: 'orange-9' },
-  sov:  { accent: '#5d4037', chipBg: 'brown-1',       chipText: 'brown-9' },
-  mig:  { accent: '#616161', chipBg: 'grey-3',        chipText: 'grey-9' },
+  reg: { accent: '#1976d2', chipBg: 'blue-1',        chipText: 'blue-9' },
+  wal: { accent: '#00796b', chipBg: 'teal-1',        chipText: 'teal-9' },
+  cap: { accent: '#5e35b1', chipBg: 'deep-purple-1', chipText: 'deep-purple-9' },
+  mkt: { accent: '#ef6c00', chipBg: 'orange-1',      chipText: 'orange-9' },
+  sov: { accent: '#5d4037', chipBg: 'brown-1',       chipText: 'brown-9' },
+  mig: { accent: '#616161', chipBg: 'grey-3',        chipText: 'grey-9' },
 }
 const PROCESS_COLOR_DEFAULT: ProcessColorEntry = {
   accent: '#9e9e9e', chipBg: 'grey-3', chipText: 'grey-9',
 }
 function processColorEntry(code: string | null | undefined): ProcessColorEntry {
   if (!code) return PROCESS_COLOR_DEFAULT
-  return PROCESS_COLORS[code.split('.')[0] ?? ''] ?? PROCESS_COLOR_DEFAULT
+  const parts = code.split('.')
+  const contract = parts.length >= 3 ? parts[1] : parts[0]
+  return PROCESS_COLORS[contract ?? ''] ?? PROCESS_COLOR_DEFAULT
 }
 function processAccentColor(code: string | null | undefined): string {
   return processColorEntry(code).accent
@@ -430,7 +416,7 @@ const columns = [
   { name: 'expand', align: 'left' as const, label: '', field: 'expand', sortable: false },
   { name: 'processHash', align: 'left' as const, label: '№', field: 'processHash' },
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
-  { name: 'actionName', align: 'left' as const, label: 'Операция', field: 'actionCode' },
+  { name: 'actionName', align: 'left' as const, label: 'Операция', field: 'operationCode' },
   { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },
   { name: 'username', align: 'left' as const, label: 'Пайщик', field: 'username' },
 ]

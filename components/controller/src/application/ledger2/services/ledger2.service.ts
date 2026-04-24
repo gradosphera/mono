@@ -30,7 +30,7 @@ export class Ledger2Service {
       blockNum: op.blockNum,
       coopname: op.coopname,
       action: op.action,
-      actionCode: op.actionCode,
+      operationCode: op.operationCode,
       processHash: op.processHash,
       username: op.username,
       accountId: op.accountId,

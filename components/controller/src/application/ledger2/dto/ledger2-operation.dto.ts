@@ -25,9 +25,9 @@ export class Ledger2OperationDTO {
 
   @Field(() => String, {
     nullable: true,
-    description: 'Для apply: ACTION_REGISTRY code (cap.debt / wall.deposit / ...)',
+    description: 'Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...)',
   })
-  actionCode?: string | null;
+  operationCode?: string | null;
 
   @Field(() => String, { nullable: true, description: 'process_hash (32-hex)' })
   processHash?: string | null;

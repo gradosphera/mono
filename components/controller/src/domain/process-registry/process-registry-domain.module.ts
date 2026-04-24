@@ -9,7 +9,7 @@ import { ProcessRegistryService } from './services/process-registry.service';
 /**
  * Доменный модуль ProcessRegistry.
  * Сервис getProcess/listProcesses — read-only агрегатор по blockchain_actions
- * (Phase A: ledger2::apply якорит process_hash → action_code → process_type)
+ * (Phase A: ledger2::apply якорит process_hash → operation_code → process_type)
  * и blockchain_deltas (Phase B: entity-таблицы из PROCESS_HASH_LOCATOR).
  * См. architecture.md §4.6.
  */

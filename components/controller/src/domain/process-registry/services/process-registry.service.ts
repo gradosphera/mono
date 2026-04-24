@@ -11,7 +11,7 @@ import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import {
   PROCESS_HASH_LOCATOR,
   KNOWN_PROCESS_TYPES,
-  ACTION_CODE_TO_PROCESS_TYPE,
+  OPERATION_CODE_TO_PROCESS_TYPE,
   type HashLocation,
 } from '../config/process-hash-locator';
 import { DOCUMENT_FIELDS, looksLikeSignedDocument } from '../config/document-field-detector';
@@ -53,8 +53,8 @@ type RedisClient = {
  *
  * Алгоритм двухфазный (Epic 1 addendum, 2026-04-18):
  *   - Phase A — anchor scan по `blockchain_actions WHERE account='ledger2' AND
- *     name='apply' AND data->>'process_hash'=X`. Из apply берётся action_code
- *     → process_type через `ACTION_CODE_TO_PROCESS_TYPE`. Все 4 связанных
+ *     name='apply' AND data->>'process_hash'=X`. Из apply берётся operation_code
+ *     → process_type через `OPERATION_CODE_TO_PROCESS_TYPE`. Все 4 связанных
  *     action (apply + walletop + debit + credit) с этим process_hash идут
  *     в actions[].
  *   - Phase B — fan-out scan по `PROCESS_HASH_LOCATOR` (entity-таблицы).
@@ -84,7 +84,7 @@ export class ProcessRegistryService {
    * Получить полную картину процесса по хэшу.
    *
    * @throws NotFoundException если ни одного ledger2::apply с process_hash не найдено
-   * @throws BadRequestException при превышении HARD_LIMIT или неизвестном action_code/process_type
+   * @throws BadRequestException при превышении HARD_LIMIT или неизвестном operation_code/process_type
    */
   async getProcess(processHash: string, coopname: string): Promise<ProcessView> {
     const normHash = this.normalizeHash(processHash);
@@ -122,14 +122,14 @@ export class ProcessRegistryService {
       );
     }
     const applyData = (applyAnchor.data ?? {}) as Record<string, unknown>;
-    const actionCode = String(applyData.action_code ?? '').trim();
-    const processType = ACTION_CODE_TO_PROCESS_TYPE[actionCode];
+    const operationCode = String(applyData.operation_code ?? '').trim();
+    const processType = OPERATION_CODE_TO_PROCESS_TYPE[operationCode];
     if (!processType) {
       this.logger.error(
-        `ProcessRegistry: action_code='${actionCode}' нет в ACTION_CODE_TO_PROCESS_TYPE (hash=${normHash}). Синхронизируйте маппинг с ACTION_REGISTRY.`
+        `ProcessRegistry: operation_code='${operationCode}' нет в OPERATION_CODE_TO_PROCESS_TYPE (hash=${normHash}). Синхронизируйте cooptypes/ledger2 с OPERATION_REGISTRY.`
       );
       throw new BadRequestException(
-        `Неизвестный action_code: ${actionCode}. ACTION_CODE_TO_PROCESS_TYPE требует обновления.`
+        `Неизвестный operation_code: ${operationCode}. OPERATION_CODE_TO_PROCESS_TYPE требует обновления.`
       );
     }
     if (!KNOWN_PROCESS_TYPES.has(processType)) {
@@ -173,8 +173,8 @@ export class ProcessRegistryService {
    * Листинг процессов с пагинацией.
    *
    * Epic 1 addendum: вместо wjournal-deltas используем blockchain_actions
-   * для apply'ев (один apply = один процесс). action_code → processType
-   * выводим через ACTION_CODE_TO_PROCESS_TYPE.
+   * для apply'ев (один apply = один процесс). operation_code → processType
+   * выводим через OPERATION_CODE_TO_PROCESS_TYPE.
    */
   async listProcesses(
     filter: ProcessesFilter,
@@ -184,21 +184,21 @@ export class ProcessRegistryService {
     const limit = Math.max(1, Math.min(100, pagination.limit ?? 10));
     const offset = (page - 1) * limit;
 
-    // Фильтр по processType трансформируется в список action_code, т.к. в
-    // blockchain_actions есть только action_code (process_type не пишется в
-    // data — его выводит backend через ACTION_CODE_TO_PROCESS_TYPE).
-    const actionCodesForFilter = filter.processType
-      ? Object.entries(ACTION_CODE_TO_PROCESS_TYPE)
+    // Фильтр по processType трансформируется в список operation_code, т.к. в
+    // blockchain_actions есть только operation_code (process_type не пишется в
+    // data — его выводит backend через OPERATION_CODE_TO_PROCESS_TYPE).
+    const operationCodesForFilter = filter.processType
+      ? Object.entries(OPERATION_CODE_TO_PROCESS_TYPE)
           .filter(([, pt]) => pt === filter.processType)
-          .map(([ac]) => ac)
+          .map(([oc]) => oc)
       : null;
 
     const params: any[] = [LEDGER2_CODE, filter.coopname];
     let pIdx = 3;
-    let actionCodeClause = '';
-    if (actionCodesForFilter && actionCodesForFilter.length > 0) {
-      actionCodeClause = ` AND a.data ->> 'action_code' = ANY($${pIdx})`;
-      params.push(actionCodesForFilter);
+    let operationCodeClause = '';
+    if (operationCodesForFilter && operationCodesForFilter.length > 0) {
+      operationCodeClause = ` AND a.data ->> 'operation_code' = ANY($${pIdx})`;
+      params.push(operationCodesForFilter);
       pIdx += 1;
     }
     let usernameClause = '';
@@ -225,7 +225,7 @@ export class ProcessRegistryService {
       AND a.name = 'apply'
       AND a.data ->> 'coopname' = $2
       AND (a.data ->> 'process_hash') IS NOT NULL
-      ${actionCodeClause}
+      ${operationCodeClause}
       ${usernameClause}
       ${fromBlockClause}
       ${toBlockClause}
@@ -241,12 +241,12 @@ export class ProcessRegistryService {
     const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
     // GROUP BY только по (process_hash, coopname) — иначе мульти-операционные
-    // процессы (cap.act2res с двумя action_code под одним hash; reg.regist с
-    // entrfee+minshare; mkt.offereq с supplcnf+recvcnf) дают двойные строки
+    // процессы (p.cap.rid с двумя operation_code под одним hash; p.reg.accept с
+    // payent+putmin; p.mkt.reqst с supply+recv) дают двойные строки
     // и totalCount (считаемый через DISTINCT process_hash) не совпадает с
-    // items.length. MIN(action_code) → любой из двух одинаково выводит
-    // processType через ACTION_CODE_TO_PROCESS_TYPE (у cap.act2res оба
-    // action_code маппятся в один тип; для multi-op типа reg.regist тоже
+    // items.length. MIN(operation_code) → любой из двух одинаково выводит
+    // processType через OPERATION_CODE_TO_PROCESS_TYPE (у p.cap.rid оба
+    // operation_code маппятся в один тип; для multi-op типа p.reg.accept тоже
     // единый процесс).
     const limitIdx = pIdx;
     params.push(limit);
@@ -256,7 +256,7 @@ export class ProcessRegistryService {
 
     const rows = await this.actionRepository.manager.query(
       `SELECT
-         MIN(a.data ->> 'action_code')        AS "actionCode",
+         MIN(a.data ->> 'operation_code')     AS "operationCode",
          LOWER(a.data ->> 'process_hash')     AS "processHash",
          (a.data ->> 'coopname')              AS "coopname",
          MIN(a.data ->> 'username')           AS "username",
@@ -278,10 +278,10 @@ export class ProcessRegistryService {
     // getProcess(hash) для конкретного процесса.
     const items: ProcessSummary[] = (rows as any[])
       .map((r): ProcessSummary | null => {
-        const derivedType = ACTION_CODE_TO_PROCESS_TYPE[r.actionCode];
+        const derivedType = OPERATION_CODE_TO_PROCESS_TYPE[r.operationCode];
         if (!derivedType || !KNOWN_PROCESS_TYPES.has(derivedType)) {
           this.logger.warn(
-            `listProcesses: неизвестный action_code='${r.actionCode}' для hash=${r.processHash} — строка пропущена`
+            `listProcesses: неизвестный operation_code='${r.operationCode}' для hash=${r.processHash} — строка пропущена`
           );
           return null;
         }

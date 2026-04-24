@@ -4,7 +4,7 @@
  * Ledger2 пишет трио действий на каждую проводку: `apply` (метаинформация
  * процесса), `walletop` (движение по кошельку), `debit`/`credit` (проводка).
  * Для журнала операций показываем все — пользователь может фильтровать
- * по action_code / кошельку / диапазону дат.
+ * по operation_code / кошельку / диапазону дат.
  */
 export interface Ledger2OperationDomainInterface {
   globalSequence: number;
@@ -12,10 +12,10 @@ export interface Ledger2OperationDomainInterface {
   coopname: string;
   /** `apply` | `walletop` | `debit` | `credit` */
   action: string;
-  /** Для `apply`: ACTION_REGISTRY code (cap.debt / wall.deposit / mig.opening / ...). */
-  actionCode: string | null;
+  /** Для `apply`: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / o.mig.minshr / ...). */
+  operationCode: string | null;
   processHash: string | null;
-  /** Кто инициировал действие; для mig.* может быть null. */
+  /** Кто инициировал действие; для миграции может быть null. */
   username: string | null;
   /** Для walletop/debit/credit — id счёта/кошелька (×1000 offset). */
   accountId: number | null;
@@ -35,8 +35,8 @@ export interface Ledger2HistoryFilterDomainInterface {
   accountId?: number;
   /** Одно из имён действий `apply|walletop|debit|credit`. Пусто = все. */
   actionNames?: string[];
-  /** Код процесса из ACTION_REGISTRY (только для `apply`). */
-  actionCodes?: string[];
+  /** Код операции из OPERATION_REGISTRY (только для `apply`). */
+  operationCodes?: string[];
   username?: string;
   /** Хэш процесса — позволяет выбрать все действия одной бизнес-операции. */
   processHash?: string;

@@ -38,12 +38,12 @@ export class GetLedger2HistoryInputDTO {
 
   @Field(() => [String], {
     nullable: true,
-    description: 'ACTION_REGISTRY коды: cap.debt, wall.deposit, mig.opening и т.д.',
+    description: 'OPERATION_REGISTRY коды: o.cap.lend, o.wal.depcpl, o.mig.minshr и т.д.',
   })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  actionCodes?: string[];
+  operationCodes?: string[];
 
   @Field(() => String, { nullable: true })
   @IsOptional()

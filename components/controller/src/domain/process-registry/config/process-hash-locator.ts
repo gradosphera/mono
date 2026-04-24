@@ -1,135 +1,136 @@
 /**
- * Таблица соответствия `process_type → таблицы/поля дельт, где искать process_hash`.
+ * Бэкенд-конфигурация ProcessRegistry.
  *
- * Используется сервисом `ProcessRegistryService` в phase B (fan-out scan) для
- * нахождения всех дельт сущности, относящейся к процессу. Каждая запись
- * указывает, в какой таблице какого контракта хранится entity-hash процесса
- * под каким именем поля.
+ * Источник правды по операциям/процессам — пакет `cooptypes` (модуль `Ledger2`,
+ * который зеркалит `components/contracts/cpp/lib/core/ledger2/operations.hpp`
+ * и `processes.hpp`). Никаких списков операций или процессов здесь не
+ * хардкодим — всё выводится из `Ledger2.LEDGER2_OPERATION_REGISTRY` и
+ * `Ledger2.LEDGER2_PROCESS_REGISTRY`.
  *
- * Расширяется при появлении новых процессов. Отсутствие записи для известного
- * `process_type` → fail-fast ошибка в getProcess.
- *
- * Имена таблиц/полей — точная сверка с контрактами (`cpp/.../entities/*.hpp`,
- * `cpp/lib/domain/table_*.hpp`). При изменении схемы контракта нужно обновить
- * и этот файл, и миграцию V2.1.0 (индексы по (value->>'field', scope)).
+ * Уникально бэкендское знание — лишь то, где в `blockchain_deltas` лежит
+ * entity-hash процесса (имя таблицы + имя поля), + редкие отклонения от
+ * контрактного `operation_code → process_type` маппинга (например, коммиты
+ * РИД группируются backend'ом в отдельный процесс `p.cap.commit`, хотя
+ * контракт пишет их под `p.cap.rid`). Ниже только это.
  *
  * См. architecture.md §4.3.
  */
+import { Ledger2 } from 'cooptypes';
+
 export type HashLocation = {
   code: string; // имя контракта (например "capital")
   table: string; // имя таблицы
   field: string; // имя поля внутри value.jsonb
 };
 
-export const PROCESS_HASH_LOCATOR: Record<string, HashLocation[]> = {
-  // registrator::candidates2.registration_hash — заявка пайщика на вступление.
-  // Одним process_hash связаны: reguser/confirmreg/declinereg/declinepay +
-  // два inline ledger2::apply (entrfee + minshare) с тем же hash.
-  'reg.regist': [{ code: 'registrator', table: 'candidates2', field: 'registration_hash' }],
-
-  // cap.loan — выдача/возврат беспроцентного займа пайщика.
-  // Один process_hash (= debt_hash), два action_code: cap.lnissue (Dr 58 / Cr 51
-  // при выдаче) и cap.lnrepay (Dr 80 / Cr 58 при возврате через акт-2).
-  'cap.loan': [{ code: 'capital', table: 'debts', field: 'debt_hash' }],
-
-  // cap.apprvcmmt — одобрение коммита мастером (Dr 08 / Cr 80).
-  // Ревью 2026-04-20 разделил коммит РИД и acceptance: `COMMIT_RID`
-  // эмитится на каждом `capital::approvecmmt` на дельту
-  // `segment.available_for_program`, `ACCEPT_RID` — позже в signact2.
-  // process_hash = project_hash (commit-entity удаляется сразу после
-  // одобрения, project — долгоживущий якорь; все коммиты проекта
-  // группируются в один процесс «жизнь проекта»).
-  'cap.apprvcmmt': [{ code: 'capital', table: 'projects', field: 'project_hash' }],
-
-  // cap.act2res — подписание акта-2 (внесение РИД в паевой фонд).
-  // Ревью 2026-04-20: теперь до ДВУХ action_code на один process_hash:
-  //   1. cap.accept   (Dr 04 / Cr 08) — приём РИД в паевой фонд
-  //   2. cap.lnrepay  (Dr 80 / Cr 58) — возврат займа, если был (опционально)
-  // `cap.commit` перенесён в отдельный процесс `cap.apprvcmmt` — см. выше.
-  //
-  // Entity-дельта — строго `capital::results`.
-  'cap.act2res': [{ code: 'capital', table: 'results', field: 'result_hash' }],
-
-  'cap.capimp': [{ code: 'capital', table: 'contributors', field: 'contributor_hash' }],
-
-  // cap.invest — инвестиция пайщика в ЦПП Благорост (wallet-only перенос
-  // 2001 → 9001, без Dr/Cr-проводок). process_hash — contributor_hash.
-  'cap.invest': [{ code: 'capital', table: 'contributors', field: 'contributor_hash' }],
-
-  // capital::pgproperties.property_hash — приём имущества в паевой фонд.
-  'cap.act2prp': [{ code: 'capital', table: 'pgproperties', field: 'property_hash' }],
-
-  'wall.deposit': [{ code: 'wallet', table: 'deposits', field: 'deposit_hash' }],
-  'wall.withdrw': [{ code: 'wallet', table: 'withdraws', field: 'withdraw_hash' }],
-
-  // marketplace::requests.hash — поле так и называется `hash` (не `request_hash`).
-  'mkt.offereq': [{ code: 'marketplace', table: 'requests', field: 'hash' }],
-
-  // sov.axncnv — одноактовый процесс: данные из blockchain_actions + документ
-  // statement (DocumentFieldDetector).
-  'sov.axncnv': [],
-
-  // mig.transit — транзитная миграция legacy → ledger2. Пересмотр 2026-04-20:
-  // единый process_type для шести миграционных action_code (TRANSIT_*), т.к.
-  // все они относятся к одному кооперативу и выполняются в одной транзакции.
-  'mig.transit': [],
+/**
+ * Бэкенд-оверрайды контрактного маппинга `operation_code → process_type`.
+ *
+ * Причина: для UX коммиты РИД (`o.cap.commit`) лучше сгруппировать в отдельный
+ * процесс «жизнь одобрённых коммитов проекта» (`p.cap.commit`), а не сваливать
+ * в общий процесс `p.cap.rid` (акт-2), где уже находятся accept + repay.
+ * На контракте это выражается тем же `p.cap.rid`, но бэкенд накладывает свой
+ * вид, чтобы `project_hash` был якорем отдельного представления процесса.
+ */
+const BACKEND_OVERRIDES: Record<string, string> = {
+  'o.cap.commit': 'p.cap.commit',
 };
 
 /**
- * Все известные process_type, зарегистрированные в локаторе.
- * Используется в fail-fast проверке: если пришёл неизвестный тип, локатор
- * требует обновления.
+ * Phase A: operation_code → process_type. Строится из cooptypes +
+ * бэкенд-оверрайдов.
+ */
+export const OPERATION_CODE_TO_PROCESS_TYPE: Readonly<Record<string, string>> = Object.freeze(
+  Object.fromEntries(
+    Ledger2.LEDGER2_OPERATION_REGISTRY.map((op) => [
+      op.code,
+      BACKEND_OVERRIDES[op.code] ?? op.process_type,
+    ]),
+  ),
+);
+
+/**
+ * Phase B: process_type → [HashLocation] — где в `blockchain_deltas` искать
+ * `process_hash` под «родным» именем поля. Это уникально бэкендское знание.
+ *
+ * Ключи — все `process_type`, которые может увидеть Phase A:
+ *   - контрактные `process_type` из `Ledger2.LEDGER2_PROCESS_REGISTRY`,
+ *   - плюс бэкенд-only `process_type` из `BACKEND_OVERRIDES` (значения).
+ *
+ * Если для какого-то ключа нет HashLocation (например, `p.sov.axncnv` —
+ * одноактовый процесс без entity-hash в сущностной таблице), массив пустой.
+ * Отсутствие записи → fail-fast ошибка в getProcess («локатор требует
+ * обновления»).
+ */
+export const PROCESS_HASH_LOCATOR: Readonly<Record<string, HashLocation[]>> = Object.freeze({
+  // registrator::candidates2.registration_hash — заявка пайщика на вступление.
+  // Одним process_hash связаны: reguser/confirmreg/declinereg/declinepay +
+  // два inline ledger2::apply (o.reg.payent + o.reg.putmin) с тем же hash.
+  'p.reg.accept': [{ code: 'registrator', table: 'candidates2', field: 'registration_hash' }],
+
+  // p.cap.debt — выдача/возврат беспроцентного займа пайщика.
+  // Один process_hash (= debt_hash), две операции: o.cap.lend (при выдаче)
+  // и o.cap.repay (при возврате через акт-2).
+  'p.cap.debt': [{ code: 'capital', table: 'debts', field: 'debt_hash' }],
+
+  // p.cap.commit — backend-only: одобрение коммита мастером (Dr 08 / Cr 80).
+  // `o.cap.commit` эмитится на каждом `capital::approvecmmt`. process_hash =
+  // project_hash (commit-entity удаляется сразу после одобрения, project —
+  // долгоживущий якорь; все коммиты проекта группируются в один процесс).
+  'p.cap.commit': [{ code: 'capital', table: 'projects', field: 'project_hash' }],
+
+  // p.cap.rid — подписание акта-2 (внесение РИД в паевой фонд).
+  // До ДВУХ операций на один process_hash:
+  //   1. o.cap.accept  (Dr 04 / Cr 08) — приём РИД
+  //   2. o.cap.repay   (Dr 80 / Cr 58) — возврат займа, если был (опционально)
+  // o.cap.commit разнесён backend'ом в отдельный процесс p.cap.commit.
+  'p.cap.rid': [{ code: 'capital', table: 'results', field: 'result_hash' }],
+
+  'p.cap.import': [{ code: 'capital', table: 'contributors', field: 'contributor_hash' }],
+
+  // p.cap.invest — wallet-only перенос 2001 → 9001 без Dr/Cr.
+  'p.cap.invest': [{ code: 'capital', table: 'contributors', field: 'contributor_hash' }],
+
+  // capital::pgproperties.property_hash — приём имущества в паевой фонд.
+  'p.cap.prop': [{ code: 'capital', table: 'pgproperties', field: 'property_hash' }],
+
+  'p.wal.depo':   [{ code: 'wallet', table: 'deposits',  field: 'deposit_hash' }],
+  'p.wal.wthdrw': [{ code: 'wallet', table: 'withdraws', field: 'withdraw_hash' }],
+
+  // marketplace::requests.hash — поле так и называется `hash`.
+  'p.mkt.reqst': [{ code: 'marketplace', table: 'requests', field: 'hash' }],
+
+  // p.sov.axncnv — одноактовый процесс: данные из blockchain_actions +
+  // документ statement (DocumentFieldDetector).
+  'p.sov.axncnv': [],
+
+  // p.mig.trans — транзитная миграция legacy → ledger2. Единый process_type
+  // для 4 миграционных операций (o.mig.*). Entity-hash в сущностных таблицах
+  // нет (миграция пишет только wjournal/journal + accounts2/wallets2 deltas).
+  'p.mig.trans': [],
+});
+
+/**
+ * Все известные process_type, которые может встретить ProcessRegistryService.
+ * Включает контрактные (из cooptypes) + бэкенд-only (из BACKEND_OVERRIDES).
  */
 export const KNOWN_PROCESS_TYPES: ReadonlySet<string> = new Set(Object.keys(PROCESS_HASH_LOCATOR));
 
-/**
- * Обратный маппинг ledger2 action_code → process_type.
- *
- * Источник истины: ACTION_REGISTRY в `cpp/lib/core/ledger2/actions.hpp`.
- * Должен синхронизироваться вручную при изменении контракта.
- *
- * Используется в Phase A: бэкенд читает blockchain_actions для
- * `ledger2::apply` (где есть только action_code), и через эту таблицу
- * выводит process_type.
- *
- * cap.accept + cap.lnrepay — до двух action_code на один process_hash
- * в рамках процесса cap.act2res. cap.commit разнесён в отдельный процесс
- * cap.apprvcmmt (эмитится на каждом одобрении коммита мастером —
- * ревью 2026-04-20, чтобы 08-й счёт накапливался по фазе «коммиты», а не
- * всплеском на финальном акт-2).
- * cap.lnissue и cap.lnrepay — оба части процесса cap.loan, но lnrepay
- * также участвует в cap.act2res когда возврат делает пайщик через акт-2.
- */
-export const ACTION_CODE_TO_PROCESS_TYPE: Record<string, string> = {
-  // registrator
-  'reg.entrfee': 'reg.regist',
-  'reg.minshare': 'reg.regist',
-  // wallet
-  'wall.depcpl': 'wall.deposit',
-  'wall.wthcpl': 'wall.withdrw',
-  // capital: импорт
-  'cap.import': 'cap.capimp',
-  // capital: заём (выдача + возврат)
-  'cap.lnissue': 'cap.loan',
-  'cap.lnrepay': 'cap.act2res',
-  // capital: одобрение коммита мастером (Dr 08 / Cr 80)
-  'cap.commit': 'cap.apprvcmmt',
-  // capital: акт-2 (приём РИД в НМА)
-  'cap.accept': 'cap.act2res',
-  // capital: имущественный взнос, инвестиция
-  'cap.act2prp': 'cap.act2prp',
-  'cap.invest': 'cap.invest',
-  // marketplace
-  'mkt.supplcnf': 'mkt.offereq',
-  'mkt.recvcnf': 'mkt.offereq',
-  // soviet
-  'sov.axncnv': 'sov.axncnv',
-  // migration — 4 TRANSIT_* относятся к единому процессу mig.transit.
-  // Программные кошельки Благороста (9001) и Генератора (10001) мигрируются
-  // прямым emplace в wallets2 БЕЗ inline apply, поэтому в blockchain_actions
-  // их не видно — только в blockchain_deltas wallets2.
-  'mig.minshr': 'mig.transit',
-  'mig.share': 'mig.transit',
-  'mig.entry': 'mig.transit',
-  'mig.rid': 'mig.transit',
-};
+// ===============================================================
+// Integrity check (runtime): каждый process_type из
+// OPERATION_CODE_TO_PROCESS_TYPE должен быть в PROCESS_HASH_LOCATOR.
+// Срабатывает при старте модуля — fail-fast при рассинхронизации.
+// ===============================================================
+{
+  const missing: string[] = [];
+  for (const pt of Object.values(OPERATION_CODE_TO_PROCESS_TYPE)) {
+    if (!KNOWN_PROCESS_TYPES.has(pt)) missing.push(pt);
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `[process-hash-locator] PROCESS_HASH_LOCATOR не содержит process_type: ` +
+        `${[...new Set(missing)].join(', ')}. ` +
+        `Обнови локатор или cooptypes/src/ledger2/.`,
+    );
+  }
+}

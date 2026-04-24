@@ -6,7 +6,7 @@ export const rawLedger2OperationSelector = {
   blockNum: true,
   coopname: true,
   action: true,
-  actionCode: true,
+  operationCode: true,
   processHash: true,
   username: true,
   accountId: true,

@@ -107,7 +107,7 @@ describe('ProcessRegistry end-to-end (Epic 4)', () => {
           })
           const p = res.process
           if (!p) return null
-          // reg.regist = 2 × (apply + walletop + debit + credit) = 8 ledger2-actions.
+          // p.reg.accept = 2 × (apply + walletop + debit + credit) = 8 ledger2-actions.
           // Ждём, пока parser сохранит всю обойму, иначе ассерты ниже могут
           // увидеть промежуточное состояние (два apply уже есть, а sibling
           // walletop/debit/credit ещё догоняют).
@@ -117,10 +117,10 @@ describe('ProcessRegistry end-to-end (Epic 4)', () => {
           return null
         }
       },
-      { timeoutMs: 90_000, intervalMs: 1000, label: 'reg.regist parser catch-up' },
+      { timeoutMs: 90_000, intervalMs: 1000, label: 'p.reg.accept parser catch-up' },
     )
 
-    expect(view.process_type).toBe('reg.regist')
+    expect(view.process_type).toBe('p.reg.accept')
     // Hash в ответе — в исходном lowercase (сервис явно нормализует).
     expect(view.process_hash.toLowerCase()).toBe(registration_hash.toLowerCase())
     expect(view.coopname).toBe(COOP)
@@ -130,8 +130,8 @@ describe('ProcessRegistry end-to-end (Epic 4)', () => {
       (a: any) => a.account === 'ledger2' && a.name === 'apply',
     )
     expect(applyActions.length).toBe(2)
-    const codes = applyActions.map((a: any) => a.data.action_code).sort()
-    expect(codes).toEqual(['reg.entrfee', 'reg.minshare'])
+    const codes = applyActions.map((a: any) => a.data.operation_code).sort()
+    expect(codes).toEqual(['o.reg.payent', 'o.reg.putmin'])
 
     // Под каждый apply есть парные walletop/debit/credit = ещё 3×2 = 6 actions.
     const sideActions = view.actions.filter(
@@ -153,9 +153,9 @@ describe('ProcessRegistry end-to-end (Epic 4)', () => {
     }
   }, 180_000)
 
-  it('(B) wall.deposit: CreateDeposit+CompleteIncome → apply wall.depcpl + deposits delta', async () => {
+  it('(B) p.wal.depo: CreateDeposit+CompleteIncome → apply o.wal.depcpl + deposits delta', async () => {
     // Депозит в кошелёк провайдера: createdpst → completedpst
-    // завершает и эмитит ledger2::apply(wall.depcpl) + walletop/debit/credit.
+    // завершает и эмитит ledger2::apply(o.wal.depcpl) + walletop/debit/credit.
     const deposit_hash = generateRandomSHA256()
     const quantity = '42.0000 RUB'
 
@@ -196,7 +196,7 @@ describe('ProcessRegistry end-to-end (Epic 4)', () => {
           })
           const p = res.process
           if (!p) return null
-          // wall.deposit = 1 × (apply + walletop + debit + credit) = 4 ledger2-actions.
+          // p.wal.depo = 1 × (apply + walletop + debit + credit) = 4 ledger2-actions.
           // Ждём полной обоймы, чтобы не увидеть промежуточное состояние.
           const ledgerActions = (p.actions || []).filter((a: any) => a.account === 'ledger2')
           return ledgerActions.length >= 4 ? p : null
@@ -204,16 +204,16 @@ describe('ProcessRegistry end-to-end (Epic 4)', () => {
           return null
         }
       },
-      { timeoutMs: 90_000, intervalMs: 1000, label: 'wall.deposit parser catch-up' },
+      { timeoutMs: 90_000, intervalMs: 1000, label: 'p.wal.depo parser catch-up' },
     )
 
-    expect(view.process_type).toBe('wall.deposit')
+    expect(view.process_type).toBe('p.wal.depo')
 
     const apply = view.actions.find(
       (a: any) => a.account === 'ledger2' && a.name === 'apply',
     )
     expect(apply, 'ledger2::apply должен быть').toBeDefined()
-    expect(apply.data.action_code).toBe('wall.depcpl')
+    expect(apply.data.operation_code).toBe('o.wal.depcpl')
 
     // Phase B entity-дельта wallet::deposits. См. комментарий в тесте (A):
     // parser→controller передача entity-дельт пока не все полностью
@@ -238,14 +238,14 @@ describe('ProcessRegistry end-to-end (Epic 4)', () => {
 
     expect(res.processes.totalCount).toBeGreaterThanOrEqual(2)
     // Элементы — уникальные процессы по (process_hash, coopname);
-    // cap.act2res и reg.regist — многоактные процессы должны быть
+    // p.cap.rid и p.reg.accept — многоактные процессы должны быть
     // ОДНОЙ строкой в items, не по количеству apply.
     const hashes = new Set(res.processes.items.map((i) => i.processHash.toLowerCase()))
     expect(hashes.size).toBe(res.processes.items.length)
 
     const types = new Set(res.processes.items.map((i) => i.processType))
-    // После (A) и (B) у нас минимум reg.regist + wall.deposit в листинге.
-    expect(types.has('reg.regist') || types.has('wall.deposit')).toBe(true)
+    // После (A) и (B) у нас минимум p.reg.accept + p.wal.depo в листинге.
+    expect(types.has('p.reg.accept') || types.has('p.wal.depo')).toBe(true)
   }, 30_000)
 
   it('(D) validation: невалидный hash → BadRequest', async () => {
