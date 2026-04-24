@@ -1,21 +1,10 @@
 <template lang="pug">
-div.page-shell
-  //- Статус автосохранения (неинвазивный — справа сверху карточки)
+q-form.page-shell(@submit.prevent='save' @validation-error='onValidationError' greedy)
+  //- Реквизиты организации (read-only — берутся из профиля кооператива)
   q-card.q-mt-md(flat)
     q-card-section.q-py-sm
-      .row.items-center.no-wrap
-        .col
-          .text-h6 Реквизиты организации
-          .text-caption.text-grey-7 Справочные данные кооператива — не редактируются
-        .col-auto
-          q-chip(
-            v-if='saveStatus !== "idle"'
-            dense
-            size='sm'
-            :color='saveChipColor'
-            :icon='saveChipIcon'
-            text-color='white'
-          ) {{ saveChipLabel }}
+      .text-h6 Реквизиты организации
+      .text-caption.text-grey-7 Справочные данные кооператива — не редактируются
 
     q-separator
 
@@ -48,7 +37,6 @@ div.page-shell
           :value='manualInput[f.key]'
           :placeholder='f.placeholder'
           :mask='f.mask'
-          :digits-only='f.digitsOnly'
           :digits-dots-only='f.digitsDotsOnly'
           :max-length='f.maxLength'
           :exact-lengths='f.exactLengths'
@@ -56,7 +44,6 @@ div.page-shell
           :pattern-message='f.patternMessage'
           required
           @update:value='v => (manualInput[f.key] = v)'
-          @blur='scheduleSave'
         )
 
   //- СФР (ЕФС-1)
@@ -75,9 +62,10 @@ div.page-shell
           :value='manualInput.sfrRegNumber'
           placeholder='XXX-XXX-XXXXXX'
           mask='###-###-######'
+          :pattern='SFR_REG_PATTERN'
+          pattern-message='Формат: XXX-XXX-XXXXXX (12 цифр)'
           required
           @update:value='v => (manualInput.sfrRegNumber = v)'
-          @blur='scheduleSave'
         )
         RequisiteField.col-md-6.col-12(
           id='field-chairmanPosition'
@@ -87,7 +75,6 @@ div.page-shell
           :max-length='100'
           required
           @update:value='v => (manualInput.chairmanPosition = v)'
-          @blur='scheduleSave'
         )
 
   //- Подписант
@@ -107,7 +94,6 @@ div.page-shell
             label='Тип подписанта'
             dense outlined
             emit-value map-options
-            @update:model-value='onSignerTypeChange'
           )
         RequisiteField.col-md-6.col-12(
           id='field-signerSnils'
@@ -115,9 +101,10 @@ div.page-shell
           :value='manualInput.signerSnils'
           placeholder='XXX-XXX-XXX XX'
           mask='###-###-### ##'
+          :pattern='SNILS_PATTERN'
+          pattern-message='Формат: XXX-XXX-XXX XX (11 цифр)'
           required
           @update:value='v => (manualInput.signerSnils = v)'
-          @blur='scheduleSave'
         )
         RequisiteField.col-12(
           v-if='signerType === "representative"'
@@ -128,16 +115,35 @@ div.page-shell
           :max-length='200'
           required
           @update:value='v => (manualInput.signerRepDoc = v)'
-          @blur='scheduleSave'
         )
 
-
+  //- Sticky save-bar внизу страницы. Единственная точка сохранения —
+  //- кнопка ниже. Валидация срабатывает перед отправкой на сервер: если
+  //- хоть одно поле красное, @submit не вызывается, летит @validation-error.
+  .save-bar
+    .save-bar-status(v-if='saveStatus === "saved"')
+      q-icon(name='fa-solid fa-circle-check' color='positive' size='16px')
+      span Реквизиты сохранены
+    .save-bar-status.text-negative(v-else-if='saveStatus === "error"')
+      q-icon(name='fa-solid fa-triangle-exclamation' size='16px')
+      span Ошибка сохранения
+    q-space
+    q-btn(
+      type='submit'
+      color='primary'
+      icon='fa-solid fa-floppy-disk'
+      label='Сохранить реквизиты'
+      :loading='saveStatus === "saving"'
+      :disable='saveStatus === "saving"'
+      no-caps
+      unelevated
+    )
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { FailAlert } from 'src/shared/api'
+import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { useReportStore } from 'src/entities/Report'
 import type { IReportRequisitesView, IUpdateReportRequisitesInput } from 'src/entities/Report'
 import RequisiteField from './RequisiteField.vue'
@@ -145,32 +151,10 @@ import RequisiteField from './RequisiteField.vue'
 const route = useRoute()
 const reportStore = useReportStore()
 
-const loading = ref(false)
 const requisites = ref<IReportRequisitesView | null>(null)
 
-// Автосохранение: состояние статуса показывается бейджем «Сохраняется…» / «Сохранено».
-// idle при старте (до любой правки), saving/saved/error — по факту.
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 const saveStatus = ref<SaveStatus>('idle')
-
-const saveChipColor = computed(() => {
-  if (saveStatus.value === 'saving') return 'orange'
-  if (saveStatus.value === 'saved') return 'positive'
-  if (saveStatus.value === 'error') return 'negative'
-  return 'grey'
-})
-const saveChipIcon = computed(() => {
-  if (saveStatus.value === 'saving') return 'fa-solid fa-rotate'
-  if (saveStatus.value === 'saved') return 'fa-solid fa-check'
-  if (saveStatus.value === 'error') return 'fa-solid fa-triangle-exclamation'
-  return ''
-})
-const saveChipLabel = computed(() => {
-  if (saveStatus.value === 'saving') return 'Сохраняется…'
-  if (saveStatus.value === 'saved') return 'Сохранено'
-  if (saveStatus.value === 'error') return 'Ошибка сохранения'
-  return ''
-})
 
 type ManualKey =
   | 'okved'
@@ -218,7 +202,6 @@ interface ClassifierField {
   label: string
   placeholder?: string
   mask?: string
-  digitsOnly?: boolean
   digitsDotsOnly?: boolean
   maxLength?: number
   exactLengths?: number[]
@@ -226,34 +209,32 @@ interface ClassifierField {
   patternMessage?: string
 }
 
-// ОКВЭД разрешает дробные уровни (NN.NN.NN); фиксированной маски нет.
-// ОКОПФ — ровно 5 цифр (mask ##### подставит слоты).
-// ОКФС/ОКТМО/ОКПО — фиксированные варианты длины; используем digitsOnly + exactLengths.
+// Placeholder'ы — правило ввода (кол-во цифр), а не конкретные примеры.
+// Для цифровых полей фиксированной/короткой длины — используем Quasar-mask
+// (`#` = только цифра, буквы блокируются на keypress нативно).
+// Для ОКВЭД (цифры + точка переменной длины) — digitsDotsOnly с @keydown-блокером.
 const classifierFields: ClassifierField[] = [
   {
     key: 'okved',
     label: 'ОКВЭД',
-    placeholder: '94.99',
+    placeholder: 'XX.XX или XX.XX.XX',
     digitsDotsOnly: true,
     maxLength: 8,
     pattern: /^\d{2}(\.\d{1,2}){0,2}$/,
-    patternMessage: 'Формат: 94.99 или 46.73.7',
+    patternMessage: 'Формат: XX.XX или XX.XX.XX',
   },
   {
     key: 'okfs',
     label: 'ОКФС',
-    placeholder: '16',
-    digitsOnly: true,
+    placeholder: '1–3 цифры',
+    mask: '###',
     maxLength: 3,
-    pattern: /^\d{1,3}$/,
-    patternMessage: '1–3 цифры',
   },
   {
     key: 'okopf',
     label: 'ОКОПФ',
-    placeholder: '20200',
+    placeholder: '5 цифр',
     mask: '#####',
-    digitsOnly: true,
     maxLength: 5,
     exactLengths: [5],
   },
@@ -261,7 +242,7 @@ const classifierFields: ClassifierField[] = [
     key: 'oktmo',
     label: 'ОКТМО',
     placeholder: '8 или 11 цифр',
-    digitsOnly: true,
+    mask: '###########',
     maxLength: 11,
     exactLengths: [8, 11],
   },
@@ -269,7 +250,7 @@ const classifierFields: ClassifierField[] = [
     key: 'okpo',
     label: 'ОКПО',
     placeholder: '8 или 10 цифр',
-    digitsOnly: true,
+    mask: '##########',
     maxLength: 10,
     exactLengths: [8, 10],
   },
@@ -280,6 +261,12 @@ const signerTypeOptions = [
   { label: 'Представитель', value: 'representative' },
 ]
 
+// Паттерны полных значений под фиксированные маски — ловят случай, когда
+// пользователь прожал пару цифр и нажал «Сохранить»: mask не мешает
+// сохранить частичный ввод, паттерн-правило блокирует.
+const SNILS_PATTERN = /^\d{3}-\d{3}-\d{3} \d{2}$/
+const SFR_REG_PATTERN = /^\d{3}-\d{3}-\d{6}$/
+
 function getValue(key: keyof IReportRequisitesView): string {
   const v = requisites.value?.[key] as any
   if (v && typeof v === 'object' && 'value' in v) return String(v.value ?? '')
@@ -287,7 +274,6 @@ function getValue(key: keyof IReportRequisitesView): string {
 }
 
 async function loadRequisites() {
-  loading.value = true
   try {
     const data = await reportStore.loadRequisites()
     if (data) {
@@ -305,28 +291,13 @@ async function loadRequisites() {
     }
   } catch (e: any) {
     FailAlert(e, 'Ошибка загрузки реквизитов')
-  } finally {
-    loading.value = false
   }
 }
 
-// Автосохранение по blur: каждый RequisiteField эмитит `blur` после потери
-// фокуса, мы коалесцируем несколько подряд blur-ов коротким debounce (600ms),
-// чтобы при быстром tab-переходе между полями не бить серверу 5 запросами.
-// Во время ввода сохранение не запускается — иначе валидация срабатывает
-// на частично набранное значение.
-let saveTimer: ReturnType<typeof setTimeout> | null = null
-let savedStatusTimer: ReturnType<typeof setTimeout> | null = null
-const DEBOUNCE_MS = 600
-
-function scheduleSave() {
-  if (saveTimer) clearTimeout(saveTimer)
-  saveTimer = setTimeout(() => {
-    void persist()
-  }, DEBOUNCE_MS)
-}
-
-async function persist() {
+async function save() {
+  // @submit у q-form сам не вызывается, если валидация не прошла (greedy
+  // прогоняет все поля за раз, подсветит всё разом). Значит здесь мы уже
+  // гарантированно валидны.
   saveStatus.value = 'saving'
   try {
     const input: Record<string, string | null> = {}
@@ -336,21 +307,17 @@ async function persist() {
     }
     input.signerType = signerType.value
     await reportStore.updateRequisites(input as IUpdateReportRequisitesInput)
-    // Не перезагружаем всё (иначе каретка в поле улетит) — фиксируем только статус.
     saveStatus.value = 'saved'
-    if (savedStatusTimer) clearTimeout(savedStatusTimer)
-    savedStatusTimer = setTimeout(() => {
-      if (saveStatus.value === 'saved') saveStatus.value = 'idle'
-    }, 2000)
+    SuccessAlert('Реквизиты сохранены')
   } catch (e: any) {
     saveStatus.value = 'error'
     FailAlert(e, 'Ошибка сохранения')
   }
 }
 
-function onSignerTypeChange() {
-  // q-select эмитит один раз при выборе — сохраняем сразу после debounce.
-  scheduleSave()
+function onValidationError() {
+  // q-form нашёл поле с ошибкой — фокусит первое красное сам.
+  FailAlert(new Error('Проверьте выделенные поля — есть незаполненные или некорректные значения'))
 }
 
 onMounted(async () => {
@@ -361,14 +328,35 @@ onMounted(async () => {
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 })
-
-onBeforeUnmount(() => {
-  // Если правка не успела долететь — дописываем синхронно перед уходом,
-  // чтобы не потерять ввод.
-  if (saveTimer) {
-    clearTimeout(saveTimer)
-    void persist()
-  }
-  if (savedStatusTimer) clearTimeout(savedStatusTimer)
-})
 </script>
+
+<style scoped lang="scss">
+.save-bar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.save-bar-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #2e7d32;
+}
+
+.body--dark .save-bar {
+  background: #1d1d1d;
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+</style>

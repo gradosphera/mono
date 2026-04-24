@@ -16,7 +16,8 @@ q-input(
   dense
   outlined
   @update:model-value='onInput'
-  @blur='onBlur'
+  @keydown='onKeydown'
+  @paste='onPaste'
 )
 </template>
 
@@ -29,21 +30,20 @@ const props = defineProps<{
   value: string
   placeholder?: string
   readOnly?: boolean
-  /** Поле обязательно; пустое значение → «Обязательное поле» (после blur). */
+  /** Поле обязательно; пустое → «Обязательное поле» (после blur). */
   required?: boolean
-  /** Quasar mask для фиксированной длины (напр. `###-###-######`). */
+  /** Quasar mask. `#` = цифра, нативно блокирует не-цифры на keypress. */
   mask?: string
   /** Подставлять плейсхолдеры маски при вводе */
   fillMask?: boolean
-  /** Разрешить только цифры (фильтрует ввод). */
-  digitsOnly?: boolean
-  /** Разрешить только цифры и точки (для ОКВЭД: 94.99, 46.73.7 и т.п.). */
+  /** Разрешить только цифры и точку (ОКВЭД: 94.99, 46.73.7). Блокирует
+   *  keypress/paste — буквы вообще не появляются в поле. */
   digitsDotsOnly?: boolean
-  /** Жёсткое ограничение длины поля (HTML maxlength). */
+  /** HTML maxlength. */
   maxLength?: number
-  /** Допустимые точные длины (ИЛИ). Напр. `[8, 11]` для ОКТМО, `[8, 10]` для ОКПО. */
+  /** Допустимые точные длины (ИЛИ). Напр. `[8, 11]` для ОКТМО. */
   exactLengths?: number[]
-  /** Регекс финального значения; показываем `patternMessage`, если не совпало. */
+  /** Регекс финального значения; показываем `patternMessage` при несоответствии. */
   pattern?: RegExp
   /** Текст ошибки для `pattern`. */
   patternMessage?: string
@@ -53,16 +53,48 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:value': [value: string]
-  blur: []
 }>()
 
-const labelText = computed(() => (props.required && !props.readOnly ? `${props.label} *` : props.label))
+const labelText = computed(() =>
+  props.required && !props.readOnly ? `${props.label} *` : props.label,
+)
 
 const inputModeComputed = computed<'numeric' | 'decimal' | 'text'>(() => {
-  if (props.digitsOnly) return 'numeric'
   if (props.digitsDotsOnly) return 'decimal'
+  // mask из одних `#` = чистая цифровая клавиатура на мобиле.
+  if (props.mask && /^#+$/.test(props.mask)) return 'numeric'
   return 'text'
 })
+
+const NAV_KEYS = new Set([
+  'Backspace',
+  'Delete',
+  'Tab',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowUp',
+  'ArrowDown',
+  'Home',
+  'End',
+  'Enter',
+  'Escape',
+])
+
+// Блокируем keypress не-допустимых символов — буквы не попадают в поле даже
+// на миллисекунды. Работает только для digitsDotsOnly (для чисто цифровых
+// полей используем Quasar-mask — он нативно блокирует не-# символы).
+function onKeydown(e: KeyboardEvent): void {
+  if (!props.digitsDotsOnly) return
+  if (e.ctrlKey || e.metaKey || e.altKey) return
+  if (NAV_KEYS.has(e.key)) return
+  if (!/^[\d.]$/.test(e.key)) e.preventDefault()
+}
+
+function onPaste(e: ClipboardEvent): void {
+  if (!props.digitsDotsOnly) return
+  const text = e.clipboardData?.getData('text') ?? ''
+  if (!/^[\d.]*$/.test(text)) e.preventDefault()
+}
 
 const rules = computed(() => {
   const rs: Array<(v: string) => true | string> = []
@@ -73,9 +105,11 @@ const rules = computed(() => {
     const expected = props.exactLengths
     rs.push((v) => {
       const s = String(v ?? '')
-      // Пустое значение обрабатывает required-правило (или оно не обязательно).
       if (!s) return true
-      return expected.includes(s.length) || `Допустимая длина: ${expected.join(' или ')} цифр`
+      return (
+        expected.includes(s.length) ||
+        `Допустимая длина: ${expected.join(' или ')} цифр`
+      )
     })
   }
   if (props.pattern) {
@@ -91,14 +125,11 @@ const rules = computed(() => {
 })
 
 function onInput(raw: string | number | null): void {
+  // Фоллбек-фильтр на случай programmatic ввода (drop/autofill). Для ручного
+  // набора актуальна либо mask (q-input сам режет), либо keydown-блокер.
   let s = String(raw ?? '')
-  if (props.digitsOnly) s = s.replace(/\D+/g, '')
   if (props.digitsDotsOnly) s = s.replace(/[^\d.]+/g, '')
   if (props.maxLength && s.length > props.maxLength) s = s.slice(0, props.maxLength)
   emit('update:value', s)
-}
-
-function onBlur(): void {
-  emit('blur')
 }
 </script>
