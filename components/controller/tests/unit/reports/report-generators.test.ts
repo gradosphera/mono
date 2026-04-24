@@ -409,12 +409,15 @@ describe('6-НДФЛ (Ndfl6Generator)', () => {
     expect(gen.generate(withPeriod(4)).xml).toContain('Период="34"');
   });
 
-  it('проходит XSD-валидацию по NO_NDFL6.2_1_231_00_05_05_02.xsd', () => {
-    const result = gen.generate(withPeriod(1));
-    const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.NDFL6].xsdFile);
-    if (!v.isValid) console.error('NDFL6 XSD errors:', v.errors.slice(0, 10));
-    expect(v.isValid).toBe(true);
-  });
+  it.each([1, 2, 3, 4])(
+    'проходит XSD-валидацию по NO_NDFL6.2_1_231_00_05_05_02.xsd для Q%d',
+    (quarter) => {
+      const result = gen.generate(withPeriod(quarter));
+      const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.NDFL6].xsdFile);
+      if (!v.isValid) console.error(`NDFL6 Q${quarter} XSD errors:`, v.errors.slice(0, 10));
+      expect(v.isValid).toBe(true);
+    },
+  );
 
   it('подписант — представитель по доверенности', () => {
     assertRepresentativeSigner(gen.generate(withPeriod(1)).xml);
@@ -447,12 +450,15 @@ describe('РСВ (RsvGenerator)', () => {
     expect(gen.generate(withPeriod(1)).xml).toMatch(/<СвПред[^>]*НаимОрг="[^"]+"/);
   });
 
-  it('проходит XSD-валидацию по NO_RASCHSV_1_162_00_05_08_02.xsd', () => {
-    const result = gen.generate(withPeriod(1));
-    const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.RSV].xsdFile);
-    if (!v.isValid) console.error('RSV XSD errors:', v.errors.slice(0, 10));
-    expect(v.isValid).toBe(true);
-  });
+  it.each([1, 2, 3, 4])(
+    'проходит XSD-валидацию по NO_RASCHSV_1_162_00_05_08_02.xsd для Q%d',
+    (quarter) => {
+      const result = gen.generate(withPeriod(quarter));
+      const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.RSV].xsdFile);
+      if (!v.isValid) console.error(`RSV Q${quarter} XSD errors:`, v.errors.slice(0, 10));
+      expect(v.isValid).toBe(true);
+    },
+  );
 
   it('подписант — представитель по доверенности', () => {
     assertRepresentativeSigner(gen.generate(withPeriod(1)).xml);
@@ -489,12 +495,15 @@ describe('ПСВ (PsvGenerator)', () => {
     expect(result.fileName).toBe('NO_PERSSVFL_my-test-id');
   });
 
-  it('проходит XSD-валидацию по NO_PERSSVFL_1_297_00_05_01_02.xsd', () => {
-    const result = gen.generate(withPeriod(1));
-    const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.PSV].xsdFile);
-    if (!v.isValid) console.error('PSV XSD errors:', v.errors.slice(0, 10));
-    expect(v.isValid).toBe(true);
-  });
+  it.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])(
+    'проходит XSD-валидацию по NO_PERSSVFL_1_297_00_05_01_02.xsd для месяца %d',
+    (month) => {
+      const result = gen.generate(withPeriod(month));
+      const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.PSV].xsdFile);
+      if (!v.isValid) console.error(`PSV month ${month} XSD errors:`, v.errors.slice(0, 10));
+      expect(v.isValid).toBe(true);
+    },
+  );
 });
 
 describe('ДУСН (DusnGenerator)', () => {
@@ -652,12 +661,15 @@ describe('Уведомление о взносах (UvVznosyGenerator)', () => {
     expect(result.xml).toContain('Год="2026"');
   });
 
-  it('проходит XSD-валидацию по UT_UVISCHSUMNAL_1_263_00_05_03_01.xsd', () => {
-    const result = gen.generate(withPeriod(3));
-    const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.UV_VZNOSY].xsdFile);
-    if (!v.isValid) console.error('UV_VZNOSY XSD errors:', v.errors.slice(0, 10));
-    expect(v.isValid).toBe(true);
-  });
+  it.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])(
+    'проходит XSD-валидацию по UT_UVISCHSUMNAL_1_263_00_05_03_01.xsd для месяца %d',
+    (month) => {
+      const result = gen.generate(withPeriod(month));
+      const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.UV_VZNOSY].xsdFile);
+      if (!v.isValid) console.error(`UV_VZNOSY month ${month} XSD errors:`, v.errors.slice(0, 10));
+      expect(v.isValid).toBe(true);
+    },
+  );
 });
 
 describe('Уведомление по УСН (UusnGenerator)', () => {
@@ -705,12 +717,15 @@ describe('Уведомление по УСН (UusnGenerator)', () => {
     expect(result.fileName).toBe('UT_UVISCHSUMNAL_my-uusn-id');
   });
 
-  it('проходит XSD-валидацию', () => {
-    const result = gen.generate(withPeriod(1));
-    const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.UUSN].xsdFile);
-    if (!v.isValid) console.error('UUSN XSD errors:', v.errors.slice(0, 10));
-    expect(v.isValid).toBe(true);
-  });
+  it.each([1, 2, 3, 4])(
+    'проходит XSD-валидацию для Q%d',
+    (quarter) => {
+      const result = gen.generate(withPeriod(quarter));
+      const v = validateAgainstXsd(result.xml, REPORT_CONFIG[ReportType.UUSN].xsdFile);
+      if (!v.isValid) console.error(`UUSN Q${quarter} XSD errors:`, v.errors.slice(0, 10));
+      expect(v.isValid).toBe(true);
+    },
+  );
 });
 
 describe('Сверка с эталонами (ПК "Ромашка", санитизированные фикстуры)', () => {
