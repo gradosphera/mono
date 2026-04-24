@@ -37,11 +37,36 @@ q-dialog(
     .row.no-wrap.col.overflow-hidden
       //- Центр — редактируемая форма
       .col.editor-container
-        q-inner-loading(:showing='isLoading')
+        q-inner-loading(:showing='isLoading || readinessLoading')
           q-spinner(size='40px' color='primary')
 
+        //- Заглушка «заполните реквизиты» — показывается раньше формы, если бэк
+        //- вернул checkReadiness(ready=false). Пока пусто — скачивать XML
+        //- нельзя, форма отчёта вообще не рендерится, чтобы не вводить в
+        //- заблуждение (пустые значения в подписанте/классификаторах).
+        .stub-requisites(v-if='!readinessLoading && notReady')
+          q-icon(name='fa-solid fa-circle-info' size='56px' color='orange')
+          .text-h6.q-mt-md.q-mb-xs Сначала заполните реквизиты
+          .text-body2.text-grey-8.q-mb-md
+            | Для отчёта «{{ reportTitle }}» не хватает обязательных полей.
+            | Заполните их в разделе «Реквизиты», после чего вернитесь сюда.
+          q-list.missing-list.q-mb-md(dense bordered separator)
+            q-item(v-for='m in readiness?.missingFields' :key='m.key')
+              q-item-section.q-pr-sm(avatar)
+                q-icon(name='fa-solid fa-triangle-exclamation' color='orange' size='xs')
+              q-item-section
+                q-item-label {{ m.label }}
+                q-item-label.text-grey-7(caption v-if='m.reason') {{ m.reason }}
+          q-btn(
+            color='primary'
+            icon='fa-solid fa-pen-to-square'
+            label='Перейти к реквизитам'
+            @click='goToRequisites'
+            no-caps
+          )
+
         BuhotchEditor(
-          v-if='reportType === "BUHOTCH" && edits'
+          v-else-if='reportType === "BUHOTCH" && edits'
           v-model:edits='buhotchEdits'
           :field-errors='fieldErrors'
           @dirty='onDirty'
@@ -80,65 +105,68 @@ q-dialog(
           no-caps
         )
 
-        //- Валидация
-        .validation-badge.q-mb-sm(:class='{ ok: isValid, bad: !isValid }')
-          q-icon(:name='isValid ? "fa-solid fa-check" : "fa-solid fa-triangle-exclamation"')
-          span(v-if='isValid') Форма валидна
-          span(v-else) Ошибок: {{ errorsCount }}
+        //- Валидация + кнопки генерации — только когда форма загружена
+        //- (реквизиты заполнены, edits подтянулись). Для notReady показываем
+        //- только блок отметок «не надо сдавать / сдан вне платформы» ниже.
+        template(v-if='!notReady')
+          .validation-badge.q-mb-sm(:class='{ ok: isValid, bad: !isValid }')
+            q-icon(:name='isValid ? "fa-solid fa-check" : "fa-solid fa-triangle-exclamation"')
+            span(v-if='isValid') Форма валидна
+            span(v-else) Ошибок: {{ errorsCount }}
 
-        .text-subtitle2.q-mb-sm Действия
+          .text-subtitle2.q-mb-sm Действия
 
-        q-btn.q-mb-sm(
-          color='primary'
-          icon='fa-solid fa-paper-plane'
-          label='Скачать XML'
-          :disable='!canGenerate'
-          :loading='isGenerating'
-          @click='downloadXml'
-          no-caps
-          stack
-        )
-          q-tooltip Сохраняет черновик, генерирует XML, валидирует XSD и скачивает файл
-        q-btn.q-mb-sm(
-          color='grey-7'
-          icon='fa-solid fa-file-pdf'
-          label='Скачать PDF'
-          :disable='!canGenerate || !hasPdfPaperView'
-          :loading='pdfLoading'
-          @click='downloadPdf'
-          no-caps
-          stack
-        )
-          q-tooltip(v-if='!hasPdfPaperView') PDF-экспорт для {{ reportTitle }} пока не поддерживается
-          q-tooltip(v-else) Заполненный отчёт в PDF (из бумажного вида)
+          q-btn.q-mb-sm(
+            color='primary'
+            icon='fa-solid fa-paper-plane'
+            label='Скачать XML'
+            :disable='!canGenerate'
+            :loading='isGenerating'
+            @click='downloadXml'
+            no-caps
+            stack
+          )
+            q-tooltip Сохраняет черновик, генерирует XML, валидирует XSD и скачивает файл
+          q-btn.q-mb-sm(
+            color='grey-7'
+            icon='fa-solid fa-file-pdf'
+            label='Скачать PDF'
+            :disable='!canGenerate || !hasPdfPaperView'
+            :loading='pdfLoading'
+            @click='downloadPdf'
+            no-caps
+            stack
+          )
+            q-tooltip(v-if='!hasPdfPaperView') PDF-экспорт для {{ reportTitle }} пока не поддерживается
+            q-tooltip(v-else) Заполненный отчёт в PDF (из бумажного вида)
 
-        q-separator.q-my-md
+          q-separator.q-my-md
 
-        q-btn.q-mb-sm(
-          outline
-          color='grey-8'
-          icon='fa-solid fa-rotate'
-          label='Перегенерировать'
-          :disable='isLoading'
-          @click='regenerate'
-          no-caps
-          stack
-        )
-          q-tooltip Подтянуть свежие данные из блокчейна; dirty-поля сохраняются
+          q-btn.q-mb-sm(
+            outline
+            color='grey-8'
+            icon='fa-solid fa-rotate'
+            label='Перегенерировать'
+            :disable='isLoading'
+            @click='regenerate'
+            no-caps
+            stack
+          )
+            q-tooltip Подтянуть актуальные данные из реестра; ваши правки сохраняются
 
-        q-btn(
-          v-if='hasDraft'
-          flat
-          color='negative'
-          icon='fa-solid fa-trash'
-          label='Удалить черновик'
-          @click='clearDraft'
-          no-caps
-          stack
-        )
-          q-tooltip Вернуть форму к дефолтам
+          q-btn(
+            v-if='hasDraft'
+            flat
+            color='negative'
+            icon='fa-solid fa-trash'
+            label='Удалить черновик'
+            @click='clearDraft'
+            no-caps
+            stack
+          )
+            q-tooltip Вернуть форму к дефолтам
 
-        q-separator.q-my-md
+          q-separator.q-my-md
 
         //- Отметки на ячейке календаря (ReportSubmissionMark, coop-wide).
         //- Состояния:
@@ -255,11 +283,13 @@ q-dialog(
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRoute, useRouter } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import {
   useReportDraft,
   useReportStore,
+  type IReportReadinessView,
   type IReportRequisitesView,
   type IReportType,
 } from 'src/entities/Report'
@@ -351,6 +381,8 @@ const emit = defineEmits<{
 
 const reportStore = useReportStore()
 const $q = useQuasar()
+const route = useRoute()
+const router = useRouter()
 
 // Видимость action-panel. На desktop (≥md) — всегда true; на mobile
 // по-умолчанию false, открывается кнопкой-слайдером в q-bar. При ресайзе
@@ -367,6 +399,8 @@ watch(
 )
 
 const requisites = ref<IReportRequisitesView | null>(null)
+const readiness = ref<IReportReadinessView | null>(null)
+const readinessLoading = ref(false)
 const lastGeneratedXml = ref<string | null>(null)
 const lastGeneratedFileName = ref<string | null>(null)
 const generationErrors = ref<string[]>([])
@@ -461,8 +495,10 @@ const reportTitle = computed(() =>
   props.reportType ? (REPORT_TITLES[props.reportType] ?? props.reportType) : '',
 )
 
+const notReady = computed(() => readiness.value !== null && readiness.value.ready === false)
+
 const canGenerate = computed(() =>
-  props.reportType !== null && edits.value !== null && !isLoading.value,
+  props.reportType !== null && edits.value !== null && !isLoading.value && !notReady.value,
 )
 
 const hasPdfPaperView = computed(() =>
@@ -507,8 +543,20 @@ watch(
     lastGeneratedFileName.value = null
     currentMark.value = null
     isRealSubmitted.value = false
+    readiness.value = null
     if (!props.reportType) return
     try {
+      // Сначала — readiness-gate: если обязательные реквизиты не заполнены,
+      // не грузим черновик и показываем stub с кнопкой «Перейти к реквизитам».
+      // Не грузим форму, чтобы не вводить в заблуждение пустыми значениями
+      // подписанта/классификаторов.
+      readinessLoading.value = true
+      try {
+        readiness.value = (await reportStore.checkReadiness(props.reportType)) ?? null
+      } finally {
+        readinessLoading.value = false
+      }
+      if (readiness.value && readiness.value.ready === false) return
       await load()
       if (!requisites.value) {
         requisites.value = (await reportStore.loadRequisites()) ?? null
@@ -669,6 +717,17 @@ function clearMark(): void {
 function close(): void {
   emit('update:modelValue', false)
 }
+
+function goToRequisites(): void {
+  const coopname = String(route.params.coopname ?? '')
+  const firstMissing = readiness.value?.missingFields?.[0]?.key
+  void router.push({
+    name: 'reports-settings',
+    params: { coopname },
+    ...(firstMissing ? { query: { focus: firstMissing } } : {}),
+  })
+  close()
+}
 </script>
 
 <style scoped lang="scss">
@@ -732,6 +791,25 @@ function close(): void {
   color: #666;
   text-align: center;
   padding: 40px;
+}
+
+.stub-requisites {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 560px;
+  margin: 48px auto;
+  padding: 32px;
+  text-align: center;
+  color: #333;
+
+  .missing-list {
+    width: 100%;
+    text-align: left;
+    border-radius: 6px;
+    background: #fff;
+  }
 }
 
 .hidden-pdf-source {

@@ -1,20 +1,21 @@
 <template lang="pug">
 div.page-shell
-  //- Кнопка сохранения (наверху)
-  .row.q-mt-md.justify-end
-    q-btn(
-      color='primary'
-      icon='fa-solid fa-floppy-disk'
-      label='Сохранить реквизиты'
-      @click='save'
-      :loading='saving'
-    )
-
-  //- Реквизиты организации (read-only)
+  //- Статус автосохранения (неинвазивный — справа сверху карточки)
   q-card.q-mt-md(flat)
-    q-card-section
-      .text-h6 Реквизиты организации
-      .text-caption.text-grey-7 Данные из блокчейна (read-only)
+    q-card-section.q-py-sm
+      .row.items-center.no-wrap
+        .col
+          .text-h6 Реквизиты организации
+          .text-caption.text-grey-7 Справочные данные кооператива — не редактируются
+        .col-auto
+          q-chip(
+            v-if='saveStatus !== "idle"'
+            dense
+            size='sm'
+            :color='saveChipColor'
+            :icon='saveChipIcon'
+            text-color='white'
+          ) {{ saveChipLabel }}
 
     q-separator
 
@@ -26,15 +27,14 @@ div.page-shell
           :id='`field-${f.key}`'
           :label='f.label'
           :value='getValue(f.key)'
-          :source='getSource(f.key)'
           read-only
         )
 
-  //- Классификаторы (ручной ввод)
+  //- Классификаторы (ручной ввод, обязательные)
   q-card.q-mt-md(flat)
-    q-card-section
+    q-card-section.q-py-sm
       .text-h6 Классификаторы
-      .text-caption.text-grey-7 Ручной ввод (ОКВЭД, ОКФС, ОКОПФ, ОКТМО, ОКПО)
+      .text-caption.text-grey-7 ОКВЭД, ОКФС, ОКОПФ, ОКТМО, ОКПО — обязательны для большинства отчётов ФНС
 
     q-separator
 
@@ -46,14 +46,14 @@ div.page-shell
           :id='`field-${f.key}`'
           :label='f.label'
           :value='manualInput[f.key]'
-          :source='getSource(f.key)'
           :placeholder='f.placeholder'
-          @update:value='v => manualInput[f.key] = v'
+          required
+          @update:value='v => onManualChange(f.key, v)'
         )
 
   //- СФР (ЕФС-1)
   q-card.q-mt-md(flat)
-    q-card-section
+    q-card-section.q-py-sm
       .text-h6 СФР (для ЕФС-1)
       .text-caption.text-grey-7 Регистрационный номер СФР и должность председателя
 
@@ -65,25 +65,25 @@ div.page-shell
           id='field-sfrRegNumber'
           label='Рег. номер СФР'
           :value='manualInput.sfrRegNumber'
-          :source='getSource("sfrRegNumber")'
           placeholder='XXX-XXX-XXXXXX'
           mask='###-###-######'
-          @update:value='v => manualInput.sfrRegNumber = v'
+          required
+          @update:value='v => onManualChange("sfrRegNumber", v)'
         )
         RequisiteField.col-md-6.col-12(
           id='field-chairmanPosition'
           label='Должность председателя'
           :value='manualInput.chairmanPosition'
-          :source='getSource("chairmanPosition")'
           placeholder='Председатель'
-          @update:value='v => manualInput.chairmanPosition = v'
+          required
+          @update:value='v => onManualChange("chairmanPosition", v)'
         )
 
   //- Подписант
   q-card.q-mt-md(flat)
-    q-card-section
+    q-card-section.q-py-sm
       .text-h6 Подписант
-      .text-caption.text-grey-7 Кто подписывает отчёты (председатель или представитель)
+      .text-caption.text-grey-7 Кто подписывает отчёты: председатель или представитель (по доверенности)
 
     q-separator
 
@@ -96,45 +96,67 @@ div.page-shell
             label='Тип подписанта'
             dense outlined
             emit-value map-options
+            @update:model-value='onSignerTypeChange'
           )
         RequisiteField.col-md-6.col-12(
           id='field-signerSnils'
           label='СНИЛС подписанта'
           :value='manualInput.signerSnils'
-          :source='getSource("signerSnils")'
           placeholder='XXX-XXX-XXX XX'
           mask='###-###-### ##'
-          @update:value='v => manualInput.signerSnils = v'
+          required
+          @update:value='v => onManualChange("signerSnils", v)'
         )
         RequisiteField.col-12(
           v-if='signerType === "representative"'
           id='field-signerRepDoc'
           label='Документ представителя'
           :value='manualInput.signerRepDoc'
-          :source='getSource("signerRepDoc")'
           placeholder='Доверенность № X от DD.MM.YYYY'
-          @update:value='v => manualInput.signerRepDoc = v'
+          required
+          @update:value='v => onManualChange("signerRepDoc", v)'
         )
 
 
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { SuccessAlert, FailAlert } from 'src/shared/api'
+import { FailAlert } from 'src/shared/api'
 import { useReportStore } from 'src/entities/Report'
 import type { IReportRequisitesView, IUpdateReportRequisitesInput } from 'src/entities/Report'
-import { Zeus } from '@coopenomics/sdk'
 import RequisiteField from './RequisiteField.vue'
 
 const route = useRoute()
 const reportStore = useReportStore()
 
 const loading = ref(false)
-const saving = ref(false)
-
 const requisites = ref<IReportRequisitesView | null>(null)
+
+// Автосохранение: состояние статуса показывается бейджем «Сохраняется…» / «Сохранено».
+// idle при старте (до любой правки), saving/saved/error — по факту.
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+const saveStatus = ref<SaveStatus>('idle')
+
+const saveChipColor = computed(() => {
+  if (saveStatus.value === 'saving') return 'orange'
+  if (saveStatus.value === 'saved') return 'positive'
+  if (saveStatus.value === 'error') return 'negative'
+  return 'grey'
+})
+const saveChipIcon = computed(() => {
+  if (saveStatus.value === 'saving') return 'fa-solid fa-rotate'
+  if (saveStatus.value === 'saved') return 'fa-solid fa-check'
+  if (saveStatus.value === 'error') return 'fa-solid fa-triangle-exclamation'
+  return ''
+})
+const saveChipLabel = computed(() => {
+  if (saveStatus.value === 'saving') return 'Сохраняется…'
+  if (saveStatus.value === 'saved') return 'Сохранено'
+  if (saveStatus.value === 'error') return 'Ошибка сохранения'
+  return ''
+})
 
 type ManualKey =
   | 'okved'
@@ -196,31 +218,18 @@ function getValue(key: keyof IReportRequisitesView): string {
   return ''
 }
 
-function getSource(key: string): 'blockchain' | 'manual' | 'empty' {
-  const v = (requisites.value as any)?.[key]
-  if (v && typeof v === 'object' && 'source' in v) {
-    const src = v.source as Zeus.RequisiteSource
-    if (src === Zeus.RequisiteSource.DATABASE) return 'blockchain'
-    if (src === Zeus.RequisiteSource.MANUAL) return 'manual'
-  }
-  return 'empty'
-}
-
 async function loadRequisites() {
   loading.value = true
   try {
     const data = await reportStore.loadRequisites()
     if (data) {
       requisites.value = data
-      // Prefill manual inputs
       for (const key of Object.keys(manualInput) as ManualKey[]) {
         const v = (data as any)[key]
         if (v && typeof v === 'object' && 'value' in v && v.value) {
           manualInput[key] = String(v.value)
         }
       }
-      // signerType — choice, не RequisiteField; default 'chairman' если бэк
-      // не вернул значения (первый заход председателя).
       const serverSignerType = (data as any).signerType
       if (serverSignerType === 'chairman' || serverSignerType === 'representative') {
         signerType.value = serverSignerType
@@ -233,15 +242,22 @@ async function loadRequisites() {
   }
 }
 
-async function save() {
-  // Для representative-подписанта без доверенности XML пойдёт с пустым
-  // НаимДок — ФНС/СФР отклонит. Блокируем до заполнения.
-  if (signerType.value === 'representative' && !manualInput.signerRepDoc?.trim()) {
-    FailAlert(new Error('Для подписанта «Представитель» нужно указать документ (доверенность)'))
-    return
-  }
+// Debounced-автосохранение: после правки ждём тишину и пишем на сервер.
+// Валидацию «representative без доверенности» не блокирует — пустое поле
+// покажется красным благодаря :required, бэк хранит пустоту до заполнения.
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+let savedStatusTimer: ReturnType<typeof setTimeout> | null = null
+const DEBOUNCE_MS = 600
 
-  saving.value = true
+function scheduleSave() {
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => {
+    void persist()
+  }, DEBOUNCE_MS)
+}
+
+async function persist() {
+  saveStatus.value = 'saving'
   try {
     const input: Record<string, string | null> = {}
     for (const key of Object.keys(manualInput) as ManualKey[]) {
@@ -250,13 +266,25 @@ async function save() {
     }
     input.signerType = signerType.value
     await reportStore.updateRequisites(input as IUpdateReportRequisitesInput)
-    SuccessAlert('Реквизиты сохранены')
-    await loadRequisites()
+    // Не перезагружаем всё (иначе каретка в поле улетит) — фиксируем только статус.
+    saveStatus.value = 'saved'
+    if (savedStatusTimer) clearTimeout(savedStatusTimer)
+    savedStatusTimer = setTimeout(() => {
+      if (saveStatus.value === 'saved') saveStatus.value = 'idle'
+    }, 2000)
   } catch (e: any) {
+    saveStatus.value = 'error'
     FailAlert(e, 'Ошибка сохранения')
-  } finally {
-    saving.value = false
   }
+}
+
+function onManualChange(key: ManualKey, v: string) {
+  manualInput[key] = v
+  scheduleSave()
+}
+
+function onSignerTypeChange() {
+  scheduleSave()
 }
 
 onMounted(async () => {
@@ -266,5 +294,15 @@ onMounted(async () => {
     const el = document.getElementById(`field-${route.query.focus}`)
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
+})
+
+onBeforeUnmount(() => {
+  // Если правка не успела долететь — дописываем синхронно перед уходом,
+  // чтобы не потерять ввод.
+  if (saveTimer) {
+    clearTimeout(saveTimer)
+    void persist()
+  }
+  if (savedStatusTimer) clearTimeout(savedStatusTimer)
 })
 </script>

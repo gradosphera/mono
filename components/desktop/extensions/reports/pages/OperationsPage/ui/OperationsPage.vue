@@ -115,7 +115,7 @@ div.page-shell
               :color='processChipBg(props.row.actionCode)'
               :text-color='processChipText(props.row.actionCode)'
             ) {{ actionLabel(props.row.actionCode) }}
-          q-td.text-right.font-monospace {{ formatAmount(props.row.quantity) }}
+          q-td.text-right.font-monospace.text-weight-bold.text-grey-10 {{ formatAmount(props.row.quantity) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
         q-tr.q-virtual-scroll--with-prev(
@@ -216,7 +216,7 @@ div.page-shell
                 .text-caption.text-grey-6.font-monospace {{ props.row.actionCode || '-' }}
               .col-auto.text-right
                 .text-caption.text-grey-6 Сумма
-                .text-body2.text-weight-medium.font-monospace {{ formatAmount(props.row.quantity) }}
+                .text-body1.text-weight-bold.font-monospace {{ formatAmount(props.row.quantity) }}
               .col-12.text-caption.text-grey-7
                 | Пайщик: {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 </template>
