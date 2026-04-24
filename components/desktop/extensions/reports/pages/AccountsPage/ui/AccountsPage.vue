@@ -41,7 +41,16 @@ div.page-shell
         )
           q-td(colspan='100%')
             .q-pa-sm
-              .text-caption.text-grey-6.q-mb-xs История проводок
+              .row.items-center.q-mb-sm
+                .col
+                  .text-caption.text-grey-6 История проводок
+                .col-auto
+                  q-btn(
+                    flat dense size='sm' color='primary'
+                    icon='fa-solid fa-arrow-right'
+                    label='Все операции'
+                    :to='{ name: "reports-operations", query: { account_id: props.row.id } }'
+                  )
               q-table(
                 flat dense
                 :rows='childOps.get(props.row.id) ?? []'
@@ -70,12 +79,6 @@ div.page-shell
                       :to='{ name: "reports-operations", query: { process_hash: cp.row.processHash } }'
                     )
                       q-tooltip Показать операцию
-              q-btn.q-mt-xs(
-                flat dense size='sm' color='primary'
-                icon='fa-solid fa-arrow-right'
-                label='Все операции'
-                :to='{ name: "reports-operations", query: { account_id: props.row.id } }'
-              )
 
       template(#item='props')
         .col-12

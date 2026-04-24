@@ -35,7 +35,16 @@ div.page-shell
         )
           q-td(colspan='100%')
             .q-pa-sm
-              .text-caption.text-grey-6.q-mb-xs Движения по кошельку
+              .row.items-center.q-mb-sm
+                .col
+                  .text-caption.text-grey-6 Движения по кошельку
+                .col-auto
+                  q-btn(
+                    flat dense size='sm' color='primary'
+                    icon='fa-solid fa-arrow-right'
+                    label='К операциям'
+                    :to='{ name: "reports-operations", query: { wallet_id: props.row.id } }'
+                  )
               q-table(
                 flat dense
                 :rows='childOps.get(props.row.id) ?? []'
@@ -57,6 +66,8 @@ div.page-shell
                     WalletIdCell(:wallet-id='cp.row.walletTo')
                 template(#body-cell-quantity='cp')
                   q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
+                template(#body-cell-memo='cp')
+                  q-td.memo-cell(:props='cp') {{ cp.row.memo || '—' }}
                 template(#body-cell-createdAt='cp')
                   q-td(:props='cp') {{ formatDate(cp.row.createdAt) }}
                 template(#body-cell-open='cp')
@@ -68,12 +79,6 @@ div.page-shell
                       :to='{ name: "reports-operations", query: { process_hash: cp.row.processHash } }'
                     )
                       q-tooltip Показать операцию
-              q-btn.q-mt-xs(
-                flat dense size='sm' color='primary'
-                icon='fa-solid fa-arrow-right'
-                label='К операциям'
-                :to='{ name: "reports-operations", query: { wallet_id: props.row.id } }'
-              )
 
       template(#item='props')
         .col-12
@@ -192,5 +197,10 @@ onMounted(async () => {
 .font-monospace {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   letter-spacing: 0.03em;
+}
+.memo-cell {
+  max-width: 240px;
+  white-space: normal;
+  word-break: break-word;
 }
 </style>

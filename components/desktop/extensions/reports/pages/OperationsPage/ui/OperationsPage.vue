@@ -115,6 +115,7 @@ div.page-shell
               :color='processChipBg(props.row.actionCode)'
               :text-color='processChipText(props.row.actionCode)'
             ) {{ actionLabel(props.row.actionCode) }}
+          q-td.text-right.font-monospace {{ formatAmount(props.row.quantity) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
         q-tr.q-virtual-scroll--with-prev(
@@ -130,7 +131,13 @@ div.page-shell
                 :style='{ borderLeftColor: processAccentColor(props.row.actionCode) }'
               )
                 .text-h6.text-weight-medium {{ actionLabel(props.row.actionCode) }}
-                .text-caption.text-grey-7.font-monospace.q-mb-sm {{ props.row.actionCode || '—' }}
+                .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.actionCode')
+                  .text-caption.text-grey-7 Тип процесса:
+                  EntityIdBadge(
+                    :rawId='props.row.actionCode'
+                    copy-on-click
+                  )
+                    q-tooltip Клик — копировать
                 .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.processHash')
                   .text-caption.text-grey-7 ID процесса:
                   EntityIdBadge(
@@ -207,8 +214,11 @@ div.page-shell
                 .text-caption.text-grey-6 {{ formatDate(props.row.createdAt) }}
                 .text-body2.text-weight-medium {{ actionLabel(props.row.actionCode) }}
                 .text-caption.text-grey-6.font-monospace {{ props.row.actionCode || '-' }}
+              .col-auto.text-right
+                .text-caption.text-grey-6 Сумма
+                .text-body2.text-weight-medium.font-monospace {{ formatAmount(props.row.quantity) }}
               .col-12.text-caption.text-grey-7
-                | Исполнитель: {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
+                | Пайщик: {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 </template>
 
 <script setup lang="ts">
@@ -403,7 +413,8 @@ const columns = [
   { name: 'processHash', align: 'left' as const, label: '№', field: 'processHash' },
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
   { name: 'actionName', align: 'left' as const, label: 'Операция', field: 'actionCode' },
-  { name: 'username', align: 'left' as const, label: 'Исполнитель', field: 'username' },
+  { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },
+  { name: 'username', align: 'left' as const, label: 'Пайщик', field: 'username' },
 ]
 
 const walletColumns = [
