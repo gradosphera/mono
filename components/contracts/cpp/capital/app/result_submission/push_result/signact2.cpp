@@ -59,14 +59,14 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   if (segment.available_for_program.amount > 0) {
     Wallet::add_blocked_funds(_capital, coopname, result -> username, segment.available_for_program, _source_program, memo);
 
-    Ledger2::apply(_capital, coopname, ledger2_ops::ACCEPT_RID, segment.available_for_program, result -> username, result_hash, memo);
+    Ledger2::apply(_capital, coopname, operations::capital::ACCEPT_RID, segment.available_for_program, result -> username, result_hash, memo);
   }
 
   // Возврат беспроцентного займа пайщика: Dr 80 / Cr 58, TRANSFER LOAN_ISSUED → SHARE_FUND_PAY.
   // Семантика: пайщик погасил ссуду результатом (интеллектуальным взносом),
   // у кооперативa уменьшилось фин. вложение 58, деньги вернулись на расчётный.
   if (result -> debt_amount.amount > 0){
-    Ledger2::apply(_capital, coopname, ledger2_ops::REPAY_LOAN, result -> debt_amount, result -> username, result_hash, memo);
+    Ledger2::apply(_capital, coopname, operations::capital::REPAY, result -> debt_amount, result -> username, result_hash, memo);
   }
   
   // Обновляем накопительные показатели контрибьютора на основе его ролей в сегменте

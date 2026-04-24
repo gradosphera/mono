@@ -44,7 +44,7 @@
   std::string memo = "Подтверждение получения для заказа №" + std::to_string(change.id);
   
   // Паевой фонд - уменьшаем циркуляцию через ledger2 (TRANSFER SHARE_FUND → SUPPLIER_PAYMENTS)
-  Ledger2::apply(_marketplace, coopname, ledger2_ops::RECEIVE_CONFIRM, change.base_cost, username, request_hash, memo);
+  Ledger2::apply(_marketplace, coopname, operations::marketplace::CONFIRM_RECEIPT, change.base_cost, username, request_hash, memo);
   
   // Заказчик - списываем заблокированный баланс
   Wallet::sub_blocked_funds(_marketplace, coopname, change.money_contributor, change.total_cost, _marketplace_program, memo);

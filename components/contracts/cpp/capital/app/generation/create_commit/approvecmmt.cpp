@@ -65,11 +65,11 @@ void capital::approvecmmt(eosio::name coopname, eosio::name master, checksum256 
   // UI группирует все коммиты проекта в один process `cap.apprvcmmt`.
   auto updated_segment = Capital::Segments::get_segment_or_fail(coopname, commit.project_hash, commit.username, "Сегмент после upsert не найден");
   eosio::asset delta_available = updated_segment.available_for_program - old_available_for_program;
-  eosio::check(delta_available.amount >= 0, "Отрицательная дельта available_for_program при COMMIT_RID");
+  eosio::check(delta_available.amount >= 0, "Отрицательная дельта available_for_program при operations::capital::COMMIT_RID");
   if (delta_available.amount > 0) {
     auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, commit.username);
     auto memo = Capital::Memo::get_push_result_memo(contributor -> id);
-    Ledger2::apply(_capital, coopname, ledger2_ops::COMMIT_RID, delta_available, commit.username, commit.project_hash, memo);
+    Ledger2::apply(_capital, coopname, operations::capital::COMMIT_RID, delta_available, commit.username, commit.project_hash, memo);
   }
 
   // Удаляем коммит после обработки

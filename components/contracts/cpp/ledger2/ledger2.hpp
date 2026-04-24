@@ -10,7 +10,7 @@
 
 #include "../lib/index.hpp"
 #include "../lib/core/ledger2/accounts.hpp"
-#include "../lib/core/ledger2/actions.hpp"
+#include "../lib/core/ledger2/operations.hpp"
 #include "../lib/core/ledger2/wallets.hpp"
 
 using namespace eosio;
@@ -21,7 +21,7 @@ using namespace eosio;
 \brief Двухконтурный учёт: управленческие кошельки + двойная бухгалтерия.
 
 Контракт ledger2 (пересмотр Epic 1 addendum, 2026-04-18) реализует единый
-интерфейс `apply(action_code, ...)` как orchestrator: он рассылает 3
+интерфейс `apply(operation_code, ...)` как orchestrator: он рассылает 3
 атомарных inline-action, связанных общим `process_hash`:
 
   1. `walletop` — issue/transfer/block/unblock на wallets2;
@@ -41,7 +41,7 @@ State-таблицы в RAM:
 blockchain_actions + blockchain_deltas.
 
 Внешних add/sub/writeoff нет — всё движение средств описывается через
-ACTION_REGISTRY.
+OPERATION_REGISTRY.
 */
 
 /** \defgroup public_ledger2_actions Действия ledger2 \ingroup public_ledger2 */
@@ -53,7 +53,7 @@ ACTION_REGISTRY.
  * @brief Контракт ledger2.
  * @details Единственное внешнее финансовое action — apply(). Миграция с
  *          ledger — одноразовое migrate(). Внешних add/sub/writeoff нет:
- *          всё движение средств описывается через ACTION_REGISTRY.
+ *          всё движение средств описывается через OPERATION_REGISTRY.
  */
 class [[eosio::contract(LEDGER2)]] ledger2 : public eosio::contract {
 public:
@@ -71,7 +71,7 @@ public:
    */
   [[eosio::action]] void apply(eosio::name coopname,
                                 eosio::name initiator,
-                                eosio::name action_code,
+                                eosio::name operation_code,
                                 eosio::asset amount,
                                 eosio::name username,
                                 eosio::checksum256 process_hash,
@@ -125,7 +125,7 @@ public:
    * `migrate(0, 10)`, `migrate(10, 10)`, ... Мета-таблица хранит
    * `last_migrated_coop_index` для возобновления.
    *
-   * Все балансы вносятся через inline `apply(TRANSIT_*)` — единый путь учёта
+   * Все балансы вносятся через inline `apply(operations::migration::*)` — единый путь учёта
    * с полной двойной проводкой и audit-trail (пересмотр 2026-04-20:
    * детерминированное разнесение на 6 целевых кошельков без транзитного
    * счёта 99 и без зеркала CASH_MAIN).

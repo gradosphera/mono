@@ -4,8 +4,8 @@
  * Разделение на два независимых потока:
  *
  *   A. **Бухгалтерские остатки** из `ledger::accounts` (scope=coopname,
- *      contract=_ledger) → через 4 inline `apply(TRANSIT_*)` с полной
- *      двойной проводкой. Счета: 51 / 80 / 86 / 04.
+ *      contract=_ledger) → через 4 inline `apply(operations::migration::*)`
+ *      с полной двойной проводкой. Счета: 51 / 80 / 86 / 04.
  *
  *   B. **Программные кошельки** из `soviet::progwallets` (scope=coopname,
  *      contract=_soviet) → прямой `wallets2.emplace` в ledger2 БЕЗ
@@ -38,10 +38,10 @@
  *        share_legacy >= share_money
  *
  *   4. Отправка 4 inline apply (ненулевые пропускаются):
- *        apply(TRANSIT_MIN_SHARE, min_total)     → Dr 51 / Cr 80, MIN_SHARE_FUND 2002
- *        apply(TRANSIT_SHARE,     share_remain)  → Dr 51 / Cr 80, SHARE_FUND_PAY 2001
- *        apply(TRANSIT_ENTRY,     entry_legacy)  → Dr 51 / Cr 86, ENTRANCE_FEES 3001
- *        apply(TRANSIT_RID,       rid_share)     → Dr 04 / Cr 80, SHARE_FUND_RID 2003
+ *        apply(migration::MIN_SHARE, min_total)    → Dr 51 / Cr 80, MIN_SHARE_FUND 2002
+ *        apply(migration::SHARE,     share_remain) → Dr 51 / Cr 80, SHARE_FUND_PAY 2001
+ *        apply(migration::ENTRY,     entry_legacy) → Dr 51 / Cr 86, ENTRANCE_FEES 3001
+ *        apply(migration::RID,       rid_share)    → Dr 04 / Cr 80, SHARE_FUND_RID 2003
  *
  *   5. Прямой emplace в wallets2 для progwallets (БЕЗ бух-проводок):
  *        Σ progwallet[blagorost].blocked → wallets2[BLAGOROST_INVEST 9001]
@@ -137,22 +137,22 @@ inline uint64_t count_active_participants(eosio::name coopname, const cooperativ
 
 /**
  * Отправляет inline apply для одной миграционной операции, если amount > 0.
- * process_hash детерминирован по (coopname, action_code).
+ * process_hash детерминирован по (coopname, operation_code).
  */
 inline void send_transit(eosio::name self_name,
                          eosio::name coopname,
-                         eosio::name action_code,
+                         eosio::name operation_code,
                          const eosio::asset& amt) {
   if (amt.amount == 0) return;
 
   const std::string hash_src =
-    std::string{"mig::"} + coopname.to_string() + std::string{"::"} + action_code.to_string();
+    std::string{"mig::"} + coopname.to_string() + std::string{"::"} + operation_code.to_string();
   const eosio::checksum256 proc_hash = hashit(hash_src);
 
   Ledger2::apply(
     self_name,
     coopname,
-    action_code,
+    operation_code,
     amt,
     eosio::name{}, // username не применим к транзитной проводке
     proc_hash,
@@ -244,15 +244,15 @@ inline void migrate_one_coop(eosio::name self_name, const cooperative2& coop) {
       _root_govern_symbol
     );
 
-    send_transit(self_name, coopname, ledger2_ops::TRANSIT_MIN_SHARE, min_total);
-    send_transit(self_name, coopname, ledger2_ops::TRANSIT_SHARE,     share_remain);
-    send_transit(self_name, coopname, ledger2_ops::TRANSIT_ENTRY,     b.entry);
-    send_transit(self_name, coopname, ledger2_ops::TRANSIT_RID,       rid_share);
+    send_transit(self_name, coopname, operations::migration::MIN_SHARE, min_total);
+    send_transit(self_name, coopname, operations::migration::SHARE,     share_remain);
+    send_transit(self_name, coopname, operations::migration::ENTRY,     b.entry);
+    send_transit(self_name, coopname, operations::migration::RID,       rid_share);
   }
 
   // ----- B. Программные кошельки — прямой emplace, без Dr/Cr -----
   // progwallets.blocked НЕ входит в legacy::accounts[80], поэтому
-  // проводить их через apply(TRANSIT_BLAGOROST) вызвало бы двойной учёт.
+  // проводить их через apply(operations::migration::*) вызвало бы двойной учёт.
   emplace_wallet_only(self_name, coopname, ledger2_wallets::BLAGOROST_INVEST,   blagorost_invest);
   emplace_wallet_only(self_name, coopname, ledger2_wallets::GENERATOR_COMMIT,   generator_commit);
 }

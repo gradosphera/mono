@@ -48,7 +48,7 @@ void capital::act2pgprp(eosio::name coopname, eosio::name username, checksum256 
   Wallet::add_blocked_funds(_capital, coopname, property.username, property.property_amount, _capital_program, memo);
   
   // Увеличиваем паевой фонд через ledger2 (ISSUE в SHARE_FUND)
-  Ledger2::apply(_capital, coopname, ledger2_ops::ACT2_PROGRAM_PROP, property.property_amount, property.username, property_hash, memo);
+  Ledger2::apply(_capital, coopname, operations::capital::ACCEPT_PROPERTY, property.property_amount, property.username, property_hash, memo);
   
   // Удаляем предложение после успешной обработки
   Capital::ProgramProperties::delete_program_property(coopname, property.id);

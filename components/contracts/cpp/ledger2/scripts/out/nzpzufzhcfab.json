@@ -1,0 +1,503 @@
+{
+  "coopname": "nzpzufzhcfab",
+  "cooperative": {
+    "status": "blocked",
+    "coop_type": "conscoop",
+    "is_branched": 0,
+    "is_enrolled": 0,
+    "created_at": "2025-01-21T14:49:22",
+    "minimum": "100.0000 RUB",
+    "org_minimum": "3000.0000 RUB",
+    "initial": "100.0000 RUB",
+    "org_initial": "1000.0000 RUB",
+    "active_participants_count_cached": 16
+  },
+  "legacy_accounts": [
+    {
+      "id": 51,
+      "name": "Расчетный счет",
+      "available": "7900.0000 RUB",
+      "blocked": "0.0000 RUB",
+      "writeoff": "0.0000 RUB",
+      "total_for_migration": "7900.0000 RUB"
+    },
+    {
+      "id": 80,
+      "name": "Паевой фонд (складочный капитал)",
+      "available": "6700.0000 RUB",
+      "blocked": "0.0000 RUB",
+      "writeoff": "0.0000 RUB",
+      "total_for_migration": "6700.0000 RUB"
+    },
+    {
+      "id": 861,
+      "name": "Вступительные взносы",
+      "available": "1200.0000 RUB",
+      "blocked": "0.0000 RUB",
+      "writeoff": "0.0000 RUB",
+      "total_for_migration": "1200.0000 RUB"
+    }
+  ],
+  "programs": [
+    {
+      "id": 1,
+      "title": "Цифровой Кошелёк",
+      "type": "wallet",
+      "is_active": 1,
+      "available": 4000.0,
+      "blocked": 0.0,
+      "spended": 0.0,
+      "share_contributions": 4000.0,
+      "membership_contributions": 0.0
+    }
+  ],
+  "progwallets_aggregate": {
+    "1": {
+      "program_title": "Цифровой Кошелёк",
+      "program_type": "wallet",
+      "count": 12,
+      "sum_available": "4000.0000 RUB",
+      "sum_blocked": "0.0000 RUB",
+      "sum_membership_contribution": "0.0000 RUB"
+    }
+  },
+  "participants": {
+    "total": 16,
+    "by_status": {
+      "accepted": 16
+    },
+    "by_type_accepted": {
+      "individual": 15,
+      "entrepreneur": 1
+    },
+    "list": [
+      {
+        "username": "aiamigkwzlis",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-29T00:00:00",
+        "last_min_pay": "2025-01-29T00:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "batnubfgrbzz",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2024-12-26T16:00:00",
+        "last_min_pay": "2024-12-26T16:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "blvpogukteiy",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-29T00:00:00",
+        "last_min_pay": "2025-01-29T00:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "eovrcdozyzyk",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-27T08:15:46",
+        "last_min_pay": "2025-01-27T08:15:46",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "300.0000 RUB"
+      },
+      {
+        "username": "iorlllcumtlb",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-27T08:13:04",
+        "last_min_pay": "2025-01-27T08:13:04",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "300.0000 RUB"
+      },
+      {
+        "username": "irjxttnqydje",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-29T00:00:00",
+        "last_min_pay": "2025-01-29T00:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "jxyjeuyzwarr",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2024-01-27T11:14:09",
+        "last_min_pay": "2024-01-27T11:14:09",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "300.0000 RUB"
+      },
+      {
+        "username": "lrragbmjkauv",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-29T00:00:00",
+        "last_min_pay": "2025-01-29T00:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "nbqmennanpdq",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-29T00:00:00",
+        "last_min_pay": "2025-01-29T00:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "ndducpxyomyb",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-23T12:00:00",
+        "last_min_pay": "2025-01-23T12:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "nybarvxyyggo",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2024-12-26T16:00:00",
+        "last_min_pay": "2024-12-26T16:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "qsuudaxwfitu",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-29T12:00:00",
+        "last_min_pay": "2025-01-29T12:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "wxwfqlozggll",
+        "type": "entrepreneur",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-24T12:00:00",
+        "last_min_pay": "2025-01-24T12:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "xtcsekrksrvd",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-16T00:00:00",
+        "last_min_pay": "2025-01-16T00:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      },
+      {
+        "username": "yvcddcnkatad",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-27T08:15:46",
+        "last_min_pay": "2025-01-27T08:15:46",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "300.0000 RUB"
+      },
+      {
+        "username": "zrkkphcoxfrr",
+        "type": "individual",
+        "status": "accepted",
+        "is_initial": 1,
+        "is_minimum": 1,
+        "has_vote": 1,
+        "braname": null,
+        "created_at": "2025-01-24T11:00:00",
+        "last_min_pay": "2025-01-24T11:00:00",
+        "initial_amount": "100.0000 RUB",
+        "minimum_amount": "100.0000 RUB"
+      }
+    ]
+  },
+  "per_participant_wallets_matrix": [
+    {
+      "username": "aiamigkwzlis",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "batnubfgrbzz",
+      "type": "individual",
+      "wallets_by_program": {},
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "blvpogukteiy",
+      "type": "individual",
+      "wallets_by_program": {},
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "eovrcdozyzyk",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "iorlllcumtlb",
+      "type": "individual",
+      "wallets_by_program": {},
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "irjxttnqydje",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "jxyjeuyzwarr",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 3000.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 3000.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "lrragbmjkauv",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "nbqmennanpdq",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "ndducpxyomyb",
+      "type": "individual",
+      "wallets_by_program": {},
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "nybarvxyyggo",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "qsuudaxwfitu",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "wxwfqlozggll",
+      "type": "entrepreneur",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "xtcsekrksrvd",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 0.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "yvcddcnkatad",
+      "type": "individual",
+      "wallets_by_program": {
+        "1": {
+          "program": "Цифровой Кошелёк",
+          "type": "wallet",
+          "available": 1000.0,
+          "blocked": 0.0,
+          "membership": 0.0
+        }
+      },
+      "total_available": 1000.0,
+      "total_blocked": 0.0
+    },
+    {
+      "username": "zrkkphcoxfrr",
+      "type": "individual",
+      "wallets_by_program": {},
+      "total_available": 0.0,
+      "total_blocked": 0.0
+    }
+  ],
+  "migration_formula_preview": {
+    "cash_legacy": "7900.0000 RUB",
+    "share_legacy": "6700.0000 RUB",
+    "entry_legacy": "1200.0000 RUB",
+    "share_money_derived": "6700.0000 RUB",
+    "rid_share_derived": "0.0000 RUB",
+    "n_individual_accepted": 15,
+    "n_organization_accepted": 0,
+    "n_entrepreneur_accepted": 1,
+    "min_total_current_formula": "1600.0000 RUB",
+    "min_total_correct_with_types": "1600.0000 RUB",
+    "blagorost_invest_from_pid4_blocked": "0.0000 RUB",
+    "generator_commit_from_pid3_blocked": "0.0000 RUB",
+    "digital_wallet_blocked_pid1": "0.0000 RUB",
+    "digital_wallet_available_pid1": "4000.0000 RUB"
+  },
+  "warnings": []
+}

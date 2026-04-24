@@ -1,27 +1,25 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Стандарт «Регистрация пайщика» — кооперативный процесс приёма в кооператив.
+# Стандарт «Приём пайщика» — кооперативный процесс приёма в кооператив.
 #
 # Это пилотный манифест v1: описывает процесс в целевом виде, где учётные
-# проводки делаются через ledger2 (reg.entrfee + reg.minshare). В текущей
-# реализации контракта `confirmreg.cpp` проводки ещё идут через legacy
-# `Ledger::add`; после перехода на ledger2.apply стандарт становится active.
+# проводки делаются через ledger2 (o.reg.payent + o.reg.putmin).
 #
 # Канон формата:
 #   coopenomics-docs/docs/standards/_spec/canon.md
 # Источники правды в коде:
 #   • cpp/registrator/registrator.hpp                 — actions
 #   • cpp/registrator/src/user/{reguser,confirmpay,confirmreg,declinepay,declinereg}.cpp
-#   • cpp/lib/core/ledger2/actions.hpp                — ACTION_REGISTRY (reg.entrfee, reg.minshare)
-#   • cpp/lib/core/ledger2/process_types.hpp          — process_types::REGISTRATION
+#   • cpp/lib/core/ledger2/operations.hpp             — OPERATION_REGISTRY (o.reg.payent, o.reg.putmin)
+#   • cpp/lib/core/ledger2/processes.hpp              — processes::registrator::ACCEPT
 #   • cpp/lib/core/ledger2/wallets.hpp                — ENTRANCE_FEES, MIN_SHARE_FUND
 #   • cpp/lib/core/ledger2/accounts.hpp               — BANK_ACCOUNT, SHARE_FUND, TARGET_RECEIPTS
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Секция 1. Паспорт ───────────────────────────────────────────────────────
-process_type: reg.regist
-id: public_registrator_registration_process
-title: Регистрация пайщика
-slug: regist
+process_type: p.reg.accept
+id: public_registrator_accept_process
+title: Приём пайщика
+slug: accept
 status: proposed
 contract: registrator
 summary: >
@@ -32,7 +30,7 @@ purpose: >
   Процесс оформляет вход человека (или организации) в кооператив: пайщик
   подписывает заявление, оплачивает вступительный взнос и минимальный паевой
   взнос, совет принимает решение. На этапе подтверждения совета в учёте
-  одновременно возникают две ledger2-операции — reg.entrfee и reg.minshare —
+  одновременно возникают две ledger2-операции — o.reg.payent и o.reg.putmin —
   и пайщик получает статус `active`.
 roles:
   - contributor        # будущий пайщик
@@ -66,7 +64,7 @@ actions:
     role: closer
     purpose: >
       Совет утверждает приём пайщика. Это закрывающее действие: после него
-      в ledger2 применяются операции reg.entrfee и reg.minshare, аккаунт
+      в ledger2 применяются операции o.reg.payent и o.reg.putmin, аккаунт
       получает статус `active`, кандидат удаляется.
   - name: registrator::declinereg
     human: Отклонить советом
@@ -129,10 +127,10 @@ transitions:
     to: active
     action: registrator::confirmreg
     actor: soviet
-    ledger_code: reg.regist
+    ledger_code: p.reg.accept
     operations:
-      - reg.entrfee
-      - reg.minshare
+      - o.reg.payent
+      - o.reg.putmin
     guards:
       - Совет принял положительное решение по повестке.
 
@@ -191,8 +189,8 @@ scenario:
         При положительном решении contract confirmreg:
         (1) проставляет accounts.status = `active`;
         (2) добавляет пайщика в список участников (soviet::addpartcpnt);
-        (3) применяет две ledger2-операции: reg.entrfee (вступительный
-        взнос, Дт 51 / Кт 86) и reg.minshare (минимальный паевой взнос,
+        (3) применяет две ledger2-операции: o.reg.payent (вступительный
+        взнос, Дт 51 / Кт 86) и o.reg.putmin (минимальный паевой взнос,
         Дт 51 / Кт 80). Запись кандидата удаляется.
       pre:
         - Кандидат в статусе `payed`.
@@ -200,7 +198,7 @@ scenario:
       post:
         - accounts.status = `active` — пайщик стал активным членом кооператива.
         - Добавлен участник в soviet::participants.
-        - В ledger2 применены reg.entrfee + reg.minshare.
+        - В ledger2 применены o.reg.payent + o.reg.putmin.
         - Запись кандидата удалена из таблицы candidates.
 
   alternatives:
@@ -213,6 +211,7 @@ scenario:
         удаляется, ledger2-операции не создаются. Пайщик может повторить
         подачу заявления.
 
+
     - branch: Отказ совета
       at_step: 3
       action: registrator::declinereg
@@ -220,7 +219,7 @@ scenario:
       description: >
         Совет отказывает кандидату. Кандидат удаляется, совершённый платёж
         подлежит возврату (возврат оформляется вне этого процесса). В ledger2
-        операции reg.entrfee и reg.minshare не создаются.
+        операции o.reg.payent и o.reg.putmin не создаются.
 
 # ── Секция 5. Документы и подписи ───────────────────────────────────────────
 documents:
@@ -239,14 +238,13 @@ documents:
     note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
 
 # ── Секция 6. Операции ──────────────────────────────────────────────────────
-# Процесс мульти-операционный: две записи ACTION_REGISTRY с process_type = reg.regist.
+# Процесс мульти-операционный: две записи OPERATION_REGISTRY с process_type = p.reg.accept.
 # Обе срабатывают на закрывающем действии confirmreg.
-# Источник: ledger2/actions.hpp — записи #1 и #2.
+# Источник: ledger2/operations.hpp — записи #1 и #2.
 # Slim-формат: коды счетов и id кошельков → человеческие имена
-# подставляет фронтенд из `standards-site/src/data/registries.ts`
-# (зеркало реестра из mono-ai-1/components/desktop/src/shared/lib/ledger2/).
+# подставляет фронтенд из cooptypes.Ledger2.
 operations:
-  - ledger_code: reg.entrfee
+  - ledger_code: o.reg.payent
     human_name: Вступительный взнос пайщика
     wallet_op: ISSUE
     wallet_from: null
@@ -260,7 +258,7 @@ operations:
       Двойная запись Дт 51 / Кт 86 — средства поступили на расчётный счёт и
       квалифицируются как целевые поступления в кооперативный фонд.
 
-  - ledger_code: reg.minshare
+  - ledger_code: o.reg.putmin
     human_name: Минимальный паевой взнос при регистрации
     wallet_op: ISSUE
     wallet_from: null
@@ -276,24 +274,24 @@ operations:
 
 # ── Секция 7. Связи ─────────────────────────────────────────────────────────
 related:
-  - process_type: cap.capimp
-    id: public_capital_capital_import_process
+  - process_type: p.cap.import
+    id: public_capital_import_process
     relation: provides
     note: >
       Альтернативный путь входа — импорт уже существующего пайщика программы
       «Благорост» без прохождения этого процесса (для миграций и исторических
       данных).
 
-  - process_type: wall.deposit
+  - process_type: p.wal.depo
     id: public_wallet_deposit_process
     relation: triggers
     note: >
       После получения статуса `active` пайщик может вносить дополнительные
-      паевые взносы через процесс «Внесение паевого взноса» (wall.deposit).
+      паевые взносы через процесс «Внесение паевого взноса» (p.wal.depo).
 
-  - process_type: wall.withdrw
+  - process_type: p.wal.wthdrw
     id: public_wallet_withdraw_process
     relation: affects
     note: >
       Выход из кооператива оформляется через обратный процесс «Возврат паевого
-      взноса» (wall.withdrw) — он возвращает средства с кошелька SHARE_FUND_PAY.
+      взноса» (p.wal.wthdrw) — он возвращает средства с кошелька SHARE_FUND_PAY.

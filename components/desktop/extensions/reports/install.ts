@@ -36,7 +36,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'reports-operations',
             component: markRaw(OperationsPage),
             meta: {
-              title: 'Операции',
+              title: 'Реестр операций',
               icon: 'fa-solid fa-list-ul',
               roles: ['chairman'],
               agreements: agreementsBase,
@@ -49,7 +49,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'reports-wallets',
             component: markRaw(WalletsPage),
             meta: {
-              title: 'Кошельки',
+              title: 'Реестр кошельков',
               icon: 'fa-solid fa-wallet',
               roles: ['chairman'],
               agreements: agreementsBase,
@@ -92,7 +92,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'reports-accounts',
             component: markRaw(AccountsPage),
             meta: {
-              title: 'Счета',
+              title: 'Реестр счетов',
               icon: 'fa-solid fa-sitemap',
               roles: ['chairman'],
               agreements: agreementsBase,

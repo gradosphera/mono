@@ -46,10 +46,10 @@ void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash
   ).send();
 
   std::string memo = "Минимальный паевой взнос при вступлении пайщика с username=" + candidate -> username.to_string();
-  Ledger2::apply(_registrator, coopname, ledger2_ops::INITIAL_SHARE, candidate -> minimum, candidate -> username, registration_hash, memo);
+  Ledger2::apply(_registrator, coopname, operations::registrator::PUT_MINSHARE, candidate -> minimum, candidate -> username, registration_hash, memo);
 
   memo = "Вступительный взнос при вступлении пайщика с username=" + candidate -> username.to_string();
-  Ledger2::apply(_registrator, coopname, ledger2_ops::ENTRANCE_FEE, candidate -> initial, candidate -> username, registration_hash, memo);
+  Ledger2::apply(_registrator, coopname, operations::registrator::PAY_ENTRANCE, candidate -> initial, candidate -> username, registration_hash, memo);
   // Увеличиваем счетчик активных пайщиков
   cooperatives2_index cooperatives(_registrator, _registrator.value);
   auto coop_itr = cooperatives.find(coopname.value);

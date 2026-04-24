@@ -24,7 +24,7 @@
 [[eosio::action]]
 void ledger2::apply(eosio::name coopname,
                     eosio::name initiator,
-                    eosio::name action_code,
+                    eosio::name operation_code,
                     eosio::asset amount,
                     eosio::name username,
                     eosio::checksum256 process_hash,
@@ -54,9 +54,9 @@ void ledger2::apply(eosio::name coopname,
   eosio::check(memo.size() < 256, "memo не должен превышать 255 символов");
 
   // -------- lookup registry --------
-  const ActionRegistryEntry* entry = ledger2_find_action(action_code);
+  const OperationRegistryEntry* entry = find_operation(operation_code);
   eosio::check(entry != nullptr,
-               std::string{"Unknown action code: "} + action_code.to_string());
+               std::string{"Unknown operation code: "} + operation_code.to_string());
 
   // -------- dispatch atomic inline actions --------
   // Для штатных операций — «тройка» (walletop + debit + credit) с общим
