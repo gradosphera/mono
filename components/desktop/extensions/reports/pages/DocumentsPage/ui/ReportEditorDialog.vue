@@ -121,7 +121,7 @@ q-dialog(
           q-btn.q-mb-sm(
             color='primary'
             icon='fa-solid fa-paper-plane'
-            label='Скачать XML'
+            label='Скачать для отправки'
             :disable='!canGenerate'
             :loading='isGenerating'
             @click='downloadXml'
@@ -132,7 +132,7 @@ q-dialog(
           q-btn.q-mb-sm(
             color='grey-7'
             icon='fa-solid fa-file-pdf'
-            label='Скачать PDF'
+            label='Скачать для просмотра'
             :disable='!canGenerate || !hasPdfPaperView'
             :loading='pdfLoading'
             @click='downloadPdf'
