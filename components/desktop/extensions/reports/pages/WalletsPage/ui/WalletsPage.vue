@@ -1,34 +1,44 @@
 <template lang="pug">
-div.page-shell
-  q-tabs.bg-white(
-    v-model='activeTab'
-    dense
-    align='left'
-    active-color='primary'
-    indicator-color='primary'
-    narrow-indicator
-    no-caps
-  )
-    q-tab(name='coop' icon='fa-solid fa-building' label='Кооператив')
-    q-tab(name='participants' icon='fa-solid fa-users' label='Пайщики')
-
-  q-separator
-
-  q-tab-panels(v-model='activeTab' animated keep-alive)
-    q-tab-panel(name='coop' class='q-pa-none')
-      CoopWalletsTab
-
-    q-tab-panel(name='participants' class='q-pa-none q-mt-md')
-      ParticipantWalletsTab
+.column.flex-1.min-h-0.min-w-0.no-wrap
+  router-view
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import CoopWalletsTab from './CoopWalletsTab.vue'
-import ParticipantWalletsTab from './ParticipantWalletsTab.vue'
+import { computed, markRaw, onBeforeUnmount, onMounted } from 'vue'
+import { useHeaderActions } from 'src/shared/hooks/useHeaderActions'
+import RouteMenuButton from 'src/shared/ui/RouteMenuButton/RouteMenuButton.vue'
 
-// Таб «Кооператив» — агрегированный вид кошельков ledger2 (2001/2002/9001 и т.д.),
-// существовавший исходно на странице. Таб «Пайщики» — срез progwallets
-// из soviet, матрица пайщик × программа (реальные деньги у конкретных людей).
-const activeTab = ref<'coop' | 'participants'>('coop')
+// Shell-страница «Кошельки»: инжектит две кнопки в шапку сайта
+// (Кооператив / Пайщики), переключает через именованные дочерние маршруты.
+// Паттерн один-в-один как DocumentsPage.
+const { registerAction, clearActions } = useHeaderActions()
+
+const menuButtons = computed(() => [
+  {
+    id: 'reports-wallets-coop-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'reports-wallets-coop',
+      label: 'Кооператив',
+    },
+    order: 1,
+  },
+  {
+    id: 'reports-wallets-participants-menu',
+    component: markRaw(RouteMenuButton),
+    props: {
+      routeName: 'reports-wallets-participants',
+      label: 'Пайщики',
+    },
+    order: 2,
+  },
+])
+
+onMounted(() => {
+  menuButtons.value.forEach((b) => registerAction(b))
+})
+
+onBeforeUnmount(() => {
+  clearActions()
+})
 </script>

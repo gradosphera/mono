@@ -4,6 +4,8 @@ import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 import {
   OperationsPage,
   WalletsPage,
+  CoopWalletsPage,
+  ParticipantWalletsPage,
   AccountsPage,
   DocumentsPage,
   DocumentsCalendarPage,
@@ -53,7 +55,37 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               agreements: agreementsBase,
               requiresAuth: true,
             },
-            children: [],
+            // shell-страница: injects 2 header buttons, рендерит <router-view>.
+            // При заходе на /reports/wallets делаем redirect на ...-coop.
+            redirect: { name: 'reports-wallets-coop' },
+            children: [
+              {
+                path: 'coop',
+                name: 'reports-wallets-coop',
+                component: markRaw(CoopWalletsPage),
+                meta: {
+                  title: 'Кооператив',
+                  icon: 'fa-solid fa-building',
+                  roles: ['chairman'],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+              {
+                path: 'participants',
+                name: 'reports-wallets-participants',
+                component: markRaw(ParticipantWalletsPage),
+                meta: {
+                  title: 'Пайщики',
+                  icon: 'fa-solid fa-users',
+                  roles: ['chairman'],
+                  agreements: agreementsBase,
+                  requiresAuth: true,
+                  hidden: true,
+                },
+              },
+            ],
           },
           {
             path: 'accounts',

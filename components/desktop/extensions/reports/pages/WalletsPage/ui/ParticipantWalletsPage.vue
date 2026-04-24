@@ -1,5 +1,5 @@
 <template lang="pug">
-.participant-wallets
+.participant-wallets.page-shell
   q-inner-loading(:showing='loading')
     q-spinner(size='40px' color='primary')
 
@@ -36,7 +36,7 @@
               WalletCell(:cell='data.matrix[p.username]?.[prog.id]')
 
             td.col-total
-              WalletCell(:cell='totalFor(p.username)')
+              WalletCell(:cell='totalFor(p.username)' bold)
 
             td.col-action
               q-btn(
@@ -116,7 +116,7 @@ function cellClass(cell?: IWalletCell): string {
 }
 
 // Inline-рендер ячейки «available / blocked с иконками». Вынесен в h-function
-// чтобы не таскать ещё одну SFC (в шаблоне используем через :is).
+// чтобы не таскать ещё одну SFC (в шаблоне используем как компонент).
 const WalletCell = {
   name: 'WalletCell',
   props: {
@@ -189,7 +189,7 @@ onMounted(() => void reload())
 .pw-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
   min-width: 640px;
 
   thead {
@@ -202,15 +202,13 @@ onMounted(() => void reload())
       font-weight: 600;
       white-space: nowrap;
 
-      &.col-prog {
-        text-align: right;
-      }
+      &.col-prog,
       &.col-total {
         text-align: right;
       }
 
       .prog-title {
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.2;
       }
       .prog-type {
@@ -245,13 +243,12 @@ onMounted(() => void reload())
 
   .col-user {
     .username {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 12px;
-      letter-spacing: 0.03em;
+      font-size: 14px;
+      font-weight: 500;
       color: #222;
     }
     .type {
-      font-size: 11px;
+      font-size: 12px;
       margin-top: 2px;
     }
   }
@@ -262,7 +259,7 @@ onMounted(() => void reload())
   }
 
   .cell-zero :deep(.wallet-cell) {
-    opacity: 0.35;
+    opacity: 0.4;
   }
 
   tfoot {
@@ -271,25 +268,27 @@ onMounted(() => void reload())
 
     td {
       padding: 10px 12px;
-      font-size: 13px;
+      font-size: 14px;
     }
   }
 }
 
-// Вложенные «available + blocked» в ячейке — вертикально, с иконками.
-// Стилизуем deep'ом т.к. это render-функция, scoped не пройдёт автоматически.
+// «available + blocked» — вертикально, с иконками. Стили через :deep
+// потому что это render-функция, scoped не пройдёт автоматически.
 :deep(.wallet-cell) {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
-  line-height: 1.2;
+  line-height: 1.3;
 
   .cell-line {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     font-variant-numeric: tabular-nums;
+    font-size: 14px;
+    font-weight: 500;
 
     &.value-avail {
       color: #2e7d32;
@@ -299,19 +298,16 @@ onMounted(() => void reload())
     }
     &.value-zero {
       color: #bbb;
+      font-weight: 400;
     }
-    &.bold .cell-value {
-      font-weight: 600;
+    &.bold {
+      font-weight: 700;
     }
   }
 
   .cell-icon {
     flex-shrink: 0;
-  }
-
-  .cell-value {
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
-    font-size: 12px;
+    opacity: 0.75;
   }
 
   .cell-dash {

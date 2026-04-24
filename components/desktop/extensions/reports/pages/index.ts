@@ -1,5 +1,5 @@
 export { OperationsPage } from './OperationsPage'
-export { WalletsPage } from './WalletsPage'
+export { WalletsPage, CoopWalletsPage, ParticipantWalletsPage } from './WalletsPage'
 export { AccountsPage } from './AccountsPage'
 export {
   DocumentsPage,
