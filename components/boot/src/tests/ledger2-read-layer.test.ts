@@ -166,13 +166,16 @@ describe('Ledger2 read-layer (Story 1.23)', () => {
     }
   }, 30_000)
 
-  it('getLedger2History: фильтр по accountId сужает результат до записей одного счёта', async () => {
+  it('getLedger2History: accountId + actionNames=[debit,credit] = только проводки по этому счёту', async () => {
+    // По дизайну фильтра (typeorm-ledger2-state.repository): accountId без
+    // actionNames возвращает все sibling-actions процесса (apply+walletop+
+    // debit+credit), которые ХОТЬ КАК-ТО касаются счёта (включая wallet_to=80000
+    // в одном процессе). Чтобы получить ТОЛЬКО прямые проводки по 51000 —
+    // нужно явно указать actionNames=['debit','credit'].
     const filtered = await gql<{ getLedger2History: any }>(token, HISTORY_QUERY, {
-      i: { coopname: COOP, accountId: ACCOUNT_BANK, limit: 20, page: 1 },
+      i: { coopname: COOP, accountId: ACCOUNT_BANK, actionNames: ['debit', 'credit'], limit: 20, page: 1 },
     })
     const resp = filtered.getLedger2History
-    // Все возвращённые записи — это debit/credit по 51000 (apply/walletop не
-    // имеют account_id → фильтр их исключает).
     for (const op of resp.items) {
       expect(Number(op.accountId)).toBe(ACCOUNT_BANK)
       expect(['debit', 'credit']).toContain(op.action)

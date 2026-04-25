@@ -6322,15 +6322,15 @@ input GetLedger2HistoryInput {
   """ID счёта/кошелька (×1000)"""
   accountId: Int
 
-  """ACTION_REGISTRY коды: cap.debt, wall.deposit, mig.opening и т.д."""
-  actionCodes: [String!]
-
   """Имена blockchain-действий: apply | walletop | debit | credit"""
   actionNames: [String!]
   coopname: String!
   dateFrom: DateTime
   dateTo: DateTime
   limit: Int = 50
+
+  """OPERATION_REGISTRY коды: o.cap.lend, o.wal.depcpl, o.mig.minshr и т.д."""
+  operationCodes: [String!]
   page: Int = 1
 
   """
@@ -6653,9 +6653,6 @@ type Ledger2Operation {
 
   """apply | walletop | debit | credit"""
   action: String!
-
-  """Для apply: ACTION_REGISTRY code (cap.debt / wall.deposit / ...)"""
-  actionCode: String
   blockNum: Int!
   coopname: String!
   createdAt: DateTime!
@@ -6663,6 +6660,9 @@ type Ledger2Operation {
   """global_sequence блокчейна (строка — значения до 2^53 overflow)"""
   globalSequence: String!
   memo: String
+
+  """Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...)"""
+  operationCode: String
 
   """process_hash (32-hex)"""
   processHash: String

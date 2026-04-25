@@ -1925,6 +1925,9 @@ describe('тест контракта CAPITAL', () => {
 
     // Повторный regshare с тем же балансом — должен пройти без ошибок
     // (upsert_contributor_segment перезаписывает значение).
+    // Спим, чтобы expiration новой транзакции отличался — иначе она получит
+    // тот же tx_hash и узел отклонит как duplicate transaction.
+    await sleep(2000)
     await processRegShare(blockchain, 'voskhod', newComponentProject.project_hash, participant, walletBefore)
 
     const segmentAfter = await getSegment(blockchain, 'voskhod', newComponentProject.project_hash, participant)

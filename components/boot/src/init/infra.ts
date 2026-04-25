@@ -71,7 +71,10 @@ export async function startInfra() {
   for (const contract of filtered_contracts)
     await blockchain.setContract(contract)
 
-  await sleep(2000)
+  // 2s часто не хватает на свежем nodeos: setabi последнего контракта
+  // ещё не финализирован, eosio.token::create падает с
+  // "fetching abi for eosio.token: Read past end of buffer".
+  await sleep(8000)
 
   console.log('создаём токен')
   await blockchain.createToken({

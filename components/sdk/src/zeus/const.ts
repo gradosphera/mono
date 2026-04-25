@@ -3239,12 +3239,12 @@ export const ReturnTypes: Record<string,any> = {
 	Ledger2Operation:{
 		accountId:"Int",
 		action:"String",
-		actionCode:"String",
 		blockNum:"Int",
 		coopname:"String",
 		createdAt:"DateTime",
 		globalSequence:"String",
 		memo:"String",
+		operationCode:"String",
 		processHash:"String",
 		quantity:"String",
 		username:"String",
