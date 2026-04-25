@@ -155,17 +155,7 @@ div.page-shell
               .op-header.q-mb-md(
                 :style='{ borderLeftColor: processAccentColor(rowChipText(props.row)) }'
               )
-                .row.items-start.no-wrap
-                  .col
-                    .text-h6.text-weight-medium {{ rowLabel(props.row) }}
-                  .col-auto(v-if='canRevert(props.row)')
-                    q-btn(
-                      flat dense color='warning'
-                      icon='fa-solid fa-rotate-left'
-                      label='Откатить'
-                      @click.stop='openRevertFor(props.row)'
-                    )
-                      q-tooltip Откатить эту операцию зеркальной проводкой
+                .text-h6.text-weight-medium {{ rowLabel(props.row) }}
                 .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.operationCode')
                   .text-caption.text-grey-7 Тип процесса:
                   EntityIdBadge(
@@ -254,21 +244,13 @@ div.page-shell
                 .text-body1.text-weight-bold.font-monospace {{ formatAmount(props.row.quantity) }}
               .col-12.text-caption.text-grey-7
                 | Пайщик: {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
-
-  RevertOperationDialog(
-    v-model='revertDialog.open'
-    :operation='revertDialog.operation'
-    @success='onRevertSuccess'
-  )
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, nextTick, reactive, ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { useWindowSize } from 'src/shared/hooks'
 import { useSystemStore } from 'src/entities/System/model'
-import { useSessionStore } from 'src/entities/Session/model'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
 import { EntityIdBadge } from 'src/shared/ui'
@@ -282,7 +264,6 @@ import { useAccountStore } from 'src/entities/Account'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { DirectionCell, WalletIdCell, AccountIdCell } from '../../../shared/ui'
 import { Ledger2 } from 'cooptypes'
-import RevertOperationDialog from './RevertOperationDialog.vue'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
@@ -290,40 +271,6 @@ const route = useRoute()
 const router = useRouter()
 const ledger2Store = useLedger2Store()
 const accountStore = useAccountStore()
-const session = useSessionStore()
-const { isChairman } = storeToRefs(session)
-
-// Reactive state модалки отката.
-const revertDialog = reactive<{ open: boolean; operation: ILedger2Operation | null }>({
-  open: false,
-  operation: null,
-})
-
-/**
- * Кнопка «Откатить» доступна только председателю + только для apply-операций
- * стандартного типа (не для миграционных и не для самих корректировок —
- * для отката отката надо открывать другую конкретную запись o.adj.rev,
- * это разрешено отдельным кейсом).
- */
-function canRevert(op: ILedger2Operation): boolean {
-  if (!isChairman.value) return false
-  if (op.action !== 'apply') return false
-  if (!op.operationCode) return false
-  if (op.operationCode.startsWith('o.mig.')) return false
-  return true
-}
-
-function openRevertFor(op: ILedger2Operation): void {
-  revertDialog.operation = op
-  revertDialog.open = true
-}
-
-async function onRevertSuccess(): Promise<void> {
-  // Сбрасываем кэш дочерних операций (балансы изменились), перезагружаем список.
-  childOps.value.clear()
-  expanded.value.clear()
-  await load()
-}
 
 // Человекочитаемые названия операций — источник правды в
 // `cooptypes/src/ledger2/operations.ts` (LEDGER2_OPERATION_REGISTRY),

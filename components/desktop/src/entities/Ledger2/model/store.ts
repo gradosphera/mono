@@ -9,7 +9,6 @@ import type {
   ILedger2HistoryFilterInput,
   ILedger2AdjustmentResult,
   IWalmoveInput,
-  IRevertOperationInput,
 } from '../types'
 
 const namespace = 'ledger2Store'
@@ -24,7 +23,6 @@ interface ILedger2Store {
   getAccountById: (id: number) => ILedger2Account | undefined
   getWalletById: (id: number) => ILedger2Wallet | undefined
   walmoveWallets: (input: IWalmoveInput) => Promise<ILedger2AdjustmentResult>
-  revertOperation: (input: IRevertOperationInput) => Promise<ILedger2AdjustmentResult>
 }
 
 export const useLedger2Store = defineStore(namespace, (): ILedger2Store => {
@@ -70,10 +68,6 @@ export const useLedger2Store = defineStore(namespace, (): ILedger2Store => {
     return ledger2Api.walmoveWallets(input)
   }
 
-  async function revertOperation(input: IRevertOperationInput): Promise<ILedger2AdjustmentResult> {
-    return ledger2Api.revertOperation(input)
-  }
-
   return {
     accounts,
     wallets,
@@ -84,7 +78,6 @@ export const useLedger2Store = defineStore(namespace, (): ILedger2Store => {
     getAccountById,
     getWalletById,
     walmoveWallets,
-    revertOperation,
   }
 })
 

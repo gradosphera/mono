@@ -1,20 +1,23 @@
 /**
  * @brief Откат ранее проведённой операции (operation o.adj.rev).
  *
- * Top-level action — председатель подписывает сам. Контракт не имеет доступа
- * к истории `blockchain_actions` (она живёт в БД coopback), поэтому параметры
- * **зеркальной** проводки приходят уже готовыми из backend-резолвера
- * `revertOperation`: backend поднимает оригинал по `original_operation_id`,
- * меняет местами Dr/Cr счета и (для wallet_op) wallet_from/wallet_to,
- * подставляет `WalletOp::REVOKE` для зеркала ISSUE.
+ * **Contract-only**: top-level вызов председателем (`coopname@active`) запрещён.
+ * Action принимает только подпись от whitelisted контрактов
+ * (`contracts_whitelist`) — то есть зеркальная проводка возможна только когда
+ * её инициирует другой контракт-инициатор (registrator/wallet/capital/...),
+ * который параллельно откатывает свой собственный state.
  *
- * Запрет на откат миграционных операций (`o.mig.*`) — миграция воспроизводит
- * legacy-данные, обратный ход создал бы artifact-проводку с минусом
- * относительно состояния, которого никогда не было в legacy. Такие случаи
- * фиксятся комбинацией WalMove + (будущий) Manual.
+ * Why this restriction: ledger2 — учётный слой; зеркальная проводка не трогает
+ * сущности контрактов-инициаторов (participants/deposits/contributors).
+ * Top-level откат председателем рассинхронизирует учёт и состояние домена
+ * (например, participant остаётся accepted, а минимальный паевой «вернулся»).
  *
- * Повторный откат отката — разрешён (двойное зеркало возвращает исходное
- * состояние, что иногда нужно для отмены ошибочного revert).
+ * Контракт не имеет доступа к истории `blockchain_actions` — параметры зеркала
+ * собирает контракт-инициатор (он знает свой исходный operation_code и
+ * соответствующие Dr/Cr/wallet через operations.hpp registry).
+ *
+ * Запрет на откат миграционных операций (`o.mig.*`) сохранён.
+ * Повторный откат отката (revert от revert) разрешён.
  *
  * @ingroup public_ledger2_actions
  */
@@ -32,10 +35,8 @@ void ledger2::revert(eosio::name coopname,
                      uint64_t mirror_credit_account_id,
                      eosio::checksum256 process_hash,
                      std::string memo) {
-  // -------- auth --------
-  if (!has_auth(coopname)) {
-    check_auth_and_get_payer_or_fail(contracts_whitelist);
-  }
+  // -------- auth: только whitelist-контракты, председатель напрямую запрещён --------
+  check_auth_and_get_payer_or_fail(contracts_whitelist);
 
   // -------- validate coopname --------
   eosio::check(coopname.value != 0, "revert: coopname пустой");

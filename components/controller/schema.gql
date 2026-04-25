@@ -7704,11 +7704,6 @@ type Mutation {
   restartAnnualGeneralMeet(data: RestartAnnualGeneralMeetInput!): MeetAggregate!
 
   """
-  Откат ранее проведённой операции зеркальной проводкой (operation o.adj.rev). Только председатель. Запрещено откатывать миграционные операции (o.mig.*).
-  """
-  revertOperation(input: RevertOperationInput!): Ledger2AdjustmentResult!
-
-  """
   Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
   """
   saveReportDraft(input: SaveReportDraftInput!): ReportDraft!
@@ -10545,18 +10540,6 @@ input ReturnByMoneySignedMetaDocumentInput {
 
   """Версия генератора, использованного для создания документа"""
   version: String!
-}
-
-input RevertOperationInput {
-  coopname: String!
-
-  """Обязательное обоснование отката"""
-  memo: String!
-
-  """
-  global_sequence оригинальной apply-операции (Ledger2OperationDTO.globalSequence) — bigint в строке
-  """
-  originalGlobalSequence: String!
 }
 
 """
