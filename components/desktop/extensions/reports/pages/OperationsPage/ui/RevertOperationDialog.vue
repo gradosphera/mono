@@ -116,9 +116,10 @@ async function submit(): Promise<void> {
       originalGlobalSequence: String(props.operation.globalSequence),
       memo: memo.value.trim(),
     })
-    SuccessAlert(`Операция откачена. process_hash: ${result.processHash.slice(0, 12)}…`)
+    SuccessAlert('Операция откачена')
     emit('success', { processHash: result.processHash })
-    close()
+    // Закрываем явно — guard в close() блокирует, пока loading=true.
+    emit('update:modelValue', false)
   } catch (e) {
     FailAlert(e)
   } finally {

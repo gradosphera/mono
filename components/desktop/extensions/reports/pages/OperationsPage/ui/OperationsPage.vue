@@ -32,6 +32,18 @@ div.page-shell
           @remove='clearUsernameFilter'
         ) Пайщик {{ fioCache.get(filters.username) || filters.username }}
       .row.q-gutter-sm.items-end
+        q-input.col-md-3.col-12(
+          v-model='filters.processHashInput'
+          label='ID процесса (process_hash)'
+          dense
+          outlined
+          clearable
+          hint='Полный hex-хэш или 8+ начальных символов'
+          @clear='applyProcessHashSearch'
+          @keyup.enter='applyProcessHashSearch'
+        )
+          template(#append)
+            q-icon.cursor-pointer(name='fa-solid fa-magnifying-glass' @click='applyProcessHashSearch')
         q-input.col-md-2.col-12(
           v-model='filters.dateFrom'
           label='С даты'
@@ -427,6 +439,8 @@ const filters = reactive<{
   accountKind: 'wallet' | 'account' | null
   accountName: string
   processHash: string | null
+  /** Текстовый ввод поиска по process_hash — применяется по Enter / клику на иконку. */
+  processHashInput: string
   username: string | null
   adjustmentsOnly: boolean
 }>({
@@ -436,9 +450,26 @@ const filters = reactive<{
   accountKind: null,
   accountName: '',
   processHash: null,
+  processHashInput: '',
   username: null,
   adjustmentsOnly: false,
 })
+
+/**
+ * Применяет search-input по process_hash к фильтру.
+ * Backend ожидает полный hex (data->>'process_hash' = $); если введён короткий
+ * фрагмент — нормализуем к lower-case полному hash через подстроку, иначе
+ * apply ровно как ввёл (полное совпадение).
+ */
+async function applyProcessHashSearch(): Promise<void> {
+  const raw = filters.processHashInput?.trim() ?? ''
+  filters.processHash = raw ? raw.toLowerCase() : null
+  const q = { ...route.query }
+  if (filters.processHash) q.process_hash = filters.processHash
+  else delete q.process_hash
+  await router.replace({ query: q })
+  reload()
+}
 
 
 const accountFilterLabel = computed(() => {
@@ -463,6 +494,7 @@ async function clearAccountFilter() {
 
 async function clearProcessHashFilter() {
   filters.processHash = null
+  filters.processHashInput = ''
   const q = { ...route.query }
   delete q.process_hash
   await router.replace({ query: q })
@@ -582,6 +614,7 @@ async function resetFilters() {
   filters.accountKind = null
   filters.accountName = ''
   filters.processHash = null
+  filters.processHashInput = ''
   filters.username = null
   filters.adjustmentsOnly = false
   const q = { ...route.query }
@@ -640,9 +673,9 @@ async function load() {
     const input: ILedger2HistoryFilterInput = {
       coopname: info.coopname,
       // Adjustment-операции (walmove/revert) — top-level actions, не «apply».
-      // При включённом фильтре «Только корректировки» расширяем actionNames,
-      // иначе остаются только обычные apply (стандартный поток).
-      actionNames: filters.adjustmentsOnly ? ['walmove', 'revert'] : ['apply'],
+      // По умолчанию показываем всё: стандартные apply + корректировки.
+      // При включённом «Только корректировки» — оставляем только их.
+      actionNames: filters.adjustmentsOnly ? ['walmove', 'revert'] : ['apply', 'walmove', 'revert'],
       page: pagination.value.page,
       limit: pagination.value.rowsPerPage,
       sortOrder: 'DESC',
@@ -722,7 +755,8 @@ onMounted(async () => {
       resolveAccountName(filters.accountId, 'wallet')
     }
     if (route.query.process_hash) {
-      filters.processHash = String(route.query.process_hash)
+      filters.processHash = String(route.query.process_hash).toLowerCase()
+      filters.processHashInput = filters.processHash
     }
     if (route.query.username) {
       filters.username = String(route.query.username)

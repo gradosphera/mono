@@ -212,9 +212,11 @@ async function submit() {
       quantity: `${Number(form.amountStr).toFixed(4)} RUB`,
       memo: form.memo.trim(),
     })
-    SuccessAlert(`Перевод выполнен. process_hash: ${result.processHash.slice(0, 12)}…`)
+    SuccessAlert('Перевод выполнен')
     emit('success', { processHash: result.processHash })
-    close()
+    // Закрываем явно (не через close(), чтобы не цеплять guard на loading,
+    // который ещё true до finally).
+    emit('update:modelValue', false)
   } catch (e) {
     FailAlert(e)
   } finally {
@@ -222,6 +224,7 @@ async function submit() {
   }
 }
 
+/** Кнопка «Отмена» / крестик — блокируем во время идущей мутации. */
 function close() {
   if (loading.value) return
   emit('update:modelValue', false)
