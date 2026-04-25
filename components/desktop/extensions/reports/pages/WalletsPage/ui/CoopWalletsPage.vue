@@ -35,13 +35,6 @@ div.page-shell
             )
               q-tooltip Перевести с этого кошелька
 
-  WalletTransferDialog(
-    v-model='transferDialog.open'
-    :wallets='wallets'
-    :fixed-from-wallet='transferDialog.fromWallet'
-    @success='onTransferSuccess'
-  )
-
         q-tr.q-virtual-scroll--with-prev(
           no-hover
           v-if='expanded.has(props.row.id)'
@@ -114,6 +107,13 @@ div.page-shell
               .col-6
                 .text-caption.text-grey-6 Заблокировано
                 .text-body2.text-weight-medium {{ formatAsset2Digits(props.row.blocked) }}
+
+  WalletTransferDialog(
+    v-model='transferDialog.open'
+    :wallets='wallets'
+    :fixed-from-wallet='transferDialog.fromWallet'
+    @success='onTransferSuccess'
+  )
 </template>
 
 <script setup lang="ts">
