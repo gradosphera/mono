@@ -38,7 +38,7 @@ const WALLETS_QUERY = `query($c:String!){
 
 const HISTORY_QUERY = `query($i:GetLedger2HistoryInput!){
   getLedger2History(input:$i){
-    items { action actionCode processHash accountId quantity }
+    items { action operationCode processHash accountId quantity }
     totalCount totalPages currentPage
   }
 }`
@@ -140,7 +140,7 @@ describe('Ledger2 read-layer (Story 1.23)', () => {
     }
   }, 30_000)
 
-  it('getLedger2History: непустая история + фильтр по actionCodes работает', async () => {
+  it('getLedger2History: непустая история + фильтр по operationCodes работает', async () => {
     const full = await gql<{ getLedger2History: any }>(token, HISTORY_QUERY, {
       i: { coopname: COOP, limit: 20, page: 1 },
     })
@@ -153,15 +153,15 @@ describe('Ledger2 read-layer (Story 1.23)', () => {
       expect(['apply', 'walletop', 'debit', 'credit']).toContain(op.action)
     }
 
-    // Фильтр по actionCodes: если есть mig.share (транзит паевого фонда), то
+    // Фильтр по operationCodes: если есть o.mig.share (транзит паевого фонда), то
     // после фильтрации все записи — только apply с этим кодом.
     const filtered = await gql<{ getLedger2History: any }>(token, HISTORY_QUERY, {
-      i: { coopname: COOP, actionCodes: ['mig.share'], limit: 10, page: 1 },
+      i: { coopname: COOP, operationCodes: ['o.mig.share'], limit: 10, page: 1 },
     })
     const fresp = filtered.getLedger2History
     expect(fresp.totalCount).toBeLessThanOrEqual(resp.totalCount)
     for (const op of fresp.items) {
-      expect(op.actionCode).toBe('mig.share')
+      expect(op.operationCode).toBe('o.mig.share')
       expect(op.action).toBe('apply')
     }
   }, 30_000)
