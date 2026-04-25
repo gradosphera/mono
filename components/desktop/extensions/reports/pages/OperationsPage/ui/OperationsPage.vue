@@ -34,7 +34,7 @@ div.page-shell
       .row.q-gutter-sm.items-end
         q-input.col-md-3.col-12(
           v-model='filters.processHashInput'
-          label='ID процесса'
+          label='ID операции'
           dense
           outlined
           clearable
@@ -157,14 +157,14 @@ div.page-shell
               )
                 .text-h6.text-weight-medium {{ rowLabel(props.row) }}
                 .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.operationCode')
-                  .text-caption.text-grey-7 Тип процесса:
+                  .text-caption.text-grey-7 Тип операции:
                   EntityIdBadge(
                     :rawId='props.row.operationCode'
                     copy-on-click
                   )
                     q-tooltip Клик — копировать
                 .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.processHash')
-                  .text-caption.text-grey-7 ID процесса:
+                  .text-caption.text-grey-7 ID операции:
                   EntityIdBadge(
                     :rawId='props.row.processHash'
                     copy-on-click
