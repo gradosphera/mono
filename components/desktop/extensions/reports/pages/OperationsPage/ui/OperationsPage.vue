@@ -48,10 +48,10 @@ div.page-shell
           label='С даты'
           dense
           outlined
-          readonly
           clearable
           mask='####-##-##'
           @clear='reload'
+          @update:model-value='onDateFromInput'
         )
           template(#append)
             q-icon.cursor-pointer(name='event')
@@ -69,10 +69,10 @@ div.page-shell
           label='По дату'
           dense
           outlined
-          readonly
           clearable
           mask='####-##-##'
           @clear='reload'
+          @update:model-value='onDateToInput'
         )
           template(#append)
             q-icon.cursor-pointer(name='event')
@@ -407,6 +407,23 @@ const filters = reactive<{
  * фрагмент — нормализуем к lower-case полному hash через подстроку, иначе
  * apply ровно как ввёл (полное совпадение).
  */
+/**
+ * Поля «С даты» / «По дату» свободно редактируемые (mask `####-##-##`),
+ * но reload запускаем только когда дата полная — иначе фильтр срабатывает
+ * на каждую цифру и мигает индикатор загрузки.
+ */
+function isCompleteOrEmptyDate(v: string | number | null): boolean {
+  if (v === null || v === '') return true
+  return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
+}
+
+function onDateFromInput(value: string | number | null): void {
+  if (isCompleteOrEmptyDate(value)) reload()
+}
+function onDateToInput(value: string | number | null): void {
+  if (isCompleteOrEmptyDate(value)) reload()
+}
+
 async function applyProcessHashSearch(): Promise<void> {
   const raw = filters.processHashInput?.trim() ?? ''
   filters.processHash = raw ? raw.toLowerCase() : null
