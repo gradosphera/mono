@@ -1142,6 +1142,9 @@ export const AllTypesProps: Record<string,any> = {
 		restartAnnualGeneralMeet:{
 			data:"RestartAnnualGeneralMeetInput"
 		},
+		revertOperation:{
+			input:"RevertOperationInput"
+		},
 		saveReportDraft:{
 			input:"SaveReportDraftInput"
 		},
@@ -1207,6 +1210,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		voteOnAnnualGeneralMeet:{
 			data:"VoteOnAnnualGeneralMeetInput"
+		},
+		walmoveWallets:{
+			input:"WalmoveInput"
 		}
 	},
 	NotificationWorkflowRecipientInput:{
@@ -1690,6 +1696,9 @@ export const AllTypesProps: Record<string,any> = {
 	ReturnByMoneySignedMetaDocumentInput:{
 
 	},
+	RevertOperationInput:{
+
+	},
 	RoomMessageKind: "enum" as const,
 	SaveReportDraftInput:{
 		reportType:"ReportType"
@@ -1881,6 +1890,9 @@ export const AllTypesProps: Record<string,any> = {
 	VoteOnAnnualGeneralMeetInput:{
 		ballot:"AnnualGeneralMeetingVotingBallotSignedDocumentInput",
 		votes:"VoteItemInput"
+	},
+	WalmoveInput:{
+
 	},
 	WebPushSubscriptionDataInput:{
 		keys:"WebPushSubscriptionKeysInput"
@@ -3230,6 +3242,10 @@ export const ReturnTypes: Record<string,any> = {
 		id:"Int",
 		name:"String"
 	},
+	Ledger2AdjustmentResult:{
+		processHash:"String",
+		transactionId:"String"
+	},
 	Ledger2HistoryResponse:{
 		currentPage:"Int",
 		items:"Ledger2Operation",
@@ -3545,6 +3561,7 @@ export const ReturnTypes: Record<string,any> = {
 		registerParticipant:"Account",
 		resetKey:"Boolean",
 		restartAnnualGeneralMeet:"MeetAggregate",
+		revertOperation:"Ledger2AdjustmentResult",
 		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
 		sendAgreement:"Transaction",
@@ -3566,7 +3583,8 @@ export const ReturnTypes: Record<string,any> = {
 		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
 		verifyEmail:"Boolean",
-		voteOnAnnualGeneralMeet:"MeetAggregate"
+		voteOnAnnualGeneralMeet:"MeetAggregate",
+		walmoveWallets:"Ledger2AdjustmentResult"
 	},
 	OneCoopDocumentOutput:{
 		action:"String",

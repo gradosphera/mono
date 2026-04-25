@@ -1,4 +1,4 @@
-import type { Queries, Zeus } from '@coopenomics/sdk';
+import type { Mutations, Queries, Zeus } from '@coopenomics/sdk';
 
 export type ILedger2Account =
   Queries.Ledger2.GetLedger2Accounts.IOutput[typeof Queries.Ledger2.GetLedger2Accounts.name][number];
@@ -12,3 +12,9 @@ export type ILedger2HistoryResponse =
 export type ILedger2Operation = ILedger2HistoryResponse['items'][number];
 
 export type ILedger2HistoryFilterInput = Zeus.ModelTypes['GetLedger2HistoryInput'];
+
+export type IWalmoveInput = Zeus.ModelTypes['WalmoveInput'];
+export type IRevertOperationInput = Zeus.ModelTypes['RevertOperationInput'];
+
+export type ILedger2AdjustmentResult =
+  Mutations.Ledger2.WalmoveWallets.IOutput[typeof Mutations.Ledger2.WalmoveWallets.name];

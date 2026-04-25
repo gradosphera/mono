@@ -133,4 +133,86 @@ public:
    * @ingroup public_ledger2_actions
    */
   [[eosio::action]] void migrate(uint64_t from_coop_index, uint64_t limit);
+
+  /**
+   * @brief Перевод между кошельками внутри одного бух.счёта (operation o.adj.walmove).
+   *
+   * Ручная корректировка председателя: переносит `amount` с `from_wallet`
+   * на `to_wallet` БЕЗ движения по бух.счетам (`debit`/`credit` не вызываются).
+   * Применение: разнесение по аналитическим кошелькам после криво легшей миграции
+   * (типичный кейс voskhod), мелкие исправления в рамках одного фонда.
+   *
+   * Auth: `coopname@active` (председатель). Audit: action+inline walletop попадают
+   * в blockchain_actions с общим `process_hash`, бэкенд видит как один процесс
+   * `processes::adjustment::CORRECTION` (`p.adj.fix`).
+   *
+   * Валидация: from_wallet ≠ to_wallet, оба в LEDGER2_WALLET_REGISTRY,
+   * memo не пуст. Соответствие `account_id` для двух кошельков обеспечивает
+   * UI/backend (контракт не хранит wallet→account mapping).
+   *
+   * @param coopname     кооператив (одновременно payer auth)
+   * @param initiator    инициатор корректировки (для аудита; обычно совпадает с coopname)
+   * @param username     владелец кошельков (для аналитики; обычно coopname для коллективных кошельков)
+   * @param from_wallet  кошелёк-источник
+   * @param to_wallet    кошелёк-получатель
+   * @param amount       сумма в _root_govern_symbol
+   * @param process_hash уникальный хэш корректировки (генерирует backend)
+   * @param memo         обязательное обоснование (≤ 255 символов)
+   *
+   * @ingroup public_ledger2_actions
+   */
+  [[eosio::action]] void walmove(eosio::name coopname,
+                                  eosio::name initiator,
+                                  eosio::name username,
+                                  uint64_t from_wallet,
+                                  uint64_t to_wallet,
+                                  eosio::asset amount,
+                                  eosio::checksum256 process_hash,
+                                  std::string memo);
+
+  /**
+   * @brief Откат ранее проведённой операции (operation o.adj.rev).
+   *
+   * Создаёт зеркальную проводку по операции `original_operation_id`:
+   * меняет местами Dr/Cr счета и (для wallet_op) wallet_from/wallet_to.
+   * Для исходного ISSUE используется новый `WalletOp::REVOKE` (изъятие
+   * с `wallet_from` без увеличения куда-либо).
+   *
+   * Параметры зеркала готовит backend из своей БД (по записи оригинала
+   * в blockchain_actions/state) — контракт не имеет доступа к истории операций.
+   *
+   * Запрещено откатывать миграционные операции (operation_code starts with `o.mig.`).
+   * Повторный откат отката (revert от revert) разрешён.
+   *
+   * Auth: `coopname@active` (председатель).
+   *
+   * @param coopname                    кооператив (payer auth)
+   * @param initiator                   инициатор отката (для аудита)
+   * @param original_operation_id       id оригинальной записи в blockchain_actions
+   * @param original_operation_code     operation_code оригинала (для запрета o.mig.*)
+   * @param username                    username оригинала (для аналитики)
+   * @param amount                      сумма (как в оригинале)
+   * @param mirror_wallet_op            тип wallet-операции зеркала (REVOKE/TRANSFER/WALLET_ONLY)
+   * @param mirror_wallet_from          кошелёк-источник зеркала
+   * @param mirror_wallet_to            кошелёк-получатель зеркала (0 для REVOKE)
+   * @param mirror_debit_account_id     Dr-счёт зеркала (0 для WALLET_ONLY)
+   * @param mirror_credit_account_id    Cr-счёт зеркала (0 для WALLET_ONLY)
+   * @param process_hash                уникальный хэш для зеркальной операции
+   * @param memo                        обязательное обоснование (≤ 255 символов)
+   *
+   * @ingroup public_ledger2_actions
+   */
+  [[eosio::action]] void revert(eosio::name coopname,
+                                 eosio::name initiator,
+                                 uint64_t original_operation_id,
+                                 eosio::name original_operation_code,
+                                 eosio::name username,
+                                 eosio::asset amount,
+                                 uint8_t mirror_wallet_op,
+                                 uint64_t mirror_wallet_from,
+                                 uint64_t mirror_wallet_to,
+                                 uint64_t mirror_debit_account_id,
+                                 uint64_t mirror_credit_account_id,
+                                 eosio::checksum256 process_hash,
+                                 std::string memo);
 };

@@ -68,4 +68,14 @@ namespace processes {
     inline constexpr eosio::name TRANSIT   = "p.mig.trans"_n;    ///< Транзитный перенос остатков legacy (серия apply на кооп).
   }
 
+  // adjustment (ручные корректировки председателя — walmove + revert)
+  //
+  // Не идёт через ledger2::apply: операции o.adj.* выполняются отдельными
+  // top-level actions ledger2::walmove и ledger2::revert (см. operations.hpp,
+  // OPERATION_ADJUSTMENT_REGISTRY). Один общий process_type p.adj.fix —
+  // потому что аудит-цепочка корректировки одноактовая (нет «pending» фазы).
+  namespace adjustment {
+    inline constexpr eosio::name CORRECTION = "p.adj.fix"_n;     ///< Ручная корректировка председателя (перевод между кошельками или откат операции).
+  }
+
 } // namespace processes

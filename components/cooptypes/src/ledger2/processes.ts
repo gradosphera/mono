@@ -42,6 +42,9 @@ export const LEDGER2_PROCESS_REGISTRY: readonly ProcessMeta[] = [
 
   // migration
   { type: 'p.mig.trans',    contract: 'migration',    name: 'TRANSIT',     human_name: 'Миграция legacy → ledger2' },
+
+  // adjustment (ручные корректировки — общий тип процесса для o.adj.walmove + o.adj.rev)
+  { type: 'p.adj.fix',      contract: 'ledger2',      name: 'CORRECTION',  human_name: 'Ручная корректировка председателя' },
 ] as const
 
 const processByType = new Map<string, ProcessMeta>(

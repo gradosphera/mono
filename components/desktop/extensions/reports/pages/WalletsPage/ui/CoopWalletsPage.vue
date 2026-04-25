@@ -26,6 +26,21 @@ div.page-shell
           q-td {{ props.row.name }}
           q-td.text-right {{ formatAsset2Digits(props.row.available) }}
           q-td.text-right {{ formatAsset2Digits(props.row.blocked) }}
+          q-td.text-right(auto-width)
+            q-btn(
+              v-if='isChairman'
+              flat dense round size='sm' color='primary'
+              icon='fa-solid fa-arrow-right-arrow-left'
+              @click='openTransferFor(props.row.id)'
+            )
+              q-tooltip Перевести с этого кошелька
+
+  WalletTransferDialog(
+    v-model='transferDialog.open'
+    :wallets='wallets'
+    :fixed-from-wallet='transferDialog.fromWallet'
+    @success='onTransferSuccess'
+  )
 
         q-tr.q-virtual-scroll--with-prev(
           no-hover
@@ -102,18 +117,28 @@ div.page-shell
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, markRaw, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useWindowSize } from 'src/shared/hooks'
+import { useHeaderActions } from 'src/shared/hooks/useHeaderActions'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { useSystemStore } from 'src/entities/System/model'
+import { useSessionStore } from 'src/entities/Session/model'
 import { useLedger2Store, type ILedger2Wallet, type ILedger2Operation } from 'src/entities/Ledger2'
 import { FailAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
 import { DirectionCell, WalletIdCell } from '../../../shared/ui'
+import WalletTransferDialog from './WalletTransferDialog.vue'
+import TransferWalletsButton from './TransferWalletsButton.vue'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
 const ledger2Store = useLedger2Store()
+const session = useSessionStore()
+const { isChairman } = storeToRefs(session)
+
+const { registerAction, unregisterAction } = useHeaderActions()
+const HEADER_ACTION_ID = 'reports-wallets-coop-transfer'
 
 const loading = ref(false)
 const pagination = ref({ rowsPerPage: 0 })
@@ -123,19 +148,51 @@ const expanded = ref(new Set<number>())
 const childOps = ref(new Map<number, ILedger2Operation[]>())
 const childLoading = ref(new Set<number>())
 
+const transferDialog = reactive<{ open: boolean; fromWallet: number | null }>({
+  open: false,
+  fromWallet: null,
+})
+
+function openTransferEmpty(): void {
+  transferDialog.fromWallet = null
+  transferDialog.open = true
+}
+
+function openTransferFor(walletId: number): void {
+  transferDialog.fromWallet = walletId
+  transferDialog.open = true
+}
+
+async function onTransferSuccess(): Promise<void> {
+  // Перезагружаем кошельки и сбрасываем кэш развёрнутых движений.
+  childOps.value.clear()
+  expanded.value.clear()
+  try {
+    wallets.value = await ledger2Store.loadWallets(info.coopname)
+  } catch (e) {
+    FailAlert(e)
+  }
+}
+
 function formatDate(d: string | Date): string {
   return new Date(d).toLocaleString('ru-RU', {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
 
-const columns: any[] = [
-  { name: 'expand', align: 'left', label: '', field: 'expand', sortable: false },
-  { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
-  { name: 'name', align: 'left', label: 'Наименование', field: 'name', sortable: true },
-  { name: 'available', align: 'right', label: 'Доступно', field: 'available', sortable: true },
-  { name: 'blocked', align: 'right', label: 'Заблокировано', field: 'blocked', sortable: true },
-]
+const columns = computed<any[]>(() => {
+  const base: any[] = [
+    { name: 'expand', align: 'left', label: '', field: 'expand', sortable: false },
+    { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
+    { name: 'name', align: 'left', label: 'Наименование', field: 'name', sortable: true },
+    { name: 'available', align: 'right', label: 'Доступно', field: 'available', sortable: true },
+    { name: 'blocked', align: 'right', label: 'Заблокировано', field: 'blocked', sortable: true },
+  ]
+  if (isChairman.value) {
+    base.push({ name: 'actions', align: 'right', label: '', field: 'actions', sortable: false })
+  }
+  return base
+})
 
 const childColumns: any[] = [
   { name: 'direction', align: 'center', label: '', field: 'direction' },
@@ -190,6 +247,21 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+
+  // Кнопка «Перевести» в шапке сайта — только председателю.
+  // Регистрируем после загрузки, чтобы не мигала на ходу.
+  if (isChairman.value) {
+    registerAction({
+      id: HEADER_ACTION_ID,
+      component: markRaw(TransferWalletsButton),
+      props: { onClick: openTransferEmpty },
+      order: 10,
+    })
+  }
+})
+
+onBeforeUnmount(() => {
+  unregisterAction(HEADER_ACTION_ID)
 })
 </script>
 

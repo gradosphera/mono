@@ -6640,6 +6640,11 @@ type Ledger2Account {
   name: String!
 }
 
+type Ledger2AdjustmentResult {
+  processHash: String!
+  transactionId: String!
+}
+
 type Ledger2HistoryResponse {
   currentPage: Int!
   items: [Ledger2Operation!]!
@@ -7699,6 +7704,11 @@ type Mutation {
   restartAnnualGeneralMeet(data: RestartAnnualGeneralMeetInput!): MeetAggregate!
 
   """
+  Откат ранее проведённой операции зеркальной проводкой (operation o.adj.rev). Только председатель. Запрещено откатывать миграционные операции (o.mig.*).
+  """
+  revertOperation(input: RevertOperationInput!): Ledger2AdjustmentResult!
+
+  """
   Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
   """
   saveReportDraft(input: SaveReportDraftInput!): ReportDraft!
@@ -7779,6 +7789,11 @@ type Mutation {
 
   """Голосование на общем собрании пайщиков"""
   voteOnAnnualGeneralMeet(data: VoteOnAnnualGeneralMeetInput!): MeetAggregate!
+
+  """
+  Перевод между кошельками одного бух.счёта (operation o.adj.walmove). Только председатель. Backend проверяет связь wallet→account до подписания.
+  """
+  walmoveWallets(input: WalmoveInput!): Ledger2AdjustmentResult!
 }
 
 input NotificationWorkflowRecipientInput {
@@ -10532,6 +10547,18 @@ input ReturnByMoneySignedMetaDocumentInput {
   version: String!
 }
 
+input RevertOperationInput {
+  coopname: String!
+
+  """Обязательное обоснование отката"""
+  memo: String!
+
+  """
+  global_sequence оригинальной apply-операции (Ledger2OperationDTO.globalSequence) — bigint в строке
+  """
+  originalGlobalSequence: String!
+}
+
 """
 Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио)
 """
@@ -11731,6 +11758,27 @@ type WaitWeight {
 
   """Вес"""
   weight: Int!
+}
+
+input WalmoveInput {
+  coopname: String!
+
+  """id кошелька-источника"""
+  fromWallet: Int!
+
+  """Обязательное обоснование корректировки"""
+  memo: String!
+
+  """
+  Сумма с символом, например "100.0000 RUB"
+  """
+  quantity: String!
+
+  """id кошелька-приёмника"""
+  toWallet: Int!
+
+  """Владелец кошельков (для коллективных — coopname)"""
+  username: String!
 }
 
 input WebPushSubscriptionDataInput {

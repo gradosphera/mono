@@ -1,10 +1,13 @@
 import { client } from 'src/shared/api/client';
-import { Queries } from '@coopenomics/sdk';
+import { Mutations, Queries } from '@coopenomics/sdk';
 import type {
   ILedger2Account,
   ILedger2Wallet,
   ILedger2HistoryResponse,
   ILedger2HistoryFilterInput,
+  ILedger2AdjustmentResult,
+  IWalmoveInput,
+  IRevertOperationInput,
 } from '../types';
 
 async function getAccounts(coopname: string): Promise<ILedger2Account[]> {
@@ -33,4 +36,26 @@ async function getHistory(
   return output;
 }
 
-export const ledger2Api = { getAccounts, getWallets, getHistory };
+async function walmoveWallets(input: IWalmoveInput): Promise<ILedger2AdjustmentResult> {
+  const { [Mutations.Ledger2.WalmoveWallets.name]: output } = await client.Mutation(
+    Mutations.Ledger2.WalmoveWallets.mutation,
+    { variables: { input } },
+  );
+  return output as ILedger2AdjustmentResult;
+}
+
+async function revertOperation(input: IRevertOperationInput): Promise<ILedger2AdjustmentResult> {
+  const { [Mutations.Ledger2.RevertOperation.name]: output } = await client.Mutation(
+    Mutations.Ledger2.RevertOperation.mutation,
+    { variables: { input } },
+  );
+  return output as ILedger2AdjustmentResult;
+}
+
+export const ledger2Api = {
+  getAccounts,
+  getWallets,
+  getHistory,
+  walmoveWallets,
+  revertOperation,
+};

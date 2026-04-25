@@ -57,6 +57,50 @@ export interface IApply {
 }
 
 /**
+ * walmove-action контракта _ledger2 — operation `o.adj.walmove` (ручная корректировка).
+ * Перевод между кошельками внутри одного бух.счёта (без Dr/Cr). Авторизация
+ * `coopname@active` (председатель). Backend проверяет связь wallet→account
+ * до подписания (контракт связь не хранит).
+ */
+export interface IWalmove {
+  coopname: IName
+  initiator: IName
+  username: IName
+  from_wallet: number
+  to_wallet: number
+  amount: IAsset
+  process_hash: IChecksum256
+  memo: string
+}
+
+/**
+ * revert-action контракта _ledger2 — operation `o.adj.rev` (откат операции).
+ * Зеркальная проводка по `original_operation_id`. Параметры зеркала готовит
+ * backend (поднимает оригинал из БД blockchain_actions, меняет местами Dr/Cr,
+ * подбирает корректный mirror_wallet_op). Запрещён откат `o.mig.*`.
+ * Авторизация `coopname@active` (председатель).
+ */
+export interface IRevert {
+  coopname: IName
+  initiator: IName
+  original_operation_id: number
+  original_operation_code: IName
+  username: IName
+  amount: IAsset
+  /**
+   * 0=ISSUE, 1=TRANSFER, 4=WALLET_ONLY, 5=REVOKE.
+   * 2=BLOCK / 3=UNBLOCK не разрешены — они симметричны сами себе.
+   */
+  mirror_wallet_op: number
+  mirror_wallet_from: number
+  mirror_wallet_to: number
+  mirror_debit_account_id: number
+  mirror_credit_account_id: number
+  process_hash: IChecksum256
+  memo: string
+}
+
+/**
  * Типы процессов ledger2 (архитектура §4.2).
  * Имя с обязательным контрактным префиксом, ≤ 13 base32-символов.
  */

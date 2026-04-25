@@ -243,4 +243,59 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
 
     return { items, totalCount, totalPages, currentPage: page };
   }
+
+  async getOperationByGlobalSequence(
+    coopname: string,
+    globalSequence: string,
+  ): Promise<Ledger2OperationDomainInterface | null> {
+    const rows = await this.actionRepo.manager.query(
+      `SELECT
+         a.global_sequence                       AS "globalSequence",
+         a.block_num                             AS "blockNum",
+         (a.data ->> 'coopname')                 AS "coopname",
+         a.name                                  AS "action",
+         (a.data ->> 'operation_code')           AS "operationCode",
+         LOWER(a.data ->> 'process_hash')        AS "processHash",
+         (a.data ->> 'username')                 AS "username",
+         COALESCE(
+           NULLIF(a.data ->> 'id', '')::bigint,
+           NULLIF(a.data ->> 'account_id', '')::bigint,
+           NULLIF(a.data ->> 'wallet_id', '')::bigint,
+           NULLIF(a.data ->> 'wallet_to', '')::bigint,
+           NULLIF(a.data ->> 'wallet_from', '')::bigint
+         )                                       AS "accountId",
+         NULLIF(a.data ->> 'wallet_from', '')::bigint AS "walletFrom",
+         NULLIF(a.data ->> 'wallet_to', '')::bigint   AS "walletTo",
+         COALESCE(
+           NULLIF(a.data ->> 'quantity', ''),
+           NULLIF(a.data ->> 'amount', '')
+         )                                       AS "quantity",
+         (a.data ->> 'memo')                     AS "memo",
+         a.created_at                            AS "createdAt"
+       FROM blockchain_actions a
+       WHERE a.account = $1
+         AND a.data ->> 'coopname' = $2
+         AND a.global_sequence = $3
+       LIMIT 1`,
+      [LEDGER2_CODE, coopname, globalSequence],
+    );
+
+    if (!rows.length) return null;
+    const r = rows[0] as Record<string, unknown>;
+    return {
+      globalSequence: Number(r.globalSequence ?? 0),
+      blockNum: Number(r.blockNum ?? 0),
+      coopname: String(r.coopname ?? ''),
+      action: String(r.action ?? ''),
+      operationCode: (r.operationCode as string | null) ?? null,
+      processHash: (r.processHash as string | null) ?? null,
+      username: (r.username as string | null) ?? null,
+      accountId: r.accountId !== null && r.accountId !== undefined ? Number(r.accountId) : null,
+      walletFrom: r.walletFrom !== null && r.walletFrom !== undefined ? Number(r.walletFrom) : null,
+      walletTo: r.walletTo !== null && r.walletTo !== undefined ? Number(r.walletTo) : null,
+      quantity: (r.quantity as string | null) ?? null,
+      memo: (r.memo as string | null) ?? null,
+      createdAt: r.createdAt instanceof Date ? r.createdAt : new Date(String(r.createdAt)),
+    };
+  }
 }

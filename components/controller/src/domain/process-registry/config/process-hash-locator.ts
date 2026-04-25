@@ -108,6 +108,11 @@ export const PROCESS_HASH_LOCATOR: Readonly<Record<string, HashLocation[]>> = Ob
   // для 4 миграционных операций (o.mig.*). Entity-hash в сущностных таблицах
   // нет (миграция пишет только wjournal/journal + accounts2/wallets2 deltas).
   'p.mig.trans': [],
+
+  // p.adj.fix — ручные корректировки председателя (o.adj.walmove + o.adj.rev).
+  // Одноактовые, без entity-hash: данные читаются напрямую из blockchain_actions
+  // (поле `data.process_hash` уникально для каждой корректировки).
+  'p.adj.fix': [],
 });
 
 /**

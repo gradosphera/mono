@@ -30,10 +30,11 @@ void ledger2::walletop(eosio::name coopname,
   require_auth(get_self());
 
   // Sender-guard: запрещаем top-level вызов. Допустим только inline-dispatch
-  // из ledger2::apply — так сохраняется парность проводок walletop+debit+credit
-  // и нельзя напрямую подписью `ledger2@active` записать одностороннюю операцию.
+  // из ledger2::apply / ledger2::walmove / ledger2::revert — так сохраняется
+  // парность проводок walletop+debit+credit и нельзя напрямую подписью
+  // `ledger2@active` записать одностороннюю операцию.
   eosio::check(eosio::get_sender() == _ledger2,
-               "walletop: допустим только inline-вызов из ledger2::apply");
+               "walletop: допустим только inline-вызов из ledger2::apply/walmove/revert");
 
   // require_recipient не вызываем: apply() уже нотифицировал coopname один раз.
   // Повторная нотификация из каждого inline создаёт 4 хука на одну бизнес-операцию.
@@ -43,7 +44,7 @@ void ledger2::walletop(eosio::name coopname,
   eosio::check(amount.symbol == _root_govern_symbol,
                "walletop: некорректный символ валюты");
   eosio::check(memo.size() < 256, "walletop: memo > 255");
-  eosio::check(op_code <= 4, "walletop: неизвестный op_code");
+  eosio::check(op_code <= 5, "walletop: неизвестный op_code");
 
   wallets2_index wallets(get_self(), coopname.value);
   const eosio::name payer = get_self();
@@ -122,6 +123,19 @@ void ledger2::walletop(eosio::name coopname,
         w.blocked   -= amount;
         w.available += amount;
       });
+      break;
+    }
+    case WalletOp::REVOKE: {
+      // Зеркало ISSUE: убираем amount с wallet_from без увеличения куда-либо.
+      // Используется только из ledger2::revert при откате ISSUE-операций.
+      eosio::check(wallet_from != 0, "walletop REVOKE: требуется wallet_from");
+      eosio::check(wallet_to == 0, "walletop REVOKE: wallet_to должен быть 0");
+      auto it = wallets.find(wallet_from);
+      eosio::check(it != wallets.end() && it->available >= amount,
+                   std::string{"walletop REVOKE: недостаточно available на кошельке "} +
+                     std::to_string(wallet_from));
+      wallets.modify(it, payer, [&](auto& w) { w.available -= amount; });
+      cleanup_if_empty(wallet_from);
       break;
     }
   }

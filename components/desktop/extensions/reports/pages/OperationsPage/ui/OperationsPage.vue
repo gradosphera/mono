@@ -74,6 +74,12 @@ div.page-shell
                 )
                   .row.items-center.justify-end
                     q-btn(v-close-popup flat label='Готово' color='primary')
+        q-toggle.col-md-auto(
+          v-model='filters.adjustmentsOnly'
+          label='Только корректировки'
+          color='warning'
+          @update:model-value='reload'
+        )
         q-btn.col-md-auto(
           v-if='hasAnyFilter'
           flat
@@ -120,9 +126,9 @@ div.page-shell
             q-chip(
               dense
               square
-              :color='processChipBg(props.row.operationCode)'
-              :text-color='processChipText(props.row.operationCode)'
-            ) {{ actionLabel(props.row.operationCode) }}
+              :color='processChipBg(rowChipText(props.row))'
+              :text-color='processChipText(rowChipText(props.row))'
+            ) {{ rowLabel(props.row) }}
           q-td.text-right.font-monospace.text-weight-bold.text-grey-10 {{ formatAmount(props.row.quantity) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
@@ -136,9 +142,19 @@ div.page-shell
             .q-pa-md
               //- Шапка: цветная полоска + название + action_code + ID + memo
               .op-header.q-mb-md(
-                :style='{ borderLeftColor: processAccentColor(props.row.operationCode) }'
+                :style='{ borderLeftColor: processAccentColor(rowChipText(props.row)) }'
               )
-                .text-h6.text-weight-medium {{ actionLabel(props.row.operationCode) }}
+                .row.items-start.no-wrap
+                  .col
+                    .text-h6.text-weight-medium {{ rowLabel(props.row) }}
+                  .col-auto(v-if='canRevert(props.row)')
+                    q-btn(
+                      flat dense color='warning'
+                      icon='fa-solid fa-rotate-left'
+                      label='Откатить'
+                      @click.stop='openRevertFor(props.row)'
+                    )
+                      q-tooltip Откатить эту операцию зеркальной проводкой
                 .row.items-center.q-gutter-sm.q-mb-xs(v-if='props.row.operationCode')
                   .text-caption.text-grey-7 Тип процесса:
                   EntityIdBadge(
@@ -227,13 +243,21 @@ div.page-shell
                 .text-body1.text-weight-bold.font-monospace {{ formatAmount(props.row.quantity) }}
               .col-12.text-caption.text-grey-7
                 | Пайщик: {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
+
+  RevertOperationDialog(
+    v-model='revertDialog.open'
+    :operation='revertDialog.operation'
+    @success='onRevertSuccess'
+  )
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, nextTick, reactive, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { useWindowSize } from 'src/shared/hooks'
 import { useSystemStore } from 'src/entities/System/model'
+import { useSessionStore } from 'src/entities/Session/model'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
 import { EntityIdBadge } from 'src/shared/ui'
@@ -247,6 +271,7 @@ import { useAccountStore } from 'src/entities/Account'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { DirectionCell, WalletIdCell, AccountIdCell } from '../../../shared/ui'
 import { Ledger2 } from 'cooptypes'
+import RevertOperationDialog from './RevertOperationDialog.vue'
 
 const { info } = useSystemStore()
 const { isMobile } = useWindowSize()
@@ -254,6 +279,40 @@ const route = useRoute()
 const router = useRouter()
 const ledger2Store = useLedger2Store()
 const accountStore = useAccountStore()
+const session = useSessionStore()
+const { isChairman } = storeToRefs(session)
+
+// Reactive state модалки отката.
+const revertDialog = reactive<{ open: boolean; operation: ILedger2Operation | null }>({
+  open: false,
+  operation: null,
+})
+
+/**
+ * Кнопка «Откатить» доступна только председателю + только для apply-операций
+ * стандартного типа (не для миграционных и не для самих корректировок —
+ * для отката отката надо открывать другую конкретную запись o.adj.rev,
+ * это разрешено отдельным кейсом).
+ */
+function canRevert(op: ILedger2Operation): boolean {
+  if (!isChairman.value) return false
+  if (op.action !== 'apply') return false
+  if (!op.operationCode) return false
+  if (op.operationCode.startsWith('o.mig.')) return false
+  return true
+}
+
+function openRevertFor(op: ILedger2Operation): void {
+  revertDialog.operation = op
+  revertDialog.open = true
+}
+
+async function onRevertSuccess(): Promise<void> {
+  // Сбрасываем кэш дочерних операций (балансы изменились), перезагружаем список.
+  childOps.value.clear()
+  expanded.value.clear()
+  await load()
+}
 
 // Человекочитаемые названия операций — источник правды в
 // `cooptypes/src/ledger2/operations.ts` (LEDGER2_OPERATION_REGISTRY),
@@ -261,6 +320,22 @@ const accountStore = useAccountStore()
 function actionLabel(code: string | null | undefined): string {
   if (!code) return '—'
   return Ledger2.getOperationHumanName(code) ?? code
+}
+
+/**
+ * Заголовок строки реестра. У стандартных операций берём из operation_code,
+ * у adjustment (walmove/revert) — operation_code в action.data не пишется,
+ * поэтому используем `action`-name через тот же registry с маппингом.
+ */
+function rowLabel(row: ILedger2Operation): string {
+  if (row.operationCode) return actionLabel(row.operationCode)
+  if (row.action === 'walmove') return Ledger2.getOperationHumanName('o.adj.walmove') ?? 'Перевод между кошельками'
+  if (row.action === 'revert') return Ledger2.getOperationHumanName('o.adj.rev') ?? 'Откат операции'
+  return '—'
+}
+
+function rowChipText(row: ILedger2Operation): string {
+  return row.operationCode ?? (row.action === 'walmove' ? 'o.adj.walmove' : row.action === 'revert' ? 'o.adj.rev' : '—')
 }
 
 // Цветовая схема по контракту-источнику operation_code — пастельный chip +
@@ -278,6 +353,9 @@ const PROCESS_COLORS: Record<string, ProcessColorEntry> = {
   mkt: { accent: '#ef6c00', chipBg: 'orange-1',      chipText: 'orange-9' },
   sov: { accent: '#5d4037', chipBg: 'brown-1',       chipText: 'brown-9' },
   mig: { accent: '#616161', chipBg: 'grey-3',        chipText: 'grey-9' },
+  // adjustment (ручные корректировки председателя — выделяем янтарным,
+  // чтобы выглядели иначе чем штатные операции).
+  adj: { accent: '#ef6c00', chipBg: 'amber-2',       chipText: 'amber-10' },
 }
 const PROCESS_COLOR_DEFAULT: ProcessColorEntry = {
   accent: '#9e9e9e', chipBg: 'grey-3', chipText: 'grey-9',
@@ -350,6 +428,7 @@ const filters = reactive<{
   accountName: string
   processHash: string | null
   username: string | null
+  adjustmentsOnly: boolean
 }>({
   dateFrom: '',
   dateTo: '',
@@ -358,7 +437,9 @@ const filters = reactive<{
   accountName: '',
   processHash: null,
   username: null,
+  adjustmentsOnly: false,
 })
+
 
 const accountFilterLabel = computed(() => {
   if (filters.accountId === null) return ''
@@ -490,7 +571,8 @@ const hasAnyFilter = computed(
     !!filters.dateTo ||
     filters.accountId !== null ||
     !!filters.processHash ||
-    !!filters.username,
+    !!filters.username ||
+    filters.adjustmentsOnly,
 )
 
 async function resetFilters() {
@@ -501,6 +583,7 @@ async function resetFilters() {
   filters.accountName = ''
   filters.processHash = null
   filters.username = null
+  filters.adjustmentsOnly = false
   const q = { ...route.query }
   delete q.wallet_id
   delete q.account_id
@@ -556,11 +639,17 @@ async function load() {
   try {
     const input: ILedger2HistoryFilterInput = {
       coopname: info.coopname,
-      actionNames: ['apply'],
+      // Adjustment-операции (walmove/revert) — top-level actions, не «apply».
+      // При включённом фильтре «Только корректировки» расширяем actionNames,
+      // иначе остаются только обычные apply (стандартный поток).
+      actionNames: filters.adjustmentsOnly ? ['walmove', 'revert'] : ['apply'],
       page: pagination.value.page,
       limit: pagination.value.rowsPerPage,
       sortOrder: 'DESC',
     }
+    // operation_code в data adjustment-action нет (walmove/revert получают
+    // process_hash, но не operation_code как payload-поле). Поэтому фильтр
+    // «Только корректировки» работает через actionNames=[walmove,revert].
     if (filters.accountId !== null) input.accountId = filters.accountId
     if (filters.processHash) input.processHash = filters.processHash
     if (filters.username) input.username = filters.username

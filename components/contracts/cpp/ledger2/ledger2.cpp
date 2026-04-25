@@ -7,3 +7,5 @@
 #include "src/common/debit.cpp"
 #include "src/common/credit.cpp"
 #include "src/migrate/migrate.cpp"
+#include "src/adjust/walmove.cpp"
+#include "src/adjust/revert.cpp"

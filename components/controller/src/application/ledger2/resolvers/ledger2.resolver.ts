@@ -1,4 +1,4 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
@@ -8,13 +8,17 @@ import { Ledger2AccountDTO } from '../dto/ledger2-account.dto';
 import { Ledger2WalletDTO } from '../dto/ledger2-wallet.dto';
 import { Ledger2HistoryResponseDTO } from '../dto/ledger2-operation.dto';
 import { GetLedger2HistoryInputDTO } from '../dto/get-ledger2-history-input.dto';
+import { WalmoveInputDTO } from '../dto/walmove-input.dto';
+import { RevertOperationInputDTO } from '../dto/revert-input.dto';
+import { Ledger2AdjustmentResultDTO } from '../dto/ledger2-adjustment-result.dto';
 
 /**
  * GraphQL фасад для ledger2. Единая точка для рабочего стола reports:
  * - AccountsPage использует getLedger2Accounts;
  * - WalletsPage использует getLedger2Wallets;
  * - OperationsPage использует getLedger2History;
- * - BuhotchGenerator внутри report.resolver тоже перешёл сюда.
+ * - корректировки председателя — мутации walmoveWallets / revertOperation
+ *   (роль `chairman` обязательна; member-роль не разрешает писать).
  */
 @Resolver()
 export class Ledger2Resolver {
@@ -58,5 +62,33 @@ export class Ledger2Resolver {
     @Args('input', { type: () => GetLedger2HistoryInputDTO }) input: GetLedger2HistoryInputDTO,
   ): Promise<Ledger2HistoryResponseDTO> {
     return this.service.getHistory(input);
+  }
+
+  @Mutation(() => Ledger2AdjustmentResultDTO, {
+    name: 'walmoveWallets',
+    description:
+      'Перевод между кошельками одного бух.счёта (operation o.adj.walmove). ' +
+      'Только председатель. Backend проверяет связь wallet→account до подписания.',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  walmoveWallets(
+    @Args('input', { type: () => WalmoveInputDTO }) input: WalmoveInputDTO,
+  ): Promise<Ledger2AdjustmentResultDTO> {
+    return this.service.walmove(input);
+  }
+
+  @Mutation(() => Ledger2AdjustmentResultDTO, {
+    name: 'revertOperation',
+    description:
+      'Откат ранее проведённой операции зеркальной проводкой (operation o.adj.rev). ' +
+      'Только председатель. Запрещено откатывать миграционные операции (o.mig.*).',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  revertOperation(
+    @Args('input', { type: () => RevertOperationInputDTO }) input: RevertOperationInputDTO,
+  ): Promise<Ledger2AdjustmentResultDTO> {
+    return this.service.revertOperation(input);
   }
 }

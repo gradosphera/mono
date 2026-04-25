@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <string_view>
 
@@ -92,6 +93,19 @@ namespace operations {
     inline constexpr eosio::name RID              = "o.mig.rid"_n;      ///< Перенос: РИД в НМА (Dr 04 / Cr 80, ISSUE SHARE_FUND_RID).
   }
 
+  // adjustment (ручные корректировки председателя)
+  //
+  // Не входят в OPERATION_REGISTRY: их параметры (wallet_from/to,
+  // debit/credit_account_id) задаются динамически каждый вызов, что несовместимо
+  // со static_assert проверками реестра. Выполняются отдельными actions:
+  //   - ledger2::walmove — WALMOVE: перевод между кошельками одного бух.счёта;
+  //   - ledger2::revert  — REVERSAL: зеркальная проводка по operation_id оригинала.
+  // Для UI human_name → см. OPERATION_ADJUSTMENT_REGISTRY ниже.
+  namespace adjustment {
+    inline constexpr eosio::name WALMOVE  = "o.adj.walmove"_n;          ///< Перевод между кошельками внутри одного бух.счёта (без Dr/Cr).
+    inline constexpr eosio::name REVERSAL = "o.adj.rev"_n;              ///< Откат операции: зеркальная проводка по operation_id.
+  }
+
 } // namespace operations
 
 /**
@@ -109,6 +123,7 @@ enum class WalletOp : uint8_t {
   BLOCK       = 2, ///< available-=amount, blocked+=amount на wallet_from
   UNBLOCK     = 3, ///< blocked-=amount, available+=amount на wallet_from
   WALLET_ONLY = 4, ///< TRANSFER wallet_from → wallet_to БЕЗ debit/credit inline-actions
+  REVOKE      = 5, ///< изъятие amount с wallet_from без увеличения куда-либо (зеркало ISSUE для o.adj.rev)
 };
 
 /**
@@ -324,6 +339,38 @@ inline const OperationRegistryEntry* find_operation(eosio::name operation_code) 
   for (size_t i = 0; i < OPERATION_REGISTRY_SIZE; ++i) {
     if (OPERATION_REGISTRY[i].code == operation_code) {
       return &OPERATION_REGISTRY[i];
+    }
+  }
+  return nullptr;
+}
+
+// =====================================================================
+// Adjustment-операции (ручные корректировки) — отдельный мини-реестр.
+// =====================================================================
+//
+// Зачем отдельно: у adjustment-операций wallet_from/wallet_to и
+// debit/credit_account_id заполняются ДИНАМИЧЕСКИ при каждом вызове
+// (определяются параметрами walmove/revert, не справочником). В
+// OPERATION_REGISTRY их положить нельзя — сломаются static_assert
+// (transfer_wallet_from_ne_to: 0==0, dr_ne_cr_when_posting и пр.).
+//
+// Здесь — только code + process_type + human_name для UI/audit
+// (cooptypes mirror живёт в src/ledger2/operations.ts → addAdjustment).
+struct OperationAdjustmentEntry {
+  eosio::name      code;
+  eosio::name      process_type;
+  std::string_view human_name;
+};
+
+inline constexpr std::array<OperationAdjustmentEntry, 2> OPERATION_ADJUSTMENT_REGISTRY = {{
+  { operations::adjustment::WALMOVE,  processes::adjustment::CORRECTION, "Перевод между кошельками" },
+  { operations::adjustment::REVERSAL, processes::adjustment::CORRECTION, "Откат операции" },
+}};
+
+inline constexpr const OperationAdjustmentEntry* find_adjustment(eosio::name operation_code) {
+  for (size_t i = 0; i < OPERATION_ADJUSTMENT_REGISTRY.size(); ++i) {
+    if (OPERATION_ADJUSTMENT_REGISTRY[i].code == operation_code) {
+      return &OPERATION_ADJUSTMENT_REGISTRY[i];
     }
   }
   return nullptr;

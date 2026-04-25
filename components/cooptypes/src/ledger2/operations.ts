@@ -10,7 +10,7 @@
  * Длина eosio::name ≤ 12 символов (13-й символ имеет ограничение по алфавиту).
  */
 
-export type WalletOp = 'ISSUE' | 'TRANSFER' | 'BLOCK' | 'UNBLOCK' | 'WALLET_ONLY'
+export type WalletOp = 'ISSUE' | 'TRANSFER' | 'BLOCK' | 'UNBLOCK' | 'WALLET_ONLY' | 'REVOKE'
 
 export interface OperationMeta {
   /** Машинный идентификатор — eosio::name в контракте. */
@@ -21,18 +21,33 @@ export interface OperationMeta {
   contract: string
   /** Имя C++-константы в namespace operations::<contract>::. */
   name: string
-  /** Тип операции по кошельку. */
-  wallet_op: WalletOp
-  /** id кошелька-источника (null для ISSUE). */
+  /**
+   * Тип операции по кошельку. Для `kind: 'adjustment'` — null, потому что
+   * реальный wallet_op зависит от исходной операции (WALMOVE = WALLET_ONLY всегда,
+   * REVERSAL = REVOKE/TRANSFER/WALLET_ONLY в зависимости от зеркала).
+   */
+  wallet_op: WalletOp | null
+  /** id кошелька-источника (null для ISSUE и для adjustment-операций). */
   wallet_from: number | null
-  /** id кошелька-приёмника (null для BLOCK/UNBLOCK). */
+  /** id кошелька-приёмника (null для BLOCK/UNBLOCK и для adjustment-операций). */
   wallet_to: number | null
-  /** Код счёта Дт (null для WALLET_ONLY). */
+  /** Код счёта Дт (null для WALLET_ONLY и для adjustment-операций). */
   debit: number | null
-  /** Код счёта Кт (null для WALLET_ONLY). */
+  /** Код счёта Кт (null для WALLET_ONLY и для adjustment-операций). */
   credit: number | null
   /** Человекочитаемое название для UI. */
   human_name: string
+  /**
+   * Тип операции:
+   *   - `'standard'` (default) — параметры зашиты в контрактном OPERATION_REGISTRY,
+   *     вызывается через `ledger2::apply`.
+   *   - `'adjustment'` — параметры задаются динамически каждый вызов; не входит
+   *     в контрактный OPERATION_REGISTRY; вызывается отдельным action
+   *     (`ledger2::walmove` для WALMOVE, `ledger2::revert` для REVERSAL).
+   *     UI запрещает таким операциям обычные пути и подсвечивает фильтром
+   *     «Только корректировки».
+   */
+  kind?: 'standard' | 'adjustment'
 }
 
 export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
@@ -131,6 +146,20 @@ export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
     name: 'RID',            wallet_op: 'ISSUE',    wallet_from: null, wallet_to: 2003,
     debit: 4, credit: 80,
     human_name: 'Транзит: принятые РИД в паевой фонд' },
+
+  // adjustment (ручные корректировки председателя — динамические параметры,
+  // не идут через ledger2::apply; см. operations.hpp `OPERATION_ADJUSTMENT_REGISTRY`).
+  { code: 'o.adj.walmove', process_type: 'p.adj.fix',     contract: 'ledger2',
+    name: 'WALMOVE',        wallet_op: null,       wallet_from: null, wallet_to: null,
+    debit: null, credit: null,
+    human_name: 'Перевод между кошельками',
+    kind: 'adjustment' },
+
+  { code: 'o.adj.rev',     process_type: 'p.adj.fix',     contract: 'ledger2',
+    name: 'REVERSAL',       wallet_op: null,       wallet_from: null, wallet_to: null,
+    debit: null, credit: null,
+    human_name: 'Откат операции',
+    kind: 'adjustment' },
 ] as const
 
 const opByCode = new Map<string, OperationMeta>(
@@ -148,4 +177,13 @@ export function getOperationProcessType(code: string | null | undefined): string
 
 export function getOperationHumanName(code: string | null | undefined): string | undefined {
   return getOperationMeta(code)?.human_name
+}
+
+/**
+ * Корректировка председателя (`o.adj.*`) — операция с динамическими параметрами,
+ * вызываемая отдельными actions ledger2::walmove / ledger2::revert. UI использует
+ * это для фильтра «Только корректировки» и для запрета обычных путей.
+ */
+export function isAdjustmentOperation(code: string | null | undefined): boolean {
+  return !!code && code.startsWith('o.adj.')
 }
