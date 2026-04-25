@@ -34,11 +34,10 @@ div.page-shell
       .row.q-gutter-sm.items-end
         q-input.col-md-3.col-12(
           v-model='filters.processHashInput'
-          label='ID процесса (process_hash)'
+          label='ID процесса'
           dense
           outlined
           clearable
-          hint='Полный hex-хэш или 8+ начальных символов'
           @clear='applyProcessHashSearch'
           @keyup.enter='applyProcessHashSearch'
         )
