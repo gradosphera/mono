@@ -1,5 +1,6 @@
-// Копирует PNG + draft.md в docs-репозиторий. По умолчанию — соседняя
-// components/docs/docs/ того же клона, где лежит harness (см. DEFAULT_DOCS_ROOT).
+// Копирует PNG + draft.md в docs-репозиторий. По умолчанию — соседний
+// components/docs/docs/ того же клона (harness живёт в components/docs-harness/,
+// см. DEFAULT_DOCS_ROOT). Переопределить через --docs-root=<path>.
 // Usage: node lib/install.mjs <scenario> [--docs-root=...] [--md]
 
 import fs from 'node:fs/promises';
@@ -10,9 +11,9 @@ const HARNESS_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const scenario = process.argv[2];
 if (!scenario) { console.error('Usage: install.mjs <scenario>'); process.exit(2); }
 
-// По умолчанию пишем в соседнюю components/docs того же клона, где лежит harness.
-// У каждого разработчика своя папка — путь вычисляем относительно HARNESS_ROOT.
-const DEFAULT_DOCS_ROOT = path.resolve(HARNESS_ROOT, '..', 'components', 'docs', 'docs');
+// По умолчанию пишем в соседнюю components/docs того же клона.
+// HARNESS_ROOT = components/docs-harness/, поэтому ../docs/docs/ — это components/docs/docs/.
+const DEFAULT_DOCS_ROOT = path.resolve(HARNESS_ROOT, '..', 'docs', 'docs');
 const docsRoot = (process.argv.find(a => a.startsWith('--docs-root=')) ?? '').split('=')[1]
   || DEFAULT_DOCS_ROOT;
 

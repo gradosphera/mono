@@ -19,7 +19,8 @@ import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const HARNESS_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REPO_ROOT = path.resolve(HARNESS_ROOT, '..');
+// Harness живёт в components/docs-harness/, репо-корень — на два уровня выше.
+const REPO_ROOT = path.resolve(HARNESS_ROOT, '..', '..');
 
 const args = process.argv.slice(2);
 const wantReboot = args.includes('--reboot');
@@ -257,8 +258,9 @@ function ensureDraft() {
   runScenario();
   ensureDraft();
   console.error('');
+  const rel = path.relative(REPO_ROOT, HARNESS_ROOT);
   console.error('✓ Готово.');
-  console.error(`  PNG:   docs-harness/shots/${scenario}/`);
-  console.error(`  draft: docs-harness/shots/${scenario}/draft.md  (правь прозу здесь)`);
-  console.error(`  install: node lib/install.mjs ${scenario} --md  (когда проза готова)`);
+  console.error(`  PNG:   ${rel}/shots/${scenario}/`);
+  console.error(`  draft: ${rel}/shots/${scenario}/draft.md  (правь прозу здесь)`);
+  console.error(`  install: cd ${rel} && node lib/install.mjs ${scenario} --md  (когда проза готова)`);
 })().catch((e) => die(e.stack || e.message));
