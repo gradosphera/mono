@@ -710,8 +710,15 @@ export class GenerationService {
         issueHashesToFilter
       );
 
+      // Если задачные требования выключены, отфильтровываем stories с непустым issue_hash:
+      // репозиторий выбирает по `project_hash IN (...) OR issue_hash IN (...)`, и stories,
+      // привязанные к задачам, всё равно попадают через project_hash. Их нужно убрать здесь.
+      const filteredStories = showIssuesRequirements
+        ? allStories
+        : allStories.filter((story) => !story.issue_hash || story.issue_hash.trim() === '');
+
       // Убираем дубликаты (на случай если одна история относится к нескольким проектам)
-      const uniqueStories = allStories.filter(
+      const uniqueStories = filteredStories.filter(
         (story, index, self) => index === self.findIndex((s) => s.story_hash === story.story_hash)
       );
 
