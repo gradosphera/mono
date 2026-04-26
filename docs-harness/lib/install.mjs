@@ -1,5 +1,6 @@
-// Копирует PNG + draft.md в docs-репозиторий (по умолчанию /home/admin/mono-ai-2/components/docs).
-// Usage: node lib/install.mjs <scenario> [--docs-root=...]
+// Копирует PNG + draft.md в docs-репозиторий. По умолчанию — соседняя
+// components/docs/docs/ того же клона, где лежит harness (см. DEFAULT_DOCS_ROOT).
+// Usage: node lib/install.mjs <scenario> [--docs-root=...] [--md]
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
