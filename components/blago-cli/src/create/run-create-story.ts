@@ -21,6 +21,8 @@ import {
 import { generateSlug, storyFileRelativePath, workspaceBasePath } from '../sync/layout.js'
 import { loadProjectMapsFromIndex } from '../sync/project-index-map.js'
 import { issueLinkForStoryPath } from '../sync/push-create.js'
+import { refreshParentProjectVersion } from '../sync/refresh-parent.js'
+import { writeWorkspaceIndexMarkdown } from '../sync/workspace-index.js'
 
 import { resolveProjectMarker } from './resolve-base.js'
 import { storyContentFormatFromCliOption } from './story-format.js'
@@ -195,7 +197,11 @@ export async function runCreateStory(
     remote_updated_at: toRemoteIso(created._updated_at),
     content_etag_local: etag,
   })
+  if (created.project_hash) {
+    await refreshParentProjectVersion(ctx, index, String(created.project_hash), projRow.parent_hash)
+  }
   await saveIndex(ctx.root, index)
   await appendPathsToStaging(ctx.root, [rel])
+  await writeWorkspaceIndexMarkdown(ctx.root)
   return { relativePath: rel }
 }
