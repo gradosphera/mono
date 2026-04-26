@@ -117,6 +117,9 @@ nav:
     - Принять пайщика: new/registration/accept.md
     - Разработчикам: new/registration/dev.md
 
+  - Вход в систему:
+    - Вход пайщика: new/auth/signin.md
+
   - Аккаунты:
     - new/accounts/index.md
 
