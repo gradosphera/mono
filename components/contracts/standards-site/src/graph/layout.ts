@@ -49,11 +49,11 @@ export const INITIAL_MARKER = '∅';
    чтобы кружок не прилипал к первой/последней карточке. Визуальный
    кружок (48px) центрируется внутри wrapper-а в соответствующем узле. */
 const SIZE = {
-  start: { width: 128, height: 80 },
-  state: { width: 180, height: 80 },
-  end: { width: 128, height: 80 },
+  start: { width: 128, height: 96 },
+  state: { width: 220, height: 96 },
+  end: { width: 128, height: 96 },
   rejected: { width: 120, height: 70 },
-  action: { width: 170, height: 54 },
+  action: { width: 210, height: 68 },
 };
 
 // ── Вспомогательные ─────────────────────────────────────────────────────────
