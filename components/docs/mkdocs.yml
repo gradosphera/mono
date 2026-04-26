@@ -175,4 +175,10 @@ nav:
     
   - Общие собрания: new/meet/index.md
   - Бухгалтерия: new/buh/index.md
+
+  - Благорост:
+    - Адаптация: new/blagorost/adaptation.md
+    - Профиль: new/blagorost/profile.md
+    - Мастерская: new/blagorost/projects-list.md
+    - Создание проекта и компонента: new/blagorost/project-create.md
   

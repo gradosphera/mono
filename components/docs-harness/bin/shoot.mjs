@@ -35,6 +35,7 @@ if (!scenario) {
 // Имена ТОЛЬКО человеческие (см. doc-shoot/SKILL.md «Фиксированные конвенции»).
 const KNOWN_FIXTURES = {
   ivanpetrov: { email: 'ivan.petrov@example.com', firstName: 'Иван', lastName: 'Петров', middleName: 'Сергеевич' },
+  ekaterina: { email: 'ekaterina.smirnova@example.com', firstName: 'Екатерина', lastName: 'Смирнова', middleName: 'Александровна' },
 };
 
 const log = (m) => console.error(`◇ ${m}`);
@@ -188,16 +189,13 @@ async function ensureDesktop(distRebuilt) {
   die(`desktop dev не поднялся за 180с — проверь ${logFile}`);
 }
 
-// 4. Фикстура пайщика. Сценарий читает state/participants/<name>.json напрямую
-//    (см. signin.mjs), поэтому если файла нет — сценарий упадёт с ENOENT.
-//    Создаём через add-plain-participant, JSON-вывод сохраняем в state.
-function ensureFixture() {
-  const scenarioPath = path.join(HARNESS_ROOT, 'scenarios', `${scenario}.mjs`);
-  if (!fs.existsSync(scenarioPath)) die(`сценарий не найден: ${scenarioPath}`);
-  const src = fs.readFileSync(scenarioPath, 'utf8');
-  const m = src.match(/state\/participants\/([\w-]+)\.json/);
-  if (!m) { ok('сценарий не требует фикстуру'); return; }
-  const name = m[1];
+// 4. Фикстура пайщика. Имена берём из двух источников:
+//    - meta.fixtures сценария (явный список — для пайщиков, которых использует
+//      seed-фаза, но не сам сценарий, например 05-additional-contributors)
+//    - state/participants/<name>.json regex'нутые из исходника сценария
+//      (для пайщиков, которыми сценарий логинится через UI — см. signin.mjs)
+//    Если файла нет — создаём через add-plain-participant, JSON-вывод в state.
+function ensureOneFixture(name) {
   const fixturePath = path.join(HARNESS_ROOT, 'state/participants', `${name}.json`);
   if (fs.existsSync(fixturePath)) { ok(`фикстура ${name} есть`); return; }
   const profile = KNOWN_FIXTURES[name];
@@ -223,7 +221,6 @@ function ensureFixture() {
   if (r.status !== 0) {
     die(`add-plain-participant упал:\nstderr:\n${r.stderr}\nstdout:\n${r.stdout}`);
   }
-  // stdout: служебные логи в stderr, JSON-результат — последняя непустая строка stdout.
   const lastLine = r.stdout.split('\n').filter((l) => l.trim()).pop();
   if (!lastLine || !lastLine.startsWith('{')) {
     die(`не нашёл JSON в выводе add-plain-participant:\n${r.stdout}`);
@@ -231,6 +228,57 @@ function ensureFixture() {
   fs.mkdirSync(path.dirname(fixturePath), { recursive: true });
   fs.writeFileSync(fixturePath, lastLine + '\n');
   ok(`фикстура ${name} создана: ${path.relative(REPO_ROOT, fixturePath)}`);
+}
+
+function ensureFixtures(meta) {
+  const scenarioPath = path.join(HARNESS_ROOT, 'scenarios', `${scenario}.mjs`);
+  if (!fs.existsSync(scenarioPath)) die(`сценарий не найден: ${scenarioPath}`);
+  const src = fs.readFileSync(scenarioPath, 'utf8');
+  const names = new Set();
+  if (Array.isArray(meta.fixtures)) {
+    for (const n of meta.fixtures) names.add(n);
+  }
+  for (const m of src.matchAll(/state\/participants\/([\w-]+)\.json/g)) {
+    names.add(m[1]);
+  }
+  if (names.size === 0) { ok('сценарий не требует фикстур'); return; }
+  for (const name of names) ensureOneFixture(name);
+}
+
+// 4.5. meta.prepare — заявленные сценарием seed-фазы для boot.
+//      Спецификация: 'group:phase', например 'capital:01-programs'. Группа
+//      резолвится в src/scripts/seed-<group>/index.ts; <phase> идёт аргументом.
+//      Каждая фаза — идемпотентна, повторный прогон без reboot — no-op.
+async function loadMeta() {
+  const scenarioPath = path.join(HARNESS_ROOT, 'scenarios', `${scenario}.mjs`);
+  try {
+    const mod = await import(scenarioPath);
+    return mod.meta || {};
+  } catch (e) {
+    die(`не смог загрузить meta из сценария:\n${e.stack || e.message}`);
+  }
+}
+
+async function runPrepare(prepareSpecs) {
+  if (!Array.isArray(prepareSpecs) || prepareSpecs.length === 0) return;
+  log(`Прогоняю prepare-фазы (${prepareSpecs.length}): ${prepareSpecs.join(', ')}`);
+  for (const spec of prepareSpecs) {
+    const m = spec.match(/^([\w-]+):([\w-]+)$/);
+    if (!m) die(`prepare: не понимаю спецификацию «${spec}» (формат: <group>:<phase>)`);
+    const [, group, phase] = m;
+    const scriptPath = `src/scripts/seed-${group}/index.ts`;
+    const componentPath = path.join(REPO_ROOT, 'components/boot', scriptPath);
+    if (!fs.existsSync(componentPath)) {
+      die(`prepare: не нашёл seed-скрипт для группы «${group}»: ${componentPath}`);
+    }
+    log(`prepare ${spec}...`);
+    const r = spawnSync('pnpm', [
+      '--filter', '@coopenomics/boot', 'exec', 'esno',
+      scriptPath, phase,
+    ], { cwd: REPO_ROOT, stdio: 'inherit' });
+    if (r.status !== 0) die(`prepare ${spec} упала`);
+  }
+  ok('prepare-фазы пройдены');
 }
 
 // 5. Прогон + 6. Скелет draft.md если его ещё нет
@@ -254,7 +302,9 @@ function ensureDraft() {
   await checkStack();
   const distRebuilt = ensureDist();
   await ensureDesktop(distRebuilt);
-  ensureFixture();
+  const meta = await loadMeta();
+  ensureFixtures(meta);
+  await runPrepare(meta.prepare);
   runScenario();
   ensureDraft();
   console.error('');
