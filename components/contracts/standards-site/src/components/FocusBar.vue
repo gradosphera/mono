@@ -158,8 +158,6 @@ const focusMode = computed<
   return 'none';
 });
 
-const relatedCount = computed(() => (props.standard.related ?? []).length);
-
 // ── Данные для «завершения отказом» ─────────────────────────────────────
 interface RejectedInfo {
   transition: Transition;
