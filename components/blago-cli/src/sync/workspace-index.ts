@@ -66,9 +66,10 @@ export async function writeWorkspaceIndexMarkdown(root: string): Promise<void> {
   const index = await loadIndex(root)
   const projects: ProjectRow[] = []
   const stories: StoryRow[] = []
+  const issueIdByHash = new Map<string, string>()
 
   for (const e of index.entries) {
-    if (e.entity_type !== 'project' && e.entity_type !== 'story') {
+    if (e.entity_type !== 'project' && e.entity_type !== 'story' && e.entity_type !== 'issue') {
       continue
     }
     const rel = normalizeRelativePath(e.relative_path)
@@ -96,6 +97,13 @@ export async function writeWorkspaceIndexMarkdown(root: string): Promise<void> {
           : String(parsed.data.parent_hash),
       )
       projects.push({ id, hash: e.entity_hash, title, rel, parentHash: parent })
+    }
+    else if (e.entity_type === 'issue') {
+      // Задачи в INDEX.md не выводятся (слишком много шума), но id нужен
+      // для подписи под требованиями, привязанными к задаче (issue_hash).
+      if (id !== undefined) {
+        issueIdByHash.set(e.entity_hash, id)
+      }
     }
     else {
       const projectHash = parsed.data.project_hash === undefined || parsed.data.project_hash === null
@@ -158,8 +166,12 @@ export async function writeWorkspaceIndexMarkdown(root: string): Promise<void> {
   else {
     for (const s of stories) {
       const ownerLabel = s.projectHash ? projectIdByHash.get(s.projectHash) ?? '?' : '?'
+      const issueLabel = s.issueHash ? issueIdByHash.get(s.issueHash) : undefined
+      const owner = issueLabel
+        ? `задача ${issueLabel} в ${ownerLabel}`
+        : `проект/компонент ${ownerLabel}`
       out.push(
-        `- **${shortDisplayId(s.id)}** — ${s.title || '(без названия)'} (проект/компонент ${ownerLabel}) → \`${s.rel}\``,
+        `- **${shortDisplayId(s.id)}** — ${s.title || '(без названия)'} (${owner}) → \`${s.rel}\``,
       )
     }
   }
