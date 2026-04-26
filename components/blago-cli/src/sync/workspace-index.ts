@@ -1,5 +1,7 @@
-// INDEX.md в корне рабочей копии: для быстрого поиска проекта/компонента/требования/задачи
+// INDEX.md в корне рабочей копии: для быстрого поиска проекта/компонента/требования
 // по id или фрагменту названия (LLM-агентам не нужно ходить по дереву ls'ом).
+// Задачи (issues) сюда намеренно не попадают: их слишком много, ищут их с привязкой
+// к проекту/компоненту, а сам проект/компонент находится по этому индексу.
 // Обновляется автоматически на pull/push/create/del/restore/clean.
 
 import * as fs from 'node:fs/promises'
@@ -15,14 +17,6 @@ interface ProjectRow {
   readonly title: string
   readonly rel: string
   readonly parentHash?: string
-}
-
-interface IssueRow {
-  readonly id?: string
-  readonly hash: string
-  readonly title: string
-  readonly rel: string
-  readonly projectHash: string
 }
 
 interface StoryRow {
@@ -71,11 +65,10 @@ function sortByIdNumeric<T extends { id?: string, title: string }>(a: T, b: T): 
 export async function writeWorkspaceIndexMarkdown(root: string): Promise<void> {
   const index = await loadIndex(root)
   const projects: ProjectRow[] = []
-  const issues: IssueRow[] = []
   const stories: StoryRow[] = []
 
   for (const e of index.entries) {
-    if (e.entity_type !== 'project' && e.entity_type !== 'issue' && e.entity_type !== 'story') {
+    if (e.entity_type !== 'project' && e.entity_type !== 'story') {
       continue
     }
     const rel = normalizeRelativePath(e.relative_path)
@@ -104,10 +97,6 @@ export async function writeWorkspaceIndexMarkdown(root: string): Promise<void> {
       )
       projects.push({ id, hash: e.entity_hash, title, rel, parentHash: parent })
     }
-    else if (e.entity_type === 'issue') {
-      const projectHash = String(parsed.data.project_hash ?? '').trim()
-      issues.push({ id, hash: e.entity_hash, title, rel, projectHash })
-    }
     else {
       const projectHash = parsed.data.project_hash === undefined || parsed.data.project_hash === null
         ? undefined
@@ -120,7 +109,6 @@ export async function writeWorkspaceIndexMarkdown(root: string): Promise<void> {
   }
 
   projects.sort(sortByIdNumeric)
-  issues.sort(sortByIdNumeric)
   stories.sort(sortByIdNumeric)
 
   const projectIdByHash = new Map<string, string>()
@@ -172,20 +160,6 @@ export async function writeWorkspaceIndexMarkdown(root: string): Promise<void> {
       const ownerLabel = s.projectHash ? projectIdByHash.get(s.projectHash) ?? '?' : '?'
       out.push(
         `- **${shortDisplayId(s.id)}** — ${s.title || '(без названия)'} (проект/компонент ${ownerLabel}) → \`${s.rel}\``,
-      )
-    }
-  }
-  out.push('')
-
-  out.push('## Задачи')
-  if (issues.length === 0) {
-    out.push('_(пусто)_')
-  }
-  else {
-    for (const i of issues) {
-      const ownerLabel = i.projectHash ? projectIdByHash.get(i.projectHash) ?? '?' : '?'
-      out.push(
-        `- **${shortDisplayId(i.id)}** — ${i.title || '(без названия)'} (проект/компонент ${ownerLabel}) → \`${i.rel}\``,
       )
     }
   }
