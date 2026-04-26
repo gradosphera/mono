@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 // Orchestrator: pre-flight + автопочинка типовых грабель + прогон сценария.
 // Один вход для doc-shoot скилла: `node bin/shoot.mjs <scenario>` делает всё,
-// что иначе пришлось бы дёргать руками (build dist, restart desktop, create fixture).
+// что иначе пришлось бы дёргать руками.
+//
+// Опции:
+//   --reboot   полная перезагрузка стека (`pnpm run reboot:extra`) перед прогоном;
+//              сносит blockchain-data + volumes + удаляет фикстуры пайщиков
+//              (их WIF после новой цепочки невалидны). Использовать когда сценарий
+//              нужен «с нуля» или цепочка/БД разъехались с фикстурами.
 //
 // Что НЕ делает:
-//   - не поднимает chain/parser/controller (это докер-стек, его держит пользователь)
 //   - не пишет прозу в draft.md (это работа Claude по фактам со скриншотов)
 //   - не запускает install.mjs (запись в components/docs/, оставляем под ручной контроль)
 
@@ -16,9 +21,11 @@ import { fileURLToPath } from 'node:url';
 const HARNESS_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO_ROOT = path.resolve(HARNESS_ROOT, '..');
 
-const scenario = process.argv[2];
+const args = process.argv.slice(2);
+const wantReboot = args.includes('--reboot');
+const scenario = args.find((a) => !a.startsWith('--'));
 if (!scenario) {
-  console.error('Usage: node bin/shoot.mjs <scenario>   (например auth/signin)');
+  console.error('Usage: node bin/shoot.mjs <scenario> [--reboot]   (например auth/signin)');
   process.exit(2);
 }
 
@@ -75,19 +82,60 @@ const PORTS = {
   mongo: dotenv.MONGO_HOST_PORT || '27017',
 };
 
-// 1. Стек, который держит пользователь (без него бессмысленно)
-function checkStack() {
+// 0. Полный reboot по запросу: --reboot снесёт blockchain-data и пересоздаст volumes;
+//    фикстуры пайщиков с прошлыми WIF на новой цепочке невалидны — чистим state, потом
+//    ensureFixture() пересоздаст с новым keypair'ом.
+async function doReboot() {
+  log('Полная перезагрузка стека через `pnpm run reboot:extra` (~3-5 мин)...');
+  const r = spawnSync('pnpm', ['run', 'reboot:extra'], { cwd: REPO_ROOT, stdio: 'inherit' });
+  if (r.status !== 0) die('pnpm run reboot:extra упал');
+  log('Чищу старые фикстуры пайщиков (WIF невалиден после новой цепочки)...');
+  const stateDir = path.join(HARNESS_ROOT, 'state/participants');
+  if (fs.existsSync(stateDir)) {
+    for (const f of fs.readdirSync(stateDir)) {
+      if (f.endsWith('.json')) fs.rmSync(path.join(stateDir, f));
+    }
+  }
+  ok('reboot завершён');
+}
+
+// 1. Стек: лежащие сервисы поднимаем через docker compose up -d (не деструктивно).
+//    Если после старта всё равно не поднялось — die с пояснением.
+async function bringUp(service) {
+  log(`Поднимаю ${service} через docker compose up -d...`);
+  const r = spawnSync('docker', ['compose', 'up', '-d', service], { cwd: REPO_ROOT, stdio: 'inherit' });
+  if (r.status !== 0) die(`docker compose up -d ${service} упал`);
+}
+
+async function ensureService(name, healthCheck, service, timeoutSec = 60) {
+  if (healthCheck()) return;
+  await bringUp(service);
+  for (let i = 0; i < timeoutSec / 2; i++) {
+    await sleep(2000);
+    if (healthCheck()) { ok(`${name} поднят`); return; }
+  }
+  die(`${name} не отвечает за ${timeoutSec}с после docker compose up -d ${service}`);
+}
+
+async function checkStack() {
   log('Проверяю стек (chain/controller/parser)...');
-  if (!curlOk(`http://127.0.0.1:${PORTS.chain}/v1/chain/get_info`)) {
-    die(`chain :${PORTS.chain} не отвечает — подними docker compose up -d node`);
-  }
-  if (!curlOk(`http://127.0.0.1:${PORTS.controller}/v1/graphql`, 'POST', '{"query":"{__typename}"}')) {
-    die(`controller :${PORTS.controller}/v1/graphql не отвечает — docker compose up -d coopback`);
-  }
-  const parser = spawnSync('docker', ['compose', 'ps', 'cooparser', '--format', 'json'], { cwd: REPO_ROOT, encoding: 'utf8' });
-  if (parser.status !== 0 || !/"State":"running"/.test(parser.stdout)) {
-    die('parser (cooparser) не запущен — docker compose up -d cooparser');
-  }
+  await ensureService(
+    `chain :${PORTS.chain}`,
+    () => curlOk(`http://127.0.0.1:${PORTS.chain}/v1/chain/get_info`),
+    'node',
+    120,
+  );
+  await ensureService(
+    `controller :${PORTS.controller}`,
+    () => curlOk(`http://127.0.0.1:${PORTS.controller}/v1/graphql`, 'POST', '{"query":"{__typename}"}'),
+    'coopback',
+    90,
+  );
+  const parserUp = () => {
+    const r = spawnSync('docker', ['compose', 'ps', 'cooparser', '--format', 'json'], { cwd: REPO_ROOT, encoding: 'utf8' });
+    return r.status === 0 && /"State":"running"/.test(r.stdout);
+  };
+  await ensureService('parser', parserUp, 'cooparser', 60);
   ok('chain, controller, parser живы');
 }
 
@@ -201,7 +249,8 @@ function ensureDraft() {
 }
 
 (async () => {
-  checkStack();
+  if (wantReboot) await doReboot();
+  await checkStack();
   const distRebuilt = ensureDist();
   await ensureDesktop(distRebuilt);
   ensureFixture();
