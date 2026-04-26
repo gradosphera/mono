@@ -1,0 +1,341 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Стандарт «Приём РИД в паевой фонд» — оформление результата интеллектуальной
+# деятельности участника проекта программы «Благорост» как имущественного
+# паевого взноса.
+#
+# Многоэтапный процесс. Три ledger2-операции:
+#   • o.cap.commit — коммит РИД при одобрении (Дт 8 / Кт 80, кошелёк 10001)
+#   • o.cap.accept — приём РИД в паевой фонд по акту-2 (TRANSFER 10001 → 9002, Дт 4 / Кт 8)
+#   • o.cap.repay  — опционально, если у участника есть заём (см. p.cap.debt)
+#
+# Источники правды в коде:
+#   • cpp/capital/capital.hpp                                            — actions
+#   • cpp/capital/src/commit/{createcmmt,approvecmmt,declinecmmt}.cpp     — коммит РИД
+#   • cpp/capital/src/result/{pushrslt,signact1,signact2}.cpp             — акты сдачи
+#   • cpp/lib/core/ledger2/operations.hpp                                 — o.cap.commit/accept/repay
+#   • cpp/lib/core/ledger2/processes.hpp                                  — processes::capital::RID
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Секция 1. Паспорт ───────────────────────────────────────────────────────
+process_type: p.cap.rid
+id: public_capital_rid_process
+title: Приём РИД в паевой фонд
+slug: rid
+status: proposed
+contract: capital
+summary: >
+  Участник программы «Благорост» оформляет результат интеллектуальной
+  деятельности (РИД) как имущественный паевой взнос: подаёт коммит,
+  получает одобрение мастера проекта, сдаёт работу актами, после чего
+  РИД зачисляется в паевой фонд кооператива.
+purpose: >
+  Многоступенчатый процесс с двумя последовательными ledger2-операциями.
+  Сначала участник коммитит РИД в проекте (createcmmt), мастер проекта
+  одобряет коммит (approvecmmt) — в этот момент применяется o.cap.commit
+  (Дт 8 / Кт 80, кошелёк «Генератор — принятый коммит»). Затем РИД
+  передаётся актами: участник подписывает акт-1, председатель — акт-2;
+  на акте-2 применяется o.cap.accept (TRANSFER 10001 → 9002, Дт 4 / Кт 8) —
+  РИД переходит в паевой фонд «Благорост — принятые РИД». Если у участника
+  был заём проекта (см. p.cap.debt), на акте-2 дополнительно срабатывает
+  o.cap.repay (зачёт займа в паевой фонд).
+roles:
+  - contributor
+  - master
+  - chairman
+  - soviet
+
+# ── Секция 2. Действия контракта ────────────────────────────────────────────
+actions:
+  - name: capital::createcmmt
+    human: Создать коммит РИД
+    actor: contributor
+    role: opener
+    purpose: >
+      Участник проекта подаёт коммит результата интеллектуальной деятельности.
+      Контракт создаёт запись коммита, рассчитывает delta-распределение
+      по формуле проекта.
+  - name: capital::approvecmmt
+    human: Одобрить коммит
+    actor: master
+    role: progress
+    purpose: >
+      Мастер проекта одобряет коммит. На этом этапе применяется ledger2-
+      операция o.cap.commit — РИД зачисляется на «Генератор — принятый
+      коммит» (10001) с проводкой Дт 8 / Кт 80.
+  - name: capital::declinecmmt
+    human: Отклонить коммит
+    actor: master
+    role: reject
+    purpose: >
+      Мастер отказывает в одобрении коммита. Запись удаляется, операция
+      o.cap.commit не создаётся.
+  - name: capital::pushrslt
+    human: Сдать результат
+    actor: contributor
+    role: progress
+    purpose: >
+      Участник передаёт результат на сдачу — оформляются акты сдачи РИД.
+  - name: capital::signact1
+    human: Подписать акт-1
+    actor: contributor
+    role: progress
+    purpose: >
+      Участник подписывает акт-1 — подтверждение передачи РИД от исполнителя.
+  - name: capital::signact2
+    human: Принять РИД в паевой фонд
+    actor: chairman
+    role: closer
+    purpose: >
+      Председатель подписывает акт-2 — закрывающее действие. Применяются
+      ledger2-операция o.cap.accept (перевод РИД из «Генератор» в
+      «Благорост — принятые РИД» с проводкой Дт 4 / Кт 8) и опционально
+      o.cap.repay (если у участника был заём проекта — закрытие займа).
+
+# ── Секция 3. Граф состояний ────────────────────────────────────────────────
+entity: "capital::commit → capital::result"
+entity_human: "Коммит РИД → принятый РИД"
+entity_source: cpp/capital/src/{commit,result}/
+
+states:
+  - name: created
+    human: Коммит подан
+    description: >
+      Участник зафиксировал коммит РИД в проекте, рассчитаны delta-распределения
+      по формуле. Ожидается одобрение мастера.
+    kind: normal
+  - name: approved
+    human: Коммит одобрен
+    description: >
+      Мастер одобрил коммит. РИД зачислен на кошелёк «Генератор — принятый
+      коммит» (10001) с проводкой Дт 8 / Кт 80. Ожидается сдача актами.
+    kind: normal
+  - name: pushed
+    human: Результат сдан
+    description: >
+      Участник передал результат проекту, оформлены акты сдачи. Ожидаются
+      подписи на актах 1 и 2.
+    kind: normal
+  - name: act1_signed
+    human: Акт-1 подписан
+    description: >
+      Участник подписал акт-1 (передача РИД от исполнителя). Ожидается
+      акт-2 от председателя.
+    kind: normal
+  - name: accepted
+    human: РИД принят в паевой фонд
+    description: >
+      Председатель подписал акт-2: РИД переведён с «Генератора» (10001)
+      на «Благорост — принятые РИД» (9002), Дт 4 / Кт 8. Если у участника
+      был заём проекта — он закрылся (o.cap.repay). РИД считается
+      имущественным паевым взносом.
+    kind: final
+  - name: removed
+    human: Отклонено
+    description: >
+      Коммит отклонён мастером, операции в ledger2 не создавались.
+    kind: virtual
+    virtual: true
+
+transitions:
+  - from: "∅"
+    to: created
+    action: capital::createcmmt
+    actor: contributor
+    guards:
+      - Проект и пайщик активны.
+      - commit_hash уникален, creator_hours > 0.
+      - Подписано приложение к проекту.
+
+  - from: created
+    to: approved
+    action: capital::approvecmmt
+    actor: master
+    ledger_code: o.cap.commit
+    operations:
+      - o.cap.commit
+    guards:
+      - Документ одобрения мастера подписан.
+
+  - from: approved
+    to: pushed
+    action: capital::pushrslt
+    actor: contributor
+    guards:
+      - Коммит одобрен.
+
+  - from: pushed
+    to: act1_signed
+    action: capital::signact1
+    actor: contributor
+    guards:
+      - Акт-1 подписан исполнителем.
+
+  - from: act1_signed
+    to: accepted
+    action: capital::signact2
+    actor: chairman
+    ledger_code: o.cap.accept
+    operations:
+      - o.cap.accept
+      - o.cap.repay
+    guards:
+      - Акт-2 подписан председателем.
+
+  - from: created
+    to: removed
+    action: capital::declinecmmt
+    actor: master
+    guards:
+      - Мастер отказал в одобрении коммита.
+
+# ── Секция 4. Сценарий ──────────────────────────────────────────────────────
+scenario:
+  steps:
+    - step: 1
+      title: Создание коммита РИД
+      actor: contributor
+      action: capital::createcmmt
+      description: >
+        Участник проекта оформляет коммит результата интеллектуальной
+        деятельности: контракт создаёт запись со статусом `created`,
+        рассчитывает delta-распределение по формуле проекта.
+
+    - step: 2
+      title: Одобрение коммита мастером
+      actor: master
+      action: capital::approvecmmt
+      description: >
+        Мастер проекта одобряет коммит. Применяется ledger2-операция
+        o.cap.commit — РИД зачисляется на «Генератор — принятый коммит»
+        (10001) с проводкой Дт 8 / Кт 80.
+
+    - step: 3
+      title: Сдача результата
+      actor: contributor
+      action: capital::pushrslt
+      description: >
+        Участник передаёт результат проекту, формируются акты сдачи.
+
+    - step: 4
+      title: Подписание акта-1
+      actor: contributor
+      action: capital::signact1
+      description: >
+        Участник подписывает акт-1 — подтверждение передачи РИД исполнителем.
+
+    - step: 5
+      title: Приём РИД в паевой фонд (акт-2)
+      actor: chairman
+      action: capital::signact2
+      description: >
+        Председатель подписывает акт-2 — закрывающее действие. Применяются
+        две ledger2-операции:
+        (1) o.cap.accept — РИД переходит с «Генератор — принятый коммит»
+            (10001) на «Благорост — принятые РИД» (9002), Дт 4 / Кт 8;
+        (2) опционально o.cap.repay — если у участника был заём проекта,
+            заём закрывается (4051 → 2001, Дт 80 / Кт 58).
+
+  alternatives:
+    - branch: Отказ мастера
+      at_step: 2
+      action: capital::declinecmmt
+      actor: master
+      description: >
+        Мастер не одобрил коммит. Запись удаляется, операции в ledger2
+        не создавались.
+
+# ── Секция 5. Документы и подписи ───────────────────────────────────────────
+documents:
+  - step: 1
+    title: Заявление-коммит участника
+    template: rid-commit-statement
+    registry_id: 0
+    signed_by: [contributor]
+    stored_in: commits.statement
+    note: "TODO: уточнить registry_id коммита РИД"
+
+  - step: 4
+    title: Акт-1 о передаче РИД
+    template: rid-act-1
+    registry_id: 0
+    signed_by: [contributor]
+    stored_in: results.act1
+    note: "TODO: уточнить registry_id акта-1"
+
+  - step: 5
+    title: Акт-2 о приёме РИД в паевой фонд
+    template: rid-act-2
+    registry_id: 0
+    signed_by: [chairman]
+    stored_in: results.act2
+    note: "TODO: уточнить registry_id акта-2"
+
+# ── Секция 6. Операции ──────────────────────────────────────────────────────
+operations:
+  - ledger_code: o.cap.commit
+    human_name: Коммит РИД по программе «Благорост»
+    wallet_op: ISSUE
+    wallet_from: null
+    wallet_to: 10001           # ЦПП «Генератор» — принятый коммит (имущество)
+    debit: 8                   # Вложения во внеоборотные активы
+    credit: 80                 # Паевой фонд (складочный капитал)
+    amount_ref: commit.delta_amount
+    triggered_by: capital::approvecmmt
+    description: >
+      Зачисление РИД-коммита на кошелёк «Генератор — принятый коммит» (10001)
+      при одобрении мастером. Двойная запись Дт 8 / Кт 80 — РИД учитывается
+      как вложение во внеоборотные активы и формирует паевой фонд.
+
+  - ledger_code: o.cap.accept
+    human_name: Приём РИД в паевой фонд
+    wallet_op: TRANSFER
+    wallet_from: 10001         # ЦПП «Генератор» — принятый коммит
+    wallet_to: 9002            # ЦПП «Благорост» — принятые РИД
+    debit: 4                   # Нематериальные активы
+    credit: 8                  # Вложения во внеоборотные активы
+    amount_ref: result.amount
+    triggered_by: capital::signact2
+    description: >
+      Перевод одобренного коммита РИД из «Генератора» в «Благорост — принятые
+      РИД». Бухгалтерия закрывает Кт 8 (вложения) и записывает Дт 4
+      (нематериальные активы) — РИД зачислен в паевой фонд кооператива.
+
+  - ledger_code: o.cap.repay
+    human_name: Возврат беспроцентного займа пайщика по акту-2
+    wallet_op: TRANSFER
+    wallet_from: 4051          # Выданные пайщикам беспроцентные займы
+    wallet_to: 2001            # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
+    debit: 80                  # Паевой фонд (складочный капитал)
+    credit: 58                 # Финансовые вложения
+    amount_ref: debt.amount
+    triggered_by: capital::signact2
+    description: >
+      Опциональная операция при наличии у участника беспроцентного займа
+      проекта (см. p.cap.debt). На акте-2 закрытый РИД зачитывает заём:
+      финансовое вложение списывается (Кт 58), паевой фонд закрывает
+      обязательство (Дт 80) и сумма становится доступной на SHARE_FUND_PAY
+      пайщика.
+
+# ── Секция 7. Связи ─────────────────────────────────────────────────────────
+related:
+  - process_type: p.cap.invest
+    id: public_capital_invest_process
+    relation: provides
+    note: >
+      Чтобы коммитить РИД в проект, участник должен быть инвестором
+      «Благорост» — это устанавливает p.cap.invest.
+
+  - process_type: p.cap.debt
+    id: public_capital_debt_process
+    relation: triggers
+    note: >
+      Если у участника был беспроцентный заём проекта, на акте-2
+      срабатывает дополнительная операция o.cap.repay — заём закрывается
+      из паевого фонда.
+
+  - process_type: p.cap.prop
+    id: public_capital_property_process
+    relation: affects
+    note: >
+      Альтернативный имущественный путь — приём имущественного паевого
+      взноса (p.cap.prop), отдельный от РИД.
