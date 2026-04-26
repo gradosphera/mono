@@ -69,7 +69,7 @@ async function pickStoryFileRelativePath(
   const slug = generateSlug(title) || 'requirement'
   const id2 = storyRequirementIdPrefix2(storyRecordId, storyHash)
   const dir = issueArg?.titleSlug
-    ? `${basePath.replace(/\\/g, '/')}/requirements/${capitalIdPathPrefix(issueArg.id)}-${issueArg.titleSlug}`
+    ? `${basePath.replace(/\\/g, '/')}/issue-requirements/${capitalIdPathPrefix(issueArg.id)}-${issueArg.titleSlug}`
     : `${basePath.replace(/\\/g, '/')}/requirements`
   const alt = `${dir}/${id2}-${slug}-${storyHash.slice(0, 6)}.md`
   const absAlt = path.join(root, alt)
