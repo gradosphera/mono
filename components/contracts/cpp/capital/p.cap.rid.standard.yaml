@@ -19,7 +19,7 @@
 # ── Секция 1. Паспорт ───────────────────────────────────────────────────────
 process_type: p.cap.rid
 id: public_capital_rid_process
-title: Приём РИД в паевой фонд
+title: Приём результатов интеллектуальной деятельности
 slug: rid
 status: proposed
 contract: capital

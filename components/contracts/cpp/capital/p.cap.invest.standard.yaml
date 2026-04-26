@@ -17,7 +17,7 @@
 # ── Секция 1. Паспорт ───────────────────────────────────────────────────────
 process_type: p.cap.invest
 id: public_capital_invest_process
-title: Инвестиция в ЦПП «Благорост»
+title: Инвестиция в программу
 slug: invest
 status: proposed
 contract: capital

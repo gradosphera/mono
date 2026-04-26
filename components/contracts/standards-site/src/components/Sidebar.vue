@@ -39,7 +39,6 @@ const activeProcessType = computed(() => {
               :class="{ 'sidebar-item--active': activeProcessType === entry.process_type }"
             >
               {{ entry.title }}
-              <span class="sidebar-item__code">{{ entry.process_type }}</span>
             </RouterLink>
           </li>
         </ul>
@@ -62,8 +61,10 @@ const activeProcessType = computed(() => {
 .sidebar-body {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
 }
 .sidebar-foot {
+  flex: 0 0 auto;
   padding: 16px 24px 0;
   border-top: 1px solid var(--border);
   margin-top: 16px;

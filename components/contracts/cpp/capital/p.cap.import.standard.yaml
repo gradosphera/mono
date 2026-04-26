@@ -17,7 +17,7 @@
 # ── Секция 1. Паспорт ───────────────────────────────────────────────────────
 process_type: p.cap.import
 id: public_capital_import_process
-title: Импорт пайщика Благорост (offline)
+title: Импорт пайщика
 slug: import
 status: proposed
 contract: capital
