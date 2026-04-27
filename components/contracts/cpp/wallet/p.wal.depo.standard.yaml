@@ -137,7 +137,7 @@ scenario:
       action: wallet::completedpst
       description: >
         После получения денежных средств на расчётный счёт кооператива
-        оператор Gateway вызывает completedpst. Контракт делает три вещи:
+        кассир вызывает completedpst. Контракт делает три вещи:
         (1) зачисляет средства на кошелёк SHARE_FUND_PAY пайщика
         (add_available_funds); (2) применяет ledger2-операцию o.wal.depcpl
         с двойной проводкой Дт 51 / Кт 80; (3) удаляет запись заявки из

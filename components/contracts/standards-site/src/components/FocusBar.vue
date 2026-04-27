@@ -34,7 +34,7 @@ const ROLE_HUMAN: Record<string, string> = {
   soviet: 'Совет',
   soviet_members: 'Члены совета',
   meet: 'Общее собрание',
-  gateway_operator: 'Оператор платежей',
+  gateway_operator: 'Кассир',
   administrator: 'Администратор',
   chairman_or_soviet: 'Председатель / Совет',
 };
@@ -597,6 +597,7 @@ function walletDisplayId(name: string | null | undefined): string {
 }
 .focus-bar__desc {
   margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-muted);
+  white-space: pre-line;
 }
 .focus-bar__inline-code {
   font-family: var(--font-mono); font-size: 11px;
