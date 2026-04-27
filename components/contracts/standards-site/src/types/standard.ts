@@ -34,10 +34,11 @@ export type Role =
   | (string & {});
 
 // ── Элементарные ссылки в ledger2 ───────────────────────────────────────────
-// В YAML — только числовые коды. Имена подтягиваются из
-// `data/registries.ts` (зеркало source-of-truth из mono-ai-1).
+// Счета — числовые коды (51, 80, 86); кошельки — eosio::name-строки
+// (w.wal.share, w.cap.bgrid). Имена подтягиваются из
+// `data/registries.ts` (зеркало source-of-truth из cooptypes/ledger2).
 export type AccountCode = number;      // код счёта (51, 80, 86, …)
-export type WalletId = number;         // id кошелька (2001, 3001, …)
+export type WalletId = string;         // имя кошелька (w.wal.share, w.cap.bgrid, …)
 
 // ── Секции стандарта ────────────────────────────────────────────────────────
 

@@ -159,8 +159,8 @@ operations:
   - ledger_code: o.sov.axncnv
     human_name: Конвертация паевого взноса в членский взнос
     wallet_op: TRANSFER
-    wallet_from: 2001         # SHARE_FUND_PAY (паевой фонд)
-    wallet_to: 3003           # DELEGATE_FEES (делегатские/членские взносы)
+    wallet_from: w.wal.share  # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
+    wallet_to: w.sov.delgte    # Делегатские членские взносы
     debit: 80                 # Паевой фонд
     credit: 86                # Целевое финансирование
     amount_ref: amount

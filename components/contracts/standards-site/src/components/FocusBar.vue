@@ -207,19 +207,19 @@ function accountTitle(code: number | null | undefined): string {
   return `${code} · ${meta.name} · ${kind}`;
 }
 
-function walletTitle(id: number | null | undefined, op: Ledger2Operation['wallet_op']): string {
-  if (id == null) {
-    // null допустим только для ISSUE (из ниоткуда) или CONSUME (в никуда)
+function walletTitle(name: string | null | undefined, op: Ledger2Operation['wallet_op']): string {
+  if (name == null || name === '') {
+    // пусто допустимо только для ISSUE (из ниоткуда) или CONSUME (в никуда)
     if (op === 'ISSUE') return 'Выпуск средств извне системы';
     return 'Кошелёк не задан';
   }
-  const meta = getWallet(id);
-  if (!meta) return `${id} (нет в реестре)`;
-  return `${id} · ${meta.name}`;
+  const meta = getWallet(name);
+  if (!meta) return `${name} (нет в реестре)`;
+  return `${name} · ${meta.human_name}`;
 }
 
-function walletDisplayId(id: number | null): string {
-  return id == null ? '∅' : String(id);
+function walletDisplayId(name: string | null | undefined): string {
+  return name == null || name === '' ? '∅' : name;
 }
 
 </script>
@@ -362,7 +362,7 @@ function walletDisplayId(id: number | null): string {
             </div>
 
             <div
-              v-if="op.wallet_op !== 'WALLET_ONLY' && (op.wallet_from != null || op.wallet_to != null)"
+              v-if="op.wallet_op !== 'WALLET_ONLY' && (!!op.wallet_from || !!op.wallet_to)"
               class="focus-bar__op-sub"
             >
               <div class="focus-bar__op-sub-label">Переводы</div>
@@ -429,7 +429,7 @@ function walletDisplayId(id: number | null): string {
 
         <div
           v-if="focusedOperation.wallet_op !== 'WALLET_ONLY'
-                && (focusedOperation.wallet_from != null || focusedOperation.wallet_to != null)"
+                && (!!focusedOperation.wallet_from || !!focusedOperation.wallet_to)"
           class="focus-bar__op-sub"
         >
           <div class="focus-bar__op-sub-label">Переводы</div>
