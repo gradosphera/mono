@@ -39,7 +39,8 @@ function lifecycleHuman(s: string): string {
  * в индексе — если да, делаем кликабельный RouterLink, иначе просто метку.
  */
 interface RelatedView {
-  label: string;
+  title: string;
+  code: string;
   relation: string;
   note: string;
   target: { contract: string; processType: string } | null;
@@ -51,7 +52,8 @@ const relatedLinks = computed<RelatedView[]>(() => {
     const pt = r.process_type;
     const known = pt ? standardsIndex.byProcessType[pt] : undefined;
     return {
-      label: pt ?? r.id ?? '—',
+      title: known?.title ?? pt ?? r.id ?? '—',
+      code: pt ?? r.id ?? '',
       relation: r.relation,
       note: r.note,
       target: known ? { contract: known.contract, processType: known.process_type } : null,
@@ -158,9 +160,13 @@ const focusStatus = computed<string | null>(() => {
             class="related__peer related__peer--link"
             :to="{ name: 'process', params: { contract: r.target.contract, processType: r.target.processType } }"
           >
-            <code>{{ r.label }}</code>
+            <span class="related__peer-title">{{ r.title }}</span>
+            <code v-if="r.code" class="related__peer-code">{{ r.code }}</code>
           </RouterLink>
-          <span v-else class="related__peer related__peer--plain"><code>{{ r.label }}</code></span>
+          <span v-else class="related__peer related__peer--plain">
+            <span class="related__peer-title">{{ r.title }}</span>
+            <code v-if="r.code" class="related__peer-code">{{ r.code }}</code>
+          </span>
           <p class="related__note">{{ r.note }}</p>
         </li>
       </ul>
@@ -312,28 +318,35 @@ const focusStatus = computed<string | null>(() => {
 }
 .related__peer {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
+  gap: 6px;
+  text-decoration: none;
 }
-.related__peer code {
+.related__peer-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.related__peer-code {
   font-family: var(--font-mono);
-  font-size: 12px;
-  padding: 1px 8px;
-  border-radius: 4px;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
   background: var(--surface);
   border: 1px solid var(--border);
+  color: var(--text-subtle);
+  font-weight: 500;
 }
-.related__peer--link code {
-  background: var(--accent-soft);
-  border-color: var(--accent-border);
+.related__peer--link .related__peer-title {
   color: var(--accent);
   transition: filter 80ms ease;
 }
-.related__peer--link:hover code {
-  filter: brightness(1.05);
+.related__peer--link:hover .related__peer-title {
+  filter: brightness(1.1);
+  text-decoration: underline;
 }
-.related__peer--plain code {
+.related__peer--plain .related__peer-title {
   color: var(--text-muted);
-  font-style: italic;
 }
 .related__note {
   margin: 0;
