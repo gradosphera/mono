@@ -9,6 +9,7 @@ export const CONTRACT_HUMAN: Record<string, string> = {
   capital: '«Благорост»',
   marketplace: '«Стол заказов»',
   soviet: 'Совет',
+  meet: 'Общие собрания',
   ledger2: 'Учёт операций',
 };
 

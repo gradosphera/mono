@@ -223,19 +223,17 @@ scenario:
 
 # ── Секция 5. Документы и подписи ───────────────────────────────────────────
 documents:
-  - step: 1
-    title: Заявление на вступление (договор УХД)
-    template: statement-reg
-    signed_by: [contributor]
+  - action: registrator::reguser
+    title: Заявление на вступление в кооператив
+    registry_id: 100
+    signed_by: [ Кандидат ]
     stored_in: candidates.statement
-    note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
 
-  - step: 3
-    title: Протокол решения совета о приёме пайщика
-    template: soviet-decision-reg
-    signed_by: [soviet_members]
+  - action: registrator::confirmreg
+    title: Решение совета о приёме пайщика в кооператив
+    registry_id: 501
+    signed_by: [ Совет ]
     stored_in: "(authorization — в параметре действия, не хранится в candidates после удаления записи)"
-    note: "TODO: сверить идентификатор шаблона с fabric/registry.md"
 
 # ── Секция 6. Операции ──────────────────────────────────────────────────────
 # Процесс мульти-операционный: две записи OPERATION_REGISTRY с process_type = p.reg.accept.

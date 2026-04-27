@@ -102,13 +102,11 @@ scenario:
 
 # ── Секция 5. Документы и подписи ───────────────────────────────────────────
 documents:
-  - step: 1
-    title: Заявление пайщика об инвестировании в «Благорост»
-    template: invest-statement
-    registry_id: 0
-    signed_by: [contributor]
+  - action: capital::createpinv
+    title: Заявление об инвестировании денежных средств в Благорост
+    registry_id: 1030
+    signed_by: [ Участник ]
     stored_in: invests.statement
-    note: "TODO: уточнить registry_id заявления об инвестировании"
 
 # ── Секция 6. Операции ──────────────────────────────────────────────────────
 operations:
