@@ -31,22 +31,29 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
     if (currentBlock === 0) {
       currentBlock = Number(info.head_block_num)
 
-      // Выполняем инициализацию только при первом запуске с head блока
-      // Загружаем текущее состояние кооператива и шаблонов из блокчейна
+      // Сначала чистим, потом наполняем — иначе purgeAfterBlock стирает
+      // дельты Initializer'а (он пишет с block_num = head, а это > currentBlock
+      // если head успел шагнуть между двумя getInfo()). Без этого Mongo
+      // остаётся пустой по cooperative/boards и factory.Cooperative.getOne
+      // падает «Совет кооператива не обнаружен».
+      console.log('Очищаем действия и дельты после блока (pre-init): ', currentBlock)
+      await db.purgeAfterBlock(currentBlock)
+
+      // Выполняем инициализацию только при первом запуске с head блока.
+      // Загружаем текущее состояние кооператива и шаблонов из блокчейна.
       await initializeFromBlockchain(db)
     }
     // Если currentBlock !== 0, продолжаем парсинг с сохраненного блока из базы данных
   }
   else {
     currentBlock = Number(startBlock)// при не 1 стартуем с startBlock
+    console.log('Очищаем действия и дельты после блока: ', currentBlock)
+    await db.purgeAfterBlock(currentBlock)
   }
 
   console.log('Стартуем с блока: ', currentBlock)
   console.log('Завершим на блоке: ', finishBlock)
   console.log('Высота цепочки: ', info.head_block_num)
-  console.log('Очищаем действия и дельты после блока: ', currentBlock)
-
-  await db.purgeAfterBlock(currentBlock)
 
   const unique_contract_names = [...new Set([...subscribedContracts, ...actions_whitelist().map(row => row.code)])]
   const abisArr = await Promise.all(unique_contract_names.map(account_name => fetchAbi(account_name)))

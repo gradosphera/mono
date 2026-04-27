@@ -160,7 +160,7 @@ async function processLastDecision(blockchain: Blockchain) {
     data: {
       ...fakeVote,
       coopname: COOPNAME,
-      member: voter,
+      username: voter,
       decision_id: String(last.id),
     } as unknown as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
   }))
