@@ -62,6 +62,84 @@ export async function loginAsChairman(page, context) {
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 }
 
+// Логин обычного пайщика по фикстуре (state/participants/<username>.json).
+// fixture: { username, email, wif, ... }
+export async function loginAs(page, fixture) {
+  await page.goto(`${env.BASE_URL}/${env.COOPNAME}/auth/signin`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForSelector('button:has-text("Войти")', { timeout: 60000 });
+  await page.locator('label:has-text("электронную почту")').locator('input').fill(fixture.email);
+  await page.locator('label:has-text("ключ доступа")').locator('input').fill(fixture.wif);
+  await page.locator('button:has-text("Войти")').click();
+  await page.waitForURL(/\/(chairman|participant|soviet|user)/, { timeout: 30000 });
+  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+}
+
+// Закрывает каскад модалок-документов первого входа (Положение о ЦПП Кошелёк,
+// ЭП, политика, пользовательское соглашение, и при наличии — Capital-документы).
+// Кликает «Подписать» нативно через DOM, потому что Playwright actionability-check
+// спотыкается о pointer-events на тексте.
+//
+// Главная сложность: между документами появляется промежуточный диалог
+// «Формируем документ...» со спиннером — кнопки в нём ещё нет. Ждём пока
+// «Подписать» появится, потом клик.
+export async function dismissOnboardingDialogs(page) {
+  // Стартовое окно — даём шанс модалкам появиться. Если их нет за 12 сек —
+  // значит онбординг уже пройден или политика обходит этого пользователя.
+  const firstAppeared = await page
+    .locator('[id^="q-portal--dialog--"]').first()
+    .waitFor({ state: 'visible', timeout: 12000 })
+    .then(() => true).catch(() => false);
+  if (!firstAppeared) return;
+
+  // Цикл идёт пока в DOM есть видимый q-portal--dialog. На каждой итерации:
+  //   1. Ждём появления кнопки «Подписать» в самом верхнем диалоге (до 30 сек).
+  //   2. Кликаем нативно через DOM.
+  //   3. Ждём 3.5 сек на blockchain confirm + переход к следующему документу.
+  for (let i = 0; i < 20; i++) {
+    const hasDialog = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[id^="q-portal--dialog--"]'))
+        .some((p) => getComputedStyle(p).display !== 'none'),
+    );
+    if (!hasDialog) break;
+
+    // Ждём пока в верхнем диалоге появится активная кнопка «Подписать».
+    const btnReady = await page.waitForFunction(
+      () => {
+        const portals = Array.from(document.querySelectorAll('[id^="q-portal--dialog--"]'))
+          .filter((p) => getComputedStyle(p).display !== 'none');
+        if (portals.length === 0) return true; // диалогов нет — выходим
+        const top = portals[portals.length - 1];
+        return !!Array.from(top.querySelectorAll('button'))
+          .find((b) => b.textContent?.trim() === 'Подписать' && !b.disabled);
+      },
+      { timeout: 60000 },
+    ).then(() => true).catch(() => false);
+    if (!btnReady) break;
+
+    const clicked = await page.evaluate(() => {
+      const portals = Array.from(document.querySelectorAll('[id^="q-portal--dialog--"]'))
+        .filter((p) => getComputedStyle(p).display !== 'none');
+      if (portals.length === 0) return false;
+      const top = portals[portals.length - 1];
+      const btn = Array.from(top.querySelectorAll('button'))
+        .find((b) => b.textContent?.trim() === 'Подписать' && !b.disabled);
+      if (!btn) return false;
+      btn.scrollIntoView({ block: 'center', behavior: 'instant' });
+      btn.click();
+      return true;
+    });
+    if (!clicked) break;
+    await page.waitForTimeout(3500);
+  }
+
+  // Финальная страховка: ждём чтобы все портал-диалоги ушли с экрана.
+  await page.waitForFunction(
+    () => !Array.from(document.querySelectorAll('[id^="q-portal--dialog--"]'))
+      .some((p) => getComputedStyle(p).display !== 'none'),
+    { timeout: 30000 },
+  ).catch(() => {});
+}
+
 // Создаёт shot-функцию + manifest для сценария.
 export function makeShotContext({ scenarioName, outDir }) {
   const shots = [];

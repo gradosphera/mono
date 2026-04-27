@@ -5,7 +5,7 @@
 // `ant` через phase-04.
 //
 // prepare:
-//   capital:01-programs        — программы УХД и Капитализация
+//   capital:01-programs        — программы УХД и Благорост
 //   capital:02-extension-config — postgres-конфиг capital extension
 //   capital:04-contributor     — регистрирует ant как Contributor (если ещё нет)
 

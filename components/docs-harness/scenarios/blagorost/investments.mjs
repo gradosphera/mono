@@ -4,7 +4,7 @@
 //   - capital::openproject — компонент готов принимать инвестиции
 //   - wallet::createdeposit + gateway::completeincome — пополняет кошельки petrov + ekaterina
 //   - capital::createinvest — petrov вносит 500 000 ₽ в компонент «MVP v1»
-//   - capital::createpinv  — ekaterina вносит 200 000 ₽ в программу «Капитализация»
+//   - capital::createpinv  — ekaterina вносит 200 000 ₽ в программу «Благорост»
 //
 // Сценарий снимает три состояния:
 //   01 — компонент с включённым переключателем «Принимает инвестиции»
@@ -145,7 +145,7 @@ export default async ({ page, context, shot, env }) => {
   const profileShot = await shot(
     page,
     '03-profile-koshelek-invest-button',
-    'Страница профиля пайщика: кнопка «Инвестировать» на Кошельке Благороста — этот путь направляет паевой взнос в программу «Капитализация», совет распределяет его между компонентами.',
+    'Страница профиля пайщика: кнопка «Инвестировать» на Кошельке Благороста — этот путь направляет паевой взнос в программу «Благорост», совет распределяет его между компонентами.',
   );
   await highlightBox(profileShot, investBtnBox, { padding: 6 });
 };
