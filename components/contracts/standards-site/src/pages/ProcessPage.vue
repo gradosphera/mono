@@ -142,7 +142,6 @@ const focusStatus = computed<string | null>(() => {
     </header>
 
     <section v-if="standard.purpose" class="process-intro">
-      <h3 class="process-intro__heading">Контракт, процесс, сущность, статус, стандарт</h3>
       <p class="process-intro__prose">{{ standard.purpose }}</p>
     </section>
 
@@ -204,14 +203,6 @@ const focusStatus = computed<string | null>(() => {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-}
-.process-intro__heading {
-  margin: 0 0 8px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-subtle);
 }
 .process-intro__prose {
   margin: 0;
