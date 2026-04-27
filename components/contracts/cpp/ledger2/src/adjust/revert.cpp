@@ -29,8 +29,8 @@ void ledger2::revert(eosio::name coopname,
                      eosio::name username,
                      eosio::asset amount,
                      uint8_t mirror_wallet_op,
-                     uint64_t mirror_wallet_from,
-                     uint64_t mirror_wallet_to,
+                     eosio::name mirror_wallet_from,
+                     eosio::name mirror_wallet_to,
                      uint64_t mirror_debit_account_id,
                      uint64_t mirror_credit_account_id,
                      eosio::checksum256 process_hash,
@@ -75,13 +75,13 @@ void ledger2::revert(eosio::name coopname,
                "revert: BLOCK/UNBLOCK не подлежат откату через revert (они симметричны сами себе)");
 
   // -------- validate mirror wallets/accounts --------
-  if (mirror_wallet_from != 0) {
-    eosio::check(!ledger2_get_wallet_name_by_id(mirror_wallet_from).empty(),
-                 std::string{"revert: неизвестный mirror_wallet_from "} + std::to_string(mirror_wallet_from));
+  if (mirror_wallet_from.value != 0) {
+    eosio::check(ledger2_is_known_wallet(mirror_wallet_from),
+                 std::string{"revert: неизвестный mirror_wallet_from "} + mirror_wallet_from.to_string());
   }
-  if (mirror_wallet_to != 0) {
-    eosio::check(!ledger2_get_wallet_name_by_id(mirror_wallet_to).empty(),
-                 std::string{"revert: неизвестный mirror_wallet_to "} + std::to_string(mirror_wallet_to));
+  if (mirror_wallet_to.value != 0) {
+    eosio::check(ledger2_is_known_wallet(mirror_wallet_to),
+                 std::string{"revert: неизвестный mirror_wallet_to "} + mirror_wallet_to.to_string());
   }
 
   const bool wallet_only = (mirror_wallet_op == static_cast<uint8_t>(WalletOp::WALLET_ONLY));

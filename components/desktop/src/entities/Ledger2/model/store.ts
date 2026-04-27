@@ -21,7 +21,8 @@ interface ILedger2Store {
   loadWallets: (coopname: string) => Promise<ILedger2Wallet[]>
   loadHistory: (input: ILedger2HistoryFilterInput) => Promise<ILedger2HistoryResponse | undefined>
   getAccountById: (id: number) => ILedger2Account | undefined
-  getWalletById: (id: number) => ILedger2Wallet | undefined
+  /** `name` — eosio::name кошелька (`w.<contract>.<waltype>`). */
+  getWalletByName: (name: string) => ILedger2Wallet | undefined
   walmoveWallets: (input: IWalmoveInput) => Promise<ILedger2AdjustmentResult>
 }
 
@@ -60,8 +61,8 @@ export const useLedger2Store = defineStore(namespace, (): ILedger2Store => {
     return accounts.value.find((a) => a.id === id)
   }
 
-  function getWalletById(id: number): ILedger2Wallet | undefined {
-    return wallets.value.find((w) => w.id === id)
+  function getWalletByName(name: string): ILedger2Wallet | undefined {
+    return wallets.value.find((w) => w.id === name)
   }
 
   async function walmoveWallets(input: IWalmoveInput): Promise<ILedger2AdjustmentResult> {
@@ -76,7 +77,7 @@ export const useLedger2Store = defineStore(namespace, (): ILedger2Store => {
     loadWallets,
     loadHistory,
     getAccountById,
-    getWalletById,
+    getWalletByName,
     walmoveWallets,
   }
 })

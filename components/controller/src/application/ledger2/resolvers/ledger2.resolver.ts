@@ -39,7 +39,7 @@ export class Ledger2Resolver {
   @Query(() => [Ledger2WalletDTO], {
     name: 'getLedger2Wallets',
     description:
-      'Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). ' +
+      'Общекооперативные кошельки из ledger2::wallets (eosio::name w.<contract>.<waltype>). ' +
       'Кошельки пайщиков живут в контракте soviet — сюда не попадают.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)

@@ -173,8 +173,8 @@ operations:
   - ledger_code: o.wal.depcpl
     human_name: Внесение пайщиком паевого взноса
     wallet_op: ISSUE
-    wallet_from: null
-    wallet_to: 2001          # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
+    wallet_from: ''
+    wallet_to: w.wal.share          # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
     debit: 51                # Расчётный счёт
     credit: 80               # Паевой фонд (складочный капитал)
     amount_ref: deposit.quantity

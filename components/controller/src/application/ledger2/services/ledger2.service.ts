@@ -116,26 +116,28 @@ export class Ledger2Service {
    * wallet_from, debit для wallet_to — для standard-flow). Все стандартные
    * кошельки имеют **один** account_id во всех операциях, поэтому первая
    * найденная привязка достаточна.
+   *
+   * `walletName` — eosio::name кошелька (`w.<contract>.<waltype>`).
    */
-  private resolveWalletAccountId(walletId: number): number | null {
+  private resolveWalletAccountId(walletName: string): number | null {
     for (const op of Ledger2.LEDGER2_OPERATION_REGISTRY) {
       if (op.kind === 'adjustment') continue;
       if (op.wallet_op === 'WALLET_ONLY') continue; // у WALLET_ONLY нет debit/credit
-      if (op.wallet_from === walletId && op.credit !== null) return op.credit;
-      if (op.wallet_to === walletId && op.credit !== null && op.wallet_op === 'ISSUE') return op.credit;
-      if (op.wallet_to === walletId && op.debit !== null) return op.debit;
-      if (op.wallet_from === walletId && op.debit !== null) return op.debit;
+      if (op.wallet_from === walletName && op.credit !== null) return op.credit;
+      if (op.wallet_to === walletName && op.credit !== null && op.wallet_op === 'ISSUE') return op.credit;
+      if (op.wallet_to === walletName && op.debit !== null) return op.debit;
+      if (op.wallet_from === walletName && op.debit !== null) return op.debit;
     }
-    // Кошельки, которые встречаются только в WALLET_ONLY (например 9001 в o.cap.invest)
+    // Кошельки, которые встречаются только в WALLET_ONLY (например w.cap.bginv в o.cap.invest)
     // — выводим из источника: WALLET_ONLY переносит между кошельками одного счёта,
     // значит партнёрский кошелёк по WALLET_ONLY имеет тот же account_id, что и
     // его пара в стандартной операции.
     for (const op of Ledger2.LEDGER2_OPERATION_REGISTRY) {
       if (op.wallet_op !== 'WALLET_ONLY' || op.kind === 'adjustment') continue;
-      if (op.wallet_from === walletId && op.wallet_to !== null) {
+      if (op.wallet_from === walletName && op.wallet_to !== null) {
         return this.resolveWalletAccountId(op.wallet_to);
       }
-      if (op.wallet_to === walletId && op.wallet_from !== null) {
+      if (op.wallet_to === walletName && op.wallet_from !== null) {
         return this.resolveWalletAccountId(op.wallet_from);
       }
     }

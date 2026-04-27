@@ -4,10 +4,10 @@ div.page-shell
   q-card.q-mt-md(flat)
     q-card-section
       .row.q-gutter-sm.items-center.q-mb-sm(
-        v-if='filters.accountId !== null || filters.processHash || filters.username'
+        v-if='filters.accountId !== null || filters.walletName || filters.processHash || filters.username'
       )
         q-chip(
-          v-if='filters.accountId !== null'
+          v-if='filters.accountId !== null || filters.walletName'
           removable
           color='primary'
           text-color='white'
@@ -198,10 +198,10 @@ div.page-shell
                             DirectionCell(:direction='cp.row.direction')
                         template(#body-cell-walletFrom='cp')
                           q-td(:props='cp')
-                            WalletIdCell(:wallet-id='cp.row.walletFrom')
+                            WalletIdCell(:wallet-name='cp.row.walletFrom')
                         template(#body-cell-walletTo='cp')
                           q-td(:props='cp')
-                            WalletIdCell(:wallet-id='cp.row.walletTo')
+                            WalletIdCell(:wallet-name='cp.row.walletTo')
                         template(#body-cell-quantity='cp')
                           q-td.text-right(:props='cp') {{ formatAmount(cp.row.quantity) }}
                       .text-caption.text-grey-6(v-else) Движений по кошелькам нет
@@ -381,7 +381,10 @@ const pagination = ref({ page: 1, rowsPerPage: 50, rowsNumber: 0 })
 const filters = reactive<{
   dateFrom: string
   dateTo: string
+  /** Бух.счёт (×1000): 51000/80000/86000 — для фильтра по debit/credit. */
   accountId: number | null
+  /** eosio::name кошелька (`w.<contract>.<waltype>`) — для фильтра по walletop. */
+  walletName: string | null
   accountKind: 'wallet' | 'account' | null
   accountName: string
   processHash: string | null
@@ -393,6 +396,7 @@ const filters = reactive<{
   dateFrom: '',
   dateTo: '',
   accountId: null,
+  walletName: null,
   accountKind: null,
   accountName: '',
   processHash: null,
@@ -436,19 +440,23 @@ async function applyProcessHashSearch(): Promise<void> {
 
 
 const accountFilterLabel = computed(() => {
-  if (filters.accountId === null) return ''
-  if (filters.accountKind === 'wallet') {
-    return `Кошелёк ${filters.accountId}${filters.accountName ? ` — ${filters.accountName}` : ''}`
+  if (filters.accountKind === 'wallet' && filters.walletName) {
+    return `Кошелёк ${filters.walletName}${filters.accountName ? ` — ${filters.accountName}` : ''}`
   }
-  const displayCode = Math.round(filters.accountId / 1000)
-  return `Счёт ${displayCode}${filters.accountName ? ` — ${filters.accountName}` : ''}`
+  if (filters.accountId !== null) {
+    const displayCode = Math.round(filters.accountId / 1000)
+    return `Счёт ${displayCode}${filters.accountName ? ` — ${filters.accountName}` : ''}`
+  }
+  return ''
 })
 
 async function clearAccountFilter() {
   filters.accountId = null
+  filters.walletName = null
   filters.accountKind = null
   filters.accountName = ''
   const q = { ...route.query }
+  delete q.wallet_name
   delete q.wallet_id
   delete q.account_id
   await router.replace({ query: q })
@@ -472,17 +480,21 @@ async function clearUsernameFilter() {
   reload()
 }
 
-async function resolveAccountName(id: number, kind: 'wallet' | 'account') {
+async function resolveWalletName(walletName: string) {
   try {
-    if (kind === 'wallet') {
-      const wallets = await ledger2Store.loadWallets(info.coopname)
-      const w = wallets.find((x) => x.id === id)
-      if (w) filters.accountName = w.name
-    } else {
-      const accounts = await ledger2Store.loadAccounts(info.coopname)
-      const a = accounts.find((x) => x.id === id)
-      if (a) filters.accountName = a.name
-    }
+    const wallets = await ledger2Store.loadWallets(info.coopname)
+    const w = wallets.find((x) => x.id === walletName)
+    if (w) filters.accountName = w.name
+  } catch {
+    // молча — chip покажется без названия
+  }
+}
+
+async function resolveAccountName(id: number) {
+  try {
+    const accounts = await ledger2Store.loadAccounts(info.coopname)
+    const a = accounts.find((x) => x.id === id)
+    if (a) filters.accountName = a.name
   } catch {
     // молча — chip покажется без названия
   }
@@ -514,8 +526,9 @@ const accountColumns = [
 interface WalletRow {
   globalSequence: string
   direction: 'in' | 'out' | 'move'
-  walletFrom: number | null
-  walletTo: number | null
+  /** eosio::name кошелька (`w.<contract>.<waltype>`) или null. */
+  walletFrom: string | null
+  walletTo: string | null
   quantity: string | null
 }
 interface AccountRow {
@@ -565,6 +578,7 @@ const hasAnyFilter = computed(
     !!filters.dateFrom ||
     !!filters.dateTo ||
     filters.accountId !== null ||
+    !!filters.walletName ||
     !!filters.processHash ||
     !!filters.username ||
     filters.adjustmentsOnly,
@@ -574,6 +588,7 @@ async function resetFilters() {
   filters.dateFrom = ''
   filters.dateTo = ''
   filters.accountId = null
+  filters.walletName = null
   filters.accountKind = null
   filters.accountName = ''
   filters.processHash = null
@@ -581,6 +596,7 @@ async function resetFilters() {
   filters.username = null
   filters.adjustmentsOnly = false
   const q = { ...route.query }
+  delete q.wallet_name
   delete q.wallet_id
   delete q.account_id
   delete q.process_hash
@@ -647,6 +663,7 @@ async function load() {
     // process_hash, но не operation_code как payload-поле). Поэтому фильтр
     // «Только корректировки» работает через actionNames=[walmove,revert].
     if (filters.accountId !== null) input.accountId = filters.accountId
+    if (filters.walletName) input.walletName = filters.walletName
     if (filters.processHash) input.processHash = filters.processHash
     if (filters.username) input.username = filters.username
     if (filters.dateFrom) input.dateFrom = new Date(filters.dateFrom)
@@ -711,11 +728,11 @@ onMounted(async () => {
     if (route.query.account_id) {
       filters.accountId = Number(route.query.account_id)
       filters.accountKind = 'account'
-      resolveAccountName(filters.accountId, 'account')
-    } else if (route.query.wallet_id) {
-      filters.accountId = Number(route.query.wallet_id)
+      resolveAccountName(filters.accountId)
+    } else if (route.query.wallet_name) {
+      filters.walletName = String(route.query.wallet_name)
       filters.accountKind = 'wallet'
-      resolveAccountName(filters.accountId, 'wallet')
+      resolveWalletName(filters.walletName)
     }
     if (route.query.process_hash) {
       filters.processHash = String(route.query.process_hash).toLowerCase()

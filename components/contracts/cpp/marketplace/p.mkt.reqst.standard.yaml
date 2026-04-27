@@ -3,8 +3,8 @@
 # кооператив с двойной конвертацией (деньги → имущество и обратно).
 #
 # Многоступенчатый процесс (10+ узлов состояний). Две ledger2-операции:
-#   • o.mkt.supply  — подтверждение поставки на КУ (ISSUE → 2001, Дт 51 / Кт 80)
-#   • o.mkt.recv    — выплата поставщику после получения (TRANSFER 2001 → 4002, Дт 80 / Кт 51)
+#   • o.mkt.supply  — подтверждение поставки на КУ (ISSUE → w.wal.share, Дт 51 / Кт 80)
+#   • o.mkt.recv    — выплата поставщику после получения (TRANSFER w.wal.share → w.mkt.payout, Дт 80 / Кт 51)
 #
 # Источники правды в коде:
 #   • cpp/marketplace/marketplace.hpp                                  — actions
@@ -105,7 +105,7 @@ actions:
     purpose: >
       Заказчик подписывает второй акт — приём имущества подтверждён.
       Применяется ledger2-операция o.mkt.recv — выплата поставщику
-      (TRANSFER 2001 → 4002, Дт 80 / Кт 51), устанавливается гарантийный период.
+      (TRANSFER w.wal.share → w.mkt.payout, Дт 80 / Кт 51), устанавливается гарантийный период.
   - name: marketplace::complete
     human: Завершить
     actor: chairman
@@ -338,7 +338,7 @@ scenario:
       action: marketplace::receivecnf
       description: >
         Заказчик подписывает RECEIVE_ACT_CONF. Применяется o.mkt.recv —
-        выплата поставщику (TRANSFER 2001 → 4002, Дт 80 / Кт 51), установлен
+        выплата поставщику (TRANSFER w.wal.share → w.mkt.payout, Дт 80 / Кт 51), установлен
         гарантийный период.
     - step: 8
       title: Завершение по гарантии
@@ -431,8 +431,8 @@ operations:
   - ledger_code: o.mkt.supply
     human_name: Подтверждение поставки
     wallet_op: ISSUE
-    wallet_from: null
-    wallet_to: 2001            # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
+    wallet_from: ''
+    wallet_to: w.wal.share            # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
     debit: 51                  # Расчётный счёт
     credit: 80                 # Паевой фонд (складочный капитал)
     amount_ref: request.total_cost
@@ -445,8 +445,8 @@ operations:
   - ledger_code: o.mkt.recv
     human_name: Подтверждение получения — выплата поставщику
     wallet_op: TRANSFER
-    wallet_from: 2001          # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
-    wallet_to: 4002            # Выплаты поставщикам
+    wallet_from: w.wal.share          # ЦПП «Цифровой Кошелёк» — паевые взносы деньгами
+    wallet_to: w.mkt.payout            # Выплаты поставщикам
     debit: 80                  # Паевой фонд
     credit: 51                 # Расчётный счёт
     amount_ref: request.base_cost

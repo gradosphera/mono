@@ -247,8 +247,8 @@ operations:
   - ledger_code: o.reg.payent
     human_name: Вступительный взнос пайщика
     wallet_op: ISSUE
-    wallet_from: null
-    wallet_to: 3001          # Вступительные взносы
+    wallet_from: ''
+    wallet_to: w.reg.entry          # Вступительные взносы
     debit: 51                # Расчётный счёт
     credit: 86               # Целевое финансирование
     amount_ref: candidate.initial
@@ -261,8 +261,8 @@ operations:
   - ledger_code: o.reg.putmin
     human_name: Минимальный паевой взнос при регистрации
     wallet_op: ISSUE
-    wallet_from: null
-    wallet_to: 2002          # Минимальный паевой взнос
+    wallet_from: ''
+    wallet_to: w.reg.minshr          # Минимальный паевой взнос
     debit: 51                # Расчётный счёт
     credit: 80               # Паевой фонд (складочный капитал)
     amount_ref: candidate.minimum

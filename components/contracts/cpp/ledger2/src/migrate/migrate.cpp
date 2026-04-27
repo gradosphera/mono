@@ -13,7 +13,7 @@
  *      системы учёта, progwallet.blocked не проводится через 80-й счёт,
  *      поэтому любая попытка провести его через Dr 51 / Cr 80 вызовет
  *      двойной учёт на бухуровне. Вместо этого переносим только
- *      wallet-аналитику (9001 BLAGOROST_INVEST, 10001 GENERATOR_COMMIT).
+ *      wallet-аналитику (w.cap.bginv BLAGOROST_INVEST, w.cap.gncom GENERATOR_COMMIT).
  *
  * Алгоритм на каждый кооператив:
  *
@@ -38,14 +38,14 @@
  *        share_legacy >= share_money
  *
  *   4. Отправка 4 inline apply (ненулевые пропускаются):
- *        apply(migration::MIN_SHARE, min_total)    → Dr 51 / Cr 80, MIN_SHARE_FUND 2002
- *        apply(migration::SHARE,     share_remain) → Dr 51 / Cr 80, SHARE_FUND_PAY 2001
- *        apply(migration::ENTRY,     entry_legacy) → Dr 51 / Cr 86, ENTRANCE_FEES 3001
- *        apply(migration::RID,       rid_share)    → Dr 04 / Cr 80, SHARE_FUND_RID 2003
+ *        apply(migration::MIN_SHARE, min_total)    → Dr 51 / Cr 80, MIN_SHARE_FUND   (w.reg.minshr)
+ *        apply(migration::SHARE,     share_remain) → Dr 51 / Cr 80, SHARE_FUND_PAY   (w.wal.share)
+ *        apply(migration::ENTRY,     entry_legacy) → Dr 51 / Cr 86, ENTRANCE_FEES    (w.reg.entry)
+ *        apply(migration::RID,       rid_share)    → Dr 04 / Cr 80, SHARE_FUND_RID   (w.wal.sharid)
  *
  *   5. Прямой emplace в wallets2 для progwallets (БЕЗ бух-проводок):
- *        Σ progwallet[blagorost].blocked → wallets2[BLAGOROST_INVEST 9001]
- *        Σ progwallet[generator].blocked → wallets2[GENERATOR_COMMIT 10001]
+ *        Σ progwallet[blagorost].blocked → wallets2[BLAGOROST_INVEST  w.cap.bginv]
+ *        Σ progwallet[generator].blocked → wallets2[GENERATOR_COMMIT  w.cap.gncom]
  *
  *      Если запись wallets2 уже есть (после inline apply сработали) —
  *      aggregate через wallets.modify(available += sum). Иначе — emplace.
@@ -168,27 +168,28 @@ inline void send_transit(eosio::name self_name,
  */
 inline void emplace_wallet_only(eosio::name self_name,
                                 eosio::name coopname,
-                                uint64_t wallet_id,
+                                eosio::name wallet_id,
                                 const eosio::asset& amt) {
   if (amt.amount == 0) return;
 
   wallets2_index wallets(self_name, coopname.value);
-  const auto name_view = ledger2_get_wallet_name_by_id(wallet_id);
-  eosio::check(!name_view.empty(),
-               std::string{"migrate: unknown wallet id "} + std::to_string(wallet_id));
+  const auto human_view = ledger2_get_wallet_human_name(wallet_id);
+  eosio::check(!human_view.empty(),
+               std::string{"migrate: unknown wallet "} + wallet_id.to_string());
 
-  auto it = wallets.find(wallet_id);
+  auto it = wallets.find(wallet_id.value);
   if (it == wallets.end()) {
     wallets.emplace(self_name, [&](auto& w) {
       w.id        = wallet_id;
-      w.name      = std::string(name_view);
+      w.name      = std::string(human_view);
       w.available = amt;
       w.blocked   = eosio::asset(0, amt.symbol);
     });
   } else {
     // Если кошелёк уже создан (например, предыдущим inline apply TRANSIT_*) —
     // просто доливаем сумму в available. Не должно случаться при чистой
-    // миграции (9001/10001 не используются базовыми TRANSIT_*), но безопасно.
+    // миграции (w.cap.bginv/w.cap.gncom не используются базовыми TRANSIT_*),
+    // но безопасно.
     wallets.modify(it, self_name, [&](auto& w) { w.available += amt; });
   }
 }

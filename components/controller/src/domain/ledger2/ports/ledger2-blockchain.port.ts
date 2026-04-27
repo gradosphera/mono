@@ -9,8 +9,10 @@ export interface WalmoveBlockchainDomainInterface {
   initiator: string;
   /** Владелец кошельков (для аналитики; для коллективных — обычно coopname). */
   username: string;
-  fromWallet: number;
-  toWallet: number;
+  /** eosio::name кошелька-источника (`w.<contract>.<waltype>`). */
+  fromWallet: string;
+  /** eosio::name кошелька-приёмника (`w.<contract>.<waltype>`). */
+  toWallet: string;
   /** Сумма с символом, например `"100.00 RUB"`. */
   quantity: string;
   /** SHA-256 хэш корректировки (генерирует backend). */
