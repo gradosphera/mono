@@ -250,28 +250,22 @@ scenario:
 # ── Секция 5. Документы и подписи ───────────────────────────────────────────
 documents:
   - step: 1
-    title: Заявление пайщика о возврате паевого взноса
-    template: wthdrw-statement
-    registry_id: 0
+    title: Заявление на возврат паевого взноса денежными средствами
+    registry_id: 900
     signed_by: [contributor]
     stored_in: withdraws.statement
-    note: "TODO: уточнить registry_id заявления о возврате"
 
   - step: 2
-    title: Решение совета об одобрении возврата
-    template: wthdrw-approval
-    registry_id: 0
+    title: Решение совета о возврате паевого взноса (одобрение)
+    registry_id: 901
     signed_by: [soviet]
     stored_in: withdraws.approved_statement
-    note: "TODO: уточнить registry_id решения совета об одобрении возврата"
 
   - step: 3
-    title: Авторизация совета на выплату
-    template: wthdrw-authorization
-    registry_id: 0
+    title: Решение совета о возврате паевого взноса (авторизация на выплату)
+    registry_id: 901
     signed_by: [soviet]
     stored_in: "(authorization — параметр действия)"
-    note: "TODO: уточнить registry_id документа авторизации совета"
 
 # ── Секция 6. Операции ──────────────────────────────────────────────────────
 operations:

@@ -227,36 +227,28 @@ scenario:
 # ── Секция 5. Документы и подписи ───────────────────────────────────────────
 documents:
   - step: 1
-    title: Заявление о внесении имущественного паевого взноса
-    template: prop-statement
-    registry_id: 0
+    title: Заявление об инвестировании имущества в благорост
+    registry_id: 1070
     signed_by: [contributor]
     stored_in: pgproperties.statement
-    note: "TODO: уточнить registry_id заявления"
 
   - step: 3
-    title: Авторизация совета на приём имущества
-    template: prop-authorization
-    registry_id: 0
+    title: Решение совета об инвестировании имущества в благорост
+    registry_id: 1071
     signed_by: [soviet]
     stored_in: pgproperties.authorization
-    note: "TODO: уточнить registry_id авторизации совета"
 
   - step: 4
-    title: Акт приёма-передачи имущества (первая подпись пайщика)
-    template: prop-act-1
-    registry_id: 0
+    title: Акт приема-передачи имущества в благорост (первая подпись пайщика)
+    registry_id: 1072
     signed_by: [contributor]
     stored_in: pgproperties.act1
-    note: "TODO: уточнить registry_id акта-1"
 
   - step: 5
-    title: Акт приёма-передачи имущества (вторая подпись председателя)
-    template: prop-act-2
-    registry_id: 0
-    signed_by: [chairman]
+    title: Акт приема-передачи имущества в благорост (вторая подпись председателя)
+    registry_id: 1072
+    signed_by: [contributor, chairman]
     stored_in: pgproperties.act2
-    note: "TODO: уточнить registry_id акта-2"
 
 # ── Секция 6. Операции ──────────────────────────────────────────────────────
 operations:

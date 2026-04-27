@@ -234,28 +234,22 @@ scenario:
 # ── Секция 5. Документы и подписи ───────────────────────────────────────────
 documents:
   - step: 1
-    title: Заявление пайщика на беспроцентный заём
-    template: debt-statement
-    registry_id: 0
+    title: Заявление на получение займа
+    registry_id: 1050
     signed_by: [contributor]
     stored_in: debts.statement
-    note: "TODO: уточнить registry_id заявления о займе"
 
   - step: 2
-    title: Решение председателя об одобрении займа
-    template: debt-approval
-    registry_id: 0
+    title: Решение совета о предоставлении займа (одобрение председателем)
+    registry_id: 1051
     signed_by: [chairman]
     stored_in: debts.approved_statement
-    note: "TODO: уточнить registry_id решения председателя"
 
   - step: 3
-    title: Авторизация совета на выдачу займа
-    template: debt-authorization
-    registry_id: 0
+    title: Решение совета о предоставлении займа (авторизация совета)
+    registry_id: 1051
     signed_by: [soviet]
     stored_in: debts.authorization
-    note: "TODO: уточнить registry_id авторизации совета"
 
 # ── Секция 6. Операции ──────────────────────────────────────────────────────
 operations:
