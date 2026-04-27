@@ -114,6 +114,29 @@ async function sovietApprove(blockchain: Blockchain, approvalHash: string) {
   }, { blocksBehind: 3, expireSeconds: 30 })
 }
 
+interface IBoardMember {
+  username: string
+  is_voting: number | boolean
+}
+interface IBoardRow {
+  id: number
+  members?: IBoardMember[]
+}
+
+async function getVotingBoardMembers(blockchain: Blockchain): Promise<string[]> {
+  const boards = await blockchain.getTableRows(
+    SovietContract.contractName.production,
+    COOPNAME,
+    'boards',
+    10,
+  ) as IBoardRow[]
+  const board = boards[0]
+  if (!board?.members?.length) return [CHAIRMAN]
+  return board.members
+    .filter((m) => Boolean(m.is_voting))
+    .map((m) => m.username)
+}
+
 async function processLastDecision(blockchain: Blockchain) {
   const decisions = await blockchain.getTableRows(
     SovietContract.contractName.production,
@@ -123,12 +146,25 @@ async function processLastDecision(blockchain: Blockchain) {
   ) as Array<{ id: number }>
   const last = decisions[decisions.length - 1]
   if (!last) throw new Error('soviet::decisions пуст — нечего голосовать')
-  log(`soviet decision id=${last.id} — голосуем + авторизуем + исполняем`)
 
-  const voteData: SovietContract.Actions.Decisions.VoteFor.IVoteForDecision = {
-    ...fakeVote,
-    decision_id: String(last.id),
-  } as unknown as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision
+  // boot:extra собирает совет из 5 членов (ant chairman + petr/anna/mikhail/olga).
+  // soviet::authorize требует консенсус — голосовать должны все voting-члены.
+  // boot (1 chairman) тоже работает — там список = [ant], одного голоса хватает.
+  const voters = await getVotingBoardMembers(blockchain)
+  log(`soviet decision id=${last.id} — голосуют ${voters.length} члена совета (${voters.join(', ')})`)
+
+  const voteActions = voters.map((voter) => ({
+    account: SovietContract.contractName.production,
+    name: SovietContract.Actions.Decisions.VoteFor.actionName,
+    authorization: [{ actor: voter, permission: 'active' }],
+    data: {
+      ...fakeVote,
+      coopname: COOPNAME,
+      member: voter,
+      decision_id: String(last.id),
+    } as unknown as SovietContract.Actions.Decisions.VoteFor.IVoteForDecision,
+  }))
+
   const authData: SovietContract.Actions.Decisions.Authorize.IAuthorize = {
     coopname: COOPNAME,
     chairman: CHAIRMAN,
@@ -143,12 +179,7 @@ async function processLastDecision(blockchain: Blockchain) {
 
   await blockchain.api.transact({
     actions: [
-      {
-        account: SovietContract.contractName.production,
-        name: SovietContract.Actions.Decisions.VoteFor.actionName,
-        authorization: [{ actor: CHAIRMAN, permission: 'active' }],
-        data: voteData,
-      },
+      ...voteActions,
       {
         account: SovietContract.contractName.production,
         name: SovietContract.Actions.Decisions.Authorize.actionName,

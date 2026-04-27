@@ -213,17 +213,44 @@ export async function phase07(): Promise<void> {
   log(`логин ${CHAIRMAN_EMAIL}...`)
   await client.login(CHAIRMAN_EMAIL, wif)
 
-  // Проверяем текущее состояние — для идемпотентности.
+  // Поллинг до 60с пока parser не индексирует createproject от фазы 06.
+  // После reboot:extra controller-БД пуста, индексация занимает ~3-10с.
+  // Без этого SetPlan падает с «Проект не найден» — мутация делает
+  // валидацию через repository ещё до отправки on-chain.
   let current: IProjectState = {}
-  try {
-    const resp = await client.Query(Queries.Capital.GetProjectWithRelations.query, {
-      variables: {
-        data: { coopname: COOPNAME, project_hash: COMPONENT_HASH },
-      } as Queries.Capital.GetProjectWithRelations.IInput,
-    }) as Record<string, IProjectState | null>
-    current = resp[Queries.Capital.GetProjectWithRelations.name] ?? {}
-  } catch (e) {
-    log(`Query GetProjectWithRelations упал: ${(e as Error).message ?? e}`)
+  for (let attempt = 0; attempt < 30; attempt++) {
+    try {
+      const resp = await client.Query(Queries.Capital.GetProjectWithRelations.query, {
+        variables: {
+          // GetProjectWithRelationsInput: только projectHash (camelCase),
+          // в отличие от SetMasterInput/SetPlanInput, которые принимают
+          // coopname+project_hash. Несимметрия в backend GraphQL.
+          data: { projectHash: COMPONENT_HASH },
+        } as Queries.Capital.GetProjectWithRelations.IInput,
+      }) as Record<string, IProjectState | null>
+      const got = resp[Queries.Capital.GetProjectWithRelations.name]
+      if (got && (got.master !== undefined || got.is_planed !== undefined)) {
+        current = got
+        log(`parser индексировал проект (attempt ${attempt + 1})`)
+        break
+      }
+      // Ответ есть, но без полей — проект ещё не догнан.
+      if (attempt < 29) {
+        await new Promise((r) => setTimeout(r, 2000))
+        continue
+      }
+      log('parser не индексировал проект за 60с — продолжаем без current state')
+    } catch (e) {
+      // GraphQL «Проект не найден» — ждём parser. Любая иная ошибка — break.
+      const raw = JSON.stringify(e).toLowerCase()
+      if (raw.includes('не найден') && attempt < 29) {
+        if (attempt % 5 === 0) log(`parser ещё не догнал createproject — ждём 2с (${attempt + 1}/30)`)
+        await new Promise((r) => setTimeout(r, 2000))
+        continue
+      }
+      log(`Query GetProjectWithRelations упал не на «не найден»: ${raw.slice(0, 200)}`)
+      break
+    }
   }
 
   if (current.master !== CHAIRMAN) {
