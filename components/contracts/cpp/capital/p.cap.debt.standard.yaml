@@ -16,7 +16,7 @@
 # ── Секция 1. Паспорт ───────────────────────────────────────────────────────
 process_type: p.cap.debt
 id: public_capital_debt_process
-title: Займ пайщику
+title: Выдача займа пайщику
 slug: debt
 status: proposed
 contract: capital

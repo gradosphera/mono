@@ -17,7 +17,7 @@
 # ── Секция 1. Паспорт ───────────────────────────────────────────────────────
 process_type: p.cap.invest
 id: public_capital_invest_process
-title: Инвестиция в программу
+title: Приём инвестиции в программу
 slug: invest
 status: proposed
 contract: capital
@@ -135,13 +135,6 @@ related:
     note: >
       Чтобы инвестировать, у пайщика должен быть остаток на SHARE_FUND_PAY —
       его создаёт «Внесение паевого взноса» (p.wal.depo).
-
-  - process_type: p.cap.import
-    id: public_capital_import_process
-    relation: provides
-    note: >
-      Альтернативный источник средств на BLAGOROST_INVEST — офлайн-импорт
-      исторического пайщика «Благорост» (p.cap.import).
 
   - process_type: p.cap.rid
     id: public_capital_rid_process

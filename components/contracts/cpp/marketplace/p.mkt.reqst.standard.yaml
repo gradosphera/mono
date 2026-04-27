@@ -17,7 +17,7 @@
 # ── Секция 1. Паспорт ───────────────────────────────────────────────────────
 process_type: p.mkt.reqst
 id: public_marketplace_request_process
-title: Запрос маркетплейса
+title: Исполнение заказа на поставку имущества
 slug: request
 status: proposed
 contract: marketplace
@@ -464,9 +464,3 @@ related:
     note: >
       Заказчик и поставщик должны иметь остаток на SHARE_FUND_PAY — его
       создаёт «Внесение паевого взноса» (p.wal.depo).
-  - process_type: p.sov.axncnv
-    id: public_soviet_axn_convert_process
-    relation: affects
-    note: >
-      Маркетплейс задействует механизм членских взносов — частично связан
-      с процессом конвертации паевого в членский (p.sov.axncnv).

@@ -226,7 +226,7 @@ function buildLayout(standard: Standard): LayoutResult {
     g.setNode(actionId, { ...SIZE.action });
 
     const isReject = virtualStateNames.has(t.to);
-    let targetId = t.to;
+    let targetId: string = t.to;
     if (isReject) {
       targetId = rejectedIdFor(t);
       if (!g.hasNode(targetId)) g.setNode(targetId, { ...SIZE.rejected });
