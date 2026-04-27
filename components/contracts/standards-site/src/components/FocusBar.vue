@@ -335,35 +335,37 @@ function walletDisplayId(name: string | null | undefined): string {
           <div v-for="op in opsForFocusedAction" :key="op.ledger_code" class="focus-bar__op-block">
             <div class="focus-bar__op-name">{{ op.human_name }}</div>
 
-            <div
-              v-if="op.debit != null || op.credit != null"
-              class="focus-bar__op-sub"
-            >
-              <div class="focus-bar__op-sub-label">Проводки</div>
-              <div class="focus-bar__op-sub-body">
-                <span class="tooltip" :data-tip="accountTitle(op.debit)">
-                  Дт <code>{{ op.debit ?? '—' }}</code>
-                </span>
-                <span class="focus-bar__op-sep">/</span>
-                <span class="tooltip" :data-tip="accountTitle(op.credit)">
-                  Кт <code>{{ op.credit ?? '—' }}</code>
-                </span>
+            <div class="focus-bar__op-subs">
+              <div
+                v-if="op.debit != null || op.credit != null"
+                class="focus-bar__op-sub"
+              >
+                <div class="focus-bar__op-sub-label">Проводки</div>
+                <div class="focus-bar__op-sub-body">
+                  <span class="tooltip" :data-tip="accountTitle(op.debit)">
+                    Дт <code>{{ op.debit ?? '—' }}</code>
+                  </span>
+                  <span class="focus-bar__op-sep">/</span>
+                  <span class="tooltip" :data-tip="accountTitle(op.credit)">
+                    Кт <code>{{ op.credit ?? '—' }}</code>
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div
-              v-if="op.wallet_op !== 'WALLET_ONLY' && (!!op.wallet_from || !!op.wallet_to)"
-              class="focus-bar__op-sub"
-            >
-              <div class="focus-bar__op-sub-label">Переводы</div>
-              <div class="focus-bar__op-sub-body">
-                <span class="tooltip" :data-tip="walletTitle(op.wallet_from, op.wallet_op)">
-                  <code>{{ walletDisplayId(op.wallet_from) }}</code>
-                </span>
-                <span class="focus-bar__arrow">→</span>
-                <span class="tooltip" :data-tip="walletTitle(op.wallet_to, op.wallet_op)">
-                  <code>{{ walletDisplayId(op.wallet_to) }}</code>
-                </span>
+              <div
+                v-if="op.wallet_op !== 'WALLET_ONLY' && (!!op.wallet_from || !!op.wallet_to)"
+                class="focus-bar__op-sub"
+              >
+                <div class="focus-bar__op-sub-label">Переводы</div>
+                <div class="focus-bar__op-sub-body">
+                  <span class="tooltip" :data-tip="walletTitle(op.wallet_from, op.wallet_op)">
+                    <code>{{ walletDisplayId(op.wallet_from) }}</code>
+                  </span>
+                  <span class="focus-bar__arrow">→</span>
+                  <span class="tooltip" :data-tip="walletTitle(op.wallet_to, op.wallet_op)">
+                    <code>{{ walletDisplayId(op.wallet_to) }}</code>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -501,10 +503,10 @@ function walletDisplayId(name: string | null | undefined): string {
 }
 
 .focus-bar__col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.focus-bar__col--main { flex: 1 1 360px; }
+.focus-bar__col--main { flex: 1 1 280px; }
 .focus-bar__col--meta { flex: 0 0 auto; }
-.focus-bar__col--ops  { flex: 1 1 240px; min-width: 200px; }
-.focus-bar__col--docs { flex: 1 1 240px; min-width: 220px; }
+.focus-bar__col--ops  { flex: 1.5 1 320px; min-width: 280px; }
+.focus-bar__col--docs { flex: 1 1 220px; min-width: 200px; }
 
 .focus-bar__doc-list { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
 .focus-bar__doc-chip {
@@ -603,13 +605,20 @@ function walletDisplayId(name: string | null | undefined): string {
 .focus-bar__guard-list { display: flex; flex-direction: column; gap: 2px; }
 .focus-bar__guard::before { content: '· '; color: var(--text-subtle); }
 
-.focus-bar__ops { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+.focus-bar__ops {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 2px;
+}
 .focus-bar__op-block {
   display: flex; flex-direction: column; gap: 6px;
+  min-width: 0;
 }
-.focus-bar__op-block + .focus-bar__op-block {
-  padding-top: 8px;
-  border-top: 1px dashed var(--edge-focus-border);
+.focus-bar__op-subs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 6px;
 }
 .focus-bar__op-name {
   font-size: 13px; font-weight: 600; color: var(--text);
