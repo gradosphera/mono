@@ -31,29 +31,28 @@ export async function loadReader(db: Database): Promise<ReturnType<typeof create
     if (currentBlock === 0) {
       currentBlock = Number(info.head_block_num)
 
-      // Сначала чистим, потом наполняем — иначе purgeAfterBlock стирает
-      // дельты Initializer'а (он пишет с block_num = head, а это > currentBlock
-      // если head успел шагнуть между двумя getInfo()). Без этого Mongo
-      // остаётся пустой по cooperative/boards и factory.Cooperative.getOne
-      // падает «Совет кооператива не обнаружен».
-      console.log('Очищаем действия и дельты после блока (pre-init): ', currentBlock)
-      await db.purgeAfterBlock(currentBlock)
-
-      // Выполняем инициализацию только при первом запуске с head блока.
-      // Загружаем текущее состояние кооператива и шаблонов из блокчейна.
-      await initializeFromBlockchain(db)
+      // Передаём currentBlock в Initializer — он пишет дельты с этим же
+      // block_num. Финальный purgeAfterBlock(currentBlock) использует $gt,
+      // т.е. записи с block_num == currentBlock не стираются.
+      // Без передачи параметра Initializer сам делал getInfo() и брал
+      // head_2 (который мог быть > currentBlock), и финальный purge
+      // стирал его дельты — Mongo оставалась пустой по cooperative/boards.
+      await initializeFromBlockchain(db, currentBlock)
     }
-    // Если currentBlock !== 0, продолжаем парсинг с сохраненного блока из базы данных
+    // Если currentBlock !== 0 — парсер уже работал, продолжаем с сохранённого
+    // блока из БД. Финальный purge ниже подчистит orphan-записи > currentBlock
+    // (нужен на случай fork/replay).
   }
   else {
     currentBlock = Number(startBlock)// при не 1 стартуем с startBlock
-    console.log('Очищаем действия и дельты после блока: ', currentBlock)
-    await db.purgeAfterBlock(currentBlock)
   }
 
   console.log('Стартуем с блока: ', currentBlock)
   console.log('Завершим на блоке: ', finishBlock)
   console.log('Высота цепочки: ', info.head_block_num)
+  console.log('Очищаем действия и дельты после блока: ', currentBlock)
+
+  await db.purgeAfterBlock(currentBlock)
 
   const unique_contract_names = [...new Set([...subscribedContracts, ...actions_whitelist().map(row => row.code)])]
   const abisArr = await Promise.all(unique_contract_names.map(account_name => fetchAbi(account_name)))
