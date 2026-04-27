@@ -415,11 +415,10 @@ documents:
     stored_in: results.statement
 
   - action: capital::approverslt
-    title: Одобренное председателем заявление о результате
-    registry_id: 0
-    signed_by: [ Председатель ]
+    title: Заявление о взносе результата интеллектуальной деятельности (вторая подпись председателя)
+    registry_id: 1040
+    signed_by: [ Участник, Председатель ]
     stored_in: results.approved_statement
-    note: "TODO: создать шаблон в cooptypes/cooperative/registry — одобренное председателем заявление о РИД."
 
   - action: capital::authrslt
     title: Протокол решения совета о приеме паевого взноса РИД
