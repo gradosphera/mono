@@ -1,5 +1,5 @@
 /**
- * Фаза 01 — программы УХД (id=3, type='generator') и Капитализация
+ * Фаза 01 — программы УХД (id=3, type='generator') и Благорост
  * (id=4, type='blagorost') + capital::setconfig.
  *
  * Идемпотентно: программы создаются только если их ещё нет в `programs`-таблице,
@@ -71,15 +71,15 @@ export async function phase01(): Promise<void> {
     log(`программа УХД (id=${SOURCE_PROGRAM_ID}) уже есть — пропуск`)
   }
 
-  // --- Программа Капитализация (Благорост) ---
+  // --- Программа Благорост ---
   const capitalProgram = await getCoopProgram(blockchain, COOPNAME, CAPITAL_PROGRAM_ID)
   if (!capitalProgram) {
-    log(`создаю программу Капитализация (id=${CAPITAL_PROGRAM_ID})`)
+    log(`создаю программу Благорост (id=${CAPITAL_PROGRAM_ID})`)
     const data: SovietContract.Actions.Programs.CreateProgram.ICreateProgram = {
       coopname: COOPNAME,
       is_can_coop_spend_share_contributions: false,
       username: CHAIRMAN,
-      title: 'Капитализация',
+      title: 'Благорост',
       announce: '',
       description: '',
       preview: '',
@@ -99,7 +99,7 @@ export async function phase01(): Promise<void> {
       }],
     }, { blocksBehind: 3, expireSeconds: 30 })
   } else {
-    log(`программа Капитализация (id=${CAPITAL_PROGRAM_ID}) уже есть — пропуск`)
+    log(`программа Благорост (id=${CAPITAL_PROGRAM_ID}) уже есть — пропуск`)
   }
 
   // --- capital::setconfig ---

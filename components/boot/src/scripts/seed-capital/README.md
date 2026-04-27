@@ -18,7 +18,7 @@ pnpm --filter @coopenomics/boot exec esno src/scripts/seed-capital/index.ts all
 
 | ID                    | Что делает                                                                  | Зависит от |
 | --------------------- | --------------------------------------------------------------------------- | ---------- |
-| `01-programs`         | Программы УХД (id=3) + Капитализация (id=4) + `capital::setconfig`          | `boot:extra` (председатель + совет) |
+| `01-programs`         | Программы УХД (id=3) + Благорост (id=4) + `capital::setconfig`              | `boot:extra` (председатель + совет) |
 | `02-extension-config` | Запись `extensions.capital` в postgres со всеми `*_done=true` (dev-shortcut). Без неё controller отдаёт 500 «Конфигурация расширения capital не найдена», и UI редиректит на страницу адаптации | работающий postgres |
 | `03-projects`         | 12 проектов и 30 компонентов из `_blago/INDEX.md`                           | `01-programs` |
 | `04-contributor`      | Регистрация председателя `ant` как Contributor (программно через `Capital.GenerateCapitalRegistrationDocuments` + `CompleteCapitalRegistration`). Без неё UI после адаптации показывает заглушку «Ранним участникам» и не пускает в Мастерскую | `02-extension-config`, controller :2998 |

@@ -21,6 +21,12 @@ import { phase05 } from './phases/05-additional-contributors'
 import { phase06 } from './phases/06-create-project-koshelek'
 import { phase07 } from './phases/07-master-and-plan'
 import { phase08 } from './phases/08-investments'
+import { phase09 } from './phases/09-tasks'
+import { phase10 } from './phases/10-commits-and-voting'
+import { phase11 } from './phases/11-cast-votes'
+import { phase12 } from './phases/12-recalc-and-calc-votes'
+import { phase13 } from './phases/13-push-result'
+import { phase14 } from './phases/14-convert-segments'
 
 const PHASES: Record<string, () => Promise<void>> = {
   '01-programs': phase01,
@@ -31,6 +37,12 @@ const PHASES: Record<string, () => Promise<void>> = {
   '06-create-project-koshelek': phase06,
   '07-master-and-plan': phase07,
   '08-investments': phase08,
+  '09-tasks': phase09,
+  '10-commits-and-voting': phase10,
+  '11-cast-votes': phase11,
+  '12-recalc-and-calc-votes': phase12,
+  '13-push-result': phase13,
+  '14-convert-segments': phase14,
 }
 
 const PHASE_ORDER = Object.keys(PHASES)

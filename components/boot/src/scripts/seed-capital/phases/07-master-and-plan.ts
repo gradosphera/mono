@@ -27,9 +27,9 @@ const CHAIRMAN_EMAIL = 'ivanov@example.com'
 const COMPONENT_HASH = createHash('sha256').update('blago:project:49').digest('hex')
 
 // План — реалистичные значения для документации.
-// 160 ч × 1500 ₽ = 240 000 ₽ за время исполнителей; + 50 000 ₽ доп. расходов.
+// 160 ч × 5000 ₽ = 800 000 ₽ за время исполнителей; + 50 000 ₽ доп. расходов.
 const PLAN_HOURS = 160
-const PLAN_HOUR_COST = '1500.0000 RUB'
+const PLAN_HOUR_COST = '5000.0000 RUB'
 const PLAN_EXPENSES = '50000.0000 RUB'
 
 interface IProjectState {

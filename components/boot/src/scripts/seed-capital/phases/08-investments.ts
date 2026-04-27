@@ -2,9 +2,14 @@
  * Фаза 08 — инвестиции: открывает приём инвестиций на компоненте, проводит
  * два паевых взноса от пайщиков-инвесторов:
  *
- *   1) ivanpetrov → компонент «MVP v1»  (500 000 ₽, прямая аллокация в компонент)
- *   2) ekaterina  → программа «Капитализация»  (200 000 ₽, без указания компонента;
+ *   1) ivanpetrov → компонент «MVP v1»  (15 000 ₽, прямая аллокация в компонент)
+ *   2) ekaterina  → программа «Благорост»  (10 000 ₽, без указания компонента;
  *      совет сам распределит средства)
+ *
+ * Объёмы намеренно небольшие: при крупных инвестициях active_voting_amount
+ * раздувается, и суммарный intellectual_cost после расчёта голосов
+ * превосходит пул кошелька «ЦПП Генератор — принятый коммит». Маленькие
+ * инвестиции дают пропорции, при которых выкуп РИД (фаза 13) проходит.
  *
  * Перед инвестициями оба пайщика пополняют свои кошельки через
  * wallet::createdeposit + gateway::completeincome.
@@ -106,8 +111,9 @@ async function startProjectIfNeeded(blockchain: Blockchain): Promise<void> {
     'sha256',
   ) as Array<{ status?: string }>
   const row = rows[0]
-  if (row?.status === 'active') {
-    log('компонент уже active — пропуск capital::startproject')
+  // startproject допустим только из pending; если уже active/voting/result/finalized — no-op.
+  if (row?.status && row.status !== 'pending') {
+    log(`компонент в статусе ${row.status} — пропуск capital::startproject`)
     return
   }
   log('capital::startproject — переводим компонент в Active')
@@ -178,7 +184,7 @@ async function investInProject(blockchain: Blockchain, investor: IFixture, amoun
 async function investInProgram(blockchain: Blockchain, investor: IFixture, amountRub: number): Promise<void> {
   const investHash = rndHash()
   const amount = `${amountRub.toFixed(4)} RUB`
-  log(`capital::createpinv ${investor.username} → программа «Капитализация» (${amount})`)
+  log(`capital::createpinv ${investor.username} → программа «Благорост» (${amount})`)
   await blockchain.api.transact({
     actions: [{
       account: CapitalContract.contractName.production,
@@ -284,7 +290,15 @@ async function ensureAgreementsAndWallet(blockchain: Blockchain, fix: IFixture):
   } else {
     log(`${fix.username}: wallet-кошелёк уже есть — пропуск signWalletAgreement`)
   }
-  // Согласие с ЦПП «Капитализация» — для инвестиций в программу/компонент.
+  // Базовые agreements первого входа — убирают каскад модалок «Прочитайте и
+  // подпишите документ» в UI (route.meta.agreements = ['wallet','signature','privacy','user']).
+  // Без них любая страница desktop при первом логине показывает 4 диалога.
+  for (const aType of ['signature', 'privacy', 'user']) {
+    await signAgreement(blockchain, fix.username, aType).catch((e) => {
+      log(`signAgreement ${aType} для ${fix.username} — пропуск (${(e as Error).message?.slice(0, 80)})`)
+    })
+  }
+  // Согласие с ЦПП «Благорост» — для инвестиций в программу/компонент.
   // Блокировка идёт по своему пути; для безопасности дёргаем при первом запуске.
   await signAgreement(blockchain, fix.username, 'blagorost').catch((e) => {
     log(`signAgreement blagorost для ${fix.username} — пропуск (${(e as Error).message?.slice(0, 80)})`)
@@ -316,13 +330,32 @@ export async function phase08(): Promise<void> {
   await signAppendixIfNeeded(blockchain, petrov.username)
   await signAppendixIfNeeded(blockchain, ekaterina.username)
 
+  // Идемпотентность: createinvest/createpinv требуют project.status = active.
+  // На повторном прогоне (компонент уже в voting/result) — пропускаем deposit
+  // и инвестиции; первая запись инвестиции уже есть в системе.
+  const componentRows = await blockchain.getTableRows(
+    CapitalContract.contractName.production,
+    COOPNAME,
+    'projects',
+    1,
+    COMPONENT_HASH,
+    COMPONENT_HASH,
+    3,
+    'sha256',
+  ) as Array<{ status?: string }>
+  if (componentRows[0]?.status !== 'active') {
+    log(`компонент в статусе ${componentRows[0]?.status} — пропуск депозитов и инвестиций (фаза 08 уже отработала ранее)`)
+    log('фаза 08 завершена')
+    return
+  }
+
   // Пополняем кошельки инвесторов через депозит
-  await depositToWallet(blockchain, petrov.username, 600_000)
-  await depositToWallet(blockchain, ekaterina.username, 300_000)
+  await depositToWallet(blockchain, petrov.username, 20_000)
+  await depositToWallet(blockchain, ekaterina.username, 15_000)
 
   // Инвестиции
-  await investInProject(blockchain, petrov, 500_000)
-  await investInProgram(blockchain, ekaterina, 200_000)
+  await investInProject(blockchain, petrov, 15_000)
+  await investInProgram(blockchain, ekaterina, 10_000)
 
   log('фаза 08 завершена')
 }
