@@ -78,6 +78,9 @@ export function makeShotContext({ scenarioName, outDir }) {
       name,
       description,
       file: `${name}.png`,
+      // Абсолютный путь — нужен сценариям, которые после shot вызывают annotate()
+      // или другую пост-обработку PNG; в manifest путь не сериализуем.
+      path: filePath,
       url: page.url(),
       at: new Date().toISOString(),
     };
@@ -141,7 +144,10 @@ export function makeShotContext({ scenarioName, outDir }) {
   }
 
   async function writeManifest(meta) {
-    const manifest = { scenario: scenarioName, meta, shots };
+    // path в entry — абсолютный, для пост-обработки в сценарии. В манифест
+    // его не пишем: он привязан к локальной FS и засоряет diff'ы при коммите.
+    const sanitized = shots.map(({ path: _, ...rest }) => rest);
+    const manifest = { scenario: scenarioName, meta, shots: sanitized };
     await fs.writeFile(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
     return manifest;
   }

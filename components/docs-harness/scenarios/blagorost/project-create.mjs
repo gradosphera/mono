@@ -13,7 +13,41 @@
 //
 // Перед прогоном: `node bin/shoot.mjs blagorost/project-create --reboot`.
 
-import { loginAsChairman } from '../../lib/harness.mjs';
+import { loginAsChairman, SHOT_SCALE } from '../../lib/harness.mjs';
+import { annotate } from '../../lib/annotate.mjs';
+
+// Получает первый видимый bbox по перечню локаторов-кандидатов.
+// Каждый кандидат проверяется с таймаутом 2с — если ни один не нашёл, вернёт null
+// (highlight просто пропустится; сценарий не падает).
+async function findBox(...locators) {
+  for (const loc of locators) {
+    try {
+      const first = loc.first();
+      await first.waitFor({ state: 'visible', timeout: 2000 });
+      const b = await first.boundingBox();
+      if (b) return b;
+    } catch {}
+  }
+  return null;
+}
+
+// Обводит bbox красной рамкой поверх PNG. Координаты в CSS-пикселях,
+// конвертируются в PNG-пиксели через SHOT_SCALE. padding в CSS-пикселях.
+async function highlightBox(shotEntry, box, opts = {}) {
+  if (!box || !shotEntry?.path) return;
+  const pad = (opts.padding ?? 6) * SHOT_SCALE;
+  const x = box.x * SHOT_SCALE - pad;
+  const y = box.y * SHOT_SCALE - pad;
+  const w = box.width * SHOT_SCALE + pad * 2;
+  const h = box.height * SHOT_SCALE + pad * 2;
+  await annotate({
+    input: shotEntry.path,
+    output: shotEntry.path,
+    annotations: [
+      { type: 'rect', at: [x, y, w, h], color: opts.color ?? '#e74c3c', width: opts.width ?? 4, radius: opts.radius ?? 10 },
+    ],
+  });
+}
 
 export const meta = {
   title: 'Создание проекта и компонента в Благоросте',
@@ -99,11 +133,19 @@ export default async ({ page, context, shot, env }) => {
   await page.waitForSelector('text=Проект (P)', { timeout: 5000 });
   await page.waitForTimeout(500);
 
-  await shot(
+  // Захватываем bbox до screenshot — после shot FAB может скрыться (Fab.vue
+  // запускает таймер scheduleHide на 1с при mouseleave).
+  const fabActionBox = await findBox(
+    page.getByRole('button', { name: 'Проект (P)' }),
+    page.locator('button:has-text("Проект (P)")'),
+    page.locator('text=Проект (P)'),
+  );
+  const fabShot = await shot(
     page,
     '01-fab-actions',
     'Мастерская в Благоросте: председатель навёл курсор на плавающую кнопку «+» в правом нижнем углу — раскрылись действия «Проект» и «Компонент».',
   );
+  await highlightBox(fabShot, fabActionBox);
 
   // --- Шаг 4. Открываем форму создания проекта ---
   // Хоткей P безусловно работает на странице (useCapitalFabHotkeys → openDialog).
@@ -185,9 +227,73 @@ export default async ({ page, context, shot, env }) => {
     // Если auto-раскрылся или другой селектор — игнорируем, скриншот снимем как есть.
   }
 
-  await shot(
+  // bbox «+» в строке проекта (CreateComponentButton) — захватываем до shot.
+  const plusBtnBox = await findBox(
+    page.locator(`tr:has-text("${PROJECT_TITLE}")`).first().locator('button:has(i:text-is("add"))'),
+    page.locator(`tr:has-text("${PROJECT_TITLE}")`).first().locator('button[aria-label*="add" i]'),
+  );
+  const listShot = await shot(
     page,
     '04-projects-list-with-koshelek',
     'Мастерская после создания: проект «Кошелёк пайщика» виден в списке, под ним раскрыт компонент «MVP v1».',
+  );
+  await highlightBox(listShot, plusBtnBox, { padding: 4 });
+
+  // --- Шаг 9. Открываем карточку проекта ---
+  // Клик по самому названию проекта (не по «+» и не по стрелке) ведёт в ProjectPage.
+  await page.locator(`tr:has-text("${PROJECT_TITLE}")`).first().getByText(PROJECT_TITLE, { exact: true }).first().click();
+  // Дождёмся router-навигации и появления описания на странице проекта
+  await page.waitForURL(/\/capital\/project\//, { timeout: 15000 }).catch(() => {});
+  await page.waitForSelector('text=Контракт лицевых счетов', { timeout: 30000 }).catch(() => {});
+  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+  await clearNotifications(page);
+  await page.waitForTimeout(800);
+
+  // bbox поля «Статус» в sidebar — захватываем до shot.
+  const statusFieldBox = await findBox(
+    page.locator('.q-field:has-text("Статус")'),
+    page.locator('label:has-text("Статус")'),
+  );
+  const projectShot = await shot(
+    page,
+    '05-project-page',
+    'Страница проекта «Кошелёк пайщика»: название, описание и левая панель управления (sidebar) — статус «Ожидает», поля «Мастер», «Видео», «Репозиторий».',
+  );
+  await highlightBox(projectShot, statusFieldBox, { padding: 6 });
+
+  // --- Шаг 10. Переключаем статус проекта на «Активен» ---
+  // q-select (UpdateStatus.vue) — открывается кликом по полю, выбор через q-item.
+  async function setStatusActive() {
+    await page.locator('.q-field:has-text("Статус")').first().click();
+    await page.waitForSelector('.q-menu', { timeout: 5000 });
+    await page.locator('.q-menu .q-item:has-text("Активен")').first().click();
+    // Подождать confirmation от chain + poll-обновление UI
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+  }
+  await setStatusActive();
+  await clearNotifications(page);
+
+  // --- Шаг 11. Переходим в карточку компонента ---
+  // ProjectPage имеет вкладки в шапке (Описание / Артефакты / Компоненты / План /
+  // Участники / История). Клик по «Компоненты» открывает ProjectComponentsPage,
+  // оттуда клик по «MVP v1» — в ComponentPage.
+  await page.getByRole('tab', { name: /Компоненты/i }).click().catch(async () => {
+    await page.locator('text=КОМПОНЕНТЫ').first().click();
+  });
+  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(600);
+  await page.locator(`text=${COMPONENT_TITLE}`).first().click();
+  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(800);
+
+  // --- Шаг 12. Переключаем статус компонента на «Активен» ---
+  await setStatusActive();
+  await clearNotifications(page);
+
+  await shot(
+    page,
+    '06-component-page-active',
+    'Страница компонента «MVP v1» после активации: статус «Активен» в левой панели, переключатель «Принимает инвестиции», описание результата. С этого момента можно принимать коммиты исполнителей (после установки плана).',
   );
 };
