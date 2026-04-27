@@ -226,29 +226,19 @@ function walletDisplayId(name: string | null | undefined): string {
 
 <template>
   <section
-    v-if="focusMode !== 'none'"
+    v-if="focusMode !== 'none' && focusMode !== 'process-start'"
     class="focus-bar"
     :class="{
       'focus-bar--edge': focusMode === 'action',
       'focus-bar--doc': focusMode === 'document',
       'focus-bar--op': focusMode === 'operation',
-      'focus-bar--process':
-        focusMode === 'process-start' || focusMode === 'process-end',
+      'focus-bar--process': focusMode === 'process-end',
       'focus-bar--rejected': focusMode === 'process-rejected',
     }"
   >
-    <!-- Начало процесса -->
-    <template v-if="focusMode === 'process-start'">
-      <div class="focus-bar__col focus-bar__col--main">
-        <div class="focus-bar__kicker">Начало процесса</div>
-        <p v-if="standard.purpose" class="focus-bar__desc focus-bar__desc--lead">
-          {{ standard.purpose }}
-        </p>
-      </div>
-    </template>
 
     <!-- Завершение отказом -->
-    <template v-else-if="focusMode === 'process-rejected' && rejectedInfo">
+    <template v-if="focusMode === 'process-rejected' && rejectedInfo">
       <div class="focus-bar__col focus-bar__col--main">
         <div class="focus-bar__kicker">Завершение отказом</div>
         <div class="focus-bar__title-row">

@@ -106,7 +106,6 @@ const focusStatus = computed<string | null>(() => {
     <header class="process-head">
       <div class="process-head__title-box">
         <h1>{{ standard.title }}</h1>
-        <p class="process-head__summary">{{ standard.summary }}</p>
       </div>
 
       <dl class="process-head__meta">
@@ -141,6 +140,11 @@ const focusStatus = computed<string | null>(() => {
         </div>
       </dl>
     </header>
+
+    <section v-if="standard.purpose" class="process-intro">
+      <h3 class="process-intro__heading">Контракт, процесс, сущность, статус, стандарт</h3>
+      <p class="process-intro__prose">{{ standard.purpose }}</p>
+    </section>
 
     <ProcessGraph
       :standard="standard"
@@ -194,12 +198,28 @@ const focusStatus = computed<string | null>(() => {
   font-size: 22px;
   line-height: 1.2;
 }
-.process-head__summary {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.55;
-  max-width: 780px;
+.process-intro {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.process-intro__heading {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+.process-intro__prose {
   margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 920px;
+  white-space: pre-line;
 }
 .process-head__meta {
   margin: 0;
