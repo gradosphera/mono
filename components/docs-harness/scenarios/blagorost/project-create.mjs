@@ -298,24 +298,28 @@ export default async ({ page, context, shot, env }) => {
   await setStatusActive();
   await clearNotifications(page);
 
-  // --- Шаг 11. Переходим в карточку компонента ---
-  // Через вкладку «Компоненты» проекта идти нельзя: председатель сам только
-  // что создал проект и допуска (clearance) у него к нему ещё нет, поэтому
-  // ProjectComponentsPage отдаёт «Нет компонентов» (а в углу горит «Принять
-  // участие (J)»). Возвращаемся в Мастерскую и кликаем компонент из общего
-  // списка — там ровно тот же экран, что снят в кадре 04, и компонент
-  // открывается напрямую без проверки clearance проекта.
-  await page.goto(`${env.BASE_URL}/${env.COOPNAME}/capital/projects`, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector(`text=${PROJECT_TITLE}`, { timeout: 30000 });
+  // --- Шаг 11. Переходим во вкладку «Компоненты» проекта ---
+  // Доступ на чтение компонентов открыт без clearance — controller их не
+  // фильтрует. Нам важно дать парсеру довести addproject до mongo: после
+  // setStatusActive клик во вкладку идёт сразу, и `capitalProject`-resolver
+  // успевает вернуть `components: []`, хотя через секунду уже отдал бы
+  // правильный список. Поэтому ждём до 30с появления MVP v1 на странице.
+  await page.waitForTimeout(3000);
+
+  await page.getByRole('tab', { name: /Компоненты/i }).click().catch(async () => {
+    await page.locator('text=КОМПОНЕНТЫ').first().click();
+  });
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-  // Стрелка раскрытия проекта — иногда уже раскрыто, тогда игнорируем.
-  try {
-    const expandBtn = page.locator(`tr:has-text("${PROJECT_TITLE}") button:has(i:text("chevron_right"))`).first();
-    await expandBtn.click({ timeout: 3000 });
-    await page.waitForTimeout(500);
-  } catch { /* раскрыт */ }
-  await page.locator(`tr:has-text("${COMPONENT_TITLE}")`).first()
-    .getByText(COMPONENT_TITLE, { exact: true }).first().click();
+
+  // Реальное ожидание появления компонента в списке. Если парсер ещё не
+  // дошёл — useProjectLoader тихо вернёт project.components=[] и страница
+  // зависнет на «Нет компонентов». Сценарий мог бы пережить это через
+  // обход (вернуться в Мастерскую и кликнуть из общего списка), но
+  // правильный пользовательский путь — именно вкладка «Компоненты», и
+  // именно его и проверяем.
+  await page.locator(`text=${COMPONENT_TITLE}`).first().waitFor({ timeout: 30000 });
+
+  await page.locator(`text=${COMPONENT_TITLE}`).first().click();
   await page.waitForURL(/\/capital\/components\//, { timeout: 15000 }).catch(() => {});
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(800);
