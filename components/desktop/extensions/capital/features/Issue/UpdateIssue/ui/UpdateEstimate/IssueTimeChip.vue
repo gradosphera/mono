@@ -189,7 +189,7 @@ const saveEstimate = async () => {
   gap: 3px;
   padding: 2px 6px;
   height: 22px;
-  width: 70px;
+  width: 86px;
   box-sizing: border-box;
   border-radius: 4px;
   font-size: 11px;
