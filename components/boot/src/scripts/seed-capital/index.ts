@@ -15,6 +15,7 @@
  */
 import { phase01 } from './phases/01-programs'
 import { phase02 } from './phases/02-extension-config'
+import { phase02Reset } from './phases/02-reset-onboarding'
 import { phase02b } from './phases/02b-real-onboarding'
 import { phase03 } from './phases/03-projects'
 import { phase04 } from './phases/04-contributor'
@@ -37,6 +38,7 @@ import { phase15 } from './phases/15-active-component'
 const PHASES: Record<string, () => Promise<void>> = {
   '01-programs': phase01,
   '02-extension-config': phase02,
+  '02-reset-onboarding': phase02Reset,
   '02b-real-onboarding': phase02b,
   '03-projects': phase03,
   '04-contributor': phase04,

@@ -30,6 +30,7 @@ const HARNESS_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 
 // Группа 1 — всё до открытия голосования (компонент остаётся Active).
 const GROUP_PRE_VOTING = [
+  'blagorost/adaptation-chairman',
   'blagorost/adaptation',
   'blagorost/profile',
   'blagorost/projects-list',

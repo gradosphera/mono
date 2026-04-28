@@ -36,6 +36,10 @@ if (!scenario) {
 const KNOWN_FIXTURES = {
   ivanpetrov: { email: 'ivan.petrov@example.com', firstName: 'Иван', lastName: 'Петров', middleName: 'Сергеевич' },
   ekaterina: { email: 'ekaterina.smirnova@example.com', firstName: 'Екатерина', lastName: 'Смирнова', middleName: 'Александровна' },
+  // newadapter — пайщик БЕЗ Capital-регистрации (его не трогает фаза
+  // 05-additional-contributors). Используется в сценарии adaptation для
+  // снимков мастера выбора ролей / часов / ставки / документов УХД.
+  newadapter: { email: 'andrey.sidorov@example.com', firstName: 'Андрей', lastName: 'Сидоров', middleName: 'Михайлович' },
 };
 
 const log = (m) => console.error(`◇ ${m}`);
