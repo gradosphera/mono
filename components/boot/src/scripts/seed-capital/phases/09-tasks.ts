@@ -68,6 +68,17 @@ const TASKS: ITaskSeed[] = [
     creators: ['ivanpetrov'],
     status: 'IN_PROGRESS',
   },
+  // Задача без estimate — иллюстрирует «время по факту»: cron каждый час
+  // добавляет 1ч / число активных задач без estimate у contributor'а.
+  // На странице «Моё время» по этой задаче часы должны тикать сами без
+  // явной оценки. Используется в инструкции tasks.md (двойной режим time-tracking).
+  {
+    title: 'Исследование альтернативных адаптеров кошелька',
+    description: 'Без чёткой оценки: пробуем подходы, фиксируем что нашли. Время по факту.',
+    estimate: 0,
+    creators: ['ekaterina'],
+    status: 'IN_PROGRESS',
+  },
 ]
 
 interface IIssueRow {
