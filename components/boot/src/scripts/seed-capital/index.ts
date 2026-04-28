@@ -20,9 +20,12 @@ import { phase04 } from './phases/04-contributor'
 import { phase05 } from './phases/05-additional-contributors'
 import { phase06 } from './phases/06-create-project-koshelek'
 import { phase07 } from './phases/07-master-and-plan'
+import { phase07b } from './phases/07b-clearance-all'
 import { phase08 } from './phases/08-investments'
 import { phase09 } from './phases/09-tasks'
+import { phase09b } from './phases/09b-artifacts'
 import { phase10 } from './phases/10-commits-and-voting'
+import { phase10a } from './phases/10a-pending-commit'
 import { phase11 } from './phases/11-cast-votes'
 import { phase12 } from './phases/12-recalc-and-calc-votes'
 import { phase13 } from './phases/13-push-result'
@@ -36,8 +39,11 @@ const PHASES: Record<string, () => Promise<void>> = {
   '05-additional-contributors': phase05,
   '06-create-project-koshelek': phase06,
   '07-master-and-plan': phase07,
+  '07b-clearance-all': phase07b,
   '08-investments': phase08,
   '09-tasks': phase09,
+  '09b-artifacts': phase09b,
+  '10a-pending-commit': phase10a,
   '10-commits-and-voting': phase10,
   '11-cast-votes': phase11,
   '12-recalc-and-calc-votes': phase12,
