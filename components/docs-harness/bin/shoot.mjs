@@ -131,7 +131,9 @@ async function checkStack() {
     `controller :${PORTS.controller}`,
     () => curlOk(`http://127.0.0.1:${PORTS.controller}/v1/graphql`, 'POST', '{"query":"{__typename}"}'),
     'coopback',
-    90,
+    // 180с — после reboot:extra coopback грузит контракты ~2 мин;
+    // 90с не хватало, первый сценарий после --reboot падал.
+    180,
   );
   const parserUp = () => {
     const r = spawnSync('docker', ['compose', 'ps', 'cooparser', '--format', 'json'], { cwd: REPO_ROOT, encoding: 'utf8' });
