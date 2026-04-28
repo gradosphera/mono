@@ -1,6 +1,7 @@
 <template lang="pug">
 .issue-row(role='row')
-  // 1. Метаблок (горизонтально): приоритет → ID → время с прогрессом.
+  // 1. Метаблок (горизонтально): приоритет → ID → инлайн-чип времени.
+  // Чип фиксированной ширины — title не «прыгает» между задачами с разным estimate/fact.
   .meta-block
     q-icon.priority-icon(
       :name='priorityIcon'
@@ -15,12 +16,11 @@
     )
       template(#prefix)
         q-icon(name='task', size='xs')
-    Estimation.meta-time(
-      v-if='hasTime'
-      :estimation='issue.estimate'
+    IssueTimeChip(
+      :issue-hash='issue.issue_hash'
+      :estimate='issue.estimate'
       :fact='issue.fact'
-      size='xs'
-      no-icon
+      :readonly='!canChangeEstimate'
     )
 
   // 2. Тайтл: занимает всё свободное место, переносится по словам, ellipsis по необходимости.
@@ -51,8 +51,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { EntityIdBadge, Estimation } from 'src/shared/ui';
+import { EntityIdBadge } from 'src/shared/ui';
 import { IssueStatusChip } from '../../../features/Issue/UpdateIssue/ui/UpdateStatus';
+import { IssueTimeChip } from '../../../features/Issue/UpdateIssue/ui/UpdateEstimate';
 import { SetCreatorAvatars } from '../../../features/Issue/SetCreator';
 import {
   getIssuePriorityIcon,
@@ -73,11 +74,9 @@ const priorityColor = computed(() =>
 );
 const priorityLabel = computed(() => props.issue.priority || '—');
 
-const hasTime = computed(() => {
-  const e = props.issue.estimate;
-  const f = (props.issue as { fact?: number }).fact;
-  return (e != null && e > 0) || (f != null && f > 0);
-});
+const canChangeEstimate = computed(
+  () => !!props.issue.permissions?.can_set_estimate
+);
 </script>
 
 <style lang="scss" scoped>
@@ -105,12 +104,6 @@ const hasTime = computed(() => {
   flex-shrink: 0;
 }
 
-.meta-time {
-  // Время идёт справа от ID, без иконки-часов внутри (она утяжеляла строку).
-  font-size: 11px;
-  line-height: 1;
-  flex-shrink: 0;
-}
 
 // 2. Title — растягивается, ellipsis при нехватке места.
 .title-block {
@@ -169,11 +162,6 @@ const hasTime = computed(() => {
 
   .meta-block {
     gap: 6px;
-
-    // На узких экранах прячем время — оно остаётся у заголовка задачи в детали.
-    .meta-time {
-      display: none;
-    }
   }
 
   .title-block {

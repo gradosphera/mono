@@ -8,24 +8,14 @@
   )
     template(v-if='currentCreators.length > 0')
       .avatar-stack
-        q-avatar(
+        .creator-avatar(
           v-for='(c, idx) in visibleCreators'
           :key='(c?.username) || idx'
-          size='28px'
-          color='primary'
-          text-color='white'
-          class='creator-avatar'
           :style='{ zIndex: visibleCreators.length - idx }'
         )
           span.creator-initial {{ initialOf(c) }}
           q-tooltip(anchor='bottom middle', self='top middle') {{ (c?.display_name) || (c?.username) }}
-        q-avatar(
-          v-if='hiddenCount > 0'
-          size='28px'
-          color='grey-4'
-          text-color='dark'
-          class='creator-avatar more-avatar'
-        )
+        .creator-avatar.more-avatar(v-if='hiddenCount > 0')
           span.creator-initial +{{ hiddenCount }}
     template(v-else)
       q-icon(name='person_add', size='18px', color='grey-6')
@@ -245,36 +235,40 @@ watch(
   flex-direction: row;
 }
 
+// Чистый div вместо q-avatar — у Quasar внутренняя `.q-avatar__content` имеет
+// position: absolute и при наличии border на родителе содержимое визуально
+// сдвигается из центра. Здесь — простой flex-center, инициал ровно в центре.
 .creator-avatar {
   box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--q-primary, #1976d2);
+  color: #fff;
   border: 2px solid var(--q-color-white, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1;
 
   & + .creator-avatar {
     margin-left: -10px;
   }
 
   &.more-avatar {
+    background-color: #e0e0e0;
+    color: #424242;
     font-size: 11px;
     font-weight: 500;
-  }
-
-  // Принудительное центрирование инициала: q-avatar__content имеет
-  // position: absolute; inset: 0, но при наличии border содержимое
-  // визуально смещается. Добавляем явный flex-center.
-  :deep(.q-avatar__content) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
   }
 }
 
 .creator-initial {
-  display: inline-block;
+  display: block;
   line-height: 1;
-  text-align: center;
+  margin-top: 1px; // оптическая центровка под cap-height шрифта
 }
 
 .selector-popup {
