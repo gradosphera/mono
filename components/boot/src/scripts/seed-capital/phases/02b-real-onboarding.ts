@@ -28,12 +28,16 @@
  * вставить пустой config (без done-флагов), потом гонять её.
  */
 import { Client, Mutations, Queries } from '@coopenomics/sdk'
-import { SovietContract } from 'cooptypes'
+import { Cooperative, SovietContract } from 'cooptypes'
 import Blockchain from '../../../blockchain'
 import config from '../../../configs'
-import { fakeDocument } from '../../../tests/shared/fakeDocument'
 
-const log = (...a: unknown[]) => console.error('[seed-capital:02]', ...a)
+const log = (...a: unknown[]) => console.error('[seed-capital:02b]', ...a)
+
+// FreeDecision — общий протокол решения совета (registry_id=600). Используется
+// для authorize/exec любого решения как «обёртка» — председатель подписывает
+// HTML-протокол, его hash попадает в decision как `final_document`.
+const FREE_DECISION_REGISTRY_ID = Cooperative.Registry.FreeDecision.registry_id
 
 const COOPNAME = 'voskhod'
 const CHAIRMAN = 'ant'
@@ -97,7 +101,10 @@ const STEPS: IStep[] = [
   },
 ]
 
-async function getDecisionByHash(blockchain: Blockchain, decisionHash: string): Promise<{ id: number, approved: boolean } | null> {
+async function getDecisionByHash(
+  blockchain: Blockchain,
+  decisionHash: string,
+): Promise<{ id: number, approved: boolean, project_id: string } | null> {
   // Решений в проекте не больше нескольких десятков; читаем последние 1000 и ищем по hash.
   const rows = await blockchain.getTableRows(
     SovietContract.contractName.production,
@@ -105,11 +112,22 @@ async function getDecisionByHash(blockchain: Blockchain, decisionHash: string): 
     'decisions',
     1000,
   )
-  const found = rows.find((r: { hash: string }) => r.hash === decisionHash)
-  return found ? { id: Number(found.id), approved: Boolean(found.approved) } : null
+  // Цепочка возвращает hash в lowercase, controller — UPPERCASE; сравниваем case-insensitive.
+  const target = decisionHash.toLowerCase()
+  const found = rows.find((r: { hash: string }) => (r.hash ?? '').toLowerCase() === target) as
+    | { id: number; approved: boolean; meta?: string }
+    | undefined
+  if (!found) return null
+  // FreeDecision-протокол требует project_id, который controller кладёт в decision.meta.
+  let projectId = ''
+  try {
+    const meta = JSON.parse(found.meta ?? '{}') as { project_id?: string }
+    projectId = meta.project_id ?? ''
+  } catch {}
+  return { id: Number(found.id), approved: Boolean(found.approved), project_id: projectId }
 }
 
-export async function phase02(): Promise<void> {
+export async function phase02b(): Promise<void> {
   const blockchain = new Blockchain(config.network, config.private_keys)
   await blockchain.update_pass_instance()
 
@@ -217,7 +235,64 @@ export async function phase02(): Promise<void> {
       )
     }
 
-    // 6. Authorize + Exec — в одной транзакции (как делает desktop AuthorizeAndExecDecision).
+    // 6. Authorize: председатель генерирует и подписывает РЕАЛЬНЫЙ протокол
+    //    решения совета (FreeDecision, registry_id=600). Для генерации
+    //    нужны decision_id + project_id (из meta решения). Никаких fakeDocument —
+    //    иначе controller'ные verify-утилиты падают на «документ с хешем X не
+    //    найден» при последующих flow.
+    //
+    //    Factory.getDecision читает votefor-actions через simple-explorer-api
+    //    (parser-индекс). После votefor parser индексирует ~1-2 блока
+    //    (≈700ms-2s). Без паузы получаем «Голоса за решение не найдены» —
+    //    ждём с retry до 10s.
+    let protocolDoc: { hash: string; doc_hash: string; meta_hash: string; meta: unknown; html: string; binary?: string; full_title?: string } | null = null
+    let lastErr: unknown = null
+    for (let attempt = 1; attempt <= 6; attempt++) {
+      await new Promise(r => setTimeout(r, attempt === 1 ? 1500 : 2000))
+      log(`[${step.id}] генерирую протокол (FreeDecision, decision_id=${decision.id}) attempt=${attempt}`)
+      try {
+        const protocolGen = await client.Mutation(
+          Mutations.Documents.GenerateDocument.mutation,
+          {
+            variables: {
+              input: {
+                data: {
+                  coopname: COOPNAME,
+                  username: CHAIRMAN,
+                  registry_id: FREE_DECISION_REGISTRY_ID,
+                  decision_id: decision.id,
+                  project_id: decision.project_id,
+                  lang: 'ru',
+                },
+              },
+            } as Mutations.Documents.GenerateDocument.IInput,
+          },
+        ) as Record<string, { hash: string; doc_hash: string; meta_hash: string; meta: unknown; html: string; binary?: string; full_title?: string }>
+        protocolDoc = protocolGen[Mutations.Documents.GenerateDocument.name]
+        break
+      } catch (e) {
+        lastErr = e
+        log(`[${step.id}] generate FreeDecision failed (parser ещё индексирует votes?): retry ${attempt}/6`)
+      }
+    }
+    if (!protocolDoc) throw lastErr ?? new Error(`[${step.id}] не удалось сгенерировать FreeDecision протокол`)
+
+    log(`[${step.id}] подписываю протокол hash=${protocolDoc.hash.slice(0, 12)}...`)
+    const signedRaw = await client.Document.signDocument(
+      protocolDoc as Parameters<typeof client.Document.signDocument>[0],
+      CHAIRMAN, // signer eosio name; без него signatures[].signer=undefined и
+                // soviet::authorize валится на «Expected string containing name».
+    )
+    // eosjs ожидает meta как string; signDocument возвращает meta как object —
+    // stringify, как делает desktop AuthorizeAndExecDecision.
+    const signedProtocol = {
+      ...signedRaw,
+      meta: typeof signedRaw.meta === 'string'
+        ? signedRaw.meta
+        : JSON.stringify(signedRaw.meta ?? {}),
+    }
+
+    // Authorize + Exec в одной транзакции (как делает desktop AuthorizeAndExecDecision).
     log(`[${step.id}] authorize + exec под ${CHAIRMAN}`)
     await blockchain.api.transact(
       {
@@ -230,7 +305,7 @@ export async function phase02(): Promise<void> {
               coopname: COOPNAME,
               chairman: CHAIRMAN,
               decision_id: decision.id,
-              document: fakeDocument,
+              document: signedProtocol,
             },
           },
           {
@@ -251,5 +326,5 @@ export async function phase02(): Promise<void> {
     log(`[${step.id}] ✓ принят`)
   }
 
-  log('фаза 02 завершена')
+  log('фаза 02b завершена — реальный онбординг через совет проведён')
 }
