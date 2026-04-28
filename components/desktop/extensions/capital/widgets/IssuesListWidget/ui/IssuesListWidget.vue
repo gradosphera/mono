@@ -38,8 +38,8 @@ div
                     )
                       template(#prefix)
                         q-icon(name='task', size='xs')
-                  // Оценка задачи (80px)
-                  .col-auto(style='width: 80px; padding-left: 20px')
+                  // Оценка задачи (фикс. ширина, не толкает соседнюю колонку приоритета)
+                  .col-auto(style='width: 110px; padding-left: 12px; flex-shrink: 0; overflow: hidden')
                     Estimation(
                       :estimation='props.row.estimate'
                       :fact='props.row.fact'

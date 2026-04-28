@@ -22,7 +22,7 @@ div
       track-color='grey-3'
       size='3px'
       rounded
-      style='min-width: 60px; margin-top: 2px'
+      style='width: 100%; max-width: 90px; margin-top: 2px'
     )
   .estimation-display(
     v-else-if='estimation != null && !Number.isNaN(estimation) && estimation > 0'
@@ -114,6 +114,8 @@ const sizeClass = computed(() => {
   color: var(--q-grey-6);
   font-size: 12px;
   font-weight: 500;
+  min-width: 0;
+  max-width: 100%;
 
   &.estimation-xs {
     font-size: 11px;
