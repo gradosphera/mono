@@ -5,7 +5,8 @@
   "description": "Playwright harness для съёмки скриншотов в документацию (см. bin/shoot.mjs)",
   "type": "module",
   "scripts": {
-    "shoot": "node bin/shoot.mjs"
+    "shoot": "node bin/shoot.mjs",
+    "shoot:blagorost": "node bin/shoot-blagorost-all.mjs"
   },
   "license": "ISC",
   "devDependencies": {

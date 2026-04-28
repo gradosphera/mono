@@ -49,6 +49,7 @@ export const meta = {
     'capital:05-additional-contributors',
     'capital:06-create-project-koshelek',
     'capital:07-master-and-plan',
+    'capital:07b-clearance-all',
     'capital:09b-artifacts',
   ],
 };
