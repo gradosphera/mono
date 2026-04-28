@@ -105,10 +105,12 @@ async function signAppendixIfNeeded(
   // apprvappndx сразу же стирает appendix через delete_appendix(); если он
   // попадёт в тот же блок что и getclearance — parser не увидит ни insert,
   // ни delete, и UI/seed-await будут считать что допуск не получен.
-  // Sleep ≥1× block_time (500ms) гарантирует разнос по разным блокам.
-  // Это временная заплатка вокруг особенности SHIP — см. memory
-  // project_parser_loses_appendix_deltas.md.
-  await new Promise((resolve) => setTimeout(resolve, 700))
+  //
+  // Эмпирически 700ms (1×block) не хватало: ~1 раз из 6 строка в
+  // capital_appendixes теряется, мастер на UI видит «Принять участие» вместо
+  // действий. 1500ms (≥3×block) разносит actions гарантированно.
+  // См. memory project_parser_loses_appendix_deltas.md.
+  await new Promise((resolve) => setTimeout(resolve, 1500))
 
   log(`soviet::confirmapprv приложение ${username} (${appendixHash.slice(0, 10)}...)`)
   await blockchain.api.transact({
