@@ -174,8 +174,14 @@ export default async ({ page, context, shot, env }) => {
 
   // --- Шаг 5. Создаём проект ---
   await projectDialog.locator('button:has-text("Создать")').last().click();
-  // Toast «Проект успешно создан» — индикатор успеха
-  await page.waitForSelector(`text=${PROJECT_TITLE}`, { timeout: 30000 });
+  // Ждём пока диалог сам закроется — это надёжнее, чем `text=PROJECT_TITLE`,
+  // который матчится в самом диалоге («Название проекта: Кошелёк пайщика»)
+  // и проскакивает мимо реального события «контракт подтвердил создание».
+  await page.waitForFunction(
+    () => !Array.from(document.querySelectorAll('[id^="q-portal--dialog--"]'))
+      .some((p) => getComputedStyle(p).display !== 'none' && p.textContent?.includes('Название проекта')),
+    { timeout: 30000 },
+  );
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
   await clearNotifications(page);
   await page.waitForTimeout(500);
@@ -212,7 +218,25 @@ export default async ({ page, context, shot, env }) => {
 
   // --- Шаг 7. Создаём компонент ---
   await componentDialog.locator('button:has-text("Создать")').last().click();
-  await page.waitForSelector(`text=${COMPONENT_TITLE}`, { timeout: 30000 }).catch(() => {});
+  // Ждём пока модалка сама закроется (контракт + парсер + UI отреагировал).
+  // На свежей цепочке парсер иногда отстаёт, и диалог зависает в спиннере
+  // даже после успешного capital::addproject — компонент уже на chain,
+  // просто UI не получил mongo-обновления. Если за 20с не закрылся —
+  // закрываем руками через Esc и идём дальше.
+  const dialogClosed = await page.waitForFunction(
+    () => !Array.from(document.querySelectorAll('[id^="q-portal--dialog--"]'))
+      .some((p) => getComputedStyle(p).display !== 'none' && p.textContent?.includes('Название компонента')),
+    { timeout: 20000 },
+  ).then(() => true).catch(() => false);
+  if (!dialogClosed) {
+    await page.keyboard.press('Escape').catch(() => {});
+    await page.waitForTimeout(500);
+    await page.evaluate(() => {
+      document.querySelectorAll('[id^="q-portal--dialog--"]').forEach((p) => {
+        if (p.textContent?.includes('Название компонента')) p.remove();
+      });
+    });
+  }
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
   await clearNotifications(page);
   await page.waitForTimeout(500);
@@ -275,15 +299,24 @@ export default async ({ page, context, shot, env }) => {
   await clearNotifications(page);
 
   // --- Шаг 11. Переходим в карточку компонента ---
-  // ProjectPage имеет вкладки в шапке (Описание / Артефакты / Компоненты / План /
-  // Участники / История). Клик по «Компоненты» открывает ProjectComponentsPage,
-  // оттуда клик по «MVP v1» — в ComponentPage.
-  await page.getByRole('tab', { name: /Компоненты/i }).click().catch(async () => {
-    await page.locator('text=КОМПОНЕНТЫ').first().click();
-  });
+  // Через вкладку «Компоненты» проекта идти нельзя: председатель сам только
+  // что создал проект и допуска (clearance) у него к нему ещё нет, поэтому
+  // ProjectComponentsPage отдаёт «Нет компонентов» (а в углу горит «Принять
+  // участие (J)»). Возвращаемся в Мастерскую и кликаем компонент из общего
+  // списка — там ровно тот же экран, что снят в кадре 04, и компонент
+  // открывается напрямую без проверки clearance проекта.
+  await page.goto(`${env.BASE_URL}/${env.COOPNAME}/capital/projects`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector(`text=${PROJECT_TITLE}`, { timeout: 30000 });
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-  await page.waitForTimeout(600);
-  await page.locator(`text=${COMPONENT_TITLE}`).first().click();
+  // Стрелка раскрытия проекта — иногда уже раскрыто, тогда игнорируем.
+  try {
+    const expandBtn = page.locator(`tr:has-text("${PROJECT_TITLE}") button:has(i:text("chevron_right"))`).first();
+    await expandBtn.click({ timeout: 3000 });
+    await page.waitForTimeout(500);
+  } catch { /* раскрыт */ }
+  await page.locator(`tr:has-text("${COMPONENT_TITLE}")`).first()
+    .getByText(COMPONENT_TITLE, { exact: true }).first().click();
+  await page.waitForURL(/\/capital\/components\//, { timeout: 15000 }).catch(() => {});
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(800);
 
