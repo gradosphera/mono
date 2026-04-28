@@ -11,21 +11,22 @@
         q-avatar(
           v-for='(c, idx) in visibleCreators'
           :key='(c?.username) || idx'
-          size='22px'
+          size='28px'
           color='primary'
           text-color='white'
           class='creator-avatar'
           :style='{ zIndex: visibleCreators.length - idx }'
         )
-          | {{ initialOf(c) }}
+          span.creator-initial {{ initialOf(c) }}
           q-tooltip(anchor='bottom middle', self='top middle') {{ (c?.display_name) || (c?.username) }}
         q-avatar(
           v-if='hiddenCount > 0'
-          size='22px'
+          size='28px'
           color='grey-4'
           text-color='dark'
           class='creator-avatar more-avatar'
-        ) +{{ hiddenCount }}
+        )
+          span.creator-initial +{{ hiddenCount }}
     template(v-else)
       q-icon(name='person_add', size='18px', color='grey-6')
 
@@ -245,18 +246,35 @@ watch(
 }
 
 .creator-avatar {
+  box-sizing: border-box;
   border: 2px solid var(--q-color-white, #fff);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
 
   & + .creator-avatar {
-    margin-left: -8px;
+    margin-left: -10px;
   }
 
   &.more-avatar {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
   }
+
+  // Принудительное центрирование инициала: q-avatar__content имеет
+  // position: absolute; inset: 0, но при наличии border содержимое
+  // визуально смещается. Добавляем явный flex-center.
+  :deep(.q-avatar__content) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+}
+
+.creator-initial {
+  display: inline-block;
+  line-height: 1;
+  text-align: center;
 }
 
 .selector-popup {

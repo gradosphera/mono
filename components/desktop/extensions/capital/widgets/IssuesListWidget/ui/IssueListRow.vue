@@ -1,27 +1,27 @@
 <template lang="pug">
 .issue-row(role='row')
-  // 1. Метаблок: ID + приоритет (горизонтально), оценка/факт под ними.
+  // 1. Метаблок (горизонтально): приоритет → ID → время с прогрессом.
   .meta-block
-    .meta-top
-      EntityIdBadge(
-        :raw-id='issue.id'
-        copy-on-click
-        address-clipboard
-      )
-        template(#prefix)
-          q-icon(name='task', size='xs')
-      q-icon.priority-icon(
-        :name='priorityIcon'
-        :color='priorityColor'
-        size='16px'
-      )
-        q-tooltip(anchor='bottom middle', self='top middle') Приоритет: {{ priorityLabel }}
-    .meta-bottom(v-if='hasTime')
-      Estimation(
-        :estimation='issue.estimate'
-        :fact='issue.fact'
-        size='xs'
-      )
+    q-icon.priority-icon(
+      :name='priorityIcon'
+      :color='priorityColor'
+      size='18px'
+    )
+      q-tooltip(anchor='bottom middle', self='top middle') Приоритет: {{ priorityLabel }}
+    EntityIdBadge(
+      :raw-id='issue.id'
+      copy-on-click
+      address-clipboard
+    )
+      template(#prefix)
+        q-icon(name='task', size='xs')
+    Estimation.meta-time(
+      v-if='hasTime'
+      :estimation='issue.estimate'
+      :fact='issue.fact'
+      size='xs'
+      no-icon
+    )
 
   // 2. Тайтл: занимает всё свободное место, переносится по словам, ellipsis по необходимости.
   .title-block(@click.stop="onTitleClick")
@@ -92,30 +92,24 @@ const hasTime = computed(() => {
   box-sizing: border-box;
 }
 
-// 1. Meta — компактная фикс-ширина, не сжимается.
+// 1. Meta — горизонтальная цепочка приоритет → ID → время.
 .meta-block {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  flex-shrink: 0;
-  width: 110px;
-  gap: 2px;
-  overflow: hidden;
-}
-
-.meta-top {
-  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 4px;
+  flex-shrink: 0;
+  gap: 8px;
 }
 
 .priority-icon {
   flex-shrink: 0;
 }
 
-.meta-bottom {
+.meta-time {
+  // Время идёт справа от ID, без иконки-часов внутри (она утяжеляла строку).
   font-size: 11px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 // 2. Title — растягивается, ellipsis при нехватке места.
@@ -165,8 +159,8 @@ const hasTime = computed(() => {
   margin-left: auto;
 }
 
-// Mobile: на узких экранах раскладываем в две строки —
-// meta + title в первой строке, actions переносится во вторую и прижимается вправо.
+// Mobile: meta + title в первой строке (title справа от меты), actions
+// переносится во вторую строку и прижимается вправо.
 @media (max-width: 640px) {
   .issue-row {
     flex-wrap: wrap;
@@ -174,11 +168,17 @@ const hasTime = computed(() => {
   }
 
   .meta-block {
-    width: 92px;
+    gap: 6px;
+
+    // На узких экранах прячем время — оно остаётся у заголовка задачи в детали.
+    .meta-time {
+      display: none;
+    }
   }
 
   .title-block {
-    flex-basis: calc(100% - 110px);
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   .actions-block {

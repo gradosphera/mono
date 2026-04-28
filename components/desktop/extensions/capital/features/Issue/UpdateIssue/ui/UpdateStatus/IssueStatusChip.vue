@@ -21,23 +21,26 @@
       anchor='bottom right'
       self='top right'
       auto-close
+      :offset='[0, 6]'
     )
-      q-list(dense, style='min-width: 180px')
-        q-item(
-          v-for='opt in statusOptions'
-          :key='opt.value'
-          clickable
-          v-close-popup
-          @click='handleStatusChange(opt)'
-        )
-          q-item-section(avatar)
-            q-badge(
-              :color='statusColorOf(opt.value)'
-              rounded
-              style='min-width: 10px; height: 10px; padding: 0'
-            )
-          q-item-section
-            .text-body2 {{ opt.label }}
+      .status-menu
+        .status-menu-header Сменить статус
+        q-list.status-menu-list
+          q-item.status-menu-item(
+            v-for='opt in statusOptions'
+            :key='opt.value'
+            clickable
+            v-close-popup
+            @click='handleStatusChange(opt)'
+          )
+            q-item-section(avatar, style='min-width: 28px')
+              q-icon(
+                name='circle'
+                :color='statusColorOf(opt.value)'
+                size='10px'
+              )
+            q-item-section
+              .status-menu-label {{ opt.label }}
 </template>
 
 <script setup lang="ts">
@@ -96,6 +99,7 @@ const statusOptions = computed(() =>
 
 const currentLabel = computed(() => getIssueStatusLabel(props.modelValue));
 const chipColor = computed(() => getIssueStatusColor(props.modelValue));
+
 const statusColorOf = (s: string) => getIssueStatusColor(s);
 
 const handleStatusChange = async (option: {
@@ -137,5 +141,49 @@ const handleStatusChange = async (option: {
     text-overflow: ellipsis;
     max-width: 110px;
   }
+}
+
+// Меню смены статуса — внутренние отступы, hover, разделители.
+.status-menu {
+  min-width: 200px;
+  padding: 6px;
+  background-color: var(--q-color-white, #fff);
+  border-radius: 8px;
+}
+
+.status-menu-header {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--q-grey-6, #757575);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px 6px;
+}
+
+.status-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-menu-item {
+  border-radius: 6px;
+  min-height: 36px;
+  padding: 4px 10px;
+  transition: background-color 0.12s ease;
+
+  :deep(.q-focus-helper) {
+    border-radius: 6px;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.status-menu-label {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
 }
 </style>

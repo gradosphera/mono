@@ -11,6 +11,7 @@ div
   )
     .time-progress-label
       q-icon(
+        v-if='!noIcon'
         name='schedule'
         size='xs'
         :color='progressColor'
@@ -29,6 +30,7 @@ div
     :class='sizeClass'
   )
     q-icon(
+      v-if='!noIcon'
       name='schedule',
       size='xs'
       color='grey-6'
@@ -46,6 +48,7 @@ const props = defineProps<{
   estimation?: number; // План в часах (может быть 0 = «оценки нет»)
   fact?: number; // Фактически накопленное время в часах (сумма TimeEntry)
   size?: 'xs' | 'sm' | 'md';
+  noIcon?: boolean; // Скрыть значок-часы (для встраивания в плотные строки списка)
 }>();
 
 function formatHours(hours: number | undefined | null): string {
