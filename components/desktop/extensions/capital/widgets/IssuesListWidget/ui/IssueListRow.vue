@@ -82,9 +82,12 @@ const canChangeEstimate = computed(
 <style lang="scss" scoped>
 .issue-row {
   display: flex;
-  flex-wrap: nowrap;
+  // Разрешаем перенос: на узких колонках (страница задач внутри компонента
+  // имеет ещё и левую панель — реальная ширина списка ~600px) actions-блок
+  // мигрирует на вторую строку, не клипается за правый край.
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   min-height: 48px;
   padding: 6px 12px;
   width: 100%;
@@ -105,10 +108,12 @@ const canChangeEstimate = computed(
 }
 
 
-// 2. Title — растягивается, ellipsis при нехватке места.
+// 2. Title — растягивается, ellipsis при нехватке места. flex-basis 200px:
+// если в строке есть место для (meta + 200 + actions) — однорядный layout;
+// если нет — title съезжает на 100% и actions переносится на вторую строку.
 .title-block {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 1 200px;
+  min-width: 200px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;

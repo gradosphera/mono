@@ -272,13 +272,20 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+// table-layout: fixed + width: 100% — иначе html-table ужимает колонки под
+// контент: длинный title распирает строку шире контейнера, actions-блок
+// уезжает за правый край (наблюдалось на ComponentTasksPage с боковой панелью).
 .q-table {
+  table-layout: fixed;
+  width: 100%;
+
   tr {
     min-height: 48px;
   }
 
   .q-td {
     padding: 0; // строка живёт в IssueListRow.vue со своими отступами
+    overflow: hidden;
   }
 }
 </style>
