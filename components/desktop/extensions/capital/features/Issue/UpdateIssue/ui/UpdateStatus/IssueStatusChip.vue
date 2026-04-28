@@ -9,6 +9,7 @@
     size='sm'
     class='status-chip-trigger'
   )
+    q-spinner(v-if='isSaving', size='12px', color='white', class='q-mr-xs')
     span.status-chip-label {{ currentLabel }}
     q-icon(
       v-if='!isReadonly && hasTransitions'
@@ -44,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
 
@@ -73,8 +74,27 @@ const emit = defineEmits<{
 const route = useRoute();
 const projectHash = computed(() => route.params.project_hash as string);
 
-const { debounceSave } = useUpdateIssue();
+const { saveImmediately } = useUpdateIssue();
 const issueStore = useIssueStore();
+
+// Оптимистичное локальное значение: показываем сразу после клика, не ждём
+// возврата store из бэка. Сбрасываем как только parent догнал переключение
+// (props.modelValue поменялся на ту же букву).
+const optimisticStatus = ref<Zeus.IssueStatus | null>(null);
+const isSaving = ref(false);
+
+watch(
+  () => props.modelValue,
+  (next) => {
+    if (optimisticStatus.value && next === optimisticStatus.value) {
+      optimisticStatus.value = null;
+    }
+  }
+);
+
+const displayStatus = computed(
+  () => optimisticStatus.value ?? props.modelValue
+);
 
 const ALL_STATUS_OPTIONS = [
   Zeus.IssueStatus.BACKLOG,
@@ -97,8 +117,8 @@ const statusOptions = computed(() =>
   )
 );
 
-const currentLabel = computed(() => getIssueStatusLabel(props.modelValue));
-const chipColor = computed(() => getIssueStatusColor(props.modelValue));
+const currentLabel = computed(() => getIssueStatusLabel(displayStatus.value));
+const chipColor = computed(() => getIssueStatusColor(displayStatus.value));
 
 const statusColorOf = (s: string) => getIssueStatusColor(s);
 
@@ -106,18 +126,29 @@ const handleStatusChange = async (option: {
   value: Zeus.IssueStatus;
   label: string;
 }) => {
-  if (option.value === props.modelValue) return;
+  if (option.value === displayStatus.value) return;
   const previousStatus = props.modelValue;
+
+  // 1) Оптимистично обновляем UI сразу — chip перекрашивается до round-trip.
+  optimisticStatus.value = option.value;
+  emit('update:modelValue', option.value);
+  isSaving.value = true;
+
   try {
-    emit('update:modelValue', option.value);
-    await debounceSave(
+    // 2) Сохраняем без debounce — статус это discrete действие, не текстовый ввод.
+    await saveImmediately(
       { issue_hash: props.issueHash, status: option.value },
       projectHash.value
     );
+    // 3) Перезагружаем задачу для свежих permissions/allowed_transitions.
+    //    Watch на props.modelValue сбросит optimisticStatus, когда придёт новое значение.
     await issueStore.updateIssueByHash(projectHash.value, props.issueHash);
   } catch (error) {
     console.error('IssueStatusChip: failed to update status', error);
+    optimisticStatus.value = null;
     emit('update:modelValue', previousStatus);
+  } finally {
+    isSaving.value = false;
   }
 };
 </script>

@@ -75,9 +75,11 @@ const isProgrammaticChange = ref(false);
 
 const canAssign = computed(() => !!props.permissions?.can_assign_creator);
 
-const visibleCreators = computed(() => currentCreators.value.slice(0, 3));
+// Показываем максимум 2 аватарки + одну overflow-«+N» — это даёт ровно 3 кружка.
+// Дальше уже толпа: лучше «+5» в одном кружке, чем 4-5 наезжающих инициалов.
+const visibleCreators = computed(() => currentCreators.value.slice(0, 2));
 const hiddenCount = computed(() =>
-  Math.max(0, currentCreators.value.length - 3)
+  Math.max(0, currentCreators.value.length - 2)
 );
 
 function initialOf(c: IContributor | undefined): string {
@@ -209,9 +211,15 @@ watch(
   align-items: center;
 }
 
+// Фиксированная ширина под максимум 2 аватарки + overflow-кружок (3 круга × 28
+// с overlap -10px = 64px + padding). Без фикс-ширины колонка прыгает при разном
+// числе исполнителей: статус-chip уезжает влево/вправо между строками.
 .creators-trigger {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
+  width: 72px;
+  box-sizing: border-box;
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 12px;
@@ -227,6 +235,7 @@ watch(
 
   &.empty {
     padding: 4px;
+    justify-content: center;
   }
 }
 
