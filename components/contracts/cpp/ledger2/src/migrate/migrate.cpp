@@ -100,27 +100,6 @@ inline LegacyBalances read_legacy_balances(eosio::name coopname) {
 }
 
 /**
- * Суммирует `available` по `progwallets` (soviet, scope=coopname) для program_id.
- * Используется voskhod-веткой миграции: переносим Цифровой Кошелёк по факту,
- * а не считаем его арифметически из (legacy_51 − legacy_861).
- */
-inline eosio::asset sum_progwallet_available(eosio::name coopname, uint64_t program_id) {
-  progwallets_index progwallets(_soviet, coopname.value);
-  auto byprog = progwallets.get_index<"byprogram"_n>();
-
-  eosio::asset total(0, _root_govern_symbol);
-
-  for (auto it = byprog.lower_bound(program_id); it != byprog.end() && it->program_id == program_id; ++it) {
-    if (it->available.amount == 0) continue;
-    eosio::check(it->available.symbol == _root_govern_symbol,
-                 std::string{"migrate: progwallet program_id="} + std::to_string(program_id) +
-                   " имеет неожиданный symbol (available)");
-    total += it->available;
-  }
-  return total;
-}
-
-/**
  * Суммирует `blocked` по `progwallets` (soviet, scope=coopname) для program_id.
  */
 inline eosio::asset sum_progwallet_blocked(eosio::name coopname, uint64_t program_id) {
@@ -235,49 +214,62 @@ inline void emplace_wallet_only(eosio::name self_name,
 }
 
 /**
- * Спец-ветка миграции для voskhod: переносим по фактическим суммам
- * progwallets + расчётным мин. паевым по типам, БЕЗ арифметического
- * расщепления legacy_80 на (share_money / rid_share).
+ * Спец-ветка миграции для voskhod — РУЧНОЙ ХАРДКОД сумм по кошелькам.
  *
- * Причина: на voskhod два параллельных учёта (ledger::accounts и
- * soviet::progwallets) не сходятся между собой (расхождение порядка 70k +
- * 141k денег Благороста, прошедших через 51, и т.п.). Вместо «сшивки»
- * через арифметику — переносим именно то, что сейчас лежит на кошельках.
+ * Цифры заведены вручную после сверки с фактическими данными mainnet
+ * (snapshot 2026-04-29). При необходимости править — править прямо здесь,
+ * пересобирать ledger2.wasm и катить.
  *
- * Раскладка:
- *   1. w.reg.minshr  ← Σ accepted-пайщиков по типу        (Dr 51 / Cr 80)
- *   2. w.wal.share   ← Σ progwallets[pid=1].available     (Dr 51 / Cr 80)
- *   3. w.reg.entry   ← legacy_861 (фактический остаток)   (Dr 51 / Cr 86)
- *   4. w.cap.bginv   ← Σ progwallets[pid=4].blocked       (БЕЗ проводок)
- *   5. w.cap.gncom   ← Σ progwallets[pid=3].blocked       (БЕЗ проводок)
+ * Причина хардкода: legacy::accounts и soviet::progwallets рассинхронизированы
+ * (деньги Благороста, прошедшие через 51, разошлись 80 vs progwallets,
+ * есть бумажный шлейф на 51, и т.п.). Вместо арифметической сшивки —
+ * заводим суммы вручную по тому, как кооператив должен выглядеть в ledger2.
  *
- * Имущественная часть на legacy 80 (РИД) НЕ мигрируется отдельным TRANSIT_RID:
- * она остаётся в legacy::ledger как «осадок» на 80 до Phase 2 (ADR-009),
- * когда Благорост схлопнется в w.cap.blago и заберёт всё имущество туда.
+ * Имущественная часть на legacy 80 (РИД ~56.8M) сюда НЕ заводится
+ * отдельным w.wal.sharid: она остаётся осадком на legacy 80 до Phase 2
+ * (ADR-009), когда Благорост схлопнется в w.cap.blago и заберёт имущество.
+ *
+ * Бух-баланс по этой таблице:
+ *   Dr 51 = w.reg.minshr + w.wal.share + w.reg.entry  = 31800 + 569900 + 12500 = 614200
+ *   Cr 80 = w.reg.minshr + w.wal.share                = 31800 + 569900         = 601700
+ *   Cr 86 = w.reg.entry                               = 12500
+ *   Σ Dr = Σ Cr = 614200 ✓
+ *
+ * Σ Благороста на bginv (57 044 311) и Генератора на gncom (0) идут
+ * прямым emplace без бух-проводок (параллельный progwallets-учёт).
  */
 inline void migrate_voskhod_facts(eosio::name self_name, const cooperative2& coop) {
   const eosio::name coopname = coop.username;
-  const LegacyBalances b = read_legacy_balances(coopname);
+  const eosio::symbol sym    = _root_govern_symbol;
 
-  // 1. Минимальные паевые — расчётно по типам
-  const eosio::asset min_total = compute_min_total_by_type(coopname, coop);
+  // ┌────────────────────────────────────────────────────────────────────┐
+  // │  ТАБЛИЦА МИГРАЦИИ ВОСХОДА — править здесь                          │
+  // │  amount задаётся в "копейках" (× 10000), т.к. RUB = 4 знака        │
+  // │  31 800.0000 RUB → 318'000'000                                     │
+  // └────────────────────────────────────────────────────────────────────┘
 
-  // 2. Цифровой Кошелёк — Σ pid=1 available из progwallets
-  const eosio::asset ck_share_pay = sum_progwallet_available(coopname, 1);
+  // 1. w.reg.minshr — Минимальные паевые взносы (Dr 51 / Cr 80)
+  const eosio::asset W_REG_MINSHR = eosio::asset(    318'000'000LL, sym); //         31 800.0000 RUB
 
-  // 3. Вступительные — фактический остаток на legacy 861
-  const eosio::asset entry_total = b.entry;
+  // 2. w.wal.share  — Цифровой Кошелёк, паевая часть (Dr 51 / Cr 80)
+  const eosio::asset W_WAL_SHARE  = eosio::asset(  5'699'000'000LL, sym); //        569 900.0000 RUB
 
-  // 4. Благорост, 5. Генератор — Σ blocked по соответствующим pid
-  const eosio::asset blagorost_invest = sum_progwallet_blocked(coopname, 4);
-  const eosio::asset generator_commit = sum_progwallet_blocked(coopname, 3);
+  // 3. w.reg.entry  — Вступительные взносы (Dr 51 / Cr 86)
+  const eosio::asset W_REG_ENTRY  = eosio::asset(    125'000'000LL, sym); //         12 500.0000 RUB
 
-  send_transit(self_name, coopname, operations::migration::MIN_SHARE, min_total);
-  send_transit(self_name, coopname, operations::migration::SHARE,     ck_share_pay);
-  send_transit(self_name, coopname, operations::migration::ENTRY,     entry_total);
+  // 4. w.cap.bginv  — ЦПП «Благорост» (emplace, БЕЗ проводок)
+  const eosio::asset W_CAP_BGINV  = eosio::asset(570'443'110'000LL, sym); //     57 044 311.0000 RUB
 
-  emplace_wallet_only(self_name, coopname, ledger2_wallets::BLAGOROST_INVEST,   blagorost_invest);
-  emplace_wallet_only(self_name, coopname, ledger2_wallets::GENERATOR_COMMIT,   generator_commit);
+  // 5. w.cap.gncom  — ЦПП «Генератор» (emplace, БЕЗ проводок); 0 → не создаётся
+  const eosio::asset W_CAP_GNCOM  = eosio::asset(              0LL, sym); //              0.0000 RUB
+
+  // ── применяем таблицу ───────────────────────────────────────────────
+  send_transit(self_name, coopname, operations::migration::MIN_SHARE, W_REG_MINSHR);
+  send_transit(self_name, coopname, operations::migration::SHARE,     W_WAL_SHARE);
+  send_transit(self_name, coopname, operations::migration::ENTRY,     W_REG_ENTRY);
+
+  emplace_wallet_only(self_name, coopname, ledger2_wallets::BLAGOROST_INVEST,   W_CAP_BGINV);
+  emplace_wallet_only(self_name, coopname, ledger2_wallets::GENERATOR_COMMIT,   W_CAP_GNCOM);
 }
 
 /**
