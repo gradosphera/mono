@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Entrypoint для образа ke-bootstrap (`ghcr.io/coopenomics/bootstrap`).
+# Entrypoint для образа ke-bootstrap (`dicoop/bootstrap`).
 #
 # Один и тот же бинарь поддерживает несколько режимов через первый
 # аргумент CMD (по умолчанию `boot:remote`). Все режимы — short-lived,

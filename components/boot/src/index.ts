@@ -289,7 +289,7 @@ program
 /**
  * Bootstrap режим для удалённой ноды (без управления docker-контейнером).
  *
- * Используется внутри образа `ghcr.io/coopenomics/bootstrap` (one-shot job
+ * Используется внутри образа `dicoop/bootstrap` (one-shot job
  * в docker-compose), запускаемого рядом с уже работающим `ke-node`-сервисом.
  * RPC URL берётся из `CHAIN_URL` (тот же конфиг, что у обычного `boot`),
  * пути до wasm/abi — из `CONTRACTS_DIR` (см. `configs/contracts.ts`).

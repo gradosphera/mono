@@ -1,6 +1,6 @@
 name: Build bootstrap container
 
-# Сборка и публикация образа `ghcr.io/coopenomics/bootstrap` —
+# Сборка и публикация образа `dicoop/bootstrap` (DockerHub) —
 # one-shot оркестратора первичного деплоя контрактов на KE-узел
 # (см. `components/boot/docker/Dockerfile`). Образ потребляется
 # в docker-compose рядом с `dicoop/blockchain_v5.1.1`-нодой как
@@ -28,8 +28,8 @@ name: Build bootstrap container
 # заново, либо запустить workflow вручную.
 #
 # Секреты:
-#   GITHUB_TOKEN                          — авто, для push в ghcr.io
-#   TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID — уведомления
+#   DOCKERHUB_USERNAME / DOCKERHUB_TOKEN  — публикация в dicoop/*
+#   TELEGRAM_BOT_TOKEN  / TELEGRAM_CHAT_ID — уведомления
 
 on:
   push:
@@ -47,10 +47,6 @@ on:
         description: 'Тег dicoop/contracts (override; default = тег ветки)'
         required: false
         default: ''
-
-permissions:
-  contents: read
-  packages: write
 
 jobs:
   build:
@@ -89,12 +85,11 @@ jobs:
             echo "CONTRACTS_TAG=${{ github.event.inputs.contracts_tag }}" >> $GITHUB_ENV
           fi
 
-      - name: Login to GHCR
+      - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Pull base contracts image (sanity check)
         run: |
@@ -103,7 +98,7 @@ jobs:
 
       - name: Build and push image
         run: |
-          IMAGE="ghcr.io/coopenomics/bootstrap"
+          IMAGE="dicoop/bootstrap"
           docker build \
             --build-arg "CONTRACTS_TAG=${CONTRACTS_TAG}" \
             --label "org.opencontainers.image.revision=${{ github.sha }}" \
@@ -128,7 +123,7 @@ jobs:
 
       - name: Verify pushed image
         run: |
-          IMAGE="ghcr.io/coopenomics/bootstrap"
+          IMAGE="dicoop/bootstrap"
           docker run --rm "${IMAGE}:${DOCKER_TAG}" verify
 
       - name: Telegram notify success
@@ -136,11 +131,11 @@ jobs:
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d text="✅ [GITHUB MONO] ghcr.io/coopenomics/bootstrap:${DOCKER_TAG} (contracts=${CONTRACTS_TAG}, sha=${GITHUB_SHA::7})"
+            -d text="✅ [GITHUB MONO] dicoop/bootstrap:${DOCKER_TAG} (contracts=${CONTRACTS_TAG}, sha=${GITHUB_SHA::7})"
 
       - name: Telegram notify failure
         if: ${{ failure() }}
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
             -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-            -d text="❌ [GITHUB MONO] Ошибка сборки ghcr.io/coopenomics/bootstrap на ${{ github.ref_name }} (sha=${GITHUB_SHA::7})"
+            -d text="❌ [GITHUB MONO] Ошибка сборки dicoop/bootstrap на ${{ github.ref_name }} (sha=${GITHUB_SHA::7})"
