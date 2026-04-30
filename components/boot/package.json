@@ -8,6 +8,11 @@
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
   "license": "",
   "keywords": [],
+  "main": "./dist/index.cjs",
+  "files": [
+    "dist",
+    "scripts"
+  ],
   "scripts": {
     "build": "unbuild",
     "enter": "./scripts/enter.sh",
