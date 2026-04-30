@@ -12,3 +12,4 @@ dist/
 _blago/
 blago/
 components/reports-standarts/ВОСХОД/
+.env.testnet
