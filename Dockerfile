@@ -50,19 +50,17 @@ RUN pnpm install --frozen-lockfile
 # образ годился любому потребителю mono-base.
 RUN lerna run build
 
-# Удалить devDeps из всех workspace node_modules. Это и есть основная
-# оптимизация размера — typescript, vitest, eslint, unbuild, ts-node,
-# desktop-сборщики и пр. удаляются из финального дерева.
+# `pnpm prune --prod` временно отключён.
 #
-#  - `CI=true` отключает интерактивный prompt («вы уверены что снести
-#    modules?») — без TTY pnpm иначе абортится с
-#    ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY.
-#  - `--ignore-scripts` подавляет lifecycle hooks (prepare/postinstall)
-#    после prune. Иначе pnpm дёргает `quasar prepare` в desktop'е,
-#    а quasar (devDep) уже снесён → ELIFECYCLE. Сборка артефактов
-#    уже прошла на шаге `lerna run build` — повторно ничего готовить
-#    не нужно.
-RUN CI=true pnpm prune --prod --ignore-scripts
+# Производственные сервисы в playbook'е monocoop запускают runtime
+# через pnpm-script'ы:
+#   cooparser     → `esno src/index.ts` (esno в devDeps)
+#   notifications → `tsx src/sync/sync-runner.ts` (tsx в devDeps)
+#
+# `prune --prod` выкинул бы их и сломал старт при pull тонкого образа
+# без volume-mount. Вернёмся к prune после того, как переведём эти
+# сервисы на `node dist/...` (есть отдельная задача — пофиксить
+# scripts.start, потом вернуть prune для финальных -1.5GB).
 
 # ── Stage 2: runtime ──────────────────────────────────────────────────
 FROM node:22-slim AS runtime
