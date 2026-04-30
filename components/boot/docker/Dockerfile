@@ -53,9 +53,13 @@ RUN corepack enable && corepack prepare pnpm@9.0.6 --activate \
 
 WORKDIR /repo
 
-# Workspace-конфиг + lockfile + корневой package.json — нужны pnpm для
-# построения графа workspace до того, как мы скопируем компоненты.
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml lerna.json ./
+# Минимальные root-файлы для мини-workspace (boot + его workspace-deps).
+# Полный root /package.json + /pnpm-workspace.yaml сюда не годятся —
+# они ссылаются на 14+ workspace-пакетов (cleos, controller, desktop,
+# ...), которые в bootstrap-образе не нужны и в build-context не
+# копируются. Использовать их → ERR_PNPM_WORKSPACE_PKG_NOT_FOUND.
+COPY components/boot/docker/bootstrap.package.json     ./package.json
+COPY components/boot/docker/bootstrap.pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 # Рабочие пакеты, нужные для boot:
 #   - cooptypes / factory      — workspace:* зависимости
@@ -64,7 +68,11 @@ COPY components/cooptypes/ ./components/cooptypes/
 COPY components/factory/   ./components/factory/
 COPY components/boot/      ./components/boot/
 
-RUN pnpm install --frozen-lockfile
+# `--no-frozen-lockfile` — мини-workspace не совпадает с корневым
+# /pnpm-lock.yaml, поэтому pnpm генерирует свой lock внутри образа.
+# В build-stage лок не сохраняется, поэтому drift здесь безопасен;
+# воспроизводимость дают branch+sha tags на финальном образе.
+RUN pnpm install --no-frozen-lockfile
 
 # ── Stage 2: build TS пакетов ────────────────────────────────────────
 FROM deps AS build

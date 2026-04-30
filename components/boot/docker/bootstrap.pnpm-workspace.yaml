@@ -1,0 +1,10 @@
+# Минимальный pnpm-workspace для сборки ke-bootstrap образа.
+# Состав совпадает с тем, что копируется в `components/boot/docker/Dockerfile`
+# (boot + его workspace-зависимости). Полный список пакетов
+# `components/*` сюда не попадает, чтобы pnpm install не пытался
+# резолвить отсутствующие компоненты (cleos, controller, desktop, ...).
+link-workspace-packages: true
+packages:
+  - 'components/boot'
+  - 'components/cooptypes'
+  - 'components/factory'
