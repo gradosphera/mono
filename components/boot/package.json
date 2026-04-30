@@ -9,6 +9,7 @@
   "license": "",
   "keywords": [],
   "scripts": {
+    "build": "unbuild",
     "enter": "./scripts/enter.sh",
     "cli": "esno src/index.ts",
     "deploy": "esno src/index.ts deploy",
@@ -17,6 +18,7 @@
     "boot": "esno src/index.ts boot",
     "boot:clean": "esno src/index.ts boot:clean",
     "boot:extra": "esno src/index.ts boot:extra",
+    "boot:remote": "esno src/index.ts boot:remote",
     "reboot:clean": "cd components/boot/scripts && bash clean_reboot.sh",
     "reboot:extra": "cd components/boot/scripts && bash extra_reboot.sh",
     "create-coop": "esno src/index.ts create-coop",
