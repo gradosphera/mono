@@ -40,6 +40,11 @@
 #                           берутся wasm/abi через `COPY --from`.
 #   Stage 5 (runtime)     — slim node:20-alpine, `/app` + `/contracts`.
 
+# Глобальный ARG до первого FROM — иначе он не виден в FROM следующих
+# стадий (BuildKit делает ARG, объявленный после FROM, локальным для
+# предыдущей стадии).
+ARG CONTRACTS_TAG=dev
+
 # ── Stage 1: install dependencies ────────────────────────────────────
 FROM node:20-alpine AS deps
 
@@ -84,8 +89,8 @@ RUN pnpm deploy --filter @coopenomics/boot --prod /app
 # Тег этого образа должен совпадать с тегом ke-bootstrap (см.
 # `.github/workflows/build-bootstrap.yaml`). Multi-stage `COPY` не
 # зависит от того, что dicoop/contracts что-то делает в ENTRYPOINT —
-# нам нужен только filesystem.
-ARG CONTRACTS_TAG=dev
+# нам нужен только filesystem. ARG объявлен в самом начале файла
+# (до первого FROM) — здесь только используется.
 FROM dicoop/contracts:${CONTRACTS_TAG} AS contracts
 
 # ── Stage 5: runtime ─────────────────────────────────────────────────
