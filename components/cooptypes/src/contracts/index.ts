@@ -78,3 +78,12 @@ export * as LedgerContract from './ledger'
  * Смарт-контракт управления общими собраниями пайщиков
  */
 export * as MeetContract from './meet'
+
+/**
+ * Смарт-контракт каталога приложений ВОСХОД (`apps-catalog`).
+ *
+ * Координационная плоскость: реестр пакетов, релизы (active/superseded/withdrawn),
+ * подписки кооперативов на пакеты, реестр коопов с subnet-signing-key.
+ * Деплоится на корневой KE-цепи и обслуживает несколько подсетей одновременно.
+ */
+export * as AppsContract from './apps'

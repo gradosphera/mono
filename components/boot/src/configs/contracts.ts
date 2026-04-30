@@ -105,4 +105,9 @@ export default [
     path: path.resolve(process.cwd(), '../contracts/build/contracts/meet'),
     target: 'meet',
   },
+  {
+    name: 'apps',
+    path: path.resolve(process.cwd(), '../contracts/build/contracts/apps'),
+    target: 'apps',
+  },
 ]
