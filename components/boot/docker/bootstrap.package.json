@@ -1,6 +1,0 @@
-{
-  "name": "monocoop-bootstrap-build",
-  "private": true,
-  "packageManager": "pnpm@9.0.6",
-  "_comment": "Минимальный root package.json для multi-stage сборки ke-bootstrap образа. Не используется в обычном workspace — там действует /package.json. Здесь только то, что нужно pnpm для построения графа из мини-набора пакетов: boot + его workspace-зависимости (cooptypes, factory). Все другие коопенономиксовые пакеты (cleos, controller, desktop, ...) сюда не попадают, чтобы не раздувать образ."
-}
