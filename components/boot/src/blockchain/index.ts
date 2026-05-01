@@ -267,6 +267,19 @@ export default class Blockchain {
       console.log('contract setted: ', contract.target)
     }
     catch (e) {
+      // Отсутствующий wasm/abi — soft warn. Контракт может быть
+      // временно отключён в components/contracts/CMakeLists.txt на
+      // другой ветке (например ledger2 пока в reports), и dicoop/contracts
+      // его не содержит. Это нормально для in-progress feature-веток.
+      if ((e as NodeJS.ErrnoException)?.code === 'ENOENT') {
+        console.warn(
+          `[setContract] SKIPPED '${contract.name}' on '${contract.target}': artifact missing at ${contract.path}`,
+        )
+        return
+      }
+      // Всё остальное (RPC errors, transaction failures, abi parse) —
+      // fail-fast: sideboot не должен молча отдавать "готовую" цепь
+      // с дырами в развёртывании.
       const msg = e instanceof Error ? e.message : String(e)
       throw new Error(
         `Failed to set contract '${contract.name}' on '${contract.target}' (path: ${contract.path}): ${msg}`,
