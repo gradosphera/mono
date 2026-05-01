@@ -41,13 +41,18 @@ RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
 # свой bundle с inlined workspace-deps.
 RUN pnpm --filter "@coopenomics/boot..." build
 
-# Workspace-deps уже в bundle — выкидываем их из package.json,
-# чтобы npm install в runtime не падал на "workspace:*" specifier.
+# Workspace-deps inline'ятся в bundle, но их транзитивные npm-deps
+# (factory тащит handlebars/ajv/mongodb/..., cooptypes пуст) остаются
+# external — нужны в финальном node_modules. Мерджим их в boot.deps
+# и удаляем сами workspace-spec'и (npm install не понимает workspace:*).
 RUN node -e "const fs=require('fs'); \
-  const p=JSON.parse(fs.readFileSync('components/boot/package.json','utf8')); \
-  delete p.dependencies['cooptypes']; \
-  delete p.dependencies['@coopenomics/factory']; \
-  fs.writeFileSync('components/boot/package.json', JSON.stringify(p, null, 2));"
+  const boot=JSON.parse(fs.readFileSync('components/boot/package.json','utf8')); \
+  const factory=JSON.parse(fs.readFileSync('components/factory/package.json','utf8')); \
+  const cooptypes=JSON.parse(fs.readFileSync('components/cooptypes/package.json','utf8')); \
+  boot.dependencies = { ...factory.dependencies, ...cooptypes.dependencies, ...boot.dependencies }; \
+  delete boot.dependencies['cooptypes']; \
+  delete boot.dependencies['@coopenomics/factory']; \
+  fs.writeFileSync('components/boot/package.json', JSON.stringify(boot, null, 2));"
 
 # ─── Stage 2: contracts ───────────────────────────────────────────────
 FROM dicoop/contracts:${CONTRACTS_TAG} AS contracts

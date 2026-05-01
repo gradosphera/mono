@@ -17,6 +17,12 @@ export default defineBuildConfig({
   ],
   declaration: true,
   clean: true,
+  // Inline workspace-deps тянет в граф транзитивные npm-deps factory'а
+  // (mongodb, handlebars, ajv, ...). unbuild на них warning'ит как
+  // "implicit external" — они корректно остаются external (мы их
+  // мерджим в boot/package.json в Dockerfile), но warning по умолчанию
+  // делает failOnWarn:true → нужно явно отключить.
+  failOnWarn: false,
   rollup: {
     emitCJS: true,
   },
