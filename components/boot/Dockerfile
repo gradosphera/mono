@@ -7,13 +7,18 @@
 # создаёт системный токен и инициализирует system/emission/powerup.
 #
 # Контракты НЕ собираются здесь — они тянутся multi-stage из
-# готового артефакта `dicoop/contracts:<tag>` (см. workflow
-# build-contracts.yaml) и кладутся в /contracts. CLI находит их
-# через CONTRACTS_DIR.
+# готового артефакта `dicoop/contracts:<tag>`.
 #
-# Образ self-contained: собирает свежий workspace из текущего
-# checkout'а, не зависит от dicoop/mono-base (который тегается
-# только под релиз-теги).
+# Сборка идёт в три стадии:
+#   1. builder  — full workspace + pnpm install + unbuild → dist/
+#                 + pnpm deploy --prod /deploy (только prod node_modules + dist)
+#   2. contracts (alias) — dicoop/contracts:<tag>
+#   3. runtime  — slim node:22 + COPY /deploy + COPY /contracts
+#
+# Финальный образ содержит только:
+#   - dist/index.cjs (бандл boot, unbuild)
+#   - node_modules только prod-зависимостей boot'а
+#   - /contracts из dicoop/contracts (~40MB)
 #
 # Окружение:
 #   CHAIN_URL              — endpoint удалённой ноды (например http://node:8888)
@@ -22,48 +27,45 @@
 #   EOSIO_PUB_KEY / EOSIO_PRV_KEY  — ключи системного аккаунта eosio
 #   INSTALL_INITIAL_DATA=1 — опционально доставить mono-данные (нужны MONGO_URI/POSTGRES_*)
 #   INSTALL_EXTRA_DATA=1   — то же + расширенный совет
-#
-# Применение в стороннем compose:
-#   services:
-#     node:
-#       image: dicoop/blockchain:latest
-#       ports: ["8888:8888"]
-#     bootcoop:
-#       image: dicoop/bootcoop:dev
-#       depends_on: [node]
-#       environment:
-#         CHAIN_URL: http://node:8888
-#         EOSIO_PUB_KEY: EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
-#         EOSIO_PRV_KEY: 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
-#       restart: "no"
 
 ARG CONTRACTS_TAG=latest
 
+# ─── Stage 1: builder ─────────────────────────────────────────────────
+FROM node:22-slim AS builder
+
+WORKDIR /app
+
+RUN npm install -g pnpm@10.33.0
+
+# Тащим workspace целиком — pnpm-workspace.yaml ожидает components/*.
+COPY . .
+
+# Ставим только boot и его транзитивные workspace-deps (cooptypes, factory).
+RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
+
+# unbuild → dist/index.{mjs,cjs}.
+RUN pnpm --filter @coopenomics/boot build
+
+# pnpm deploy --prod собирает self-contained директорию: только prod
+# node_modules (без dev) + копия пакета. Workspace-deps ресолвятся в файлы.
+RUN pnpm --filter @coopenomics/boot deploy --prod --legacy /deploy
+
+# ─── Stage 2: contracts ───────────────────────────────────────────────
 FROM dicoop/contracts:${CONTRACTS_TAG} AS contracts
 
+# ─── Stage 3: runtime ────────────────────────────────────────────────
 FROM node:22-slim AS runtime
 
 WORKDIR /app
 
-# pnpm под lockfile v9.0 (как в publish-packages.yaml)
-RUN npm install -g pnpm@10.33.0
+# Self-contained boot: dist/ + prod node_modules + package.json.
+COPY --from=builder /deploy /app
 
-# Тащим весь workspace — pnpm-workspace.yaml ожидает components/*.
-# Можно было бы перепилить workspace под slim-образ, но размер не
-# критичен для bootstrap-контейнера, а так не дрейфит с корнем.
-COPY . .
-
-# --filter "@coopenomics/boot..." ставит только boot и его транзитивные
-# workspace-deps (cooptypes, factory). --frozen-lockfile для воспроизводимости.
-RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
-
-# Контракты из готового артефакта в flat-layout
-# (configs/contracts.ts читает из CONTRACTS_DIR).
+# Контракты flat-layout в /contracts (configs/contracts.ts читает CONTRACTS_DIR).
 COPY --from=contracts /contracts /contracts
 ENV CONTRACTS_DIR=/contracts
 
-WORKDIR /app/components/boot
-
 # По умолчанию sideboot режим — против внешней ноды, без docker-управления.
-ENTRYPOINT ["pnpm", "run"]
+# Прямой запуск собранного бандла, без pnpm/esno-обёртки.
+ENTRYPOINT ["node", "dist/index.cjs"]
 CMD ["boot:remote"]
