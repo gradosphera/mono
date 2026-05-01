@@ -43,8 +43,10 @@ COPY . .
 # Ставим только boot и его транзитивные workspace-deps (cooptypes, factory).
 RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
 
-# unbuild → dist/index.{mjs,cjs}.
-RUN pnpm --filter @coopenomics/boot build
+# unbuild → dist/index.{mjs,cjs} для boot + транзитивных
+# workspace-deps (cooptypes, factory). Иначе runtime падает с
+# "Cannot find module '@coopenomics/factory/dist/index.cjs'".
+RUN pnpm --filter "@coopenomics/boot..." build
 
 # pnpm deploy --prod собирает self-contained директорию: только prod
 # node_modules (без dev) + копия пакета. Workspace-deps ресолвятся в файлы.
