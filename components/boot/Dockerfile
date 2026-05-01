@@ -10,15 +10,14 @@
 # готового артефакта `dicoop/contracts:<tag>`.
 #
 # Сборка идёт в три стадии:
-#   1. builder  — full workspace + pnpm install + unbuild → dist/
-#                 + pnpm deploy --prod /deploy (только prod node_modules + dist)
-#   2. contracts (alias) — dicoop/contracts:<tag>
-#   3. runtime  — slim node:22 + COPY /deploy + COPY /contracts
+#   1. builder   — full workspace + pnpm install + unbuild (с inline
+#                  workspace-deps cooptypes/factory) → dist/index.cjs
+#                  + переписанный package.json без workspace-deps
+#   2. contracts — dicoop/contracts:<tag>
+#   3. runtime   — slim node:22 + dist + npm install --omit=dev
 #
-# Финальный образ содержит только:
-#   - dist/index.cjs (бандл boot, unbuild)
-#   - node_modules только prod-зависимостей boot'а
-#   - /contracts из dicoop/contracts (~40MB)
+# В финальном образе только prod-зависимости с npm registry, без
+# pnpm-storage и dev-deps.
 #
 # Окружение:
 #   CHAIN_URL              — endpoint удалённой ноды (например http://node:8888)
@@ -37,20 +36,21 @@ WORKDIR /app
 
 RUN npm install -g pnpm@10.33.0
 
-# Тащим workspace целиком — pnpm-workspace.yaml ожидает components/*.
 COPY . .
 
-# Ставим только boot и его транзитивные workspace-deps (cooptypes, factory).
 RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
 
-# unbuild → dist/index.{mjs,cjs} для boot + транзитивных
-# workspace-deps (cooptypes, factory). Иначе runtime падает с
-# "Cannot find module '@coopenomics/factory/dist/index.cjs'".
+# Билд всех в графе — boot + транзитивные cooptypes/factory.
 RUN pnpm --filter "@coopenomics/boot..." build
 
-# pnpm deploy --prod собирает self-contained директорию: только prod
-# node_modules (без dev) + копия пакета. Workspace-deps ресолвятся в файлы.
-RUN pnpm --filter @coopenomics/boot deploy --prod --legacy /deploy
+# Workspace-deps уже инлайнены в dist (см. build.config.ts) —
+# выкидываем их из package.json, чтобы npm install в финальной
+# стадии не падал на "workspace:*" specifier.
+RUN node -e "const fs=require('fs'); \
+  const p=JSON.parse(fs.readFileSync('components/boot/package.json','utf8')); \
+  delete p.dependencies['cooptypes']; \
+  delete p.dependencies['@coopenomics/factory']; \
+  fs.writeFileSync('components/boot/package.json', JSON.stringify(p, null, 2));"
 
 # ─── Stage 2: contracts ───────────────────────────────────────────────
 FROM dicoop/contracts:${CONTRACTS_TAG} AS contracts
@@ -60,14 +60,19 @@ FROM node:22-slim AS runtime
 
 WORKDIR /app
 
-# Self-contained boot: dist/ + prod node_modules + package.json.
-COPY --from=builder /deploy /app
+# package.json без workspace-deps + готовый dist.
+COPY --from=builder /app/components/boot/package.json ./package.json
+COPY --from=builder /app/components/boot/dist ./dist
+
+# Только prod-зависимости из npm registry. --no-package-lock потому что
+# исходный pnpm-lock.yaml несовместим с npm и не нужен в slim-образе.
+RUN npm install --omit=dev --no-package-lock --no-fund --no-audit \
+ && npm cache clean --force \
+ && rm -rf /root/.npm
 
 # Контракты flat-layout в /contracts (configs/contracts.ts читает CONTRACTS_DIR).
 COPY --from=contracts /contracts /contracts
 ENV CONTRACTS_DIR=/contracts
 
-# По умолчанию sideboot режим — против внешней ноды, без docker-управления.
-# Прямой запуск собранного бандла, без pnpm/esno-обёртки.
 ENTRYPOINT ["node", "dist/index.cjs"]
 CMD ["boot:remote"]
