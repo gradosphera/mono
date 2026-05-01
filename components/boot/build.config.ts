@@ -8,10 +8,11 @@ export default defineBuildConfig({
   clean: true,
   rollup: {
     emitCJS: true,
-    // Инлайним workspace-deps в финальный bundle. Это позволяет в
-    // docker-образе dicoop/bootcoop ставить только npm-зависимости через
-    // `npm install --omit=dev` без workspace-контекста — иначе pnpm
-    // deploy тащит весь .pnpm storage (~1.5GB).
-    inlineDependencies: ['cooptypes', '@coopenomics/factory'],
+    // Инлайним ВСЕ зависимости в финальный bundle. Это позволяет в
+    // docker-образе dicoop/bootcoop вообще не нужен node_modules —
+    // только dist/index.cjs + node runtime. Иначе pnpm deploy тащит
+    // .pnpm storage (~1.5GB), а npm install --omit=dev падает на
+    // workspace:* specifier'ах.
+    inlineDependencies: true,
   },
 })

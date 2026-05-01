@@ -10,14 +10,13 @@
 # готового артефакта `dicoop/contracts:<tag>`.
 #
 # Сборка идёт в три стадии:
-#   1. builder   — full workspace + pnpm install + unbuild (с inline
-#                  workspace-deps cooptypes/factory) → dist/index.cjs
-#                  + переписанный package.json без workspace-deps
+#   1. builder   — full workspace + pnpm install + unbuild с
+#                  inlineDependencies:true → один dist/index.cjs со
+#                  всеми зависимостями zip'нутыми внутрь
 #   2. contracts — dicoop/contracts:<tag>
-#   3. runtime   — slim node:22 + dist + npm install --omit=dev
+#   3. runtime   — slim node:22 + ОДИН файл dist/index.cjs + /contracts
 #
-# В финальном образе только prod-зависимости с npm registry, без
-# pnpm-storage и dev-deps.
+# В финальном образе нет node_modules вообще — только bundle и runtime.
 #
 # Окружение:
 #   CHAIN_URL              — endpoint удалённой ноды (например http://node:8888)
@@ -40,17 +39,9 @@ COPY . .
 
 RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
 
-# Билд всех в графе — boot + транзитивные cooptypes/factory.
+# Билд всего графа — boot + транзитивные cooptypes/factory.
+# inlineDependencies:true запихивает все imports в один bundle.
 RUN pnpm --filter "@coopenomics/boot..." build
-
-# Workspace-deps уже инлайнены в dist (см. build.config.ts) —
-# выкидываем их из package.json, чтобы npm install в финальной
-# стадии не падал на "workspace:*" specifier.
-RUN node -e "const fs=require('fs'); \
-  const p=JSON.parse(fs.readFileSync('components/boot/package.json','utf8')); \
-  delete p.dependencies['cooptypes']; \
-  delete p.dependencies['@coopenomics/factory']; \
-  fs.writeFileSync('components/boot/package.json', JSON.stringify(p, null, 2));"
 
 # ─── Stage 2: contracts ───────────────────────────────────────────────
 FROM dicoop/contracts:${CONTRACTS_TAG} AS contracts
@@ -60,19 +51,12 @@ FROM node:22-slim AS runtime
 
 WORKDIR /app
 
-# package.json без workspace-deps + готовый dist.
-COPY --from=builder /app/components/boot/package.json ./package.json
-COPY --from=builder /app/components/boot/dist ./dist
-
-# Только prod-зависимости из npm registry. --no-package-lock потому что
-# исходный pnpm-lock.yaml несовместим с npm и не нужен в slim-образе.
-RUN npm install --omit=dev --no-package-lock --no-fund --no-audit \
- && npm cache clean --force \
- && rm -rf /root/.npm
+# Bundle со всеми deps внутри — больше ничего не нужно.
+COPY --from=builder /app/components/boot/dist/index.cjs ./index.cjs
 
 # Контракты flat-layout в /contracts (configs/contracts.ts читает CONTRACTS_DIR).
 COPY --from=contracts /contracts /contracts
 ENV CONTRACTS_DIR=/contracts
 
-ENTRYPOINT ["node", "dist/index.cjs"]
+ENTRYPOINT ["node", "index.cjs"]
 CMD ["boot:remote"]
