@@ -229,7 +229,7 @@ export default class Blockchain {
       // console.log(data)
       // console.log("abi: ", serializedAbiHexString)
 
-      this.api.transact(
+      await this.api.transact(
         {
           actions: [
             {
@@ -267,7 +267,11 @@ export default class Blockchain {
       console.log('contract setted: ', contract.target)
     }
     catch (e) {
-      console.log(e)
+      const msg = e instanceof Error ? e.message : String(e)
+      throw new Error(
+        `Failed to set contract '${contract.name}' on '${contract.target}' (path: ${contract.path}): ${msg}`,
+        { cause: e },
+      )
     }
   }
 
