@@ -10,20 +10,18 @@
 # готового артефакта `dicoop/contracts:<tag>`.
 #
 # Сборка идёт в три стадии:
-#   1. builder   — full workspace + pnpm install + unbuild с
-#                  inlineDependencies:true → один dist/index.cjs со
-#                  всеми зависимостями zip'нутыми внутрь
+#   1. builder   — full workspace + pnpm install + unbuild
+#                  (workspace-deps cooptypes/factory inline'ятся в
+#                  bundle, npm-deps остаются external)
 #   2. contracts — dicoop/contracts:<tag>
-#   3. runtime   — slim node:22 + ОДИН файл dist/index.cjs + /contracts
-#
-# В финальном образе нет node_modules вообще — только bundle и runtime.
+#   3. runtime   — slim node:22 + bundle + npm install --omit=dev
 #
 # Окружение:
-#   CHAIN_URL              — endpoint удалённой ноды (например http://node:8888)
-#   CONTRACTS_DIR=/contracts (выставлено по умолчанию)
-#   RPC_WAIT_TIMEOUT_MS    — сколько ждать RPC (default 120000)
-#   EOSIO_PUB_KEY / EOSIO_PRV_KEY  — ключи системного аккаунта eosio
-#   INSTALL_INITIAL_DATA=1 — опционально доставить mono-данные (нужны MONGO_URI/POSTGRES_*)
+#   CHAIN_URL              — endpoint удалённой ноды
+#   CONTRACTS_DIR=/contracts
+#   RPC_WAIT_TIMEOUT_MS    — default 120000
+#   EOSIO_PUB_KEY / EOSIO_PRV_KEY
+#   INSTALL_INITIAL_DATA=1 — опционально mono-данные (нужны MONGO_URI/POSTGRES_*)
 #   INSTALL_EXTRA_DATA=1   — то же + расширенный совет
 
 ARG CONTRACTS_TAG=latest
@@ -39,9 +37,17 @@ COPY . .
 
 RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
 
-# Билд всего графа — boot + транзитивные cooptypes/factory.
-# inlineDependencies:true запихивает все imports в один bundle.
+# Билд графа: cooptypes/factory собирают свои dist/, boot собирает
+# свой bundle с inlined workspace-deps.
 RUN pnpm --filter "@coopenomics/boot..." build
+
+# Workspace-deps уже в bundle — выкидываем их из package.json,
+# чтобы npm install в runtime не падал на "workspace:*" specifier.
+RUN node -e "const fs=require('fs'); \
+  const p=JSON.parse(fs.readFileSync('components/boot/package.json','utf8')); \
+  delete p.dependencies['cooptypes']; \
+  delete p.dependencies['@coopenomics/factory']; \
+  fs.writeFileSync('components/boot/package.json', JSON.stringify(p, null, 2));"
 
 # ─── Stage 2: contracts ───────────────────────────────────────────────
 FROM dicoop/contracts:${CONTRACTS_TAG} AS contracts
@@ -51,12 +57,17 @@ FROM node:22-slim AS runtime
 
 WORKDIR /app
 
-# Bundle со всеми deps внутри — больше ничего не нужно.
-COPY --from=builder /app/components/boot/dist/index.cjs ./index.cjs
+COPY --from=builder /app/components/boot/package.json ./package.json
+COPY --from=builder /app/components/boot/dist ./dist
 
-# Контракты flat-layout в /contracts (configs/contracts.ts читает CONTRACTS_DIR).
+# Только prod npm-зависимости. --no-package-lock потому что
+# pnpm-lock несовместим с npm и в slim-образе не нужен.
+RUN npm install --omit=dev --no-package-lock --no-fund --no-audit \
+ && npm cache clean --force \
+ && rm -rf /root/.npm
+
 COPY --from=contracts /contracts /contracts
 ENV CONTRACTS_DIR=/contracts
 
-ENTRYPOINT ["node", "index.cjs"]
+ENTRYPOINT ["node", "dist/index.cjs"]
 CMD ["boot:remote"]

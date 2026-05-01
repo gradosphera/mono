@@ -1,13 +1,16 @@
-import { builtinModules } from 'node:module'
 import { defineBuildConfig } from 'unbuild'
 
-// Полный bundle всех deps в один dist/index.cjs — для docker-образа
-// dicoop/bootcoop, чтобы в финальном слое не нужен был node_modules.
+// Bundle workspace-deps (cooptypes, @coopenomics/factory) внутрь
+// dist/index.cjs, чтобы в docker-образе не нужно было их пробрасывать
+// через workspace-context. NPM-deps оставляем external — nativе
+// binaries (cpu-features через dockerode→ssh2) не bundling-friendly,
+// плюс tree-shake даёт меньшие финальные node_modules.
 //
-// `rollup.inlineDependencies: true` декларирует намерение, но в unbuild 2
-// есть баг: он добавляет всё из pkg.dependencies в externals ДО проверки
-// inlineDependencies. Поэтому hook 'rollup:options' переопределяет
-// external напрямую — external только built-ins.
+// unbuild 2 имеет особенность: pkg.dependencies авто-добавляются в
+// externals ДО hooks. Чтобы override — переопределяем external через
+// rollup:options. Возвращаем false → не external → inline. Возвращаем
+// undefined → unbuild решает по своим правилам (а он по умолчанию
+// делает npm-deps external).
 export default defineBuildConfig({
   entries: [
     'src/index',
@@ -16,18 +19,16 @@ export default defineBuildConfig({
   clean: true,
   rollup: {
     emitCJS: true,
-    inlineDependencies: true,
   },
   hooks: {
     'rollup:options'(_ctx, options) {
-      const builtins = new Set([
-        ...builtinModules,
-        ...builtinModules.map(m => `node:${m}`),
-      ])
-      options.external = (id) => {
-        if (builtins.has(id) || id.startsWith('node:'))
-          return true
-        return false
+      const prev = options.external
+      options.external = (id: string, importer?: string, isResolved?: boolean) => {
+        if (id === 'cooptypes' || id.startsWith('@coopenomics/factory'))
+          return false
+        if (typeof prev === 'function')
+          return (prev as any)(id, importer, isResolved)
+        return undefined
       }
     },
   },
