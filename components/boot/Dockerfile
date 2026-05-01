@@ -11,6 +11,10 @@
 # build-contracts.yaml) и кладутся в /contracts. CLI находит их
 # через CONTRACTS_DIR.
 #
+# Образ self-contained: собирает свежий workspace из текущего
+# checkout'а, не зависит от dicoop/mono-base (который тегается
+# только под релиз-теги).
+#
 # Окружение:
 #   CHAIN_URL              — endpoint удалённой ноды (например http://node:8888)
 #   CONTRACTS_DIR=/contracts (выставлено по умолчанию)
@@ -34,11 +38,24 @@
 #       restart: "no"
 
 ARG CONTRACTS_TAG=latest
-ARG MONO_BASE_TAG=latest
 
 FROM dicoop/contracts:${CONTRACTS_TAG} AS contracts
 
-FROM dicoop/mono-base:${MONO_BASE_TAG} AS runtime
+FROM node:22-slim AS runtime
+
+WORKDIR /app
+
+# pnpm под lockfile v9.0 (как в publish-packages.yaml)
+RUN npm install -g pnpm@10.33.0
+
+# Тащим весь workspace — pnpm-workspace.yaml ожидает components/*.
+# Можно было бы перепилить workspace под slim-образ, но размер не
+# критичен для bootstrap-контейнера, а так не дрейфит с корнем.
+COPY . .
+
+# --filter "@coopenomics/boot..." ставит только boot и его транзитивные
+# workspace-deps (cooptypes, factory). --frozen-lockfile для воспроизводимости.
+RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
 
 # Контракты из готового артефакта в flat-layout
 # (configs/contracts.ts читает из CONTRACTS_DIR).
@@ -48,7 +65,5 @@ ENV CONTRACTS_DIR=/contracts
 WORKDIR /app/components/boot
 
 # По умолчанию sideboot режим — против внешней ноды, без docker-управления.
-# Переопределить можно: docker run dicoop/bootcoop:dev pnpm run boot:remote
-# или подменив CMD/entrypoint в compose.
 ENTRYPOINT ["pnpm", "run"]
 CMD ["boot:remote"]

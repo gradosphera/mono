@@ -12,7 +12,9 @@ name: Build bootstrap container
 #
 # Зависимости в hub:
 #   dicoop/contracts:<branch>   — пакет wasm/abi (build-contracts.yaml)
-#   dicoop/mono-base:<branch>   — runtime с pnpm/node + workspace (build-containers.yaml)
+#
+# Образ self-contained: собирает workspace из текущего checkout'а,
+# не зависит от dicoop/mono-base (который тегается только релиз-тегами).
 #
 # Секреты:
 #   DOCKERHUB_USERNAME / DOCKERHUB_TOKEN
@@ -60,17 +62,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Pull source images
-        run: |
-          docker pull dicoop/contracts:${{ env.DOCKER_TAG }}
-          docker pull dicoop/mono-base:${{ env.DOCKER_TAG }}
+      - name: Pull contracts image
+        run: docker pull dicoop/contracts:${{ env.DOCKER_TAG }}
 
       - name: Build and push image
         run: |
           IMAGE="dicoop/bootcoop"
           docker build \
             --build-arg CONTRACTS_TAG=${{ env.DOCKER_TAG }} \
-            --build-arg MONO_BASE_TAG=${{ env.DOCKER_TAG }} \
             --label "org.opencontainers.image.revision=${{ github.sha }}" \
             --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -f components/boot/Dockerfile \
