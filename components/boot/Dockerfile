@@ -41,15 +41,15 @@ RUN pnpm install --frozen-lockfile --filter "@coopenomics/boot..."
 # свой bundle с inlined workspace-deps.
 RUN pnpm --filter "@coopenomics/boot..." build
 
-# Workspace-deps inline'ятся в bundle, но их транзитивные npm-deps
-# (factory тащит handlebars/ajv/mongodb/..., cooptypes пуст) остаются
-# external — нужны в финальном node_modules. Мерджим их в boot.deps
-# и удаляем сами workspace-spec'и (npm install не понимает workspace:*).
+# Workspace-deps inline'ятся в bundle, их транзитивные npm-deps factory
+# (handlebars/ajv/mongodb/...) мерджим в boot.deps — нужны в runtime.
+# Cooptypes type-only — его @typescript-eslint/parser в runtime не
+# нужен и конфликтует с eslint v9 в boot.devDeps по peer-spec'ам.
+# Удаляем сами workspace-spec'и (npm install не понимает workspace:*).
 RUN node -e "const fs=require('fs'); \
   const boot=JSON.parse(fs.readFileSync('components/boot/package.json','utf8')); \
   const factory=JSON.parse(fs.readFileSync('components/factory/package.json','utf8')); \
-  const cooptypes=JSON.parse(fs.readFileSync('components/cooptypes/package.json','utf8')); \
-  boot.dependencies = { ...factory.dependencies, ...cooptypes.dependencies, ...boot.dependencies }; \
+  boot.dependencies = { ...factory.dependencies, ...boot.dependencies }; \
   delete boot.dependencies['cooptypes']; \
   delete boot.dependencies['@coopenomics/factory']; \
   fs.writeFileSync('components/boot/package.json', JSON.stringify(boot, null, 2));"
@@ -67,7 +67,7 @@ COPY --from=builder /app/components/boot/dist ./dist
 
 # Только prod npm-зависимости. --no-package-lock потому что
 # pnpm-lock несовместим с npm и в slim-образе не нужен.
-RUN npm install --omit=dev --no-package-lock --no-fund --no-audit \
+RUN npm install --omit=dev --no-package-lock --no-fund --no-audit --legacy-peer-deps \
  && npm cache clean --force \
  && rm -rf /root/.npm
 
