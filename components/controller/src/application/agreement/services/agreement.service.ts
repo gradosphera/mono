@@ -88,13 +88,23 @@ export class AgreementService {
   }
 
   private async fetchNonProgrammatic(filter: AgreementFilterInput): Promise<AgreementDTO[]> {
-    const result = await this.agreementRepository.findAllPaginated(filter, {
-      page: 1,
-      limit: 10_000,
-      sortBy: undefined,
-      sortOrder: 'DESC',
-    });
-    return await this.toDTOs(result.items);
+    // Валидатор пагинации ограничен 1000; если в кооперативе больше непрограммных
+    // соглашений — добираем последовательно. Per-coop cap по Эпику 2 — десятки записей.
+    const PAGE_LIMIT = 1000;
+    const items: import('~/domain/agreement/entities/agreement.entity').AgreementDomainEntity[] = [];
+    let page = 1;
+    while (true) {
+      const result = await this.agreementRepository.findAllPaginated(filter, {
+        page,
+        limit: PAGE_LIMIT,
+        sortBy: undefined,
+        sortOrder: 'DESC',
+      });
+      items.push(...result.items);
+      if (result.items.length < PAGE_LIMIT) break;
+      page += 1;
+    }
+    return await this.toDTOs(items);
   }
 
   private async fetchProgrammatic(filter: AgreementFilterInput & { coopname: string }): Promise<AgreementDTO[]> {
