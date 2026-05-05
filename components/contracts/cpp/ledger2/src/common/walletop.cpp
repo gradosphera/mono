@@ -81,14 +81,14 @@ void ledger2::walletop(eosio::name coopname,
       wallets.modify(it, payer, [&](auto& w) { w.available += amount; });
       break;
     }
-    case WalletOp::TRANSFER:
-    case WalletOp::WALLET_ONLY: {
-      // Оба типа — перенос available между кошельками. WALLET_ONLY отличается
-      // только отсутствием inline debit/credit (см. apply.cpp).
+    case WalletOp::TRANSFER: {
+      // Перенос available между кошельками. Опциональное отсутствие inline
+      // debit/credit определяется парой нулевых account_id на уровне записи
+      // OPERATION_REGISTRY (см. apply.cpp), а не отдельным walletop (ADR-003).
       eosio::check(wallet_from.value != 0 && wallet_to.value != 0,
-                   "walletop TRANSFER/WALLET_ONLY: требуются wallet_from и wallet_to");
+                   "walletop TRANSFER: требуются wallet_from и wallet_to");
       eosio::check(wallet_from != wallet_to,
-                   "walletop TRANSFER/WALLET_ONLY: wallet_from == wallet_to");
+                   "walletop TRANSFER: wallet_from == wallet_to");
       auto from_it = wallets.find(wallet_from.value);
       eosio::check(from_it != wallets.end() && from_it->available >= amount,
                    std::string{"walletop TRANSFER: недостаточно средств на кошельке "} +
@@ -125,14 +125,15 @@ void ledger2::walletop(eosio::name coopname,
       });
       break;
     }
-    case WalletOp::REVOKE: {
-      // Зеркало ISSUE: убираем amount с wallet_from без увеличения куда-либо.
-      // Используется только из ledger2::revert при откате ISSUE-операций.
-      eosio::check(wallet_from.value != 0, "walletop REVOKE: требуется wallet_from");
-      eosio::check(wallet_to.value == 0, "walletop REVOKE: wallet_to должен быть пустым");
+    case WalletOp::BURN: {
+      // Изъятие amount с wallet_from без увеличения куда-либо (ADR-003).
+      // Покрывает: (a) штатное сжигание как бизнес-операция в OPERATION_REGISTRY;
+      // (b) зеркало ISSUE при ledger2::revert. Различие — через operation_code.
+      eosio::check(wallet_from.value != 0, "walletop BURN: требуется wallet_from");
+      eosio::check(wallet_to.value == 0, "walletop BURN: wallet_to должен быть пустым");
       auto it = wallets.find(wallet_from.value);
       eosio::check(it != wallets.end() && it->available >= amount,
-                   std::string{"walletop REVOKE: недостаточно available на кошельке "} +
+                   std::string{"walletop BURN: недостаточно available на кошельке "} +
                      wallet_from.to_string());
       wallets.modify(it, payer, [&](auto& w) { w.available -= amount; });
       cleanup_if_empty(wallet_from);

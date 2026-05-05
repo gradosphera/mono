@@ -122,18 +122,20 @@ export class Ledger2Service {
   private resolveWalletAccountId(walletName: string): number | null {
     for (const op of Ledger2.LEDGER2_OPERATION_REGISTRY) {
       if (op.kind === 'adjustment') continue;
-      if (op.wallet_op === 'WALLET_ONLY') continue; // у WALLET_ONLY нет debit/credit
+      // Записи без бухпроводок (debit == null && credit == null, ADR-003) — пропускаем
+      if (op.debit === null && op.credit === null) continue;
       if (op.wallet_from === walletName && op.credit !== null) return op.credit;
       if (op.wallet_to === walletName && op.credit !== null && op.wallet_op === 'ISSUE') return op.credit;
       if (op.wallet_to === walletName && op.debit !== null) return op.debit;
       if (op.wallet_from === walletName && op.debit !== null) return op.debit;
     }
-    // Кошельки, которые встречаются только в WALLET_ONLY (например w.cap.bginv в o.cap.invest)
-    // — выводим из источника: WALLET_ONLY переносит между кошельками одного счёта,
-    // значит партнёрский кошелёк по WALLET_ONLY имеет тот же account_id, что и
-    // его пара в стандартной операции.
+    // Кошельки, встречающиеся только в TRANSFER без бухпроводок (например w.cap.blago
+    // в o.cap.invest) — выводим из источника: такой TRANSFER переносит между
+    // кошельками одного счёта, значит партнёрский кошелёк имеет тот же account_id,
+    // что и его пара в стандартной операции.
     for (const op of Ledger2.LEDGER2_OPERATION_REGISTRY) {
-      if (op.wallet_op !== 'WALLET_ONLY' || op.kind === 'adjustment') continue;
+      if (op.kind === 'adjustment') continue;
+      if (op.debit !== null || op.credit !== null) continue; // только без проводок
       if (op.wallet_from === walletName && op.wallet_to !== null) {
         return this.resolveWalletAccountId(op.wallet_to);
       }

@@ -84,13 +84,15 @@ void ledger2::revert(eosio::name coopname,
                  std::string{"revert: неизвестный mirror_wallet_to "} + mirror_wallet_to.to_string());
   }
 
-  const bool wallet_only = (mirror_wallet_op == static_cast<uint8_t>(WalletOp::WALLET_ONLY));
-  if (wallet_only) {
-    eosio::check(mirror_debit_account_id == 0 && mirror_credit_account_id == 0,
-                 "revert: для WALLET_ONLY mirror_debit_account_id и mirror_credit_account_id должны быть 0");
+  // ADR-003: «без бухпроводок» — пара (debit_account_id == 0, credit_account_id == 0).
+  // Соответственно zero-mirror = откат операции, у которой не было Dr/Cr (для walmove
+  // и других «без проводок»-сценариев).
+  const bool zero_mirror = (mirror_debit_account_id == 0 && mirror_credit_account_id == 0);
+  if (zero_mirror) {
+    // OK — откат без бухпроводок (zero-zero пара).
   } else {
     eosio::check(mirror_debit_account_id != 0 && mirror_credit_account_id != 0,
-                 "revert: mirror_debit_account_id и mirror_credit_account_id обязательны для проводки с Dr/Cr");
+                 "revert: смешанная пара mirror_debit/credit_account_id (один == 0, второй ≠ 0) запрещена");
     eosio::check(mirror_debit_account_id != mirror_credit_account_id,
                  "revert: mirror_debit_account_id == mirror_credit_account_id (self-posting запрещён)");
     eosio::check(ledger2_find_account_meta(mirror_debit_account_id) != nullptr,
@@ -109,7 +111,7 @@ void ledger2::revert(eosio::name coopname,
                     process_hash, memo)
   ).send();
 
-  if (wallet_only) {
+  if (zero_mirror) {
     return;
   }
 

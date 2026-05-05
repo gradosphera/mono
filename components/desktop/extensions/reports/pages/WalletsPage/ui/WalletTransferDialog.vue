@@ -128,14 +128,17 @@ const form = reactive({
 function resolveAccountId(walletName: string): number | null {
   for (const op of Ledger2.LEDGER2_OPERATION_REGISTRY) {
     if (op.kind === 'adjustment') continue
-    if (op.wallet_op === 'WALLET_ONLY') continue
+    if (op.debit === null && op.credit === null) continue
     if (op.wallet_from === walletName && op.credit !== null) return op.credit
     if (op.wallet_to === walletName && op.wallet_op === 'ISSUE' && op.credit !== null) return op.credit
     if (op.wallet_to === walletName && op.debit !== null) return op.debit
     if (op.wallet_from === walletName && op.debit !== null) return op.debit
   }
+  // Fallback: TRANSFER без бухпроводок (debit==null && credit==null), напр. o.cap.invest —
+  // привязка кошелька к счёту резолвится через парный кошелёк операции.
   for (const op of Ledger2.LEDGER2_OPERATION_REGISTRY) {
-    if (op.wallet_op !== 'WALLET_ONLY' || op.kind === 'adjustment') continue
+    if (op.kind === 'adjustment') continue
+    if (op.debit !== null || op.credit !== null) continue
     if (op.wallet_from === walletName && op.wallet_to !== null) return resolveAccountId(op.wallet_to)
     if (op.wallet_to === walletName && op.wallet_from !== null) return resolveAccountId(op.wallet_from)
   }

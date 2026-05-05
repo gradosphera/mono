@@ -175,8 +175,9 @@ public:
    *
    * Создаёт зеркальную проводку по операции `original_operation_id`:
    * меняет местами Dr/Cr счета и (для wallet_op) wallet_from/wallet_to.
-   * Для исходного ISSUE используется новый `WalletOp::REVOKE` (изъятие
-   * с `wallet_from` без увеличения куда-либо).
+   * Для исходного ISSUE используется `WalletOp::BURN` (изъятие
+   * с `wallet_from` без увеличения куда-либо). Различие «штатное сжигание»
+   * vs «зеркало revert» делается через operation_code (`o.adj.rev`).
    *
    * Параметры зеркала готовит backend из своей БД (по записи оригинала
    * в blockchain_actions/state) — контракт не имеет доступа к истории операций.
@@ -192,11 +193,11 @@ public:
    * @param original_operation_code     operation_code оригинала (для запрета o.mig.*)
    * @param username                    username оригинала (для аналитики)
    * @param amount                      сумма (как в оригинале)
-   * @param mirror_wallet_op            тип wallet-операции зеркала (REVOKE/TRANSFER/WALLET_ONLY)
+   * @param mirror_wallet_op            тип wallet-операции зеркала (TRANSFER/BURN)
    * @param mirror_wallet_from          кошелёк-источник зеркала
-   * @param mirror_wallet_to            кошелёк-получатель зеркала (пустое имя для REVOKE)
-   * @param mirror_debit_account_id     Dr-счёт зеркала (0 для WALLET_ONLY)
-   * @param mirror_credit_account_id    Cr-счёт зеркала (0 для WALLET_ONLY)
+   * @param mirror_wallet_to            кошелёк-получатель зеркала (пустое имя для BURN)
+   * @param mirror_debit_account_id     Dr-счёт зеркала (0 если оригинал был без бухпроводок)
+   * @param mirror_credit_account_id    Cr-счёт зеркала (0 если оригинал был без бухпроводок)
    * @param process_hash                уникальный хэш для зеркальной операции
    * @param memo                        обязательное обоснование (≤ 255 символов)
    *

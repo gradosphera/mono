@@ -59,9 +59,10 @@ void ledger2::apply(eosio::name coopname,
                std::string{"Unknown operation code: "} + operation_code.to_string());
 
   // -------- dispatch atomic inline actions --------
-  // Для штатных операций — «тройка» (walletop + debit + credit) с общим
-  // process_hash. Для WALLET_ONLY — только walletop (перенос средств между
-  // аналитическими разрезами одного бухсчёта, без debit/credit).
+  // Для записей с проводкой — «тройка» (walletop + debit + credit) с общим
+  // process_hash. Для записей без бухпроводки (оба account_id == 0,
+  // ADR-003) — только walletop: перенос средств между аналитическими
+  // разрезами одного бухсчёта, без debit/credit.
   const auto self_perm = eosio::permission_level{get_self(), "active"_n};
 
   eosio::action(self_perm, get_self(), "walletop"_n,
@@ -74,7 +75,7 @@ void ledger2::apply(eosio::name coopname,
                     memo)
   ).send();
 
-  if (entry->wallet_op == WalletOp::WALLET_ONLY) {
+  if (entry->debit_account_id == 0 && entry->credit_account_id == 0) {
     return;
   }
 

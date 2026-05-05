@@ -91,8 +91,11 @@ export interface IRevert {
   username: IName
   amount: IAsset
   /**
-   * 0=ISSUE, 1=TRANSFER, 4=WALLET_ONLY, 5=REVOKE.
+   * 0=ISSUE, 1=TRANSFER, 4=BURN.
    * 2=BLOCK / 3=UNBLOCK не разрешены — они симметричны сами себе.
+   * Для зеркала ISSUE используется BURN; различие «штатное сжигание» vs «mirror revert»
+   * фиксируется через operation_code (`o.adj.rev`).
+   * Для зеркала без бухпроводок mirror_debit_account_id и mirror_credit_account_id оба == 0.
    */
   mirror_wallet_op: number
   mirror_wallet_from: IName

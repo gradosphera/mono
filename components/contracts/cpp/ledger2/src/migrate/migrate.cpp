@@ -13,7 +13,7 @@
  *      системы учёта, progwallet.blocked не проводится через 80-й счёт,
  *      поэтому любая попытка провести его через Dr 51 / Cr 80 вызовет
  *      двойной учёт на бухуровне. Вместо этого переносим только
- *      wallet-аналитику (w.cap.bginv BLAGOROST_INVEST, w.cap.gncom GENERATOR_COMMIT).
+ *      wallet-аналитику (w.cap.blago BLAGOROST_FUND, w.cap.gen GENERATOR_FUND — ADR-009).
  *
  * Алгоритм на каждый кооператив:
  *
@@ -28,25 +28,23 @@
  *
  *   3. Вычисление распределения:
  *        share_money    = cash_legacy − entry_legacy
- *        rid_share      = share_legacy − share_money
  *        min_total      = clamp(Σ accepted-пайщиков по типу, 0, share_money)
  *                         где для organization берётся coop.org_minimum,
  *                         иначе — coop.minimum (см. compute_min_total_by_type).
  *        share_remain   = share_money − min_total
  *
  *      Инварианты (eosio::check):
- *        cash_legacy  >= entry_legacy
- *        share_legacy >= share_money
+ *        cash_legacy   >= entry_legacy
+ *        share_legacy  == share_money  (legacy 80 без РИД-части — иначе abort)
  *
- *   4. Отправка 4 inline apply (ненулевые пропускаются):
+ *   4. Отправка 3 inline apply (ненулевые пропускаются):
  *        apply(migration::MIN_SHARE, min_total)    → Dr 51 / Cr 80, MIN_SHARE_FUND   (w.reg.minshr)
  *        apply(migration::SHARE,     share_remain) → Dr 51 / Cr 80, SHARE_FUND_PAY   (w.wal.share)
  *        apply(migration::ENTRY,     entry_legacy) → Dr 51 / Cr 86, ENTRANCE_FEES    (w.reg.entry)
- *        apply(migration::RID,       rid_share)    → Dr 04 / Cr 80, SHARE_FUND_RID   (w.wal.sharid)
  *
  *   5. Прямой emplace в wallets2 для progwallets (БЕЗ бух-проводок):
- *        Σ progwallet[blagorost].blocked → wallets2[BLAGOROST_INVEST  w.cap.bginv]
- *        Σ progwallet[generator].blocked → wallets2[GENERATOR_COMMIT  w.cap.gncom]
+ *        Σ progwallet[blagorost].blocked → wallets2[BLAGOROST_FUND  w.cap.blago]
+ *        Σ progwallet[generator].blocked → wallets2[GENERATOR_FUND  w.cap.gen]
  *
  *      Если запись wallets2 уже есть (после inline apply сработали) —
  *      aggregate через wallets.modify(available += sum). Иначе — emplace.
@@ -207,7 +205,7 @@ inline void emplace_wallet_only(eosio::name self_name,
   } else {
     // Если кошелёк уже создан (например, предыдущим inline apply TRANSIT_*) —
     // просто доливаем сумму в available. Не должно случаться при чистой
-    // миграции (w.cap.bginv/w.cap.gncom не используются базовыми TRANSIT_*),
+    // миграции (w.cap.blago/w.cap.gen не используются базовыми TRANSIT_*),
     // но безопасно.
     wallets.modify(it, self_name, [&](auto& w) { w.available += amt; });
   }
@@ -225,9 +223,9 @@ inline void emplace_wallet_only(eosio::name self_name,
  * есть бумажный шлейф на 51, и т.п.). Вместо арифметической сшивки —
  * заводим суммы вручную по тому, как кооператив должен выглядеть в ledger2.
  *
- * Имущественная часть на legacy 80 (РИД ~56.8M) сюда НЕ заводится
- * отдельным w.wal.sharid: она остаётся осадком на legacy 80 до Phase 2
- * (ADR-009), когда Благорост схлопнется в w.cap.blago и заберёт имущество.
+ * Имущественная часть на legacy 80 (РИД ~56.8M) сюда НЕ заводится:
+ * она остаётся осадком на legacy 80 до Phase 2 (ADR-009), когда Благорост
+ * схлопнется в w.cap.blago и заберёт имущество.
  *
  * Бух-баланс по этой таблице:
  *   Dr 51 = w.reg.minshr + w.wal.share + w.reg.entry  = 31800 + 569900 + 12500 = 614200
@@ -235,7 +233,7 @@ inline void emplace_wallet_only(eosio::name self_name,
  *   Cr 86 = w.reg.entry                               = 12500
  *   Σ Dr = Σ Cr = 614200 ✓
  *
- * Σ Благороста на bginv (57 044 311) и Генератора на gncom (0) идут
+ * Σ Благороста на w.cap.blago (57 044 311) и Генератора на w.cap.gen (0) идут
  * прямым emplace без бух-проводок (параллельный progwallets-учёт).
  */
 inline void migrate_voskhod_facts(eosio::name self_name, const cooperative2& coop) {
@@ -257,19 +255,19 @@ inline void migrate_voskhod_facts(eosio::name self_name, const cooperative2& coo
   // 3. w.reg.entry  — Вступительные взносы (Dr 51 / Cr 86)
   const eosio::asset W_REG_ENTRY  = eosio::asset(    125'000'000LL, sym); //         12 500.0000 RUB
 
-  // 4. w.cap.bginv  — ЦПП «Благорост» (emplace, БЕЗ проводок)
-  const eosio::asset W_CAP_BGINV  = eosio::asset(570'443'110'000LL, sym); //     57 044 311.0000 RUB
+  // 4. w.cap.blago  — ЦПП «Благорост» — единый кошелёк программы (emplace, БЕЗ проводок); ADR-009
+  const eosio::asset W_CAP_BLAGO  = eosio::asset(570'443'110'000LL, sym); //     57 044 311.0000 RUB
 
-  // 5. w.cap.gncom  — ЦПП «Генератор» (emplace, БЕЗ проводок); 0 → не создаётся
-  const eosio::asset W_CAP_GNCOM  = eosio::asset(              0LL, sym); //              0.0000 RUB
+  // 5. w.cap.gen    — ЦПП «Генератор» — единый кошелёк программы (emplace, БЕЗ проводок); 0 → не создаётся
+  const eosio::asset W_CAP_GEN    = eosio::asset(              0LL, sym); //              0.0000 RUB
 
   // ── применяем таблицу ───────────────────────────────────────────────
   send_transit(self_name, coopname, operations::migration::MIN_SHARE, W_REG_MINSHR);
   send_transit(self_name, coopname, operations::migration::SHARE,     W_WAL_SHARE);
   send_transit(self_name, coopname, operations::migration::ENTRY,     W_REG_ENTRY);
 
-  emplace_wallet_only(self_name, coopname, ledger2_wallets::BLAGOROST_INVEST,   W_CAP_BGINV);
-  emplace_wallet_only(self_name, coopname, ledger2_wallets::GENERATOR_COMMIT,   W_CAP_GNCOM);
+  emplace_wallet_only(self_name, coopname, ledger2_wallets::BLAGOROST_FUND,   W_CAP_BLAGO);
+  emplace_wallet_only(self_name, coopname, ledger2_wallets::GENERATOR_FUND,   W_CAP_GEN);
 }
 
 /**
@@ -300,24 +298,23 @@ inline void migrate_one_coop(eosio::name self_name, const cooperative2& coop) {
     return;
   }
 
-  // ----- A. Бухгалтерский перенос legacy::accounts через 4 TRANSIT_* -----
+  // ----- A. Бухгалтерский перенос legacy::accounts через 3 TRANSIT_* -----
   if (b.cash.amount > 0 || b.share.amount > 0 || b.entry.amount > 0) {
     // Деньги на паевой фонд: всё на 51 сверх вступительных.
     const eosio::asset share_money(
       b.cash.amount >= b.entry.amount ? b.cash.amount - b.entry.amount : 0,
       _root_govern_symbol
     );
-    // Не-денежная часть 80: РИД Восхода (+56M) + всё, что было проведено
-    // как имущество через legacy::ledger::add на 80 без prior 51.
-    const eosio::asset rid_share(
-      b.share.amount >= share_money.amount ? b.share.amount - share_money.amount : 0,
-      _root_govern_symbol
-    );
 
     eosio::check(b.cash.amount >= b.entry.amount,
                  std::string{"migrate: entry > cash на кооп "} + coopname.to_string());
-    eosio::check(b.share.amount >= share_money.amount,
-                 std::string{"migrate: share_money > share_legacy на кооп "} + coopname.to_string());
+    // Инвариант: legacy::accounts[80] (паевой фонд) равен money-части (51 - 86).
+    // РИД-часть на legacy 80 не поддерживается этим путём (ADR-009: РИД-программа
+    // переезжает в w.cap.blago отдельно); если такой остаток есть — миграция
+    // отказывается, кооператив должен закрыть РИД-часть до миграции.
+    eosio::check(b.share.amount == share_money.amount,
+                 std::string{"migrate: legacy 80 содержит РИД-часть на кооп "} + coopname.to_string() +
+                 " — ledger2 не поддерживает РИД-перенос (ADR-009). Закрыть РИД до миграции.");
 
     // Минимальный паевой: Σ по accepted-пайщикам с учётом типа
     // (organization → coop.org_minimum, иначе → coop.minimum), не больше share_money.
@@ -334,14 +331,13 @@ inline void migrate_one_coop(eosio::name self_name, const cooperative2& coop) {
     send_transit(self_name, coopname, operations::migration::MIN_SHARE, min_total);
     send_transit(self_name, coopname, operations::migration::SHARE,     share_remain);
     send_transit(self_name, coopname, operations::migration::ENTRY,     b.entry);
-    send_transit(self_name, coopname, operations::migration::RID,       rid_share);
   }
 
   // ----- B. Программные кошельки — прямой emplace, без Dr/Cr -----
   // progwallets.blocked НЕ входит в legacy::accounts[80], поэтому
   // проводить их через apply(operations::migration::*) вызвало бы двойной учёт.
-  emplace_wallet_only(self_name, coopname, ledger2_wallets::BLAGOROST_INVEST,   blagorost_invest);
-  emplace_wallet_only(self_name, coopname, ledger2_wallets::GENERATOR_COMMIT,   generator_commit);
+  emplace_wallet_only(self_name, coopname, ledger2_wallets::BLAGOROST_FUND,   blagorost_invest);
+  emplace_wallet_only(self_name, coopname, ledger2_wallets::GENERATOR_FUND,   generator_commit);
 }
 
 } // namespace
