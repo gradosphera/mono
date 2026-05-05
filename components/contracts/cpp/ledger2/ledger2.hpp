@@ -87,6 +87,7 @@ public:
                                    uint8_t op_code,
                                    eosio::name wallet_from,
                                    eosio::name wallet_to,
+                                   eosio::name username,
                                    eosio::asset amount,
                                    eosio::checksum256 process_hash,
                                    std::string memo);

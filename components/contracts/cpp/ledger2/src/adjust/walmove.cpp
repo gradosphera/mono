@@ -66,7 +66,7 @@ void ledger2::walmove(eosio::name coopname,
   eosio::action(self_perm, get_self(), "walletop"_n,
     std::make_tuple(coopname,
                     static_cast<uint8_t>(WalletOp::TRANSFER),
-                    from_wallet, to_wallet, amount,
+                    from_wallet, to_wallet, username, amount,
                     process_hash, memo)
   ).send();
 }

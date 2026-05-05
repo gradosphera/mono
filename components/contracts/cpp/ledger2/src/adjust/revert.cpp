@@ -107,7 +107,7 @@ void ledger2::revert(eosio::name coopname,
   eosio::action(self_perm, get_self(), "walletop"_n,
     std::make_tuple(coopname,
                     mirror_wallet_op,
-                    mirror_wallet_from, mirror_wallet_to, amount,
+                    mirror_wallet_from, mirror_wallet_to, username, amount,
                     process_hash, memo)
   ).send();
 

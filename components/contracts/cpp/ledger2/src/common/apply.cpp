@@ -70,6 +70,7 @@ void ledger2::apply(eosio::name coopname,
                     static_cast<uint8_t>(entry->wallet_op),
                     entry->wallet_from,
                     entry->wallet_to,
+                    username,
                     amount,
                     process_hash,
                     memo)

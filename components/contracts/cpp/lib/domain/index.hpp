@@ -58,6 +58,7 @@
 #include "table_ledger_writeoffs.hpp"
 #include "table_ledger2_wallet.hpp"
 #include "table_ledger2_account.hpp"
+#include "table_ledger2_userwallets.hpp"
 // Epic 1 addendum (2026-04-18): journal+wjournal удалены из RAM; история
 // собирается на бэкенде из blockchain_actions[ledger2::apply/walletop/debit/credit]
 // и blockchain_deltas[ledger2::accounts/wallets].
