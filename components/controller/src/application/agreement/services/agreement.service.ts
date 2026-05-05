@@ -8,6 +8,13 @@ import {
   AGREEMENT_REPOSITORY,
   AgreementFilterInput,
 } from '~/domain/agreement/repositories/agreement.repository';
+import {
+  UserAgreementRepository,
+  USER_AGREEMENT_REPOSITORY,
+} from '~/domain/wallet/repositories/user-agreement.repository';
+import type { UserAgreementDomainEntity } from '~/domain/wallet/entities/user-agreement-domain.entity';
+import type { IProgramAgreement } from '~/domain/wallet/interfaces/user-agreement-blockchain.interface';
+import { AgreementStatus } from '~/domain/agreement/enums/agreement-status.enum';
 import { AgreementDTO } from '../dto/agreement.dto';
 import { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import { PaginationResult } from '~/application/common/dto/pagination.dto';
@@ -16,6 +23,7 @@ import { SendAgreementInputDTO } from '../dto/send-agreement-input.dto';
 import { ConfirmAgreementInputDTO } from '../dto/confirm-agreement-input.dto';
 import { DeclineAgreementInputDTO } from '../dto/decline-agreement-input.dto';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
+import { config } from '~/config';
 
 @Injectable()
 export class AgreementService {
@@ -23,28 +31,114 @@ export class AgreementService {
     private readonly agreementInteractor: AgreementInteractor,
     @Inject(AGREEMENT_REPOSITORY)
     private readonly agreementRepository: AgreementRepository,
+    @Inject(USER_AGREEMENT_REPOSITORY)
+    private readonly userAgreementRepository: UserAgreementRepository,
     private readonly documentAggregationService: DocumentAggregationService
   ) {}
 
   /**
-   * Получить все соглашения с пагинацией и фильтрацией
+   * Получить все соглашения с пагинацией и фильтрацией.
+   *
+   * Источник зависит от `program_id` (Эпик 2 / ADR-008):
+   * - `program_id == 0` или не задан + явно непрограммный type → `soviet::agreements3`
+   *   (репозиторий `agreement`).
+   * - `program_id > 0` или фильтр без program_id → программные читаются из
+   *   `wallet::users.programs[]` (репозиторий `user_agreement`) и разворачиваются
+   *   в плоский ряд `AgreementDTO`.
+   * - Без явного `program_id` оба источника объединяются в памяти.
+   *
+   * Программные DTO синтезируются: `id`/`document` отсутствуют (полный документ
+   * лежит в action data, а не в state); `status=CONFIRMED` (запись в `users`
+   * существует только для подписанных соглашений), `type='programmatic'`.
    */
   async getAgreements(
     filter?: AgreementFilterInput,
     options?: PaginationInputDomainInterface
   ): Promise<PaginationResult<AgreementDTO>> {
-    // Получаем пагинированный результат из репозитория
-    const result = await this.agreementRepository.findAllPaginated(filter, options);
+    const coopname = filter?.coopname ?? config.coopname;
+    const onlyNonProgrammatic = filter?.program_id === 0;
+    const onlyProgrammatic = typeof filter?.program_id === 'number' && filter.program_id > 0;
 
-    // Преобразуем в DTO
-    const items = await this.toDTOs(result.items);
+    const nonProgrammaticFilter = onlyProgrammatic
+      ? null
+      : onlyNonProgrammatic
+        ? { ...filter, program_id: 0 }
+        : filter;
 
-    // Возвращаем полный пагинированный результат
+    const nonProgItemsAll = nonProgrammaticFilter
+      ? await this.fetchNonProgrammatic(nonProgrammaticFilter)
+      : [];
+
+    const progItemsAll = onlyNonProgrammatic
+      ? []
+      : await this.fetchProgrammatic({ ...filter, coopname });
+
+    const merged = [...nonProgItemsAll, ...progItemsAll].sort(
+      (a, b) => (b.updated_at?.getTime() ?? 0) - (a.updated_at?.getTime() ?? 0)
+    );
+
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 50;
+    const totalCount = merged.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+    const offset = (page - 1) * limit;
+    const items = merged.slice(offset, offset + limit);
+
+    return { items, totalCount, totalPages, currentPage: page };
+  }
+
+  private async fetchNonProgrammatic(filter: AgreementFilterInput): Promise<AgreementDTO[]> {
+    const result = await this.agreementRepository.findAllPaginated(filter, {
+      page: 1,
+      limit: 10_000,
+      sortBy: undefined,
+      sortOrder: 'DESC',
+    });
+    return await this.toDTOs(result.items);
+  }
+
+  private async fetchProgrammatic(filter: AgreementFilterInput & { coopname: string }): Promise<AgreementDTO[]> {
+    let owners: UserAgreementDomainEntity[];
+
+    if (filter.username) {
+      const owner = await this.userAgreementRepository.findByUsername(filter.coopname, filter.username);
+      owners = owner ? [owner] : [];
+    } else if (typeof filter.program_id === 'number' && filter.program_id > 0) {
+      owners = await this.userAgreementRepository.findByProgramId(filter.coopname, filter.program_id);
+    } else {
+      owners = await this.userAgreementRepository.findByCoopname(filter.coopname);
+    }
+
+    const flat: AgreementDTO[] = [];
+    for (const owner of owners) {
+      if (owner.present === false) continue;
+      for (const program of owner.programs) {
+        if (typeof filter.program_id === 'number' && filter.program_id > 0 && Number(program.program_id) !== filter.program_id) {
+          continue;
+        }
+        flat.push(this.programAgreementToDTO(owner, program));
+      }
+    }
+    return flat;
+  }
+
+  private programAgreementToDTO(owner: UserAgreementDomainEntity, program: IProgramAgreement): AgreementDTO {
     return {
-      items,
-      totalCount: result.totalCount,
-      totalPages: result.totalPages,
-      currentPage: result.currentPage,
+      _id: owner._id,
+      present: owner.present,
+      block_num: owner.block_num,
+      _created_at: owner._created_at,
+      _updated_at: owner._updated_at,
+      id: undefined,
+      coopname: owner.coopname,
+      username: owner.username,
+      type: 'programmatic',
+      program_id: Number(program.program_id),
+      draft_id: program.draft_id ? Number(program.draft_id) : undefined,
+      version: typeof program.version === 'number' ? program.version : Number(program.version),
+      status: AgreementStatus.CONFIRMED,
+      document: null,
+      updated_at: program.signed_at ? new Date(program.signed_at) : undefined,
     };
   }
 
