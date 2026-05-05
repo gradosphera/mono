@@ -235,3 +235,227 @@ describe('ledger2 L3 + wallet::users — integration (live blockchain)', () => {
     }
   }, 60_000)
 })
+
+/**
+ * Edge-кейсы вокруг wallet::users (signagree/revokeagree) и ledger2::migrate3.
+ * Каждый тест держит свой setup/cleanup, чтобы порядок исполнения не влиял
+ * на корректность; финальное состояние пайщика — без program_id=BLAGO.
+ */
+describe('wallet::users / ledger2::migrate3 — edge cases (live blockchain)', () => {
+  const bc = new Blockchain(config.network, config.private_keys)
+  const TEST_PROGRAM_ID_BLAGO = 4
+  const TEST_PROGRAM_ID_GEN = 3 // Программа существует в boot:extra (Генератор)
+  const TEST_USERNAME = 'ant'
+
+  beforeAll(async () => {
+    await bc.update_pass_instance()
+  }, 60_000)
+
+  /** Гарантирует отсутствие program_id у пайщика (revokeagree если есть, иначе no-op). */
+  async function ensureNoProgram(program_id: number): Promise<void> {
+    const rows = await bc.getTableRows('wallet', COOP, 'users', 100)
+    const userRow = (rows as Array<{ username: string; programs: Array<{ program_id: number | string }> }>)
+      .find((r) => r.username === TEST_USERNAME)
+    if (!userRow) return
+    if (!userRow.programs.some((p) => Number(p.program_id) === program_id)) return
+    await bc.api.transact({
+      actions: [{
+        account: WalletContract.contractName.production,
+        name: WalletContract.Actions.RevokeAgreement.actionName,
+        authorization: [{ actor: COOP, permission: 'active' }],
+        data: { coopname: COOP, username: TEST_USERNAME, program_id },
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+  }
+
+  async function signProgram(program_id: number): Promise<string> {
+    const doc_hash = generateRandomSHA256()
+    const data: WalletContract.Actions.SignAgreement.ISignAgreement = {
+      coopname: COOP,
+      username: TEST_USERNAME,
+      program_id,
+      document: {
+        version: '0',
+        hash: doc_hash,
+        doc_hash,
+        meta_hash: '0000000000000000000000000000000000000000000000000000000000000000',
+        meta: '',
+        signatures: [],
+      },
+      draft_id: 0,
+    }
+    await bc.api.transact({
+      actions: [{
+        account: WalletContract.contractName.production,
+        name: WalletContract.Actions.SignAgreement.actionName,
+        authorization: [{ actor: COOP, permission: 'active' }],
+        data,
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+    return doc_hash
+  }
+
+  it('wallet::signagree повторно с тем же program_id обновляет doc_hash, не дублирует', async () => {
+    await ensureNoProgram(TEST_PROGRAM_ID_BLAGO)
+
+    await signProgram(TEST_PROGRAM_ID_BLAGO)
+    const secondHash = await signProgram(TEST_PROGRAM_ID_BLAGO)
+
+    const rows = await bc.getTableRows('wallet', COOP, 'users', 100)
+    const userRow = (rows as Array<{ username: string; programs: Array<{ program_id: number | string; doc_hash: string }> }>)
+      .find((r) => r.username === TEST_USERNAME)
+    expect(userRow).toBeDefined()
+    const blago = userRow!.programs.filter((p) => Number(p.program_id) === TEST_PROGRAM_ID_BLAGO)
+    expect(blago.length, 'программа не должна дублироваться при повторной подписи').toBe(1)
+    // Контракт нормализует hex-хэш в lowercase (см. document utils) — сравниваем без регистра.
+    expect(blago[0]!.doc_hash.toLowerCase(), 'doc_hash должен обновиться на последний').toBe(secondHash.toLowerCase())
+
+    await ensureNoProgram(TEST_PROGRAM_ID_BLAGO)
+  }, 60_000)
+
+  it('wallet::revokeagree без записи users → throws', async () => {
+    await ensureNoProgram(TEST_PROGRAM_ID_BLAGO)
+    await ensureNoProgram(TEST_PROGRAM_ID_GEN)
+
+    await expect(
+      bc.api.transact({
+        actions: [{
+          account: WalletContract.contractName.production,
+          name: WalletContract.Actions.RevokeAgreement.actionName,
+          authorization: [{ actor: COOP, permission: 'active' }],
+          data: { coopname: COOP, username: TEST_USERNAME, program_id: TEST_PROGRAM_ID_BLAGO },
+        }],
+      }, { blocksBehind: 3, expireSeconds: 30 })
+    ).rejects.toThrow(/программных соглашений/i)
+  }, 60_000)
+
+  it('wallet::revokeagree program_id не в programs[] → throws', async () => {
+    await ensureNoProgram(TEST_PROGRAM_ID_GEN)
+    await signProgram(TEST_PROGRAM_ID_BLAGO)
+
+    await expect(
+      bc.api.transact({
+        actions: [{
+          account: WalletContract.contractName.production,
+          name: WalletContract.Actions.RevokeAgreement.actionName,
+          authorization: [{ actor: COOP, permission: 'active' }],
+          data: { coopname: COOP, username: TEST_USERNAME, program_id: TEST_PROGRAM_ID_GEN },
+        }],
+      }, { blocksBehind: 3, expireSeconds: 30 })
+    ).rejects.toThrow(/не подписана/i)
+
+    await ensureNoProgram(TEST_PROGRAM_ID_BLAGO)
+  }, 60_000)
+
+  /** Гарантирует отсутствие L3-записи userwallets для (wallet_name, username). */
+  async function ensureNoUserWallet(wallet_name: string): Promise<void> {
+    const rows = await bc.getTableRows('ledger2', COOP, 'userwallets', 100)
+    const exists = (rows as Array<{ wallet_name: string; username: string }>)
+      .some((r) => r.wallet_name === wallet_name && r.username === TEST_USERNAME)
+    if (!exists) return
+    await bc.api.transact({
+      actions: [{
+        account: Ledger2Contract.contractName.production,
+        name: Ledger2Contract.Actions.Migrate3.actionName,
+        authorization: [{ actor: COOP, permission: 'active' }],
+        data: {
+          coopname: COOP,
+          wallet_name,
+          username: TEST_USERNAME,
+          available: '0.0000 RUB',
+          blocked: '0.0000 RUB',
+        },
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+  }
+
+  it('ledger2::migrate3 идемпотентность: два одинаковых вызова не падают и значения не дублируются', async () => {
+    await ensureNoUserWallet('w.cap.blago')
+
+    const data: Ledger2Contract.Actions.Migrate3.IMigrate3 = {
+      coopname: COOP,
+      wallet_name: 'w.cap.blago',
+      username: TEST_USERNAME,
+      available: '500.0000 RUB',
+      blocked: '0.0000 RUB',
+    }
+    await bc.api.transact({
+      actions: [{
+        account: Ledger2Contract.contractName.production,
+        name: Ledger2Contract.Actions.Migrate3.actionName,
+        authorization: [{ actor: COOP, permission: 'active' }],
+        data,
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+    await bc.api.transact({
+      actions: [{
+        account: Ledger2Contract.contractName.production,
+        name: Ledger2Contract.Actions.Migrate3.actionName,
+        authorization: [{ actor: COOP, permission: 'active' }],
+        data,
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    const rows = await bc.getTableRows('ledger2', COOP, 'userwallets', 100)
+    const matches = (rows as Array<{ wallet_name: string; username: string; available: string }>)
+      .filter((r) => r.wallet_name === 'w.cap.blago' && r.username === TEST_USERNAME)
+    expect(matches.length, 'L3-запись (wallet_name, username) должна быть единственной').toBe(1)
+    expect(matches[0]!.available).toBe('500.0000 RUB')
+
+    await ensureNoUserWallet('w.cap.blago')
+  }, 60_000)
+
+  it('ledger2::migrate3 с blocked > 0 сохраняет blocked-значение', async () => {
+    await ensureNoUserWallet('w.cap.blago')
+
+    const data: Ledger2Contract.Actions.Migrate3.IMigrate3 = {
+      coopname: COOP,
+      wallet_name: 'w.cap.blago',
+      username: TEST_USERNAME,
+      available: '1000.0000 RUB',
+      blocked: '250.0000 RUB',
+    }
+    await bc.api.transact({
+      actions: [{
+        account: Ledger2Contract.contractName.production,
+        name: Ledger2Contract.Actions.Migrate3.actionName,
+        authorization: [{ actor: COOP, permission: 'active' }],
+        data,
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    const rows = await bc.getTableRows('ledger2', COOP, 'userwallets', 100)
+    const entry = (rows as Array<{ wallet_name: string; username: string; available: string; blocked: string }>)
+      .find((r) => r.wallet_name === 'w.cap.blago' && r.username === TEST_USERNAME)
+    expect(entry).toBeDefined()
+    expect(entry!.available).toBe('1000.0000 RUB')
+    expect(entry!.blocked).toBe('250.0000 RUB')
+
+    await ensureNoUserWallet('w.cap.blago')
+  }, 60_000)
+
+  it('ledger2::migrate3 (0, 0) когда записи нет → no-op (не падает, ничего не создаёт)', async () => {
+    await ensureNoUserWallet('w.cap.blago')
+
+    const data: Ledger2Contract.Actions.Migrate3.IMigrate3 = {
+      coopname: COOP,
+      wallet_name: 'w.cap.blago',
+      username: TEST_USERNAME,
+      available: '0.0000 RUB',
+      blocked: '0.0000 RUB',
+    }
+    await bc.api.transact({
+      actions: [{
+        account: Ledger2Contract.contractName.production,
+        name: Ledger2Contract.Actions.Migrate3.actionName,
+        authorization: [{ actor: COOP, permission: 'active' }],
+        data,
+      }],
+    }, { blocksBehind: 3, expireSeconds: 30 })
+
+    const rows = await bc.getTableRows('ledger2', COOP, 'userwallets', 100)
+    const exists = (rows as Array<{ wallet_name: string; username: string }>)
+      .some((r) => r.wallet_name === 'w.cap.blago' && r.username === TEST_USERNAME)
+    expect(exists, '(0,0) не должен создавать запись').toBe(false)
+  }, 60_000)
+})
