@@ -1,15 +1,18 @@
 /**
  * Загрузка исходных данных для таба «Пайщики» на странице Кошельки.
  *
- * Программы и progwallets тянем напрямую из blockchain через fetchTable
- * (scope=coopname). Пайщиков (ФИО + username + статус) грузит страница
- * отдельно через useAccountStore.getAccounts — чтобы получить private_account
- * с ФИО, что через чтение таблицы `participants` по контракту недоступно.
+ * Программы тянем из blockchain через fetchTable (`soviet::programs`,
+ * scope=coopname). Программные кошельки — через GraphQL `getProgramWallets`,
+ * который собирает срезы из `ledger2::userwallets` (Эпик 3, ADR-008).
+ * Пайщиков (ФИО + username + статус) грузит страница отдельно через
+ * `useAccountStore.getAccounts`.
  *
  * Возвращаем собранный pivot-срез «program_id → username → cell» — страница
  * только рендерит.
  */
 import { fetchTable } from 'src/shared/api'
+import { client } from 'src/shared/api/client'
+import { Queries } from '@coopenomics/sdk'
 import { SovietContract } from 'cooptypes'
 
 export interface IProgramColumn {
@@ -40,23 +43,21 @@ function parseAsset(s: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
-/**
- * Тянем 2 таблицы scope=coopname (programs + progwallets) и строим pivot-срез.
- */
 export async function loadProgramsAndWallets(
   coopname: string,
 ): Promise<IProgramsAndWallets> {
-  const [programsRaw, walletsRaw] = await Promise.all([
+  const [programsRaw, walletsResponse] = await Promise.all([
     fetchTable(
       SovietContract.contractName.production,
       coopname,
       SovietContract.Tables.Programs.tableName,
     ),
-    fetchTable(
-      SovietContract.contractName.production,
-      coopname,
-      SovietContract.Tables.ProgramWallets.tableName,
-    ),
+    client.Query(Queries.Wallet.GetProgramWallets.query, {
+      variables: {
+        filter: { coopname },
+        options: { page: 1, limit: 100000 },
+      },
+    }),
   ])
 
   const programs: IProgramColumn[] = (programsRaw as Array<Record<string, unknown>>)
@@ -73,7 +74,9 @@ export async function loadProgramsAndWallets(
   const totals: Record<number, IWalletCell> = {}
   for (const p of programs) totals[p.id] = { available: 0, blocked: 0 }
 
-  for (const w of walletsRaw as Array<Record<string, unknown>>) {
+  const wallets = walletsResponse[Queries.Wallet.GetProgramWallets.name]?.items ?? []
+
+  for (const w of wallets) {
     const username = String(w.username)
     const program_id = Number(w.program_id)
     const avail = parseAsset(w.available)

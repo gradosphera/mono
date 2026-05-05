@@ -15,18 +15,6 @@ async function loadCooperativeAgreements(coopname: string): Promise<SovietContra
 }
 
 
-async function loadAgreementsOfAllParticipants(coopname: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {
-  return (
-    await fetchTable(
-      SovietContract.contractName.production,
-      coopname,
-      SovietContract.Tables.Agreements.tableName,
-    )
-  ) as SovietContract.Tables.Agreements.IAgreement[];
-
-}
-
-
 async function loadAgreementTemplates(coopname: string): Promise<DraftContract.Tables.Drafts.IDraft[]> {
 
     const global = await fetchTable(
@@ -57,4 +45,4 @@ async function loadPaginatedAgreements(data: ILoadPaginatedAgreementsInput): Pro
   return output;
 }
 
-export const api = {loadCooperativeAgreements, loadAgreementsOfAllParticipants, loadAgreementTemplates, loadPaginatedAgreements}
+export const api = {loadCooperativeAgreements, loadAgreementTemplates, loadPaginatedAgreements}

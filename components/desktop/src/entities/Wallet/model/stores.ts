@@ -5,10 +5,10 @@ import {
   IWithdrawData,
   ExtendedProgramWalletData,
   IPaymentMethodData,
+  IUserAgreement,
 } from './types';
 import { ILoadUserWallet } from './types';
 import { Ref, ref } from 'vue';
-import type { SovietContract } from 'cooptypes';
 
 const namespace = 'wallet';
 
@@ -18,7 +18,7 @@ interface IWalletStore {
   deposits: Ref<IDepositData[]>;
   withdraws: Ref<IWithdrawData[]>;
   methods: Ref<IPaymentMethodData[]>;
-  agreements: Ref<SovietContract.Tables.Agreements.IAgreement[]>;
+  agreements: Ref<IUserAgreement[]>;
 
   loadUserWallet: (params: ILoadUserWallet) => Promise<void>;
 }
@@ -28,7 +28,7 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
   const withdraws = ref<IWithdrawData[]>([]);
   const program_wallets = ref<ExtendedProgramWalletData[]>([]);
   const methods = ref<IPaymentMethodData[]>([]);
-  const agreements = ref<SovietContract.Tables.Agreements.IAgreement[]>([]);
+  const agreements = ref<IUserAgreement[]>([]);
 
   const loadUserWallet = async (params: ILoadUserWallet) => {
     try {

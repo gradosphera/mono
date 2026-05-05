@@ -15,11 +15,11 @@ import {
   ExtendedProgramWalletData,
   IGetPaymentMethods,
   IPaymentMethodData,
+  IUserAgreement,
 } from '../model';
 
 import {
   ILoadSingleUserDeposit,
-  ILoadSingleUserProgramWallet,
   ILoadSingleUserWithdraw,
   ILoadUserDeposits,
   ILoadUserProgramWallets,
@@ -40,21 +40,6 @@ async function loadSingleUserDepositData(
       LimitsList.One
     )
   )[0] as IDepositData;
-}
-
-async function loadSingleUserProgramWalletData(
-  params: ILoadSingleUserProgramWallet
-): Promise<IProgramWalletData> {
-  return (
-    await fetchTable(
-      SovietContract.contractName.production,
-      params.coopname,
-      SovietContract.Tables.ProgramWallets.tableName,
-      params.wallet_id,
-      params.wallet_id,
-      LimitsList.One
-    )
-  )[0] as IProgramWalletData;
 }
 
 async function loadSingleUserWithdrawData(
@@ -100,6 +85,12 @@ async function loadUserWithdrawsData(
   )) as IWithdrawData[];
 }
 
+/**
+ * После Эпика 3 источник кошельков — `getProgramWallets` (контроллер собирает
+ * программные срезы из `ledger2::userwallets` через `wallet::users.programs[]`).
+ * Список программ кооператива по-прежнему лежит в `soviet::programs` —
+ * читаем напрямую и мерджим, чтобы получить `program_details` для UI.
+ */
 async function loadUserProgramWalletsData(
   params: ILoadUserProgramWallets
 ): Promise<ExtendedProgramWalletData[]> {
@@ -109,33 +100,24 @@ async function loadUserProgramWalletsData(
     SovietContract.Tables.Programs.tableName
   )) as ICoopProgramData[];
 
-  const program_wallets = (await fetchTable(
-    SovietContract.contractName.production,
-    params.coopname,
-    SovietContract.Tables.ProgramWallets.tableName,
-    params.username,
-    params.username,
-    LimitsList.None,
-    SecondaryIndexesNumbers.Two
-  )) as IProgramWalletData[];
+  const { [Queries.Wallet.GetProgramWallets.name]: paginated } = await client.Query(
+    Queries.Wallet.GetProgramWallets.query,
+    {
+      variables: {
+        filter: { coopname: params.coopname, username: params.username },
+        options: { page: 1, limit: 1000 },
+      },
+    }
+  );
 
-  const extendedProgramWallets: ExtendedProgramWalletData[] =
-    program_wallets.map((wallet) => {
-      const programInfo = programs.find(
-        (program) => program.id === wallet.program_id
-      );
-
-      if (programInfo) {
-        return {
-          ...wallet,
-          program_details: programInfo,
-        } as ExtendedProgramWalletData;
-      }
-
-      return wallet as ExtendedProgramWalletData;
-    });
-
-  return extendedProgramWallets;
+  return (paginated?.items ?? []).map((wallet) => {
+    const programInfo = programs.find((program) => String(program.id) === String(wallet.program_id));
+    return {
+      ...(wallet as unknown as IProgramWalletData),
+      program_type: wallet.program_type,
+      ...(programInfo ? { program_details: programInfo } : {}),
+    } as ExtendedProgramWalletData;
+  });
 }
 
 
@@ -165,25 +147,27 @@ async function loadMethods(params: IGetPaymentMethods): Promise<IPaymentMethodDa
   return methods.sort((a, b) => b.method_id.localeCompare(a.method_id));
 }
 
-async function loadUserAgreements(coopname: string, username: string): Promise<SovietContract.Tables.Agreements.IAgreement[]> {
-
-    const result = await fetchTable(
-      SovietContract.contractName.production,
-      coopname,
-      SovietContract.Tables.Agreements.tableName,
-      username,
-      username,
-      LimitsList.None,
-      'secondary'
-    )
-
-    return result as SovietContract.Tables.Agreements.IAgreement[];
+/**
+ * После Эпика 3 программные соглашения живут в `wallet::users.programs[]`,
+ * непрограммные — в `soviet::agreements3`. Контроллер объединяет оба источника
+ * в `getAgreements`, поэтому desktop читает только GraphQL.
+ */
+async function loadUserAgreements(coopname: string, username: string): Promise<IUserAgreement[]> {
+  const { [Queries.Agreements.Agreements.name]: paginated } = await client.Query(
+    Queries.Agreements.Agreements.query,
+    {
+      variables: {
+        filter: { coopname, username },
+        options: { page: 1, limit: 1000 },
+      },
+    }
+  );
+  return (paginated?.items ?? []) as IUserAgreement[];
 }
 
 
 export const api = {
   loadSingleUserDepositData,
-  loadSingleUserProgramWalletData,
   loadSingleUserWithdrawData,
   loadUserDepositsData,
   loadUserWithdrawsData,
