@@ -131,6 +131,63 @@ void ledger2::walletop(eosio::name coopname,
            ledger2_get_wallet_kind(wallet_id) == WalletKind::USER_SHARED;
   };
 
+  // ── Cross-contract check wallet::users.programs[] (Story 3.2; ADR-004) ──
+  // Перед операцией на USER_SHARED-кошельке у пайщика должно быть подписано
+  // соответствующее программное соглашение в wallet::users (исключение —
+  // w.reg.minshr: required_program_id == 0 → проверка пропускается).
+  auto assert_program_signed = [&](eosio::name wallet_id) {
+    if (!is_user_shared_l3(wallet_id)) return;
+    const uint64_t required_pid = ledger2_required_program_id(wallet_id);
+    if (required_pid == 0) return; // исключение (например, w.reg.minshr)
+
+    Wallet::users_index wallet_users(_wallet, coopname.value);
+    auto user_it = wallet_users.find(username.value);
+    eosio::check(user_it != wallet_users.end(),
+                 std::string{"walletop: у пайщика "} + username.to_string() +
+                   " нет программных соглашений в wallet::users (требуется program_id=" +
+                   std::to_string(required_pid) + " для " + wallet_id.to_string() + ")");
+
+    bool found = false;
+    for (const auto& pa : user_it->programs) {
+      if (pa.program_id == required_pid) { found = true; break; }
+    }
+    eosio::check(found,
+                 std::string{"walletop: у пайщика "} + username.to_string() +
+                   " не подписано соглашение program_id=" + std::to_string(required_pid) +
+                   " для кошелька " + wallet_id.to_string());
+  };
+
+  // ── Post-mutation assert Σ L3 == L2 (Story 3.2; NFR2) ─────────────────
+  // Последняя линия защиты инварианта L3 ⊆ L2. Считается только для
+  // затронутых USER_SHARED-кошельков. Стоимость O(N_users) на кошелёк;
+  // падение здесь = откат всей tx (включая бух-проводки в debit/credit).
+  auto assert_sum_l3_equals_l2 = [&](eosio::name wallet_id) {
+    if (wallet_id.value == 0) return;
+    if (ledger2_get_wallet_kind(wallet_id) != WalletKind::USER_SHARED) return;
+
+    auto wallet_it = wallets.find(wallet_id.value);
+    int64_t l2_avail = wallet_it == wallets.end() ? 0 : wallet_it->available.amount;
+    int64_t l2_block = wallet_it == wallets.end() ? 0 : wallet_it->blocked.amount;
+
+    int64_t sum_avail = 0, sum_block = 0;
+    auto idx = user_wallets.get_index<"bywallet"_n>();
+    for (auto it = idx.lower_bound(wallet_id.value);
+         it != idx.end() && it->wallet_name == wallet_id;
+         ++it) {
+      sum_avail += it->available.amount;
+      sum_block += it->blocked.amount;
+    }
+    eosio::check(sum_avail == l2_avail && sum_block == l2_block,
+                 std::string{"walletop: инвариант Σ L3 == L2 нарушен на "} +
+                   wallet_id.to_string() +
+                   " (L2: " + std::to_string(l2_avail) + "/" + std::to_string(l2_block) +
+                   ", Σ L3: " + std::to_string(sum_avail) + "/" + std::to_string(sum_block) + ")");
+  };
+
+  // Pre-flight cross-contract check (до мутаций — fail-fast).
+  assert_program_signed(wallet_from);
+  assert_program_signed(wallet_to);
+
   switch (static_cast<WalletOp>(op_code)) {
     case WalletOp::ISSUE: {
       eosio::check(wallet_from.value == 0, "walletop ISSUE: wallet_from должен быть пустым");
@@ -255,5 +312,13 @@ void ledger2::walletop(eosio::name coopname,
       cleanup_l3_if_empty(wallet_from);
       break;
     }
+  }
+
+  // Post-mutation: инвариант Σ L3 == L2 на каждом затронутом кошельке.
+  // Проверяется только для USER_SHARED-кошельков с непустым username
+  // (для COOPERATIVE и L2-only-mode инварианта L3⊆L2 нет).
+  if (username.value != 0) {
+    assert_sum_l3_equals_l2(wallet_from);
+    assert_sum_l3_equals_l2(wallet_to);
   }
 }

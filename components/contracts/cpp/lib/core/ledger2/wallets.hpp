@@ -200,6 +200,61 @@ inline constexpr bool ledger2_is_known_wallet(eosio::name wallet_name) {
 }
 
 /**
+ * @brief Маппинг USER_SHARED-кошелька → требуемый program_id для cross-contract
+ * проверки `wallet::users.programs[]` (ADR-004; Story 3.2).
+ *
+ * Перед операцией на USER_SHARED-кошельке у пайщика должно быть подписано
+ * соответствующее программное соглашение в `wallet::users`. Исключение —
+ * `w.reg.minshr` (минимальные паевые взносы в момент регистрации, до того
+ * как пайщик подпишет ЦК-соглашение).
+ *
+ * Соответствие program_id ↔ контракт-программа задаётся в lib/consts.hpp:
+ *   1 = wallet (ЦК)
+ *   3 = source (Генератор)
+ *   4 = capital (Благорост)
+ */
+struct Ledger2WalletProgramMapping {
+  eosio::name wallet_name;
+  uint64_t    required_program_id; // 0 = исключение (без проверки)
+};
+
+inline constexpr std::array<Ledger2WalletProgramMapping, 5> LEDGER2_USER_SHARED_PROGRAM_MAPPING = {{
+  { ledger2_wallets::MIN_SHARE_FUND,    0 /* w.reg.minshr — без проверки */    },
+  { ledger2_wallets::SHARE_FUND_PAY,    1 /* ЦК */                              },
+  { ledger2_wallets::CK_MEMBER,         1 /* ЦК */                              },
+  { ledger2_wallets::BLAGOROST_FUND,    4 /* Благорост */                       },
+  { ledger2_wallets::GENERATOR_FUND,    3 /* Генератор */                       },
+}};
+
+/**
+ * @brief Возвращает required program_id для USER_SHARED-кошелька.
+ *
+ * Возвращает 0 если:
+ *   - кошелёк не USER_SHARED (запрос не имеет смысла);
+ *   - кошелёк USER_SHARED но в списке исключений (например, w.reg.minshr).
+ *
+ * Если кошелёк USER_SHARED, но его нет в маппинге — `eosio::check(false, ...)`
+ * (защита от добавления нового USER_SHARED-кошелька без соответствующей
+ * записи в маппинге).
+ */
+inline uint64_t ledger2_required_program_id(eosio::name wallet_name) {
+  for (const auto& m : LEDGER2_USER_SHARED_PROGRAM_MAPPING) {
+    if (m.wallet_name == wallet_name) return m.required_program_id;
+  }
+  // Кошелёк не в маппинге.
+  for (size_t i = 0; i < LEDGER2_WALLET_REGISTRY_SIZE; ++i) {
+    if (LEDGER2_WALLET_REGISTRY[i].name == wallet_name &&
+        LEDGER2_WALLET_REGISTRY[i].kind == WalletKind::USER_SHARED) {
+      eosio::check(false,
+                   std::string{"ledger2_required_program_id: USER_SHARED-кошелёк "} +
+                     wallet_name.to_string() +
+                     " не имеет записи в LEDGER2_USER_SHARED_PROGRAM_MAPPING");
+    }
+  }
+  return 0; // не USER_SHARED → без проверки
+}
+
+/**
  * @brief Возвращает `WalletKind` кошелька по его `eosio::name` (ADR-002, ADR-010).
  *
  * Для имени, отсутствующего в реестре — `eosio::check(false, ...)` (фейлит tx).
