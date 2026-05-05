@@ -136,6 +136,35 @@ public:
   [[eosio::action]] void migrate(uint64_t from_coop_index, uint64_t limit);
 
   /**
+   * @brief Идемпотентная per-record миграция L3-балансов (Phase 1/2; ADR-008).
+   *
+   * Заполняет `userwallets[coopname][wallet_name, username]` переданными
+   * значениями. Идемпотентно: значения УСТАНАВЛИВАЮТСЯ (не инкрементируются),
+   * повторный вызов с теми же параметрами = no-op.
+   *
+   * Без бух-проводок (это инициализация состояния, не операция). Без сверки
+   * с `wallet::users.programs[]` — миграция может заполнять L3 ДО переезда
+   * соглашений в `wallet::users` (порядок миграции — на уровне rollout-окна).
+   *
+   * Auth: `coopname@active`.
+   *
+   * НЕ путать с зарезервированным `ledger2::migrate` (legacy ledger → ledger2).
+   *
+   * @param coopname     кооператив (auth + payer)
+   * @param wallet_name  USER_SHARED-кошелёк (см. LEDGER2_WALLET_REGISTRY)
+   * @param username     пайщик
+   * @param available    значение available (asset)
+   * @param blocked      значение blocked (asset)
+   *
+   * @ingroup public_ledger2_actions
+   */
+  [[eosio::action]] void migrate3(eosio::name coopname,
+                                   eosio::name wallet_name,
+                                   eosio::name username,
+                                   eosio::asset available,
+                                   eosio::asset blocked);
+
+  /**
    * @brief Перевод между кошельками внутри одного бух.счёта (operation o.adj.walmove).
    *
    * Ручная корректировка председателя: переносит `amount` с `from_wallet`
