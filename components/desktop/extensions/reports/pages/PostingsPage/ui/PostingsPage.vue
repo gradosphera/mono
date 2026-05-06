@@ -134,6 +134,15 @@ div.page-shell
           q-td.text-right.font-monospace.text-weight-bold {{ formatAmount(props.row.quantity) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '—' }}
 
+          q-td.text-right(auto-width)
+            q-btn(
+              v-if='props.row.parentApplyGlobalSequence && props.row.processHash'
+              flat dense round size='sm' color='primary'
+              icon='fa-solid fa-arrow-right'
+              :to='{ name: "reports-operations", query: { process_hash: props.row.processHash, operation_id: props.row.parentApplyGlobalSequence } }'
+            )
+              q-tooltip К операции
+
       template(#item='props')
         .col-12
           q-card.q-pa-md.q-mb-sm
@@ -144,6 +153,14 @@ div.page-shell
               .col-auto.text-right
                 .text-caption.text-grey-6 Сумма
                 .text-body1.text-weight-bold.font-monospace {{ formatAmount(props.row.quantity) }}
+              .col-auto
+                q-btn(
+                  v-if='props.row.parentApplyGlobalSequence && props.row.processHash'
+                  flat dense size='sm' color='primary'
+                  icon='fa-solid fa-arrow-right'
+                  label='К операции'
+                  :to='{ name: "reports-operations", query: { process_hash: props.row.processHash, operation_id: props.row.parentApplyGlobalSequence } }'
+                )
             .row.q-mt-sm.items-center.q-gutter-x-md
               .col-auto.text-caption.text-grey-7 Дебет
               .col-auto
@@ -336,6 +353,7 @@ const columns = [
   { name: 'credit', align: 'center' as const, label: 'Кредит', field: 'creditAccountId' },
   { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },
   { name: 'username', align: 'left' as const, label: 'Пайщик', field: 'username' },
+  { name: 'actions', align: 'right' as const, label: '', field: 'parentApplyGlobalSequence', sortable: false },
 ]
 
 const hasAnyFilter = computed(
