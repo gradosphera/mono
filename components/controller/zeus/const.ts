@@ -3293,6 +3293,7 @@ export const ReturnTypes: Record<string,any> = {
 		globalSequence:"String",
 		memo:"String",
 		operationCode:"String",
+		parentApplyGlobalSequence:"String",
 		processHash:"String",
 		quantity:"String",
 		username:"String",

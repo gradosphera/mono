@@ -60,7 +60,6 @@ div.page-shell
           clearable
           @keyup.enter='applySearch'
           @clear='applySearch'
-          hint='Цифры — № проводки/операции, hex64 — процесс'
         )
           template(#append)
             q-icon.cursor-pointer(name='fa-solid fa-magnifying-glass' @click='applySearch')
@@ -132,22 +131,21 @@ div.page-shell
         q-tr(:key='`pst_${props.row.key}`' :props='props')
           q-td {{ formatDate(props.row.createdAt) }}
           q-td
-            //- Основная адресация = debit.global_sequence (unique). Под ним —
-            //- мелким серым process_hash как вторичная связка с реестром операций.
-            .text-body2.font-monospace.text-weight-medium
-              span(v-if='props.row.debitGlobalSequence'
-                   @click='copyText(props.row.debitGlobalSequence)'
-                   style='cursor: pointer;')
-                | {{ props.row.debitGlobalSequence }}
-                q-tooltip
-                  | № проводки (debit.global_sequence). Клик — копировать.
-                  br
-                  | Парный credit: {{ props.row.creditGlobalSequence ?? '—' }}
-              span.text-grey-6(v-else) —
-            .text-caption.text-grey-6(v-if='props.row.processHash')
-              span(@click='copyFullHash(props.row.processHash)' style='cursor: pointer;')
-                | проц. {{ shortHash(props.row.processHash) }}
-                q-tooltip Клик — копировать полный process_hash
+            EntityIdBadge(
+              v-if='props.row.debitGlobalSequence'
+              :rawId='props.row.debitGlobalSequence'
+              @click='copyText(props.row.debitGlobalSequence!)'
+            )
+              q-tooltip Клик — копировать
+            span.text-grey-6(v-else) —
+          q-td
+            EntityIdBadge(
+              v-if='props.row.processHash'
+              :rawId='shortHash(props.row.processHash)'
+              @click='copyFullHash(props.row.processHash)'
+            )
+              q-tooltip Клик — копировать полный хэш
+            span.text-grey-6(v-else) —
           q-td
             q-chip(
               v-if='props.row.operationCode'
@@ -200,10 +198,19 @@ div.page-shell
                 AccountIdCell(:account-code='creditCode(props.row.creditAccountId)')
             .col-12.text-caption.text-grey-7
               | Пайщик: {{ fioCache.get(props.row.username ?? '') || props.row.username || '—' }}
-            .col-12.text-caption.text-grey-7.font-monospace.q-mt-xs
-              | № проводки {{ props.row.debitGlobalSequence ?? '—' }}
-              template(v-if='props.row.processHash')
-                |  · проц. {{ shortHash(props.row.processHash) }}
+            .col-12.row.q-gutter-xs.q-mt-xs.items-center
+              .text-caption.text-grey-7 № проводки
+              EntityIdBadge(
+                v-if='props.row.debitGlobalSequence'
+                :rawId='props.row.debitGlobalSequence'
+                @click='copyText(props.row.debitGlobalSequence!)'
+              )
+              .text-caption.text-grey-7 № процесса
+              EntityIdBadge(
+                v-if='props.row.processHash'
+                :rawId='shortHash(props.row.processHash)'
+                @click='copyFullHash(props.row.processHash)'
+              )
 </template>
 
 <script setup lang="ts">
@@ -213,6 +220,7 @@ import { copyToClipboard } from 'quasar'
 import { useWindowSize } from 'src/shared/hooks'
 import { useSystemStore } from 'src/entities/System/model'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
+import { EntityIdBadge } from 'src/shared/ui'
 import { useLedger2Store } from 'src/entities/Ledger2'
 import type { ILedger2Posting, ILedger2PostingsFilterInput } from 'src/entities/Ledger2'
 import { useAccountStore } from 'src/entities/Account'
@@ -434,6 +442,7 @@ async function resolveAccountName(id: number) {
 const columns = [
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
   { name: 'postingId', align: 'left' as const, label: '№ проводки', field: 'debitGlobalSequence' },
+  { name: 'processHash', align: 'left' as const, label: '№ процесса', field: 'processHash' },
   { name: 'operationCode', align: 'left' as const, label: 'Операция', field: 'operationCode' },
   { name: 'debit', align: 'center' as const, label: 'Дебет', field: 'debitAccountId' },
   { name: 'credit', align: 'center' as const, label: 'Кредит', field: 'creditAccountId' },

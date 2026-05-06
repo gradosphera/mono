@@ -5957,6 +5957,8 @@ export type ValueTypes = {
 	memo?:boolean | `@${string}`,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?:boolean | `@${string}`,
+	/** global_sequence ближайшего предшествующего apply того же processHash (родитель) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
 	/** process_hash (32-hex) */
 	processHash?:boolean | `@${string}`,
 	/** Asset "100.0000 RUB" */
@@ -14188,6 +14190,8 @@ export type ResolverInputTypes = {
 	memo?:boolean | `@${string}`,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?:boolean | `@${string}`,
+	/** global_sequence ближайшего предшествующего apply того же processHash (родитель) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
 	/** process_hash (32-hex) */
 	processHash?:boolean | `@${string}`,
 	/** Asset "100.0000 RUB" */
@@ -22176,6 +22180,8 @@ export type ModelTypes = {
 	memo?: string | undefined | null,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?: string | undefined | null,
+	/** global_sequence ближайшего предшествующего apply того же processHash (родитель) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash (32-hex) */
 	processHash?: string | undefined | null,
 	/** Asset "100.0000 RUB" */
@@ -30935,6 +30941,8 @@ export type GraphQLTypes = {
 	memo?: string | undefined | null,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?: string | undefined | null,
+	/** global_sequence ближайшего предшествующего apply того же processHash (родитель) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash (32-hex) */
 	processHash?: string | undefined | null,
 	/** Asset "100.0000 RUB" */

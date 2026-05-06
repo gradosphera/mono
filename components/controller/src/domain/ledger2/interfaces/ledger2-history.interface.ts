@@ -26,6 +26,13 @@ export interface Ledger2OperationDomainInterface {
   /** Сумма в формате asset (`"100.0000 RUB"`) — применимо к walletop/debit/credit. */
   quantity: string | null;
   memo: string | null;
+  /**
+   * global_sequence ближайшего предшествующего apply того же processHash
+   * (родительский apply). null для самих apply-строк и legacy-debit/credit
+   * без apply-родителя. Применение: cross-link из AccountsPage / WalletsPage
+   * на точечную операцию в реестре операций.
+   */
+  parentApplyGlobalSequence: string | null;
   createdAt: Date;
 }
 

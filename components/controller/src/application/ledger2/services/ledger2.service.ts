@@ -54,6 +54,7 @@ export class Ledger2Service {
       walletTo: op.walletTo,
       quantity: op.quantity,
       memo: op.memo,
+      parentApplyGlobalSequence: op.parentApplyGlobalSequence,
       createdAt: op.createdAt,
     }));
     return {

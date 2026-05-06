@@ -49,7 +49,6 @@ div.page-shell
           clearable
           @clear='applyIdSearch'
           @keyup.enter='applyIdSearch'
-          hint='Цифры — № операции (apply.global_sequence), hex64 — процесс'
         )
           template(#append)
             q-icon.cursor-pointer(name='fa-solid fa-magnifying-glass' @click='applyIdSearch')
@@ -135,20 +134,19 @@ div.page-shell
               @click='toggleExpand(props.row.globalSequence, props.row.processHash)'
             )
           q-td
-            //- Канон. ID операции = apply.global_sequence (unique, monotone).
-            //- Под ним вторично — короткий process_hash для cross-check.
-            .text-body2.font-monospace.text-weight-medium
-              span(@click='copyText(String(props.row.globalSequence))' style='cursor: pointer;')
-                | {{ props.row.globalSequence }}
-                q-tooltip
-                  | № операции (apply.global_sequence). Клик — копировать.
-                  br
-                  span.text-grey-4(v-if='props.row.processHash')
-                    | процесс: {{ props.row.processHash }}
-            .text-caption.text-grey-6(v-if='props.row.processHash')
-              span(@click='copyFullHash(props.row.processHash)' style='cursor: pointer;')
-                | проц. {{ shortHash(props.row.processHash) }}
-                q-tooltip Клик — копировать полный process_hash
+            EntityIdBadge(
+              :rawId='props.row.globalSequence'
+              @click='copyText(String(props.row.globalSequence))'
+            )
+              q-tooltip Клик — копировать
+          q-td
+            EntityIdBadge(
+              v-if='props.row.processHash'
+              :rawId='shortHash(props.row.processHash)'
+              @click='copyFullHash(props.row.processHash)'
+            )
+              q-tooltip Клик — копировать полный хэш
+            span.text-grey-6(v-else) —
           q-td {{ formatDate(props.row.createdAt) }}
           q-td
             q-chip(
@@ -261,10 +259,18 @@ div.page-shell
                 .text-body1.text-weight-bold.font-monospace {{ formatAmount(props.row.quantity) }}
               .col-12.text-caption.text-grey-7
                 | Пайщик: {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
-              .col-12.text-caption.text-grey-7.font-monospace.q-mt-xs
-                | № операции {{ props.row.globalSequence }}
-                template(v-if='props.row.processHash')
-                  |  · проц. {{ shortHash(props.row.processHash) }}
+              .col-12.row.q-gutter-xs.q-mt-xs.items-center
+                .text-caption.text-grey-7 № операции
+                EntityIdBadge(
+                  :rawId='props.row.globalSequence'
+                  @click='copyText(String(props.row.globalSequence))'
+                )
+                .text-caption.text-grey-7 № процесса
+                EntityIdBadge(
+                  v-if='props.row.processHash'
+                  :rawId='shortHash(props.row.processHash)'
+                  @click='copyFullHash(props.row.processHash)'
+                )
 </template>
 
 <script setup lang="ts">
@@ -553,6 +559,7 @@ async function resolveAccountName(id: number) {
 const columns = [
   { name: 'expand', align: 'left' as const, label: '', field: 'expand', sortable: false },
   { name: 'operationId', align: 'left' as const, label: '№ операции', field: 'globalSequence' },
+  { name: 'processHash', align: 'left' as const, label: '№ процесса', field: 'processHash' },
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
   { name: 'actionName', align: 'left' as const, label: 'Операция', field: 'operationCode' },
   { name: 'quantity', align: 'right' as const, label: 'Сумма', field: 'quantity' },

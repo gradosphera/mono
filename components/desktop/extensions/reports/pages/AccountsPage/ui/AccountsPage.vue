@@ -66,6 +66,22 @@ div.page-shell
                     span.text-weight-medium(
                       :class='cp.row.action === "debit" ? "text-blue-grey-8" : "text-brown-7"'
                     ) {{ cp.row.action === 'debit' ? 'Дебет' : 'Кредит' }}
+                template(#body-cell-postingId='cp')
+                  q-td(:props='cp')
+                    EntityIdBadge(
+                      :rawId='cp.row.globalSequence'
+                      @click='copyText(String(cp.row.globalSequence))'
+                    )
+                      q-tooltip Клик — копировать
+                template(#body-cell-processHash='cp')
+                  q-td(:props='cp')
+                    EntityIdBadge(
+                      v-if='cp.row.processHash'
+                      :rawId='shortHash(cp.row.processHash)'
+                      @click='copyFullHash(cp.row.processHash)'
+                    )
+                      q-tooltip Клик — копировать полный хэш
+                    span.text-grey-6(v-else) —
                 template(#body-cell-quantity='cp')
                   q-td.text-right(:props='cp') {{ cp.row.quantity ? formatAsset2Digits(cp.row.quantity) : '—' }}
                 template(#body-cell-createdAt='cp')
@@ -73,10 +89,10 @@ div.page-shell
                 template(#body-cell-open='cp')
                   q-td.text-right(:props='cp')
                     q-btn(
-                      v-if='cp.row.processHash'
+                      v-if='cp.row.parentApplyGlobalSequence'
                       flat dense round size='sm' color='primary'
                       icon='fa-solid fa-arrow-right'
-                      :to='{ name: "reports-operations", query: { process_hash: cp.row.processHash } }'
+                      :to='{ name: "reports-operations", query: { operation_id: cp.row.parentApplyGlobalSequence } }'
                     )
                       q-tooltip К операции
 
@@ -111,12 +127,14 @@ div.page-shell
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { copyToClipboard } from 'quasar'
 import { useWindowSize } from 'src/shared/hooks'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { useSystemStore } from 'src/entities/System/model'
 import { useLedger2Store, type ILedger2Account, type ILedger2Operation } from 'src/entities/Ledger2'
-import { FailAlert } from 'src/shared/api'
+import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
+import { EntityIdBadge } from 'src/shared/ui'
 import { AccountIdCell } from '../../../shared/ui'
 
 const { info } = useSystemStore()
@@ -141,6 +159,25 @@ function formatDate(d: string | Date): string {
   })
 }
 
+function shortHash(hash: string | null | undefined): string {
+  if (!hash) return '—'
+  return hash.slice(0, 8)
+}
+
+async function copyText(text: string) {
+  try {
+    await copyToClipboard(text)
+    SuccessAlert('Скопировано')
+  } catch {
+    FailAlert('Не удалось скопировать')
+  }
+}
+
+async function copyFullHash(hash: string | null | undefined) {
+  if (!hash) return
+  await copyText(hash)
+}
+
 const columns: any[] = [
   { name: 'expand', align: 'left', label: '', field: 'expand', sortable: false },
   { name: 'id', align: 'left', label: 'Счёт', field: 'id', sortable: true },
@@ -153,9 +190,11 @@ const columns: any[] = [
 
 const childColumns: any[] = [
   { name: 'action', align: 'left', label: 'Тип', field: 'action' },
+  { name: 'postingId', align: 'left', label: '№ проводки', field: 'globalSequence' },
+  { name: 'processHash', align: 'left', label: '№ процесса', field: 'processHash' },
   { name: 'quantity', align: 'right', label: 'Сумма', field: 'quantity' },
   { name: 'createdAt', align: 'left', label: 'Дата', field: 'createdAt' },
-  { name: 'open', align: 'right', label: '', field: 'processHash' },
+  { name: 'open', align: 'right', label: '', field: 'parentApplyGlobalSequence' },
 ]
 
 async function toggleExpand(id: number) {

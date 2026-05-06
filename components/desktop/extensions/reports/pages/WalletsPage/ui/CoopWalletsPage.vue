@@ -64,10 +64,12 @@ div.page-shell
                 no-data-label='Движений нет'
               )
                 template(#body-cell-movementId='cp')
-                  q-td.font-monospace(:props='cp')
-                    span(@click='copyText(String(cp.row.globalSequence))' style='cursor: pointer;')
-                      | {{ cp.row.globalSequence }}
-                      q-tooltip № движения (walletop.global_sequence). Клик — копировать.
+                  q-td(:props='cp')
+                    EntityIdBadge(
+                      :rawId='cp.row.globalSequence'
+                      @click='copyText(String(cp.row.globalSequence))'
+                    )
+                      q-tooltip Клик — копировать
                 template(#body-cell-direction='cp')
                   q-td(:props='cp')
                     DirectionCell(:direction='directionFor(cp.row, String(props.row.id))')
@@ -133,6 +135,7 @@ import { useSessionStore } from 'src/entities/Session/model'
 import { useLedger2Store, type ILedger2Wallet, type ILedger2Operation } from 'src/entities/Ledger2'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
+import { EntityIdBadge } from 'src/shared/ui'
 import { DirectionCell, WalletIdCell } from '../../../shared/ui'
 import WalletTransferDialog from './WalletTransferDialog.vue'
 import TransferWalletsButton from './TransferWalletsButton.vue'

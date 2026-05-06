@@ -6778,6 +6778,11 @@ type Ledger2Operation {
   """Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...)"""
   operationCode: String
 
+  """
+  global_sequence ближайшего предшествующего apply того же processHash (родитель) — для точечного cross-link на конкретную операцию.
+  """
+  parentApplyGlobalSequence: String
+
   """process_hash (32-hex)"""
   processHash: String
 

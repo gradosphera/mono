@@ -50,6 +50,13 @@ export class Ledger2OperationDTO {
   @Field(() => String, { nullable: true })
   memo?: string | null;
 
+  @Field(() => String, {
+    nullable: true,
+    description:
+      'global_sequence ближайшего предшествующего apply того же processHash (родитель) — для точечного cross-link на конкретную операцию.',
+  })
+  parentApplyGlobalSequence?: string | null;
+
   @Field(() => Date)
   createdAt!: Date;
 }

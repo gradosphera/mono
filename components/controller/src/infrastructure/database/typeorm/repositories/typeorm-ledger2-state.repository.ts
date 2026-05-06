@@ -296,6 +296,19 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
            NULLIF(a.data ->> 'amount', '')
          )                                       AS "quantity",
          (a.data ->> 'memo')                     AS "memo",
+         CASE WHEN a.name IN ('walletop', 'debit', 'credit')
+              THEN (
+                SELECT b.global_sequence
+                  FROM blockchain_actions b
+                 WHERE b.account = a.account
+                   AND b.name = 'apply'
+                   AND LOWER(b.data ->> 'process_hash') = LOWER(a.data ->> 'process_hash')
+                   AND b.global_sequence::bigint < a.global_sequence::bigint
+                 ORDER BY b.global_sequence::bigint DESC
+                 LIMIT 1
+              )
+              ELSE NULL
+         END                                     AS "parentApplyGlobalSequence",
          a.created_at                            AS "createdAt"
        FROM blockchain_actions a
        WHERE ${where}
@@ -319,6 +332,8 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       walletTo: r.walletTo != null ? String(r.walletTo) : null,
       quantity: (r.quantity as string | null) ?? null,
       memo: (r.memo as string | null) ?? null,
+      parentApplyGlobalSequence:
+        r.parentApplyGlobalSequence != null ? String(r.parentApplyGlobalSequence) : null,
       createdAt: r.createdAt instanceof Date ? r.createdAt : new Date(String(r.createdAt)),
     }));
 
