@@ -5709,6 +5709,19 @@ export type ValueTypes = {
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
 	walletName?: string | undefined | null | Variable<any, string>
 };
+	["GetLedger2PostingsInput"]: {
+	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null | Variable<any, string>,
+	coopname: string | Variable<any, string>,
+	dateFrom?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	limit?: number | undefined | null | Variable<any, string>,
+	page?: number | undefined | null | Variable<any, string>,
+	/** process_hash для выборки всех проводок одной операции */
+	processHash?: string | undefined | null | Variable<any, string>,
+	sortOrder?: string | undefined | null | Variable<any, string>,
+	username?: string | undefined | null | Variable<any, string>
+};
 	["GetLedgerHistoryInput"]: {
 	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
 	account_id?: number | undefined | null | Variable<any, string>,
@@ -5947,6 +5960,40 @@ export type ValueTypes = {
 	walletTo?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on Ledger2Operation']?: Omit<ValueTypes["Ledger2Operation"], "...on Ledger2Operation">
+}>;
+	["Ledger2Posting"]: AliasType<{
+	blockNum?:boolean | `@${string}`,
+	createdAt?:boolean | `@${string}`,
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?:boolean | `@${string}`,
+	/** global_sequence credit-action */
+	creditGlobalSequence?:boolean | `@${string}`,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?:boolean | `@${string}`,
+	/** global_sequence debit-action */
+	debitGlobalSequence?:boolean | `@${string}`,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key?:boolean | `@${string}`,
+	memo?:boolean | `@${string}`,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?:boolean | `@${string}`,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
+	/** process_hash (32-hex) */
+	processHash?:boolean | `@${string}`,
+	/** Asset "100.0000 RUB" */
+	quantity?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on Ledger2Posting']?: Omit<ValueTypes["Ledger2Posting"], "...on Ledger2Posting">
+}>;
+	["Ledger2PostingsResponse"]: AliasType<{
+	currentPage?:boolean | `@${string}`,
+	items?:ValueTypes["Ledger2Posting"],
+	totalCount?:boolean | `@${string}`,
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on Ledger2PostingsResponse']?: Omit<ValueTypes["Ledger2PostingsResponse"], "...on Ledger2PostingsResponse">
 }>;
 	["Ledger2Wallet"]: AliasType<{
 	/** Доступный баланс */
@@ -7718,6 +7765,7 @@ getInstallationStatus?: [{	data: ValueTypes["GetInstallationStatusInput"] | Vari
 getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
 getLedger2Accounts?: [{	coopname: string | Variable<any, string>},ValueTypes["Ledger2Account"]],
 getLedger2History?: [{	input: ValueTypes["GetLedger2HistoryInput"] | Variable<any, string>},ValueTypes["Ledger2HistoryResponse"]],
+getLedger2Postings?: [{	input: ValueTypes["GetLedger2PostingsInput"] | Variable<any, string>},ValueTypes["Ledger2PostingsResponse"]],
 getLedger2Wallets?: [{	coopname: string | Variable<any, string>},ValueTypes["Ledger2Wallet"]],
 getLedgerHistory?: [{	data: ValueTypes["GetLedgerHistoryInput"] | Variable<any, string>},ValueTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -13891,6 +13939,19 @@ export type ResolverInputTypes = {
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
 	walletName?: string | undefined | null
 };
+	["GetLedger2PostingsInput"]: {
+	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null,
+	coopname: string,
+	dateFrom?: ResolverInputTypes["DateTime"] | undefined | null,
+	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	/** process_hash для выборки всех проводок одной операции */
+	processHash?: string | undefined | null,
+	sortOrder?: string | undefined | null,
+	username?: string | undefined | null
+};
 	["GetLedgerHistoryInput"]: {
 	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
 	account_id?: number | undefined | null,
@@ -14120,6 +14181,38 @@ export type ResolverInputTypes = {
 	walletFrom?:boolean | `@${string}`,
 	/** walletop: wallet_to (eosio::name w.<contract>.<waltype>) */
 	walletTo?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Ledger2Posting"]: AliasType<{
+	blockNum?:boolean | `@${string}`,
+	createdAt?:boolean | `@${string}`,
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?:boolean | `@${string}`,
+	/** global_sequence credit-action */
+	creditGlobalSequence?:boolean | `@${string}`,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?:boolean | `@${string}`,
+	/** global_sequence debit-action */
+	debitGlobalSequence?:boolean | `@${string}`,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key?:boolean | `@${string}`,
+	memo?:boolean | `@${string}`,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?:boolean | `@${string}`,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
+	/** process_hash (32-hex) */
+	processHash?:boolean | `@${string}`,
+	/** Asset "100.0000 RUB" */
+	quantity?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Ledger2PostingsResponse"]: AliasType<{
+	currentPage?:boolean | `@${string}`,
+	items?:ResolverInputTypes["Ledger2Posting"],
+	totalCount?:boolean | `@${string}`,
+	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["Ledger2Wallet"]: AliasType<{
@@ -15824,6 +15917,7 @@ getInstallationStatus?: [{	data: ResolverInputTypes["GetInstallationStatusInput"
 getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
 getLedger2Accounts?: [{	coopname: string},ResolverInputTypes["Ledger2Account"]],
 getLedger2History?: [{	input: ResolverInputTypes["GetLedger2HistoryInput"]},ResolverInputTypes["Ledger2HistoryResponse"]],
+getLedger2Postings?: [{	input: ResolverInputTypes["GetLedger2PostingsInput"]},ResolverInputTypes["Ledger2PostingsResponse"]],
 getLedger2Wallets?: [{	coopname: string},ResolverInputTypes["Ledger2Wallet"]],
 getLedgerHistory?: [{	data: ResolverInputTypes["GetLedgerHistoryInput"]},ResolverInputTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -21836,6 +21930,19 @@ export type ModelTypes = {
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
 	walletName?: string | undefined | null
 };
+	["GetLedger2PostingsInput"]: {
+	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null,
+	coopname: string,
+	dateFrom?: ModelTypes["DateTime"] | undefined | null,
+	dateTo?: ModelTypes["DateTime"] | undefined | null,
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	/** process_hash для выборки всех проводок одной операции */
+	processHash?: string | undefined | null,
+	sortOrder?: string | undefined | null,
+	username?: string | undefined | null
+};
 	["GetLedgerHistoryInput"]: {
 	/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
 	account_id?: number | undefined | null,
@@ -22054,6 +22161,36 @@ export type ModelTypes = {
 	walletFrom?: string | undefined | null,
 	/** walletop: wallet_to (eosio::name w.<contract>.<waltype>) */
 	walletTo?: string | undefined | null
+};
+	["Ledger2Posting"]: {
+		blockNum: number,
+	createdAt: ModelTypes["DateTime"],
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?: number | undefined | null,
+	/** global_sequence credit-action */
+	creditGlobalSequence?: string | undefined | null,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?: number | undefined | null,
+	/** global_sequence debit-action */
+	debitGlobalSequence?: string | undefined | null,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key: string,
+	memo?: string | undefined | null,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?: string | undefined | null,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?: string | undefined | null,
+	/** process_hash (32-hex) */
+	processHash?: string | undefined | null,
+	/** Asset "100.0000 RUB" */
+	quantity?: string | undefined | null,
+	username?: string | undefined | null
+};
+	["Ledger2PostingsResponse"]: {
+		currentPage: number,
+	items: Array<ModelTypes["Ledger2Posting"]>,
+	totalCount: number,
+	totalPages: number
 };
 	["Ledger2Wallet"]: {
 		/** Доступный баланс */
@@ -24270,6 +24407,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	getLedger2History: ModelTypes["Ledger2HistoryResponse"],
+	/** Реестр проводок: пары debit+credit (Дт/Кт/Сумма), восстановленные из blockchain_actions по правилу «ближайший parent apply». Источник для фронт-страницы «Реестр проводок».
+
+Требуемые роли: chairman, member.  */
+	getLedger2Postings: ModelTypes["Ledger2PostingsResponse"],
 	/** Общекооперативные кошельки из ledger2::wallets (eosio::name w.<contract>.<waltype>). Кошельки пайщиков живут в контракте soviet — сюда не попадают.
 
 Требуемые роли: chairman, member.  */
@@ -30521,6 +30662,19 @@ export type GraphQLTypes = {
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
 	walletName?: string | undefined | null
 };
+	["GetLedger2PostingsInput"]: {
+		/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null,
+	coopname: string,
+	dateFrom?: GraphQLTypes["DateTime"] | undefined | null,
+	dateTo?: GraphQLTypes["DateTime"] | undefined | null,
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	/** process_hash для выборки всех проводок одной операции */
+	processHash?: string | undefined | null,
+	sortOrder?: string | undefined | null,
+	username?: string | undefined | null
+};
 	["GetLedgerHistoryInput"]: {
 		/** ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам */
 	account_id?: number | undefined | null,
@@ -30759,6 +30913,40 @@ export type GraphQLTypes = {
 	/** walletop: wallet_to (eosio::name w.<contract>.<waltype>) */
 	walletTo?: string | undefined | null,
 	['...on Ledger2Operation']: Omit<GraphQLTypes["Ledger2Operation"], "...on Ledger2Operation">
+};
+	["Ledger2Posting"]: {
+	__typename: "Ledger2Posting",
+	blockNum: number,
+	createdAt: GraphQLTypes["DateTime"],
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?: number | undefined | null,
+	/** global_sequence credit-action */
+	creditGlobalSequence?: string | undefined | null,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?: number | undefined | null,
+	/** global_sequence debit-action */
+	debitGlobalSequence?: string | undefined | null,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key: string,
+	memo?: string | undefined | null,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?: string | undefined | null,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?: string | undefined | null,
+	/** process_hash (32-hex) */
+	processHash?: string | undefined | null,
+	/** Asset "100.0000 RUB" */
+	quantity?: string | undefined | null,
+	username?: string | undefined | null,
+	['...on Ledger2Posting']: Omit<GraphQLTypes["Ledger2Posting"], "...on Ledger2Posting">
+};
+	["Ledger2PostingsResponse"]: {
+	__typename: "Ledger2PostingsResponse",
+	currentPage: number,
+	items: Array<GraphQLTypes["Ledger2Posting"]>,
+	totalCount: number,
+	totalPages: number,
+	['...on Ledger2PostingsResponse']: Omit<GraphQLTypes["Ledger2PostingsResponse"], "...on Ledger2PostingsResponse">
 };
 	["Ledger2Wallet"]: {
 	__typename: "Ledger2Wallet",
@@ -33134,6 +33322,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	getLedger2History: GraphQLTypes["Ledger2HistoryResponse"],
+	/** Реестр проводок: пары debit+credit (Дт/Кт/Сумма), восстановленные из blockchain_actions по правилу «ближайший parent apply». Источник для фронт-страницы «Реестр проводок».
+
+Требуемые роли: chairman, member.  */
+	getLedger2Postings: GraphQLTypes["Ledger2PostingsResponse"],
 	/** Общекооперативные кошельки из ledger2::wallets (eosio::name w.<contract>.<waltype>). Кошельки пайщиков живут в контракте soviet — сюда не попадают.
 
 Требуемые роли: chairman, member.  */
@@ -35421,6 +35613,7 @@ type ZEUS_VARIABLES = {
 	["GetInstallationStatusInput"]: ValueTypes["GetInstallationStatusInput"];
 	["GetInvestInput"]: ValueTypes["GetInvestInput"];
 	["GetLedger2HistoryInput"]: ValueTypes["GetLedger2HistoryInput"];
+	["GetLedger2PostingsInput"]: ValueTypes["GetLedger2PostingsInput"];
 	["GetLedgerHistoryInput"]: ValueTypes["GetLedgerHistoryInput"];
 	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
 	["GetMaxOriginServerTsForRoomInput"]: ValueTypes["GetMaxOriginServerTsForRoomInput"];

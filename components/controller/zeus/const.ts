@@ -529,6 +529,10 @@ export const AllTypesProps: Record<string,any> = {
 		dateFrom:"DateTime",
 		dateTo:"DateTime"
 	},
+	GetLedger2PostingsInput:{
+		dateFrom:"DateTime",
+		dateTo:"DateTime"
+	},
 	GetLedgerHistoryInput:{
 
 	},
@@ -1528,6 +1532,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getLedger2History:{
 			input:"GetLedger2HistoryInput"
+		},
+		getLedger2Postings:{
+			input:"GetLedger2PostingsInput"
 		},
 		getLedger2Wallets:{
 
@@ -3292,6 +3299,27 @@ export const ReturnTypes: Record<string,any> = {
 		walletFrom:"String",
 		walletTo:"String"
 	},
+	Ledger2Posting:{
+		blockNum:"Int",
+		createdAt:"DateTime",
+		creditAccountId:"Int",
+		creditGlobalSequence:"String",
+		debitAccountId:"Int",
+		debitGlobalSequence:"String",
+		key:"String",
+		memo:"String",
+		operationCode:"String",
+		parentApplyGlobalSequence:"String",
+		processHash:"String",
+		quantity:"String",
+		username:"String"
+	},
+	Ledger2PostingsResponse:{
+		currentPage:"Int",
+		items:"Ledger2Posting",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	Ledger2Wallet:{
 		available:"String",
 		blocked:"String",
@@ -4108,6 +4136,7 @@ export const ReturnTypes: Record<string,any> = {
 		getLedger:"LedgerState",
 		getLedger2Accounts:"Ledger2Account",
 		getLedger2History:"Ledger2HistoryResponse",
+		getLedger2Postings:"Ledger2PostingsResponse",
 		getLedger2Wallets:"Ledger2Wallet",
 		getLedgerHistory:"LedgerHistoryResponse",
 		getMeet:"MeetAggregate",

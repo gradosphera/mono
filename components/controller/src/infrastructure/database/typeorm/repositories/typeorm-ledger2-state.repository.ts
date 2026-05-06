@@ -12,6 +12,11 @@ import type {
   Ledger2HistoryResponseDomainInterface,
   Ledger2OperationDomainInterface,
 } from '~/domain/ledger2/interfaces/ledger2-history.interface';
+import type {
+  Ledger2PostingDomainInterface,
+  Ledger2PostingsFilterDomainInterface,
+  Ledger2PostingsResponseDomainInterface,
+} from '~/domain/ledger2/interfaces/ledger2-postings.interface';
 
 const LEDGER2_CODE = Ledger2Contract.contractName.production;
 
@@ -267,6 +272,186 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       memo: (r.memo as string | null) ?? null,
       createdAt: r.createdAt instanceof Date ? r.createdAt : new Date(String(r.createdAt)),
     }));
+
+    return { items, totalCount, totalPages, currentPage: page };
+  }
+
+  async getPostings(
+    filter: Ledger2PostingsFilterDomainInterface,
+  ): Promise<Ledger2PostingsResponseDomainInterface> {
+    const page = Math.max(1, filter.page ?? 1);
+    const limit = Math.max(1, Math.min(500, filter.limit ?? 50));
+    const offset = (page - 1) * limit;
+    const sortOrder = filter.sortOrder === 'ASC' ? 'ASC' : 'DESC';
+
+    const params: unknown[] = [LEDGER2_CODE, filter.coopname];
+    let pIdx = 3;
+    const debitClauses: string[] = [];
+
+    if (filter.processHash) {
+      debitClauses.push(`LOWER(d.data ->> 'process_hash') = $${pIdx}`);
+      params.push(filter.processHash.toLowerCase());
+      pIdx += 1;
+    }
+    if (filter.username) {
+      debitClauses.push(`d.data ->> 'username' = $${pIdx}`);
+      params.push(filter.username);
+      pIdx += 1;
+    }
+    if (filter.dateFrom) {
+      debitClauses.push(`d.created_at >= $${pIdx}`);
+      params.push(filter.dateFrom);
+      pIdx += 1;
+    }
+    if (filter.dateTo) {
+      debitClauses.push(`d.created_at <= $${pIdx}`);
+      params.push(filter.dateTo);
+      pIdx += 1;
+    }
+    // accountId — попадание в debit ИЛИ credit. Для debit-ноги тривиально:
+    // сравниваем data->>'account_id'. Для credit-ноги — через EXISTS на пару
+    // (тот же processHash, > debit.global_sequence, нет apply между ними).
+    if (filter.accountId !== undefined) {
+      debitClauses.push(
+        `(
+          (d.data ->> 'account_id')::text = $${pIdx}
+          OR EXISTS (
+            SELECT 1 FROM blockchain_actions cc
+            WHERE cc.account = d.account
+              AND cc.name = 'credit'
+              AND LOWER(cc.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+              AND cc.global_sequence::bigint > d.global_sequence::bigint
+              AND (cc.data ->> 'account_id')::text = $${pIdx}
+              AND NOT EXISTS (
+                SELECT 1 FROM blockchain_actions ap
+                WHERE ap.account = d.account
+                  AND ap.name = 'apply'
+                  AND LOWER(ap.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+                  AND ap.global_sequence::bigint > d.global_sequence::bigint
+                  AND ap.global_sequence::bigint < cc.global_sequence::bigint
+              )
+          )
+        )`,
+      );
+      params.push(String(filter.accountId));
+      pIdx += 1;
+    }
+
+    const debitWhere = `
+      d.account = $1
+      AND d.name = 'debit'
+      AND d.data ->> 'coopname' = $2
+      ${debitClauses.length ? 'AND ' + debitClauses.join(' AND ') : ''}
+    `;
+
+    const countRow = await this.actionRepo.manager.query(
+      `SELECT COUNT(*) AS cnt FROM blockchain_actions d WHERE ${debitWhere}`,
+      params,
+    );
+    const totalCount = parseInt(countRow[0]?.cnt ?? '0', 10);
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+
+    // Парная связь: для каждой debit-записи credit ищется как ПЕРВЫЙ credit
+    // того же processHash с global_sequence > debit и БЕЗ apply между ними
+    // (apply закрывает текущую группу пар). parent apply = ПОСЛЕДНИЙ apply
+    // того же processHash до debit. Если debit без своего apply (миграция,
+    // прямой вызов) — operationCode/parentApply будут null, проводка всё
+    // равно валидна и попадает в реестр.
+    const rows = await this.actionRepo.manager.query(
+      `SELECT
+         d.global_sequence                       AS "debitGlobalSequence",
+         d.block_num                             AS "blockNum",
+         LOWER(d.data ->> 'process_hash')        AS "processHash",
+         (d.data ->> 'username')                 AS "username",
+         (d.data ->> 'memo')                     AS "memo",
+         d.created_at                            AS "createdAt",
+         NULLIF(d.data ->> 'account_id','')::bigint AS "debitAccountId",
+         NULLIF(d.data ->> 'quantity','')        AS "quantity",
+         (
+           SELECT c.global_sequence
+             FROM blockchain_actions c
+            WHERE c.account = d.account
+              AND c.name = 'credit'
+              AND LOWER(c.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+              AND c.global_sequence::bigint > d.global_sequence::bigint
+              AND NOT EXISTS (
+                SELECT 1 FROM blockchain_actions ap
+                WHERE ap.account = d.account
+                  AND ap.name = 'apply'
+                  AND LOWER(ap.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+                  AND ap.global_sequence::bigint > d.global_sequence::bigint
+                  AND ap.global_sequence::bigint < c.global_sequence::bigint
+              )
+            ORDER BY c.global_sequence::bigint ASC
+            LIMIT 1
+         )                                       AS "creditGlobalSequence",
+         (
+           SELECT NULLIF(c.data ->> 'account_id','')::bigint
+             FROM blockchain_actions c
+            WHERE c.account = d.account
+              AND c.name = 'credit'
+              AND LOWER(c.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+              AND c.global_sequence::bigint > d.global_sequence::bigint
+              AND NOT EXISTS (
+                SELECT 1 FROM blockchain_actions ap
+                WHERE ap.account = d.account
+                  AND ap.name = 'apply'
+                  AND LOWER(ap.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+                  AND ap.global_sequence::bigint > d.global_sequence::bigint
+                  AND ap.global_sequence::bigint < c.global_sequence::bigint
+              )
+            ORDER BY c.global_sequence::bigint ASC
+            LIMIT 1
+         )                                       AS "creditAccountId",
+         (
+           SELECT b.global_sequence
+             FROM blockchain_actions b
+            WHERE b.account = d.account
+              AND b.name = 'apply'
+              AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+              AND b.global_sequence::bigint < d.global_sequence::bigint
+            ORDER BY b.global_sequence::bigint DESC
+            LIMIT 1
+         )                                       AS "parentApplyGlobalSequence",
+         (
+           SELECT b.data ->> 'operation_code'
+             FROM blockchain_actions b
+            WHERE b.account = d.account
+              AND b.name = 'apply'
+              AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+              AND b.global_sequence::bigint < d.global_sequence::bigint
+            ORDER BY b.global_sequence::bigint DESC
+            LIMIT 1
+         )                                       AS "operationCode"
+       FROM blockchain_actions d
+       WHERE ${debitWhere}
+       ORDER BY d.block_num ${sortOrder}, d.global_sequence ${sortOrder}
+       LIMIT ${limit} OFFSET ${offset}`,
+      params,
+    );
+
+    const items: Ledger2PostingDomainInterface[] = (
+      rows as Array<Record<string, unknown>>
+    ).map((r) => {
+      const debitSeq = r.debitGlobalSequence != null ? String(r.debitGlobalSequence) : null;
+      const creditSeq = r.creditGlobalSequence != null ? String(r.creditGlobalSequence) : null;
+      return {
+        key: `${debitSeq ?? '_'}_${creditSeq ?? '_'}`,
+        blockNum: Number(r.blockNum ?? 0),
+        processHash: (r.processHash as string | null) ?? null,
+        operationCode: (r.operationCode as string | null) ?? null,
+        parentApplyGlobalSequence:
+          r.parentApplyGlobalSequence != null ? String(r.parentApplyGlobalSequence) : null,
+        debitGlobalSequence: debitSeq,
+        debitAccountId: r.debitAccountId != null ? Number(r.debitAccountId) : null,
+        creditGlobalSequence: creditSeq,
+        creditAccountId: r.creditAccountId != null ? Number(r.creditAccountId) : null,
+        quantity: (r.quantity as string | null) ?? null,
+        memo: (r.memo as string | null) ?? null,
+        username: (r.username as string | null) ?? null,
+        createdAt: r.createdAt instanceof Date ? r.createdAt : new Date(String(r.createdAt)),
+      };
+    });
 
     return { items, totalCount, totalPages, currentPage: page };
   }

@@ -6420,6 +6420,21 @@ input GetLedger2HistoryInput {
   walletName: String
 }
 
+input GetLedger2PostingsInput {
+  """Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки."""
+  accountId: Int
+  coopname: String!
+  dateFrom: DateTime
+  dateTo: DateTime
+  limit: Int = 50
+  page: Int = 1
+
+  """process_hash для выборки всех проводок одной операции"""
+  processHash: String
+  sortOrder: String = "DESC"
+  username: String
+}
+
 input GetLedgerHistoryInput {
   """
   ID счета для фильтрации. Если не указан, возвращаются операции по всем счетам
@@ -6759,6 +6774,51 @@ type Ledger2Operation {
 
   """walletop: wallet_to (eosio::name w.<contract>.<waltype>)"""
   walletTo: String
+}
+
+type Ledger2Posting {
+  blockNum: Int!
+  createdAt: DateTime!
+
+  """id бух.счёта credit (×1000)"""
+  creditAccountId: Int
+
+  """global_sequence credit-action"""
+  creditGlobalSequence: String
+
+  """id бух.счёта debit (×1000)"""
+  debitAccountId: Int
+
+  """global_sequence debit-action"""
+  debitGlobalSequence: String
+
+  """Стабильный ключ для UI: debitSeq_creditSeq"""
+  key: String!
+  memo: String
+
+  """
+  OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...)
+  """
+  operationCode: String
+
+  """global_sequence parent apply (для cross-link в реестр операций)"""
+  parentApplyGlobalSequence: String
+
+  """process_hash (32-hex)"""
+  processHash: String
+
+  """
+  Asset "100.0000 RUB"
+  """
+  quantity: String
+  username: String
+}
+
+type Ledger2PostingsResponse {
+  currentPage: Int!
+  items: [Ledger2Posting!]!
+  totalCount: Int!
+  totalPages: Int!
 }
 
 type Ledger2Wallet {
@@ -10279,6 +10339,13 @@ type Query {
   Требуемые роли: chairman, member. 
   """
   getLedger2History(input: GetLedger2HistoryInput!): Ledger2HistoryResponse!
+
+  """
+  Реестр проводок: пары debit+credit (Дт/Кт/Сумма), восстановленные из blockchain_actions по правилу «ближайший parent apply». Источник для фронт-страницы «Реестр проводок».
+  
+  Требуемые роли: chairman, member. 
+  """
+  getLedger2Postings(input: GetLedger2PostingsInput!): Ledger2PostingsResponse!
 
   """
   Общекооперативные кошельки из ledger2::wallets (eosio::name w.<contract>.<waltype>). Кошельки пайщиков живут в контракте soviet — сюда не попадают.

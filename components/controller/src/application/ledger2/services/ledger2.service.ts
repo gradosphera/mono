@@ -15,7 +15,12 @@ import type {
   Ledger2HistoryResponseDTO,
   Ledger2OperationDTO,
 } from '../dto/ledger2-operation.dto';
+import type {
+  Ledger2PostingDTO,
+  Ledger2PostingsResponseDTO,
+} from '../dto/ledger2-posting.dto';
 import type { GetLedger2HistoryInputDTO } from '../dto/get-ledger2-history-input.dto';
+import type { GetLedger2PostingsInputDTO } from '../dto/get-ledger2-postings-input.dto';
 import type { WalmoveInputDTO } from '../dto/walmove-input.dto';
 import type { Ledger2AdjustmentResultDTO } from '../dto/ledger2-adjustment-result.dto';
 
@@ -50,6 +55,31 @@ export class Ledger2Service {
       quantity: op.quantity,
       memo: op.memo,
       createdAt: op.createdAt,
+    }));
+    return {
+      items,
+      totalCount: resp.totalCount,
+      totalPages: resp.totalPages,
+      currentPage: resp.currentPage,
+    };
+  }
+
+  async getPostings(input: GetLedger2PostingsInputDTO): Promise<Ledger2PostingsResponseDTO> {
+    const resp = await this.port.getPostings(input);
+    const items: Ledger2PostingDTO[] = resp.items.map((p) => ({
+      key: p.key,
+      blockNum: p.blockNum,
+      processHash: p.processHash,
+      operationCode: p.operationCode,
+      parentApplyGlobalSequence: p.parentApplyGlobalSequence,
+      debitGlobalSequence: p.debitGlobalSequence,
+      debitAccountId: p.debitAccountId,
+      creditGlobalSequence: p.creditGlobalSequence,
+      creditAccountId: p.creditAccountId,
+      quantity: p.quantity,
+      memo: p.memo,
+      username: p.username,
+      createdAt: p.createdAt,
     }));
     return {
       items,
