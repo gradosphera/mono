@@ -22,7 +22,7 @@
  * program_id) — дельта 0 копеек до production rollout.
  */
 
-import { Ledger2Contract, SovietContract } from 'cooptypes';
+import { Ledger2, Ledger2Contract, SovietContract } from 'cooptypes';
 import type { Migration } from '../src/migration_interface';
 import { api } from '../src/eos';
 import { listCoops } from '../src/utils/listCoops';
@@ -41,11 +41,17 @@ interface IMigrateAction {
   };
 }
 
-const PROGRAM_TO_WALLET: Record<number, string> = {
-  1: 'w.wal.share',
-  3: 'w.cap.gen',
-  4: 'w.cap.blago',
-};
+/**
+ * Primary wallet_name программы (non-membership). Берём из cooptypes-реестра
+ * `LEDGER2_USER_SHARED_PROGRAM_MAPPING` (генерируется из C++ wallets.hpp), чтобы
+ * не дублировать маппинг ещё раз. Для ЦК primary = w.wal.share, membership →
+ * w.wal.member отдельно ниже. Marketplace (program_id=2) кошельков не имеет.
+ */
+function primaryWalletFor(program_id: number): string | undefined {
+  return Ledger2.walletNamesForProgram(program_id).find(
+    (w) => w !== Ledger2.MEMBERSHIP_WALLET_NAME
+  );
+}
 
 /** Возвращает "0.0000 RUB" с такой же длиной дробной части и символом, как у образца. */
 function zeroAssetLike(asset: string): string {
@@ -70,7 +76,7 @@ export class MigratePhase2Progwallets implements Migration {
         table: SovietContract.Tables.ProgramWallets.tableName,
       });
 
-      const eligible = progwallets.filter((pw) => PROGRAM_TO_WALLET[Number(pw.program_id)]);
+      const eligible = progwallets.filter((pw) => primaryWalletFor(Number(pw.program_id)));
       if (eligible.length === 0) {
         console.log(`[049] ${coopname}: нет progwallets под маппинг — пропуск`);
         continue;
@@ -79,7 +85,7 @@ export class MigratePhase2Progwallets implements Migration {
       const allActions: IMigrateAction[] = [];
       for (const pw of eligible) {
         const program_id = Number(pw.program_id);
-        const primaryWallet = PROGRAM_TO_WALLET[program_id]!;
+        const primaryWallet = primaryWalletFor(program_id)!;
 
         allActions.push({
           account: Ledger2Contract.contractName.production,
@@ -94,7 +100,7 @@ export class MigratePhase2Progwallets implements Migration {
           },
         });
 
-        // ЦК: members_contribution → отдельный кошелёк w.wal.member.
+        // ЦК (program_id=1): members_contribution → отдельный кошелёк MEMBERSHIP.
         if (program_id === 1) {
           const membership = pw.membership_contribution ?? zeroAssetLike(pw.available);
           allActions.push({
@@ -103,7 +109,7 @@ export class MigratePhase2Progwallets implements Migration {
             authorization: [{ actor: coopname, permission: 'active' }],
             data: {
               coopname,
-              wallet_name: 'w.wal.member',
+              wallet_name: Ledger2.MEMBERSHIP_WALLET_NAME,
               username: pw.username,
               available: membership,
               blocked: zeroAssetLike(membership),

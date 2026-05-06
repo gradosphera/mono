@@ -1,5 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { Cooperative } from 'cooptypes';
+import { Cooperative, Ledger2 } from 'cooptypes';
 import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { WalletBlockchainPort, WALLET_BLOCKCHAIN_PORT } from '~/domain/wallet/ports/wallet-blockchain.port';
@@ -17,11 +17,6 @@ import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 import type { ProgramWalletFilterInputDTO } from '../dto/program-wallet-filter-input.dto';
 import { PaginationResult, PaginationInputDTO } from '~/application/common/dto/pagination.dto';
 import { getProgramId, getProgramType } from '~/domain/wallet/enums/program-type.enum';
-import {
-  PROGRAM_ID_TO_WALLET_NAMES,
-  WALLET_NAME_TO_PROGRAM_ID,
-  MEMBERSHIP_WALLET_NAME,
-} from '~/domain/wallet/utils/program-wallet-mapping';
 import { config } from '~/config';
 
 /**
@@ -199,8 +194,8 @@ export class WalletInteractor {
 
     const targetWalletNames =
       program_id !== undefined
-        ? PROGRAM_ID_TO_WALLET_NAMES[program_id] ?? []
-        : Object.keys(WALLET_NAME_TO_PROGRAM_ID);
+        ? Ledger2.walletNamesForProgram(program_id)
+        : [...Ledger2.ALL_PROGRAM_WALLET_NAMES];
 
     if (targetWalletNames.length === 0) return [];
 
@@ -223,13 +218,13 @@ export class WalletInteractor {
     for (const row of rows) {
       if (row.present === false) continue;
       const wn = row.wallet_name as string;
-      const pid = WALLET_NAME_TO_PROGRAM_ID[wn];
+      const pid = Ledger2.programIdForWallet(wn);
       if (pid === undefined) continue;
 
       const key = `${row.coopname}::${row.username}::${pid}`;
       const bucket = buckets.get(key) ?? {};
       if (pid === 1) {
-        if (wn === MEMBERSHIP_WALLET_NAME) bucket.member = row;
+        if (wn === Ledger2.MEMBERSHIP_WALLET_NAME) bucket.member = row;
         else bucket.share = row;
       } else {
         bucket.single = row;
