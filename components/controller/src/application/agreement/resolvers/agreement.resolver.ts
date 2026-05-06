@@ -15,6 +15,8 @@ import { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagin
 import { SendAgreementInputDTO } from '../dto/send-agreement-input.dto';
 import { ConfirmAgreementInputDTO } from '../dto/confirm-agreement-input.dto';
 import { DeclineAgreementInputDTO } from '../dto/decline-agreement-input.dto';
+import { CoopAgreementDTO } from '../dto/coop-agreement.dto';
+import { AgreementTemplateDTO } from '../dto/agreement-template.dto';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 
 // Пагинированные результаты
@@ -49,6 +51,30 @@ export class AgreementResolver {
 
     // Сервис возвращает полный пагинированный результат с DTO
     return await this.agreementService.getAgreements(filter, domainOptions);
+  }
+
+  /**
+   * Конфиг соглашений кооператива (типы + draft_id) из `soviet::coagreements`.
+   * Заменяет прямой fetchTable с фронта.
+   */
+  @Query(() => [CoopAgreementDTO], {
+    name: 'cooperativeAgreements',
+    description: 'Конфиг соглашений кооператива: какие типы соглашений требуются с пайщика',
+  })
+  async getCooperativeAgreements(@Args('coopname') coopname: string): Promise<CoopAgreementDTO[]> {
+    return await this.agreementService.getCoopAgreements(coopname);
+  }
+
+  /**
+   * Шаблоны документов соглашений (глобальные + per-coop) из `draft::drafts`.
+   * Заменяет два fetchTable с фронта.
+   */
+  @Query(() => [AgreementTemplateDTO], {
+    name: 'agreementTemplates',
+    description: 'Шаблоны документов соглашений (глобальные draft + per-coop) объединённые',
+  })
+  async getAgreementTemplates(@Args('coopname') coopname: string): Promise<AgreementTemplateDTO[]> {
+    return await this.agreementService.getAgreementTemplates(coopname);
   }
 
   // ============ МУТАЦИИ СОГЛАШЕНИЙ ============

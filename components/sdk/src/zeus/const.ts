@@ -1312,6 +1312,9 @@ export const AllTypesProps: Record<string,any> = {
 		statement:"SignedDigitalDocumentInput"
 	},
 	Query:{
+		agreementTemplates:{
+
+		},
 		agreements:{
 			filter:"AgreementFilter",
 			options:"PaginationInput"
@@ -1468,6 +1471,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		checkReportReadiness:{
 			reportType:"ReportType"
+		},
+		cooperativeAgreements:{
+
 		},
 		getAccount:{
 			data:"GetAccountInput"
@@ -1966,6 +1972,15 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String",
 		updated_at:"DateTime",
 		username:"String",
+		version:"Int"
+	},
+	AgreementTemplate:{
+		context:"String",
+		default_translation_id:"Int",
+		description:"String",
+		model:"String",
+		registry_id:"Int",
+		title:"String",
 		version:"Int"
 	},
 	AgreementVar:{
@@ -2918,6 +2933,12 @@ export const ReturnTypes: Record<string,any> = {
 		generator_agreement_created_at:"String",
 		generator_agreement_number:"String"
 	},
+	CoopAgreement:{
+		coopname:"String",
+		draft_id:"Int",
+		program_id:"Int",
+		type:"String"
+	},
 	CooperativeOperatorAccount:{
 		active_participants_count:"Float",
 		announce:"String",
@@ -3258,13 +3279,13 @@ export const ReturnTypes: Record<string,any> = {
 		processHash:"String",
 		quantity:"String",
 		username:"String",
-		walletFrom:"Int",
-		walletTo:"Int"
+		walletFrom:"String",
+		walletTo:"String"
 	},
 	Ledger2Wallet:{
 		available:"String",
 		blocked:"String",
-		id:"Int",
+		id:"String",
 		name:"String"
 	},
 	LedgerHistoryResponse:{
@@ -4004,6 +4025,7 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String"
 	},
 	Query:{
+		agreementTemplates:"AgreementTemplate",
 		agreements:"PaginatedAgreementsPaginationResult",
 		buildInitialReportEdits:"BuildInitialReportEdits",
 		candidates:"PaginatedCandidatesPaginationResult",
@@ -4053,6 +4075,7 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
 		chatcoopListUtcDatesWithNewRoomMessages:"String",
 		checkReportReadiness:"ReportReadinessView",
+		cooperativeAgreements:"CoopAgreement",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

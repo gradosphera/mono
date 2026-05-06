@@ -15,8 +15,12 @@ import {
 import type { UserAgreementDomainEntity } from '~/domain/wallet/entities/user-agreement-domain.entity';
 import type { IProgramAgreement } from '~/domain/wallet/interfaces/user-agreement-blockchain.interface';
 import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
+import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
+import { DraftContract } from 'cooptypes';
 import { AgreementStatus } from '~/domain/agreement/enums/agreement-status.enum';
 import { AgreementDTO } from '../dto/agreement.dto';
+import { CoopAgreementDTO } from '../dto/coop-agreement.dto';
+import { AgreementTemplateDTO } from '../dto/agreement-template.dto';
 import { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import { PaginationResult } from '~/application/common/dto/pagination.dto';
 import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
@@ -36,8 +40,55 @@ export class AgreementService {
     private readonly userAgreementRepository: UserAgreementRepository,
     @Inject(SOVIET_BLOCKCHAIN_PORT)
     private readonly sovietBlockchainPort: SovietBlockchainPort,
+    @Inject(BLOCKCHAIN_PORT)
+    private readonly blockchainPort: BlockchainPort,
     private readonly documentAggregationService: DocumentAggregationService
   ) {}
+
+  /**
+   * Конфиг соглашений кооператива (`soviet::coagreements`). Заменяет
+   * прямой `fetchTable` с фронта. Используется виджетом `RequireAgreements`
+   * для определения, какие типы соглашений нужно подписать.
+   */
+  async getCoopAgreements(coopname: string): Promise<CoopAgreementDTO[]> {
+    const rows = await this.sovietBlockchainPort.getCoagreements(coopname);
+    return rows.map((r) => ({
+      type: String(r.type),
+      coopname: String(r.coopname),
+      program_id: Number(r.program_id),
+      draft_id: Number(r.draft_id),
+    }));
+  }
+
+  /**
+   * Шаблоны документов соглашений (`draft::drafts`): глобальные (scope=draft)
+   * + per-coop (scope=coopname), объединённые. Заменяет два прямых
+   * `fetchTable` с фронта. Используется виджетом `RequireAgreements` для
+   * сравнения версии подписи пайщика с актуальной версией шаблона.
+   */
+  async getAgreementTemplates(coopname: string): Promise<AgreementTemplateDTO[]> {
+    const [globalRows, coopRows] = await Promise.all([
+      this.blockchainPort.getAllRows(
+        DraftContract.contractName.production,
+        DraftContract.contractName.production,
+        DraftContract.Tables.Drafts.tableName
+      ),
+      this.blockchainPort.getAllRows(
+        DraftContract.contractName.production,
+        coopname,
+        DraftContract.Tables.Drafts.tableName
+      ),
+    ]);
+    return [...globalRows, ...coopRows].map((r: any) => ({
+      registry_id: Number(r.registry_id),
+      version: Number(r.version),
+      default_translation_id: Number(r.default_translation_id),
+      title: String(r.title ?? ''),
+      description: String(r.description ?? ''),
+      context: String(r.context ?? ''),
+      model: String(r.model ?? ''),
+    }));
+  }
 
   /**
    * Получить все соглашения с пагинацией и фильтрацией.
