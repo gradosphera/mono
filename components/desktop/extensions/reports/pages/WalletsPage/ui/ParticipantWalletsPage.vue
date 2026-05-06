@@ -82,6 +82,7 @@ div.page-shell
 
 <script setup lang="ts">
 import { computed, h, onMounted, ref } from 'vue'
+import { QIcon, QTooltip } from 'quasar'
 import { FailAlert } from 'src/shared/api'
 import { useSystemStore } from 'src/entities/System/model'
 import { useAccountStore } from 'src/entities/Account/model'
@@ -182,7 +183,8 @@ const columns = computed(() => {
 })
 
 // Inline-рендер ячейки «available / blocked с иконками». Вынесен в h-function,
-// чтобы не таскать ещё одну SFC.
+// чтобы не таскать ещё одну SFC. Иконки: lock-open / lock + q-tooltip — чтобы
+// без подписей было понятно где «доступно», где «заблокировано».
 const WalletCell = {
   name: 'WalletCell',
   props: {
@@ -195,17 +197,26 @@ const WalletCell = {
       if (!c) {
         return h('div', { class: 'cell-dash' }, '—')
       }
-      const aClass = ['cell-line', c.available > 0 ? 'value-avail' : 'value-zero', props.bold ? 'bold' : '']
-      const bClass = ['cell-line', c.blocked > 0 ? 'value-blocked' : 'value-zero', props.bold ? 'bold' : '']
+      const renderLine = (
+        amount: number,
+        kind: 'avail' | 'blocked',
+      ) => {
+        const valueClass = amount > 0 ? `value-${kind}` : 'value-zero'
+        const tooltip = kind === 'avail' ? 'Доступно' : 'Заблокировано'
+        const icon = kind === 'avail' ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'
+        return h(
+          'div',
+          { class: ['cell-line', valueClass, props.bold ? 'bold' : ''].join(' ') },
+          [
+            h(QIcon, { name: icon, size: '12px', class: 'cell-icon' }),
+            h('span', { class: 'cell-value' }, formatAsset2Digits(`${amount.toFixed(4)} RUB`)),
+            h(QTooltip, { anchor: 'top middle', self: 'bottom middle', delay: 200 }, () => tooltip),
+          ],
+        )
+      }
       return h('div', { class: 'wallet-cell' }, [
-        h('div', { class: aClass.join(' ') }, [
-          h('q-icon', { name: 'fa-solid fa-coins', size: '12px', class: 'cell-icon' }),
-          h('span', { class: 'cell-value' }, formatAsset2Digits(`${c.available.toFixed(4)} RUB`)),
-        ]),
-        h('div', { class: bClass.join(' ') }, [
-          h('q-icon', { name: 'fa-solid fa-lock', size: '12px', class: 'cell-icon' }),
-          h('span', { class: 'cell-value' }, formatAsset2Digits(`${c.blocked.toFixed(4)} RUB`)),
-        ]),
+        renderLine(c.available, 'avail'),
+        renderLine(c.blocked, 'blocked'),
       ])
     }
   },
@@ -328,7 +339,7 @@ onMounted(() => void reload())
     &.value-avail { color: var(--q-positive); }
     &.value-blocked { color: var(--q-warning); }
     &.value-zero {
-      color: rgba(0, 0, 0, 0.35);
+      color: rgba(0, 0, 0, 0.55);
       font-weight: 400;
     }
     &.bold { font-weight: 700; }
@@ -336,16 +347,16 @@ onMounted(() => void reload())
 
   .cell-icon {
     flex-shrink: 0;
-    opacity: 0.75;
+    opacity: 0.85;
   }
 
   .cell-dash {
-    color: rgba(0, 0, 0, 0.35);
+    color: rgba(0, 0, 0, 0.55);
   }
 }
 
 .body--dark .wallet-cell {
-  .cell-line.value-zero { color: rgba(255, 255, 255, 0.4); }
-  .cell-dash { color: rgba(255, 255, 255, 0.4); }
+  .cell-line.value-zero { color: rgba(255, 255, 255, 0.7); }
+  .cell-dash { color: rgba(255, 255, 255, 0.7); }
 }
 </style>
