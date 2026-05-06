@@ -1671,9 +1671,10 @@ input CalculateVotesInput {
 }
 
 """
-Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty.
+Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required, before_registration (период приходился на даты до регистрации кооператива — сдавать не надо). Приоритет: submitted > submitted_externally > draft > not_required > before_registration > overdue > empty.
 """
 enum CalendarEntryStatus {
+  BEFORE_REGISTRATION
   DRAFT
   EMPTY
   NOT_REQUIRED

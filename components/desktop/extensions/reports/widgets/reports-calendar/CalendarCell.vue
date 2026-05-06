@@ -25,10 +25,16 @@ const emit = defineEmits<(e: 'click') => void>()
 
 // Wire-значения enum'а — на шине GraphQL KEYS uppercase (Zeus так типизирует).
 
+// before_registration — период приходился до даты регистрации кооператива:
+// сдавать не нужно, ячейка некликабельна, выглядит нейтрально-серой.
+function isBeforeRegistration(status: string): boolean {
+  return status === Zeus.CalendarEntryStatus.BEFORE_REGISTRATION
+}
+
 // Для CSS-класса и словаря подписей используем строковое представление
-// status как есть (`DRAFT`/`OVERDUE`/`NOT_REQUIRED`/`EMPTY`/`SUBMITTED`/`SUBMITTED_EXTERNALLY`).
+// status как есть (`DRAFT`/`OVERDUE`/`NOT_REQUIRED`/`EMPTY`/`SUBMITTED`/`SUBMITTED_EXTERNALLY`/`BEFORE_REGISTRATION`).
 const classes = computed<Record<string, boolean>>(() => ({
-  active: !!props.entry,
+  active: !!props.entry && !isBeforeRegistration(props.entry.status),
   [`status-${props.entry?.status ?? 'EMPTY'}`]: !!props.entry,
 }))
 
@@ -39,6 +45,7 @@ const STATUS_RU: Record<string, string> = {
   [Zeus.CalendarEntryStatus.OVERDUE]: 'Просрочен',
   [Zeus.CalendarEntryStatus.NOT_REQUIRED]: 'Не надо сдавать',
   [Zeus.CalendarEntryStatus.EMPTY]: 'Не сдан',
+  [Zeus.CalendarEntryStatus.BEFORE_REGISTRATION]: 'Не требуется (до регистрации)',
 }
 
 const tooltip = computed(() => {
@@ -59,12 +66,17 @@ function statusIcon(status: string): string {
     case Zeus.CalendarEntryStatus.DRAFT: return 'fa-solid fa-pen'
     case Zeus.CalendarEntryStatus.OVERDUE: return 'fa-solid fa-triangle-exclamation'
     case Zeus.CalendarEntryStatus.NOT_REQUIRED: return 'fa-solid fa-circle-xmark'
+    case Zeus.CalendarEntryStatus.BEFORE_REGISTRATION: return 'fa-solid fa-minus'
     default: return 'fa-regular fa-circle'
   }
 }
 
 function onClick() {
-  if (props.entry) emit('click')
+  // before_registration — статичная ячейка, открывать диалог нечего
+  // (ни редактора отчёта, ни ручной отметки на ней не существует).
+  if (!props.entry) return
+  if (isBeforeRegistration(props.entry.status)) return
+  emit('click')
 }
 </script>
 
@@ -155,6 +167,18 @@ function onClick() {
   &.status-EMPTY .cell-inner {
     color: #546e7a;
     background: #f5f7fa;
+  }
+
+  // Before registration: период приходится на даты до регистрации кооператива.
+  // Ничего не сдавали и сдавать не надо — ровный приглушённый серый, без
+  // hover-обводки, чтобы не путали с EMPTY-будущим (там клик откроет редактор).
+  &.status-BEFORE_REGISTRATION {
+    cursor: default;
+    .cell-inner {
+      color: #90a4ae;
+      background: #fafafa;
+    }
+    &:hover { background: inherit; }
   }
 }
 </style>
