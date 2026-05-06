@@ -379,13 +379,10 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
          (d.data ->> 'memo')                     AS "memo",
          d.created_at                            AS "createdAt",
          NULLIF(d.data ->> 'account_id','')::bigint AS "debitAccountId",
-         -- ledger2::debit принимает поле \`amount\`, не \`quantity\` (см. ledger2.hpp).
-         -- COALESCE на случай legacy-данных или ручных корректировок (walmove/revert
-         -- кладут \`quantity\`).
-         COALESCE(
-           NULLIF(d.data ->> 'amount',''),
-           NULLIF(d.data ->> 'quantity','')
-         )                                       AS "quantity",
+         -- ledger2::debit принимает поле \`amount\` (см. ledger2.hpp).
+         -- В data других ledger2-actions \`quantity\` нет ни у кого
+         -- (apply/walletop/walmove/revert тоже только \`amount\`).
+         NULLIF(d.data ->> 'amount','')          AS "quantity",
          (
            SELECT c.global_sequence
              FROM blockchain_actions c
