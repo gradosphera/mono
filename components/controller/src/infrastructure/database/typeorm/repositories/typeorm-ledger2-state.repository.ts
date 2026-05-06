@@ -164,6 +164,55 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       params.push(filter.processHash.toLowerCase());
       pIdx += 1;
     }
+    if (filter.applyGlobalSequence) {
+      // № операции — точечная адресация по apply.global_sequence.
+      // Возвращаем САМ apply + всех его siblings (walletop/debit/credit)
+      // ровно этой apply-группы, ограниченной диапазоном до СЛЕДУЮЩЕГО
+      // apply того же processHash (multi-effect защита).
+      const applySeqIdx = pIdx;
+      clauses.push(
+        `(
+          (a.name = 'apply' AND a.global_sequence::bigint = $${applySeqIdx}::bigint)
+          OR (
+            a.name IN ('walletop', 'debit', 'credit')
+            AND LOWER(a.data ->> 'process_hash') = (
+              SELECT LOWER(ap.data ->> 'process_hash')
+                FROM blockchain_actions ap
+               WHERE ap.account = $1
+                 AND ap.name = 'apply'
+                 AND ap.global_sequence::bigint = $${applySeqIdx}::bigint
+               LIMIT 1
+            )
+            AND a.global_sequence::bigint > $${applySeqIdx}::bigint
+            AND a.global_sequence::bigint < COALESCE(
+              (SELECT MIN(ap2.global_sequence::bigint)
+                 FROM blockchain_actions ap2
+                WHERE ap2.account = $1
+                  AND ap2.name = 'apply'
+                  AND LOWER(ap2.data ->> 'process_hash') = (
+                    SELECT LOWER(ap.data ->> 'process_hash')
+                      FROM blockchain_actions ap
+                     WHERE ap.account = $1
+                       AND ap.name = 'apply'
+                       AND ap.global_sequence::bigint = $${applySeqIdx}::bigint
+                     LIMIT 1
+                  )
+                  AND ap2.global_sequence::bigint > $${applySeqIdx}::bigint),
+              9223372036854775807::bigint
+            )
+          )
+        )`,
+      );
+      params.push(filter.applyGlobalSequence);
+      pIdx += 1;
+    }
+    if (filter.walletopGlobalSequence) {
+      clauses.push(
+        `(a.name = 'walletop' AND a.global_sequence::bigint = $${pIdx}::bigint)`,
+      );
+      params.push(filter.walletopGlobalSequence);
+      pIdx += 1;
+    }
     if (filter.parentApplyGlobalSequence && filter.processHash) {
       // Ограничиваем siblings (walletop/debit/credit) диапазоном global_sequence
       // между текущим apply и следующим apply того же processHash — чтобы
@@ -291,6 +340,41 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
     if (filter.processHash) {
       debitClauses.push(`LOWER(d.data ->> 'process_hash') = $${pIdx}`);
       params.push(filter.processHash.toLowerCase());
+      pIdx += 1;
+    }
+    if (filter.debitGlobalSequence) {
+      // № проводки = debit.global_sequence (unique). Парный credit подтянется
+      // стандартным алгоритмом ниже.
+      debitClauses.push(`d.global_sequence::bigint = $${pIdx}::bigint`);
+      params.push(filter.debitGlobalSequence);
+      pIdx += 1;
+    }
+    if (filter.applyGlobalSequence) {
+      // № операции — фильтруем debit'ы, чей parent apply ровно этот.
+      // parent apply = последний apply того же processHash до debit, ограниченный
+      // диапазоном до следующего apply (multi-effect защита).
+      const applySeqIdx = pIdx;
+      debitClauses.push(
+        `d.global_sequence::bigint > $${applySeqIdx}::bigint
+         AND d.global_sequence::bigint < COALESCE(
+           (SELECT MIN(ap2.global_sequence::bigint)
+              FROM blockchain_actions ap2
+             WHERE ap2.account = d.account
+               AND ap2.name = 'apply'
+               AND LOWER(ap2.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+               AND ap2.global_sequence::bigint > $${applySeqIdx}::bigint),
+           9223372036854775807::bigint
+         )
+         AND LOWER(d.data ->> 'process_hash') = (
+           SELECT LOWER(ap.data ->> 'process_hash')
+             FROM blockchain_actions ap
+            WHERE ap.account = d.account
+              AND ap.name = 'apply'
+              AND ap.global_sequence::bigint = $${applySeqIdx}::bigint
+            LIMIT 1
+         )`,
+      );
+      params.push(filter.applyGlobalSequence);
       pIdx += 1;
     }
     if (filter.username) {

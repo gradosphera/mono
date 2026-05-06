@@ -37,6 +37,17 @@ export interface Ledger2PostingsFilterDomainInterface {
   username?: string;
   /** processHash — все проводки одной бизнес-операции. */
   processHash?: string;
+  /**
+   * № проводки — `debit.global_sequence` ровно одной строки. Парный credit
+   * подтягивается стандартным алгоритмом «closest-credit-after-debit-without-apply-between».
+   */
+  debitGlobalSequence?: string;
+  /**
+   * № операции — `apply.global_sequence`, родитель проводки. Возвращает
+   * пары debit+credit ровно одной apply-группы (отличает соседние apply
+   * с одинаковым processHash в multi-effect процессах).
+   */
+  applyGlobalSequence?: string;
   dateFrom?: Date;
   dateTo?: Date;
   page?: number;

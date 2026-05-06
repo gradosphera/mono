@@ -1,14 +1,15 @@
 <template lang="pug">
 div.page-shell
-  //- Активные фильтры (чипы) + фильтры по датам.
-  //- Поиск по process_hash здесь не нужен: реестр операций — основное место
-  //- поиска, оттуда уже видно и проводки, и движения по кошелькам в одной
-  //- развёрнутой строке. Сюда фильтры account_id / username прилетают только
-  //- через cross-link из других страниц (по query-параметру).
+  //- Поиск по «номеру»: умный input — определяет тип ID по формату.
+  //- Числовой bigint (≤24 цифр) → debit.global_sequence (точечно одна проводка).
+  //- 64-символьная hex-строка → process_hash (все проводки одной операции).
+  //- Любая другая строка с операционными префиксами (o.cap...) — игнорируем
+  //- (для этого есть реестр операций). Фильтры account_id/username прилетают
+  //- через cross-link.
   q-card.q-mt-md(flat)
     q-card-section
       .row.q-gutter-sm.items-center.q-mb-sm(
-        v-if='filters.accountId !== null || filters.username'
+        v-if='filters.accountId !== null || filters.username || filters.debitGlobalSequence || filters.applyGlobalSequence || filters.processHash'
       )
         q-chip(
           v-if='filters.accountId !== null'
@@ -26,7 +27,43 @@ div.page-shell
           icon='fa-solid fa-user'
           @remove='clearUsernameFilter'
         ) Пайщик {{ fioCache.get(filters.username) || filters.username }}
+        q-chip(
+          v-if='filters.debitGlobalSequence'
+          removable
+          color='primary'
+          text-color='white'
+          icon='fa-solid fa-hashtag'
+          @remove='clearIdFilter'
+        ) № проводки {{ filters.debitGlobalSequence }}
+        q-chip(
+          v-if='filters.applyGlobalSequence'
+          removable
+          color='primary'
+          text-color='white'
+          icon='fa-solid fa-hashtag'
+          @remove='clearIdFilter'
+        ) № операции {{ filters.applyGlobalSequence }}
+        q-chip(
+          v-if='filters.processHash'
+          removable
+          color='primary'
+          text-color='white'
+          icon='fa-solid fa-hashtag'
+          @remove='clearIdFilter'
+        ) Процесс {{ filters.processHash.slice(0, 8) }}…
       .row.q-gutter-sm.items-end
+        q-input.col-md-3.col-12(
+          v-model='searchInput'
+          label='Поиск (№ проводки / операции / процесса)'
+          dense
+          outlined
+          clearable
+          @keyup.enter='applySearch'
+          @clear='applySearch'
+          hint='Цифры — № проводки/операции, hex64 — процесс'
+        )
+          template(#append)
+            q-icon.cursor-pointer(name='fa-solid fa-magnifying-glass' @click='applySearch')
         q-input.col-md-2.col-12(
           v-model='filters.dateFrom'
           label='С даты'
@@ -95,13 +132,22 @@ div.page-shell
         q-tr(:key='`pst_${props.row.key}`' :props='props')
           q-td {{ formatDate(props.row.createdAt) }}
           q-td
-            EntityIdBadge(
-              v-if='props.row.processHash'
-              :rawId='shortHash(props.row.processHash)'
-              @click='copyFullHash(props.row.processHash)'
-            )
-              q-tooltip Клик — копировать полный хэш
-            span.text-grey-6(v-else) —
+            //- Основная адресация = debit.global_sequence (unique). Под ним —
+            //- мелким серым process_hash как вторичная связка с реестром операций.
+            .text-body2.font-monospace.text-weight-medium
+              span(v-if='props.row.debitGlobalSequence'
+                   @click='copyText(props.row.debitGlobalSequence)'
+                   style='cursor: pointer;')
+                | {{ props.row.debitGlobalSequence }}
+                q-tooltip
+                  | № проводки (debit.global_sequence). Клик — копировать.
+                  br
+                  | Парный credit: {{ props.row.creditGlobalSequence ?? '—' }}
+              span.text-grey-6(v-else) —
+            .text-caption.text-grey-6(v-if='props.row.processHash')
+              span(@click='copyFullHash(props.row.processHash)' style='cursor: pointer;')
+                | проц. {{ shortHash(props.row.processHash) }}
+                q-tooltip Клик — копировать полный process_hash
           q-td
             q-chip(
               v-if='props.row.operationCode'
@@ -120,10 +166,10 @@ div.page-shell
 
           q-td.text-right(auto-width)
             q-btn(
-              v-if='props.row.parentApplyGlobalSequence && props.row.processHash'
+              v-if='props.row.parentApplyGlobalSequence'
               flat dense round size='sm' color='primary'
               icon='fa-solid fa-arrow-right'
-              :to='{ name: "reports-operations", query: { process_hash: props.row.processHash, operation_id: props.row.parentApplyGlobalSequence } }'
+              :to='{ name: "reports-operations", query: { operation_id: props.row.parentApplyGlobalSequence } }'
             )
               q-tooltip К операции
 
@@ -139,11 +185,11 @@ div.page-shell
                 .text-body1.text-weight-bold.font-monospace {{ formatAmount(props.row.quantity) }}
               .col-auto
                 q-btn(
-                  v-if='props.row.parentApplyGlobalSequence && props.row.processHash'
+                  v-if='props.row.parentApplyGlobalSequence'
                   flat dense size='sm' color='primary'
                   icon='fa-solid fa-arrow-right'
                   label='К операции'
-                  :to='{ name: "reports-operations", query: { process_hash: props.row.processHash, operation_id: props.row.parentApplyGlobalSequence } }'
+                  :to='{ name: "reports-operations", query: { operation_id: props.row.parentApplyGlobalSequence } }'
                 )
             .row.q-mt-sm.items-center.q-gutter-x-md
               .col-auto.text-caption.text-grey-7 Дебет
@@ -154,6 +200,10 @@ div.page-shell
                 AccountIdCell(:account-code='creditCode(props.row.creditAccountId)')
             .col-12.text-caption.text-grey-7
               | Пайщик: {{ fioCache.get(props.row.username ?? '') || props.row.username || '—' }}
+            .col-12.text-caption.text-grey-7.font-monospace.q-mt-xs
+              | № проводки {{ props.row.debitGlobalSequence ?? '—' }}
+              template(v-if='props.row.processHash')
+                |  · проц. {{ shortHash(props.row.processHash) }}
 </template>
 
 <script setup lang="ts">
@@ -163,7 +213,6 @@ import { copyToClipboard } from 'quasar'
 import { useWindowSize } from 'src/shared/hooks'
 import { useSystemStore } from 'src/entities/System/model'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
-import { EntityIdBadge } from 'src/shared/ui'
 import { useLedger2Store } from 'src/entities/Ledger2'
 import type { ILedger2Posting, ILedger2PostingsFilterInput } from 'src/entities/Ledger2'
 import { useAccountStore } from 'src/entities/Account'
@@ -254,13 +303,88 @@ const filters = reactive<{
   accountId: number | null
   accountName: string
   username: string | null
+  /** debit.global_sequence — точечная адресация одной проводки. */
+  debitGlobalSequence: string | null
+  /** apply.global_sequence — все проводки одной apply-группы. */
+  applyGlobalSequence: string | null
+  /** process_hash — все проводки одной бизнес-операции (=> может быть несколько apply-групп). */
+  processHash: string | null
 }>({
   dateFrom: '',
   dateTo: '',
   accountId: null,
   accountName: '',
   username: null,
+  debitGlobalSequence: null,
+  applyGlobalSequence: null,
+  processHash: null,
 })
+
+const searchInput = ref('')
+
+/**
+ * Универсальный поиск по «номеру»: определяет тип ID по формату ввода.
+ * - Чистые цифры (1–24 знака) → debit.global_sequence (одна проводка).
+ *   `apply.global_sequence` сюда же не попадёт — апплай и debit-номера лежат
+ *   в одном пространстве global_sequence, и пользователь, как правило, видит
+ *   на странице debit; поиск же по № операции — через query-parameter из реестра.
+ * - 64 hex-символа → process_hash.
+ * - Остальное — игнорируем (валидация падает молча, чип не появляется).
+ */
+function applySearch() {
+  const raw = (searchInput.value ?? '').trim()
+  filters.debitGlobalSequence = null
+  filters.applyGlobalSequence = null
+  filters.processHash = null
+  if (!raw) {
+    void clearIdQueryAndReload()
+    return
+  }
+  if (/^\d{1,24}$/.test(raw)) {
+    filters.debitGlobalSequence = raw
+  } else if (/^[a-f0-9]{64}$/i.test(raw)) {
+    filters.processHash = raw.toLowerCase()
+  }
+  void syncIdQueryAndReload()
+}
+
+async function syncIdQueryAndReload() {
+  const q = { ...route.query }
+  delete q.posting_id
+  delete q.operation_id
+  delete q.process_hash
+  if (filters.debitGlobalSequence) q.posting_id = filters.debitGlobalSequence
+  if (filters.applyGlobalSequence) q.operation_id = filters.applyGlobalSequence
+  if (filters.processHash) q.process_hash = filters.processHash
+  await router.replace({ query: q })
+  reload()
+}
+
+async function clearIdQueryAndReload() {
+  const q = { ...route.query }
+  delete q.posting_id
+  delete q.operation_id
+  delete q.process_hash
+  await router.replace({ query: q })
+  reload()
+}
+
+async function clearIdFilter() {
+  filters.debitGlobalSequence = null
+  filters.applyGlobalSequence = null
+  filters.processHash = null
+  searchInput.value = ''
+  await clearIdQueryAndReload()
+}
+
+async function copyText(text: string) {
+  try {
+    await copyToClipboard(text)
+    SuccessAlert('Скопировано')
+  } catch {
+    FailAlert('Не удалось скопировать')
+  }
+}
 
 function isCompleteOrEmptyDate(v: string | number | null): boolean {
   if (v === null || v === '') return true
@@ -309,7 +433,7 @@ async function resolveAccountName(id: number) {
 
 const columns = [
   { name: 'createdAt', align: 'left' as const, label: 'Дата', field: 'createdAt' },
-  { name: 'processHash', align: 'left' as const, label: '№', field: 'processHash' },
+  { name: 'postingId', align: 'left' as const, label: '№ проводки', field: 'debitGlobalSequence' },
   { name: 'operationCode', align: 'left' as const, label: 'Операция', field: 'operationCode' },
   { name: 'debit', align: 'center' as const, label: 'Дебет', field: 'debitAccountId' },
   { name: 'credit', align: 'center' as const, label: 'Кредит', field: 'creditAccountId' },
@@ -323,7 +447,10 @@ const hasAnyFilter = computed(
     !!filters.dateFrom ||
     !!filters.dateTo ||
     filters.accountId !== null ||
-    !!filters.username,
+    !!filters.username ||
+    !!filters.debitGlobalSequence ||
+    !!filters.applyGlobalSequence ||
+    !!filters.processHash,
 )
 
 async function resetFilters() {
@@ -332,9 +459,16 @@ async function resetFilters() {
   filters.accountId = null
   filters.accountName = ''
   filters.username = null
+  filters.debitGlobalSequence = null
+  filters.applyGlobalSequence = null
+  filters.processHash = null
+  searchInput.value = ''
   const q = { ...route.query }
   delete q.account_id
   delete q.username
+  delete q.posting_id
+  delete q.operation_id
+  delete q.process_hash
   await router.replace({ query: q })
   reload()
 }
@@ -364,6 +498,9 @@ async function load() {
     }
     if (filters.accountId !== null) input.accountId = filters.accountId
     if (filters.username) input.username = filters.username
+    if (filters.debitGlobalSequence) input.debitGlobalSequence = filters.debitGlobalSequence
+    if (filters.applyGlobalSequence) input.applyGlobalSequence = filters.applyGlobalSequence
+    if (filters.processHash) input.processHash = filters.processHash
     if (filters.dateFrom) input.dateFrom = new Date(filters.dateFrom)
     if (filters.dateTo) {
       const to = new Date(filters.dateTo)
@@ -431,6 +568,19 @@ onMounted(async () => {
     }
     if (route.query.username) {
       filters.username = String(route.query.username)
+    }
+    // Унифицированные ID-параметры. Для UX в input.searchInput кладём то,
+    // что пользователь, скорее всего, захочет видеть/редактировать.
+    if (route.query.posting_id) {
+      filters.debitGlobalSequence = String(route.query.posting_id)
+      searchInput.value = filters.debitGlobalSequence
+    }
+    if (route.query.operation_id) {
+      filters.applyGlobalSequence = String(route.query.operation_id)
+    }
+    if (route.query.process_hash) {
+      filters.processHash = String(route.query.process_hash).toLowerCase()
+      if (!searchInput.value) searchInput.value = filters.processHash
     }
     await load()
   } catch (e) {

@@ -5693,6 +5693,8 @@ export type ValueTypes = {
 	accountId?: number | undefined | null | Variable<any, string>,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null | Variable<any, string>,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null | Variable<any, string>,
 	coopname: string | Variable<any, string>,
 	dateFrom?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
 	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
@@ -5707,14 +5709,20 @@ export type ValueTypes = {
 	sortOrder?: string | undefined | null | Variable<any, string>,
 	username?: string | undefined | null | Variable<any, string>,
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
-	walletName?: string | undefined | null | Variable<any, string>
+	walletName?: string | undefined | null | Variable<any, string>,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null | Variable<any, string>
 };
 	["GetLedger2PostingsInput"]: {
 	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
 	accountId?: number | undefined | null | Variable<any, string>,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null | Variable<any, string>,
 	coopname: string | Variable<any, string>,
 	dateFrom?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
 	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null | Variable<any, string>,
 	limit?: number | undefined | null | Variable<any, string>,
 	page?: number | undefined | null | Variable<any, string>,
 	/** process_hash для выборки всех проводок одной операции */
@@ -13923,6 +13931,8 @@ export type ResolverInputTypes = {
 	accountId?: number | undefined | null,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: ResolverInputTypes["DateTime"] | undefined | null,
 	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
@@ -13937,14 +13947,20 @@ export type ResolverInputTypes = {
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null,
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
-	walletName?: string | undefined | null
+	walletName?: string | undefined | null,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null
 };
 	["GetLedger2PostingsInput"]: {
 	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
 	accountId?: number | undefined | null,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: ResolverInputTypes["DateTime"] | undefined | null,
 	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
 	/** process_hash для выборки всех проводок одной операции */
@@ -21914,6 +21930,8 @@ export type ModelTypes = {
 	accountId?: number | undefined | null,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: ModelTypes["DateTime"] | undefined | null,
 	dateTo?: ModelTypes["DateTime"] | undefined | null,
@@ -21928,14 +21946,20 @@ export type ModelTypes = {
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null,
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
-	walletName?: string | undefined | null
+	walletName?: string | undefined | null,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null
 };
 	["GetLedger2PostingsInput"]: {
 	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
 	accountId?: number | undefined | null,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: ModelTypes["DateTime"] | undefined | null,
 	dateTo?: ModelTypes["DateTime"] | undefined | null,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
 	/** process_hash для выборки всех проводок одной операции */
@@ -30646,6 +30670,8 @@ export type GraphQLTypes = {
 	accountId?: number | undefined | null,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: GraphQLTypes["DateTime"] | undefined | null,
 	dateTo?: GraphQLTypes["DateTime"] | undefined | null,
@@ -30660,14 +30686,20 @@ export type GraphQLTypes = {
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null,
 	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
-	walletName?: string | undefined | null
+	walletName?: string | undefined | null,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null
 };
 	["GetLedger2PostingsInput"]: {
 		/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
 	accountId?: number | undefined | null,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: GraphQLTypes["DateTime"] | undefined | null,
 	dateTo?: GraphQLTypes["DateTime"] | undefined | null,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null,
 	limit?: number | undefined | null,
 	page?: number | undefined | null,
 	/** process_hash для выборки всех проводок одной операции */

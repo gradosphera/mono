@@ -50,6 +50,18 @@ export interface Ledger2HistoryFilterDomainInterface {
    * того же processHash (multi-effect процессы типа cap.act2res).
    */
   parentApplyGlobalSequence?: string;
+  /**
+   * № операции — точечная адресация одной apply-записи
+   * (`apply.global_sequence`). При наличии — возвращаем сам apply + его
+   * siblings (walletop/debit/credit) из ровно этой группы. Применение:
+   * cross-link из реестра проводок, поиск по канон. ID операции.
+   */
+  applyGlobalSequence?: string;
+  /**
+   * № движения по кошельку — точечная адресация одной строки `walletop`
+   * (`walletop.global_sequence`).
+   */
+  walletopGlobalSequence?: string;
   dateFrom?: Date;
   dateTo?: Date;
   page?: number;

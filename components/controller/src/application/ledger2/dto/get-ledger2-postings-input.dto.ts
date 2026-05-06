@@ -41,6 +41,24 @@ export class GetLedger2PostingsInputDTO {
   @MaxLength(66)
   processHash?: string;
 
+  @Field(() => String, {
+    nullable: true,
+    description: '№ проводки = debit.global_sequence (unique). Парный credit подтянется автоматически.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  debitGlobalSequence?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: '№ операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  applyGlobalSequence?: string;
+
   @Field(() => Date, { nullable: true })
   @IsOptional()
   @IsDate()

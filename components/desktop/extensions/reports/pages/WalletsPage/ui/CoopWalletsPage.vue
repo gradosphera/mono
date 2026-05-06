@@ -63,6 +63,11 @@ div.page-shell
                 :loading='childLoading.has(props.row.id)'
                 no-data-label='Движений нет'
               )
+                template(#body-cell-movementId='cp')
+                  q-td.font-monospace(:props='cp')
+                    span(@click='copyText(String(cp.row.globalSequence))' style='cursor: pointer;')
+                      | {{ cp.row.globalSequence }}
+                      q-tooltip № движения (walletop.global_sequence). Клик — копировать.
                 template(#body-cell-direction='cp')
                   q-td(:props='cp')
                     DirectionCell(:direction='directionFor(cp.row, String(props.row.id))')
@@ -119,13 +124,14 @@ div.page-shell
 <script setup lang="ts">
 import { computed, markRaw, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { copyToClipboard } from 'quasar'
 import { useWindowSize } from 'src/shared/hooks'
 import { useHeaderActions } from 'src/shared/hooks/useHeaderActions'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { useSystemStore } from 'src/entities/System/model'
 import { useSessionStore } from 'src/entities/Session/model'
 import { useLedger2Store, type ILedger2Wallet, type ILedger2Operation } from 'src/entities/Ledger2'
-import { FailAlert } from 'src/shared/api'
+import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton'
 import { DirectionCell, WalletIdCell } from '../../../shared/ui'
 import WalletTransferDialog from './WalletTransferDialog.vue'
@@ -181,6 +187,15 @@ function formatDate(d: string | Date): string {
   })
 }
 
+async function copyText(text: string) {
+  try {
+    await copyToClipboard(text)
+    SuccessAlert('Скопировано')
+  } catch {
+    FailAlert('Не удалось скопировать')
+  }
+}
+
 const columns = computed<any[]>(() => {
   const base: any[] = [
     { name: 'expand', align: 'left', label: '', field: 'expand', sortable: false },
@@ -196,6 +211,7 @@ const columns = computed<any[]>(() => {
 })
 
 const childColumns: any[] = [
+  { name: 'movementId', align: 'left', label: '№', field: 'globalSequence' },
   { name: 'direction', align: 'center', label: '', field: 'direction' },
   { name: 'walletFrom', align: 'left', label: 'Из', field: 'walletFrom' },
   { name: 'walletTo', align: 'left', label: 'В', field: 'walletTo' },

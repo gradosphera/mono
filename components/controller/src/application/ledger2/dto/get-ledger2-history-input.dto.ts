@@ -76,6 +76,24 @@ export class GetLedger2HistoryInputDTO {
   @MaxLength(24)
   parentApplyGlobalSequence?: string;
 
+  @Field(() => String, {
+    nullable: true,
+    description: '№ операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit).',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  applyGlobalSequence?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: '№ движения по кошельку = walletop.global_sequence. Уникален.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  walletopGlobalSequence?: string;
+
   @Field(() => Date, { nullable: true })
   @IsOptional()
   @IsDate()

@@ -6395,6 +6395,11 @@ input GetLedger2HistoryInput {
 
   """Имена blockchain-действий: apply | walletop | debit | credit"""
   actionNames: [String!]
+
+  """
+  № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit).
+  """
+  applyGlobalSequence: String
   coopname: String!
   dateFrom: DateTime
   dateTo: DateTime
@@ -6418,14 +6423,27 @@ input GetLedger2HistoryInput {
   eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий.
   """
   walletName: String
+
+  """№ движения по кошельку = walletop.global_sequence. Уникален."""
+  walletopGlobalSequence: String
 }
 
 input GetLedger2PostingsInput {
   """Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки."""
   accountId: Int
+
+  """
+  № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы.
+  """
+  applyGlobalSequence: String
   coopname: String!
   dateFrom: DateTime
   dateTo: DateTime
+
+  """
+  № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически.
+  """
+  debitGlobalSequence: String
   limit: Int = 50
   page: Int = 1
 
