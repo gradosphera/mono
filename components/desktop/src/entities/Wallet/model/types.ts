@@ -16,11 +16,23 @@ export type ICreateInitialPayment =
 export type IProgramWalletData =
   SovietContract.Tables.ProgramWallets.IProgramWallet;
 
-export type ICoopProgramData = SovietContract.Tables.Programs.IProgram;
+/**
+ * Минимальная сводка программы кооператива, нужная UI: id + читаемое title
+ * (из cooptypes/programs.ts) + тип программы. Полная chain-запись больше
+ * не таскается на фронт — backend `cooperativePrograms` отдаёт только то,
+ * что отображается. Поле `title` — UI-метка из реестра, а не chain-title.
+ */
+export interface ICoopProgramSummary {
+  id: number | string;
+  title: string;
+  program_type: string;
+  is_active?: boolean;
+  draft_id?: number;
+}
 
 export type ExtendedProgramWalletData = IProgramWalletData & {
   program_type: string;
-  program_details: ICoopProgramData; // | или другие типы будущих программ
+  program_details: ICoopProgramSummary;
 };
 
 export type IDepositData = GatewayContract.Tables.Incomes.IIncome;

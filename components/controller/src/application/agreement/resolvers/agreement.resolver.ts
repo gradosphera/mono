@@ -17,6 +17,7 @@ import { ConfirmAgreementInputDTO } from '../dto/confirm-agreement-input.dto';
 import { DeclineAgreementInputDTO } from '../dto/decline-agreement-input.dto';
 import { CoopAgreementDTO } from '../dto/coop-agreement.dto';
 import { AgreementTemplateDTO } from '../dto/agreement-template.dto';
+import { CooperativeProgramDTO } from '../dto/cooperative-program.dto';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 
 // Пагинированные результаты
@@ -75,6 +76,19 @@ export class AgreementResolver {
   })
   async getAgreementTemplates(@Args('coopname') coopname: string): Promise<AgreementTemplateDTO[]> {
     return await this.agreementService.getAgreementTemplates(coopname);
+  }
+
+  /**
+   * Целевые потребительские программы кооператива (`soviet::programs`).
+   * Заменяет прямой fetchTable с фронта. Человекочитаемые названия — на стороне
+   * фронта из реестра cooptypes/src/ledger2/programs.ts.
+   */
+  @Query(() => [CooperativeProgramDTO], {
+    name: 'cooperativePrograms',
+    description: 'Целевые потребительские программы кооператива (id, тип, активность, draft_id)',
+  })
+  async getCooperativePrograms(@Args('coopname') coopname: string): Promise<CooperativeProgramDTO[]> {
+    return await this.agreementService.getCooperativePrograms(coopname);
   }
 
   // ============ МУТАЦИИ СОГЛАШЕНИЙ ============

@@ -11,6 +11,9 @@ export interface SovietBlockchainPort {
   // Все строки `coagreements` кооператива (≤10 строк per coop).
   getCoagreements(coopname: string): Promise<SovietContract.Tables.CoopAgreements.ICoopAgreement[]>;
 
+  // Целевые потребительские программы кооператива (`soviet::programs`).
+  getPrograms(coopname: string): Promise<SovietContract.Tables.Programs.IProgram[]>;
+
   publishProjectOfFreeDecision(
     data: SovietContract.Actions.Decisions.CreateFreeDecision.ICreateFreeDecision
   ): Promise<TransactResult>;

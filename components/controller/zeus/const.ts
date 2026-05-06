@@ -1475,6 +1475,9 @@ export const AllTypesProps: Record<string,any> = {
 		cooperativeAgreements:{
 
 		},
+		cooperativePrograms:{
+
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -2966,6 +2969,13 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String",
 		verifications:"Verification"
 	},
+	CooperativeProgram:{
+		coopname:"String",
+		draft_id:"Int",
+		id:"Int",
+		is_active:"Boolean",
+		program_type:"String"
+	},
 	CreateSubscriptionResponse:{
 		message:"String",
 		subscription:"WebPushSubscriptionDto",
@@ -4076,6 +4086,7 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopListUtcDatesWithNewRoomMessages:"String",
 		checkReportReadiness:"ReportReadinessView",
 		cooperativeAgreements:"CoopAgreement",
+		cooperativePrograms:"CooperativeProgram",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

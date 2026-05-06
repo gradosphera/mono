@@ -4211,6 +4211,20 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on CooperativeOperatorAccount']?: Omit<ValueTypes["CooperativeOperatorAccount"], "...on CooperativeOperatorAccount">
 }>;
+	["CooperativeProgram"]: AliasType<{
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id?:boolean | `@${string}`,
+	/** Идентификатор программы (program_id) */
+	id?:boolean | `@${string}`,
+	/** Активна ли программа в кооперативе */
+	is_active?:boolean | `@${string}`,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on CooperativeProgram']?: Omit<ValueTypes["CooperativeProgram"], "...on CooperativeProgram">
+}>;
 	/** Страна регистрации пользователя */
 ["Country"]:Country;
 	["CreateAnnualGeneralMeetInput"]: {
@@ -7666,6 +7680,7 @@ chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunica
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportReadinessView"]],
 cooperativeAgreements?: [{	coopname: string | Variable<any, string>},ValueTypes["CoopAgreement"]],
+cooperativePrograms?: [{	coopname: string | Variable<any, string>},ValueTypes["CooperativeProgram"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -12407,6 +12422,19 @@ export type ResolverInputTypes = {
 	verifications?:ResolverInputTypes["Verification"],
 		__typename?: boolean | `@${string}`
 }>;
+	["CooperativeProgram"]: AliasType<{
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id?:boolean | `@${string}`,
+	/** Идентификатор программы (program_id) */
+	id?:boolean | `@${string}`,
+	/** Активна ли программа в кооперативе */
+	is_active?:boolean | `@${string}`,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Страна регистрации пользователя */
 ["Country"]:Country;
 	["CreateAnnualGeneralMeetInput"]: {
@@ -15758,6 +15786,7 @@ chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectC
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportReadinessView"]],
 cooperativeAgreements?: [{	coopname: string},ResolverInputTypes["CoopAgreement"]],
+cooperativePrograms?: [{	coopname: string},ResolverInputTypes["CooperativeProgram"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -20373,6 +20402,18 @@ export type ModelTypes = {
 	/** Дата регистрации */
 	verifications: Array<ModelTypes["Verification"]>
 };
+	["CooperativeProgram"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id: number,
+	/** Идентификатор программы (program_id) */
+	id: number,
+	/** Активна ли программа в кооперативе */
+	is_active: boolean,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type: string
+};
 	["Country"]:Country;
 	["CreateAnnualGeneralMeetInput"]: {
 	/** Повестка собрания */
@@ -24153,6 +24194,8 @@ export type ModelTypes = {
 	checkReportReadiness: ModelTypes["ReportReadinessView"],
 	/** Конфиг соглашений кооператива: какие типы соглашений требуются с пайщика */
 	cooperativeAgreements: Array<ModelTypes["CoopAgreement"]>,
+	/** Целевые потребительские программы кооператива (id, тип, активность, draft_id) */
+	cooperativePrograms: Array<ModelTypes["CooperativeProgram"]>,
 	/** Получить сводную информацию о аккаунте
 
 Требуемые роли: chairman, member.  */
@@ -28980,6 +29023,20 @@ export type GraphQLTypes = {
 	verifications: Array<GraphQLTypes["Verification"]>,
 	['...on CooperativeOperatorAccount']: Omit<GraphQLTypes["CooperativeOperatorAccount"], "...on CooperativeOperatorAccount">
 };
+	["CooperativeProgram"]: {
+	__typename: "CooperativeProgram",
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id: number,
+	/** Идентификатор программы (program_id) */
+	id: number,
+	/** Активна ли программа в кооперативе */
+	is_active: boolean,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type: string,
+	['...on CooperativeProgram']: Omit<GraphQLTypes["CooperativeProgram"], "...on CooperativeProgram">
+};
 	/** Страна регистрации пользователя */
 ["Country"]: Country;
 	["CreateAnnualGeneralMeetInput"]: {
@@ -33001,6 +33058,8 @@ export type GraphQLTypes = {
 	checkReportReadiness: GraphQLTypes["ReportReadinessView"],
 	/** Конфиг соглашений кооператива: какие типы соглашений требуются с пайщика */
 	cooperativeAgreements: Array<GraphQLTypes["CoopAgreement"]>,
+	/** Целевые потребительские программы кооператива (id, тип, активность, draft_id) */
+	cooperativePrograms: Array<GraphQLTypes["CooperativeProgram"]>,
 	/** Получить сводную информацию о аккаунте
 
 Требуемые роли: chairman, member.  */

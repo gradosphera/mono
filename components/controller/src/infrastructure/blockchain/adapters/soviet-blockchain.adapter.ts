@@ -49,6 +49,15 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
     );
   }
 
+  async getPrograms(coopname: string): Promise<SovietContract.Tables.Programs.IProgram[]> {
+    // Per-coop programs ~единицы строк; full scan адекватен.
+    return await this.blockchainService.getAllRows<SovietContract.Tables.Programs.IProgram>(
+      SovietContract.contractName.production,
+      coopname,
+      SovietContract.Tables.Programs.tableName
+    );
+  }
+
   async publishProjectOfFreeDecision(
     data: SovietContract.Actions.Decisions.CreateFreeDecision.ICreateFreeDecision
   ): Promise<TransactResult> {

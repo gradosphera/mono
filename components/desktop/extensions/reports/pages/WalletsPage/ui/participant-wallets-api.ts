@@ -1,19 +1,18 @@
 /**
  * Загрузка исходных данных для таба «Пайщики» на странице Кошельки.
  *
- * Программы тянем из blockchain через fetchTable (`soviet::programs`,
- * scope=coopname). Программные кошельки — через GraphQL `getProgramWallets`,
- * который собирает срезы из `ledger2::userwallets` (Эпик 3, ADR-008).
- * Пайщиков (ФИО + username + статус) грузит страница отдельно через
- * `useAccountStore.getAccounts`.
+ * Программы и кошельки — через GraphQL контроллера (ADR: фронт не ходит
+ * в чейн напрямую). Контроллер читает `soviet::programs` для метаданных
+ * программ и `ledger2::userwallets` через `getProgramWallets` для
+ * пользовательских срезов (Эпик 3, ADR-008). Пайщиков (ФИО + username +
+ * статус) грузит страница отдельно через `useAccountStore.getAccounts`.
  *
  * Возвращаем собранный pivot-срез «program_id → username → cell» — страница
  * только рендерит.
  */
-import { fetchTable } from 'src/shared/api'
 import { client } from 'src/shared/api/client'
 import { Queries } from '@coopenomics/sdk'
-import { SovietContract, Ledger2 } from 'cooptypes'
+import { Ledger2 } from 'cooptypes'
 
 export interface IProgramColumn {
   id: number
@@ -46,12 +45,10 @@ function parseAsset(s: unknown): number {
 export async function loadProgramsAndWallets(
   coopname: string,
 ): Promise<IProgramsAndWallets> {
-  const [programsRaw, walletsResponse] = await Promise.all([
-    fetchTable(
-      SovietContract.contractName.production,
-      coopname,
-      SovietContract.Tables.Programs.tableName,
-    ),
+  const [programsResponse, walletsResponse] = await Promise.all([
+    client.Query(Queries.Agreements.CooperativePrograms.query, {
+      variables: { coopname },
+    }),
     client.Query(Queries.Wallet.GetProgramWallets.query, {
       variables: {
         filter: { coopname },
@@ -60,19 +57,20 @@ export async function loadProgramsAndWallets(
     }),
   ])
 
-  const programs: IProgramColumn[] = (programsRaw as Array<Record<string, unknown>>)
-    .filter((p) => Number(p.is_active) === 1)
+  const programsRaw = programsResponse[Queries.Agreements.CooperativePrograms.name] ?? []
+
+  const programs: IProgramColumn[] = programsRaw
+    .filter((p) => p.is_active)
     .map((p) => {
       const id = Number(p.id)
       const desc = Ledger2.getProgramDescriptor(id)
-      // title — короткая UI-метка из реестра (`ЦПП Генератор` и т.п.), а не
-      // длинная техническая строка из chain-поля `title`. Менять метки
-      // централизованно в cooptypes/src/ledger2/programs.ts.
+      // title — UI-метка из реестра (`ЦПП Генератор` и т.п.), а не chain-title.
+      // Менять централизованно в cooptypes/src/ledger2/programs.ts.
       return {
         id,
         title: Ledger2.getProgramLabel(id),
         program_type: desc?.internal_name ?? String(p.program_type ?? ''),
-        is_active: Number(p.is_active),
+        is_active: p.is_active ? 1 : 0,
       }
     })
     .sort((a, b) => a.id - b.id)

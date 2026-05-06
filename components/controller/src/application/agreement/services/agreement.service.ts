@@ -21,6 +21,7 @@ import { AgreementStatus } from '~/domain/agreement/enums/agreement-status.enum'
 import { AgreementDTO } from '../dto/agreement.dto';
 import { CoopAgreementDTO } from '../dto/coop-agreement.dto';
 import { AgreementTemplateDTO } from '../dto/agreement-template.dto';
+import { CooperativeProgramDTO } from '../dto/cooperative-program.dto';
 import { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
 import { PaginationResult } from '~/application/common/dto/pagination.dto';
 import { DocumentAggregationService } from '~/domain/document/services/document-aggregation.service';
@@ -57,6 +58,22 @@ export class AgreementService {
       coopname: String(r.coopname),
       program_id: Number(r.program_id),
       draft_id: Number(r.draft_id),
+    }));
+  }
+
+  /**
+   * Целевые потребительские программы кооператива (`soviet::programs`).
+   * Заменяет прямой `fetchTable` с фронта. Человекочитаемые названия —
+   * на стороне фронта из `cooptypes/src/ledger2/programs.ts`.
+   */
+  async getCooperativePrograms(coopname: string): Promise<CooperativeProgramDTO[]> {
+    const rows = await this.sovietBlockchainPort.getPrograms(coopname);
+    return rows.map((r) => ({
+      id: Number(r.id),
+      coopname: String(r.coopname),
+      program_type: String(r.program_type ?? ''),
+      is_active: Boolean(r.is_active),
+      draft_id: Number(r.draft_id ?? 0),
     }));
   }
 

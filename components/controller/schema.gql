@@ -4307,6 +4307,25 @@ type CooperativeOperatorAccount {
   verifications: [Verification!]!
 }
 
+type CooperativeProgram {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """
+  Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона
+  """
+  draft_id: Int!
+
+  """Идентификатор программы (program_id)"""
+  id: Int!
+
+  """Активна ли программа в кооперативе"""
+  is_active: Boolean!
+
+  """Тип программы: wallet/generator/blagorost/marketplace и т.п."""
+  program_type: String!
+}
+
 """Страна регистрации пользователя"""
 enum Country {
   Russia
@@ -10131,6 +10150,11 @@ type Query {
   Конфиг соглашений кооператива: какие типы соглашений требуются с пайщика
   """
   cooperativeAgreements(coopname: String!): [CoopAgreement!]!
+
+  """
+  Целевые потребительские программы кооператива (id, тип, активность, draft_id)
+  """
+  cooperativePrograms(coopname: String!): [CooperativeProgram!]!
 
   """
   Получить сводную информацию о аккаунте

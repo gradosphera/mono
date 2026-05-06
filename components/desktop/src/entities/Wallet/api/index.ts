@@ -11,7 +11,7 @@ import {
   IDepositData,
   IWithdrawData,
   IProgramWalletData,
-  ICoopProgramData,
+  ICoopProgramSummary,
   ExtendedProgramWalletData,
   IGetPaymentMethods,
   IPaymentMethodData,
@@ -25,7 +25,7 @@ import {
   ILoadUserProgramWallets,
   ILoadUserWithdraws,
 } from '../model';
-import { GatewayContract, SovietContract, Ledger2 } from 'cooptypes';
+import { GatewayContract, Ledger2 } from 'cooptypes';
 
 async function loadSingleUserDepositData(
   params: ILoadSingleUserDeposit
@@ -88,34 +88,39 @@ async function loadUserWithdrawsData(
 /**
  * После Эпика 3 источник кошельков — `getProgramWallets` (контроллер собирает
  * программные срезы из `ledger2::userwallets` через `wallet::users.programs[]`).
- * Список программ кооператива по-прежнему лежит в `soviet::programs` —
- * читаем напрямую и мерджим, чтобы получить `program_details` для UI.
+ * Метаданные программ кооператива (`soviet::programs`) идут через GraphQL
+ * `cooperativePrograms` (ADR: фронт не ходит в чейн напрямую). Заголовок
+ * программы для UI — из реестра `cooptypes/src/ledger2/programs.ts`.
  */
 async function loadUserProgramWalletsData(
   params: ILoadUserProgramWallets
 ): Promise<ExtendedProgramWalletData[]> {
-  const programs = (await fetchTable(
-    SovietContract.contractName.production,
-    params.coopname,
-    SovietContract.Tables.Programs.tableName
-  )) as ICoopProgramData[];
-
-  const { [Queries.Wallet.GetProgramWallets.name]: paginated } = await client.Query(
-    Queries.Wallet.GetProgramWallets.query,
-    {
+  const [programsResponse, walletsResponse] = await Promise.all([
+    client.Query(Queries.Agreements.CooperativePrograms.query, {
+      variables: { coopname: params.coopname },
+    }),
+    client.Query(Queries.Wallet.GetProgramWallets.query, {
       variables: {
         filter: { coopname: params.coopname, username: params.username },
         options: { page: 1, limit: 1000 },
       },
-    }
-  );
+    }),
+  ]);
+
+  const programs = programsResponse[Queries.Agreements.CooperativePrograms.name] ?? [];
+  const paginated = walletsResponse[Queries.Wallet.GetProgramWallets.name];
 
   return (paginated?.items ?? []).map((wallet) => {
     const programInfo = programs.find((program) => String(program.id) === String(wallet.program_id));
-    // Источник заголовка — реестр программ в cooptypes (короткое UI-имя),
-    // а не chain-поле title (там длинная техническая строка).
-    const enrichedDetails = programInfo
-      ? { ...programInfo, title: Ledger2.getProgramLabel(Number(programInfo.id)) }
+    // title — UI-метка из реестра (`ЦПП Генератор` и т.п.), не chain-title.
+    const enrichedDetails: ICoopProgramSummary | undefined = programInfo
+      ? {
+          id: programInfo.id,
+          title: Ledger2.getProgramLabel(Number(programInfo.id)),
+          program_type: programInfo.program_type,
+          is_active: programInfo.is_active,
+          draft_id: programInfo.draft_id,
+        }
       : undefined;
     return {
       ...(wallet as unknown as IProgramWalletData),
