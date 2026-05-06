@@ -75,10 +75,10 @@ div.page-shell
                     q-btn(
                       v-if='cp.row.processHash'
                       flat dense round size='sm' color='primary'
-                      icon='fa-solid fa-up-right-from-square'
+                      icon='fa-solid fa-arrow-right'
                       :to='{ name: "reports-operations", query: { process_hash: cp.row.processHash } }'
                     )
-                      q-tooltip Показать операцию
+                      q-tooltip К операции
 
       template(#item='props')
         .col-12
@@ -92,11 +92,11 @@ div.page-shell
                 ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
               .col-auto
                 q-btn(
-                  flat dense size='sm' color='primary'
-                  icon='fa-solid fa-list-ul'
+                  flat dense round size='sm' color='primary'
+                  icon='fa-solid fa-arrow-right'
                   :to='{ name: "reports-operations", query: { account_id: props.row.id } }'
                 )
-                  q-tooltip Журнал проводок
+                  q-tooltip К операциям счёта
             .row.q-mt-sm
               .col-4
                 .text-caption.text-grey-6 Дебет

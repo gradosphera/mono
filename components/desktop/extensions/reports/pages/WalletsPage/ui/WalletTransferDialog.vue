@@ -44,6 +44,7 @@ q-dialog(
           label='В кошелёк'
           outlined dense
           :disable='!form.fromWallet'
+          :hint='toHint'
           :rules='[(v) => !!v || "Выберите кошелёк-получатель", (v) => v !== form.fromWallet || "Источник и получатель не должны совпадать"]'
         )
           template(#option='scope')
@@ -51,6 +52,14 @@ q-dialog(
               q-item-section
                 q-item-label {{ scope.opt.label }}
                 q-item-label(caption) Доступно: {{ scope.opt.available }}
+          //- Причина пустого списка важнее, чем «No results» по дефолту:
+          //- walmove ходит ТОЛЬКО внутри одного бух.счёта, поэтому если у
+          //- кооператива нет других кошельков на том же счёте — выбора нет.
+          template(#no-option)
+            q-item
+              q-item-section.text-italic.caption-muted
+                | Нет других кошельков на бух.счёте {{ accountIdLabel }}.
+                | Перевод между разными счетами требует решения совета.
 
         .row.items-center.q-gutter-sm.q-mb-sm(v-if='form.fromWallet')
           .col
@@ -170,6 +179,13 @@ const toOptions = computed(() => {
       label: `${w.id} · ${w.name}`,
       available: w.available,
     }))
+})
+
+const toHint = computed(() => {
+  if (!form.fromWallet) return ''
+  const n = toOptions.value.length
+  if (n === 0) return 'На этом бух.счёте нет других кошельков'
+  return `Доступно ${n} ${n === 1 ? 'кошелёк' : n < 5 ? 'кошелька' : 'кошельков'} на счёте`
 })
 
 function onFromChange() {

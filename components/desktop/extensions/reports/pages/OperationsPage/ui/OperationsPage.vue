@@ -140,7 +140,7 @@ div.page-shell
               :color='processChipBg(rowChipText(props.row))'
               :text-color='processChipText(rowChipText(props.row))'
             ) {{ rowLabel(props.row) }}
-          q-td.text-right.font-monospace.text-weight-bold.text-grey-10 {{ formatAmount(props.row.quantity) }}
+          q-td.text-right.font-monospace.text-weight-bold {{ formatAmount(props.row.quantity) }}
           q-td {{ fioCache.get(props.row.username ?? '') || props.row.username || '-' }}
 
         q-tr.q-virtual-scroll--with-prev(

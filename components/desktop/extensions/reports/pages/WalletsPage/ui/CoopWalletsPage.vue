@@ -83,10 +83,10 @@ div.page-shell
                     q-btn(
                       v-if='cp.row.processHash'
                       flat dense round size='sm' color='primary'
-                      icon='fa-solid fa-up-right-from-square'
+                      icon='fa-solid fa-arrow-right'
                       :to='{ name: "reports-operations", query: { process_hash: cp.row.processHash } }'
                     )
-                      q-tooltip Показать операцию
+                      q-tooltip К операции
 
       template(#item='props')
         .col-12

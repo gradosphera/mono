@@ -1,10 +1,14 @@
 <template lang="pug">
 div.page-shell
-  //- Активные фильтры (чипы) + фильтры по датам / поиск процесса
+  //- Активные фильтры (чипы) + фильтры по датам.
+  //- Поиск по process_hash здесь не нужен: реестр операций — основное место
+  //- поиска, оттуда уже видно и проводки, и движения по кошелькам в одной
+  //- развёрнутой строке. Сюда фильтры account_id / username прилетают только
+  //- через cross-link из других страниц (по query-параметру).
   q-card.q-mt-md(flat)
     q-card-section
       .row.q-gutter-sm.items-center.q-mb-sm(
-        v-if='filters.accountId !== null || filters.processHash || filters.username'
+        v-if='filters.accountId !== null || filters.username'
       )
         q-chip(
           v-if='filters.accountId !== null'
@@ -15,15 +19,6 @@ div.page-shell
           @remove='clearAccountFilter'
         ) {{ accountFilterLabel }}
         q-chip(
-          v-if='filters.processHash'
-          removable
-          color='primary'
-          text-color='white'
-          icon='fa-solid fa-fingerprint'
-          @remove='clearProcessHashFilter'
-          class='font-monospace'
-        ) Операция {{ filters.processHash.slice(0, 8) }}
-        q-chip(
           v-if='filters.username'
           removable
           color='primary'
@@ -32,17 +27,6 @@ div.page-shell
           @remove='clearUsernameFilter'
         ) Пайщик {{ fioCache.get(filters.username) || filters.username }}
       .row.q-gutter-sm.items-end
-        q-input.col-md-3.col-12(
-          v-model='filters.processHashInput'
-          label='ID процесса'
-          dense
-          outlined
-          clearable
-          @clear='applyProcessHashSearch'
-          @keyup.enter='applyProcessHashSearch'
-        )
-          template(#append)
-            q-icon.cursor-pointer(name='fa-solid fa-magnifying-glass' @click='applyProcessHashSearch')
         q-input.col-md-2.col-12(
           v-model='filters.dateFrom'
           label='С даты'
@@ -269,16 +253,12 @@ const filters = reactive<{
   dateTo: string
   accountId: number | null
   accountName: string
-  processHash: string | null
-  processHashInput: string
   username: string | null
 }>({
   dateFrom: '',
   dateTo: '',
   accountId: null,
   accountName: '',
-  processHash: null,
-  processHashInput: '',
   username: null,
 })
 
@@ -291,16 +271,6 @@ function onDateFromInput(value: string | number | null): void {
 }
 function onDateToInput(value: string | number | null): void {
   if (isCompleteOrEmptyDate(value)) reload()
-}
-
-async function applyProcessHashSearch(): Promise<void> {
-  const raw = filters.processHashInput?.trim() ?? ''
-  filters.processHash = raw ? raw.toLowerCase() : null
-  const q = { ...route.query }
-  if (filters.processHash) q.process_hash = filters.processHash
-  else delete q.process_hash
-  await router.replace({ query: q })
-  reload()
 }
 
 const accountFilterLabel = computed(() => {
@@ -316,14 +286,6 @@ async function clearAccountFilter() {
   filters.accountName = ''
   const q = { ...route.query }
   delete q.account_id
-  await router.replace({ query: q })
-  reload()
-}
-async function clearProcessHashFilter() {
-  filters.processHash = null
-  filters.processHashInput = ''
-  const q = { ...route.query }
-  delete q.process_hash
   await router.replace({ query: q })
   reload()
 }
@@ -361,7 +323,6 @@ const hasAnyFilter = computed(
     !!filters.dateFrom ||
     !!filters.dateTo ||
     filters.accountId !== null ||
-    !!filters.processHash ||
     !!filters.username,
 )
 
@@ -370,12 +331,9 @@ async function resetFilters() {
   filters.dateTo = ''
   filters.accountId = null
   filters.accountName = ''
-  filters.processHash = null
-  filters.processHashInput = ''
   filters.username = null
   const q = { ...route.query }
   delete q.account_id
-  delete q.process_hash
   delete q.username
   await router.replace({ query: q })
   reload()
@@ -405,7 +363,6 @@ async function load() {
       sortOrder: 'DESC',
     }
     if (filters.accountId !== null) input.accountId = filters.accountId
-    if (filters.processHash) input.processHash = filters.processHash
     if (filters.username) input.username = filters.username
     if (filters.dateFrom) input.dateFrom = new Date(filters.dateFrom)
     if (filters.dateTo) {
@@ -471,10 +428,6 @@ onMounted(async () => {
     if (route.query.account_id) {
       filters.accountId = Number(route.query.account_id)
       resolveAccountName(filters.accountId)
-    }
-    if (route.query.process_hash) {
-      filters.processHash = String(route.query.process_hash).toLowerCase()
-      filters.processHashInput = filters.processHash
     }
     if (route.query.username) {
       filters.username = String(route.query.username)
