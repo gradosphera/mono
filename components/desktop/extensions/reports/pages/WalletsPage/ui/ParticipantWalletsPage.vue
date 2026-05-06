@@ -16,7 +16,7 @@ div.page-shell
           q-th(v-for='col in props.cols' :key='col.name' :props='props')
             template(v-if='col.name.startsWith("prog_")')
               .prog-title {{ col.label }}
-              .prog-type.text-grey-6 {{ programTypeFor(col.name) }}
+              .prog-type.caption-muted {{ programTypeFor(col.name) }}
             template(v-else)
               | {{ col.label }}
 
@@ -24,7 +24,7 @@ div.page-shell
         q-tr(:key='`pw_${props.row.username}`' :props='props')
           q-td.col-user(auto-width)
             .name {{ getName(props.row) || '—' }}
-            .username.text-grey-6 {{ props.row.username }}
+            .username.caption-muted {{ props.row.username }}
 
           q-td.text-right(
             v-for='prog in data.programs'
@@ -62,7 +62,7 @@ div.page-shell
             .row.items-center.q-gutter-x-md
               .col
                 .text-body1 {{ getName(props.row) || '—' }}
-                .text-caption.text-grey-6 {{ props.row.username }}
+                .text-caption.caption-muted {{ props.row.username }}
               .col-auto
                 q-btn(
                   flat dense size='sm' color='primary'
@@ -71,7 +71,7 @@ div.page-shell
                   :to='{ name: "reports-operations", query: { username: props.row.username } }'
                 )
             .row.q-mt-sm(v-for='prog in data.programs' :key='`m_${props.row.username}_${prog.id}`')
-              .col-6.text-caption.text-grey-6 {{ prog.title }}
+              .col-6.text-caption.caption-muted {{ prog.title }}
               .col-6.text-right
                 WalletCell(:cell='data.matrix[props.row.username]?.[prog.id]')
             .row.q-mt-sm
@@ -240,6 +240,14 @@ onMounted(() => void reload())
 </script>
 
 <style scoped lang="scss">
+// Все цвета через quasar runtime variables (`var(--q-*)`) и body--dark
+// overrides — без хардкода hex. Иначе светлая/тёмная темы выглядят плохо.
+// Не использовать quasar `text-grey-6` — он не реагирует на body--dark.
+.caption-muted {
+  color: rgba(0, 0, 0, 0.6);
+  .body--dark & { color: rgba(255, 255, 255, 0.6); }
+}
+
 .pw-table {
   :deep(thead th) {
     font-weight: 600;
@@ -258,11 +266,19 @@ onMounted(() => void reload())
   }
 
   :deep(.row-totals) {
-    background: #f5f6f8;
+    background: rgba(0, 0, 0, 0.04);
     font-weight: 600;
 
     td {
-      border-top: 2px solid #e0e0e0;
+      border-top: 2px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .body--dark & {
+      background: rgba(255, 255, 255, 0.06);
+
+      td {
+        border-top-color: rgba(255, 255, 255, 0.12);
+      }
     }
   }
 
@@ -270,7 +286,7 @@ onMounted(() => void reload())
     .name {
       font-size: 14px;
       font-weight: 500;
-      color: #222;
+      color: inherit;
       line-height: 1.25;
     }
     .username {
@@ -283,9 +299,6 @@ onMounted(() => void reload())
 
   .cell-zero :deep(.wallet-cell) {
     opacity: 0.4;
-  }
-  .cell-empty :deep(.cell-dash) {
-    color: #ccc;
   }
 }
 
@@ -305,9 +318,13 @@ onMounted(() => void reload())
     font-size: 14px;
     font-weight: 500;
 
-    &.value-avail { color: #2e7d32; }
-    &.value-blocked { color: #8d6e63; }
-    &.value-zero { color: #bbb; font-weight: 400; }
+    &.value-avail { color: var(--q-positive); }
+    &.value-blocked { color: var(--q-warning); }
+    &.value-zero {
+      color: rgba(0, 0, 0, 0.35);
+      font-weight: 400;
+      .body--dark & { color: rgba(255, 255, 255, 0.4); }
+    }
     &.bold { font-weight: 700; }
   }
 
@@ -317,7 +334,8 @@ onMounted(() => void reload())
   }
 
   .cell-dash {
-    color: #ccc;
+    color: rgba(0, 0, 0, 0.35);
+    .body--dark & { color: rgba(255, 255, 255, 0.4); }
   }
 }
 </style>

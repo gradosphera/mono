@@ -13,7 +13,7 @@
 import { fetchTable } from 'src/shared/api'
 import { client } from 'src/shared/api/client'
 import { Queries } from '@coopenomics/sdk'
-import { SovietContract } from 'cooptypes'
+import { SovietContract, Ledger2 } from 'cooptypes'
 
 export interface IProgramColumn {
   id: number
@@ -62,12 +62,19 @@ export async function loadProgramsAndWallets(
 
   const programs: IProgramColumn[] = (programsRaw as Array<Record<string, unknown>>)
     .filter((p) => Number(p.is_active) === 1)
-    .map((p) => ({
-      id: Number(p.id),
-      title: String(p.title ?? ''),
-      program_type: String(p.program_type ?? ''),
-      is_active: Number(p.is_active),
-    }))
+    .map((p) => {
+      const id = Number(p.id)
+      const desc = Ledger2.getProgramDescriptor(id)
+      // title — короткая UI-метка из реестра (`ЦПП Генератор` и т.п.), а не
+      // длинная техническая строка из chain-поля `title`. Менять метки
+      // централизованно в cooptypes/src/ledger2/programs.ts.
+      return {
+        id,
+        title: Ledger2.getProgramLabel(id),
+        program_type: desc?.internal_name ?? String(p.program_type ?? ''),
+        is_active: Number(p.is_active),
+      }
+    })
     .sort((a, b) => a.id - b.id)
 
   const matrix: Record<string, Record<number, IWalletCell>> = {}

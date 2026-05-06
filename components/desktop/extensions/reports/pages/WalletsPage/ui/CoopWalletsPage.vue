@@ -45,7 +45,7 @@ div.page-shell
             .q-pa-sm
               .row.items-center.q-mb-sm
                 .col
-                  .text-caption.text-grey-6 Движения по кошельку
+                  .text-caption.caption-muted Движения по кошельку
                 .col-auto
                   q-btn(
                     flat dense size='sm' color='primary'
@@ -94,7 +94,7 @@ div.page-shell
             .row.items-center.q-gutter-x-md
               .col
                 .text-body1 {{ props.row.name }}
-                .text-caption.text-grey-6.font-monospace ID: {{ props.row.id }}
+                .text-caption.caption-muted.font-monospace ID: {{ props.row.id }}
               .col-auto
                 ExpandToggleButton(
                   :expanded='expanded.has(props.row.id)'
@@ -102,10 +102,10 @@ div.page-shell
                 )
             .row.q-mt-sm
               .col-6
-                .text-caption.text-grey-6 Доступно
+                .text-caption.caption-muted Доступно
                 .text-body2.text-weight-medium {{ formatAsset2Digits(props.row.available) }}
               .col-6
-                .text-caption.text-grey-6 Заблокировано
+                .text-caption.caption-muted Заблокировано
                 .text-body2.text-weight-medium {{ formatAsset2Digits(props.row.blocked) }}
 
   WalletTransferDialog(
@@ -266,7 +266,7 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .font-monospace {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   letter-spacing: 0.03em;
@@ -275,5 +275,12 @@ onBeforeUnmount(() => {
   max-width: 240px;
   white-space: normal;
   word-break: break-word;
+}
+// Приглушённый caption-цвет, согласованный с темой. Не использовать
+// quasar `text-grey-6` — он не реагирует на body--dark и плохо читается
+// на тёмной теме.
+.caption-muted {
+  color: rgba(0, 0, 0, 0.6);
+  .body--dark & { color: rgba(255, 255, 255, 0.6); }
 }
 </style>

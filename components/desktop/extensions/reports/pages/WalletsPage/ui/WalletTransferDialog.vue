@@ -12,7 +12,7 @@ q-dialog(
         q-tooltip Закрыть
 
     q-card-section.q-pa-md
-      .text-caption.text-grey-7.q-mb-md
+      .text-caption.caption-muted.q-mb-md
         | Перевод между кошельками одного бухгалтерского счёта без изменения сальдо счёта.
         | Доступен только председателю.
 
@@ -54,7 +54,7 @@ q-dialog(
 
         .row.items-center.q-gutter-sm.q-mb-sm(v-if='form.fromWallet')
           .col
-            .text-caption.text-grey-6 Бух.счёт
+            .text-caption.caption-muted Бух.счёт
             .text-body2.text-weight-medium {{ accountIdLabel }}
 
         q-input.q-mb-sm(
@@ -236,3 +236,11 @@ function close() {
   emit('update:modelValue', false)
 }
 </script>
+
+<style scoped lang="scss">
+// Не использовать quasar `text-grey-X` — фиксированный hex без body--dark.
+.caption-muted {
+  color: rgba(0, 0, 0, 0.6);
+  .body--dark & { color: rgba(255, 255, 255, 0.6); }
+}
+</style>

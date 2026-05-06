@@ -25,7 +25,7 @@ import {
   ILoadUserProgramWallets,
   ILoadUserWithdraws,
 } from '../model';
-import { GatewayContract, SovietContract } from 'cooptypes';
+import { GatewayContract, SovietContract, Ledger2 } from 'cooptypes';
 
 async function loadSingleUserDepositData(
   params: ILoadSingleUserDeposit
@@ -112,10 +112,15 @@ async function loadUserProgramWalletsData(
 
   return (paginated?.items ?? []).map((wallet) => {
     const programInfo = programs.find((program) => String(program.id) === String(wallet.program_id));
+    // Источник заголовка — реестр программ в cooptypes (короткое UI-имя),
+    // а не chain-поле title (там длинная техническая строка).
+    const enrichedDetails = programInfo
+      ? { ...programInfo, title: Ledger2.getProgramLabel(Number(programInfo.id)) }
+      : undefined;
     return {
       ...(wallet as unknown as IProgramWalletData),
       program_type: wallet.program_type,
-      ...(programInfo ? { program_details: programInfo } : {}),
+      ...(enrichedDetails ? { program_details: enrichedDetails } : {}),
     } as ExtendedProgramWalletData;
   });
 }
