@@ -19,13 +19,13 @@ export default async function (): Promise<IWorkspaceConfig[]> {
   return [{
     workspace: 'reports',
     extension_name: 'reports',
-    title: 'Отчёты ФНС',
+    title: 'Стол бухгалтера',
     icon: 'fa-solid fa-file-invoice',
     defaultRoute: 'reports-operations',
     routes: [
       {
         meta: {
-          title: 'Отчёты ФНС',
+          title: 'Стол бухгалтера',
           icon: 'fa-solid fa-file-invoice',
           roles: ['chairman'],
         },

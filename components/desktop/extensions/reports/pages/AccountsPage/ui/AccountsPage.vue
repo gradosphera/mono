@@ -29,8 +29,8 @@ div.page-shell
           q-td.text-right {{ formatAsset2Digits(props.row.creditBalance) }}
           q-td.text-right.text-weight-bold {{ formatAsset2Digits(props.row.balance) }}
           q-td
-            span.text-weight-medium(
-              :class='props.row.accountType === 0 ? "text-blue-grey-8" : "text-brown-7"'
+            span.text-weight-bold(
+              :class='props.row.accountType === 0 ? "account-type-active" : "account-type-passive"'
             ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
 
         q-tr.q-virtual-scroll--with-prev(
@@ -63,8 +63,8 @@ div.page-shell
               )
                 template(#body-cell-action='cp')
                   q-td(:props='cp')
-                    span.text-weight-medium(
-                      :class='cp.row.action === "debit" ? "text-blue-grey-8" : "text-brown-7"'
+                    span.text-weight-bold(
+                      :class='cp.row.action === "debit" ? "account-type-active" : "account-type-passive"'
                     ) {{ cp.row.action === 'debit' ? 'Дебет' : 'Кредит' }}
                 template(#body-cell-postingId='cp')
                   q-td(:props='cp')
@@ -103,8 +103,8 @@ div.page-shell
               .col
                 .text-h6.font-monospace {{ displayId(props.row.id) }}
                 .text-body2 {{ props.row.name }}
-                .text-caption.q-mt-xs.text-weight-medium(
-                  :class='props.row.accountType === 0 ? "text-blue-grey-8" : "text-brown-7"'
+                .text-caption.q-mt-xs.text-weight-bold(
+                  :class='props.row.accountType === 0 ? "account-type-active" : "account-type-passive"'
                 ) {{ props.row.accountType === 0 ? 'Активный' : 'Пассивный' }}
               .col-auto
                 q-btn(
@@ -233,9 +233,20 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .font-monospace {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
   letter-spacing: 0.03em;
+}
+// Тип счёта (Активный/Пассивный) и сторона проводки (Дебет/Кредит): subtle
+// hue-различие при максимальной читаемости. quasar text-blue-grey-8 /
+// text-brown-7 нечитаемы на тёмной теме — здесь theme-aware-варианты.
+.account-type-active {
+  color: #37474F; // blue-grey-9
+  .body--dark & { color: #B0BEC5; } // blue-grey-3
+}
+.account-type-passive {
+  color: #5D4037; // brown-8
+  .body--dark & { color: #BCAAA4; } // brown-3
 }
 </style>
