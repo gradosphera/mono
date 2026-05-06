@@ -815,7 +815,11 @@ onMounted(async () => {
 
     if (filters.applyGlobalSequence) {
       const seq = filters.applyGlobalSequence
+      const row = items.value.find((r) => String(r.globalSequence) === seq)
       expanded.value.set(seq, true)
+      if (row?.processHash) {
+        loadChildOps(seq, row.processHash)
+      }
       nextTick(() => {
         rowRefs.get(seq)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       })
