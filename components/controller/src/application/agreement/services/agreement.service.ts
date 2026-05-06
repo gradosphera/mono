@@ -14,6 +14,7 @@ import {
 } from '~/domain/wallet/repositories/user-agreement.repository';
 import type { UserAgreementDomainEntity } from '~/domain/wallet/entities/user-agreement-domain.entity';
 import type { IProgramAgreement } from '~/domain/wallet/interfaces/user-agreement-blockchain.interface';
+import { SOVIET_BLOCKCHAIN_PORT, SovietBlockchainPort } from '~/domain/common/ports/soviet-blockchain.port';
 import { AgreementStatus } from '~/domain/agreement/enums/agreement-status.enum';
 import { AgreementDTO } from '../dto/agreement.dto';
 import { PaginationInputDomainInterface } from '~/domain/common/interfaces/pagination.interface';
@@ -33,6 +34,8 @@ export class AgreementService {
     private readonly agreementRepository: AgreementRepository,
     @Inject(USER_AGREEMENT_REPOSITORY)
     private readonly userAgreementRepository: UserAgreementRepository,
+    @Inject(SOVIET_BLOCKCHAIN_PORT)
+    private readonly sovietBlockchainPort: SovietBlockchainPort,
     private readonly documentAggregationService: DocumentAggregationService
   ) {}
 
@@ -49,7 +52,10 @@ export class AgreementService {
    *
    * Программные DTO синтезируются: `id`/`document` отсутствуют (полный документ
    * лежит в action data, а не в state); `status=CONFIRMED` (запись в `users`
-   * существует только для подписанных соглашений), `type='programmatic'`.
+   * существует только для подписанных соглашений). Поле `type` берётся из
+   * `soviet::coagreements[program_id].type` (тот же 'wallet'/'blagorost' и т.п.,
+   * который виджет `RequireAgreements` использует для матчинга подписи); если
+   * программа без коагримента — fallback `'programmatic'`.
    */
   async getAgreements(
     filter?: AgreementFilterInput,
@@ -119,6 +125,13 @@ export class AgreementService {
       owners = await this.userAgreementRepository.findByCoopname(filter.coopname);
     }
 
+    if (owners.length === 0) return [];
+
+    const coagreements = await this.sovietBlockchainPort.getCoagreements(filter.coopname);
+    const typeByProgramId = new Map<number, string>(
+      coagreements.map((c) => [Number(c.program_id), c.type])
+    );
+
     const flat: AgreementDTO[] = [];
     for (const owner of owners) {
       if (owner.present === false) continue;
@@ -126,13 +139,18 @@ export class AgreementService {
         if (typeof filter.program_id === 'number' && filter.program_id > 0 && Number(program.program_id) !== filter.program_id) {
           continue;
         }
-        flat.push(this.programAgreementToDTO(owner, program));
+        flat.push(this.programAgreementToDTO(owner, program, typeByProgramId));
       }
     }
     return flat;
   }
 
-  private programAgreementToDTO(owner: UserAgreementDomainEntity, program: IProgramAgreement): AgreementDTO {
+  private programAgreementToDTO(
+    owner: UserAgreementDomainEntity,
+    program: IProgramAgreement,
+    typeByProgramId: Map<number, string>
+  ): AgreementDTO {
+    const pid = Number(program.program_id);
     return {
       _id: owner._id,
       present: owner.present,
@@ -142,8 +160,8 @@ export class AgreementService {
       id: undefined,
       coopname: owner.coopname,
       username: owner.username,
-      type: 'programmatic',
-      program_id: Number(program.program_id),
+      type: typeByProgramId.get(pid) ?? 'programmatic',
+      program_id: pid,
       draft_id: program.draft_id ? Number(program.draft_id) : undefined,
       version: typeof program.version === 'number' ? program.version : Number(program.version),
       status: AgreementStatus.CONFIRMED,

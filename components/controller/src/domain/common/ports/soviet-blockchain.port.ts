@@ -8,6 +8,9 @@ export interface SovietBlockchainPort {
   // Конфиг соглашения кооператива (program_id, draft_id) по типу.
   getCoagreement(coopname: string, agreement_type: string): Promise<SovietContract.Tables.CoopAgreements.ICoopAgreement | null>;
 
+  // Все строки `coagreements` кооператива (≤10 строк per coop).
+  getCoagreements(coopname: string): Promise<SovietContract.Tables.CoopAgreements.ICoopAgreement[]>;
+
   publishProjectOfFreeDecision(
     data: SovietContract.Actions.Decisions.CreateFreeDecision.ICreateFreeDecision
   ): Promise<TransactResult>;
