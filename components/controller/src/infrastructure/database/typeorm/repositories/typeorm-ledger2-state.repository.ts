@@ -294,7 +294,21 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       pIdx += 1;
     }
     if (filter.username) {
-      debitClauses.push(`d.data ->> 'username' = $${pIdx}`);
+      // username нет в data debit/credit-actions (см. ledger2.hpp: debit/credit
+      // принимают только coopname/account_id/amount/process_hash/memo). Берём
+      // из parent apply того же processHash через subquery.
+      debitClauses.push(
+        `(
+          SELECT b.data ->> 'username'
+            FROM blockchain_actions b
+           WHERE b.account = d.account
+             AND b.name = 'apply'
+             AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+             AND b.global_sequence::bigint < d.global_sequence::bigint
+           ORDER BY b.global_sequence::bigint DESC
+           LIMIT 1
+        ) = $${pIdx}`,
+      );
       params.push(filter.username);
       pIdx += 1;
     }
@@ -362,11 +376,16 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
          d.global_sequence                       AS "debitGlobalSequence",
          d.block_num                             AS "blockNum",
          LOWER(d.data ->> 'process_hash')        AS "processHash",
-         (d.data ->> 'username')                 AS "username",
          (d.data ->> 'memo')                     AS "memo",
          d.created_at                            AS "createdAt",
          NULLIF(d.data ->> 'account_id','')::bigint AS "debitAccountId",
-         NULLIF(d.data ->> 'quantity','')        AS "quantity",
+         -- ledger2::debit принимает поле \`amount\`, не \`quantity\` (см. ledger2.hpp).
+         -- COALESCE на случай legacy-данных или ручных корректировок (walmove/revert
+         -- кладут \`quantity\`).
+         COALESCE(
+           NULLIF(d.data ->> 'amount',''),
+           NULLIF(d.data ->> 'quantity','')
+         )                                       AS "quantity",
          (
            SELECT c.global_sequence
              FROM blockchain_actions c
@@ -422,7 +441,19 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
               AND b.global_sequence::bigint < d.global_sequence::bigint
             ORDER BY b.global_sequence::bigint DESC
             LIMIT 1
-         )                                       AS "operationCode"
+         )                                       AS "operationCode",
+         -- username живёт только в parent apply: debit/credit-actions его не
+         -- передают как поле data (см. ledger2.hpp). Берём из ближайшего apply.
+         (
+           SELECT b.data ->> 'username'
+             FROM blockchain_actions b
+            WHERE b.account = d.account
+              AND b.name = 'apply'
+              AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
+              AND b.global_sequence::bigint < d.global_sequence::bigint
+            ORDER BY b.global_sequence::bigint DESC
+            LIMIT 1
+         )                                       AS "username"
        FROM blockchain_actions d
        WHERE ${debitWhere}
        ORDER BY d.block_num ${sortOrder}, d.global_sequence ${sortOrder}
