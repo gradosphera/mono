@@ -3,11 +3,17 @@ import { Cooperative, Ledger2 } from 'cooptypes';
 import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service';
 import { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity';
 import { WalletBlockchainPort, WALLET_BLOCKCHAIN_PORT } from '~/domain/wallet/ports/wallet-blockchain.port';
+import { BLOCKCHAIN_PORT, BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import {
   UserWalletRepository,
   USER_WALLET_REPOSITORY,
 } from '~/domain/wallet/repositories/user-wallet.repository';
+import {
+  UserAgreementRepository,
+  USER_AGREEMENT_REPOSITORY,
+} from '~/domain/wallet/repositories/user-agreement.repository';
 import type { UserWalletDomainEntity } from '~/domain/wallet/entities/user-wallet-domain.entity';
+import type { UserAgreementDomainEntity } from '~/domain/wallet/entities/user-agreement-domain.entity';
 import { ProgramWalletDomainEntity } from '~/domain/wallet/entities/program-wallet-domain.entity';
 import type { CreateWithdrawInputDomainInterface } from '~/domain/wallet/interfaces/create-withdraw-input-domain.interface';
 import { GATEWAY_INTERACTOR_PORT, GatewayInteractorPort } from '~/domain/wallet/ports/gateway-interactor.port';
@@ -30,8 +36,12 @@ export class WalletInteractor {
     private readonly generatorInfrastructureService: GeneratorInfrastructureService,
     @Inject(WALLET_BLOCKCHAIN_PORT)
     private readonly walletBlockchainPort: WalletBlockchainPort,
+    @Inject(BLOCKCHAIN_PORT)
+    private readonly blockchainPort: BlockchainPort,
     @Inject(USER_WALLET_REPOSITORY)
     private readonly userWalletRepository: UserWalletRepository,
+    @Inject(USER_AGREEMENT_REPOSITORY)
+    private readonly userAgreementRepository: UserAgreementRepository,
     @Inject(GATEWAY_INTERACTOR_PORT)
     private readonly gatewayInteractorPort: GatewayInteractorPort
   ) {}
@@ -180,8 +190,19 @@ export class WalletInteractor {
   }
 
   /**
-   * Собирает плоский ряд `ProgramWalletDomainEntity` из L3-записей `user_wallets`,
-   * агрегируя split-кошельки (например, ЦК = w.wal.share + w.wal.member).
+   * Собирает плоский ряд `ProgramWalletDomainEntity` для пайщика(ов).
+   *
+   * Видимость кошелька = факт подписанного программного соглашения
+   * (`wallet::users.programs[]`), а не наличие L3-баланса. Контракт ledger2
+   * стирает запись `userwallets` при достижении нуля (Эпик 3 §6) — без
+   * stub'ов пайщик с подписанной программой, но без переводов, не увидел бы
+   * свой кошелёк. Поэтому для каждой пары (username, program_id) из
+   * `wallet::users` создаём запись со суммой из L3 либо нулём в валюте
+   * кооператива.
+   *
+   * Split-кошельки (ЦК = w.wal.share + w.wal.member) сворачиваются в один
+   * `ProgramWalletDomainEntity` с available/blocked из share и
+   * membership_contribution из member.
    *
    * @internal используется агрегацией внутри интерактора и капитал-расширением.
    */
@@ -190,17 +211,16 @@ export class WalletInteractor {
     username?: string;
     program_id?: string;
   }): Promise<ProgramWalletDomainEntity[]> {
-    const program_id = filter.program_id ? Number(filter.program_id) : undefined;
+    const filterPid = filter.program_id ? Number(filter.program_id) : undefined;
 
     const targetWalletNames =
-      program_id !== undefined
-        ? Ledger2.walletNamesForProgram(program_id)
+      filterPid !== undefined
+        ? Ledger2.walletNamesForProgram(filterPid)
         : [...Ledger2.ALL_PROGRAM_WALLET_NAMES];
-
     if (targetWalletNames.length === 0) return [];
 
+    // 1. L3-rows — балансы.
     const rows: UserWalletDomainEntity[] = [];
-
     if (filter.username) {
       const userRows = await this.userWalletRepository.findByUsername(filter.coopname, filter.username);
       rows.push(...userRows.filter((r) => r.wallet_name && targetWalletNames.includes(r.wallet_name)));
@@ -211,15 +231,37 @@ export class WalletInteractor {
       }
     }
 
-    // Группируем (coopname, username, program_id) → ProgramWalletDomainEntity
+    // 2. Подписанные соглашения — источник «открытости» кошелька.
+    const owners: UserAgreementDomainEntity[] = filter.username
+      ? await this.resolveAgreementOwners(filter.coopname, filter.username)
+      : filterPid !== undefined
+        ? await this.userAgreementRepository.findByProgramId(filter.coopname, filterPid)
+        : await this.userAgreementRepository.findByCoopname(filter.coopname);
+
+    type ExpectedMeta = { signed_at?: string; block_num?: number };
+    const expected = new Map<string, ExpectedMeta>(); // ключ "username::pid"
+    for (const owner of owners) {
+      if (owner.present === false) continue;
+      for (const p of owner.programs) {
+        const pid = Number(p.program_id);
+        if (filterPid !== undefined && pid !== filterPid) continue;
+        if (Ledger2.walletNamesForProgram(pid).length === 0) continue; // marketplace и т.п.
+        expected.set(`${owner.username}::${pid}`, {
+          signed_at: p.signed_at,
+          block_num: owner.block_num,
+        });
+      }
+    }
+
+    // 3. Buckets из L3-rows.
     type Bucket = { share?: UserWalletDomainEntity; member?: UserWalletDomainEntity; single?: UserWalletDomainEntity };
     const buckets = new Map<string, Bucket>();
-
     for (const row of rows) {
       if (row.present === false) continue;
       const wn = row.wallet_name as string;
       const pid = Ledger2.programIdForWallet(wn);
       if (pid === undefined) continue;
+      if (filterPid !== undefined && pid !== filterPid) continue;
 
       const key = `${row.coopname}::${row.username}::${pid}`;
       const bucket = buckets.get(key) ?? {};
@@ -232,27 +274,50 @@ export class WalletInteractor {
       buckets.set(key, bucket);
     }
 
+    // 4. Pre-create пустые buckets для каждой ожидаемой пары — это и есть stub.
+    for (const expectedKey of expected.keys()) {
+      const [username, pidStr] = expectedKey.split('::');
+      const fullKey = `${filter.coopname}::${username}::${pidStr}`;
+      if (!buckets.has(fullKey)) buckets.set(fullKey, {});
+    }
+
+    // 5. Образец asset для нулей в чистых stub'ах.
+    let sampleAsset = rows.find((r) => r.available)?.available;
+    if (!sampleAsset && expected.size > 0) {
+      const coop = await this.blockchainPort.getCooperative(filter.coopname);
+      sampleAsset = (coop?.initial as string | undefined) ?? '0.0000 RUB';
+    }
+
+    // 6. Сборка entities.
     const result: ProgramWalletDomainEntity[] = [];
     for (const [key, bucket] of buckets) {
       const [coopname, username, pidStr] = key.split('::');
       const pid = Number(pidStr);
       const head = bucket.single ?? bucket.share ?? bucket.member;
-      if (!head) continue;
+      const expectedMeta = expected.get(`${username}::${pid}`);
 
-      const available = (bucket.single ?? bucket.share)?.available ?? this.zeroAssetLike(head.available);
-      const blocked = (bucket.single ?? bucket.share)?.blocked ?? this.zeroAssetLike(head.blocked);
-      const membership = bucket.member?.available ?? this.zeroAssetLike(head.available);
+      // Bucket из L3 без агримента + program_id отсутствует в реестре =
+      // не стоит показывать. На практике сюда не попасть: программа без записи
+      // в маппинге фильтруется ранее.
+      if (!head && !expectedMeta) continue;
+
+      const zero = (s?: string) => this.zeroAssetLike(s ?? sampleAsset);
+      const available = (bucket.single ?? bucket.share)?.available ?? zero(head?.available);
+      const blocked = (bucket.single ?? bucket.share)?.blocked ?? zero(head?.blocked);
+      const membership = bucket.member?.available ?? zero(head?.available);
+
+      const stubDate = expectedMeta?.signed_at ? new Date(expectedMeta.signed_at) : new Date(0);
 
       const entity = new ProgramWalletDomainEntity(
         {
-          _id: head._id,
-          _created_at: head._created_at,
-          _updated_at: head._updated_at,
-          block_num: head.block_num,
+          _id: head?._id ?? `stub-${coopname}-${username}-${pid}`,
+          _created_at: head?._created_at ?? stubDate,
+          _updated_at: head?._updated_at ?? stubDate,
+          block_num: head?.block_num ?? expectedMeta?.block_num,
           present: true,
         },
         {
-          id: head.id ?? `${pid}-${username}`,
+          id: head?.id ?? `${pid}-${username}`,
           coopname,
           program_id: String(pid),
           agreement_id: '0',
@@ -267,6 +332,11 @@ export class WalletInteractor {
     }
 
     return result;
+  }
+
+  private async resolveAgreementOwners(coopname: string, username: string): Promise<UserAgreementDomainEntity[]> {
+    const owner = await this.userAgreementRepository.findByUsername(coopname, username);
+    return owner ? [owner] : [];
   }
 
   private zeroAssetLike(asset: string | undefined): string {
