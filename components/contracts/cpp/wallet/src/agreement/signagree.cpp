@@ -34,8 +34,11 @@
   // Кооператив должен существовать и быть активным.
   get_cooperative_or_fail(coopname);
 
-  // Пайщик должен быть зарегистрирован в кооперативе.
-  get_participant_or_fail(coopname, username);
+  // Симметрично soviet::sndagreement: проверки participant нет — кооператив
+  // подписывает action своим ключом и отвечает за корректность; на этапе
+  // bundle-регистрации (createaccount + reguser + completeincome + signagree)
+  // participant ещё не создан (создаётся позже в soviet::confirmreg →
+  // soviet::addpartcpnt после голосования совета). Доверие — на coopname@active.
 
   // Программа должна существовать и быть активной.
   auto program = get_program_or_fail(coopname, program_id);
@@ -85,4 +88,11 @@
       }
     });
   }
+
+  // Фиксируем документ в реестре документов как принятый — симметрично
+  // soviet::sndagreement, чтобы программные соглашения попадали в общий
+  // off-chain реестр документов кооператива.
+  Soviet::make_complete_document(_wallet, coopname, username,
+                                 Names::WalletActions::SIGN_AGREEMENT,
+                                 document.hash, document);
 }
