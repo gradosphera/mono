@@ -301,9 +301,16 @@ onMounted(() => void reload())
     opacity: 0.4;
   }
 }
+</style>
 
-// «available + blocked» — вертикально, с иконками. :deep потому что render-функция.
-:deep(.wallet-cell) {
+<!--
+  «available + blocked» рендерятся через render-функцию `WalletCell`,
+  у которой нет своего scoped-id. scoped + :deep до неё не доходит
+  стабильно, поэтому стили лежат в global-блоке. Класс `.wallet-cell`
+  достаточно специфичен — конфликтов с другими компонентами нет.
+-->
+<style lang="scss">
+.wallet-cell {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -323,7 +330,6 @@ onMounted(() => void reload())
     &.value-zero {
       color: rgba(0, 0, 0, 0.35);
       font-weight: 400;
-      .body--dark & { color: rgba(255, 255, 255, 0.4); }
     }
     &.bold { font-weight: 700; }
   }
@@ -335,7 +341,11 @@ onMounted(() => void reload())
 
   .cell-dash {
     color: rgba(0, 0, 0, 0.35);
-    .body--dark & { color: rgba(255, 255, 255, 0.4); }
   }
+}
+
+.body--dark .wallet-cell {
+  .cell-line.value-zero { color: rgba(255, 255, 255, 0.4); }
+  .cell-dash { color: rgba(255, 255, 255, 0.4); }
 }
 </style>
