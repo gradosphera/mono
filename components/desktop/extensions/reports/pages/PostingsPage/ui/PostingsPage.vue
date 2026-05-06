@@ -134,7 +134,7 @@ div.page-shell
             EntityIdBadge(
               v-if='props.row.debitGlobalSequence'
               :rawId='props.row.debitGlobalSequence'
-              @click='copyText(props.row.debitGlobalSequence!)'
+              @click='copyText(String(props.row.debitGlobalSequence))'
             )
               q-tooltip Клик — копировать
             span.text-grey-6(v-else) —
@@ -203,7 +203,7 @@ div.page-shell
               EntityIdBadge(
                 v-if='props.row.debitGlobalSequence'
                 :rawId='props.row.debitGlobalSequence'
-                @click='copyText(props.row.debitGlobalSequence!)'
+                @click='copyText(String(props.row.debitGlobalSequence))'
               )
               .text-caption.text-grey-7 № процесса
               EntityIdBadge(
