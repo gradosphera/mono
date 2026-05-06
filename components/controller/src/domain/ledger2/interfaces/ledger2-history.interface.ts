@@ -27,9 +27,9 @@ export interface Ledger2OperationDomainInterface {
   quantity: string | null;
   memo: string | null;
   /**
-   * global_sequence ближайшего предшествующего apply того же processHash
-   * (родительский apply). null для самих apply-строк и legacy-debit/credit
-   * без apply-родителя. Применение: cross-link из AccountsPage / WalletsPage
+   * global_sequence родительского apply, найденного по точечной связи parser2:
+   * `(transaction_id, action_ordinal=this.creator_action_ordinal)`. null для
+   * самих apply-строк. Применение: cross-link из AccountsPage / WalletsPage
    * на точечную операцию в реестре операций.
    */
   parentApplyGlobalSequence: string | null;
@@ -51,10 +51,10 @@ export interface Ledger2HistoryFilterDomainInterface {
   processHash?: string;
   /**
    * global_sequence родительского apply. При наличии — возвращаем только
-   * siblings (walletop/debit/credit), лежащие в диапазоне
-   * (parentApplyGlobalSequence, nextApplySeqInSameProcess) — чтобы
-   * раскрытый apply давал ровно своё трио, а не сибсы соседних apply
-   * того же processHash (multi-effect процессы типа cap.act2res).
+   * inline-сибсов (walletop/debit/credit) этого конкретного apply'а через
+   * точечный JOIN parser2 на (transaction_id, creator_action_ordinal=apply.action_ordinal).
+   * В multi-effect процессах (тип cap.act2res, два apply под одним processHash)
+   * каждый apply раскрывается ровно своим трио.
    */
   parentApplyGlobalSequence?: string;
   /**

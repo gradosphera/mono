@@ -69,7 +69,7 @@ export class GetLedger2HistoryInputDTO {
   @Field(() => String, {
     nullable: true,
     description:
-      'global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash',
+      'global_sequence родительского apply: возвращает только inline-сибсов (walletop/debit/credit) этого apply через точечную связь parser2 (transaction_id + creator_action_ordinal=apply.action_ordinal).',
   })
   @IsOptional()
   @IsString()

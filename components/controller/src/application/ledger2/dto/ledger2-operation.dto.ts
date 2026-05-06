@@ -53,7 +53,7 @@ export class Ledger2OperationDTO {
   @Field(() => String, {
     nullable: true,
     description:
-      'global_sequence ближайшего предшествующего apply того же processHash (родитель) — для точечного cross-link на конкретную операцию.',
+      'global_sequence родительского apply (parser2: transaction_id + action_ordinal=this.creator_action_ordinal) — для точечного cross-link на конкретную операцию.',
   })
   parentApplyGlobalSequence?: string | null;
 

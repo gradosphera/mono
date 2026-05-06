@@ -23,14 +23,15 @@ const LEDGER2_CODE = Ledger2Contract.contractName.production;
 /**
  * Чтение состояния ledger2 из Postgres-таблиц блокчейн-синка.
  *
- * - Текущие балансы: `SELECT DISTINCT ON (primary_key) ... ORDER BY primary_key,
- *   block_num DESC, created_at DESC` — берём последнюю дельту для каждого id.
- *   Deltas-consumer (`BlockchainConsumerService`) уже наполняет таблицу,
- *   отдельной подписки не нужно.
+ * Текущие балансы — `SELECT DISTINCT ON (primary_key) ... ORDER BY primary_key,
+ * block_num DESC` по `blockchain_deltas`.
  *
- * - История операций: `blockchain_actions WHERE account='ledger2'` —
- *   source-of-truth для трио apply+walletop+debit+credit (см.
- *   ProcessRegistryService: та же стратегия).
+ * История операций / реестр проводок — `blockchain_actions WHERE account='ledger2'`.
+ * Связь apply-orchestrator ↔ inline walletop/debit/credit строится через явные
+ * идентификаторы parser2: пара `(transaction_id, creator_action_ordinal)`
+ * каждой inline-action указывает на `(transaction_id, action_ordinal)` её
+ * родителя. Никаких эвристик «ближайший apply того же processHash» —
+ * родительский apply находится точечным JOIN на этих полях.
  */
 @Injectable()
 export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
@@ -92,70 +93,42 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
     const clauses: string[] = [];
 
     if (filter.accountId !== undefined) {
-      // Бух.счёт (debit/credit действий) — числовой. apply-события не имеют account_id
-      // в data, связь идёт через process_hash с siblings (debit/credit). Для raw-siblings
-      // достаточно прямого совпадения.
-      const siblingOnly =
-        !!filter.actionNames &&
-        filter.actionNames.length > 0 &&
-        !filter.actionNames.includes('apply');
-      if (siblingOnly) {
-        clauses.push(
-          `(
-            (a.data ->> 'id')::text = $${pIdx}
-            OR (a.data ->> 'account_id')::text = $${pIdx}
-          )`,
-        );
-      } else {
-        clauses.push(
-          `LOWER(a.data ->> 'process_hash') IN (
-             SELECT LOWER(b.data ->> 'process_hash')
-             FROM blockchain_actions b
-             WHERE b.account = $1
-               AND b.data ->> 'coopname' = $2
-               AND b.data ->> 'process_hash' IS NOT NULL
-               AND (
-                 (b.data ->> 'id')::text = $${pIdx}
-                 OR (b.data ->> 'account_id')::text = $${pIdx}
-               )
-           )`,
-        );
-      }
+      // Бух.счёт (×1000): debit/credit имеют account_id в data — прямое сравнение.
+      // apply / revert сами account_id не несут, но мэтчатся через inline ребёнка
+      // (`debit`/`credit` с этим account_id и creator_action_ordinal=parent.action_ordinal).
+      clauses.push(
+        `(
+          (a.name IN ('debit', 'credit') AND (a.data ->> 'account_id')::text = $${pIdx})
+          OR (a.name IN ('apply', 'revert') AND EXISTS (
+            SELECT 1 FROM blockchain_actions s
+             WHERE s.account = a.account
+               AND s.transaction_id = a.transaction_id
+               AND s.creator_action_ordinal = a.action_ordinal
+               AND s.name IN ('debit', 'credit')
+               AND (s.data ->> 'account_id')::text = $${pIdx}
+          ))
+        )`,
+      );
       params.push(String(filter.accountId));
       pIdx += 1;
     }
     if (filter.walletName) {
-      // Кошелёк (walletop действий) — eosio::name. Для apply-событий wallet_from/to нет
-      // в data, поэтому фильтр через process_hash подтягивает все 3 действия (apply +
-      // walletop + debit/credit) одного процесса, в котором участвует этот кошелёк.
-      const siblingOnly =
-        !!filter.actionNames &&
-        filter.actionNames.length > 0 &&
-        !filter.actionNames.includes('apply');
-      if (siblingOnly) {
-        clauses.push(
-          `(
-            (a.data ->> 'wallet_from') = $${pIdx}
-            OR (a.data ->> 'wallet_to') = $${pIdx}
-            OR (a.data ->> 'id') = $${pIdx}
-          )`,
-        );
-      } else {
-        clauses.push(
-          `LOWER(a.data ->> 'process_hash') IN (
-             SELECT LOWER(b.data ->> 'process_hash')
-             FROM blockchain_actions b
-             WHERE b.account = $1
-               AND b.data ->> 'coopname' = $2
-               AND b.data ->> 'process_hash' IS NOT NULL
-               AND (
-                 (b.data ->> 'wallet_from') = $${pIdx}
-                 OR (b.data ->> 'wallet_to') = $${pIdx}
-                 OR (b.data ->> 'id') = $${pIdx}
-               )
-           )`,
-        );
-      }
+      // walletop / walmove несут wallet_from/wallet_to в data — прямое сравнение.
+      // apply / revert — через inline ребёнка walletop с этим кошельком.
+      clauses.push(
+        `(
+          (a.name IN ('walletop', 'walmove')
+           AND ((a.data ->> 'wallet_from') = $${pIdx} OR (a.data ->> 'wallet_to') = $${pIdx}))
+          OR (a.name IN ('apply', 'revert') AND EXISTS (
+            SELECT 1 FROM blockchain_actions s
+             WHERE s.account = a.account
+               AND s.transaction_id = a.transaction_id
+               AND s.creator_action_ordinal = a.action_ordinal
+               AND s.name = 'walletop'
+               AND ((s.data ->> 'wallet_from') = $${pIdx} OR (s.data ->> 'wallet_to') = $${pIdx})
+          ))
+        )`,
+      );
       params.push(filter.walletName);
       pIdx += 1;
     }
@@ -165,42 +138,19 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       pIdx += 1;
     }
     if (filter.applyGlobalSequence) {
-      // № операции — точечная адресация по apply.global_sequence.
-      // Возвращаем САМ apply + всех его siblings (walletop/debit/credit)
-      // ровно этой apply-группы, ограниченной диапазоном до СЛЕДУЮЩЕГО
-      // apply того же processHash (multi-effect защита).
-      const applySeqIdx = pIdx;
+      // № операции — точечная адресация одной operation-родительской записи
+      // (apply / walmove / revert). Возвращаем сам родитель + все его inline
+      // (walletop/debit/credit) через связь (transaction_id, creator_action_ordinal).
       clauses.push(
         `(
-          (a.name = 'apply' AND a.global_sequence::bigint = $${applySeqIdx}::bigint)
-          OR (
-            a.name IN ('walletop', 'debit', 'credit')
-            AND LOWER(a.data ->> 'process_hash') = (
-              SELECT LOWER(ap.data ->> 'process_hash')
-                FROM blockchain_actions ap
-               WHERE ap.account = $1
-                 AND ap.name = 'apply'
-                 AND ap.global_sequence::bigint = $${applySeqIdx}::bigint
-               LIMIT 1
-            )
-            AND a.global_sequence::bigint > $${applySeqIdx}::bigint
-            AND a.global_sequence::bigint < COALESCE(
-              (SELECT MIN(ap2.global_sequence::bigint)
-                 FROM blockchain_actions ap2
-                WHERE ap2.account = $1
-                  AND ap2.name = 'apply'
-                  AND LOWER(ap2.data ->> 'process_hash') = (
-                    SELECT LOWER(ap.data ->> 'process_hash')
-                      FROM blockchain_actions ap
-                     WHERE ap.account = $1
-                       AND ap.name = 'apply'
-                       AND ap.global_sequence::bigint = $${applySeqIdx}::bigint
-                     LIMIT 1
-                  )
-                  AND ap2.global_sequence::bigint > $${applySeqIdx}::bigint),
-              9223372036854775807::bigint
-            )
-          )
+          (a.name IN ('apply', 'walmove', 'revert') AND a.global_sequence::bigint = $${pIdx}::bigint)
+          OR (a.name IN ('walletop', 'debit', 'credit') AND EXISTS (
+            SELECT 1 FROM blockchain_actions ap
+             WHERE ap.account = a.account
+               AND ap.transaction_id = a.transaction_id
+               AND ap.action_ordinal = a.creator_action_ordinal
+               AND ap.global_sequence::bigint = $${pIdx}::bigint
+          ))
         )`,
       );
       params.push(filter.applyGlobalSequence);
@@ -213,29 +163,22 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       params.push(filter.walletopGlobalSequence);
       pIdx += 1;
     }
-    if (filter.parentApplyGlobalSequence && filter.processHash) {
-      // Ограничиваем siblings (walletop/debit/credit) диапазоном global_sequence
-      // между текущим apply и следующим apply того же processHash — чтобы
-      // раскрытие одного apply не цепляло сибсов соседних apply в multi-effect
-      // процессах (p.cap.rid: две пары operation_code внутри одного processHash).
-      // global_sequence хранится как varchar(32), для числового сравнения
-      // кастим обе стороны к bigint.
-      clauses.push(`a.global_sequence::bigint > $${pIdx}::bigint`);
-      params.push(filter.parentApplyGlobalSequence);
-      const pIdxHash = pIdx + 1;
+    if (filter.parentApplyGlobalSequence) {
+      // Раскрытие операции: inline-сибсы конкретного родителя по точечной связи
+      // (transaction_id, creator_action_ordinal=parent.action_ordinal). Имя
+      // родителя не ограничиваем — apply / walmove / revert одинаково
+      // оркестрируют inline-children.
       clauses.push(
-        `a.global_sequence::bigint < COALESCE(
-           (SELECT MIN(b.global_sequence::bigint)
-              FROM blockchain_actions b
-             WHERE b.account = $1
-               AND b.name = 'apply'
-               AND LOWER(b.data ->> 'process_hash') = $${pIdxHash}
-               AND b.global_sequence::bigint > $${pIdx}::bigint),
-           9223372036854775807::bigint
-         )`,
+        `EXISTS (
+          SELECT 1 FROM blockchain_actions ap
+           WHERE ap.account = a.account
+             AND ap.transaction_id = a.transaction_id
+             AND ap.action_ordinal = a.creator_action_ordinal
+             AND ap.global_sequence::bigint = $${pIdx}::bigint
+        )`,
       );
-      params.push(filter.processHash.toLowerCase());
-      pIdx += 2;
+      params.push(filter.parentApplyGlobalSequence);
+      pIdx += 1;
     }
     if (filter.actionNames && filter.actionNames.length > 0) {
       clauses.push(`a.name = ANY($${pIdx})`);
@@ -301,10 +244,8 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
                 SELECT b.global_sequence
                   FROM blockchain_actions b
                  WHERE b.account = a.account
-                   AND b.name = 'apply'
-                   AND LOWER(b.data ->> 'process_hash') = LOWER(a.data ->> 'process_hash')
-                   AND b.global_sequence::bigint < a.global_sequence::bigint
-                 ORDER BY b.global_sequence::bigint DESC
+                   AND b.transaction_id = a.transaction_id
+                   AND b.action_ordinal = a.creator_action_ordinal
                  LIMIT 1
               )
               ELSE NULL
@@ -359,54 +300,38 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
     }
     if (filter.debitGlobalSequence) {
       // № проводки = debit.global_sequence (unique). Парный credit подтянется
-      // стандартным алгоритмом ниже.
+      // ниже через JOIN (transaction_id + creator_action_ordinal).
       debitClauses.push(`d.global_sequence::bigint = $${pIdx}::bigint`);
       params.push(filter.debitGlobalSequence);
       pIdx += 1;
     }
     if (filter.applyGlobalSequence) {
-      // № операции — фильтруем debit'ы, чей parent apply ровно этот.
-      // parent apply = последний apply того же processHash до debit, ограниченный
-      // диапазоном до следующего apply (multi-effect защита).
-      const applySeqIdx = pIdx;
+      // № операции — debit, чей родитель имеет это global_sequence. Связь
+      // по (transaction_id, creator_action_ordinal=parent.action_ordinal);
+      // имя родителя не ограничиваем — apply / revert одинаково ведут inline debit/credit.
       debitClauses.push(
-        `d.global_sequence::bigint > $${applySeqIdx}::bigint
-         AND d.global_sequence::bigint < COALESCE(
-           (SELECT MIN(ap2.global_sequence::bigint)
-              FROM blockchain_actions ap2
-             WHERE ap2.account = d.account
-               AND ap2.name = 'apply'
-               AND LOWER(ap2.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-               AND ap2.global_sequence::bigint > $${applySeqIdx}::bigint),
-           9223372036854775807::bigint
-         )
-         AND LOWER(d.data ->> 'process_hash') = (
-           SELECT LOWER(ap.data ->> 'process_hash')
-             FROM blockchain_actions ap
-            WHERE ap.account = d.account
-              AND ap.name = 'apply'
-              AND ap.global_sequence::bigint = $${applySeqIdx}::bigint
-            LIMIT 1
-         )`,
+        `EXISTS (
+          SELECT 1 FROM blockchain_actions ap
+           WHERE ap.account = d.account
+             AND ap.transaction_id = d.transaction_id
+             AND ap.action_ordinal = d.creator_action_ordinal
+             AND ap.global_sequence::bigint = $${pIdx}::bigint
+        )`,
       );
       params.push(filter.applyGlobalSequence);
       pIdx += 1;
     }
     if (filter.username) {
-      // username нет в data debit/credit-actions (см. ledger2.hpp: debit/credit
-      // принимают только coopname/account_id/amount/process_hash/memo). Берём
-      // из parent apply того же processHash через subquery.
+      // username debit/credit-actions не передают (см. ledger2.hpp). Берём из
+      // родителя (apply/revert) через точечный JOIN на (transaction_id, action_ordinal).
       debitClauses.push(
-        `(
-          SELECT b.data ->> 'username'
-            FROM blockchain_actions b
-           WHERE b.account = d.account
-             AND b.name = 'apply'
-             AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-             AND b.global_sequence::bigint < d.global_sequence::bigint
-           ORDER BY b.global_sequence::bigint DESC
-           LIMIT 1
-        ) = $${pIdx}`,
+        `EXISTS (
+          SELECT 1 FROM blockchain_actions ap
+           WHERE ap.account = d.account
+             AND ap.transaction_id = d.transaction_id
+             AND ap.action_ordinal = d.creator_action_ordinal
+             AND ap.data ->> 'username' = $${pIdx}
+        )`,
       );
       params.push(filter.username);
       pIdx += 1;
@@ -421,28 +346,19 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
       params.push(filter.dateTo);
       pIdx += 1;
     }
-    // accountId — попадание в debit ИЛИ credit. Для debit-ноги тривиально:
-    // сравниваем data->>'account_id'. Для credit-ноги — через EXISTS на пару
-    // (тот же processHash, > debit.global_sequence, нет apply между ними).
     if (filter.accountId !== undefined) {
+      // Попадание в debit ИЛИ credit ноге. Парный credit ищем по точному JOIN
+      // (transaction_id, creator_action_ordinal) — тот же оркестратор.
       debitClauses.push(
         `(
           (d.data ->> 'account_id')::text = $${pIdx}
           OR EXISTS (
             SELECT 1 FROM blockchain_actions cc
-            WHERE cc.account = d.account
-              AND cc.name = 'credit'
-              AND LOWER(cc.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-              AND cc.global_sequence::bigint > d.global_sequence::bigint
-              AND (cc.data ->> 'account_id')::text = $${pIdx}
-              AND NOT EXISTS (
-                SELECT 1 FROM blockchain_actions ap
-                WHERE ap.account = d.account
-                  AND ap.name = 'apply'
-                  AND LOWER(ap.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-                  AND ap.global_sequence::bigint > d.global_sequence::bigint
-                  AND ap.global_sequence::bigint < cc.global_sequence::bigint
-              )
+             WHERE cc.account = d.account
+               AND cc.transaction_id = d.transaction_id
+               AND cc.creator_action_ordinal = d.creator_action_ordinal
+               AND cc.name = 'credit'
+               AND (cc.data ->> 'account_id')::text = $${pIdx}
           )
         )`,
       );
@@ -464,12 +380,14 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
     const totalCount = parseInt(countRow[0]?.cnt ?? '0', 10);
     const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
-    // Парная связь: для каждой debit-записи credit ищется как ПЕРВЫЙ credit
-    // того же processHash с global_sequence > debit и БЕЗ apply между ними
-    // (apply закрывает текущую группу пар). parent apply = ПОСЛЕДНИЙ apply
-    // того же processHash до debit. Если debit без своего apply (миграция,
-    // прямой вызов) — operationCode/parentApply будут null, проводка всё
-    // равно валидна и попадает в реестр.
+    // Пары debit↔credit — точечный LEFT JOIN на (transaction_id, creator_action_ordinal):
+    // оба inline вызваны из одного apply, у обоих creator_action_ordinal равен
+    // action_ordinal этого apply. Родительский apply подтягивается по
+    // (transaction_id, action_ordinal=d.creator_action_ordinal).
+    //
+    // ledger2::debit принимает поле `amount` (см. ledger2.hpp); в data других
+    // ledger2-actions `quantity` нет ни у кого (apply/walletop/walmove/revert
+    // тоже только `amount`).
     const rows = await this.actionRepo.manager.query(
       `SELECT
          d.global_sequence                       AS "debitGlobalSequence",
@@ -478,79 +396,22 @@ export class TypeOrmLedger2StateRepository implements Ledger2StatePort {
          (d.data ->> 'memo')                     AS "memo",
          d.created_at                            AS "createdAt",
          NULLIF(d.data ->> 'account_id','')::bigint AS "debitAccountId",
-         -- ledger2::debit принимает поле \`amount\` (см. ledger2.hpp).
-         -- В data других ledger2-actions \`quantity\` нет ни у кого
-         -- (apply/walletop/walmove/revert тоже только \`amount\`).
          NULLIF(d.data ->> 'amount','')          AS "quantity",
-         (
-           SELECT c.global_sequence
-             FROM blockchain_actions c
-            WHERE c.account = d.account
-              AND c.name = 'credit'
-              AND LOWER(c.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-              AND c.global_sequence::bigint > d.global_sequence::bigint
-              AND NOT EXISTS (
-                SELECT 1 FROM blockchain_actions ap
-                WHERE ap.account = d.account
-                  AND ap.name = 'apply'
-                  AND LOWER(ap.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-                  AND ap.global_sequence::bigint > d.global_sequence::bigint
-                  AND ap.global_sequence::bigint < c.global_sequence::bigint
-              )
-            ORDER BY c.global_sequence::bigint ASC
-            LIMIT 1
-         )                                       AS "creditGlobalSequence",
-         (
-           SELECT NULLIF(c.data ->> 'account_id','')::bigint
-             FROM blockchain_actions c
-            WHERE c.account = d.account
-              AND c.name = 'credit'
-              AND LOWER(c.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-              AND c.global_sequence::bigint > d.global_sequence::bigint
-              AND NOT EXISTS (
-                SELECT 1 FROM blockchain_actions ap
-                WHERE ap.account = d.account
-                  AND ap.name = 'apply'
-                  AND LOWER(ap.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-                  AND ap.global_sequence::bigint > d.global_sequence::bigint
-                  AND ap.global_sequence::bigint < c.global_sequence::bigint
-              )
-            ORDER BY c.global_sequence::bigint ASC
-            LIMIT 1
-         )                                       AS "creditAccountId",
-         (
-           SELECT b.global_sequence
-             FROM blockchain_actions b
-            WHERE b.account = d.account
-              AND b.name = 'apply'
-              AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-              AND b.global_sequence::bigint < d.global_sequence::bigint
-            ORDER BY b.global_sequence::bigint DESC
-            LIMIT 1
-         )                                       AS "parentApplyGlobalSequence",
-         (
-           SELECT b.data ->> 'operation_code'
-             FROM blockchain_actions b
-            WHERE b.account = d.account
-              AND b.name = 'apply'
-              AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-              AND b.global_sequence::bigint < d.global_sequence::bigint
-            ORDER BY b.global_sequence::bigint DESC
-            LIMIT 1
-         )                                       AS "operationCode",
-         -- username живёт только в parent apply: debit/credit-actions его не
-         -- передают как поле data (см. ledger2.hpp). Берём из ближайшего apply.
-         (
-           SELECT b.data ->> 'username'
-             FROM blockchain_actions b
-            WHERE b.account = d.account
-              AND b.name = 'apply'
-              AND LOWER(b.data ->> 'process_hash') = LOWER(d.data ->> 'process_hash')
-              AND b.global_sequence::bigint < d.global_sequence::bigint
-            ORDER BY b.global_sequence::bigint DESC
-            LIMIT 1
-         )                                       AS "username"
+         c.global_sequence                       AS "creditGlobalSequence",
+         NULLIF(c.data ->> 'account_id','')::bigint AS "creditAccountId",
+         ap.global_sequence                      AS "parentApplyGlobalSequence",
+         (ap.data ->> 'operation_code')          AS "operationCode",
+         (ap.data ->> 'username')                AS "username"
        FROM blockchain_actions d
+       LEFT JOIN blockchain_actions c
+         ON c.account = d.account
+        AND c.transaction_id = d.transaction_id
+        AND c.creator_action_ordinal = d.creator_action_ordinal
+        AND c.name = 'credit'
+       LEFT JOIN blockchain_actions ap
+         ON ap.account = d.account
+        AND ap.transaction_id = d.transaction_id
+        AND ap.action_ordinal = d.creator_action_ordinal
        WHERE ${debitWhere}
        ORDER BY d.block_num ${sortOrder}, d.global_sequence ${sortOrder}
        LIMIT ${limit} OFFSET ${offset}`,

@@ -1,12 +1,12 @@
 /**
- * Бух.проводка ledger2 = пара действий (debit + credit) одного процесса,
- * закрытая между ближайшим предшествующим `apply` и следующим. В одном
- * processHash может быть несколько таких пар (multi-effect процессы типа
- * `p.cap.rid` — два apply, каждое со своей парой).
+ * Бух.проводка ledger2 = пара действий (debit + credit), вызванных одним
+ * apply-оркестратором. Парование точечное через метаданные parser2: оба
+ * inline имеют одинаковую пару `(transaction_id, creator_action_ordinal)`,
+ * указывающую на родительский apply.
  *
- * Ключ парования = (processHash, parentApplyGlobalSequence). Внутри пары
- * debit предшествует credit по global_sequence — порядок гарантирован
- * контрактом ledger2 (см. apply.cpp).
+ * В multi-effect процессах (тип `p.cap.rid` — два apply под одним processHash)
+ * каждое apply даёт свою пару проводок, разделение между ними естественное
+ * через разный `creator_action_ordinal`.
  */
 export interface Ledger2PostingDomainInterface {
   /** Стабильный ключ для UI: `${debitGlobalSequence}_${creditGlobalSequence ?? '_'}`. */
@@ -39,13 +39,13 @@ export interface Ledger2PostingsFilterDomainInterface {
   processHash?: string;
   /**
    * № проводки — `debit.global_sequence` ровно одной строки. Парный credit
-   * подтягивается стандартным алгоритмом «closest-credit-after-debit-without-apply-between».
+   * подтягивается точечным JOIN на (transaction_id, creator_action_ordinal).
    */
   debitGlobalSequence?: string;
   /**
    * № операции — `apply.global_sequence`, родитель проводки. Возвращает
-   * пары debit+credit ровно одной apply-группы (отличает соседние apply
-   * с одинаковым processHash в multi-effect процессах).
+   * пары debit+credit ровно одной apply-группы; отличает соседние apply
+   * с одинаковым processHash через свой action_ordinal.
    */
   applyGlobalSequence?: string;
   dateFrom?: Date;
