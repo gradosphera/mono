@@ -1,6 +1,6 @@
 {
   "name": "migrator",
-  "version": "2026.4.30-7",
+  "version": "2026.5.7-alpha-1",
   "description": "Утилита миграции данных между версиями",
   "private": true,
   "type": "module",
