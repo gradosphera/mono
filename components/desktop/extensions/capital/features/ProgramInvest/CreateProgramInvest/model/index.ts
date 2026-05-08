@@ -86,16 +86,18 @@ export function useCreateProgramInvest() {
         statement: signedDoc,
       };
 
-      // Оптимистичный update: списываем с ЦК (program_type='wallet'),
-      // зачисляем в Благорост (program_type='blagorost'). Обе суммы — в
-      // `available`, потому что Ledger2::apply(INVEST) делает TRANSFER
-      // w.wal.share → w.cap.blago: оба USER_SHARED, оба пишутся в .available
-      // (см. operations.hpp:INVEST). progwallets.blocked в десктоп-картах не
-      // отображается — UI читает available из L3 userwallets.
+      // Оптимистичный update: списываем с ЦК (program_type='main' —
+      // controller маппит program_id=1 → ProgramType.MAIN, см.
+      // controller/src/domain/wallet/enums/program-type.enum.ts), зачисляем
+      // в Благорост (program_type='blagorost'). Обе суммы — в `available`,
+      // потому что Ledger2::apply(INVEST) делает TRANSFER w.wal.share →
+      // w.cap.blago: оба USER_SHARED, оба пишутся в .available
+      // (см. operations.hpp:INVEST). progwallets.blocked в десктоп-картах
+      // не отображается — UI читает available из L3 userwallets.
       optimisticPatchId = walletStore.applyOptimisticPatch([
         {
           username: session.username,
-          program_type: 'wallet',
+          program_type: 'main',
           available_delta: `-${formattedAmount}`,
         },
         {
