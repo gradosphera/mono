@@ -12,7 +12,7 @@
  *   - если `program_id` уже подписан — update version/draft_id/signed_at/doc_hash
  *     (повторная подпись = пересоглашение).
  *
- * @param coopname Кооператив (auth: coopname@active, payer для записи `users`)
+ * @param coopname Кооператив (payer для записи `users`)
  * @param username Пайщик, подписывающий соглашение
  * @param program_id Идентификатор программы (см. soviet::programs)
  * @param document Документ соглашения с подписями (только в action data, не в state)
@@ -20,7 +20,13 @@
  * @ingroup public_actions
  * @ingroup public_wallet_actions
  *
- * @note Авторизация требуется от аккаунта: @p coopname (active)
+ * @note Авторизация: @p coopname (active) ИЛИ один из системных контрактов
+ *       из `contracts_whitelist` (например, `capital@active` для inline-вызова
+ *       из `capital::regcontrib`). В обоих случаях кооператив остаётся payer-ом
+ *       записи `wallet::users`. Whitelist гарантирует атомарность связки
+ *       «документ из payload → wallet::users.programs[] → реестр»: контракт не
+ *       может разойтись, поскольку выполняет signagree в той же транзакции на
+ *       тех же данных.
  */
 [[eosio::action]] void wallet::signagree(
   eosio::name coopname,
@@ -29,7 +35,17 @@
   document2   document,
   uint64_t    draft_id
 ) {
-  require_auth(coopname);
+  // Auth: либо сам кооператив, либо системный контракт из whitelist (например
+  // capital — inline вызов из regcontrib). require_auth(coopname) тоже валиден
+  // через ветку has_auth(coopname). Если ничего не подходит — payer-helper
+  // упадёт «Недостаточно прав доступа».
+  // Payer для записи `wallet::users` — тот, кто подал auth: сам кооператив
+  // (когда signagree вызвал desktop напрямую) ИЛИ системный контракт
+  // (capital@active inline). RAM-аккаунтинг не может увеличить usage аккаунту,
+  // не подавшему auth — поэтому нельзя жёстко платить coopname'ом.
+  std::vector<eosio::name> allowed{coopname};
+  for (const auto& c : contracts_whitelist) allowed.push_back(c);
+  const eosio::name payer = check_auth_and_get_payer_or_fail(allowed);
 
   // Кооператив должен существовать и быть активным.
   get_cooperative_or_fail(coopname);
@@ -71,12 +87,12 @@
   };
 
   if (user_it == users.end()) {
-    users.emplace(coopname, [&](auto &row) {
+    users.emplace(payer, [&](auto &row) {
       row.username = username;
       row.programs = { new_pa };
     });
   } else {
-    users.modify(user_it, coopname, [&](auto &row) {
+    users.modify(user_it, payer, [&](auto &row) {
       auto pa_it = std::find_if(
         row.programs.begin(), row.programs.end(),
         [&](const Wallet::program_agreement &p) { return p.program_id == program_id; });

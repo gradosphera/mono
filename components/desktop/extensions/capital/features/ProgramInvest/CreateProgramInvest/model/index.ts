@@ -61,6 +61,8 @@ export function useCreateProgramInvest() {
   async function createProgramInvestWithGeneratedStatement(
     amount: string,
   ): Promise<ICreateProgramInvestOutput> {
+    let optimisticPatchId: string | null = null;
+
     try {
       isGenerating.value = true;
 
@@ -84,6 +86,24 @@ export function useCreateProgramInvest() {
         statement: signedDoc,
       };
 
+      // Оптимистичный update: списываем с ЦК (program_type='wallet'),
+      // зачисляем в blocked программы Благорост (program_type='capital').
+      // Если мутация упадёт — реверт ниже. Если дельта не догонит за TTL,
+      // патч сам снимется. Следующий loadUserWallet перетрёт overlay
+      // серверной правдой.
+      optimisticPatchId = walletStore.applyOptimisticPatch([
+        {
+          username: session.username,
+          program_type: 'wallet',
+          available_delta: `-${formattedAmount}`,
+        },
+        {
+          username: session.username,
+          program_type: 'capital',
+          blocked_delta: formattedAmount,
+        },
+      ]);
+
       const result = await createProgramInvest(investData);
 
       await walletStore.loadUserWallet({
@@ -92,6 +112,11 @@ export function useCreateProgramInvest() {
       });
 
       return result;
+    } catch (e) {
+      if (optimisticPatchId) {
+        walletStore.revertOptimisticPatch(optimisticPatchId);
+      }
+      throw e;
     } finally {
       isGenerating.value = false;
     }

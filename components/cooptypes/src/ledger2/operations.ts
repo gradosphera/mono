@@ -73,6 +73,16 @@ export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
     debit: 51, credit: 80,
     human_name: 'Внесение пайщиком паевого взноса' },
 
+  { code: 'o.wal.wthreq',  process_type: 'p.wal.wthdrw',  contract: 'wallet',
+    name: 'REQUEST_WITHDRAW',  wallet_op: 'BLOCK',    wallet_from: 'w.wal.share', wallet_to: null,
+    debit: null, credit: null,
+    human_name: 'Блокировка паевого под запрос на возврат' },
+
+  { code: 'o.wal.wthdec',  process_type: 'p.wal.wthdrw',  contract: 'wallet',
+    name: 'DECLINE_WITHDRAW',  wallet_op: 'UNBLOCK',  wallet_from: 'w.wal.share', wallet_to: null,
+    debit: null, credit: null,
+    human_name: 'Разблокировка паевого после отклонения запроса на возврат' },
+
   { code: 'o.wal.wthcpl',  process_type: 'p.wal.wthdrw',  contract: 'wallet',
     name: 'COMPLETE_WITHDRAW', wallet_op: 'TRANSFER', wallet_from: 'w.wal.share', wallet_to: 'w.wal.wthdrw',
     debit: 80, credit: 51,
@@ -113,6 +123,11 @@ export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
     name: 'REPAY',          wallet_op: 'TRANSFER', wallet_from: 'w.cap.loan', wallet_to: 'w.wal.share',
     debit: 80, credit: 58,
     human_name: 'Возврат беспроцентного займа пайщика по акту-2' },
+
+  { code: 'o.cap.wthcap',  process_type: 'p.cap.wthcap',  contract: 'capital',
+    name: 'WITHDRAW_FROM_CAPITAL', wallet_op: 'TRANSFER', wallet_from: 'w.cap.blago', wallet_to: 'w.wal.share',
+    debit: null, credit: null,
+    human_name: 'Возврат паевого из ЦПП «Благорост» в Цифровой Кошелёк' },
 
   // marketplace
   { code: 'o.mkt.supply',  process_type: 'p.mkt.reqst',   contract: 'marketplace',

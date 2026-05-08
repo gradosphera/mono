@@ -62,17 +62,20 @@ namespace operations {
   namespace wallet {
     inline constexpr eosio::name COMPLETE_DEPOSIT  = "o.wal.depcpl"_n;  ///< Завершение внесения паевого взноса (Dr 51 / Cr 80, ISSUE SHARE_FUND_PAY).
     inline constexpr eosio::name COMPLETE_WITHDRAW = "o.wal.wthcpl"_n;  ///< Завершение возврата паевого взноса (Dr 80 / Cr 51, TRANSFER SHARE_FUND_PAY → WITHDRAWALS_SINK).
+    inline constexpr eosio::name REQUEST_WITHDRAW  = "o.wal.wthreq"_n;  ///< Запрос на возврат паевого: BLOCK на SHARE_FUND_PAY (без Dr/Cr).
+    inline constexpr eosio::name DECLINE_WITHDRAW  = "o.wal.wthdec"_n;  ///< Отклонение запроса на возврат: UNBLOCK на SHARE_FUND_PAY (без Dr/Cr).
   }
 
   // capital
   namespace capital {
-    inline constexpr eosio::name IMPORT           = "o.cap.import"_n;   ///< Оффлайн-импорт пайщика Благорост (Dr 51 / Cr 80, ISSUE BLAGOROST_FUND).
-    inline constexpr eosio::name INVEST           = "o.cap.invest"_n;   ///< Инвестиция в ЦПП Благорост (TRANSFER SHARE_FUND_PAY → BLAGOROST_FUND, без Dr/Cr).
-    inline constexpr eosio::name COMMIT_RID       = "o.cap.commit"_n;   ///< Коммит РИД (Dr 08 / Cr 80, ISSUE GENERATOR_FUND).
-    inline constexpr eosio::name ACCEPT_RID       = "o.cap.accept"_n;   ///< Приём РИД в НМА (Dr 04 / Cr 08, TRANSFER GENERATOR_FUND → BLAGOROST_FUND).
-    inline constexpr eosio::name ACCEPT_PROPERTY  = "o.cap.actprp"_n;   ///< Акт-2 имущественный паевой взнос (Dr 51 / Cr 80, ISSUE BLAGOROST_FUND).
-    inline constexpr eosio::name LEND             = "o.cap.lend"_n;     ///< Выдача беспроцентного займа пайщику (Dr 58 / Cr 51, ISSUE LOAN_ISSUED).
-    inline constexpr eosio::name REPAY            = "o.cap.repay"_n;    ///< Возврат займа пайщика по акту-2 (Dr 80 / Cr 58, TRANSFER LOAN_ISSUED → SHARE_FUND_PAY).
+    inline constexpr eosio::name IMPORT              = "o.cap.import"_n;   ///< Оффлайн-импорт пайщика Благорост (Dr 51 / Cr 80, ISSUE BLAGOROST_FUND).
+    inline constexpr eosio::name INVEST              = "o.cap.invest"_n;   ///< Инвестиция в ЦПП Благорост (TRANSFER SHARE_FUND_PAY → BLAGOROST_FUND, без Dr/Cr).
+    inline constexpr eosio::name COMMIT_RID          = "o.cap.commit"_n;   ///< Коммит РИД (Dr 08 / Cr 80, ISSUE GENERATOR_FUND).
+    inline constexpr eosio::name ACCEPT_RID          = "o.cap.accept"_n;   ///< Приём РИД в НМА (Dr 04 / Cr 08, TRANSFER GENERATOR_FUND → BLAGOROST_FUND).
+    inline constexpr eosio::name ACCEPT_PROPERTY     = "o.cap.actprp"_n;   ///< Акт-2 имущественный паевой взнос (Dr 51 / Cr 80, ISSUE BLAGOROST_FUND).
+    inline constexpr eosio::name LEND                = "o.cap.lend"_n;     ///< Выдача беспроцентного займа пайщику (Dr 58 / Cr 51, ISSUE LOAN_ISSUED).
+    inline constexpr eosio::name REPAY               = "o.cap.repay"_n;    ///< Возврат займа пайщика по акту-2 (Dr 80 / Cr 58, TRANSFER LOAN_ISSUED → SHARE_FUND_PAY).
+    inline constexpr eosio::name WITHDRAW_FROM_CAPITAL = "o.cap.wthcap"_n; ///< Возврат паевого из ЦПП «Благорост» в кошелёк пайщика (TRANSFER BLAGOROST_FUND → SHARE_FUND_PAY, без Dr/Cr).
   }
 
   // marketplace
@@ -235,6 +238,24 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
     ledger2_wallets::SHARE_FUND_PAY, ledger2_wallets::DELEGATE_FEES,
     ledger2_accounts::SHARE_FUND, ledger2_accounts::TARGET_RECEIPTS,
     "Трансляция паевого взноса из ЦПП «Цифровой Кошелёк» в членский взнос за пользование инфраструктурой" },
+
+  // 15. Запрос на возврат паевого: BLOCK SHARE_FUND_PAY (без Dr/Cr — внутри одного бухсчёта 80).
+  { operations::wallet::REQUEST_WITHDRAW, processes::wallet::WITHDRAW, WalletOp::BLOCK,
+    ledger2_wallets::SHARE_FUND_PAY, eosio::name{},
+    0, 0,
+    "Блокировка паевого под запрос на возврат" },
+
+  // 16. Отклонение запроса на возврат: UNBLOCK SHARE_FUND_PAY (без Dr/Cr — зеркало REQUEST_WITHDRAW).
+  { operations::wallet::DECLINE_WITHDRAW, processes::wallet::WITHDRAW, WalletOp::UNBLOCK,
+    ledger2_wallets::SHARE_FUND_PAY, eosio::name{},
+    0, 0,
+    "Разблокировка паевого после отклонения запроса на возврат" },
+
+  // 17. Возврат из ЦПП «Благорост» в Цифровой Кошелёк: TRANSFER BLAGOROST_FUND → SHARE_FUND_PAY (без Dr/Cr — оба счёта 80, зеркало INVEST).
+  { operations::capital::WITHDRAW_FROM_CAPITAL, processes::capital::WTHCAP, WalletOp::TRANSFER,
+    ledger2_wallets::BLAGOROST_FUND, ledger2_wallets::SHARE_FUND_PAY,
+    0, 0,
+    "Возврат паевого из ЦПП «Благорост» в Цифровой Кошелёк" },
 
   // ----- Миграционные (o.mig.*) — вызываются только из migrate.cpp -----
 
