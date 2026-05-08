@@ -108,10 +108,19 @@ export function useCreateProgramInvest() {
 
       const result = await createProgramInvest(investData);
 
-      await walletStore.loadUserWallet({
-        coopname: system.info.coopname,
-        username: session.username,
-      });
+      // НЕ ждём loadUserWallet синхронно: parser2 → consumer → PG обычно
+      // отстают от блока на 1-3с, и refetch сразу после мутации вернёт
+      // ещё стейт ДО инвеста → loadUserWallet сотрёт оптимистичный патч
+      // через clearOptimisticPatches() и UI откатится. Откладываем refetch
+      // на ~4с — за это время дельта успевает прилететь, и обновление
+      // переходит со «снимок-до-инвеста» сразу на «снимок-после» без
+      // промежуточного отката.
+      setTimeout(() => {
+        void walletStore.loadUserWallet({
+          coopname: system.info.coopname,
+          username: session.username,
+        });
+      }, 4000);
 
       return result;
     } catch (e) {
