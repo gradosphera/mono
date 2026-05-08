@@ -57,8 +57,6 @@ void capital::signact2(eosio::name coopname, eosio::name chairman, checksum256 r
   // Инвариант: Σ COMMIT_RID (по коммитам сегмента) == ACCEPT_RID → GENERATOR_FUND
   // (w.cap.gen) закрывается в ноль, 08-й счёт закрывается в ноль по этому сегменту.
   if (segment.available_for_program.amount > 0) {
-    Wallet::add_blocked_funds(_capital, coopname, result -> username, segment.available_for_program, _source_program, memo);
-
     Ledger2::apply(_capital, coopname, operations::capital::ACCEPT_RID, segment.available_for_program, result -> username, result_hash, memo);
   }
 

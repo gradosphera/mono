@@ -76,6 +76,8 @@ namespace operations {
     inline constexpr eosio::name LEND                = "o.cap.lend"_n;     ///< Выдача беспроцентного займа пайщику (Dr 58 / Cr 51, ISSUE LOAN_ISSUED).
     inline constexpr eosio::name REPAY               = "o.cap.repay"_n;    ///< Возврат займа пайщика по акту-2 (Dr 80 / Cr 58, TRANSFER LOAN_ISSUED → SHARE_FUND_PAY).
     inline constexpr eosio::name WITHDRAW_FROM_CAPITAL = "o.cap.wthcap"_n; ///< Возврат паевого из ЦПП «Благорост» в кошелёк пайщика (TRANSFER BLAGOROST_FUND → SHARE_FUND_PAY, без Dr/Cr).
+    inline constexpr eosio::name CONVERT_TO_SHARE    = "o.cap.cnvshr"_n;   ///< Конвертация сегмента: интеллектуальная стоимость → паевой взнос деньгами (Dr 80 / Cr 08, TRANSFER GENERATOR_FUND → SHARE_FUND_PAY).
+    inline constexpr eosio::name CONVERT_TO_BLAGO    = "o.cap.cnvbl"_n;    ///< Конвертация сегмента: интеллектуальная стоимость → ЦПП «Благорост» (Dr 04 / Cr 08, TRANSFER GENERATOR_FUND → BLAGOROST_FUND).
   }
 
   // marketplace
@@ -256,6 +258,23 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
     ledger2_wallets::BLAGOROST_FUND, ledger2_wallets::SHARE_FUND_PAY,
     0, 0,
     "Возврат паевого из ЦПП «Благорост» в Цифровой Кошелёк" },
+
+  // 18. Конвертация сегмента (часть в ЦК): Dr 80 / Cr 08, TRANSFER GENERATOR_FUND → SHARE_FUND_PAY.
+  // Семантика: после ACT2 интеллектуальная доля сегмента, не направленная в Благорост,
+  // возвращается пайщику деньгами в Цифровой Кошелёк. РИД-в-работе закрывается (Cr 08),
+  // паевой фонд получает компенсацию деньгами (Dr 80).
+  { operations::capital::CONVERT_TO_SHARE, processes::capital::CNVSEG, WalletOp::TRANSFER,
+    ledger2_wallets::GENERATOR_FUND, ledger2_wallets::SHARE_FUND_PAY,
+    ledger2_accounts::SHARE_FUND, ledger2_accounts::NON_CURRENT_INVESTMENTS,
+    "Конвертация сегмента: интеллектуальная стоимость → паевой взнос деньгами" },
+
+  // 19. Конвертация сегмента (часть в Благорост): Dr 04 / Cr 08, TRANSFER GENERATOR_FUND → BLAGOROST_FUND.
+  // Семантика та же что у ACCEPT_RID, но в контексте конвертации сегмента после голосования.
+  // Отдельная операция для аудит-следа (различимость в реестре).
+  { operations::capital::CONVERT_TO_BLAGO, processes::capital::CNVSEG, WalletOp::TRANSFER,
+    ledger2_wallets::GENERATOR_FUND, ledger2_wallets::BLAGOROST_FUND,
+    ledger2_accounts::INTANGIBLE_ASSETS, ledger2_accounts::NON_CURRENT_INVESTMENTS,
+    "Конвертация сегмента: интеллектуальная стоимость → ЦПП «Благорост»" },
 
   // ----- Миграционные (o.mig.*) — вызываются только из migrate.cpp -----
 
