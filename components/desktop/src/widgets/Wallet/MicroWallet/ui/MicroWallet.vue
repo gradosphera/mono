@@ -39,15 +39,40 @@ const session = useSessionStore();
 const walletStore = useWalletStore();
 const { info } = useSystemStore();
 
-// Форматированный баланс доступных средств. Берём именно ЦК
-// (program_type='main' — контроллер маппит program_id=1 → ProgramType.MAIN,
-// см. controller/src/domain/wallet/enums/program-type.enum.ts), а не первый
-// элемент массива — порядок program_wallets от backend недетерминирован,
-// и [0] мог оказаться Благорост / Генератор.
+// Форматированный баланс доступных средств. Ищем ЦК по program_type='main'
+// (controller-enum). Если не нашли — диагностический console.log, чтобы
+// быстро увидеть что реально приходит с бэкенда.
 const formattedBalance = computed(() => {
   const walletEntry = walletStore.program_wallets.find(
     (w) => w.program_type === 'main',
   );
+
+  if (!walletEntry) {
+    // eslint-disable-next-line no-console
+    console.log(
+      '%c[MICROWALLET] ЦК НЕ НАЙДЕН ПО program_type=="main"',
+      'background:#c00;color:#fff;font-size:14px;padding:2px 6px;',
+    );
+    // eslint-disable-next-line no-console
+    console.log(
+      '%c[MICROWALLET] СОДЕРЖИМОЕ program_wallets:',
+      'background:#c00;color:#fff;font-size:14px;padding:2px 6px;',
+      JSON.parse(JSON.stringify(walletStore.program_wallets)),
+    );
+    // eslint-disable-next-line no-console
+    console.log(
+      '%c[MICROWALLET] program_type значения:',
+      'background:#c00;color:#fff;font-size:14px;padding:2px 6px;',
+      walletStore.program_wallets.map((w) => ({
+        id: w.id,
+        program_id: w.program_id,
+        program_type: w.program_type,
+        title: w.program_details?.title,
+        available: w.available,
+      })),
+    );
+  }
+
   const available = walletEntry?.available || '0';
   return formatAsset2Digits(`${available} ${info.symbols.root_govern_symbol}`);
 });
