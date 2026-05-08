@@ -247,6 +247,47 @@ public:
                                  std::optional<eosio::public_key> signing_key,
                                  std::optional<bool> active);
 
+  // ─── pricing & globals (v2.1) ───────────────────────────────────────
+
+  /**
+   * \brief Установить ставку плана `plan` для пакета `package_id` (FR1, D1).
+   * \details Per-plan upsert в таблице `pricings` (scope = `package_id`):
+   *          row нет → `emplace`; row есть → `modify` с обновлённым
+   *          `hourly_rate` и `updated_at` = текущее время блока.
+   *          RAM payer — `get_self()` (`apps`-контракт; ВОСХОД как owner
+   *          аккаунта оплачивает RAM координационной плоскости).
+   *
+   *          Story v2.1.1 — каркас без бизнес-валидации. Полная валидация
+   *          (`hourly_rate.amount > 0`, символ против `_root_govern_symbol`,
+   *          plan-whitelist, snapshot предыдущей ставки в audit_log_admin)
+   *          добавляется в Story v2.1.2.
+   *
+   * \param package_id  scope таблицы `pricings` (Antelope `name`).
+   * \param plan        имя плана, PK (в MVP всегда `default`).
+   * \param hourly_rate ставка за час (общая валюта экосистемы — RUB,4).
+   * \note Авторизация: `require_auth(get_self())` — действие выполняется
+   *       контрактом от своего имени по запросу из `CA-admin` через
+   *       `KE write-adapter` (Story v2.1.3).
+   */
+  [[eosio::action]] void setpricing(eosio::name package_id,
+                                    eosio::name plan,
+                                    eosio::asset hourly_rate);
+
+  /**
+   * \brief Установить общесистемные параметры каталога (FR2, D2).
+   * \details Полная замена singleton `globals` (scope = `get_self()`):
+   *          row нет → создаём, есть → перезаписываем все четыре поля.
+   *          RAM payer — `get_self()`. Story v2.1.1 — каркас без
+   *          валидации диапазонов; валидация и snapshot предыдущего
+   *          state'а добавляются в Story v2.1.2.
+   *
+   * \note Авторизация: `require_auth(get_self())`.
+   */
+  [[eosio::action]] void setglobals(uint32_t min_payment_period_seconds,
+                                    uint32_t free_trial_period_seconds,
+                                    uint32_t lead_time_seconds,
+                                    uint8_t  retry_max);
+
   // ─── service tables ─────────────────────────────────────────────────
 
   struct [[eosio::table, eosio::contract(APPS)]] counts : counts_base {};

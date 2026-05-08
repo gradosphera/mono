@@ -11,6 +11,8 @@
 #include "src/expsub.cpp"
 #include "src/regcoop.cpp"
 #include "src/setcoop.cpp"
+#include "src/setpricing.cpp"
+#include "src/setglobals.cpp"
 
 /**
  * \brief Миграция контракта.
