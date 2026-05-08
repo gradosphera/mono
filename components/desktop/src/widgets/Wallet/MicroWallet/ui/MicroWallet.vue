@@ -39,9 +39,14 @@ const session = useSessionStore();
 const walletStore = useWalletStore();
 const { info } = useSystemStore();
 
-// Форматированный баланс доступных средств
+// Форматированный баланс доступных средств. Берём именно ЦК (program_type='wallet'),
+// а не первый элемент массива — порядок program_wallets от backend
+// недетерминирован, и [0] мог оказаться Благорост / Генератор.
 const formattedBalance = computed(() => {
-  const available = walletStore.program_wallets[0]?.available || '0';
+  const walletEntry = walletStore.program_wallets.find(
+    (w) => w.program_type === 'wallet',
+  );
+  const available = walletEntry?.available || '0';
   return formatAsset2Digits(`${available} ${info.symbols.root_govern_symbol}`);
 });
 

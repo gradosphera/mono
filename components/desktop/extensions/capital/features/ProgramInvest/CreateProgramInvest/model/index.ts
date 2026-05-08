@@ -87,10 +87,11 @@ export function useCreateProgramInvest() {
       };
 
       // Оптимистичный update: списываем с ЦК (program_type='wallet'),
-      // зачисляем в blocked программы Благорост (program_type='capital').
-      // Если мутация упадёт — реверт ниже. Если дельта не догонит за TTL,
-      // патч сам снимется. Следующий loadUserWallet перетрёт overlay
-      // серверной правдой.
+      // зачисляем в Благорост (program_type='blagorost'). Обе суммы — в
+      // `available`, потому что Ledger2::apply(INVEST) делает TRANSFER
+      // w.wal.share → w.cap.blago: оба USER_SHARED, оба пишутся в .available
+      // (см. operations.hpp:INVEST). progwallets.blocked в десктоп-картах не
+      // отображается — UI читает available из L3 userwallets.
       optimisticPatchId = walletStore.applyOptimisticPatch([
         {
           username: session.username,
@@ -99,8 +100,8 @@ export function useCreateProgramInvest() {
         },
         {
           username: session.username,
-          program_type: 'capital',
-          blocked_delta: formattedAmount,
+          program_type: 'blagorost',
+          available_delta: formattedAmount,
         },
       ]);
 
