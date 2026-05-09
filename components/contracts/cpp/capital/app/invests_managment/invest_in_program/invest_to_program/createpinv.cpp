@@ -34,6 +34,16 @@ void capital::createpinv(name coopname, name username, checksum256 invest_hash, 
   // Как в createinvest: программные инвесторы не проходят через signact2 — фиксируем вклад здесь
   Capital::Contributors::increase_investor_contribution(coopname, contributor -> id, amount);
 
+  // Геймификация: программный инвестор не имеет сегмента, поэтому energy_gain
+  // считаем от суммы напрямую (как в createinvest, только без агрегации по
+  // ролям сегмента). Без этого вызова уровень/энергия не растут при прямой
+  // инвестиции в Благорост.
+  {
+    auto config = Capital::State::get_global_state(coopname).config;
+    double energy_gain = Capital::Gamification::calculate_energy_gain(amount, contributor -> level, config);
+    Capital::Gamification::add_energy_and_check_levelup(coopname, contributor -> id, energy_gain);
+  }
+
   // ledger2: TRANSFER w.wal.share → w.cap.blago (без бухпроводки — оба счёта 80).
   // Источник правды UI для балансов кошельков пайщика — L3 ledger2::userwallets.
   Ledger2::apply(_capital, coopname, operations::capital::INVEST, amount,
