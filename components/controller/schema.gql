@@ -4093,9 +4093,6 @@ input ConvertSegmentInput {
   """Сумма для конвертации в благорост"""
   capital_amount: String!
 
-  """Хэш конвертации"""
-  convert_hash: String!
-
   """Заявление"""
   convert_statement: SignedDigitalDocumentInput!
 
@@ -4104,6 +4101,9 @@ input ConvertSegmentInput {
 
   """Хэш проекта"""
   project_hash: String!
+
+  """Хэш результата (анкер процесса p.cap.rid)"""
+  result_hash: String!
 
   """Имя пользователя"""
   username: String!

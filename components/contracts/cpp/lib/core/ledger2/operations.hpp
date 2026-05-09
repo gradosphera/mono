@@ -264,17 +264,19 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
     "Возврат паевого из ЦПП «Благорост» в Цифровой Кошелёк" },
 
   // 18. Конвертация сегмента (часть в ЦК): TRANSFER GENERATOR_FUND → SHARE_FUND_PAY, без Dr/Cr.
-  // Бухпроводка Dr 04 / Cr 08 уже сделана в ACCEPT_RID на полный
-  // available_for_program сегмента; здесь только перемещаем кошелёк.
-  { operations::capital::CONVERT_TO_SHARE, processes::capital::CNVSEG, WalletOp::TRANSFER,
+  // Финальная фаза процесса p.cap.rid (после signact2). Бухпроводка
+  // Dr 04 / Cr 08 уже сделана в ACCEPT_RID на полный available_for_program
+  // сегмента; здесь только перемещаем кошелёк. process_hash = result_hash.
+  { operations::capital::CONVERT_TO_SHARE, processes::capital::RID, WalletOp::TRANSFER,
     ledger2_wallets::GENERATOR_FUND, ledger2_wallets::SHARE_FUND_PAY,
     0, 0,
     "Конвертация сегмента: РИД → паевой взнос деньгами" },
 
   // 19. Конвертация сегмента (часть в Благорост): TRANSFER GENERATOR_FUND → BLAGOROST_FUND, без Dr/Cr.
-  // Бухпроводка Dr 04 / Cr 08 уже сделана в ACCEPT_RID; здесь только перенос
-  // кошелька в программный фонд.
-  { operations::capital::CONVERT_TO_BLAGO, processes::capital::CNVSEG, WalletOp::TRANSFER,
+  // Финальная фаза процесса p.cap.rid (после signact2). Бухпроводка
+  // Dr 04 / Cr 08 уже сделана в ACCEPT_RID; здесь только перенос кошелька
+  // в программный фонд. process_hash = result_hash.
+  { operations::capital::CONVERT_TO_BLAGO, processes::capital::RID, WalletOp::TRANSFER,
     ledger2_wallets::GENERATOR_FUND, ledger2_wallets::BLAGOROST_FUND,
     0, 0,
     "Конвертация сегмента: РИД → ЦПП «Благорост»" },
