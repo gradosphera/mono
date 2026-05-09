@@ -196,12 +196,12 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
   { operations::capital::INVEST, processes::capital::INVEST, WalletOp::TRANSFER,
     ledger2_wallets::SHARE_FUND_PAY, ledger2_wallets::BLAGOROST_FUND,
     0, 0,
-    "Инвестиция в ЦПП «Благорост» (перенос между кошельками паевого фонда)" },
+    "Инвестиция в ЦПП «Благорост»" },
 
   // 7. Коммит РИД: Dr 08 / Cr 80, ISSUE GENERATOR_FUND (ADR-009: единый кошелёк программы Генератор)
   { operations::capital::COMMIT_RID, processes::capital::RID, WalletOp::ISSUE, eosio::name{}, ledger2_wallets::GENERATOR_FUND,
     ledger2_accounts::NON_CURRENT_INVESTMENTS, ledger2_accounts::SHARE_FUND,
-    "Коммит результата интеллектуальной деятельности по программе «Благорост»" },
+    "Коммит результата интеллектуальной деятельности по программе «Генератор»" },
 
   // 8. Приём РИД в НМА: Dr 04 / Cr 08, NONE — кошелёк остаётся на GENERATOR_FUND.
   // Семантика: подписан акт-2, РИД принят как НМА (закрылся 08-й). Перемещение

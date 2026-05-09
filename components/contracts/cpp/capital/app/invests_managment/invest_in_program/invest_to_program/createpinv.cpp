@@ -26,8 +26,8 @@ void capital::createpinv(name coopname, name username, checksum256 invest_hash, 
   auto contributor = Capital::Contributors::get_active_contributor_or_fail(coopname, username);
   
   // Проверяем наличие кошелька в программе благороста (_capital_wallet)
-  auto capital_wallet = Capital::Wallets::get_program_capital_wallet(coopname, username);
-  eosio::check(capital_wallet.has_value(), "У пайщика нет кошелька в программе благороста");
+  eosio::check(Capital::Wallets::has_program_capital_wallet(coopname, username),
+               "У пайщика нет кошелька в программе благороста");
 
   std::string memo = Capital::Memo::get_program_invest_memo(contributor -> id);
 

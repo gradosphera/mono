@@ -97,12 +97,12 @@ export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
   { code: 'o.cap.invest',  process_type: 'p.cap.invest',  contract: 'capital',
     name: 'INVEST',         wallet_op: 'TRANSFER', wallet_from: 'w.wal.share', wallet_to: 'w.cap.blago',
     debit: null, credit: null,
-    human_name: 'Инвестиция в ЦПП «Благорост» (перенос между кошельками)' },
+    human_name: 'Инвестиция в ЦПП «Благорост»' },
 
   { code: 'o.cap.commit',  process_type: 'p.cap.rid',     contract: 'capital',
     name: 'COMMIT_RID',     wallet_op: 'ISSUE',    wallet_from: null, wallet_to: 'w.cap.gen',
     debit: 8, credit: 80,
-    human_name: 'Коммит РИД по программе «Благорост»' },
+    human_name: 'Коммит РИД по программе «Генератор»' },
 
   { code: 'o.cap.accept',  process_type: 'p.cap.rid',     contract: 'capital',
     name: 'ACCEPT_RID',     wallet_op: 'NONE',     wallet_from: null, wallet_to: null,
