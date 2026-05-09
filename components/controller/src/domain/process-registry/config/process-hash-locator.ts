@@ -97,6 +97,17 @@ export const PROCESS_HASH_LOCATOR: Readonly<Record<string, HashLocation[]>> = Ob
   'p.wal.depo':   [{ code: 'wallet', table: 'deposits',  field: 'deposit_hash' }],
   'p.wal.wthdrw': [{ code: 'wallet', table: 'withdraws', field: 'withdraw_hash' }],
 
+  // p.cap.wthcap — возврат паевого из ЦПП Благорост в ЦК.
+  // Жизнь запроса: createwthd3 → capauthwthd3 / capdeclwthd3 → approvewthd3.
+  // Сущностная таблица — `capital::prgwithdraws.withdraw_hash`.
+  'p.cap.wthcap': [{ code: 'capital', table: 'prgwithdraws', field: 'withdraw_hash' }],
+
+  // p.cap.cnvseg — конвертация сегмента после ACT2 (одноактовый action
+  // `convertsegm`, две inline-операции o.cap.cnvshr + o.cap.cnvbl). convert_hash
+  // в сущностных таблицах не сохраняется — данные читаются из blockchain_actions
+  // (DocumentFieldDetector + ActionRegistry), как у `p.sov.axncnv`.
+  'p.cap.cnvseg': [],
+
   // marketplace::requests.hash — поле так и называется `hash`.
   'p.mkt.reqst': [{ code: 'marketplace', table: 'requests', field: 'hash' }],
 
