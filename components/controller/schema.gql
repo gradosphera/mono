@@ -344,6 +344,29 @@ enum AgreementStatus {
   REGISTERED
 }
 
+type AgreementTemplate {
+  """Контекст (HTML/markup) шаблона"""
+  context: String!
+
+  """Идентификатор перевода по умолчанию"""
+  default_translation_id: Int!
+
+  """Описание шаблона"""
+  description: String!
+
+  """JSON-строка модели данных для подстановки"""
+  model: String!
+
+  """Идентификатор шаблона в реестре drafts"""
+  registry_id: Int!
+
+  """Заголовок шаблона"""
+  title: String!
+
+  """Версия шаблона (инкрементится при upversion)"""
+  version: Int!
+}
+
 type AgreementVar {
   protocol_day_month_year: String!
   protocol_number: String!
@@ -1640,9 +1663,10 @@ input CalculateVotesInput {
 }
 
 """
-Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty.
+Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required, before_registration (период приходился на даты до регистрации кооператива — сдавать не надо). Приоритет: submitted > submitted_externally > draft > not_required > before_registration > overdue > empty.
 """
 enum CalendarEntryStatus {
+  BEFORE_REGISTRATION
   DRAFT
   EMPTY
   NOT_REQUIRED
@@ -3475,8 +3499,10 @@ input CapitalStoryFilter {
   """
   show_components_requirements: Boolean = true
 
-  """Показывать требования задач при фильтрации по project_hash"""
-  show_issues_requirements: Boolean = true
+  """
+  Показывать требования задач при фильтрации по project_hash (по умолчанию false: задачные требования живут на странице задачи и не аккумулируются на проект/компонент)
+  """
+  show_issues_requirements: Boolean = false
 
   """Фильтр по статусу истории"""
   status: StoryStatus
@@ -4067,9 +4093,6 @@ input ConvertSegmentInput {
   """Сумма для конвертации в благорост"""
   capital_amount: String!
 
-  """Хэш конвертации"""
-  convert_hash: String!
-
   """Заявление"""
   convert_statement: SignedDigitalDocumentInput!
 
@@ -4078,6 +4101,9 @@ input ConvertSegmentInput {
 
   """Хэш проекта"""
   project_hash: String!
+
+  """Хэш результата (анкер процесса p.cap.rid)"""
+  result_hash: String!
 
   """Имя пользователя"""
   username: String!
@@ -4179,6 +4205,24 @@ input ConvertToAxonStatementSignedMetaDocumentInput {
   version: String!
 }
 
+type CoopAgreement {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Идентификатор шаблона документа (registry_id из draft::drafts)"""
+  draft_id: Int!
+
+  """
+  Идентификатор программы (0 — непрограммное; >0 — программа из soviet::programs)
+  """
+  program_id: Int!
+
+  """
+  Тип соглашения (wallet, privacy, signature, user, blagorost, generator, marketplace)
+  """
+  type: String!
+}
+
 type CooperativeOperatorAccount {
   """Количество активных участников"""
   active_participants_count: Float!
@@ -4254,6 +4298,25 @@ type CooperativeOperatorAccount {
 
   """Дата регистрации"""
   verifications: [Verification!]!
+}
+
+type CooperativeProgram {
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """
+  Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона
+  """
+  draft_id: Int!
+
+  """Идентификатор программы (program_id)"""
+  id: Int!
+
+  """Активна ли программа в кооперативе"""
+  is_active: Boolean!
+
+  """Тип программы: wallet/generator/blagorost/marketplace и т.п."""
+  program_type: String!
 }
 
 """Страна регистрации пользователя"""
@@ -6324,6 +6387,11 @@ input GetLedger2HistoryInput {
 
   """Имена blockchain-действий: apply | walletop | debit | credit"""
   actionNames: [String!]
+
+  """
+  № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit).
+  """
+  applyGlobalSequence: String
   coopname: String!
   dateFrom: DateTime
   dateTo: DateTime
@@ -6334,7 +6402,7 @@ input GetLedger2HistoryInput {
   page: Int = 1
 
   """
-  global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash
+  global_sequence родительского apply: возвращает только inline-сибсов (walletop/debit/credit) этого apply через точечную связь parser2 (transaction_id + creator_action_ordinal=apply.action_ordinal).
   """
   parentApplyGlobalSequence: String
 
@@ -6347,6 +6415,34 @@ input GetLedger2HistoryInput {
   eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий.
   """
   walletName: String
+
+  """№ движения по кошельку = walletop.global_sequence. Уникален."""
+  walletopGlobalSequence: String
+}
+
+input GetLedger2PostingsInput {
+  """Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки."""
+  accountId: Int
+
+  """
+  № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы.
+  """
+  applyGlobalSequence: String
+  coopname: String!
+  dateFrom: DateTime
+  dateTo: DateTime
+
+  """
+  № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически.
+  """
+  debitGlobalSequence: String
+  limit: Int = 50
+  page: Int = 1
+
+  """process_hash для выборки всех проводок одной операции"""
+  processHash: String
+  sortOrder: String = "DESC"
+  username: String
 }
 
 input GetLedgerHistoryInput {
@@ -6674,6 +6770,11 @@ type Ledger2Operation {
   """Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...)"""
   operationCode: String
 
+  """
+  global_sequence родительского apply (parser2: transaction_id + action_ordinal=this.creator_action_ordinal) — для точечного cross-link на конкретную операцию.
+  """
+  parentApplyGlobalSequence: String
+
   """process_hash (32-hex)"""
   processHash: String
 
@@ -6688,6 +6789,51 @@ type Ledger2Operation {
 
   """walletop: wallet_to (eosio::name w.<contract>.<waltype>)"""
   walletTo: String
+}
+
+type Ledger2Posting {
+  blockNum: Int!
+  createdAt: DateTime!
+
+  """id бух.счёта credit (×1000)"""
+  creditAccountId: Int
+
+  """global_sequence credit-action"""
+  creditGlobalSequence: String
+
+  """id бух.счёта debit (×1000)"""
+  debitAccountId: Int
+
+  """global_sequence debit-action"""
+  debitGlobalSequence: String
+
+  """Стабильный ключ для UI: debitSeq_creditSeq"""
+  key: String!
+  memo: String
+
+  """
+  OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...)
+  """
+  operationCode: String
+
+  """global_sequence parent apply (для cross-link в реестр операций)"""
+  parentApplyGlobalSequence: String
+
+  """process_hash (32-hex)"""
+  processHash: String
+
+  """
+  Asset "100.0000 RUB"
+  """
+  quantity: String
+  username: String
+}
+
+type Ledger2PostingsResponse {
+  currentPage: Int!
+  items: [Ledger2Posting!]!
+  totalCount: Int!
+  totalPages: Int!
 }
 
 type Ledger2Wallet {
@@ -9292,6 +9438,11 @@ input PushResultInput {
 }
 
 type Query {
+  """
+  Шаблоны документов соглашений (глобальные draft + per-coop) объединённые
+  """
+  agreementTemplates(coopname: String!): [AgreementTemplate!]!
+
   """Получение списка соглашений с фильтрацией и пагинацией"""
   agreements(filter: AgreementFilter, options: PaginationInput): PaginatedAgreementsPaginationResult!
 
@@ -9451,6 +9602,16 @@ type Query {
   """Проверить готовность реквизитов для генерации конкретной формы"""
   checkReportReadiness(reportType: ReportType!): ReportReadinessView!
 
+  """
+  Конфиг соглашений кооператива: какие типы соглашений требуются с пайщика
+  """
+  cooperativeAgreements(coopname: String!): [CoopAgreement!]!
+
+  """
+  Целевые потребительские программы кооператива (id, тип, активность, draft_id)
+  """
+  cooperativePrograms(coopname: String!): [CooperativeProgram!]!
+
   """Получить сводную информацию о аккаунте"""
   getAccount(data: GetAccountInput!): Account!
 
@@ -9521,6 +9682,11 @@ type Query {
   История операций ledger2 с серверными фильтрами (action/accountId/username/date-range).
   """
   getLedger2History(input: GetLedger2HistoryInput!): Ledger2HistoryResponse!
+
+  """
+  Реестр проводок: пары debit+credit (Дт/Кт/Сумма), восстановленные из blockchain_actions по правилу «ближайший parent apply». Источник для фронт-страницы «Реестр проводок».
+  """
+  getLedger2Postings(input: GetLedger2PostingsInput!): Ledger2PostingsResponse!
 
   """
   Общекооперативные кошельки из ledger2::wallets (eosio::name w.<contract>.<waltype>). Кошельки пайщиков живут в контракте soviet — сюда не попадают.

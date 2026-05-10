@@ -353,7 +353,7 @@ function walletDisplayId(name: string | null | undefined): string {
               </div>
 
               <div
-                v-if="op.wallet_op !== 'WALLET_ONLY' && (!!op.wallet_from || !!op.wallet_to)"
+                v-if="!!op.wallet_from || !!op.wallet_to"
                 class="focus-bar__op-sub"
               >
                 <div class="focus-bar__op-sub-label">Переводы</div>
@@ -420,8 +420,7 @@ function walletDisplayId(name: string | null | undefined): string {
         </div>
 
         <div
-          v-if="focusedOperation.wallet_op !== 'WALLET_ONLY'
-                && (!!focusedOperation.wallet_from || !!focusedOperation.wallet_to)"
+          v-if="!!focusedOperation.wallet_from || !!focusedOperation.wallet_to"
           class="focus-bar__op-sub"
         >
           <div class="focus-bar__op-sub-label">Переводы</div>

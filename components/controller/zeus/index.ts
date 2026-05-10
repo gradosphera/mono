@@ -1357,6 +1357,24 @@ export type ValueTypes = {
 };
 	/** Статус соглашения в системе кооператива */
 ["AgreementStatus"]:AgreementStatus;
+	["AgreementTemplate"]: AliasType<{
+	/** Контекст (HTML/markup) шаблона */
+	context?:boolean | `@${string}`,
+	/** Идентификатор перевода по умолчанию */
+	default_translation_id?:boolean | `@${string}`,
+	/** Описание шаблона */
+	description?:boolean | `@${string}`,
+	/** JSON-строка модели данных для подстановки */
+	model?:boolean | `@${string}`,
+	/** Идентификатор шаблона в реестре drafts */
+	registry_id?:boolean | `@${string}`,
+	/** Заголовок шаблона */
+	title?:boolean | `@${string}`,
+	/** Версия шаблона (инкрементится при upversion) */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on AgreementTemplate']?: Omit<ValueTypes["AgreementTemplate"], "...on AgreementTemplate">
+}>;
 	["AgreementVar"]: AliasType<{
 	protocol_day_month_year?:boolean | `@${string}`,
 	protocol_number?:boolean | `@${string}`,
@@ -2307,7 +2325,7 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
-	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
+	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required, before_registration (период приходился на даты до регистрации кооператива — сдавать не надо). Приоритет: submitted > submitted_externally > draft > not_required > before_registration > overdue > empty. */
 ["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -3615,7 +3633,7 @@ export type ValueTypes = {
 	project_hash?: string | undefined | null | Variable<any, string>,
 	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
 	show_components_requirements?: boolean | undefined | null | Variable<any, string>,
-	/** Показывать требования задач при фильтрации по project_hash */
+	/** Показывать требования задач при фильтрации по project_hash (по умолчанию false: задачные требования живут на странице задачи и не аккумулируются на проект/компонент) */
 	show_issues_requirements?: boolean | undefined | null | Variable<any, string>,
 	/** Фильтр по статусу истории */
 	status?: ValueTypes["StoryStatus"] | undefined | null | Variable<any, string>,
@@ -4046,14 +4064,14 @@ export type ValueTypes = {
 	["ConvertSegmentInput"]: {
 	/** Сумма для конвертации в благорост */
 	capital_amount: string | Variable<any, string>,
-	/** Хэш конвертации */
-	convert_hash: string | Variable<any, string>,
 	/** Заявление */
 	convert_statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>,
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
 	/** Хэш проекта */
 	project_hash: string | Variable<any, string>,
+	/** Хэш результата (анкер процесса p.cap.rid) */
+	result_hash: string | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>,
 	/** Сумма для конвертации в главный кошелек */
@@ -4123,6 +4141,18 @@ export type ValueTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["CoopAgreement"]: AliasType<{
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts) */
+	draft_id?:boolean | `@${string}`,
+	/** Идентификатор программы (0 — непрограммное; >0 — программа из soviet::programs) */
+	program_id?:boolean | `@${string}`,
+	/** Тип соглашения (wallet, privacy, signature, user, blagorost, generator, marketplace) */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on CoopAgreement']?: Omit<ValueTypes["CoopAgreement"], "...on CoopAgreement">
+}>;
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Количество активных участников */
 	active_participants_count?:boolean | `@${string}`,
@@ -4176,6 +4206,20 @@ export type ValueTypes = {
 	verifications?:ValueTypes["Verification"],
 		__typename?: boolean | `@${string}`,
 	['...on CooperativeOperatorAccount']?: Omit<ValueTypes["CooperativeOperatorAccount"], "...on CooperativeOperatorAccount">
+}>;
+	["CooperativeProgram"]: AliasType<{
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id?:boolean | `@${string}`,
+	/** Идентификатор программы (program_id) */
+	id?:boolean | `@${string}`,
+	/** Активна ли программа в кооперативе */
+	is_active?:boolean | `@${string}`,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on CooperativeProgram']?: Omit<ValueTypes["CooperativeProgram"], "...on CooperativeProgram">
 }>;
 	/** Страна регистрации пользователя */
 ["Country"]:Country;
@@ -5641,10 +5685,12 @@ export type ValueTypes = {
 	_id: string | Variable<any, string>
 };
 	["GetLedger2HistoryInput"]: {
-	/** ID счёта/кошелька (×1000) */
+	/** Бух.счёт (×1000): 51000/80000/86000 — для debit/credit действий. */
 	accountId?: number | undefined | null | Variable<any, string>,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null | Variable<any, string>,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null | Variable<any, string>,
 	coopname: string | Variable<any, string>,
 	dateFrom?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
 	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
@@ -5652,9 +5698,30 @@ export type ValueTypes = {
 	/** OPERATION_REGISTRY коды: o.cap.lend, o.wal.depcpl, o.mig.minshr и т.д. */
 	operationCodes?: Array<string> | undefined | null | Variable<any, string>,
 	page?: number | undefined | null | Variable<any, string>,
-	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	/** global_sequence родительского apply: возвращает только inline-сибсов (walletop/debit/credit) этого apply через точечную связь parser2 (transaction_id + creator_action_ordinal=apply.action_ordinal). */
 	parentApplyGlobalSequence?: string | undefined | null | Variable<any, string>,
 	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null | Variable<any, string>,
+	sortOrder?: string | undefined | null | Variable<any, string>,
+	username?: string | undefined | null | Variable<any, string>,
+	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
+	walletName?: string | undefined | null | Variable<any, string>,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null | Variable<any, string>
+};
+	["GetLedger2PostingsInput"]: {
+	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null | Variable<any, string>,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null | Variable<any, string>,
+	coopname: string | Variable<any, string>,
+	dateFrom?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	dateTo?: ValueTypes["DateTime"] | undefined | null | Variable<any, string>,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null | Variable<any, string>,
+	limit?: number | undefined | null | Variable<any, string>,
+	page?: number | undefined | null | Variable<any, string>,
+	/** process_hash для выборки всех проводок одной операции */
 	processHash?: string | undefined | null | Variable<any, string>,
 	sortOrder?: string | undefined | null | Variable<any, string>,
 	username?: string | undefined | null | Variable<any, string>
@@ -5886,24 +5953,60 @@ export type ValueTypes = {
 	memo?:boolean | `@${string}`,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?:boolean | `@${string}`,
+	/** global_sequence родительского apply (parser2: transaction_id + action_ordinal=this.creator_action_ordinal) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
 	/** process_hash (32-hex) */
 	processHash?:boolean | `@${string}`,
 	/** Asset "100.0000 RUB" */
 	quantity?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
-	/** walletop: wallet_from (исходящий) */
+	/** walletop: wallet_from (eosio::name w.<contract>.<waltype>) */
 	walletFrom?:boolean | `@${string}`,
-	/** walletop: wallet_to (входящий) */
+	/** walletop: wallet_to (eosio::name w.<contract>.<waltype>) */
 	walletTo?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on Ledger2Operation']?: Omit<ValueTypes["Ledger2Operation"], "...on Ledger2Operation">
+}>;
+	["Ledger2Posting"]: AliasType<{
+	blockNum?:boolean | `@${string}`,
+	createdAt?:boolean | `@${string}`,
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?:boolean | `@${string}`,
+	/** global_sequence credit-action */
+	creditGlobalSequence?:boolean | `@${string}`,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?:boolean | `@${string}`,
+	/** global_sequence debit-action */
+	debitGlobalSequence?:boolean | `@${string}`,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key?:boolean | `@${string}`,
+	memo?:boolean | `@${string}`,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?:boolean | `@${string}`,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
+	/** process_hash (32-hex) */
+	processHash?:boolean | `@${string}`,
+	/** Asset "100.0000 RUB" */
+	quantity?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on Ledger2Posting']?: Omit<ValueTypes["Ledger2Posting"], "...on Ledger2Posting">
+}>;
+	["Ledger2PostingsResponse"]: AliasType<{
+	currentPage?:boolean | `@${string}`,
+	items?:ValueTypes["Ledger2Posting"],
+	totalCount?:boolean | `@${string}`,
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on Ledger2PostingsResponse']?: Omit<ValueTypes["Ledger2PostingsResponse"], "...on Ledger2PostingsResponse">
 }>;
 	["Ledger2Wallet"]: AliasType<{
 	/** Доступный баланс */
 	available?:boolean | `@${string}`,
 	/** Заблокированный баланс */
 	blocked?:boolean | `@${string}`,
-	/** ID кошелька (×1000 offset): 1001/2001/3001/4001 */
+	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id?:boolean | `@${string}`,
 	/** Название кошелька */
 	name?:boolean | `@${string}`,
@@ -7568,6 +7671,7 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 	username: string | Variable<any, string>
 };
 	["Query"]: AliasType<{
+agreementTemplates?: [{	coopname: string | Variable<any, string>},ValueTypes["AgreementTemplate"]],
 agreements?: [{	filter?: ValueTypes["AgreementFilter"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedAgreementsPaginationResult"]],
 buildInitialReportEdits?: [{	period?: number | undefined | null | Variable<any, string>,	reportType: ValueTypes["ReportType"] | Variable<any, string>,	year: number | Variable<any, string>},ValueTypes["BuildInitialReportEdits"]],
 candidates?: [{	filter?: ValueTypes["CandidateFilterInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedCandidatesPaginationResult"]],
@@ -7620,6 +7724,8 @@ chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | und
 chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunicationRoomsInput"] | Variable<any, string>},ValueTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportReadinessView"]],
+cooperativeAgreements?: [{	coopname: string | Variable<any, string>},ValueTypes["CoopAgreement"]],
+cooperativePrograms?: [{	coopname: string | Variable<any, string>},ValueTypes["CooperativeProgram"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -7647,6 +7753,7 @@ getInstallationStatus?: [{	data: ValueTypes["GetInstallationStatusInput"] | Vari
 getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
 getLedger2Accounts?: [{	coopname: string | Variable<any, string>},ValueTypes["Ledger2Account"]],
 getLedger2History?: [{	input: ValueTypes["GetLedger2HistoryInput"] | Variable<any, string>},ValueTypes["Ledger2HistoryResponse"]],
+getLedger2Postings?: [{	input: ValueTypes["GetLedger2PostingsInput"] | Variable<any, string>},ValueTypes["Ledger2PostingsResponse"]],
 getLedger2Wallets?: [{	coopname: string | Variable<any, string>},ValueTypes["Ledger2Wallet"]],
 getLedgerHistory?: [{	data: ValueTypes["GetLedgerHistoryInput"] | Variable<any, string>},ValueTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -9234,14 +9341,14 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 }>;
 	["WalmoveInput"]: {
 	coopname: string | Variable<any, string>,
-	/** id кошелька-источника */
-	fromWallet: number | Variable<any, string>,
+	/** eosio::name кошелька-источника (w.<contract>.<waltype>) */
+	fromWallet: string | Variable<any, string>,
 	/** Обязательное обоснование корректировки */
 	memo: string | Variable<any, string>,
 	/** Сумма с символом, например "100.0000 RUB" */
 	quantity: string | Variable<any, string>,
-	/** id кошелька-приёмника */
-	toWallet: number | Variable<any, string>,
+	/** eosio::name кошелька-приёмника (w.<contract>.<waltype>) */
+	toWallet: string | Variable<any, string>,
 	/** Владелец кошельков (для коллективных — coopname) */
 	username: string | Variable<any, string>
 };
@@ -9561,6 +9668,23 @@ export type ResolverInputTypes = {
 };
 	/** Статус соглашения в системе кооператива */
 ["AgreementStatus"]:AgreementStatus;
+	["AgreementTemplate"]: AliasType<{
+	/** Контекст (HTML/markup) шаблона */
+	context?:boolean | `@${string}`,
+	/** Идентификатор перевода по умолчанию */
+	default_translation_id?:boolean | `@${string}`,
+	/** Описание шаблона */
+	description?:boolean | `@${string}`,
+	/** JSON-строка модели данных для подстановки */
+	model?:boolean | `@${string}`,
+	/** Идентификатор шаблона в реестре drafts */
+	registry_id?:boolean | `@${string}`,
+	/** Заголовок шаблона */
+	title?:boolean | `@${string}`,
+	/** Версия шаблона (инкрементится при upversion) */
+	version?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["AgreementVar"]: AliasType<{
 	protocol_day_month_year?:boolean | `@${string}`,
 	protocol_number?:boolean | `@${string}`,
@@ -10489,7 +10613,7 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
+	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required, before_registration (период приходился на даты до регистрации кооператива — сдавать не надо). Приоритет: submitted > submitted_externally > draft > not_required > before_registration > overdue > empty. */
 ["CalendarEntryStatus"]:CalendarEntryStatus;
 	["CallTranscription"]: AliasType<{
 	createdAt?:boolean | `@${string}`,
@@ -11765,7 +11889,7 @@ export type ResolverInputTypes = {
 	project_hash?: string | undefined | null,
 	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
 	show_components_requirements?: boolean | undefined | null,
-	/** Показывать требования задач при фильтрации по project_hash */
+	/** Показывать требования задач при фильтрации по project_hash (по умолчанию false: задачные требования живут на странице задачи и не аккумулируются на проект/компонент) */
 	show_issues_requirements?: boolean | undefined | null,
 	/** Фильтр по статусу истории */
 	status?: ResolverInputTypes["StoryStatus"] | undefined | null,
@@ -12183,14 +12307,14 @@ export type ResolverInputTypes = {
 	["ConvertSegmentInput"]: {
 	/** Сумма для конвертации в благорост */
 	capital_amount: string,
-	/** Хэш конвертации */
-	convert_hash: string,
 	/** Заявление */
 	convert_statement: ResolverInputTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Хэш проекта */
 	project_hash: string,
+	/** Хэш результата (анкер процесса p.cap.rid) */
+	result_hash: string,
 	/** Имя пользователя */
 	username: string,
 	/** Сумма для конвертации в главный кошелек */
@@ -12260,6 +12384,17 @@ export type ResolverInputTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["CoopAgreement"]: AliasType<{
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts) */
+	draft_id?:boolean | `@${string}`,
+	/** Идентификатор программы (0 — непрограммное; >0 — программа из soviet::programs) */
+	program_id?:boolean | `@${string}`,
+	/** Тип соглашения (wallet, privacy, signature, user, blagorost, generator, marketplace) */
+	type?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["CooperativeOperatorAccount"]: AliasType<{
 	/** Количество активных участников */
 	active_participants_count?:boolean | `@${string}`,
@@ -12311,6 +12446,19 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 	/** Дата регистрации */
 	verifications?:ResolverInputTypes["Verification"],
+		__typename?: boolean | `@${string}`
+}>;
+	["CooperativeProgram"]: AliasType<{
+	/** Имя аккаунта кооператива */
+	coopname?:boolean | `@${string}`,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id?:boolean | `@${string}`,
+	/** Идентификатор программы (program_id) */
+	id?:boolean | `@${string}`,
+	/** Активна ли программа в кооперативе */
+	is_active?:boolean | `@${string}`,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	/** Страна регистрации пользователя */
@@ -13749,10 +13897,12 @@ export type ResolverInputTypes = {
 	_id: string
 };
 	["GetLedger2HistoryInput"]: {
-	/** ID счёта/кошелька (×1000) */
+	/** Бух.счёт (×1000): 51000/80000/86000 — для debit/credit действий. */
 	accountId?: number | undefined | null,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: ResolverInputTypes["DateTime"] | undefined | null,
 	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
@@ -13760,9 +13910,30 @@ export type ResolverInputTypes = {
 	/** OPERATION_REGISTRY коды: o.cap.lend, o.wal.depcpl, o.mig.minshr и т.д. */
 	operationCodes?: Array<string> | undefined | null,
 	page?: number | undefined | null,
-	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	/** global_sequence родительского apply: возвращает только inline-сибсов (walletop/debit/credit) этого apply через точечную связь parser2 (transaction_id + creator_action_ordinal=apply.action_ordinal). */
 	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
+	sortOrder?: string | undefined | null,
+	username?: string | undefined | null,
+	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
+	walletName?: string | undefined | null,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null
+};
+	["GetLedger2PostingsInput"]: {
+	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null,
+	coopname: string,
+	dateFrom?: ResolverInputTypes["DateTime"] | undefined | null,
+	dateTo?: ResolverInputTypes["DateTime"] | undefined | null,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null,
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	/** process_hash для выборки всех проводок одной операции */
 	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
@@ -13987,15 +14158,49 @@ export type ResolverInputTypes = {
 	memo?:boolean | `@${string}`,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?:boolean | `@${string}`,
+	/** global_sequence родительского apply (parser2: transaction_id + action_ordinal=this.creator_action_ordinal) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
 	/** process_hash (32-hex) */
 	processHash?:boolean | `@${string}`,
 	/** Asset "100.0000 RUB" */
 	quantity?:boolean | `@${string}`,
 	username?:boolean | `@${string}`,
-	/** walletop: wallet_from (исходящий) */
+	/** walletop: wallet_from (eosio::name w.<contract>.<waltype>) */
 	walletFrom?:boolean | `@${string}`,
-	/** walletop: wallet_to (входящий) */
+	/** walletop: wallet_to (eosio::name w.<contract>.<waltype>) */
 	walletTo?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Ledger2Posting"]: AliasType<{
+	blockNum?:boolean | `@${string}`,
+	createdAt?:boolean | `@${string}`,
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?:boolean | `@${string}`,
+	/** global_sequence credit-action */
+	creditGlobalSequence?:boolean | `@${string}`,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?:boolean | `@${string}`,
+	/** global_sequence debit-action */
+	debitGlobalSequence?:boolean | `@${string}`,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key?:boolean | `@${string}`,
+	memo?:boolean | `@${string}`,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?:boolean | `@${string}`,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?:boolean | `@${string}`,
+	/** process_hash (32-hex) */
+	processHash?:boolean | `@${string}`,
+	/** Asset "100.0000 RUB" */
+	quantity?:boolean | `@${string}`,
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["Ledger2PostingsResponse"]: AliasType<{
+	currentPage?:boolean | `@${string}`,
+	items?:ResolverInputTypes["Ledger2Posting"],
+	totalCount?:boolean | `@${string}`,
+	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["Ledger2Wallet"]: AliasType<{
@@ -14003,7 +14208,7 @@ export type ResolverInputTypes = {
 	available?:boolean | `@${string}`,
 	/** Заблокированный баланс */
 	blocked?:boolean | `@${string}`,
-	/** ID кошелька (×1000 offset): 1001/2001/3001/4001 */
+	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id?:boolean | `@${string}`,
 	/** Название кошелька */
 	name?:boolean | `@${string}`,
@@ -15600,6 +15805,7 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 	username: string
 };
 	["Query"]: AliasType<{
+agreementTemplates?: [{	coopname: string},ResolverInputTypes["AgreementTemplate"]],
 agreements?: [{	filter?: ResolverInputTypes["AgreementFilter"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedAgreementsPaginationResult"]],
 buildInitialReportEdits?: [{	period?: number | undefined | null,	reportType: ResolverInputTypes["ReportType"],	year: number},ResolverInputTypes["BuildInitialReportEdits"]],
 candidates?: [{	filter?: ResolverInputTypes["CandidateFilterInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedCandidatesPaginationResult"]],
@@ -15652,6 +15858,8 @@ chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput
 chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectCommunicationRoomsInput"]},ResolverInputTypes["ChatcoopProjectCommunicationRoom"]],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportReadinessView"]],
+cooperativeAgreements?: [{	coopname: string},ResolverInputTypes["CoopAgreement"]],
+cooperativePrograms?: [{	coopname: string},ResolverInputTypes["CooperativeProgram"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -15679,6 +15887,7 @@ getInstallationStatus?: [{	data: ResolverInputTypes["GetInstallationStatusInput"
 getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
 getLedger2Accounts?: [{	coopname: string},ResolverInputTypes["Ledger2Account"]],
 getLedger2History?: [{	input: ResolverInputTypes["GetLedger2HistoryInput"]},ResolverInputTypes["Ledger2HistoryResponse"]],
+getLedger2Postings?: [{	input: ResolverInputTypes["GetLedger2PostingsInput"]},ResolverInputTypes["Ledger2PostingsResponse"]],
 getLedger2Wallets?: [{	coopname: string},ResolverInputTypes["Ledger2Wallet"]],
 getLedgerHistory?: [{	data: ResolverInputTypes["GetLedgerHistoryInput"]},ResolverInputTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -17227,14 +17436,14 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 }>;
 	["WalmoveInput"]: {
 	coopname: string,
-	/** id кошелька-источника */
-	fromWallet: number,
+	/** eosio::name кошелька-источника (w.<contract>.<waltype>) */
+	fromWallet: string,
 	/** Обязательное обоснование корректировки */
 	memo: string,
 	/** Сумма с символом, например "100.0000 RUB" */
 	quantity: string,
-	/** id кошелька-приёмника */
-	toWallet: number,
+	/** eosio::name кошелька-приёмника (w.<contract>.<waltype>) */
+	toWallet: string,
 	/** Владелец кошельков (для коллективных — coopname) */
 	username: string
 };
@@ -17543,6 +17752,22 @@ export type ModelTypes = {
 	protocol_number: string
 };
 	["AgreementStatus"]:AgreementStatus;
+	["AgreementTemplate"]: {
+		/** Контекст (HTML/markup) шаблона */
+	context: string,
+	/** Идентификатор перевода по умолчанию */
+	default_translation_id: number,
+	/** Описание шаблона */
+	description: string,
+	/** JSON-строка модели данных для подстановки */
+	model: string,
+	/** Идентификатор шаблона в реестре drafts */
+	registry_id: number,
+	/** Заголовок шаблона */
+	title: string,
+	/** Версия шаблона (инкрементится при upversion) */
+	version: number
+};
 	["AgreementVar"]: {
 		protocol_day_month_year: string,
 	protocol_number: string
@@ -19689,7 +19914,7 @@ export type ModelTypes = {
 	project_hash?: string | undefined | null,
 	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
 	show_components_requirements?: boolean | undefined | null,
-	/** Показывать требования задач при фильтрации по project_hash */
+	/** Показывать требования задач при фильтрации по project_hash (по умолчанию false: задачные требования живут на странице задачи и не аккумулируются на проект/компонент) */
 	show_issues_requirements?: boolean | undefined | null,
 	/** Фильтр по статусу истории */
 	status?: ModelTypes["StoryStatus"] | undefined | null,
@@ -20092,14 +20317,14 @@ export type ModelTypes = {
 	["ConvertSegmentInput"]: {
 	/** Сумма для конвертации в благорост */
 	capital_amount: string,
-	/** Хэш конвертации */
-	convert_hash: string,
 	/** Заявление */
 	convert_statement: ModelTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Хэш проекта */
 	project_hash: string,
+	/** Хэш результата (анкер процесса p.cap.rid) */
+	result_hash: string,
 	/** Имя пользователя */
 	username: string,
 	/** Сумма для конвертации в главный кошелек */
@@ -20169,6 +20394,16 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["CoopAgreement"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts) */
+	draft_id: number,
+	/** Идентификатор программы (0 — непрограммное; >0 — программа из soviet::programs) */
+	program_id: number,
+	/** Тип соглашения (wallet, privacy, signature, user, blagorost, generator, marketplace) */
+	type: string
+};
 	["CooperativeOperatorAccount"]: {
 		/** Количество активных участников */
 	active_participants_count: number,
@@ -20220,6 +20455,18 @@ export type ModelTypes = {
 	username: string,
 	/** Дата регистрации */
 	verifications: Array<ModelTypes["Verification"]>
+};
+	["CooperativeProgram"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id: number,
+	/** Идентификатор программы (program_id) */
+	id: number,
+	/** Активна ли программа в кооперативе */
+	is_active: boolean,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type: string
 };
 	["Country"]:Country;
 	["CreateAnnualGeneralMeetInput"]: {
@@ -21623,10 +21870,12 @@ export type ModelTypes = {
 	_id: string
 };
 	["GetLedger2HistoryInput"]: {
-	/** ID счёта/кошелька (×1000) */
+	/** Бух.счёт (×1000): 51000/80000/86000 — для debit/credit действий. */
 	accountId?: number | undefined | null,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: ModelTypes["DateTime"] | undefined | null,
 	dateTo?: ModelTypes["DateTime"] | undefined | null,
@@ -21634,9 +21883,30 @@ export type ModelTypes = {
 	/** OPERATION_REGISTRY коды: o.cap.lend, o.wal.depcpl, o.mig.minshr и т.д. */
 	operationCodes?: Array<string> | undefined | null,
 	page?: number | undefined | null,
-	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	/** global_sequence родительского apply: возвращает только inline-сибсов (walletop/debit/credit) этого apply через точечную связь parser2 (transaction_id + creator_action_ordinal=apply.action_ordinal). */
 	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
+	sortOrder?: string | undefined | null,
+	username?: string | undefined | null,
+	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
+	walletName?: string | undefined | null,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null
+};
+	["GetLedger2PostingsInput"]: {
+	/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null,
+	coopname: string,
+	dateFrom?: ModelTypes["DateTime"] | undefined | null,
+	dateTo?: ModelTypes["DateTime"] | undefined | null,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null,
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	/** process_hash для выборки всех проводок одной операции */
 	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
@@ -21850,23 +22120,55 @@ export type ModelTypes = {
 	memo?: string | undefined | null,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?: string | undefined | null,
+	/** global_sequence родительского apply (parser2: transaction_id + action_ordinal=this.creator_action_ordinal) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash (32-hex) */
 	processHash?: string | undefined | null,
 	/** Asset "100.0000 RUB" */
 	quantity?: string | undefined | null,
 	username?: string | undefined | null,
-	/** walletop: wallet_from (исходящий) */
-	walletFrom?: number | undefined | null,
-	/** walletop: wallet_to (входящий) */
-	walletTo?: number | undefined | null
+	/** walletop: wallet_from (eosio::name w.<contract>.<waltype>) */
+	walletFrom?: string | undefined | null,
+	/** walletop: wallet_to (eosio::name w.<contract>.<waltype>) */
+	walletTo?: string | undefined | null
+};
+	["Ledger2Posting"]: {
+		blockNum: number,
+	createdAt: ModelTypes["DateTime"],
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?: number | undefined | null,
+	/** global_sequence credit-action */
+	creditGlobalSequence?: string | undefined | null,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?: number | undefined | null,
+	/** global_sequence debit-action */
+	debitGlobalSequence?: string | undefined | null,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key: string,
+	memo?: string | undefined | null,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?: string | undefined | null,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?: string | undefined | null,
+	/** process_hash (32-hex) */
+	processHash?: string | undefined | null,
+	/** Asset "100.0000 RUB" */
+	quantity?: string | undefined | null,
+	username?: string | undefined | null
+};
+	["Ledger2PostingsResponse"]: {
+		currentPage: number,
+	items: Array<ModelTypes["Ledger2Posting"]>,
+	totalCount: number,
+	totalPages: number
 };
 	["Ledger2Wallet"]: {
 		/** Доступный баланс */
 	available: string,
 	/** Заблокированный баланс */
 	blocked: string,
-	/** ID кошелька (×1000 offset): 1001/2001/3001/4001 */
-	id: number,
+	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
+	id: string,
 	/** Название кошелька */
 	name: string
 };
@@ -23555,7 +23857,9 @@ export type ModelTypes = {
 	username: string
 };
 	["Query"]: {
-		/** Получение списка соглашений с фильтрацией и пагинацией */
+		/** Шаблоны документов соглашений (глобальные draft + per-coop) объединённые */
+	agreementTemplates: Array<ModelTypes["AgreementTemplate"]>,
+	/** Получение списка соглашений с фильтрацией и пагинацией */
 	agreements: ModelTypes["PaginatedAgreementsPaginationResult"],
 	/** Построить предзаполненные edits для формы: дефолты (ledger2 + реквизиты + корректировки), с наложением dirty-полей существующего черновика (если он есть). */
 	buildInitialReportEdits: ModelTypes["BuildInitialReportEdits"],
@@ -23653,6 +23957,10 @@ export type ModelTypes = {
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: ModelTypes["ReportReadinessView"],
+	/** Конфиг соглашений кооператива: какие типы соглашений требуются с пайщика */
+	cooperativeAgreements: Array<ModelTypes["CoopAgreement"]>,
+	/** Целевые потребительские программы кооператива (id, тип, активность, draft_id) */
+	cooperativePrograms: Array<ModelTypes["CooperativeProgram"]>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: ModelTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -23694,7 +24002,9 @@ export type ModelTypes = {
 	getLedger2Accounts: Array<ModelTypes["Ledger2Account"]>,
 	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range). */
 	getLedger2History: ModelTypes["Ledger2HistoryResponse"],
-	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
+	/** Реестр проводок: пары debit+credit (Дт/Кт/Сумма), восстановленные из blockchain_actions по правилу «ближайший parent apply». Источник для фронт-страницы «Реестр проводок». */
+	getLedger2Postings: ModelTypes["Ledger2PostingsResponse"],
+	/** Общекооперативные кошельки из ledger2::wallets (eosio::name w.<contract>.<waltype>). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
 	getLedger2Wallets: Array<ModelTypes["Ledger2Wallet"]>,
 	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
 	getLedgerHistory: ModelTypes["LedgerHistoryResponse"],
@@ -25212,14 +25522,14 @@ export type ModelTypes = {
 };
 	["WalmoveInput"]: {
 	coopname: string,
-	/** id кошелька-источника */
-	fromWallet: number,
+	/** eosio::name кошелька-источника (w.<contract>.<waltype>) */
+	fromWallet: string,
 	/** Обязательное обоснование корректировки */
 	memo: string,
 	/** Сумма с символом, например "100.0000 RUB" */
 	quantity: string,
-	/** id кошелька-приёмника */
-	toWallet: number,
+	/** eosio::name кошелька-приёмника (w.<contract>.<waltype>) */
+	toWallet: string,
 	/** Владелец кошельков (для коллективных — coopname) */
 	username: string
 };
@@ -25547,6 +25857,24 @@ export type GraphQLTypes = {
 };
 	/** Статус соглашения в системе кооператива */
 ["AgreementStatus"]: AgreementStatus;
+	["AgreementTemplate"]: {
+	__typename: "AgreementTemplate",
+	/** Контекст (HTML/markup) шаблона */
+	context: string,
+	/** Идентификатор перевода по умолчанию */
+	default_translation_id: number,
+	/** Описание шаблона */
+	description: string,
+	/** JSON-строка модели данных для подстановки */
+	model: string,
+	/** Идентификатор шаблона в реестре drafts */
+	registry_id: number,
+	/** Заголовок шаблона */
+	title: string,
+	/** Версия шаблона (инкрементится при upversion) */
+	version: number,
+	['...on AgreementTemplate']: Omit<GraphQLTypes["AgreementTemplate"], "...on AgreementTemplate">
+};
 	["AgreementVar"]: {
 	__typename: "AgreementVar",
 	protocol_day_month_year: string,
@@ -26497,7 +26825,7 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
-	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
+	/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required, before_registration (период приходился на даты до регистрации кооператива — сдавать не надо). Приоритет: submitted > submitted_externally > draft > not_required > before_registration > overdue > empty. */
 ["CalendarEntryStatus"]: CalendarEntryStatus;
 	["CallTranscription"]: {
 	__typename: "CallTranscription",
@@ -27805,7 +28133,7 @@ export type GraphQLTypes = {
 	project_hash?: string | undefined | null,
 	/** Показывать требования дочерних компонентов при фильтрации по project_hash */
 	show_components_requirements?: boolean | undefined | null,
-	/** Показывать требования задач при фильтрации по project_hash */
+	/** Показывать требования задач при фильтрации по project_hash (по умолчанию false: задачные требования живут на странице задачи и не аккумулируются на проект/компонент) */
 	show_issues_requirements?: boolean | undefined | null,
 	/** Фильтр по статусу истории */
 	status?: GraphQLTypes["StoryStatus"] | undefined | null,
@@ -28236,14 +28564,14 @@ export type GraphQLTypes = {
 	["ConvertSegmentInput"]: {
 		/** Сумма для конвертации в благорост */
 	capital_amount: string,
-	/** Хэш конвертации */
-	convert_hash: string,
 	/** Заявление */
 	convert_statement: GraphQLTypes["SignedDigitalDocumentInput"],
 	/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Хэш проекта */
 	project_hash: string,
+	/** Хэш результата (анкер процесса p.cap.rid) */
+	result_hash: string,
 	/** Имя пользователя */
 	username: string,
 	/** Сумма для конвертации в главный кошелек */
@@ -28313,6 +28641,18 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["CoopAgreement"]: {
+	__typename: "CoopAgreement",
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts) */
+	draft_id: number,
+	/** Идентификатор программы (0 — непрограммное; >0 — программа из soviet::programs) */
+	program_id: number,
+	/** Тип соглашения (wallet, privacy, signature, user, blagorost, generator, marketplace) */
+	type: string,
+	['...on CoopAgreement']: Omit<GraphQLTypes["CoopAgreement"], "...on CoopAgreement">
+};
 	["CooperativeOperatorAccount"]: {
 	__typename: "CooperativeOperatorAccount",
 	/** Количество активных участников */
@@ -28366,6 +28706,20 @@ export type GraphQLTypes = {
 	/** Дата регистрации */
 	verifications: Array<GraphQLTypes["Verification"]>,
 	['...on CooperativeOperatorAccount']: Omit<GraphQLTypes["CooperativeOperatorAccount"], "...on CooperativeOperatorAccount">
+};
+	["CooperativeProgram"]: {
+	__typename: "CooperativeProgram",
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор шаблона документа (registry_id из draft::drafts), 0 — без шаблона */
+	draft_id: number,
+	/** Идентификатор программы (program_id) */
+	id: number,
+	/** Активна ли программа в кооперативе */
+	is_active: boolean,
+	/** Тип программы: wallet/generator/blagorost/marketplace и т.п. */
+	program_type: string,
+	['...on CooperativeProgram']: Omit<GraphQLTypes["CooperativeProgram"], "...on CooperativeProgram">
 };
 	/** Страна регистрации пользователя */
 ["Country"]: Country;
@@ -29831,10 +30185,12 @@ export type GraphQLTypes = {
 	_id: string
 };
 	["GetLedger2HistoryInput"]: {
-		/** ID счёта/кошелька (×1000) */
+		/** Бух.счёт (×1000): 51000/80000/86000 — для debit/credit действий. */
 	accountId?: number | undefined | null,
 	/** Имена blockchain-действий: apply | walletop | debit | credit */
 	actionNames?: Array<string> | undefined | null,
+	/** № операции = apply.global_sequence. Точечная адресация одной apply-группы (apply + walletop/debit/credit). */
+	applyGlobalSequence?: string | undefined | null,
 	coopname: string,
 	dateFrom?: GraphQLTypes["DateTime"] | undefined | null,
 	dateTo?: GraphQLTypes["DateTime"] | undefined | null,
@@ -29842,9 +30198,30 @@ export type GraphQLTypes = {
 	/** OPERATION_REGISTRY коды: o.cap.lend, o.wal.depcpl, o.mig.minshr и т.д. */
 	operationCodes?: Array<string> | undefined | null,
 	page?: number | undefined | null,
-	/** global_sequence родительского apply: фильтрует siblings (walletop/debit/credit) диапазоном до следующего apply того же processHash */
+	/** global_sequence родительского apply: возвращает только inline-сибсов (walletop/debit/credit) этого apply через точечную связь parser2 (transaction_id + creator_action_ordinal=apply.action_ordinal). */
 	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash для выборки всех действий одной операции */
+	processHash?: string | undefined | null,
+	sortOrder?: string | undefined | null,
+	username?: string | undefined | null,
+	/** eosio::name кошелька (`w.<contract>.<waltype>`) — для walletop действий. */
+	walletName?: string | undefined | null,
+	/** № движения по кошельку = walletop.global_sequence. Уникален. */
+	walletopGlobalSequence?: string | undefined | null
+};
+	["GetLedger2PostingsInput"]: {
+		/** Бух.счёт (×1000) — попадание в debit ИЛИ credit ноге проводки. */
+	accountId?: number | undefined | null,
+	/** № операции = apply.global_sequence. Возвращает проводки ровно этой apply-группы. */
+	applyGlobalSequence?: string | undefined | null,
+	coopname: string,
+	dateFrom?: GraphQLTypes["DateTime"] | undefined | null,
+	dateTo?: GraphQLTypes["DateTime"] | undefined | null,
+	/** № проводки = debit.global_sequence (unique). Парный credit подтянется автоматически. */
+	debitGlobalSequence?: string | undefined | null,
+	limit?: number | undefined | null,
+	page?: number | undefined | null,
+	/** process_hash для выборки всех проводок одной операции */
 	processHash?: string | undefined | null,
 	sortOrder?: string | undefined | null,
 	username?: string | undefined | null
@@ -30077,16 +30454,52 @@ export type GraphQLTypes = {
 	memo?: string | undefined | null,
 	/** Для apply: OPERATION_REGISTRY code (o.cap.lend / o.wal.depcpl / ...) */
 	operationCode?: string | undefined | null,
+	/** global_sequence родительского apply (parser2: transaction_id + action_ordinal=this.creator_action_ordinal) — для точечного cross-link на конкретную операцию. */
+	parentApplyGlobalSequence?: string | undefined | null,
 	/** process_hash (32-hex) */
 	processHash?: string | undefined | null,
 	/** Asset "100.0000 RUB" */
 	quantity?: string | undefined | null,
 	username?: string | undefined | null,
-	/** walletop: wallet_from (исходящий) */
-	walletFrom?: number | undefined | null,
-	/** walletop: wallet_to (входящий) */
-	walletTo?: number | undefined | null,
+	/** walletop: wallet_from (eosio::name w.<contract>.<waltype>) */
+	walletFrom?: string | undefined | null,
+	/** walletop: wallet_to (eosio::name w.<contract>.<waltype>) */
+	walletTo?: string | undefined | null,
 	['...on Ledger2Operation']: Omit<GraphQLTypes["Ledger2Operation"], "...on Ledger2Operation">
+};
+	["Ledger2Posting"]: {
+	__typename: "Ledger2Posting",
+	blockNum: number,
+	createdAt: GraphQLTypes["DateTime"],
+	/** id бух.счёта credit (×1000) */
+	creditAccountId?: number | undefined | null,
+	/** global_sequence credit-action */
+	creditGlobalSequence?: string | undefined | null,
+	/** id бух.счёта debit (×1000) */
+	debitAccountId?: number | undefined | null,
+	/** global_sequence debit-action */
+	debitGlobalSequence?: string | undefined | null,
+	/** Стабильный ключ для UI: debitSeq_creditSeq */
+	key: string,
+	memo?: string | undefined | null,
+	/** OPERATION_REGISTRY код из parent apply (`o.cap.lend` / `o.wal.depcpl` / ...) */
+	operationCode?: string | undefined | null,
+	/** global_sequence parent apply (для cross-link в реестр операций) */
+	parentApplyGlobalSequence?: string | undefined | null,
+	/** process_hash (32-hex) */
+	processHash?: string | undefined | null,
+	/** Asset "100.0000 RUB" */
+	quantity?: string | undefined | null,
+	username?: string | undefined | null,
+	['...on Ledger2Posting']: Omit<GraphQLTypes["Ledger2Posting"], "...on Ledger2Posting">
+};
+	["Ledger2PostingsResponse"]: {
+	__typename: "Ledger2PostingsResponse",
+	currentPage: number,
+	items: Array<GraphQLTypes["Ledger2Posting"]>,
+	totalCount: number,
+	totalPages: number,
+	['...on Ledger2PostingsResponse']: Omit<GraphQLTypes["Ledger2PostingsResponse"], "...on Ledger2PostingsResponse">
 };
 	["Ledger2Wallet"]: {
 	__typename: "Ledger2Wallet",
@@ -30094,8 +30507,8 @@ export type GraphQLTypes = {
 	available: string,
 	/** Заблокированный баланс */
 	blocked: string,
-	/** ID кошелька (×1000 offset): 1001/2001/3001/4001 */
-	id: number,
+	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
+	id: string,
 	/** Название кошелька */
 	name: string,
 	['...on Ledger2Wallet']: Omit<GraphQLTypes["Ledger2Wallet"], "...on Ledger2Wallet">
@@ -31942,6 +32355,8 @@ export type GraphQLTypes = {
 };
 	["Query"]: {
 	__typename: "Query",
+	/** Шаблоны документов соглашений (глобальные draft + per-coop) объединённые */
+	agreementTemplates: Array<GraphQLTypes["AgreementTemplate"]>,
 	/** Получение списка соглашений с фильтрацией и пагинацией */
 	agreements: GraphQLTypes["PaginatedAgreementsPaginationResult"],
 	/** Построить предзаполненные edits для формы: дефолты (ledger2 + реквизиты + корректировки), с наложением dirty-полей существующего черновика (если он есть). */
@@ -32040,6 +32455,10 @@ export type GraphQLTypes = {
 	chatcoopListUtcDatesWithNewRoomMessages: Array<string>,
 	/** Проверить готовность реквизитов для генерации конкретной формы */
 	checkReportReadiness: GraphQLTypes["ReportReadinessView"],
+	/** Конфиг соглашений кооператива: какие типы соглашений требуются с пайщика */
+	cooperativeAgreements: Array<GraphQLTypes["CoopAgreement"]>,
+	/** Целевые потребительские программы кооператива (id, тип, активность, draft_id) */
+	cooperativePrograms: Array<GraphQLTypes["CooperativeProgram"]>,
 	/** Получить сводную информацию о аккаунте */
 	getAccount: GraphQLTypes["Account"],
 	/** Получить сводную информацию о аккаунтах системы */
@@ -32081,7 +32500,9 @@ export type GraphQLTypes = {
 	getLedger2Accounts: Array<GraphQLTypes["Ledger2Account"]>,
 	/** История операций ledger2 с серверными фильтрами (action/accountId/username/date-range). */
 	getLedger2History: GraphQLTypes["Ledger2HistoryResponse"],
-	/** Общекооперативные кошельки из ledger2::wallets (1001/2001/3001/4001). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
+	/** Реестр проводок: пары debit+credit (Дт/Кт/Сумма), восстановленные из blockchain_actions по правилу «ближайший parent apply». Источник для фронт-страницы «Реестр проводок». */
+	getLedger2Postings: GraphQLTypes["Ledger2PostingsResponse"],
+	/** Общекооперативные кошельки из ledger2::wallets (eosio::name w.<contract>.<waltype>). Кошельки пайщиков живут в контракте soviet — сюда не попадают. */
 	getLedger2Wallets: Array<GraphQLTypes["Ledger2Wallet"]>,
 	/** Получить историю операций по счетам кооператива. Возвращает список операций с возможностью фильтрации по account_id и пагинацией. Операции сортируются по дате создания (новые первыми). */
 	getLedgerHistory: GraphQLTypes["LedgerHistoryResponse"],
@@ -33691,14 +34112,14 @@ export type GraphQLTypes = {
 };
 	["WalmoveInput"]: {
 		coopname: string,
-	/** id кошелька-источника */
-	fromWallet: number,
+	/** eosio::name кошелька-источника (w.<contract>.<waltype>) */
+	fromWallet: string,
 	/** Обязательное обоснование корректировки */
 	memo: string,
 	/** Сумма с символом, например "100.0000 RUB" */
 	quantity: string,
-	/** id кошелька-приёмника */
-	toWallet: number,
+	/** eosio::name кошелька-приёмника (w.<contract>.<waltype>) */
+	toWallet: string,
 	/** Владелец кошельков (для коллективных — coopname) */
 	username: string
 };
@@ -33799,8 +34220,9 @@ export enum BuhotchSignerType {
 	CHAIRMAN = "CHAIRMAN",
 	REPRESENTATIVE = "REPRESENTATIVE"
 }
-/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required. Приоритет: submitted > submitted_externally > draft > not_required > overdue > empty. */
+/** Статус ячейки календаря: empty, draft, submitted (реальный XML в архиве), submitted_externally (отметка «сдано сторонне»), overdue, not_required, before_registration (период приходился на даты до регистрации кооператива — сдавать не надо). Приоритет: submitted > submitted_externally > draft > not_required > before_registration > overdue > empty. */
 export enum CalendarEntryStatus {
+	BEFORE_REGISTRATION = "BEFORE_REGISTRATION",
 	DRAFT = "DRAFT",
 	EMPTY = "EMPTY",
 	NOT_REQUIRED = "NOT_REQUIRED",
@@ -34321,6 +34743,7 @@ type ZEUS_VARIABLES = {
 	["GetInstallationStatusInput"]: ValueTypes["GetInstallationStatusInput"];
 	["GetInvestInput"]: ValueTypes["GetInvestInput"];
 	["GetLedger2HistoryInput"]: ValueTypes["GetLedger2HistoryInput"];
+	["GetLedger2PostingsInput"]: ValueTypes["GetLedger2PostingsInput"];
 	["GetLedgerHistoryInput"]: ValueTypes["GetLedgerHistoryInput"];
 	["GetLedgerInput"]: ValueTypes["GetLedgerInput"];
 	["GetMaxOriginServerTsForRoomInput"]: ValueTypes["GetMaxOriginServerTsForRoomInput"];
