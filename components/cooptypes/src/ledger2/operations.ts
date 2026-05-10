@@ -132,7 +132,7 @@ export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
   { code: 'o.cap.cnvshr',  process_type: 'p.cap.rid',     contract: 'capital',
     name: 'CONVERT_TO_SHARE', wallet_op: 'TRANSFER', wallet_from: 'w.cap.gen', wallet_to: 'w.wal.share',
     debit: null, credit: null,
-    human_name: 'Конвертация сегмента: РИД → паевой взнос деньгами' },
+    human_name: 'Конвертация сегмента: РИД → главный кошелёк' },
 
   { code: 'o.cap.cnvbl',   process_type: 'p.cap.rid',     contract: 'capital',
     name: 'CONVERT_TO_BLAGO', wallet_op: 'TRANSFER', wallet_from: 'w.cap.gen', wallet_to: 'w.cap.blago',
