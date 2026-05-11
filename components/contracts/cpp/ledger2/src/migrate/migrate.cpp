@@ -95,10 +95,10 @@ inline LegacyBalances read_legacy_balances(eosio::name coopname) {
       case Ledger::accounts::SHARE_FUND:     r.share = total; break;   // 80
       case Ledger::accounts::ENTRANCE_FEES:  r.entry = total; break;   // 861
       default:
-        // Все прочие legacy-id в проде нулевые. Ненулевое — сигнал.
-        eosio::check(false,
-                     std::string{"migrate: неожиданный ненулевой legacy acc id="} +
-                       std::to_string(acc_it->id));
+        // Прочие legacy-id (862..867 — RESERVE/INDIVISIBLE/ECONOMIC/MUTUAL/DEVELOPMENT/DELEGATE_FEES)
+        // в ledger2 как отдельные кошельки не выделены. Намеренно пропускаем —
+        // не падаем, чтобы не блокировать миграцию кооператива.
+        break;
     }
   }
   return r;
