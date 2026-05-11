@@ -11,7 +11,7 @@
  */
 
 // ── Типы-строки для wallet_op / relation / status / role ────────────────────
-export type WalletOp = 'ISSUE' | 'TRANSFER' | 'BLOCK' | 'UNBLOCK' | 'WALLET_ONLY';
+export type WalletOp = 'ISSUE' | 'TRANSFER' | 'BLOCK' | 'UNBLOCK' | 'BURN';
 
 export type StandardLifecycle = 'proposed' | 'approved' | 'active' | 'deprecated';
 
@@ -34,10 +34,11 @@ export type Role =
   | (string & {});
 
 // ── Элементарные ссылки в ledger2 ───────────────────────────────────────────
-// В YAML — только числовые коды. Имена подтягиваются из
-// `data/registries.ts` (зеркало source-of-truth из mono-ai-1).
+// Счета — числовые коды (51, 80, 86); кошельки — eosio::name-строки
+// (w.wal.share, w.cap.blago). Имена подтягиваются из
+// `data/registries.ts` (зеркало source-of-truth из cooptypes/ledger2).
 export type AccountCode = number;      // код счёта (51, 80, 86, …)
-export type WalletId = number;         // id кошелька (2001, 3001, …)
+export type WalletId = string;         // имя кошелька (w.wal.share, w.cap.blago, …)
 
 // ── Секции стандарта ────────────────────────────────────────────────────────
 

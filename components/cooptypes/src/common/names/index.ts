@@ -73,6 +73,11 @@ export const _ledger = {
   testnet: 'ledger',
 } as const
 
+export const _ledger2 = {
+  production: 'ledger2',
+  testnet: 'ledger2',
+} as const
+
 export const _apps = {
   production: 'apps',
   testnet: 'apps',

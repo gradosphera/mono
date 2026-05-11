@@ -49,11 +49,11 @@ export const INITIAL_MARKER = '∅';
    чтобы кружок не прилипал к первой/последней карточке. Визуальный
    кружок (48px) центрируется внутри wrapper-а в соответствующем узле. */
 const SIZE = {
-  start: { width: 128, height: 80 },
-  state: { width: 180, height: 80 },
-  end: { width: 128, height: 80 },
+  start: { width: 128, height: 96 },
+  state: { width: 220, height: 96 },
+  end: { width: 128, height: 96 },
   rejected: { width: 120, height: 70 },
-  action: { width: 170, height: 54 },
+  action: { width: 210, height: 68 },
 };
 
 // ── Вспомогательные ─────────────────────────────────────────────────────────
@@ -226,7 +226,7 @@ function buildLayout(standard: Standard): LayoutResult {
     g.setNode(actionId, { ...SIZE.action });
 
     const isReject = virtualStateNames.has(t.to);
-    let targetId = t.to;
+    let targetId: string = t.to;
     if (isReject) {
       targetId = rejectedIdFor(t);
       if (!g.hasNode(targetId)) g.setNode(targetId, { ...SIZE.rejected });
@@ -339,9 +339,7 @@ function buildLayout(standard: Standard): LayoutResult {
     const ops = opsByAction.get(t.action) ?? [];
     const hasDocs = (docsByAction.get(t.action) ?? []).length > 0;
     const hasWalletMove = ops.length > 0;
-    const hasPosting = ops.some(
-      (op) => op.wallet_op !== 'WALLET_ONLY' && (op.debit != null || op.credit != null),
-    );
+    const hasPosting = ops.some((op) => op.debit != null || op.credit != null);
 
     nodes.push({
       id: actionId,

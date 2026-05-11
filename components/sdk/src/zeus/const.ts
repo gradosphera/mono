@@ -128,9 +128,11 @@ export const AllTypesProps: Record<string,any> = {
 	BankAccountInput:{
 		details:"BankAccountDetailsInput"
 	},
+	BuhotchSignerType: "enum" as const,
 	CalculateVotesInput:{
 
 	},
+	CalendarEntryStatus: "enum" as const,
 	CancelRequestInput:{
 
 	},
@@ -446,9 +448,6 @@ export const AllTypesProps: Record<string,any> = {
 	GenerateRegistrationDocumentsInput:{
 		account_type:"AccountType"
 	},
-	GenerateReportInput:{
-		reportType:"ReportType"
-	},
 	GenerationContractGenerateDocumentInput:{
 
 	},
@@ -526,6 +525,14 @@ export const AllTypesProps: Record<string,any> = {
 	GetInvestInput:{
 
 	},
+	GetLedger2HistoryInput:{
+		dateFrom:"DateTime",
+		dateTo:"DateTime"
+	},
+	GetLedger2PostingsInput:{
+		dateFrom:"DateTime",
+		dateTo:"DateTime"
+	},
 	GetLedgerHistoryInput:{
 
 	},
@@ -590,6 +597,9 @@ export const AllTypesProps: Record<string,any> = {
 	IssueStatus: "enum" as const,
 	JSON: `scalar.JSON` as const,
 	JSONObject: `scalar.JSONObject` as const,
+	ListReportDraftsFilterInput:{
+		reportType:"ReportType"
+	},
 	ListUtcDatesWithNewRoomMessagesInput:{
 
 	},
@@ -603,6 +613,10 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	MakeClearanceInput:{
 		document:"SignedDigitalDocumentInput"
+	},
+	MarkReportPeriodInput:{
+		mark:"ReportSubmissionMark",
+		reportType:"ReportType"
 	},
 	ModerateRequestInput:{
 
@@ -962,6 +976,9 @@ export const AllTypesProps: Record<string,any> = {
 		deletePaymentMethod:{
 			data:"DeletePaymentMethodInput"
 		},
+		deleteReportDraft:{
+
+		},
 		deleteTrustedAccount:{
 			data:"DeleteTrustedAccountInput"
 		},
@@ -1032,9 +1049,8 @@ export const AllTypesProps: Record<string,any> = {
 		generateRegistrationDocuments:{
 			data:"GenerateRegistrationDocumentsInput"
 		},
-		generateReport:{
-			data:"GenerateReportInput",
-			organization:"OrganizationDataInput"
+		generateReportFromEdits:{
+			reportType:"ReportType"
 		},
 		generateReturnByAssetAct:{
 			data:"ReturnByAssetActGenerateDocumentInput",
@@ -1091,6 +1107,9 @@ export const AllTypesProps: Record<string,any> = {
 		logout:{
 			data:"LogoutInput"
 		},
+		markReportPeriod:{
+			data:"MarkReportPeriodInput"
+		},
 		moderateRequest:{
 			data:"ModerateRequestInput"
 		},
@@ -1126,6 +1145,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		restartAnnualGeneralMeet:{
 			data:"RestartAnnualGeneralMeetInput"
+		},
+		saveReportDraft:{
+			input:"SaveReportDraftInput"
 		},
 		selectBranch:{
 			data:"SelectBranchInput"
@@ -1172,6 +1194,9 @@ export const AllTypesProps: Record<string,any> = {
 		updateExtension:{
 			data:"ExtensionInput"
 		},
+		updateReportRequisites:{
+			input:"UpdateReportRequisitesInput"
+		},
 		updateRequest:{
 			data:"UpdateRequestInput"
 		},
@@ -1186,6 +1211,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		voteOnAnnualGeneralMeet:{
 			data:"VoteOnAnnualGeneralMeetInput"
+		},
+		walmoveWallets:{
+			input:"WalmoveInput"
 		}
 	},
 	NotificationWorkflowRecipientInput:{
@@ -1195,9 +1223,6 @@ export const AllTypesProps: Record<string,any> = {
 		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
 	},
 	OpenProjectInput:{
-
-	},
-	OrganizationDataInput:{
 
 	},
 	OrganizationDetailsInput:{
@@ -1246,6 +1271,9 @@ export const AllTypesProps: Record<string,any> = {
 		position:"ProcessStepPositionInput"
 	},
 	ProcessTemplateStatus: "enum" as const,
+	ProcessesFilter:{
+
+	},
 	ProgramCapitalizationMoneyInvestStatementGenerateDocumentInput:{
 
 	},
@@ -1288,9 +1316,15 @@ export const AllTypesProps: Record<string,any> = {
 		statement:"SignedDigitalDocumentInput"
 	},
 	Query:{
+		agreementTemplates:{
+
+		},
 		agreements:{
 			filter:"AgreementFilter",
 			options:"PaginationInput"
+		},
+		buildInitialReportEdits:{
+			reportType:"ReportType"
 		},
 		candidates:{
 			filter:"CandidateFilterInput",
@@ -1439,6 +1473,15 @@ export const AllTypesProps: Record<string,any> = {
 		chatcoopListUtcDatesWithNewRoomMessages:{
 			data:"ListUtcDatesWithNewRoomMessagesInput"
 		},
+		checkReportReadiness:{
+			reportType:"ReportType"
+		},
+		cooperativeAgreements:{
+
+		},
+		cooperativePrograms:{
+
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -1484,6 +1527,18 @@ export const AllTypesProps: Record<string,any> = {
 		getLedger:{
 			data:"GetLedgerInput"
 		},
+		getLedger2Accounts:{
+
+		},
+		getLedger2History:{
+			input:"GetLedger2HistoryInput"
+		},
+		getLedger2Postings:{
+			input:"GetLedger2PostingsInput"
+		},
+		getLedger2Wallets:{
+
+		},
 		getLedgerHistory:{
 			data:"GetLedgerHistoryInput"
 		},
@@ -1513,17 +1568,45 @@ export const AllTypesProps: Record<string,any> = {
 		getRegistrationConfig:{
 			account_type:"AccountType"
 		},
+		getReport:{
+
+		},
+		getReportCalendar:{
+
+		},
+		getReportDraft:{
+			reportType:"ReportType"
+		},
+		getReportHistory:{
+			filter:"ReportHistoryFilterInput"
+		},
+		getReportPreview:{
+			input:"ReportPreviewInput"
+		},
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
 		},
+		listReportDrafts:{
+			filter:"ListReportDraftsFilterInput"
+		},
 		onecoopGetDocuments:{
 			data:"GetOneCoopDocumentsInput"
+		},
+		process:{
+
+		},
+		processes:{
+			filter:"ProcessesFilter",
+			pagination:"PaginationInput"
 		},
 		searchDocuments:{
 			data:"SearchDocumentsInput"
 		},
 		searchPrivateAccounts:{
 			data:"SearchPrivateAccountsInput"
+		},
+		validateReportEdits:{
+			reportType:"ReportType"
 		}
 	},
 	ReceiveOnRequestInput:{
@@ -1557,10 +1640,18 @@ export const AllTypesProps: Record<string,any> = {
 		user_agreement:"SignedDigitalDocumentInput",
 		wallet_agreement:"SignedDigitalDocumentInput"
 	},
+	ReportHistoryFilterInput:{
+		reportType:"ReportType"
+	},
+	ReportPreviewInput:{
+		reportType:"ReportType"
+	},
+	ReportSubmissionMark: "enum" as const,
 	ReportType: "enum" as const,
 	RepresentedByInput:{
 
 	},
+	RequisiteSource: "enum" as const,
 	ResetKeyInput:{
 
 	},
@@ -1619,6 +1710,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	RoomMessageKind: "enum" as const,
+	SaveReportDraftInput:{
+		reportType:"ReportType"
+	},
 	SbpDataInput:{
 
 	},
@@ -1769,6 +1863,9 @@ export const AllTypesProps: Record<string,any> = {
 		status:"ProcessTemplateStatus",
 		steps:"ProcessStepTemplateInput"
 	},
+	UpdateReportRequisitesInput:{
+
+	},
 	UpdateRequestInput:{
 
 	},
@@ -1804,12 +1901,16 @@ export const AllTypesProps: Record<string,any> = {
 		ballot:"AnnualGeneralMeetingVotingBallotSignedDocumentInput",
 		votes:"VoteItemInput"
 	},
+	WalmoveInput:{
+
+	},
 	WebPushSubscriptionDataInput:{
 		keys:"WebPushSubscriptionKeysInput"
 	},
 	WebPushSubscriptionKeysInput:{
 
 	},
+	ZeroReportSignerType: "enum" as const,
 	ID: `scalar.ID` as const
 }
 
@@ -1883,6 +1984,15 @@ export const ReturnTypes: Record<string,any> = {
 		username:"String",
 		version:"Int"
 	},
+	AgreementTemplate:{
+		context:"String",
+		default_translation_id:"Int",
+		description:"String",
+		model:"String",
+		registry_id:"Int",
+		title:"String",
+		version:"Int"
+	},
 	AgreementVar:{
 		protocol_day_month_year:"String",
 		protocol_number:"String"
@@ -1918,9 +2028,18 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	AvailableReport:{
 		deadline:"String",
+		lastGeneratedAt:"DateTime",
+		missingFields:"String",
 		name:"String",
+		nextDeadlineDate:"DateTime",
 		period:"String",
+		readyToGenerate:"Boolean",
 		type:"ReportType"
+	},
+	BalanceRowEdits:{
+		otch:"Int",
+		prePrev:"Int",
+		prev:"Int"
 	},
 	BankAccount:{
 		account_number:"String",
@@ -2082,6 +2201,47 @@ export const ReturnTypes: Record<string,any> = {
 		trusted:"Individual",
 		trustee:"Individual",
 		type:"String"
+	},
+	BuhotchBalanceEdits:{
+		assetsTotal:"BalanceRowEdits",
+		cash:"BalanceRowEdits",
+		nonMaterialAndLongFin:"BalanceRowEdits",
+		passivesTotal:"BalanceRowEdits",
+		shortTermFin:"BalanceRowEdits",
+		targetFunds:"BalanceRowEdits"
+	},
+	BuhotchHeaderEdits:{
+		approved:"Boolean",
+		audit:"Boolean",
+		correctionNumber:"Int",
+		docDate:"String",
+		idFile:"String",
+		programVersion:"String",
+		reportYear:"Int"
+	},
+	BuhotchNotesEdits:{
+		explanationFileName:"String"
+	},
+	BuhotchOrganizationEdits:{
+		address:"String",
+		inn:"String",
+		kpp:"String",
+		okfs:"String",
+		okopf:"String",
+		okpo:"String",
+		orgName:"String"
+	},
+	BuhotchSignerEdits:{
+		firstName:"String",
+		lastName:"String",
+		middleName:"String",
+		repDoc:"String",
+		type:"BuhotchSignerType"
+	},
+	BuildInitialReportEdits:{
+		editedFields:"String",
+		editsJson:"String",
+		hasDraft:"Boolean"
 	},
 	CallTranscription:{
 		createdAt:"DateTime",
@@ -2783,6 +2943,12 @@ export const ReturnTypes: Record<string,any> = {
 		generator_agreement_created_at:"String",
 		generator_agreement_number:"String"
 	},
+	CoopAgreement:{
+		coopname:"String",
+		draft_id:"Int",
+		program_id:"Int",
+		type:"String"
+	},
 	CooperativeOperatorAccount:{
 		active_participants_count:"Float",
 		announce:"String",
@@ -2809,6 +2975,13 @@ export const ReturnTypes: Record<string,any> = {
 		type:"String",
 		username:"String",
 		verifications:"Verification"
+	},
+	CooperativeProgram:{
+		coopname:"String",
+		draft_id:"Int",
+		id:"Int",
+		is_active:"Boolean",
+		program_type:"String"
 	},
 	CreateSubscriptionResponse:{
 		message:"String",
@@ -2980,6 +3153,10 @@ export const ReturnTypes: Record<string,any> = {
 		totalCount:"Int",
 		totalPages:"Int"
 	},
+	FieldError:{
+		message:"String",
+		path:"String"
+	},
 	GatewayPayment:{
 		blockchain_data:"JSON",
 		can_change_status:"Boolean",
@@ -3040,11 +3217,25 @@ export const ReturnTypes: Record<string,any> = {
 		title:"String"
 	},
 	GeneratedReport:{
+		createdAt:"DateTime",
 		errors:"String",
 		fileName:"String",
+		id:"String",
 		isValid:"Boolean",
+		period:"Int",
 		reportType:"ReportType",
-		xml:"String"
+		xml:"String",
+		year:"Int"
+	},
+	GeneratedReportSummary:{
+		createdAt:"DateTime",
+		fileName:"String",
+		generatedBy:"String",
+		id:"String",
+		isValid:"Boolean",
+		period:"Int",
+		reportType:"ReportType",
+		year:"Int"
 	},
 	Individual:{
 		birthdate:"String",
@@ -3074,6 +3265,67 @@ export const ReturnTypes: Record<string,any> = {
 	KeyWeight:{
 		key:"String",
 		weight:"Int"
+	},
+	Ledger2Account:{
+		accountType:"Int",
+		balance:"String",
+		creditBalance:"String",
+		debitBalance:"String",
+		id:"Int",
+		name:"String"
+	},
+	Ledger2AdjustmentResult:{
+		processHash:"String",
+		transactionId:"String"
+	},
+	Ledger2HistoryResponse:{
+		currentPage:"Int",
+		items:"Ledger2Operation",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	Ledger2Operation:{
+		accountId:"Int",
+		action:"String",
+		blockNum:"Int",
+		coopname:"String",
+		createdAt:"DateTime",
+		globalSequence:"String",
+		memo:"String",
+		operationCode:"String",
+		parentApplyGlobalSequence:"String",
+		processHash:"String",
+		quantity:"String",
+		username:"String",
+		walletFrom:"String",
+		walletTo:"String"
+	},
+	Ledger2Posting:{
+		blockNum:"Int",
+		createdAt:"DateTime",
+		creditAccountId:"Int",
+		creditGlobalSequence:"String",
+		debitAccountId:"Int",
+		debitGlobalSequence:"String",
+		key:"String",
+		memo:"String",
+		operationCode:"String",
+		parentApplyGlobalSequence:"String",
+		processHash:"String",
+		quantity:"String",
+		username:"String"
+	},
+	Ledger2PostingsResponse:{
+		currentPage:"Int",
+		items:"Ledger2Posting",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	Ledger2Wallet:{
+		available:"String",
+		blocked:"String",
+		id:"String",
+		name:"String"
 	},
 	LedgerHistoryResponse:{
 		currentPage:"Int",
@@ -3180,6 +3432,12 @@ export const ReturnTypes: Record<string,any> = {
 		votes_abstained:"Int",
 		votes_against:"Int",
 		votes_for:"Int"
+	},
+	MissingRequisiteField:{
+		key:"String",
+		label:"String",
+		reason:"String",
+		source:"RequisiteSource"
 	},
 	MonoAccount:{
 		email:"String",
@@ -3308,6 +3566,7 @@ export const ReturnTypes: Record<string,any> = {
 		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
+		deleteReportDraft:"Boolean",
 		deleteTrustedAccount:"Branch",
 		deliverOnRequest:"Transaction",
 		disputeOnRequest:"Transaction",
@@ -3327,7 +3586,7 @@ export const ReturnTypes: Record<string,any> = {
 		generatePrivacyAgreement:"GeneratedDocument",
 		generateProjectOfFreeDecision:"GeneratedDocument",
 		generateRegistrationDocuments:"GenerateRegistrationDocumentsOutput",
-		generateReport:"GeneratedReport",
+		generateReportFromEdits:"GeneratedReport",
 		generateReturnByAssetAct:"GeneratedDocument",
 		generateReturnByAssetDecision:"GeneratedDocument",
 		generateReturnByAssetStatement:"GeneratedDocument",
@@ -3343,6 +3602,7 @@ export const ReturnTypes: Record<string,any> = {
 		installSystem:"SystemInfo",
 		login:"RegisteredAccount",
 		logout:"Boolean",
+		markReportPeriod:"Boolean",
 		moderateRequest:"Transaction",
 		notifyOnAnnualGeneralMeet:"MeetAggregate",
 		processConvertToAxonStatement:"Boolean",
@@ -3355,6 +3615,7 @@ export const ReturnTypes: Record<string,any> = {
 		registerParticipant:"Account",
 		resetKey:"Boolean",
 		restartAnnualGeneralMeet:"MeetAggregate",
+		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
 		sendAgreement:"Transaction",
 		setPaymentStatus:"GatewayPayment",
@@ -3370,11 +3631,13 @@ export const ReturnTypes: Record<string,any> = {
 		updateAccount:"Account",
 		updateBankAccount:"PaymentMethod",
 		updateExtension:"Extension",
+		updateReportRequisites:"ReportRequisitesView",
 		updateRequest:"Transaction",
 		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
 		verifyEmail:"Boolean",
-		voteOnAnnualGeneralMeet:"MeetAggregate"
+		voteOnAnnualGeneralMeet:"MeetAggregate",
+		walmoveWallets:"Ledger2AdjustmentResult"
 	},
 	OneCoopDocumentOutput:{
 		action:"String",
@@ -3649,6 +3912,40 @@ export const ReturnTypes: Record<string,any> = {
 		score:"Float",
 		type:"String"
 	},
+	ProcessAction:{
+		account:"String",
+		block_id:"String",
+		block_num:"Float",
+		created_at:"DateTime",
+		data:"JSON",
+		global_sequence:"String",
+		id:"String",
+		name:"String",
+		transaction_id:"String"
+	},
+	ProcessDelta:{
+		block_num:"Float",
+		code:"String",
+		created_at:"DateTime",
+		id:"String",
+		present:"Boolean",
+		primary_key:"String",
+		scope:"String",
+		table:"String",
+		value:"JSON"
+	},
+	ProcessDocument:{
+		document:"JSON",
+		hash:"String",
+		raw:"JSON",
+		source:"ProcessDocumentSource"
+	},
+	ProcessDocumentSource:{
+		code:"String",
+		field:"String",
+		primary_key:"String",
+		table:"String"
+	},
 	ProcessEdge:{
 		id:"String",
 		source:"String",
@@ -3684,6 +3981,20 @@ export const ReturnTypes: Record<string,any> = {
 		position:"ProcessStepPosition",
 		title:"String"
 	},
+	ProcessSummary:{
+		coopname:"String",
+		firstSeenAt:"DateTime",
+		lastSeenAt:"DateTime",
+		processHash:"String",
+		processType:"String",
+		username:"String"
+	},
+	ProcessSummaryPaginationResult:{
+		currentPage:"Int",
+		items:"ProcessSummary",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	ProcessTemplate:{
 		coopname:"String",
 		created_at:"DateTime",
@@ -3696,6 +4007,16 @@ export const ReturnTypes: Record<string,any> = {
 		steps:"ProcessStepTemplate",
 		title:"String",
 		updated_at:"DateTime"
+	},
+	ProcessView:{
+		actions:"ProcessAction",
+		coopname:"String",
+		delta_history:"ProcessDelta",
+		documents:"ProcessDocument",
+		first_seen_at:"DateTime",
+		last_seen_at:"DateTime",
+		process_hash:"String",
+		process_type:"String"
 	},
 	ProgramWallet:{
 		agreement_id:"ID",
@@ -3743,7 +4064,9 @@ export const ReturnTypes: Record<string,any> = {
 		middle_name:"String"
 	},
 	Query:{
+		agreementTemplates:"AgreementTemplate",
 		agreements:"PaginatedAgreementsPaginationResult",
+		buildInitialReportEdits:"BuildInitialReportEdits",
 		candidates:"PaginatedCandidatesPaginationResult",
 		capitalCandidates:"PaginatedCapitalCandidatesPaginationResult",
 		capitalCommit:"CapitalCommit",
@@ -3790,6 +4113,9 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
 		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
 		chatcoopListUtcDatesWithNewRoomMessages:"String",
+		checkReportReadiness:"ReportReadinessView",
+		cooperativeAgreements:"CoopAgreement",
+		cooperativePrograms:"CooperativeProgram",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",
@@ -3809,6 +4135,10 @@ export const ReturnTypes: Record<string,any> = {
 		getExtensions:"Extension",
 		getInstallationStatus:"InstallationStatus",
 		getLedger:"LedgerState",
+		getLedger2Accounts:"Ledger2Account",
+		getLedger2History:"Ledger2HistoryResponse",
+		getLedger2Postings:"Ledger2PostingsResponse",
+		getLedger2Wallets:"Ledger2Wallet",
 		getLedgerHistory:"LedgerHistoryResponse",
 		getMeet:"MeetAggregate",
 		getMeets:"MeetAggregate",
@@ -3819,12 +4149,22 @@ export const ReturnTypes: Record<string,any> = {
 		getProviderSubscriptionById:"ProviderSubscription",
 		getProviderSubscriptions:"ProviderSubscription",
 		getRegistrationConfig:"RegistrationConfig",
+		getReport:"GeneratedReport",
+		getReportCalendar:"ReportCalendarRow",
+		getReportDraft:"ReportDraft",
+		getReportHistory:"ReportHistoryPage",
+		getReportPreview:"ReportPreview",
+		getReportRequisites:"ReportRequisitesView",
 		getSystemInfo:"SystemInfo",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
+		listReportDrafts:"ReportDraft",
 		onecoopGetDocuments:"OneCoopDocumentsResponse",
+		process:"ProcessView",
+		processes:"ProcessSummaryPaginationResult",
 		searchDocuments:"SearchResult",
-		searchPrivateAccounts:"PrivateAccountSearchResult"
+		searchPrivateAccounts:"PrivateAccountSearchResult",
+		validateReportEdits:"FieldError"
 	},
 	Question:{
 		context:"String",
@@ -3864,6 +4204,79 @@ export const ReturnTypes: Record<string,any> = {
 		requirements:"String",
 		title:"String"
 	},
+	ReportCalendarPeriodEntry:{
+		dueDate:"String",
+		dueMonth:"Int",
+		label:"String",
+		periodCode:"Int",
+		reportYear:"Int",
+		status:"CalendarEntryStatus"
+	},
+	ReportCalendarRow:{
+		periodKind:"String",
+		periods:"ReportCalendarPeriodEntry",
+		reportType:"ReportType",
+		shortName:"String"
+	},
+	ReportDraft:{
+		createdAt:"DateTime",
+		editedFields:"String",
+		editsJson:"String",
+		id:"String",
+		ownerUsername:"String",
+		period:"Int",
+		reportType:"ReportType",
+		updatedAt:"DateTime",
+		year:"Int"
+	},
+	ReportHistoryPage:{
+		items:"GeneratedReportSummary",
+		total:"Int"
+	},
+	ReportPreview:{
+		period:"Int",
+		reportType:"ReportType",
+		sections:"ReportPreviewSection",
+		year:"Int"
+	},
+	ReportPreviewField:{
+		key:"String",
+		label:"String",
+		unit:"String",
+		value:"String"
+	},
+	ReportPreviewSection:{
+		fields:"ReportPreviewField",
+		title:"String"
+	},
+	ReportReadinessView:{
+		missingFields:"MissingRequisiteField",
+		ready:"Boolean",
+		reportType:"ReportType"
+	},
+	ReportRequisitesView:{
+		address:"RequisiteFieldView",
+		chairmanPosition:"RequisiteFieldView",
+		chairmanPositionFromOrg:"RequisiteFieldView",
+		coopname:"String",
+		inn:"RequisiteFieldView",
+		kpp:"RequisiteFieldView",
+		ogrn:"RequisiteFieldView",
+		okfs:"RequisiteFieldView",
+		okopf:"RequisiteFieldView",
+		okpo:"RequisiteFieldView",
+		oktmo:"RequisiteFieldView",
+		okved:"RequisiteFieldView",
+		orgName:"RequisiteFieldView",
+		phone:"RequisiteFieldView",
+		sfrRegNumber:"RequisiteFieldView",
+		signerFirstName:"RequisiteFieldView",
+		signerLastName:"RequisiteFieldView",
+		signerMiddleName:"RequisiteFieldView",
+		signerRepDoc:"RequisiteFieldView",
+		signerSnils:"RequisiteFieldView",
+		signerType:"String"
+	},
 	RepresentedBy:{
 		based_on:"String",
 		first_name:"String",
@@ -3876,6 +4289,10 @@ export const ReturnTypes: Record<string,any> = {
 		last_name:"String",
 		middle_name:"String",
 		position:"String"
+	},
+	RequisiteFieldView:{
+		source:"RequisiteSource",
+		value:"String"
 	},
 	ResourceDelegationDTO:{
 		cpu_weight:"String",
@@ -4063,6 +4480,36 @@ export const ReturnTypes: Record<string,any> = {
 		updatedAt:"DateTime",
 		userAgent:"String",
 		username:"String"
+	},
+	ZeroReportHeaderEdits:{
+		correctionNumber:"Int",
+		docDate:"String",
+		idFile:"String",
+		period:"Int",
+		reportYear:"Int",
+		versProgram:"String"
+	},
+	ZeroReportOrganizationEdits:{
+		address:"String",
+		inn:"String",
+		kpp:"String",
+		ogrn:"String",
+		okfs:"String",
+		okopf:"String",
+		okpo:"String",
+		oktmo:"String",
+		okved:"String",
+		orgName:"String"
+	},
+	ZeroReportSignerEdits:{
+		chairmanPosition:"String",
+		firstName:"String",
+		lastName:"String",
+		middleName:"String",
+		repDoc:"String",
+		sfrRegNumber:"String",
+		snils:"String",
+		type:"ZeroReportSignerType"
 	},
 	ID: `scalar.ID` as const
 }

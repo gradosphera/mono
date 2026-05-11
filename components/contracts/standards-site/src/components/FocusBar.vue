@@ -34,7 +34,7 @@ const ROLE_HUMAN: Record<string, string> = {
   soviet: 'Совет',
   soviet_members: 'Члены совета',
   meet: 'Общее собрание',
-  gateway_operator: 'Оператор платежей',
+  gateway_operator: 'Кассир',
   administrator: 'Администратор',
   chairman_or_soviet: 'Председатель / Совет',
 };
@@ -207,48 +207,38 @@ function accountTitle(code: number | null | undefined): string {
   return `${code} · ${meta.name} · ${kind}`;
 }
 
-function walletTitle(id: number | null | undefined, op: Ledger2Operation['wallet_op']): string {
-  if (id == null) {
-    // null допустим только для ISSUE (из ниоткуда) или CONSUME (в никуда)
+function walletTitle(name: string | null | undefined, op: Ledger2Operation['wallet_op']): string {
+  if (name == null || name === '') {
+    // пусто допустимо только для ISSUE (из ниоткуда) или CONSUME (в никуда)
     if (op === 'ISSUE') return 'Выпуск средств извне системы';
     return 'Кошелёк не задан';
   }
-  const meta = getWallet(id);
-  if (!meta) return `${id} (нет в реестре)`;
-  return `${id} · ${meta.name}`;
+  const meta = getWallet(name);
+  if (!meta) return `${name} (нет в реестре)`;
+  return `${name} · ${meta.human_name}`;
 }
 
-function walletDisplayId(id: number | null): string {
-  return id == null ? '∅' : String(id);
+function walletDisplayId(name: string | null | undefined): string {
+  return name == null || name === '' ? '∅' : name;
 }
 
 </script>
 
 <template>
   <section
-    v-if="focusMode !== 'none'"
+    v-if="focusMode !== 'none' && focusMode !== 'process-start'"
     class="focus-bar"
     :class="{
       'focus-bar--edge': focusMode === 'action',
       'focus-bar--doc': focusMode === 'document',
       'focus-bar--op': focusMode === 'operation',
-      'focus-bar--process':
-        focusMode === 'process-start' || focusMode === 'process-end',
+      'focus-bar--process': focusMode === 'process-end',
       'focus-bar--rejected': focusMode === 'process-rejected',
     }"
   >
-    <!-- Начало процесса -->
-    <template v-if="focusMode === 'process-start'">
-      <div class="focus-bar__col focus-bar__col--main">
-        <div class="focus-bar__kicker">Начало процесса</div>
-        <p v-if="standard.purpose" class="focus-bar__desc focus-bar__desc--lead">
-          {{ standard.purpose }}
-        </p>
-      </div>
-    </template>
 
     <!-- Завершение отказом -->
-    <template v-else-if="focusMode === 'process-rejected' && rejectedInfo">
+    <template v-if="focusMode === 'process-rejected' && rejectedInfo">
       <div class="focus-bar__col focus-bar__col--main">
         <div class="focus-bar__kicker">Завершение отказом</div>
         <div class="focus-bar__title-row">
@@ -345,35 +335,37 @@ function walletDisplayId(id: number | null): string {
           <div v-for="op in opsForFocusedAction" :key="op.ledger_code" class="focus-bar__op-block">
             <div class="focus-bar__op-name">{{ op.human_name }}</div>
 
-            <div
-              v-if="op.debit != null || op.credit != null"
-              class="focus-bar__op-sub"
-            >
-              <div class="focus-bar__op-sub-label">Проводки</div>
-              <div class="focus-bar__op-sub-body">
-                <span class="tooltip" :data-tip="accountTitle(op.debit)">
-                  Дт <code>{{ op.debit ?? '—' }}</code>
-                </span>
-                <span class="focus-bar__op-sep">/</span>
-                <span class="tooltip" :data-tip="accountTitle(op.credit)">
-                  Кт <code>{{ op.credit ?? '—' }}</code>
-                </span>
+            <div class="focus-bar__op-subs">
+              <div
+                v-if="op.debit != null || op.credit != null"
+                class="focus-bar__op-sub"
+              >
+                <div class="focus-bar__op-sub-label">Проводки</div>
+                <div class="focus-bar__op-sub-body">
+                  <span class="tooltip" :data-tip="accountTitle(op.debit)">
+                    Дт <code>{{ op.debit ?? '—' }}</code>
+                  </span>
+                  <span class="focus-bar__op-sep">/</span>
+                  <span class="tooltip" :data-tip="accountTitle(op.credit)">
+                    Кт <code>{{ op.credit ?? '—' }}</code>
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div
-              v-if="op.wallet_op !== 'WALLET_ONLY' && (op.wallet_from != null || op.wallet_to != null)"
-              class="focus-bar__op-sub"
-            >
-              <div class="focus-bar__op-sub-label">Переводы</div>
-              <div class="focus-bar__op-sub-body">
-                <span class="tooltip" :data-tip="walletTitle(op.wallet_from, op.wallet_op)">
-                  <code>{{ walletDisplayId(op.wallet_from) }}</code>
-                </span>
-                <span class="focus-bar__arrow">→</span>
-                <span class="tooltip" :data-tip="walletTitle(op.wallet_to, op.wallet_op)">
-                  <code>{{ walletDisplayId(op.wallet_to) }}</code>
-                </span>
+              <div
+                v-if="!!op.wallet_from || !!op.wallet_to"
+                class="focus-bar__op-sub"
+              >
+                <div class="focus-bar__op-sub-label">Переводы</div>
+                <div class="focus-bar__op-sub-body">
+                  <span class="tooltip" :data-tip="walletTitle(op.wallet_from, op.wallet_op)">
+                    <code>{{ walletDisplayId(op.wallet_from) }}</code>
+                  </span>
+                  <span class="focus-bar__arrow">→</span>
+                  <span class="tooltip" :data-tip="walletTitle(op.wallet_to, op.wallet_op)">
+                    <code>{{ walletDisplayId(op.wallet_to) }}</code>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -428,8 +420,7 @@ function walletDisplayId(id: number | null): string {
         </div>
 
         <div
-          v-if="focusedOperation.wallet_op !== 'WALLET_ONLY'
-                && (focusedOperation.wallet_from != null || focusedOperation.wallet_to != null)"
+          v-if="!!focusedOperation.wallet_from || !!focusedOperation.wallet_to"
           class="focus-bar__op-sub"
         >
           <div class="focus-bar__op-sub-label">Переводы</div>
@@ -511,10 +502,10 @@ function walletDisplayId(id: number | null): string {
 }
 
 .focus-bar__col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.focus-bar__col--main { flex: 1 1 360px; }
+.focus-bar__col--main { flex: 1 1 280px; }
 .focus-bar__col--meta { flex: 0 0 auto; }
-.focus-bar__col--ops  { flex: 1 1 240px; min-width: 200px; }
-.focus-bar__col--docs { flex: 1 1 240px; min-width: 220px; }
+.focus-bar__col--ops  { flex: 1.5 1 320px; min-width: 280px; }
+.focus-bar__col--docs { flex: 1 1 220px; min-width: 200px; }
 
 .focus-bar__doc-list { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
 .focus-bar__doc-chip {
@@ -597,6 +588,7 @@ function walletDisplayId(id: number | null): string {
 }
 .focus-bar__desc {
   margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-muted);
+  white-space: pre-line;
 }
 .focus-bar__inline-code {
   font-family: var(--font-mono); font-size: 11px;
@@ -612,13 +604,20 @@ function walletDisplayId(id: number | null): string {
 .focus-bar__guard-list { display: flex; flex-direction: column; gap: 2px; }
 .focus-bar__guard::before { content: '· '; color: var(--text-subtle); }
 
-.focus-bar__ops { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+.focus-bar__ops {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 2px;
+}
 .focus-bar__op-block {
   display: flex; flex-direction: column; gap: 6px;
+  min-width: 0;
 }
-.focus-bar__op-block + .focus-bar__op-block {
-  padding-top: 8px;
-  border-top: 1px dashed var(--edge-focus-border);
+.focus-bar__op-subs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 6px;
 }
 .focus-bar__op-name {
   font-size: 13px; font-weight: 600; color: var(--text);

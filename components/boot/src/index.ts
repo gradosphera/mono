@@ -5,13 +5,14 @@ import { Command } from 'commander'
 import { config } from 'dotenv'
 import { execCommand } from './docker/exec'
 import { stopContainerByName } from './docker/stop'
-import { runContainer } from './docker/run'
+import { runContainer, runInfraContainers } from './docker/run'
 import { boot, bootClean, bootExtra } from './init/booter'
 import { startCoop } from './init/cooperative'
 import { sleep } from './utils'
 import { checkHealth } from './docker/health'
 import { clearDB, clearDirectory, deleteFile } from './docker/purge'
 import { deployCommand } from './docker/deploy'
+import { addTestUser } from './scripts/add-test-user'
 
 config()
 
@@ -29,6 +30,20 @@ if (!fs.existsSync(keosdPath)) {
 const program = new Command()
 
 program.version('0.1.0')
+
+// Epic 4: smoke-скрипт для проверки ProcessRegistry end-to-end.
+program
+  .command('add-test-user <username>')
+  .description('Добавить пайщика через registrator::adduser — для live-тестов ProcessRegistry')
+  .action(async (username: string) => {
+    try {
+      await addTestUser(username)
+      process.exit(0)
+    } catch (e) {
+      console.error('Failed:', e)
+      process.exit(1)
+    }
+  })
 
 // Команда для запуска команды в контейнере
 program
@@ -121,6 +136,7 @@ program
     }
 
     try {
+      await runInfraContainers()
       await runContainer()
 
       await sleep(5000)
@@ -199,6 +215,7 @@ program
     }
 
     try {
+      await runInfraContainers()
       await runContainer()
 
       await sleep(5000)
@@ -261,6 +278,7 @@ program
       await stopContainerByName('node')
       await deleteFile(keosdPath)
       await clearDirectory(basePath)
+      await runInfraContainers()
       await sleep(5000)
       await clearDB()
       await runContainer()

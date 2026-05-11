@@ -7,3 +7,6 @@
 
 export * from './accounts'
 export * from './wallets'
+export * from './processes'
+export * from './operations'
+export * from './programs'

@@ -24,7 +24,8 @@ void soviet::addbal(eosio::name coopname, eosio::name username, uint64_t program
   auto participant = get_participant_or_fail(coopname, username);
 
   // Upsert: если у пайщика ещё нет progwallets-записи для этой программы —
-  // создаём её с нулевыми балансами и сразу зачисляем quantity.
+  // создаём с нулевыми балансами. Подписание соглашения не открывает кошелёк
+  // отдельно (ADR-008): запись возникает в момент первого начисления.
   progwallets_index progwallets(_soviet, coopname.value);
   auto by_user_program = progwallets.get_index<"byuserprog"_n>();
   auto key = combine_ids(username.value, program_id);
