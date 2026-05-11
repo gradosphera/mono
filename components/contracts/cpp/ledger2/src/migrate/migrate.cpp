@@ -587,8 +587,11 @@ void ledger2::migrate(uint64_t from_coop_index, uint64_t limit) {
     if (idx < from_coop_index) continue;
     if (done >= limit) { reached_end = false; break; }
 
-    // Мигрируем только кооперативы (не отделения и не физ. записи).
-    if (it->is_cooperative) {
+    // Мигрируем только активные кооперативы (не отделения, не физ. записи,
+    // не приостановленные/архивные). apply() всё равно отказывает не-active
+    // через get_cooperative_or_fail — здесь явно пропускаем, чтобы курсор шёл.
+    const bool is_active = it->status.has_value() && it->status.value() == "active"_n;
+    if (it->is_cooperative && is_active) {
       migrate_one_coop(get_self(), *it);
     }
     ++done;

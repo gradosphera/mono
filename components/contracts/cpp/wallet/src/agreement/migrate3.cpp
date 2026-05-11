@@ -12,7 +12,7 @@
  * (soviet::agreements3) и заполняет state как есть. Полные проверки делает
  * нормальный flow `signagree`.
  *
- * @param coopname Кооператив (auth: coopname@active, payer)
+ * @param coopname Кооператив (ключей от него у нас нет — поэтому НЕ авторизатор)
  * @param username Пайщик
  * @param program_id Идентификатор программы
  * @param doc_hash Хэш документа из `agreements3.document.hash`
@@ -22,7 +22,8 @@
  * @ingroup public_actions
  * @ingroup public_wallet_actions
  *
- * @note Авторизация требуется от аккаунта: @p coopname (active)
+ * @note Auth: `wallet@active` (через `get_self()`), payer: `wallet`. Так
+ * миграция работает для ЛЮБОГО кооператива без его ключей.
  */
 [[eosio::action]] void wallet::migrate3(
   eosio::name        coopname,
@@ -33,7 +34,7 @@
   uint64_t           draft_id,
   eosio::time_point  signed_at
 ) {
-  require_auth(coopname);
+  require_auth(get_self());
 
   Wallet::users_index users(_wallet, coopname.value);
   auto user_it = users.find(username.value);
@@ -47,12 +48,12 @@
   };
 
   if (user_it == users.end()) {
-    users.emplace(coopname, [&](auto &row) {
+    users.emplace(get_self(), [&](auto &row) {
       row.username = username;
       row.programs = { pa };
     });
   } else {
-    users.modify(user_it, coopname, [&](auto &row) {
+    users.modify(user_it, get_self(), [&](auto &row) {
       auto it = std::find_if(
         row.programs.begin(), row.programs.end(),
         [&](const Wallet::program_agreement &p) { return p.program_id == program_id; });
