@@ -96,7 +96,7 @@ export class MigratePhase2Progwallets implements Migration {
             wallet_name: primaryWallet,
             username: pw.username,
             available: pw.available,
-            blocked: pw.blocked,
+            blocked: pw.blocked ?? zeroAssetLike(pw.available),
           },
         });
 
