@@ -90,7 +90,7 @@ export class MigratePhase2Progwallets implements Migration {
         allActions.push({
           account: Ledger2Contract.contractName.production,
           name: Ledger2Contract.Actions.Migrate3.actionName,
-          authorization: [{ actor: coopname, permission: 'active' }],
+          authorization: [{ actor: Ledger2Contract.contractName.production, permission: 'active' }],
           data: {
             coopname,
             wallet_name: primaryWallet,
@@ -106,7 +106,7 @@ export class MigratePhase2Progwallets implements Migration {
           allActions.push({
             account: Ledger2Contract.contractName.production,
             name: Ledger2Contract.Actions.Migrate3.actionName,
-            authorization: [{ actor: coopname, permission: 'active' }],
+            authorization: [{ actor: Ledger2Contract.contractName.production, permission: 'active' }],
             data: {
               coopname,
               wallet_name: Ledger2.MEMBERSHIP_WALLET_NAME,
