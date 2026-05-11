@@ -483,6 +483,28 @@ inline void migrate_one_coop(eosio::name self_name, const cooperative2& coop) {
 
   // ----- A. Бухгалтерский перенос legacy::accounts через 3 TRANSIT_* -----
   if (b.cash.amount > 0 || b.share.amount > 0 || b.entry.amount > 0) {
+#ifdef IS_TESTNET
+    // На тестнете терпим грязные данные: clamp'им вместо abort.
+    // Тестовые остатки (entry > cash, РИД-часть на 80, Σmin > share) — игнорятся.
+    const int64_t entry_amt  = b.entry.amount < b.cash.amount ? b.entry.amount : b.cash.amount;
+    const int64_t share_money_amt = b.cash.amount - entry_amt;
+    const eosio::asset entry_eff(entry_amt, _root_govern_symbol);
+    const eosio::asset share_money(share_money_amt, _root_govern_symbol);
+
+    eosio::asset min_total = compute_min_total_by_type(coopname, coop);
+    if (min_total.amount > share_money.amount) {
+      min_total = share_money;
+    }
+
+    const eosio::asset share_remain(
+      share_money.amount - min_total.amount,
+      _root_govern_symbol
+    );
+
+    send_transit(self_name, coopname, operations::migration::MIN_SHARE, min_total);
+    send_transit(self_name, coopname, operations::migration::SHARE,     share_remain);
+    send_transit(self_name, coopname, operations::migration::ENTRY,     entry_eff);
+#else
     // Деньги на паевой фонд: всё на 51 сверх вступительных.
     const eosio::asset share_money(
       b.cash.amount >= b.entry.amount ? b.cash.amount - b.entry.amount : 0,
@@ -521,6 +543,7 @@ inline void migrate_one_coop(eosio::name self_name, const cooperative2& coop) {
     send_transit(self_name, coopname, operations::migration::MIN_SHARE, min_total);
     send_transit(self_name, coopname, operations::migration::SHARE,     share_remain);
     send_transit(self_name, coopname, operations::migration::ENTRY,     b.entry);
+#endif
   }
 
   // ----- B. Программные кошельки — прямой emplace, без Dr/Cr -----
