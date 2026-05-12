@@ -4,6 +4,7 @@ import { AgreementRegistryService, AGREEMENT_REGISTRY_SERVICE } from './services
 import { RegistrationDocumentsService, REGISTRATION_DOCUMENTS_SERVICE } from './services/registration-documents.service';
 import { CooperativeConfigService } from './services/cooperative-config.service';
 import { AGREEMENT_REGISTRATION_PORT } from './ports/agreement-registration.port';
+import { AGREEMENT_QUERY_PORT } from './ports/agreement-query.port';
 import { DocumentModule } from '~/application/document/document.module';
 import { ExtensionDomainModule } from '~/domain/extension/extension-domain.module';
 
@@ -33,6 +34,10 @@ import { ExtensionDomainModule } from '~/domain/extension/extension-domain.modul
       provide: AGREEMENT_REGISTRATION_PORT,
       useExisting: AgreementRegistryService,
     },
+    {
+      provide: AGREEMENT_QUERY_PORT,
+      useExisting: AgreementConfigurationService,
+    },
     RegistrationDocumentsService,
     {
       provide: REGISTRATION_DOCUMENTS_SERVICE,
@@ -45,6 +50,7 @@ import { ExtensionDomainModule } from '~/domain/extension/extension-domain.modul
     AgreementRegistryService,
     AGREEMENT_REGISTRY_SERVICE,
     AGREEMENT_REGISTRATION_PORT,
+    AGREEMENT_QUERY_PORT,
     RegistrationDocumentsService,
     REGISTRATION_DOCUMENTS_SERVICE,
   ],
