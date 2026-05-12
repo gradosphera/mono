@@ -54,6 +54,7 @@ import { DecisionTrackingInfrastructureModule } from '~/infrastructure/decision-
 // Символы для DI
 import { APPROVAL_REPOSITORY } from './domain/repositories/approval.repository';
 import { CHAIRMAN_BLOCKCHAIN_PORT } from './domain/interfaces/chairman-blockchain.port';
+import { computeOnboardingExpiresAt } from '~/domain/onboarding/constants/onboarding-ttl';
 
 // Функция для описания полей в схеме конфигурации
 function describeField(description: DeserializedDescriptionOfExtension): string {
@@ -226,8 +227,7 @@ export class ChairmanPlugin extends BaseExtModule {
     }
     if (!this.plugin.config.onboarding_expire_at) {
       const started = new Date(this.plugin.config.onboarding_init_at || nowIso);
-      const expire = new Date(started.getTime() + 30 * 24 * 60 * 60 * 1000);
-      this.plugin.config.onboarding_expire_at = expire.toISOString();
+      this.plugin.config.onboarding_expire_at = computeOnboardingExpiresAt(started);
       needUpdate = true;
     }
 
