@@ -6,3 +6,5 @@ export * as CooperativeAgreements from './cooperativeAgreements'
 export * as AgreementTemplates from './agreementTemplates'
 /** Целевые потребительские программы кооператива из soviet::programs */
 export * as CooperativePrograms from './cooperativePrograms'
+/** Оферты регистрации, сливая платформенные базовые и extension-зарегистрированные */
+export * as GetRegistrationAgreements from './getRegistrationAgreements'

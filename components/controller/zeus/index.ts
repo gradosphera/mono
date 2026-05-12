@@ -7765,6 +7765,7 @@ getProgramWallets?: [{	filter?: ValueTypes["ProgramWalletFilterInput"] | undefin
 getProviderSubscriptionById?: [{	id: number | Variable<any, string>},ValueTypes["ProviderSubscription"]],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions?:ValueTypes["ProviderSubscription"],
+getRegistrationAgreements?: [{	account_type: ValueTypes["AccountType"] | Variable<any, string>,	coopname: string | Variable<any, string>,	program_key?: string | undefined | null | Variable<any, string>},ValueTypes["RegistrationAgreement"]],
 getRegistrationConfig?: [{	account_type: ValueTypes["AccountType"] | Variable<any, string>,	coopname: string | Variable<any, string>},ValueTypes["RegistrationConfig"]],
 getReport?: [{	id: string | Variable<any, string>},ValueTypes["GeneratedReport"]],
 getReportCalendar?: [{	year: number | Variable<any, string>},ValueTypes["ReportCalendarRow"]],
@@ -7924,6 +7925,31 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	tokens?:ValueTypes["Tokens"],
 		__typename?: boolean | `@${string}`,
 	['...on RegisteredAccount']?: Omit<ValueTypes["RegisteredAccount"], "...on RegisteredAccount">
+}>;
+	/** Описание оферты, которую пайщик должен принять при регистрации */
+["RegistrationAgreement"]: AliasType<{
+	/** Тип соглашения для on-chain sendAgreement */
+	agreement_type?:boolean | `@${string}`,
+	/** Типы аккаунтов, для которых оферта применима */
+	applicable_account_types?:boolean | `@${string}`,
+	/** Текст для галочки */
+	checkbox_text?:boolean | `@${string}`,
+	/** Строковый идентификатор оферты */
+	id?:boolean | `@${string}`,
+	/** Нужно ли отправлять в блокчейн через sendAgreement */
+	is_blockchain_agreement?:boolean | `@${string}`,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text?:boolean | `@${string}`,
+	/** Нужно ли линковать хеш документа в заявление */
+	link_to_statement?:boolean | `@${string}`,
+	/** Порядок отображения */
+	order?:boolean | `@${string}`,
+	/** registry_id шаблона на фабрике документов */
+	registry_id?:boolean | `@${string}`,
+	/** Человекочитаемое название оферты */
+	title?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on RegistrationAgreement']?: Omit<ValueTypes["RegistrationAgreement"], "...on RegistrationAgreement">
 }>;
 	["RegistrationConfig"]: AliasType<{
 	/** Доступные программы */
@@ -15899,6 +15925,7 @@ getProgramWallets?: [{	filter?: ResolverInputTypes["ProgramWalletFilterInput"] |
 getProviderSubscriptionById?: [{	id: number},ResolverInputTypes["ProviderSubscription"]],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions?:ResolverInputTypes["ProviderSubscription"],
+getRegistrationAgreements?: [{	account_type: ResolverInputTypes["AccountType"],	coopname: string,	program_key?: string | undefined | null},ResolverInputTypes["RegistrationAgreement"]],
 getRegistrationConfig?: [{	account_type: ResolverInputTypes["AccountType"],	coopname: string},ResolverInputTypes["RegistrationConfig"]],
 getReport?: [{	id: string},ResolverInputTypes["GeneratedReport"]],
 getReportCalendar?: [{	year: number},ResolverInputTypes["ReportCalendarRow"]],
@@ -16053,6 +16080,30 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	account?:ResolverInputTypes["Account"],
 	/** Токены доступа и обновления */
 	tokens?:ResolverInputTypes["Tokens"],
+		__typename?: boolean | `@${string}`
+}>;
+	/** Описание оферты, которую пайщик должен принять при регистрации */
+["RegistrationAgreement"]: AliasType<{
+	/** Тип соглашения для on-chain sendAgreement */
+	agreement_type?:boolean | `@${string}`,
+	/** Типы аккаунтов, для которых оферта применима */
+	applicable_account_types?:boolean | `@${string}`,
+	/** Текст для галочки */
+	checkbox_text?:boolean | `@${string}`,
+	/** Строковый идентификатор оферты */
+	id?:boolean | `@${string}`,
+	/** Нужно ли отправлять в блокчейн через sendAgreement */
+	is_blockchain_agreement?:boolean | `@${string}`,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text?:boolean | `@${string}`,
+	/** Нужно ли линковать хеш документа в заявление */
+	link_to_statement?:boolean | `@${string}`,
+	/** Порядок отображения */
+	order?:boolean | `@${string}`,
+	/** registry_id шаблона на фабрике документов */
+	registry_id?:boolean | `@${string}`,
+	/** Человекочитаемое название оферты */
+	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["RegistrationConfig"]: AliasType<{
@@ -24024,6 +24075,8 @@ export type ModelTypes = {
 	getProviderSubscriptionById: ModelTypes["ProviderSubscription"],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions: Array<ModelTypes["ProviderSubscription"]>,
+	/** Получить список оферт для регистрации пайщика заданного типа аккаунта и (опционально) программы. Сливает базовые платформенные оферты с теми, что зарегистрировали расширения. */
+	getRegistrationAgreements: Array<ModelTypes["RegistrationAgreement"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: ModelTypes["RegistrationConfig"],
 	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
@@ -24189,6 +24242,29 @@ export type ModelTypes = {
 	account: ModelTypes["Account"],
 	/** Токены доступа и обновления */
 	tokens: ModelTypes["Tokens"]
+};
+	/** Описание оферты, которую пайщик должен принять при регистрации */
+["RegistrationAgreement"]: {
+		/** Тип соглашения для on-chain sendAgreement */
+	agreement_type: string,
+	/** Типы аккаунтов, для которых оферта применима */
+	applicable_account_types: Array<ModelTypes["AccountType"]>,
+	/** Текст для галочки */
+	checkbox_text: string,
+	/** Строковый идентификатор оферты */
+	id: string,
+	/** Нужно ли отправлять в блокчейн через sendAgreement */
+	is_blockchain_agreement: boolean,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text: string,
+	/** Нужно ли линковать хеш документа в заявление */
+	link_to_statement: boolean,
+	/** Порядок отображения */
+	order: number,
+	/** registry_id шаблона на фабрике документов */
+	registry_id: number,
+	/** Человекочитаемое название оферты */
+	title: string
 };
 	["RegistrationConfig"]: {
 		/** Доступные программы */
@@ -32522,6 +32598,8 @@ export type GraphQLTypes = {
 	getProviderSubscriptionById: GraphQLTypes["ProviderSubscription"],
 	/** Получить подписки пользователя у провайдера */
 	getProviderSubscriptions: Array<GraphQLTypes["ProviderSubscription"]>,
+	/** Получить список оферт для регистрации пайщика заданного типа аккаунта и (опционально) программы. Сливает базовые платформенные оферты с теми, что зарегистрировали расширения. */
+	getRegistrationAgreements: Array<GraphQLTypes["RegistrationAgreement"]>,
 	/** Получить конфигурацию программ регистрации для кооператива */
 	getRegistrationConfig: GraphQLTypes["RegistrationConfig"],
 	/** Получить сгенерированный отчёт по UUID — XML возвращается дословно */
@@ -32694,6 +32772,31 @@ export type GraphQLTypes = {
 	/** Токены доступа и обновления */
 	tokens: GraphQLTypes["Tokens"],
 	['...on RegisteredAccount']: Omit<GraphQLTypes["RegisteredAccount"], "...on RegisteredAccount">
+};
+	/** Описание оферты, которую пайщик должен принять при регистрации */
+["RegistrationAgreement"]: {
+	__typename: "RegistrationAgreement",
+	/** Тип соглашения для on-chain sendAgreement */
+	agreement_type: string,
+	/** Типы аккаунтов, для которых оферта применима */
+	applicable_account_types: Array<GraphQLTypes["AccountType"]>,
+	/** Текст для галочки */
+	checkbox_text: string,
+	/** Строковый идентификатор оферты */
+	id: string,
+	/** Нужно ли отправлять в блокчейн через sendAgreement */
+	is_blockchain_agreement: boolean,
+	/** Текст ссылки для открытия диалога чтения */
+	link_text: string,
+	/** Нужно ли линковать хеш документа в заявление */
+	link_to_statement: boolean,
+	/** Порядок отображения */
+	order: number,
+	/** registry_id шаблона на фабрике документов */
+	registry_id: number,
+	/** Человекочитаемое название оферты */
+	title: string,
+	['...on RegistrationAgreement']: Omit<GraphQLTypes["RegistrationAgreement"], "...on RegistrationAgreement">
 };
 	["RegistrationConfig"]: {
 	__typename: "RegistrationConfig",
