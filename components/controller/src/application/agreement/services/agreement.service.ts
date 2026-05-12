@@ -317,21 +317,4 @@ export class AgreementService {
   ): Promise<AgreementDTO[]> {
     return await Promise.all(entities.map((entity) => this.toDTO(entity)));
   }
-
-  /**
-   * Реализация AgreementSignaturePort (план C28-10 раздел 3.1 — L3-гейт).
-   *
-   * true ↔ найдено on-chain соглашение (coopname, username, type) в
-   * любом статусе кроме DECLINED — REGISTERED уже достаточно для
-   * входа в расширение, CONFIRMED — после ратификации советом.
-   */
-  async hasSigned(coopname: string, username: string, agreement_type: string): Promise<boolean> {
-    const agreements = await this.agreementRepository.findByUsername(username);
-    return agreements.some(
-      (a) =>
-        a.coopname === coopname &&
-        a.type === agreement_type &&
-        a.status !== AgreementStatus.DECLINED
-    );
-  }
 }
