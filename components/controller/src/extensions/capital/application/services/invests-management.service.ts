@@ -1,4 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  AGREEMENT_SIGNATURE_PORT,
+  AgreementSignaturePort,
+} from '~/domain/agreement/ports/agreement-signature.port';
+import {
+  BLAGOROST_AGREEMENT_TYPE,
+  GENERATOR_AGREEMENT_TYPE,
+} from '../../constants/capital-agreement-ids';
 import { InvestsManagementInteractor } from '../use-cases/invests-management.interactor';
 import type { CreateProjectInvestInputDTO } from '../dto/invests_management/create-project-invest-input.dto';
 import type { CreateProgramInvestInputDTO } from '../dto/invests_management/create-program-invest-input.dto';
@@ -25,8 +33,33 @@ import { verifySignedDocumentAgainstStoredDraft } from '~/utils/signed-document-
 export class InvestsManagementService {
   constructor(
     private readonly investsManagementInteractor: InvestsManagementInteractor,
-    private readonly documentInteractor: DocumentInteractor
+    private readonly documentInteractor: DocumentInteractor,
+    @Inject(AGREEMENT_SIGNATURE_PORT)
+    private readonly agreementSignaturePort: AgreementSignaturePort
   ) {}
+
+  /**
+   * L3-гейт: запрещает участие в программе без подписи соответствующей
+   * оферты (план C28-10 раздел 3.1).
+   *
+   * Не подписана generator → нельзя инвестировать в проект программы Генерация;
+   * не подписана blagorost → нельзя сделать программную инвестицию Благорост.
+   * Подписи проверяются по платформенному AgreementSignaturePort, опирающемуся
+   * на on-chain `agreements3` (backfilled в Postgres сервисом sync).
+   */
+  private async assertSignedOffer(
+    coopname: string,
+    username: string,
+    agreement_type: string,
+    humanProgramName: string
+  ): Promise<void> {
+    const signed = await this.agreementSignaturePort.hasSigned(coopname, username, agreement_type);
+    if (!signed) {
+      throw new ForbiddenException(
+        `Чтобы участвовать в программе «${humanProgramName}», нужно сначала подписать оферту программы. Перейдите в раздел регистрации и завершите подписание.`
+      );
+    }
+  }
 
   /**
    * Инвестирование в проект CAPITAL контракта
@@ -35,6 +68,7 @@ export class InvestsManagementService {
     data: CreateProjectInvestInputDTO,
     currentUser: MonoAccountDomainInterface
   ): Promise<TransactResult> {
+    await this.assertSignedOffer(data.coopname, currentUser.username, GENERATOR_AGREEMENT_TYPE, 'Генерация');
     CurrencyValidationUtil.validateCurrencySymbol(data.amount, 'сумме инвестиции');
     await verifySignedDocumentAgainstStoredDraft(
       (docHash) => this.documentInteractor.getDocumentByHash(docHash),
@@ -64,6 +98,7 @@ export class InvestsManagementService {
     data: CreateProgramInvestInputDTO,
     currentUser: MonoAccountDomainInterface
   ): Promise<TransactResult> {
+    await this.assertSignedOffer(data.coopname, currentUser.username, BLAGOROST_AGREEMENT_TYPE, 'Благорост');
     CurrencyValidationUtil.validateCurrencySymbol(data.amount, 'сумме программной инвестиции');
     await verifySignedDocumentAgainstStoredDraft(
       (docHash) => this.documentInteractor.getDocumentByHash(docHash),
