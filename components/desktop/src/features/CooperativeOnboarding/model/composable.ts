@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, type Ref, type ComputedRef } from 'vue'
 import {
   fetchExtensionOnboardingState,
   completeExtensionOnboardingStep,
@@ -10,13 +10,13 @@ import type {
 } from './types'
 
 export interface IExtensionCooperativeOnboardingController {
-  state: ReturnType<typeof ref<IExtensionOnboardingState | null>>
-  isLoading: ReturnType<typeof ref<boolean>>
-  error: ReturnType<typeof ref<string | null>>
-  steps: ReturnType<typeof computed<IExtensionOnboardingStepState[]>>
-  allDone: ReturnType<typeof computed<boolean>>
-  expiresAt: ReturnType<typeof computed<string>>
-  isExpired: ReturnType<typeof computed<boolean>>
+  state: Ref<IExtensionOnboardingState | null>
+  isLoading: Ref<boolean>
+  error: Ref<string | null>
+  steps: ComputedRef<IExtensionOnboardingStepState[]>
+  allDone: ComputedRef<boolean>
+  expiresAt: ComputedRef<string>
+  isExpired: ComputedRef<boolean>
   load(): Promise<void>
   completeStep(input: ICompleteExtensionOnboardingStepInput): Promise<void>
   reset(): void

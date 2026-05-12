@@ -1,4 +1,5 @@
-import { Selector } from '../../zeus'
+import type { MakeAllFieldsRequired } from '../../utils/MakeAllFieldsRequired'
+import { Selector, type ValueTypes } from '../../zeus'
 
 const extensionOnboardingStepStateFields = {
   step_key: true,
@@ -6,7 +7,7 @@ const extensionOnboardingStepStateFields = {
   hash: true,
   order: true,
   default_title: true,
-} as const
+}
 
 const extensionOnboardingStateFields = {
   extension_name: true,
@@ -14,8 +15,13 @@ const extensionOnboardingStateFields = {
   onboarding_init_at: true,
   onboarding_expire_at: true,
   all_done: true,
-} as const
+}
+
+const _validateStep: MakeAllFieldsRequired<ValueTypes['ExtensionOnboardingStepState']> =
+  extensionOnboardingStepStateFields
+const _validate: MakeAllFieldsRequired<ValueTypes['ExtensionOnboardingState']> =
+  extensionOnboardingStateFields
 
 export const extensionOnboardingStateSelector = Selector('ExtensionOnboardingState')(
-  extensionOnboardingStateFields as any
+  extensionOnboardingStateFields
 )
