@@ -110,7 +110,7 @@ export class MigratePhase1Minshare implements Migration {
       const actions = accepted.map((p) => ({
         account: Ledger2Contract.contractName.production,
         name: Ledger2Contract.Actions.Migrate3.actionName,
-        authorization: [{ actor: coopname, permission: 'active' }],
+        authorization: [{ actor: Ledger2Contract.contractName.production, permission: 'active' }],
         data: {
           coopname,
           wallet_name: W_REG_MINSHR,

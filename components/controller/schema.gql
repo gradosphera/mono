@@ -9724,6 +9724,11 @@ type Query {
   """Получить подписки пользователя у провайдера"""
   getProviderSubscriptions: [ProviderSubscription!]!
 
+  """
+  Получить список оферт для регистрации пайщика заданного типа аккаунта и (опционально) программы. Сливает базовые платформенные оферты с теми, что зарегистрировали расширения.
+  """
+  getRegistrationAgreements(account_type: AccountType!, coopname: String!, program_key: String): [RegistrationAgreement!]!
+
   """Получить конфигурацию программ регистрации для кооператива"""
   getRegistrationConfig(account_type: AccountType!, coopname: String!): RegistrationConfig!
 
@@ -9996,6 +10001,39 @@ type RegisteredAccount {
 
   """Токены доступа и обновления"""
   tokens: Tokens!
+}
+
+"""Описание оферты, которую пайщик должен принять при регистрации"""
+type RegistrationAgreement {
+  """Тип соглашения для on-chain sendAgreement"""
+  agreement_type: String!
+
+  """Типы аккаунтов, для которых оферта применима"""
+  applicable_account_types: [AccountType!]!
+
+  """Текст для галочки"""
+  checkbox_text: String!
+
+  """Строковый идентификатор оферты"""
+  id: String!
+
+  """Нужно ли отправлять в блокчейн через sendAgreement"""
+  is_blockchain_agreement: Boolean!
+
+  """Текст ссылки для открытия диалога чтения"""
+  link_text: String!
+
+  """Нужно ли линковать хеш документа в заявление"""
+  link_to_statement: Boolean!
+
+  """Порядок отображения"""
+  order: Int!
+
+  """registry_id шаблона на фабрике документов"""
+  registry_id: Int!
+
+  """Человекочитаемое название оферты"""
+  title: String!
 }
 
 type RegistrationConfig {

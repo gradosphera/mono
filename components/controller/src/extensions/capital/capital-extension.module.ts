@@ -267,6 +267,11 @@ import { UdataDocumentParametersService, UDATA_DOCUMENT_PARAMETERS_SERVICE } fro
 import { UdataDocumentParametersAdapter } from './infrastructure/adapters/udata-document-parameters.adapter';
 import { CapitalInterProjectCapitalClearanceAdapter } from './infrastructure/inter/capital-inter-project-capital-clearance.adapter';
 import { UDATA_DOCUMENT_PARAMETERS_PORT } from '~/domain/common/ports/udata-document-parameters.port';
+import {
+  AGREEMENT_REGISTRATION_PORT,
+  type AgreementRegistrationPort,
+} from '~/domain/registration/ports/agreement-registration.port';
+import { registerCapitalInAgreementRegistry } from './application/registration/register-capital-in-agreement-registry';
 
 // Репозитории
 import { ProjectTypeormRepository } from './infrastructure/repositories/project.typeorm-repository';
@@ -459,11 +464,13 @@ export class CapitalPlugin extends BaseExtModule {
     private readonly programShareRegistrationScheduler: ProgramShareRegistrationSchedulerService,
     private readonly githubService: GitHubService,
     private readonly gitService: GitService,
-    private readonly capitalDevelopmentRepositoryGitSync: CapitalDevelopmentRepositoryGitSyncService
+    private readonly capitalDevelopmentRepositoryGitSync: CapitalDevelopmentRepositoryGitSyncService,
+    @Inject(AGREEMENT_REGISTRATION_PORT) private readonly agreementRegistrationPort: AgreementRegistrationPort
   ) {
     super();
     this.logger.setContext(CapitalPlugin.name);
   }
+
 
   name = 'capital';
   plugin!: ExtensionDomainEntity<IConfig>; // ExtensionDomainEntity<IConfig>;
@@ -609,6 +616,24 @@ export class CapitalPlugin extends BaseExtModule {
       const message = error instanceof Error ? error.message : String(error)
       const stack = error instanceof Error ? error.stack : undefined
       this.logger.error(`Не удалось настроить планировщик regshare: ${message}`, stack)
+    }
+
+    // L2: регистрация оферт и программ capital в платформенном реестре.
+    // Если L1 ещё не завершён — реестр остаётся пустым, SignUp не предлагает
+    // программы capital (раздел 4.1 req 44 проекта 13).
+    try {
+      const registered = registerCapitalInAgreementRegistry(this.agreementRegistrationPort, extensionConfig as IConfig);
+      if (registered) {
+        this.logger.log('[CAPITAL.REGISTRY] зарегистрировано 2 оферты + 2 программы capital');
+      } else {
+        this.logger.log(
+          '[CAPITAL.REGISTRY] L1 онбординг ещё не завершён — оферты и программы не регистрируются'
+        );
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Не удалось зарегистрировать capital в AgreementRegistry: ${message}`, stack);
     }
   }
 }
