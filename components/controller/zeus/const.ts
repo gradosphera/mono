@@ -1565,9 +1565,6 @@ export const AllTypesProps: Record<string,any> = {
 		getProviderSubscriptionById:{
 
 		},
-		getRegistrationAgreements:{
-			account_type:"AccountType"
-		},
 		getRegistrationConfig:{
 			account_type:"AccountType"
 		},
@@ -4151,7 +4148,6 @@ export const ReturnTypes: Record<string,any> = {
 		getProgramWallets:"ProgramWalletsPaginationResult",
 		getProviderSubscriptionById:"ProviderSubscription",
 		getProviderSubscriptions:"ProviderSubscription",
-		getRegistrationAgreements:"RegistrationAgreement",
 		getRegistrationConfig:"RegistrationConfig",
 		getReport:"GeneratedReport",
 		getReportCalendar:"ReportCalendarRow",
@@ -4194,18 +4190,6 @@ export const ReturnTypes: Record<string,any> = {
 	RegisteredAccount:{
 		account:"Account",
 		tokens:"Tokens"
-	},
-	RegistrationAgreement:{
-		agreement_type:"String",
-		applicable_account_types:"AccountType",
-		checkbox_text:"String",
-		id:"String",
-		is_blockchain_agreement:"Boolean",
-		link_text:"String",
-		link_to_statement:"Boolean",
-		order:"Int",
-		registry_id:"Int",
-		title:"String"
 	},
 	RegistrationConfig:{
 		programs:"RegistrationProgram",
