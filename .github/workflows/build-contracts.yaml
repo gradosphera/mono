@@ -31,6 +31,15 @@ on:
       - 'components/contracts/build-all.sh'
       - 'components/contracts/docker/**'
       - '.github/workflows/build-contracts.yaml'
+    # Дополнительно ловим все push'и тэгов: build-containers.yaml зависит от
+    # успеха этой сборки через workflow_run, и без unconditional запуска по
+    # тегу build-containers не получит триггер для коммитов, где .cpp не
+    # менялся (например `chore(release): publish` правит только версии
+    # пакетов). См. историю гонки 2026-05-13: webhook деплоя сработал на
+    # 2:34 быстрее обновления `dicoop/contracts:testnet`, на чейн уехал
+    # старый wasm.
+    tags:
+      - '*'
   workflow_dispatch:
 
 jobs:
