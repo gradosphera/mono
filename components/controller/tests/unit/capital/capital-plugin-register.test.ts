@@ -89,7 +89,7 @@ describe('registerCapitalInAgreementRegistry', () => {
       expect.objectContaining({
         id: 'blagorost_offer',
         registry_id: Cooperative.Registry.BlagorostOffer.registry_id,
-        agreement_type: 'blagorost',
+        agreement_type: 'capital',
         extension_name: 'capital',
         applicable_account_types: [AccountType.individual],
       })

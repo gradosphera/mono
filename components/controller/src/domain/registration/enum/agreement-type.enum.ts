@@ -1,7 +1,7 @@
 /**
  * Типы платформенных соглашений для отправки в блокчейн (sendAgreement).
  *
- * Типы оферт расширений (capital → 'blagorost', 'generator' и т.п.)
+ * Типы оферт расширений (capital → 'capital', 'generator' и т.п.)
  * не входят в этот enum: расширения сами задают строковые agreement_type
  * через AgreementRegistrationPort и обращаются к sendAgreement напрямую
  * с этими значениями.

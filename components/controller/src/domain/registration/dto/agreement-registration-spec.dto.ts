@@ -25,7 +25,7 @@ export interface AgreementRegistrationSpec {
 
   /**
    * Тип соглашения для on-chain `agreements` (sendAgreement action).
-   * Расширение предоставляет своё значение (например 'blagorost' для capital,
+   * Расширение предоставляет своё значение (например 'capital' для capital,
    * 'order_table' для Стола заказов).
    */
   agreement_type: string;
