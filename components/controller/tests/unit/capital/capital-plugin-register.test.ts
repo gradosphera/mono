@@ -16,7 +16,6 @@
  */
 
 import { Cooperative } from 'cooptypes';
-import { AccountType } from '~/application/account/enum/account-type.enum';
 import { registerCapitalInAgreementRegistry } from '~/extensions/capital/application/registration/register-capital-in-agreement-registry';
 
 const baseConfig = {
@@ -89,9 +88,11 @@ describe('registerCapitalInAgreementRegistry', () => {
       expect.objectContaining({
         id: 'blagorost_offer',
         registry_id: Cooperative.Registry.BlagorostOffer.registry_id,
-        agreement_type: 'blagorost',
+        agreement_type: 'capital',
         extension_name: 'capital',
-        applicable_account_types: [AccountType.individual],
+        // Пусто — оферта подтягивается через программу CAPITALIZATION,
+        // не как дефолтная для individual (см. 8847a5c0939).
+        applicable_account_types: [],
       })
     );
 
