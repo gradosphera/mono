@@ -36,6 +36,15 @@ void ledger2::migrate3(eosio::name coopname,
   eosio::check(wallet_name.value != 0, "migrate3: wallet_name пустой");
   eosio::check(ledger2_is_known_wallet(wallet_name),
                std::string{"migrate3: неизвестный wallet_name "} + wallet_name.to_string());
+
+#ifndef IS_TESTNET
+  // voskhod: мин.паевые перенесены на w.sov.mnused (COOPERATIVE) при миграции —
+  // см. migrate_voskhod_facts. L3 для w.reg.minshr на voskhod не создаётся,
+  // иначе сломается инвариант Σ L3 == L2 (L2 пуст, а 048 написал бы 34 L3-записи).
+  eosio::check(!(coopname == "voskhod"_n && wallet_name == ledger2_wallets::MIN_SHARE_FUND),
+               "migrate3: voskhod не использует w.reg.minshr — мин.паевые на w.sov.mnused "
+               "(см. migrate_voskhod_facts); migrator-048 должен пропускать voskhod");
+#endif
   eosio::check(ledger2_get_wallet_kind(wallet_name) == WalletKind::USER_SHARED,
                std::string{"migrate3: wallet_name "} + wallet_name.to_string() +
                  " не USER_SHARED — L3-запись не имеет смысла");
