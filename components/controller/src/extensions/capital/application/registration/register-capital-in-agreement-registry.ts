@@ -61,7 +61,13 @@ export function registerCapitalInAgreementRegistry(
     title: 'Оферта по целевой потребительской программе "Благорост"',
     checkbox_text: 'Я прочитал и принимаю',
     link_text: 'оферту по целевой потребительской программе "Благорост"',
-    applicable_account_types: [AccountType.individual],
+    // applicable_account_types: пусто — оферта подтягивается ТОЛЬКО через
+    // программу CAPITALIZATION (agreement_ids ниже), не как дефолтная
+    // для individual. Иначе при выборе GENERATION бэк попытался бы
+    // сгенерить blagorost_offer как дефолтную, но generateDocumentParameters
+    // под GENERATION зовёт только generateGeneratorOfferParameters →
+    // Factory падает «Данные соглашения благороста не найдены в Udata».
+    applicable_account_types: [],
     order: 5,
     extension_name: CAPITAL_EXTENSION_NAME,
   });
