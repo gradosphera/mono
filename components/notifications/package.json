@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/notifications",
-  "version": "2026.5.13-alpha-4",
+  "version": "2026.5.14",
   "description": "Библиотека типобезопасных workflow-уведомлений для Novu",
   "type": "module",
   "private": false,
