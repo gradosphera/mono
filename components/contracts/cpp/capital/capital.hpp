@@ -322,4 +322,7 @@ public:
     [[eosio::action]]
     void settledebt(name coopname, name username, eosio::asset amount, document2 statement);
 
+    [[eosio::action]]
+    void topupprogexp(name coopname, eosio::asset amount);
+
 };
