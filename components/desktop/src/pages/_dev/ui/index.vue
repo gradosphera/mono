@@ -549,6 +549,92 @@
         </div>
       </div>
     </section>
+
+    <!-- ============ 17 WALLET CARD — programs × compact / full ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">17</span>
+        <h2 class="dev-ui__sect-title">Кошелёк (WalletCard)</h2>
+        <p class="dev-ui__sect-sub">
+          Канонический <code>.wallet</code> с программным акцентом
+          (<code>--prog-blagorost</code>, <code>--prog-wallet</code>,
+          <code>--prog-generator</code>). Compact-вариант (<code>.wallet--row</code>)
+          для слота шапки; full — для дашборда.
+        </p>
+      </div>
+
+      <div class="dev-ui__stage">
+        <h3 class="dev-ui__h3">Compact (для слота шапки)</h3>
+        <div class="dev-ui__grid dev-ui__grid--3">
+          <WalletCard
+            compact
+            program="blagorost"
+            balance="125 400,00"
+            symbol="RUB"
+          />
+          <WalletCard
+            compact
+            program="wallet"
+            balance="48 250,75"
+            symbol="RUB"
+          />
+          <WalletCard
+            compact
+            program="generator"
+            balance="6 320,00"
+            symbol="RUB"
+          />
+        </div>
+
+        <h3 class="dev-ui__h3" style="margin-top: 20px">Full (дашборд)</h3>
+        <div class="dev-ui__grid dev-ui__grid--2">
+          <WalletCard
+            program="blagorost"
+            subtitle="Накопления на жильё"
+            balance="125 400,00"
+            symbol="RUB"
+            locked-balance="12 000,00"
+          />
+          <WalletCard
+            program="wallet"
+            subtitle="Свободный остаток"
+            balance="48 250,75"
+            symbol="RUB"
+          />
+          <WalletCard
+            program="generator"
+            subtitle="Доходы от программы"
+            balance="6 320,00"
+            symbol="RUB"
+            locked-balance="2 100,00"
+          />
+          <WalletCard
+            program="wallet"
+            subtitle="Пустой счёт"
+            balance="0,00"
+            symbol="RUB"
+            empty
+          />
+        </div>
+
+        <h3 class="dev-ui__h3" style="margin-top: 20px">Состояние loading</h3>
+        <div class="dev-ui__grid dev-ui__grid--3">
+          <WalletCard
+            compact
+            program="blagorost"
+            balance=""
+            symbol="RUB"
+            loading
+          />
+          <WalletCard
+            program="wallet"
+            balance=""
+            symbol="RUB"
+            loading
+          />
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -560,6 +646,7 @@ import { AppHeader } from 'src/shared/ui/layout/AppHeader';
 import { PageHead } from 'src/shared/ui/layout/PageHead';
 import { PageTabs } from 'src/shared/ui/layout/PageTabs';
 import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
+import { WalletCard } from 'src/shared/ui/domain/WalletCard';
 import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
 import type { PageTab } from 'src/shared/ui/layout/PageTabs';
 
@@ -1056,5 +1143,31 @@ code {
 }
 .dev-ui__token-text:focus {
   border-color: var(--p-accent);
+}
+
+.dev-ui__h3 {
+  font-size: var(--p-fs-h3, 14px);
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  color: var(--p-ink-2);
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+.dev-ui__grid {
+  display: grid;
+  gap: 12px;
+}
+.dev-ui__grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.dev-ui__grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .dev-ui__grid--2,
+  .dev-ui__grid--3 {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
