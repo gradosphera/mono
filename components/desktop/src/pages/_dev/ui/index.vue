@@ -534,6 +534,9 @@
               <template #actions>
                 <BaseButton variant="primary" size="sm">Совершить взнос</BaseButton>
               </template>
+              <template #wallet>
+                <WalletCardMini program="wallet" />
+              </template>
               <template #notifications>
                 <button class="icon-btn" aria-label="Уведомления" type="button">☷</button>
               </template>
@@ -635,6 +638,28 @@
         </div>
       </div>
     </section>
+
+    <!-- ============ 18 WALLET CARD MINI — connected widget ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">18</span>
+        <h2 class="dev-ui__sect-title">Кошелёк · connected (WalletCardMini)</h2>
+        <p class="dev-ui__sect-sub">
+          <code>widgets/wallet-card-mini</code> — обёртка над WalletCard,
+          подключена к Pinia <code>useWalletStore</code> и роутеру (клик →
+          <code>name: 'wallet'</code>). На dev-странице store пустой (никто
+          не вызвал <code>loadUserWallet</code>) — отрисуется skeleton-loading.
+          На реальных страницах после init процесса покажет настоящий баланс.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__grid dev-ui__grid--3">
+          <WalletCardMini program="wallet" />
+          <WalletCardMini program="blagorost" />
+          <WalletCardMini program="generator" />
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -647,6 +672,7 @@ import { PageHead } from 'src/shared/ui/layout/PageHead';
 import { PageTabs } from 'src/shared/ui/layout/PageTabs';
 import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
 import { WalletCard } from 'src/shared/ui/domain/WalletCard';
+import { WalletCardMini } from 'src/widgets/wallet-card-mini';
 import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
 import type { PageTab } from 'src/shared/ui/layout/PageTabs';
 
