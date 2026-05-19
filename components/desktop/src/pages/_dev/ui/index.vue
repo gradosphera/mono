@@ -324,13 +324,16 @@
             @select="(i) => (railActive = i.key)"
           >
             <template #footer>
-              <div class="rail-demo__user">
-                <Avatar name="Муравьёв Антон" size="sm" tone="accent" />
-                <div class="rail-demo__userinfo">
-                  <b>Муравьёв А.Н.</b>
-                  <span>Председатель</span>
-                </div>
-              </div>
+              <RailUserCard
+                v-model:collapsed="railUserCollapsed"
+                name="Муравьёв А.Н."
+                role="Председатель совета"
+                :balance="'400,00'"
+                symbol="RUB"
+                show-signout
+                @primary-action="onTopUp"
+                @signout="onSignout"
+              />
             </template>
           </AppDrawer>
           <div class="dev-ui__rail-stub">
@@ -454,7 +457,20 @@
             :active-key="frameActive"
             show-cmdk
             @select="(i) => (frameActive = i.key)"
-          />
+          >
+            <template #footer>
+              <RailUserCard
+                v-model:collapsed="frameUserCollapsed"
+                name="Муравьёв А.Н."
+                role="Председатель совета"
+                :balance="'400,00'"
+                symbol="RUB"
+                show-signout
+                @primary-action="onTopUp"
+                @signout="onSignout"
+              />
+            </template>
+          </AppDrawer>
           <div class="dev-ui__appframe-content">
             <AppHeader title="Кошелёк">
               <template #actions>
@@ -484,6 +500,7 @@ import { AppDrawer } from 'src/shared/ui/layout/AppDrawer';
 import { AppHeader } from 'src/shared/ui/layout/AppHeader';
 import { PageHead } from 'src/shared/ui/layout/PageHead';
 import { PageTabs } from 'src/shared/ui/layout/PageTabs';
+import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
 import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
 import type { PageTab } from 'src/shared/ui/layout/PageTabs';
 
@@ -595,8 +612,17 @@ const frameItems: Array<RailItem | RailSection> = [
 ];
 const frameActive = ref('wallet');
 
+const railUserCollapsed = ref(false);
+const frameUserCollapsed = ref(false);
+
 function onMenuToggle(): void {
   // dev-витрина — реальный toggle живёт на странице приложения
+}
+function onTopUp(): void {
+  // dev-витрина — открытие диалога пополнения уходит на страницу-коннектор
+}
+function onSignout(): void {
+  // dev-витрина — реальный signout (router.push + auth.logout) на странице
 }
 </script>
 
@@ -694,26 +720,6 @@ code {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-.rail-demo__user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  border-top: 1px solid var(--p-line);
-}
-.rail-demo__userinfo {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-.rail-demo__userinfo b {
-  font-size: var(--p-fs-body-sm);
-  font-weight: 600;
-}
-.rail-demo__userinfo span {
-  font-size: var(--p-fs-meta);
-  color: var(--p-ink-2);
 }
 
 .dev-ui__notifs {

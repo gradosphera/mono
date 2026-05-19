@@ -172,7 +172,7 @@ if (process.env.DEV) {
     path: '/_dev/ui',
     name: 'dev-ui-showcase',
     component: () => import('src/pages/_dev/ui/index.vue'),
-    meta: { title: 'MONO v2 — базовые компоненты' },
+    meta: { title: 'MONO v2 — базовые компоненты', icon: 'fa-solid fa-flask' },
   });
 }
 
