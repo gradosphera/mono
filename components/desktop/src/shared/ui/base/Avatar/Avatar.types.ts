@@ -1,5 +1,5 @@
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type AvatarTone = 'neutral' | 'accent' | 'ink';
+export type AvatarTone = 'neutral' | 'primary' | 'accent';
 
 export interface AvatarProps {
   /** Полное имя, по нему сгенерируются инициалы */

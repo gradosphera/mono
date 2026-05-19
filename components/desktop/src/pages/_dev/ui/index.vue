@@ -330,7 +330,7 @@
           <Avatar name="Антон Председатель" size="sm" />
           <Avatar name="Антон Председатель" />
           <Avatar name="Антон Председатель" size="lg" tone="accent" />
-          <Avatar name="Антон Председатель" size="xl" tone="ink" />
+          <Avatar name="Антон Председатель" size="xl" tone="primary" />
         </div>
       </div>
     </section>
