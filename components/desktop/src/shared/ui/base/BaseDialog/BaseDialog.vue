@@ -78,17 +78,18 @@ const maxWidthBySize: Record<BaseDialogSize, string> = {
   letter-spacing: var(--p-ls-h3);
   color: var(--p-ink);
 }
-/* Между описанием диалога (<p>) и первым инпутом — отступ. Между
-   остальными детьми reserve-hint-space инпутов сам даёт достаточно
-   воздуха. Универсальный gap здесь — избыточно. */
+/* Между описанием диалога и первым инпутом — отступ. Между остальными
+   детьми reserve-hint-space инпутов сам даёт достаточно воздуха.
+   Селектор `:first-child + *` крепится ко второму ребёнку (даём ему
+   margin-top), а не к первому — иначе inline `style="margin:0"` на
+   `<p>`-описании перебивает CSS, и отступ ломается. */
 .base-dialog__body {
   display: flex;
   flex-direction: column;
   padding-bottom: var(--p-2, 8px);
 }
-.base-dialog__body > p:first-child,
-.base-dialog__body > .intro:first-child {
-  margin: 0 0 var(--p-4, 16px);
+.base-dialog__body > :first-child + * {
+  margin-top: var(--p-4, 16px);
 }
 /* Кнопки в footer ближе к body — без избыточного зазора */
 .base-dialog__foot {
