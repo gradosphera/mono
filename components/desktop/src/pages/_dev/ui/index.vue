@@ -590,7 +590,7 @@
         <div class="dev-ui__grid dev-ui__grid--2">
           <WalletCard
             program="blagorost"
-            subtitle="Накопления на жильё"
+            subtitle="Капитализация результатов интеллектуальной деятельности"
             balance="125 400,00"
             symbol="RUB"
             locked-balance="12 000,00"
@@ -603,7 +603,7 @@
           />
           <WalletCard
             program="generator"
-            subtitle="Доходы от программы"
+            subtitle="Генерация результатов интеллектуальной деятельности"
             balance="6 320,00"
             symbol="RUB"
             locked-balance="2 100,00"
