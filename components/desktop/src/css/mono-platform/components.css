@@ -595,8 +595,8 @@ body {
 .avatar--sm { width: 28px; height: 28px; font-size: 11px; }
 .avatar--lg { width: 44px; height: 44px; font-size: 14px; }
 .avatar--xl { width: 64px; height: 64px; font-size: 18px; }
-.avatar--accent { background: var(--p-primary-soft); color: var(--p-primary); }
-.avatar--ink    { background: var(--p-ink); color: var(--p-canvas); }
+.avatar--primary { background: var(--p-primary-soft); color: var(--p-primary); }
+.avatar--accent  { background: var(--p-accent-soft);  color: var(--p-accent); }
 
 /* Stack — overlapping avatars (council preview) */
 .avatar-stack { display: inline-flex; align-items: center; }
