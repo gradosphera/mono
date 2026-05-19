@@ -1,0 +1,20 @@
+export interface BaseInputProps {
+  modelValue?: string | number | null;
+  label?: string;
+  hint?: string;
+  error?: string;
+  placeholder?: string;
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
+  /** Моноширинный шрифт (для аккаунт-имён, hash, и т.п.) */
+  mono?: boolean;
+  /** Постфикс в правой части поля (например `RUB`) */
+  suffix?: string;
+  /** Префикс в левой части поля */
+  prefix?: string;
+  readonly?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+  autocomplete?: string;
+  name?: string;
+  id?: string;
+}

@@ -1,0 +1,33 @@
+import { boot } from 'quasar/wrappers';
+
+import BaseButton from 'src/shared/ui/base/BaseButton/BaseButton.vue';
+import BaseInput from 'src/shared/ui/base/BaseInput/BaseInput.vue';
+import BaseSelect from 'src/shared/ui/base/BaseSelect/BaseSelect.vue';
+import BaseCard from 'src/shared/ui/base/BaseCard/BaseCard.vue';
+import BaseTable from 'src/shared/ui/base/BaseTable/BaseTable.vue';
+import BaseChip from 'src/shared/ui/base/BaseChip/BaseChip.vue';
+import BaseBadge from 'src/shared/ui/base/BaseBadge/BaseBadge.vue';
+import BaseDialog from 'src/shared/ui/base/BaseDialog/BaseDialog.vue';
+import BaseBanner from 'src/shared/ui/base/BaseBanner/BaseBanner.vue';
+import BaseForm from 'src/shared/ui/base/BaseForm/BaseForm.vue';
+import EmptyState from 'src/shared/ui/base/EmptyState/EmptyState.vue';
+import Avatar from 'src/shared/ui/base/Avatar/Avatar.vue';
+import ThemeToggle from 'src/shared/ui/base/ThemeToggle/ThemeToggle.vue';
+import AuthCard from 'src/shared/ui/base/AuthCard/AuthCard.vue';
+
+export default boot(({ app }) => {
+  app.component('BaseButton', BaseButton);
+  app.component('BaseInput', BaseInput);
+  app.component('BaseSelect', BaseSelect);
+  app.component('BaseCard', BaseCard);
+  app.component('BaseTable', BaseTable);
+  app.component('BaseChip', BaseChip);
+  app.component('BaseBadge', BaseBadge);
+  app.component('BaseDialog', BaseDialog);
+  app.component('BaseBanner', BaseBanner);
+  app.component('BaseForm', BaseForm);
+  app.component('EmptyState', EmptyState);
+  app.component('Avatar', Avatar);
+  app.component('ThemeToggle', ThemeToggle);
+  app.component('AuthCard', AuthCard);
+});
