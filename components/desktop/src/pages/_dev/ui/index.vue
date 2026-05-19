@@ -330,8 +330,10 @@
                 role="Председатель совета"
                 :balance="'400,00'"
                 symbol="RUB"
+                balance-route="/_dev/ui#wallet"
                 show-signout
                 @primary-action="onTopUp"
+                @balance-click="onBalanceClick"
                 @signout="onSignout"
               />
             </template>
@@ -623,6 +625,9 @@ function onTopUp(): void {
 }
 function onSignout(): void {
   // dev-витрина — реальный signout (router.push + auth.logout) на странице
+}
+function onBalanceClick(): void {
+  // dev-витрина — на проде это router.push на страницу кошелька
 }
 </script>
 
