@@ -8,100 +8,54 @@
    ============================================================ */
 
 /* ===== Field (q-input / q-select / q-input-mask / etc) =====
-   Высоту НЕ задаём принудительно — Quasar держит свою вертикальную
-   разметку (control-container с padding-top под floating-label).
-   Для канон-look 40px BaseInput использует dense + stack-label —
-   `.q-field--dense` ниже даёт ровно 40px без раздавливания label-слота. */
+   ТОЛЬКО ЦВЕТ. Никакой геометрии (height/padding/border-radius/font),
+   никаких transitions/opacity manipulations, никаких box-shadow override
+   и ::after-tweaks — Quasar отвечает за всё это сам, дефолтное
+   поведение пользователя устраивает. */
+
+/* Цвет фона control'а (canon surface) */
 .q-field--outlined .q-field__control {
   background: var(--p-surface);
-  border-radius: var(--p-r-sm, 8px);
-  padding: 0 14px;
-  transition: border-color var(--p-dur-fast, 120ms), box-shadow var(--p-dur-fast, 120ms);
   color: var(--p-ink);
-  font-size: var(--p-fs-body);
-  font-family: var(--p-sans, inherit);
 }
+/* Цвет границы по умолчанию */
 .q-field--outlined .q-field__control::before {
-  border: 1px solid var(--p-line-1);
-  border-radius: var(--p-r-sm, 8px);
-  /* opacity:1 принудительно — Quasar внутри анимирует opacity ::before
-     при focus (прячет старую границу перед показом ::after underline).
-     Так как ::after мы спрятали, это давало мерцание (пустая граница
-     в течение ~200-400 ms). Фиксируем opacity и transition только по
-     цвету — граница меняет ТОЛЬКО цвет, без исчезновения. */
-  opacity: 1 !important;
-  transition: border-color var(--p-dur-fast, 120ms);
+  border-color: var(--p-line-1);
 }
-.q-field--outlined:hover .q-field__control::before {
-  border-color: var(--p-line-2);
-}
-/* Focus: только цвет границы через ::before (Quasar внутренне ставит класс
-   --focused/--highlighted). Никаких box-shadow и outline сверху — это
-   избегает двойной подсветки (наш accent-border + браузерный focus-ring). */
+/* Цвет границы на focus */
 .q-field--outlined.q-field--focused .q-field__control::before {
-  border: 1px solid var(--p-accent);
+  border-color: var(--p-accent);
 }
-/* Снимаем Quasar-внутренние focus-эффекты — оставляем только border-color */
-.q-field--outlined.q-field--focused .q-field__control,
-.q-field--outlined.q-field--highlighted .q-field__control {
-  box-shadow: none !important;
+/* Цвет границы при ошибке */
+.q-field--outlined.q-field--error .q-field__control::before {
+  border-color: var(--p-neg);
 }
-.q-field--outlined.q-field--focused .q-field__control::after,
-.q-field--outlined.q-field--highlighted .q-field__control::after {
-  display: none;
-}
+/* Цвет текста значения */
 .q-field--outlined .q-field__native,
 .q-field--outlined .q-field__input {
-  font-size: var(--p-fs-body);
   color: var(--p-ink);
-  font-family: var(--p-sans, inherit);
-  outline: none;
 }
-.q-field--outlined .q-field__native:focus,
-.q-field--outlined .q-field__input:focus {
-  outline: none;
-  box-shadow: none;
-}
+/* Цвет placeholder */
 .q-field--outlined .q-field__native::placeholder,
 .q-field--outlined .q-field__input::placeholder {
   color: var(--p-ink-3);
 }
+/* Цвет метки */
 .q-field--outlined .q-field__label {
   color: var(--p-ink-2);
-  font-size: var(--p-fs-body);
-  font-weight: 400;
 }
-.q-field--outlined.q-field--float .q-field__label {
-  font-size: var(--p-fs-meta);
-  color: var(--p-ink-3);
-  letter-spacing: 0;
-}
-.q-field--outlined.q-field--error .q-field__control::before {
-  border-color: var(--p-neg);
-}
-.q-field--outlined.q-field--error.q-field--focused .q-field__control::before {
-  border: 1px solid var(--p-neg);
-}
+/* Цвет hint/error в нижней строке */
 .q-field__bottom {
-  font-size: var(--p-fs-meta);
   color: var(--p-ink-3);
-  padding: 6px 2px 0;
-  min-height: 24px;
 }
 .q-field--error .q-field__bottom,
 .q-field--error .q-field__messages {
   color: var(--p-neg);
 }
+/* Цвет prefix/suffix */
 .q-field__prefix,
 .q-field__suffix {
   color: var(--p-ink-3);
-  font-size: var(--p-fs-meta);
-}
-
-/* Dense — компактное поле (canon-default для BaseInput через `dense` prop).
-   Quasar в dense сам делает control 40px и переключает геометрию label. */
-.q-field--dense .q-field__control {
-  padding: 0 12px;
 }
 
 /* ===== Button (q-btn) ===== */
