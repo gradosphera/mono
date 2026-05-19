@@ -43,7 +43,9 @@ function onSubmit(e: Event): void {
 .base-form__body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* gap не задаём — reserve-hint-space у q-input уже даёт ~24px
+     снизу под error/hint, дополнительный gap делает расстояние
+     избыточным и неприятным. */
 }
 .base-form__banner {
   background: var(--p-neg-soft);
