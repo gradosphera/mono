@@ -1,6 +1,8 @@
 <template>
   <q-input
     outlined
+    dense
+    stack-label
     reserve-hint-space
     no-error-icon
     :model-value="modelValue ?? ''"

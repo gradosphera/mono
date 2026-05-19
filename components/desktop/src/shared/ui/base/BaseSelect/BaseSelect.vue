@@ -1,6 +1,8 @@
 <template>
   <q-select
     outlined
+    dense
+    stack-label
     reserve-hint-space
     map-options
     emit-value

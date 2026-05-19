@@ -7,11 +7,14 @@
    canon-look без правок.
    ============================================================ */
 
-/* ===== Field (q-input / q-select / q-input-mask / etc) ===== */
+/* ===== Field (q-input / q-select / q-input-mask / etc) =====
+   Высоту НЕ задаём принудительно — Quasar держит свою вертикальную
+   разметку (control-container с padding-top под floating-label).
+   Для канон-look 40px BaseInput использует dense + stack-label —
+   `.q-field--dense` ниже даёт ровно 40px без раздавливания label-слота. */
 .q-field--outlined .q-field__control {
   background: var(--p-surface);
   border-radius: var(--p-r-sm, 8px);
-  height: 40px;
   padding: 0 14px;
   transition: border-color var(--p-dur-fast, 120ms), box-shadow var(--p-dur-fast, 120ms);
   color: var(--p-ink);
@@ -74,22 +77,22 @@
   font-size: var(--p-fs-meta);
 }
 
-/* Dense — сжатое поле (для inline-filters) */
+/* Dense — компактное поле (canon-default для BaseInput через `dense` prop).
+   Quasar в dense сам делает control 40px и переключает геометрию label. */
 .q-field--dense .q-field__control {
-  height: 32px;
-  padding: 0 10px;
+  padding: 0 12px;
 }
 
 /* ===== Button (q-btn) ===== */
 .q-btn {
   text-transform: none;
-  font-size: var(--p-fs-body);
-  font-weight: 500;
+  font-size: var(--p-fs-body-sm);
+  font-weight: 450;
   border-radius: var(--p-r-sm, 8px);
   font-family: var(--p-sans, inherit);
   letter-spacing: 0;
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 36px;
+  padding: 0 14px;
   transition: background var(--p-dur-fast, 120ms), border-color var(--p-dur-fast, 120ms),
     color var(--p-dur-fast, 120ms);
 }
@@ -119,14 +122,21 @@
   background: var(--p-accent-press) !important;
 }
 
-/* Secondary — outline */
+/* Secondary — outline (hairline 1px, не «жирная рамка») */
 .q-btn--outline {
-  border: 1px solid var(--p-line-1) !important;
-  color: var(--p-ink) !important;
   background: var(--p-surface);
+}
+.q-btn--outline:before {
+  border: 1px solid var(--p-line-1) !important;
+  border-radius: var(--p-r-sm, 8px);
+}
+.q-btn--outline {
+  color: var(--p-ink) !important;
 }
 .q-btn--outline:hover {
   background: var(--p-surface-2);
+}
+.q-btn--outline:hover:before {
   border-color: var(--p-line-2) !important;
 }
 
@@ -156,13 +166,13 @@
 /* Sizes */
 .q-btn--dense,
 .q-btn[size="sm"] {
-  min-height: 30px;
-  padding: 0 12px;
+  min-height: 28px;
+  padding: 0 10px;
   font-size: var(--p-fs-meta);
 }
 .q-btn[size="lg"] {
-  min-height: 48px;
-  padding: 0 20px;
+  min-height: 44px;
+  padding: 0 18px;
   font-size: var(--p-fs-body);
 }
 
@@ -193,8 +203,17 @@
   color: var(--p-ink);
   border-radius: var(--p-r-pill, 999px);
   font-size: var(--p-fs-meta);
-  font-weight: 500;
-  height: 24px;
+  font-weight: 450;
+  height: 26px;
+  padding: 0 12px;
+  margin: 0;
+}
+.q-chip .q-chip__icon {
+  font-size: 14px;
+  margin-right: 6px;
+}
+.q-chip--dense {
+  height: 22px;
   padding: 0 10px;
 }
 .q-chip.bg-primary {
