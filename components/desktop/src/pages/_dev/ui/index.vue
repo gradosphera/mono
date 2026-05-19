@@ -301,27 +301,178 @@
       </BaseTable>
     </section>
 
-    <!-- ============ 12 AUTH CARD ============ -->
+    <!-- ============ 12 LAYOUT — APP DRAWER (rail) ============ -->
     <section class="dev-ui__sect">
       <div class="dev-ui__sect-head">
         <span class="dev-ui__sect-num">12</span>
-        <h2 class="dev-ui__sect-title">Карточка авторизации</h2>
+        <h2 class="dev-ui__sect-title">Боковая панель (AppDrawer)</h2>
         <p class="dev-ui__sect-sub">
-          Контейнер для экранов входа/регистрации с teal-капом. Внутри — обычная форма.
+          Solid surface (no gradient), активный пункт — soft-accent заливка
+          пилюлей + 2-px рейл слева. Принимает <code>items</code> и
+          <code>activeKey</code> через props.
         </p>
       </div>
-      <div class="dev-ui__stage" style="display: grid; place-items: center; padding: 36px 24px">
-        <AuthCard title="Вход в кооператив" subtitle="Восход — рабочее пространство председателя">
-          <BaseForm @submit.prevent>
-            <BaseInput v-model="authEmail" label="E-mail" type="email" placeholder="user@example.com" />
-            <BaseInput v-model="authPass" label="Пароль" type="password" />
-          </BaseForm>
-          <BaseButton variant="primary" block>Войти</BaseButton>
-          <template #footer>
-            <a href="#" class="t-sm t-muted">Забыли ключ?</a>
-            <a href="#" class="t-sm t-accent">Зарегистрироваться</a>
+      <div class="dev-ui__stage" style="padding: 0">
+        <div class="dev-ui__rail-demo">
+          <AppDrawer
+            coop-name="ПК «Восход»"
+            coop-meta="Стол пайщика"
+            :items="railItems"
+            :active-key="railActive"
+            show-cmdk
+            cmdk-label="Найти"
+            @select="(i) => (railActive = i.key)"
+          >
+            <template #footer>
+              <div class="rail-demo__user">
+                <Avatar name="Муравьёв Антон" size="sm" tone="accent" />
+                <div class="rail-demo__userinfo">
+                  <b>Муравьёв А.Н.</b>
+                  <span>Председатель</span>
+                </div>
+              </div>
+            </template>
+          </AppDrawer>
+          <div class="dev-ui__rail-stub">
+            <div class="t-muted t-sm">— контент текущего раздела —</div>
+            <div class="t-meta t-faint">Активный пункт: <code>{{ railActive }}</code></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 13 LAYOUT — APP HEADER (topbar) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">13</span>
+        <h2 class="dev-ui__sect-title">Шапка приложения (AppHeader)</h2>
+        <p class="dev-ui__sect-sub">
+          Каноничный паттерн <code>[≡] crumb · · · действия │ глобальные</code>.
+          Поддерживает простой title и multi-level breadcrumb с chevron'ами.
+        </p>
+      </div>
+      <div class="dev-ui__stage" style="padding: 0; overflow: hidden">
+        <AppHeader title="Кошелёк" @toggle-menu="onMenuToggle">
+          <template #actions>
+            <BaseButton variant="primary" size="sm">Совершить взнос</BaseButton>
+            <button class="icon-btn" aria-label="Ещё действия" type="button">⋯</button>
           </template>
-        </AuthCard>
+          <template #notifications>
+            <button class="icon-btn dev-ui__notifs" aria-label="Уведомления" type="button">
+              ☷<span class="dev-ui__notifs-dot" />
+            </button>
+          </template>
+          <template #theme>
+            <ThemeToggle />
+          </template>
+        </AppHeader>
+      </div>
+      <div class="dev-ui__stage" style="padding: 0; overflow: hidden">
+        <AppHeader
+          :breadcrumbs="[
+            { label: 'Мастерская' },
+            { label: 'Проект «Восход 2025»' },
+          ]"
+          @toggle-menu="onMenuToggle"
+        >
+          <template #actions>
+            <BaseButton variant="primary" size="sm">Новый взнос</BaseButton>
+          </template>
+          <template #notifications>
+            <button class="icon-btn" aria-label="Уведомления" type="button">☷</button>
+          </template>
+          <template #theme>
+            <ThemeToggle />
+          </template>
+        </AppHeader>
+      </div>
+    </section>
+
+    <!-- ============ 14 LAYOUT — PAGE HEAD ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">14</span>
+        <h2 class="dev-ui__sect-title">Шапка страницы (PageHead)</h2>
+        <p class="dev-ui__sect-sub">
+          Eyebrow + title + subtitle + actions. Используется для страниц
+          без подстраниц — единственный носитель действий, если нет
+          <code>PageTabs</code>.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <PageHead
+          eyebrow="Контактные данные"
+          title="Потребительский Кооператив «Восход»"
+          subtitle="ИНН 9728130611 · ОГРН 124770283346 · Зарегистрирован в реестре кооперативов с 15 марта 2024 года."
+        >
+          <template #actions>
+            <BaseButton variant="secondary" size="sm">Скопировать карточку</BaseButton>
+          </template>
+        </PageHead>
+      </div>
+    </section>
+
+    <!-- ============ 15 LAYOUT — PAGE TABS ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">15</span>
+        <h2 class="dev-ui__sect-title">Вкладки страницы (PageTabs)</h2>
+        <p class="dev-ui__sect-sub">
+          Подстраницы текущего раздела. Sub-action — отдельный слот справа,
+          отделён hairline. Используется ВМЕСТО <code>page-head__actions</code>
+          когда у страницы есть подстраницы.
+        </p>
+      </div>
+      <div class="dev-ui__stage" style="padding: 0; overflow: hidden">
+        <PageTabs :tabs="walletTabs" :active-key="walletTab" @select="(t) => (walletTab = t.key)" />
+      </div>
+      <div class="dev-ui__stage" style="padding: 0; overflow: hidden; margin-top: 12px">
+        <PageTabs :tabs="projectTabs" :active-key="projectTab" @select="(t) => (projectTab = t.key)">
+          <template #actions>
+            <BaseButton variant="ghost" size="sm">Фильтр</BaseButton>
+          </template>
+        </PageTabs>
+      </div>
+    </section>
+
+    <!-- ============ 16 LAYOUT — APP FRAME (вся связка) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">16</span>
+        <h2 class="dev-ui__sect-title">Каркас приложения</h2>
+        <p class="dev-ui__sect-sub">
+          AppDrawer + AppHeader + PageTabs в живой связке. Никаких legacy
+          QLayout/QDrawer — только canon-разметка через layout-обёртки.
+        </p>
+      </div>
+      <div class="dev-ui__stage" style="padding: 0; overflow: hidden">
+        <div class="dev-ui__appframe">
+          <AppDrawer
+            coop-name="ПК «Восход»"
+            coop-meta="Стол пайщика"
+            :items="frameItems"
+            :active-key="frameActive"
+            show-cmdk
+            @select="(i) => (frameActive = i.key)"
+          />
+          <div class="dev-ui__appframe-content">
+            <AppHeader title="Кошелёк">
+              <template #actions>
+                <BaseButton variant="primary" size="sm">Совершить взнос</BaseButton>
+              </template>
+              <template #notifications>
+                <button class="icon-btn" aria-label="Уведомления" type="button">☷</button>
+              </template>
+              <template #theme>
+                <ThemeToggle />
+              </template>
+            </AppHeader>
+            <PageTabs :tabs="walletTabs" :active-key="walletTab" @select="(t) => (walletTab = t.key)" />
+            <div class="dev-ui__appframe-body">
+              <div class="t-sm t-muted">— содержимое вкладки —</div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -329,6 +480,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { AppDrawer } from 'src/shared/ui/layout/AppDrawer';
+import { AppHeader } from 'src/shared/ui/layout/AppHeader';
+import { PageHead } from 'src/shared/ui/layout/PageHead';
+import { PageTabs } from 'src/shared/ui/layout/PageTabs';
+import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
+import type { PageTab } from 'src/shared/ui/layout/PageTabs';
 
 const inputText = ref('chairman.voskhod@gmail.com');
 const inputMono = ref('ant');
@@ -366,9 +523,6 @@ function onFormSubmit(): void {
   }, 800);
 }
 
-const authEmail = ref('');
-const authPass = ref('');
-
 interface TableRow {
   id: string;
   doc: string;
@@ -389,6 +543,60 @@ const tableRows: TableRow[] = [
 ];
 function statusLabel(s: string): string {
   return { pos: 'Завершён', warn: 'Ожидает подписи', neg: 'Отклонён' }[s] ?? s;
+}
+
+const railItems: Array<RailItem | RailSection> = [
+  {
+    section: 'Раздел',
+    items: [
+      { key: 'wallet', label: 'Кошелёк', icon: 'account_balance_wallet' },
+      { key: 'id', label: 'Удостоверение', icon: 'badge' },
+      { key: 'requisites', label: 'Реквизиты', icon: 'link' },
+      { key: 'docs', label: 'Документы', icon: 'description', badge: 12 },
+      { key: 'pay', label: 'Платежи', icon: 'payments' },
+      { key: 'meetings', label: 'Собрания', icon: 'groups' },
+      { key: 'contacts', label: 'Контакты', icon: 'contacts' },
+      { key: 'support', label: 'Поддержка', icon: 'support_agent' },
+    ],
+  },
+];
+const railActive = ref('wallet');
+
+const walletTabs: PageTab[] = [
+  { key: 'wallets', label: 'Кошельки', count: 3 },
+  { key: 'payments', label: 'Платежи', count: 28 },
+  { key: 'methods', label: 'Способы получения' },
+  { key: 'plan', label: 'План платежей' },
+];
+const walletTab = ref('wallets');
+
+const projectTabs: PageTab[] = [
+  { key: 'desc', label: 'Описание' },
+  { key: 'shares', label: 'Взносы', count: 14 },
+  { key: 'members', label: 'Члены', count: 42 },
+  { key: 'docs', label: 'Документы', count: 12 },
+  { key: 'meetings', label: 'Собрания' },
+  { key: 'decisions', label: 'Решения' },
+  { key: 'history', label: 'История' },
+  { key: 'settings', label: 'Настройки' },
+];
+const projectTab = ref('shares');
+
+const frameItems: Array<RailItem | RailSection> = [
+  {
+    section: 'Раздел',
+    items: [
+      { key: 'wallet', label: 'Кошелёк', icon: 'account_balance_wallet' },
+      { key: 'id', label: 'Удостоверение', icon: 'badge' },
+      { key: 'docs', label: 'Документы', icon: 'description', badge: 12 },
+      { key: 'pay', label: 'Платежи', icon: 'payments' },
+    ],
+  },
+];
+const frameActive = ref('wallet');
+
+function onMenuToggle(): void {
+  // dev-витрина — реальный toggle живёт на странице приложения
 }
 </script>
 
@@ -470,5 +678,75 @@ code {
   padding: 1px 6px;
   border-radius: var(--p-r-xs);
   color: var(--p-ink);
+}
+
+/* ===== Layout demos ===== */
+.dev-ui__rail-demo {
+  display: grid;
+  grid-template-columns: var(--p-rail-w, 248px) 1fr;
+  min-height: 460px;
+  border-radius: var(--p-r-md);
+  overflow: hidden;
+}
+.dev-ui__rail-stub {
+  background: var(--p-canvas);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rail-demo__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--p-line);
+}
+.rail-demo__userinfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.rail-demo__userinfo b {
+  font-size: var(--p-fs-body-sm);
+  font-weight: 600;
+}
+.rail-demo__userinfo span {
+  font-size: var(--p-fs-meta);
+  color: var(--p-ink-2);
+}
+
+.dev-ui__notifs {
+  position: relative;
+}
+.dev-ui__notifs-dot {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--p-neg);
+}
+
+.dev-ui__appframe {
+  display: grid;
+  grid-template-columns: var(--p-rail-w, 248px) 1fr;
+  min-height: 520px;
+  border-radius: var(--p-r-md);
+  overflow: hidden;
+}
+.dev-ui__appframe-content {
+  background: var(--p-canvas);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dev-ui__appframe-body {
+  padding: 24px 28px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
