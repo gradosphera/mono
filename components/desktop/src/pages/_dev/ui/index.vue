@@ -729,11 +729,11 @@ interface TokenGroup {
 }
 const tokenGroups: TokenGroup[] = [
   {
-    title: 'Акцент',
+    title: 'Основной цвет',
     items: [
-      { key: '--p-accent', label: 'Accent', type: 'color' },
-      { key: '--p-accent-hover', label: 'Accent · hover', type: 'color' },
-      { key: '--p-accent-press', label: 'Accent · press', type: 'color' },
+      { key: '--p-primary', label: 'Primary', type: 'color' },
+      { key: '--p-primary-hover', label: 'Primary · hover', type: 'color' },
+      { key: '--p-primary-press', label: 'Primary · press', type: 'color' },
     ],
   },
   {
@@ -750,7 +750,7 @@ const tokenGroups: TokenGroup[] = [
     title: 'Текст',
     items: [
       { key: '--p-ink', label: 'Ink (основной)', type: 'color' },
-      { key: '--p-ink-on-accent', label: 'Ink · on-accent', type: 'color' },
+      { key: '--p-ink-on-primary', label: 'Ink · on-primary', type: 'color' },
     ],
   },
   {
@@ -1150,8 +1150,8 @@ code {
   border-color: var(--p-line-2);
 }
 .dev-ui__token--overridden {
-  border-color: var(--p-accent-line);
-  background: var(--p-accent-soft);
+  border-color: var(--p-primary-line);
+  background: var(--p-primary-soft);
 }
 .dev-ui__token-swatch {
   width: 32px;
@@ -1206,7 +1206,7 @@ code {
   outline: none;
 }
 .dev-ui__token-text:focus {
-  border-color: var(--p-accent);
+  border-color: var(--p-primary);
 }
 
 .dev-ui__h3 {

@@ -73,20 +73,20 @@
   box-shadow: none;
 }
 
-/* Primary — заливка accent */
+/* Primary — заливка primary (canon teal через --q-primary) */
 .q-btn--standard.bg-primary,
 .q-btn--unelevated.bg-primary,
 .q-btn--standard.text-primary.bg-primary {
-  background: var(--p-accent) !important;
-  color: var(--p-ink-on-accent) !important;
+  background: var(--p-primary) !important;
+  color: var(--p-ink-on-primary) !important;
 }
 .q-btn--standard.bg-primary:hover,
 .q-btn--unelevated.bg-primary:hover {
-  background: var(--p-accent-hover) !important;
+  background: var(--p-primary-hover) !important;
 }
 .q-btn--standard.bg-primary:active,
 .q-btn--unelevated.bg-primary:active {
-  background: var(--p-accent-press) !important;
+  background: var(--p-primary-press) !important;
 }
 
 /* Secondary — outline (hairline 1px, не «жирная рамка») */
@@ -184,8 +184,8 @@
   padding: 0 10px;
 }
 .q-chip.bg-primary {
-  background: var(--p-accent-soft) !important;
-  color: var(--p-accent) !important;
+  background: var(--p-primary-soft) !important;
+  color: var(--p-primary) !important;
 }
 .q-chip.bg-positive {
   background: var(--p-pos-soft) !important;
@@ -206,14 +206,14 @@
 
 /* ===== Badge ===== */
 .q-badge {
-  background: var(--p-accent-soft);
-  color: var(--p-accent);
+  background: var(--p-primary-soft);
+  color: var(--p-primary);
   border-radius: var(--p-r-xs, 4px);
   font-size: var(--p-fs-meta);
   font-weight: 600;
   padding: 2px 8px;
 }
-.q-badge.bg-primary { background: var(--p-accent-soft) !important; color: var(--p-accent) !important; }
+.q-badge.bg-primary { background: var(--p-primary-soft) !important; color: var(--p-primary) !important; }
 .q-badge.bg-positive { background: var(--p-pos-soft) !important; color: var(--p-pos) !important; }
 .q-badge.bg-negative { background: var(--p-neg-soft) !important; color: var(--p-neg) !important; }
 .q-badge.bg-warning { background: var(--p-warn-soft) !important; color: var(--p-warn) !important; }
@@ -265,8 +265,8 @@
 }
 .q-item--active,
 .q-item--active:hover {
-  background: var(--p-accent-soft);
-  color: var(--p-accent);
+  background: var(--p-primary-soft);
+  color: var(--p-primary);
 }
 
 /* ===== Table ===== */
@@ -297,5 +297,5 @@
 /* ===== Toggle / Checkbox (минимальная coherence — без полного rewrite) ===== */
 .q-checkbox__inner--truthy .q-checkbox__bg,
 .q-toggle__inner--truthy .q-toggle__track {
-  color: var(--p-accent);
+  color: var(--p-primary);
 }

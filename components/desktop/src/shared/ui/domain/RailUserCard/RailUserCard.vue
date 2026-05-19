@@ -133,7 +133,7 @@ function onBalanceClick(event: MouseEvent): void {
   transition: background var(--p-dur-fast, 120ms) ease;
 }
 .rail__balance--clickable:hover {
-  background: var(--p-accent-soft);
+  background: var(--p-primary-soft);
   filter: brightness(0.97);
 }
 
