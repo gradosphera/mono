@@ -50,6 +50,7 @@ module.exports = configure(function (ctx) {
       // Импортируются ДО приложения, чтобы переопределения проекта могли наследоваться.
       'mono-platform/tokens.css',
       'mono-platform/components.css',
+      'mono-platform/quasar-canon.css',
       '../app/styles/app.scss',
       '../app/styles/style.css',
       '../app/styles/variables.sass',
