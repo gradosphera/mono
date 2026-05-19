@@ -37,6 +37,19 @@ defineProps<AuthCardProps>();
   display: flex;
   flex-direction: column;
   gap: var(--p-5, 20px);
+  /* Auth-карточка — hero-element auth-страницы. Усиливаем shadow поверх
+     canon-минималистского `.card` — без этого светлая тема выглядит плоской
+     (canvas #fafafa и surface #ffffff почти неразличимы). На тёмной shadow
+     поверх чёрного фона остаётся ненавязчивой — лишнего шума не даёт. */
+  box-shadow:
+    0 1px 2px rgba(9, 9, 11, 0.04),
+    0 8px 24px rgba(9, 9, 11, 0.06);
+  border-color: var(--p-line-1);
+}
+[data-theme="dark"] .auth-card {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 12px 32px rgba(0, 0, 0, 0.32);
 }
 .auth-card__head {
   margin-bottom: 0;

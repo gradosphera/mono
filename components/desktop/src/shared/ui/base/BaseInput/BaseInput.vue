@@ -35,8 +35,9 @@
       @input="onInput"
     />
 
-    <div v-if="error" class="field__error">{{ error }}</div>
-    <div v-else-if="hint" class="field__hint">{{ hint }}</div>
+    <div class="field__message" :class="{ 'field__message--error': !!error }">
+      {{ error || hint || ' ' }}
+    </div>
   </div>
 </template>
 
@@ -65,15 +66,18 @@ function onInput(e: Event): void {
 </script>
 
 <style scoped>
-.field__error {
-  margin-top: 6px;
-  font-size: var(--p-fs-meta);
-  color: var(--p-neg);
-}
-.field__hint {
+/* Резервируем место под error/hint всегда — иначе появление сообщения
+   дёргает форму вверх-вниз (layout shift) при keystroke-валидации.
+   Когда нет ни ошибки, ни хинта — рендерится NBSP, высота сохраняется. */
+.field__message {
   margin-top: 6px;
   font-size: var(--p-fs-meta);
   color: var(--p-ink-3);
+  line-height: 1.4;
+  min-height: calc(var(--p-fs-meta) * 1.4);
+}
+.field__message--error {
+  color: var(--p-neg);
 }
 .is-invalid {
   border-color: var(--p-neg) !important;
