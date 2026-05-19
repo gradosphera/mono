@@ -59,7 +59,7 @@ defineProps<AuthCardProps>();
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--p-accent);
+  background: var(--p-primary);
   z-index: 1;
 }
 [data-theme="dark"] .auth-card {

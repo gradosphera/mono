@@ -20,20 +20,22 @@
   --p-ink-2:         rgba(9, 9, 11, 0.58);
   --p-ink-3:         rgba(9, 9, 11, 0.40);
   --p-ink-4:         rgba(9, 9, 11, 0.24);
-  --p-ink-on-accent: #ffffff;
+  --p-ink-on-primary: #ffffff;
 
   /* — Lines — */
   --p-line:          rgba(9, 9, 11, 0.07);
   --p-line-1:        rgba(9, 9, 11, 0.10);
   --p-line-2:        rgba(9, 9, 11, 0.16);
 
-  /* — Accent (deep teal, banking-grade) — */
-  --p-accent:        #0f766e;
-  --p-accent-hover:  #115e59;
-  --p-accent-press:  #134e4a;
-  --p-accent-soft:   rgba(15, 118, 110, 0.10);
-  --p-accent-line:   rgba(15, 118, 110, 0.24);
-  --p-accent-strong: #064e44;
+  /* — Primary (deep teal, banking-grade) — основной цвет canon-палитры.
+     Проброшен в --q-primary → Quasar красит focus q-field, color="primary"
+     на q-btn, bg-primary utility и т.п. без CSS-overrides. */
+  --p-primary:        #0f766e;
+  --p-primary-hover:  #115e59;
+  --p-primary-press:  #134e4a;
+  --p-primary-soft:   rgba(15, 118, 110, 0.10);
+  --p-primary-line:   rgba(15, 118, 110, 0.24);
+  --p-primary-strong: #064e44;
 
   /* — Status — */
   --p-pos:           #15803d;
@@ -86,20 +88,20 @@
   --p-ink-2:         rgba(250, 250, 250, 0.62);
   --p-ink-3:         rgba(250, 250, 250, 0.40);
   --p-ink-4:         rgba(250, 250, 250, 0.20);
-  --p-ink-on-accent: #04231f;
+  --p-ink-on-primary: #04231f;
 
   /* — Lines — */
   --p-line:          rgba(255, 255, 255, 0.06);
   --p-line-1:        rgba(255, 255, 255, 0.10);
   --p-line-2:        rgba(255, 255, 255, 0.16);
 
-  /* — Accent — */
-  --p-accent:        #2dd4bf;
-  --p-accent-hover:  #5eead4;
-  --p-accent-press:  #14b8a6;
-  --p-accent-soft:   rgba(45, 212, 191, 0.14);
-  --p-accent-line:   rgba(45, 212, 191, 0.30);
-  --p-accent-strong: #99f6e4;
+  /* — Primary (canon teal — dark variant) — */
+  --p-primary:        #2dd4bf;
+  --p-primary-hover:  #5eead4;
+  --p-primary-press:  #14b8a6;
+  --p-primary-soft:   rgba(45, 212, 191, 0.14);
+  --p-primary-line:   rgba(45, 212, 191, 0.30);
+  --p-primary-strong: #99f6e4;
 
   /* — Status — */
   --p-pos:           #34d399;
@@ -141,9 +143,9 @@
    через его CSS-переменные. Quasar внутренне читает --q-primary etc.
    для focus-границ q-field, color="primary" на q-btn, bg-primary
    utility-классов и т.д. Резолвится lazy — автоматически следует за
-   текущей темой через --p-accent. */
+   текущей темой через --p-primary. */
 :root {
-  --q-primary:  var(--p-accent);
+  --q-primary:  var(--p-primary);
   --q-negative: var(--p-neg);
   --q-positive: var(--p-pos);
   --q-warning:  var(--p-warn);
