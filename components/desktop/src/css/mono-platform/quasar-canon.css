@@ -44,20 +44,10 @@
 .q-field--error .q-field__messages {
   color: var(--p-neg);
 }
-/* Цвет prefix/suffix + вертикальное выравнивание по центру control'а.
-   Quasar по умолчанию ставит prefix/suffix с padding-top: 24px из-за
-   floating-label слота — это даёт визуальное смещение вниз. На dense
-   без stack-label убираем этот pad-top, чтобы «RUB» сидел в одну линию
-   со значением input'а. */
+/* Цвет prefix/suffix */
 .q-field__prefix,
 .q-field__suffix {
   color: var(--p-ink-3);
-}
-.q-field--dense .q-field__prefix,
-.q-field--dense .q-field__suffix {
-  padding-top: 0;
-  padding-bottom: 0;
-  align-self: center;
 }
 
 /* ===== Button (q-btn) ===== */
