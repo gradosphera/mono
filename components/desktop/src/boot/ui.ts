@@ -13,7 +13,6 @@ import BaseForm from 'src/shared/ui/base/BaseForm/BaseForm.vue';
 import EmptyState from 'src/shared/ui/base/EmptyState/EmptyState.vue';
 import Avatar from 'src/shared/ui/base/Avatar/Avatar.vue';
 import ThemeToggle from 'src/shared/ui/base/ThemeToggle/ThemeToggle.vue';
-import AuthCard from 'src/shared/ui/base/AuthCard/AuthCard.vue';
 
 export default boot(({ app }) => {
   app.component('BaseButton', BaseButton);
@@ -29,5 +28,4 @@ export default boot(({ app }) => {
   app.component('EmptyState', EmptyState);
   app.component('Avatar', Avatar);
   app.component('ThemeToggle', ThemeToggle);
-  app.component('AuthCard', AuthCard);
 });

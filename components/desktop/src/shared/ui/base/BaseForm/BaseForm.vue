@@ -33,11 +33,11 @@ function onSubmit(e: Event): void {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 .form__body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 </style>

@@ -11,4 +11,3 @@ export * from './BaseForm';
 export * from './EmptyState';
 export * from './Avatar';
 export * from './ThemeToggle';
-export * from './AuthCard';
