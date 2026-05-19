@@ -116,41 +116,11 @@ function onBalanceClick(event: MouseEvent): void {
   transform: rotate(180deg);
 }
 
-/* === Плавная свёртка ===
-   canon использует `display: none`, что даёт резкий jump высоты карточки и
-   визуальное «прыгание» chevron'а. Подменяем display:none на анимируемые
-   `max-height`/`opacity`. Логика canon селекторов (`is-collapsed`) не
-   нарушается — мы лишь добавляем плавность. */
-.rail__usercard .rail__balance,
-.rail__usercard .rail__action--primary {
-  overflow: hidden;
-  transition: max-height var(--p-dur-base, 200ms) var(--p-ease-standard, ease),
-              opacity var(--p-dur-fast, 120ms) ease,
-              padding var(--p-dur-base, 200ms) var(--p-ease-standard, ease);
-  max-height: 200px;
-  opacity: 1;
-}
-.rail__usercard.is-collapsed .rail__balance,
-.rail__usercard.is-collapsed .rail__action--primary {
-  display: flex !important; /* отменяем canon `display: none` */
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  border-top-width: 0;
-  border-bottom-width: 0;
-  pointer-events: none;
-}
-/* Primary в свёрнутом виде остаётся в DOM (для анимации), но flex: 0 +
-   width: 0 — освобождает место для chevron, который canon делает
-   width: 100% в `.is-collapsed`. Без этого слева остаётся «фантомный
-   отступ» от схлопнутого primary. */
-.rail__usercard.is-collapsed .rail__action--primary {
-  flex: 0 0 0;
-  width: 0;
-  margin: 0;
-  min-width: 0;
-}
+/* Свёртка использует canon `display: none` для balance и primary —
+   мгновенный jump без анимации (попытка плавной max-height transition
+   давала baseline-skipping у крупной суммы). Chevron остаётся видимым
+   и через canon `.is-collapsed .rail__usercard__collapse` растягивается
+   на всю ширину (border-left снимается, width: 100%). */
 
 /* === Clickable balance ===
    Когда задан `balanceRoute`, оборачиваем содержимое в `<router-link>`
