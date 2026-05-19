@@ -43,7 +43,7 @@ function onSubmit(e: Event): void {
 .base-form__body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
 }
 .base-form__banner {
   background: var(--p-neg-soft);

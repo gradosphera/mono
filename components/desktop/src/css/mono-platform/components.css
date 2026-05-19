@@ -336,12 +336,12 @@ body {
 }
 .wallet__metric { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .wallet__metric-val {
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.012em;
   font-variant-numeric: tabular-nums;
   color: var(--p-ink);
-  line-height: 1.15;
+  line-height: 1.2;
   white-space: nowrap;
 }
 .wallet__metric-val .ccy {
