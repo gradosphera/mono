@@ -37,10 +37,12 @@
       <slot name="actions" />
     </div>
 
-    <!-- Глобальные действия справа: уведомления, тема, профиль. Несколько вариантов: -->
+    <!-- Глобальные действия справа: уведомления, тема, профиль.
+         Mini-wallet СПЕЦИАЛЬНО НЕ ПРИСУТСТВУЕТ — баланс пайщика отображается
+         в RailUserCard (нижняя часть AppDrawer), дублировать его в шапке
+         нет смысла. В правой части шапки только глобальные действия. -->
     <div v-if="hasRight" class="topbar__right">
       <slot name="right">
-        <slot name="wallet" />
         <slot name="notifications" />
         <slot name="theme" />
         <slot name="profile" />
@@ -64,6 +66,6 @@ const emit = defineEmits<{
 const slots = useSlots();
 const hasActions = computed(() => !!slots.actions);
 const hasRight = computed(
-  () => !!(slots.right || slots.wallet || slots.notifications || slots.theme || slots.profile),
+  () => !!(slots.right || slots.notifications || slots.theme || slots.profile),
 );
 </script>

@@ -29,17 +29,32 @@
 .q-field--outlined:hover .q-field__control::before {
   border-color: var(--p-line-2);
 }
+/* Focus: только цвет границы через ::before (Quasar внутренне ставит класс
+   --focused/--highlighted). Никаких box-shadow и outline сверху — это
+   избегает двойной подсветки (наш accent-border + браузерный focus-ring). */
 .q-field--outlined.q-field--focused .q-field__control::before {
   border: 1px solid var(--p-accent);
 }
-.q-field--outlined.q-field--focused .q-field__control {
-  box-shadow: var(--p-focus-ring);
+/* Снимаем Quasar-внутренние focus-эффекты — оставляем только border-color */
+.q-field--outlined.q-field--focused .q-field__control,
+.q-field--outlined.q-field--highlighted .q-field__control {
+  box-shadow: none !important;
+}
+.q-field--outlined.q-field--focused .q-field__control::after,
+.q-field--outlined.q-field--highlighted .q-field__control::after {
+  display: none;
 }
 .q-field--outlined .q-field__native,
 .q-field--outlined .q-field__input {
   font-size: var(--p-fs-body);
   color: var(--p-ink);
   font-family: var(--p-sans, inherit);
+  outline: none;
+}
+.q-field--outlined .q-field__native:focus,
+.q-field--outlined .q-field__input:focus {
+  outline: none;
+  box-shadow: none;
 }
 .q-field--outlined .q-field__native::placeholder,
 .q-field--outlined .q-field__input::placeholder {
@@ -58,8 +73,8 @@
 .q-field--outlined.q-field--error .q-field__control::before {
   border-color: var(--p-neg);
 }
-.q-field--outlined.q-field--error.q-field--focused .q-field__control {
-  box-shadow: 0 0 0 3px var(--p-neg-soft);
+.q-field--outlined.q-field--error.q-field--focused .q-field__control::before {
+  border: 1px solid var(--p-neg);
 }
 .q-field__bottom {
   font-size: var(--p-fs-meta);

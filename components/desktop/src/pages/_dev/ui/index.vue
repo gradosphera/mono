@@ -534,9 +534,6 @@
               <template #actions>
                 <BaseButton variant="primary" size="sm">Совершить взнос</BaseButton>
               </template>
-              <template #wallet>
-                <WalletCardMini program="wallet" />
-              </template>
               <template #notifications>
                 <button class="icon-btn" aria-label="Уведомления" type="button">☷</button>
               </template>
