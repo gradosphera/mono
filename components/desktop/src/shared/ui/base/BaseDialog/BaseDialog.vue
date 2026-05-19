@@ -78,4 +78,12 @@ const maxWidthBySize: Record<BaseDialogSize, string> = {
   letter-spacing: var(--p-ls-h3);
   color: var(--p-ink);
 }
+/* Универсальный отступ между детьми body: текст-описание → инпут →
+   список → таблица и т.д. получают одинаковый воздух без правки
+   потребителя. */
+.base-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-4, 16px);
+}
 </style>
