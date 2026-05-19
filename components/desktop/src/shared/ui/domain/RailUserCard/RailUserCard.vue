@@ -141,6 +141,16 @@ function onBalanceClick(event: MouseEvent): void {
   border-bottom-width: 0;
   pointer-events: none;
 }
+/* Primary в свёрнутом виде остаётся в DOM (для анимации), но flex: 0 +
+   width: 0 — освобождает место для chevron, который canon делает
+   width: 100% в `.is-collapsed`. Без этого слева остаётся «фантомный
+   отступ» от схлопнутого primary. */
+.rail__usercard.is-collapsed .rail__action--primary {
+  flex: 0 0 0;
+  width: 0;
+  margin: 0;
+  min-width: 0;
+}
 
 /* === Clickable balance ===
    Когда задан `balanceRoute`, оборачиваем содержимое в `<router-link>`

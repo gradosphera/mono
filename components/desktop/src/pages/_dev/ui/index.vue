@@ -13,6 +13,62 @@
       <ThemeToggle />
     </header>
 
+    <!-- ============ 00 TOKEN PALETTE ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">00</span>
+        <h2 class="dev-ui__sect-title">Палитра системы</h2>
+        <p class="dev-ui__sect-sub">
+          Текущие значения CSS-токенов <code>--p-*</code> для активной темы.
+          Меняй цвет любого токена — компоненты ниже перекрасятся в реальном
+          времени. Кнопка «Сбросить» возвращает дефолтные значения из
+          <code>tokens.css</code>.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__token-head">
+          <span class="t-sm t-muted">
+            Активная тема: <b>{{ themeName }}</b> · переопределено
+            <b>{{ overriddenCount }}</b> токен(ов)
+          </span>
+          <BaseButton variant="ghost" size="sm" @click="resetTokens">
+            Сбросить
+          </BaseButton>
+        </div>
+
+        <template v-for="group in tokenGroups" :key="group.title">
+          <div class="dev-ui__token-group-title">{{ group.title }}</div>
+          <div class="dev-ui__tokens">
+            <label
+              v-for="t in group.items"
+              :key="t.key"
+              :class="['dev-ui__token', { 'dev-ui__token--overridden': overridden[t.key] }]"
+            >
+              <span class="dev-ui__token-swatch" :style="{ background: `var(${t.key})` }" />
+              <div class="dev-ui__token-meta">
+                <div class="dev-ui__token-name">{{ t.label }}</div>
+                <code class="dev-ui__token-key">{{ t.key }}</code>
+              </div>
+              <input
+                v-if="t.type === 'color'"
+                type="color"
+                class="dev-ui__token-picker"
+                :value="hexValues[t.key] || '#000000'"
+                @input="(e) => onColorChange(t.key, (e.target as HTMLInputElement).value)"
+              />
+              <input
+                v-else
+                type="text"
+                class="dev-ui__token-text"
+                :value="resolvedValues[t.key]"
+                @change="(e) => onTextChange(t.key, (e.target as HTMLInputElement).value)"
+              />
+            </label>
+          </div>
+        </template>
+      </div>
+    </section>
+
     <!-- ============ 01 BUTTONS ============ -->
     <section class="dev-ui__sect">
       <div class="dev-ui__sect-head">
@@ -497,7 +553,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { Dark } from 'quasar';
 import { AppDrawer } from 'src/shared/ui/layout/AppDrawer';
 import { AppHeader } from 'src/shared/ui/layout/AppHeader';
 import { PageHead } from 'src/shared/ui/layout/PageHead';
@@ -505,6 +562,145 @@ import { PageTabs } from 'src/shared/ui/layout/PageTabs';
 import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
 import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
 import type { PageTab } from 'src/shared/ui/layout/PageTabs';
+
+/* === Token palette ============================================================
+   Подмножество --p-* токенов, формирующих визуальную идентичность.
+   Меняем через input[type=color] → setProperty на documentElement —
+   inline-style на :root перебивает все CSS-правила, мгновенный отклик. */
+interface TokenDef {
+  key: string;
+  label: string;
+  type: 'color' | 'rgba';
+}
+interface TokenGroup {
+  title: string;
+  items: TokenDef[];
+}
+const tokenGroups: TokenGroup[] = [
+  {
+    title: 'Акцент',
+    items: [
+      { key: '--p-accent', label: 'Accent', type: 'color' },
+      { key: '--p-accent-hover', label: 'Accent · hover', type: 'color' },
+      { key: '--p-accent-press', label: 'Accent · press', type: 'color' },
+    ],
+  },
+  {
+    title: 'Поверхности',
+    items: [
+      { key: '--p-canvas', label: 'Canvas (фон страницы)', type: 'color' },
+      { key: '--p-canvas-2', label: 'Canvas-2', type: 'color' },
+      { key: '--p-surface', label: 'Surface (карточки)', type: 'color' },
+      { key: '--p-surface-2', label: 'Surface-2', type: 'color' },
+      { key: '--p-surface-3', label: 'Surface-3', type: 'color' },
+    ],
+  },
+  {
+    title: 'Текст',
+    items: [
+      { key: '--p-ink', label: 'Ink (основной)', type: 'color' },
+      { key: '--p-ink-on-accent', label: 'Ink · on-accent', type: 'color' },
+    ],
+  },
+  {
+    title: 'Линии',
+    items: [
+      { key: '--p-line', label: 'Line (тонкая)', type: 'rgba' },
+      { key: '--p-line-1', label: 'Line-1', type: 'rgba' },
+      { key: '--p-line-2', label: 'Line-2', type: 'rgba' },
+    ],
+  },
+  {
+    title: 'Статусы',
+    items: [
+      { key: '--p-pos', label: 'Positive', type: 'color' },
+      { key: '--p-neg', label: 'Negative', type: 'color' },
+      { key: '--p-warn', label: 'Warning', type: 'color' },
+      { key: '--p-info', label: 'Info', type: 'color' },
+    ],
+  },
+  {
+    title: 'Программные тинты',
+    items: [
+      { key: '--prog-blagorost', label: 'Blagorost', type: 'color' },
+      { key: '--prog-wallet', label: 'Wallet', type: 'color' },
+      { key: '--prog-generator', label: 'Generator', type: 'color' },
+    ],
+  },
+];
+
+const resolvedValues = reactive<Record<string, string>>({});
+const hexValues = reactive<Record<string, string>>({});
+const overridden = reactive<Record<string, boolean>>({});
+
+function readTokens(): void {
+  if (typeof document === 'undefined') return;
+  const styles = getComputedStyle(document.documentElement);
+  const inlineKeys = new Set<string>();
+  for (let i = 0; i < document.documentElement.style.length; i++) {
+    const k = document.documentElement.style.item(i);
+    if (k.startsWith('--p-') || k.startsWith('--prog-')) inlineKeys.add(k);
+  }
+  for (const g of tokenGroups) {
+    for (const t of g.items) {
+      const val = styles.getPropertyValue(t.key).trim();
+      resolvedValues[t.key] = val;
+      if (t.type === 'color') hexValues[t.key] = toHex(val);
+      overridden[t.key] = inlineKeys.has(t.key);
+    }
+  }
+}
+
+function toHex(value: string): string {
+  if (!value) return '#000000';
+  if (value.startsWith('#')) {
+    if (value.length === 4) {
+      // #abc → #aabbcc
+      return `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`;
+    }
+    return value.slice(0, 7).toLowerCase();
+  }
+  const m = value.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  if (m) {
+    const [r, g, b] = [m[1], m[2], m[3]].map((n) => parseInt(n, 10).toString(16).padStart(2, '0'));
+    return `#${r}${g}${b}`;
+  }
+  return '#000000';
+}
+
+function onColorChange(key: string, hex: string): void {
+  document.documentElement.style.setProperty(key, hex);
+  hexValues[key] = hex;
+  resolvedValues[key] = hex;
+  overridden[key] = true;
+}
+
+function onTextChange(key: string, value: string): void {
+  document.documentElement.style.setProperty(key, value);
+  resolvedValues[key] = value;
+  overridden[key] = true;
+}
+
+function resetTokens(): void {
+  for (const g of tokenGroups) {
+    for (const t of g.items) {
+      document.documentElement.style.removeProperty(t.key);
+    }
+  }
+  readTokens();
+}
+
+const themeName = computed(() => (Dark.isActive ? 'тёмная' : 'светлая'));
+const overriddenCount = computed(() => Object.values(overridden).filter(Boolean).length);
+
+let themeWatcher: (() => void) | null = null;
+onMounted(() => {
+  readTokens();
+  themeWatcher = watch(() => Dark.isActive, () => readTokens());
+});
+onUnmounted(() => {
+  themeWatcher?.();
+});
 
 const inputText = ref('chairman.voskhod@gmail.com');
 const inputMono = ref('ant');
@@ -759,5 +955,106 @@ code {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ===== Token palette ===== */
+.dev-ui__token-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--p-line);
+}
+.dev-ui__token-group-title {
+  font-size: var(--p-fs-eyebrow);
+  letter-spacing: var(--p-ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--p-ink-3);
+  font-weight: 500;
+  margin: 16px 0 8px;
+}
+.dev-ui__token-group-title:first-child {
+  margin-top: 0;
+}
+.dev-ui__tokens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.dev-ui__token {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-sm);
+  background: var(--p-surface);
+  cursor: pointer;
+  transition: border-color var(--p-dur-fast) ease;
+}
+.dev-ui__token:hover {
+  border-color: var(--p-line-2);
+}
+.dev-ui__token--overridden {
+  border-color: var(--p-accent-line);
+  background: var(--p-accent-soft);
+}
+.dev-ui__token-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--p-r-xs);
+  border: 1px solid var(--p-line-1);
+  flex-shrink: 0;
+}
+.dev-ui__token-meta {
+  min-width: 0;
+  line-height: 1.2;
+}
+.dev-ui__token-name {
+  font-size: var(--p-fs-body-sm);
+  color: var(--p-ink);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dev-ui__token-key {
+  font-size: 11px;
+  color: var(--p-ink-3);
+  font-family: var(--p-mono);
+}
+.dev-ui__token-picker {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--p-line-1);
+  border-radius: var(--p-r-xs);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.dev-ui__token-picker::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+.dev-ui__token-picker::-webkit-color-swatch {
+  border: 0;
+  border-radius: 4px;
+}
+.dev-ui__token-text {
+  width: 140px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--p-line-1);
+  border-radius: var(--p-r-xs);
+  background: var(--p-surface);
+  color: var(--p-ink);
+  font: 11px/1.4 var(--p-mono);
+  outline: none;
+}
+.dev-ui__token-text:focus {
+  border-color: var(--p-accent);
 }
 </style>
