@@ -1,5 +1,14 @@
 <template>
-  <span :class="classes"><slot /></span>
+  <q-chip
+    :color="resolvedColor"
+    :text-color="resolvedTextColor"
+    :dense="size === 'sm'"
+    :size="size === 'lg' ? 'lg' : undefined"
+    square
+    :class="['base-chip', `base-chip--${variant}`]"
+  >
+    <slot />
+  </q-chip>
 </template>
 
 <script setup lang="ts">
@@ -11,9 +20,17 @@ const props = withDefaults(defineProps<BaseChipProps>(), {
   size: 'sm',
 });
 
-const classes = computed(() => [
-  'chip',
-  `chip--${props.variant}`,
-  props.size === 'lg' && 'chip--lg',
-].filter(Boolean));
+const variantToQuasarColor: Record<NonNullable<BaseChipProps['variant']>, string | undefined> = {
+  neutral: undefined,
+  accent: 'primary',
+  pos: 'positive',
+  neg: 'negative',
+  warn: 'warning',
+  info: 'info',
+};
+
+const resolvedColor = computed(() => variantToQuasarColor[props.variant]);
+const resolvedTextColor = computed(() =>
+  props.variant === 'neutral' ? undefined : 'white',
+);
 </script>
