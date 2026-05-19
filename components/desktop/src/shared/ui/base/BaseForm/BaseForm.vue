@@ -1,15 +1,20 @@
 <template>
-  <form class="form" @submit.prevent="onSubmit">
-    <div v-if="error" class="banner banner--neg" role="alert">
-      <div class="banner__body">{{ error }}</div>
-    </div>
-    <div class="form__body">
+  <q-form class="base-form" @submit.prevent="onSubmit">
+    <q-banner
+      v-if="error"
+      class="base-form__banner bg-negative-soft"
+      role="alert"
+      dense
+    >
+      {{ error }}
+    </q-banner>
+    <div class="base-form__body">
       <slot />
     </div>
-    <div v-if="$slots.footer" class="form-foot">
+    <div v-if="$slots.footer" class="base-form__footer">
       <slot name="footer" :loading="loading" />
     </div>
-  </form>
+  </q-form>
 </template>
 
 <script setup lang="ts">
@@ -30,14 +35,20 @@ function onSubmit(e: Event): void {
 </script>
 
 <style scoped>
-.form {
+.base-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-.form__body {
+.base-form__body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
+}
+.base-form__banner {
+  background: var(--p-neg-soft);
+  color: var(--p-neg);
+  border-left: 3px solid var(--p-neg);
+  border-radius: var(--p-r-sm, 8px);
 }
 </style>
