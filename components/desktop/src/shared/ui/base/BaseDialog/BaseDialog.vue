@@ -85,5 +85,10 @@ const maxWidthBySize: Record<BaseDialogSize, string> = {
   display: flex;
   flex-direction: column;
   gap: var(--p-4, 16px);
+  padding-bottom: var(--p-2, 8px);
+}
+/* Кнопки в footer ближе к body — без избыточного зазора */
+.base-dialog__foot {
+  padding-top: var(--p-2, 8px);
 }
 </style>
