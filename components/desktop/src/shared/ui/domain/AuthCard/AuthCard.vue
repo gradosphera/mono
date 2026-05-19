@@ -1,23 +1,26 @@
 <template>
   <div class="auth-card-shell" :style="{ maxWidth: `${maxWidth ?? 480}px` }">
-    <div class="card auth-card">
-      <header v-if="title || subtitle || $slots.head" class="card__head auth-card__head">
+    <q-card flat class="auth-card">
+      <q-card-section
+        v-if="title || subtitle || $slots.head"
+        class="auth-card__head"
+      >
         <slot name="head">
           <div>
-            <h1 v-if="title" class="card__title auth-card__title">{{ title }}</h1>
-            <p v-if="subtitle" class="card__sub auth-card__sub">{{ subtitle }}</p>
+            <h1 v-if="title" class="auth-card__title">{{ title }}</h1>
+            <p v-if="subtitle" class="auth-card__sub">{{ subtitle }}</p>
           </div>
         </slot>
-      </header>
+      </q-card-section>
 
-      <div class="auth-card__body">
+      <q-card-section class="auth-card__body">
         <slot />
-      </div>
+      </q-card-section>
 
-      <footer v-if="$slots.footer" class="auth-card__footer">
+      <q-card-actions v-if="$slots.footer" align="center" class="auth-card__footer">
         <slot name="footer" />
-      </footer>
-    </div>
+      </q-card-actions>
+    </q-card>
   </div>
 </template>
 
@@ -33,12 +36,12 @@ defineProps<AuthCardProps>();
   margin: 0 auto;
 }
 .auth-card {
-  padding: var(--p-6, 24px);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--p-5, 20px);
+  gap: var(--p-3, 12px);
   /* Auth-карточка — hero-element auth-страницы. Усиливаем shadow поверх
-     canon-минималистского `.card` — без этого светлая тема выглядит плоской
+     canon-минималистского q-card — без этого светлая тема выглядит плоской
      (canvas и surface почти неразличимы). На тёмной shadow поверх чёрного
      фона остаётся ненавязчивой — лишнего шума не даёт. */
   box-shadow:
@@ -48,8 +51,7 @@ defineProps<AuthCardProps>();
   position: relative;
   overflow: hidden;
 }
-/* Статичный accent-стрип сверху — визуальный якорь без анимации.
-   Бренд-маркер: auth — это вход в систему, акцент сигнализирует «здесь главное». */
+/* Статичный accent-стрип сверху — визуальный якорь без анимации. */
 .auth-card::before {
   content: '';
   position: absolute;
@@ -58,6 +60,7 @@ defineProps<AuthCardProps>();
   right: 0;
   height: 3px;
   background: var(--p-accent);
+  z-index: 1;
 }
 [data-theme="dark"] .auth-card {
   box-shadow:
@@ -65,30 +68,28 @@ defineProps<AuthCardProps>();
     0 12px 32px rgba(0, 0, 0, 0.32);
 }
 .auth-card__head {
-  margin-bottom: 0;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
+  padding: var(--p-6, 24px) var(--p-6, 24px) var(--p-2, 8px);
   text-align: center;
 }
 .auth-card__title {
   font-size: var(--p-fs-h2);
   line-height: var(--p-lh-h2);
   letter-spacing: var(--p-ls-h2);
+  font-weight: 600;
+  color: var(--p-ink);
+  margin: 0;
 }
 .auth-card__sub {
-  margin-top: 6px;
+  font-size: var(--p-fs-body-sm);
+  color: var(--p-ink-2);
+  margin: 6px 0 0;
 }
 .auth-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-4, 16px);
+  padding: var(--p-3, 12px) var(--p-6, 24px) var(--p-5, 20px);
 }
 .auth-card__footer {
   border-top: 1px solid var(--p-line);
-  padding-top: var(--p-4, 16px);
-  display: flex;
-  justify-content: center;
+  padding: var(--p-4, 16px) var(--p-6, 24px);
   gap: var(--p-3, 12px);
   font-size: var(--p-fs-body-sm);
 }
