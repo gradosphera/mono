@@ -8,27 +8,19 @@
    ============================================================ */
 
 /* ===== Field (q-input / q-select / q-input-mask / etc) =====
-   ТОЛЬКО ЦВЕТ. Никакой геометрии (height/padding/border-radius/font),
-   никаких transitions/opacity manipulations, никаких box-shadow override
-   и ::after-tweaks — Quasar отвечает за всё это сам, дефолтное
-   поведение пользователя устраивает. */
+   ЦВЕТА + rounded. Границу Quasar красит сам через --q-primary
+   (см. tokens.css → Quasar brand mapping). Геометрию/transitions
+   не трогаем. */
 
-/* Цвет фона control'а (canon surface) */
+/* Цвет фона и rounded углы */
 .q-field--outlined .q-field__control {
   background: var(--p-surface);
   color: var(--p-ink);
+  border-radius: var(--p-r-sm, 8px);
 }
-/* Цвет границы по умолчанию */
-.q-field--outlined .q-field__control::before {
-  border-color: var(--p-line-1);
-}
-/* Цвет границы на focus */
-.q-field--outlined.q-field--focused .q-field__control::before {
-  border-color: var(--p-accent);
-}
-/* Цвет границы при ошибке */
-.q-field--outlined.q-field--error .q-field__control::before {
-  border-color: var(--p-neg);
+.q-field--outlined .q-field__control::before,
+.q-field--outlined .q-field__control::after {
+  border-radius: var(--p-r-sm, 8px);
 }
 /* Цвет текста значения */
 .q-field--outlined .q-field__native,

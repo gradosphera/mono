@@ -1,6 +1,8 @@
 <template>
   <q-select
     outlined
+    dense
+    color="primary"
     reserve-hint-space
     map-options
     emit-value

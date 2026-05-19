@@ -137,6 +137,19 @@
   color-scheme: dark;
 }
 
+/* — Quasar brand mapping — пробрасываем canon-палитру в Quasar-движок
+   через его CSS-переменные. Quasar внутренне читает --q-primary etc.
+   для focus-границ q-field, color="primary" на q-btn, bg-primary
+   utility-классов и т.д. Резолвится lazy — автоматически следует за
+   текущей темой через --p-accent. */
+:root {
+  --q-primary:  var(--p-accent);
+  --q-negative: var(--p-neg);
+  --q-positive: var(--p-pos);
+  --q-warning:  var(--p-warn);
+  --q-info:     var(--p-info);
+}
+
 /* — Typography — */
 :root {
   --p-sans: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
