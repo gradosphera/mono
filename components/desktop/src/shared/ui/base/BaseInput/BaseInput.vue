@@ -1,6 +1,8 @@
 <template>
   <q-input
     outlined
+    dense
+    color="primary"
     reserve-hint-space
     no-error-icon
     :model-value="modelValue ?? ''"
