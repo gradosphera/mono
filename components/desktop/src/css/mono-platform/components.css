@@ -285,18 +285,18 @@ body {
    ------------------------------------------------------------------- */
 .wallet {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
-  gap: var(--p-5);
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: var(--p-4);
   align-items: center;
   background: var(--p-surface);
   border: 1px solid var(--p-line);
   border-radius: var(--p-r-md);
-  padding: 18px var(--p-5);
+  padding: 14px var(--p-5);
   transition: border-color var(--p-dur-base), background var(--p-dur-base);
 }
 .wallet:hover { border-color: var(--p-line-2); }
 .wallet__icon {
-  width: 44px; height: 44px;
+  width: 40px; height: 40px;
   border-radius: var(--p-r-sm);
   display: grid;
   place-items: center;
@@ -304,7 +304,7 @@ body {
   color: var(--prog-fg, var(--p-accent));
   flex-shrink: 0;
 }
-.wallet__icon svg { width: 22px; height: 22px; }
+.wallet__icon svg { width: 20px; height: 20px; }
 .wallet__main {
   display: flex;
   flex-direction: column;
@@ -336,19 +336,19 @@ body {
 }
 .wallet__metric { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .wallet__metric-val {
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 600;
   letter-spacing: -0.012em;
   font-variant-numeric: tabular-nums;
   color: var(--p-ink);
-  line-height: 1.1;
+  line-height: 1.15;
   white-space: nowrap;
 }
 .wallet__metric-val .ccy {
   color: var(--p-ink-3);
   font-weight: 500;
   margin-left: 5px;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 .wallet__metric-label {
@@ -390,13 +390,13 @@ body {
 
 /* — Compact-row variant for dense lists — */
 .wallet--row {
-  padding: 14px var(--p-5);
-  grid-template-columns: 36px minmax(0, 1fr) auto;
-  gap: var(--p-4);
+  padding: 10px var(--p-4);
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: var(--p-3);
 }
-.wallet--row .wallet__icon { width: 36px; height: 36px; border-radius: var(--p-r-xs); }
-.wallet--row .wallet__icon svg { width: 18px; height: 18px; }
-.wallet--row .wallet__metric-val { font-size: 18px; }
+.wallet--row .wallet__icon { width: 32px; height: 32px; border-radius: var(--p-r-xs); }
+.wallet--row .wallet__icon svg { width: 16px; height: 16px; }
+.wallet--row .wallet__metric-val { font-size: 16px; }
 
 /* ---- Table ---- */
 .table-wrap {
@@ -1388,11 +1388,11 @@ body {
   margin-top: 4px;
 }
 .rail__balance-val b {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.012em;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: 1.15;
   color: var(--p-ink);
 }
 .rail__balance-val .ccy {
