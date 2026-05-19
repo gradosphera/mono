@@ -39,12 +39,25 @@ defineProps<AuthCardProps>();
   gap: var(--p-5, 20px);
   /* Auth-карточка — hero-element auth-страницы. Усиливаем shadow поверх
      canon-минималистского `.card` — без этого светлая тема выглядит плоской
-     (canvas #fafafa и surface #ffffff почти неразличимы). На тёмной shadow
-     поверх чёрного фона остаётся ненавязчивой — лишнего шума не даёт. */
+     (canvas и surface почти неразличимы). На тёмной shadow поверх чёрного
+     фона остаётся ненавязчивой — лишнего шума не даёт. */
   box-shadow:
     0 1px 2px rgba(9, 9, 11, 0.04),
     0 8px 24px rgba(9, 9, 11, 0.06);
   border-color: var(--p-line-1);
+  position: relative;
+  overflow: hidden;
+}
+/* Статичный accent-стрип сверху — визуальный якорь без анимации.
+   Бренд-маркер: auth — это вход в систему, акцент сигнализирует «здесь главное». */
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--p-accent);
 }
 [data-theme="dark"] .auth-card {
   box-shadow:
