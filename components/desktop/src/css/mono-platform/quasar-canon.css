@@ -24,6 +24,12 @@
 .q-field--outlined .q-field__control::before {
   border: 1px solid var(--p-line-1);
   border-radius: var(--p-r-sm, 8px);
+  /* opacity:1 принудительно — Quasar внутри анимирует opacity ::before
+     при focus (прячет старую границу перед показом ::after underline).
+     Так как ::after мы спрятали, это давало мерцание (пустая граница
+     в течение ~200-400 ms). Фиксируем opacity и transition только по
+     цвету — граница меняет ТОЛЬКО цвет, без исчезновения. */
+  opacity: 1 !important;
   transition: border-color var(--p-dur-fast, 120ms);
 }
 .q-field--outlined:hover .q-field__control::before {

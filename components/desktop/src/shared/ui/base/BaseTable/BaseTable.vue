@@ -30,7 +30,7 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
 import { computed } from 'vue';
 import type { QTableProps } from 'quasar';
-import type { BaseTableProps, BaseTableColumn } from './BaseTable.types';
+import type { BaseTableProps } from './BaseTable.types';
 
 const props = defineProps<BaseTableProps<T>>();
 
