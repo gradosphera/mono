@@ -37,6 +37,13 @@
   --p-primary-line:   rgba(15, 118, 110, 0.24);
   --p-primary-strong: #064e44;
 
+  /* — Accent (warm orange) — второй цвет, для РЕДКОГО выделения:
+     ссылки batch_id, инлайн-подсветки и т.п. Совпадает с Quasar legacy
+     $accent (#D84315) → старый код, который красил `color="accent"` /
+     `var(--q-accent)`, продолжает работать без изменений. */
+  --p-accent:         #D84315;
+  --p-accent-soft:    rgba(216, 67, 21, 0.10);
+
   /* — Status — */
   --p-pos:           #15803d;
   --p-pos-soft:      rgba(21, 128, 61, 0.10);
@@ -103,6 +110,10 @@
   --p-primary-line:   rgba(45, 212, 191, 0.30);
   --p-primary-strong: #99f6e4;
 
+  /* — Accent (warm orange — dark variant) — */
+  --p-accent:         #FF7043;
+  --p-accent-soft:    rgba(255, 112, 67, 0.14);
+
   /* — Status — */
   --p-pos:           #34d399;
   --p-pos-soft:      rgba(52, 211, 153, 0.14);
@@ -146,6 +157,7 @@
    текущей темой через --p-primary. */
 :root {
   --q-primary:  var(--p-primary);
+  --q-accent:   var(--p-accent);
   --q-negative: var(--p-neg);
   --q-positive: var(--p-pos);
   --q-warning:  var(--p-warn);

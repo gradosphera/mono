@@ -78,14 +78,17 @@ const maxWidthBySize: Record<BaseDialogSize, string> = {
   letter-spacing: var(--p-ls-h3);
   color: var(--p-ink);
 }
-/* Универсальный отступ между детьми body: текст-описание → инпут →
-   список → таблица и т.д. получают одинаковый воздух без правки
-   потребителя. */
+/* Между описанием диалога (<p>) и первым инпутом — отступ. Между
+   остальными детьми reserve-hint-space инпутов сам даёт достаточно
+   воздуха. Универсальный gap здесь — избыточно. */
 .base-dialog__body {
   display: flex;
   flex-direction: column;
-  gap: var(--p-4, 16px);
   padding-bottom: var(--p-2, 8px);
+}
+.base-dialog__body > p:first-child,
+.base-dialog__body > .intro:first-child {
+  margin: 0 0 var(--p-4, 16px);
 }
 /* Кнопки в footer ближе к body — без избыточного зазора */
 .base-dialog__foot {
