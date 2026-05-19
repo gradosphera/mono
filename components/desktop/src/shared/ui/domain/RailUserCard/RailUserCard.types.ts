@@ -17,6 +17,10 @@ export interface RailUserCardProps {
   lockedLabel?: string;
   /** Подпись основной кнопки (default «Пополнить») */
   primaryActionLabel?: string;
+  /** Маршрут, на который кликом по блоку баланса переходит пользователь.
+   *  Если задан, баланс оборачивается в `<router-link>`. Параллельно
+   *  эмитится `balance-click` — для аналитики или функциональных handler'ов. */
+  balanceRoute?: string | Record<string, unknown>;
   /** Состояние свёртки баланса/кнопки. Управляется через v-model:collapsed */
   collapsed?: boolean;
   /** Показывать ли блок «Выйти» под карточкой */
