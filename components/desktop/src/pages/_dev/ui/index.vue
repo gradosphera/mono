@@ -660,6 +660,46 @@
         </div>
       </div>
     </section>
+
+    <!-- ============ 19 AUTH CARD — композит ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">19</span>
+        <h2 class="dev-ui__sect-title">Карточка аутентификации (AuthCard)</h2>
+        <p class="dev-ui__sect-sub">
+          Композит из <code>.card</code> + center-aligned head + footer-slot.
+          Используется на страницах входа / восстановления / приглашения.
+          AuthLayout — обёртка для full-page центрирования с тоглом темы.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <AuthCard
+          title="Вход для пайщиков"
+          subtitle="Цифровой Кооператив"
+          :max-width="480"
+        >
+          <BaseForm>
+            <BaseInput
+              label="Электронная почта"
+              type="email"
+              placeholder="example@coop.ru"
+              autocomplete="email"
+            />
+            <BaseInput
+              label="Ключ доступа"
+              type="password"
+              autocomplete="current-password"
+            />
+            <BaseButton variant="primary" block type="submit">Войти</BaseButton>
+          </BaseForm>
+          <template #footer>
+            <a href="#" class="t-sm t-muted">Потеряли ключ?</a>
+            <span class="t-sm t-muted">·</span>
+            <a href="#" class="t-sm">Нет аккаунта?</a>
+          </template>
+        </AuthCard>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -673,6 +713,7 @@ import { PageTabs } from 'src/shared/ui/layout/PageTabs';
 import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
 import { WalletCard } from 'src/shared/ui/domain/WalletCard';
 import { WalletCardMini } from 'src/widgets/wallet-card-mini';
+import { AuthCard } from 'src/shared/ui/domain/AuthCard';
 import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
 import type { PageTab } from 'src/shared/ui/layout/PageTabs';
 
