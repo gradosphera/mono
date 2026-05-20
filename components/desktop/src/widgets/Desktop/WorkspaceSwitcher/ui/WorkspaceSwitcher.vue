@@ -179,6 +179,7 @@ function onSelect(name: string): void {
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
+  padding-top: 2px;
 }
 
 .ws-switcher__chevron {
