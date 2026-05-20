@@ -27,7 +27,11 @@ const props = defineProps<{
 }>();
 
 const qrElement = ref<HTMLCanvasElement | null>(null);
-const detailsOpen = ref<boolean>(false);
+const showDetails = ref<boolean>(false);
+
+function toggleDetails(): void {
+  showDetails.value = !showDetails.value;
+}
 
 const amount = computed(() => {
   return orderData.value.sum
@@ -119,8 +123,8 @@ const downloadQR = () => {
 
 <template lang="pug">
 .bank-pay
-  //- Плоский layout без вложенных carousel-карточек.
-  //- Сводка - QR - действия - детали (свёрнуты).
+  //- Плоский layout. Сводка вверху всегда видна.
+  //- Дальше — переключаемая зона: QR или реквизиты для ручного перевода.
   dl.bank-pay__summary
     .bank-pay__summary-row
       dt.bank-pay__summary-label Получатель
@@ -132,70 +136,74 @@ const downloadQR = () => {
       dt.bank-pay__summary-label Назначение
       dd.bank-pay__summary-value {{ orderData.purpose }}
 
-  //- QR-canvas центрирован без обёртки. Он сам белый+чёрный — это
-  //- функциональное требование контрастного сканирования, не дизайн.
-  canvas#qr.bank-pay__qr
+  //- QR-canvas. v-show, чтобы canvas сохранил состояние при toggle назад.
+  //- Сам canvas белый+чёрный — функциональное требование сканирования.
+  canvas#qr.bank-pay__qr(v-show='!showDetails')
 
+  //- Альтернативная панель: список реквизитов для ручного перевода.
+  //- v-if чтобы не держать тяжёлые BaseInput в DOM пока не нужны.
+  .bank-pay__details(v-if='showDetails')
+    .bank-pay__field
+      BaseInput(label='ИНН получателя', :model-value='orderData.payeeinn', readonly, mono)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.payeeinn)')
+
+    .bank-pay__field
+      BaseInput(label='Получатель', :model-value='orderData.name', readonly)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.name)')
+
+    .bank-pay__field
+      BaseInput(label='БИК', :model-value='orderData.bic', readonly, mono)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.bic)')
+
+    .bank-pay__field
+      BaseInput(label='Банк получателя', :model-value='orderData.bankname', readonly)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.bankname)')
+
+    .bank-pay__field
+      BaseInput(label='КПП', :model-value='orderData.kpp', readonly, mono)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.kpp)')
+
+    .bank-pay__field
+      BaseInput(label='Корреспондентский счёт', :model-value='orderData.correspacc', readonly, mono)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.correspacc)')
+
+    .bank-pay__field
+      BaseInput(label='Номер счёта', :model-value='orderData.personalacc', readonly, mono)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.personalacc)')
+
+    .bank-pay__field
+      BaseInput(label='Сумма платежа', :model-value='amount', readonly, mono)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(amount)')
+
+    .bank-pay__field
+      BaseInput(label='Назначение платежа', :model-value='orderData.purpose', readonly)
+        template(#append)
+          q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.purpose)')
+
+  //- Действия в одной строке. Состав зависит от showDetails.
   .bank-pay__actions
-    BaseButton(variant='primary', @click='downloadQR')
-      q-icon.q-mr-xs(name='download', size='16px')
-      | Скачать QR
-    BaseButton(variant='secondary', @click='copyAll')
-      q-icon.q-mr-xs(name='content_copy', size='16px')
-      | Скопировать реквизиты
-
-  q-expansion-item.bank-pay__details(
-    v-model='detailsOpen',
-    label='Реквизиты для ручного перевода',
-    icon='receipt_long',
-    expand-icon-class='bank-pay__chevron',
-    dense
-  )
-    .bank-pay__details-list
-      .bank-pay__field
-        BaseInput(label='ИНН получателя', :model-value='orderData.payeeinn', readonly, mono)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.payeeinn)')
-
-      .bank-pay__field
-        BaseInput(label='Получатель', :model-value='orderData.name', readonly)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.name)')
-
-      .bank-pay__field
-        BaseInput(label='БИК', :model-value='orderData.bic', readonly, mono)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.bic)')
-
-      .bank-pay__field
-        BaseInput(label='Банк получателя', :model-value='orderData.bankname', readonly)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.bankname)')
-
-      .bank-pay__field
-        BaseInput(label='КПП', :model-value='orderData.kpp', readonly, mono)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.kpp)')
-
-      .bank-pay__field
-        BaseInput(label='Корреспондентский счёт', :model-value='orderData.correspacc', readonly, mono)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.correspacc)')
-
-      .bank-pay__field
-        BaseInput(label='Номер счёта', :model-value='orderData.personalacc', readonly, mono)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.personalacc)')
-
-      .bank-pay__field
-        BaseInput(label='Сумма платежа', :model-value='amount', readonly, mono)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(amount)')
-
-      .bank-pay__field
-        BaseInput(label='Назначение платежа', :model-value='orderData.purpose', readonly)
-          template(#append)
-            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.purpose)')
+    template(v-if='!showDetails')
+      BaseButton(variant='primary', @click='downloadQR')
+        q-icon.q-mr-xs(name='download', size='16px')
+        | Скачать QR
+      BaseButton(variant='secondary', @click='toggleDetails')
+        q-icon.q-mr-xs(name='receipt_long', size='16px')
+        | Показать реквизиты
+    template(v-else)
+      BaseButton(variant='primary', @click='copyAll')
+        q-icon.q-mr-xs(name='content_copy', size='16px')
+        | Скопировать всё
+      BaseButton(variant='secondary', @click='toggleDetails')
+        q-icon.q-mr-xs(name='qr_code', size='16px')
+        | Показать QR
 </template>
 
 <style scoped>
@@ -257,18 +265,11 @@ const downloadQR = () => {
   gap: var(--p-3, 12px);
 }
 
-/* Сворачиваемый блок реквизитов: минимальное оформление, без своего фона. */
-.bank-pay__details :deep(.q-expansion-item__container > .q-item) {
-  border-top: 1px solid var(--p-line);
-  border-bottom: 1px solid var(--p-line);
-  padding: var(--p-2, 8px) 0;
-  min-height: 0;
-}
-.bank-pay__details-list {
+/* Список реквизитов вместо QR при toggle. Плоский, без своего surface. */
+.bank-pay__details {
   display: flex;
   flex-direction: column;
   gap: var(--p-2, 8px);
-  padding: var(--p-4, 16px) 0 0;
 }
 .bank-pay__field {
   width: 100%;
