@@ -13,32 +13,9 @@
       @cmdk="onCmdk"
     >
       <template #footer>
-        <transition name="slide">
-          <div
-            v-show="isBottomSectionExpanded !== null && isBottomSectionExpanded"
-            class="left-drawer-menu__foot"
-          >
-            <MicroWallet />
-            <div class="left-drawer-menu__logout">
-              <LogoutButton />
-            </div>
-          </div>
-        </transition>
-        <div class="left-drawer-menu__toggle">
-          <q-btn
-            v-if="isBottomSectionExpanded !== null"
-            flat
-            dense
-            round
-            size="sm"
-            :icon="isBottomSectionExpanded ? 'expand_more' : 'expand_less'"
-            @click="toggleBottomSection"
-          >
-            <q-tooltip>
-              {{ isBottomSectionExpanded ? 'Свернуть' : 'Развернуть' }}
-            </q-tooltip>
-          </q-btn>
-          <div v-else class="left-drawer-menu__toggle-ph" />
+        <div class="left-drawer-menu__foot">
+          <WalletCardMini />
+          <LogoutButton />
         </div>
       </template>
     </AppDrawer>
@@ -46,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
@@ -57,30 +34,13 @@ import { useActionsStore } from 'src/shared/lib/stores/actions.store';
 import { AppDrawer } from 'src/shared/ui/layout/AppDrawer';
 import type { RailItem } from 'src/shared/ui/layout/AppDrawer';
 import { LogoutButton } from 'src/features/User/Logout';
-import { MicroWallet } from 'src/widgets/Wallet';
-
-const STORAGE_KEY_BOTTOM_SECTION = 'monocoop-left-drawer-bottom-expanded';
+import { WalletCardMini } from 'src/widgets/wallet-card-mini';
 
 const router = useRouter();
 const desktop = useDesktopStore();
 const session = useSessionStore();
 const { info } = useSystemStore();
 const actionsStore = useActionsStore();
-
-const isBottomSectionExpanded = ref<boolean | null>(null);
-
-onMounted(() => {
-  const saved = localStorage.getItem(STORAGE_KEY_BOTTOM_SECTION);
-  isBottomSectionExpanded.value = saved !== null ? saved === 'true' : true;
-});
-
-function toggleBottomSection(): void {
-  isBottomSectionExpanded.value = !isBottomSectionExpanded.value;
-  localStorage.setItem(
-    STORAGE_KEY_BOTTOM_SECTION,
-    String(isBottomSectionExpanded.value),
-  );
-}
 
 // --- Адаптер: activeSecondLevelRoutes → RailItem[] -------------------------
 
@@ -221,27 +181,7 @@ const coopMeta = computed<string | undefined>(() =>
 .left-drawer-menu__foot {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 12px 16px 16px;
 }
-.left-drawer-menu__logout {
-  margin-top: 4px;
-}
-.left-drawer-menu__toggle {
-  display: flex;
-  justify-content: center;
-  padding: 6px 0 8px;
-}
-.left-drawer-menu__toggle-ph {
-  width: 32px;
-  height: 32px;
-}
-
-/* slide-анимация раскрытия нижнего блока (сохраняем поведение legacy) */
-.slide-enter-active { transition: all 0.3s ease-out; overflow: hidden; }
-.slide-leave-active { transition: all 0.25s ease-in; overflow: hidden; }
-.slide-enter-from { opacity: 0; transform: translateY(12px); }
-.slide-enter-to { opacity: 1; transform: translateY(0); }
-.slide-leave-from { opacity: 1; transform: translateY(0); }
-.slide-leave-to { opacity: 0; transform: translateY(12px); }
 </style>
