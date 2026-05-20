@@ -1,9 +1,7 @@
 <template lang="pug">
 button.ws-switcher(
   type='button',
-  :aria-haspopup='workspaces.length > 1 ? "menu" : undefined',
-  :aria-disabled='workspaces.length <= 1',
-  :disabled='workspaces.length <= 1'
+  :aria-haspopup='workspaces.length > 1 ? "menu" : undefined'
 )
   span.ws-switcher__icon
     span.ws-switcher__icon-svg(v-html='logoSvg')
@@ -125,12 +123,9 @@ function onSelect(name: string): void {
   font: inherit;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
-.ws-switcher:hover:not(:disabled) {
+.ws-switcher:hover {
   background: var(--p-surface);
   border-color: var(--p-line);
-}
-.ws-switcher:disabled {
-  cursor: default;
 }
 
 .ws-switcher__icon {
