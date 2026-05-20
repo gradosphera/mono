@@ -1,112 +1,94 @@
-<template>
-  <aside class="rail" role="navigation" aria-label="Главная навигация">
-    <!-- Бренд: иконка + ПК «Название» / подпись расширения -->
-    <div class="rail__top">
-      <slot name="brand">
-        <div class="rail__brand">
-          <slot name="brand-icon">
-            <q-icon name="dashboard" />
-          </slot>
-        </div>
-        <div class="rail__name">
-          <strong>{{ coopName ?? 'Кооператив' }}</strong>
-          <span v-if="coopMeta">{{ coopMeta }}</span>
-        </div>
-      </slot>
-    </div>
+<template lang="pug">
+aside.rail(role='navigation', aria-label='Главная навигация')
+  //- Бренд: иконка + ПК «Название» / подпись расширения
+  .rail__top
+    slot(name='brand')
+      .rail__brand
+        slot(name='brand-icon')
+          q-icon(name='dashboard')
+      .rail__name
+        strong {{ coopName ?? 'Кооператив' }}
+        span(v-if='coopMeta') {{ coopMeta }}
 
-    <!-- ⌘K поиск — отдельным блоком после rail__top, как в каноне -->
-    <button
-      v-if="showCmdk"
-      class="rail__cmdk"
-      type="button"
-      :style="cmdkStyle"
-      :title="cmdkHint ?? 'Поиск'"
-      @click="emit('cmdk')"
-    >
-      <q-icon name="search" :style="{ color: 'var(--p-ink-3)' }" />
-      <span :style="{ color: 'var(--p-ink-2)', flex: 1, textAlign: 'left' }">
-        {{ cmdkLabel ?? 'Найти' }}
-      </span>
-      <span :style="{ display: 'inline-flex', gap: '2px' }">
-        <span class="kbd">⌘</span><span class="kbd">K</span>
-      </span>
-    </button>
+  //- ⌘K поиск — отдельным блоком после rail__top, выровнен с .rail__nav
+  button.rail__cmdk(
+    v-if='showCmdk',
+    type='button',
+    :style='cmdkStyle',
+    :title="cmdkHint ?? 'Поиск'",
+    @click="emit('cmdk')"
+  )
+    q-icon(name='search', :style="{ color: 'var(--p-ink-3)' }")
+    span(:style="{ color: 'var(--p-ink-2)', flex: 1, textAlign: 'left' }") {{ cmdkLabel ?? 'Найти' }}
+    span(:style="{ display: 'inline-flex', gap: '2px' }")
+      span.kbd ⌘
+      span.kbd K
 
-    <!-- Пункты — плоский список (всегда обёрнут в .rail__nav) или секции -->
-    <template v-if="hasSections">
-      <template v-for="(entry, idx) in items" :key="idx">
-        <template v-if="isSection(entry)">
-          <div class="rail__sect-label">{{ entry.section }}</div>
-          <nav class="rail__nav">
-            <component
-              :is="item.route ? 'router-link' : 'div'"
-              v-for="item in entry.items"
-              :key="item.key"
-              :to="item.route"
-              active-class=""
-              exact-active-class=""
-              :class="['rail__item', { 'rail__item--active': item.key === activeKey }]"
-              :role="item.route ? undefined : 'button'"
-              :tabindex="item.route ? undefined : 0"
-              @click="emit('select', item)"
-              @keydown.enter="emit('select', item)"
-              @keydown.space.prevent="emit('select', item)"
-            >
-              <q-icon v-if="item.icon" :name="item.icon" class="rail__item-ico" />
-              <span class="rail__item-label">{{ item.label }}</span>
-              <span v-if="item.badge !== undefined" class="rail__item-meta">{{ item.badge }}</span>
-              <span v-else-if="item.meta" class="rail__item-meta">{{ item.meta }}</span>
-            </component>
-          </nav>
-        </template>
-        <nav v-else class="rail__nav">
-          <component
-            :is="(entry as RailItem).route ? 'router-link' : 'div'"
-            :to="(entry as RailItem).route"
-            active-class=""
-            exact-active-class=""
-            :class="['rail__item', { 'rail__item--active': (entry as RailItem).key === activeKey }]"
-            :role="(entry as RailItem).route ? undefined : 'button'"
-            :tabindex="(entry as RailItem).route ? undefined : 0"
-            @click="emit('select', entry as RailItem)"
-            @keydown.enter="emit('select', entry as RailItem)"
-            @keydown.space.prevent="emit('select', entry as RailItem)"
-          >
-            <q-icon v-if="(entry as RailItem).icon" :name="(entry as RailItem).icon!" class="rail__item-ico" />
-            <span class="rail__item-label">{{ (entry as RailItem).label }}</span>
-            <span v-if="(entry as RailItem).badge !== undefined" class="rail__item-meta">{{ (entry as RailItem).badge }}</span>
-            <span v-else-if="(entry as RailItem).meta" class="rail__item-meta">{{ (entry as RailItem).meta }}</span>
-          </component>
-        </nav>
-      </template>
-    </template>
-    <nav v-else class="rail__nav rail__nav--flat">
-      <component
-        :is="(item as RailItem).route ? 'router-link' : 'div'"
-        v-for="(item) in (items as RailItem[])"
-        :key="item.key"
-        :to="item.route"
-        active-class=""
-        exact-active-class=""
-        :class="['rail__item', { 'rail__item--active': item.key === activeKey }]"
-        :role="item.route ? undefined : 'button'"
-        :tabindex="item.route ? undefined : 0"
-        @click="emit('select', item)"
-        @keydown.enter="emit('select', item)"
-        @keydown.space.prevent="emit('select', item)"
-      >
-        <q-icon v-if="item.icon" :name="item.icon" class="rail__item-ico" />
-        <span class="rail__item-label">{{ item.label }}</span>
-        <span v-if="item.badge !== undefined" class="rail__item-meta">{{ item.badge }}</span>
-        <span v-else-if="item.meta" class="rail__item-meta">{{ item.meta }}</span>
-      </component>
-    </nav>
+  //- Пункты — секции с заголовками ИЛИ плоский список (всегда в .rail__nav)
+  template(v-if='hasSections')
+    template(v-for='(entry, idx) in items', :key='idx')
+      template(v-if='isSection(entry)')
+        .rail__sect-label {{ entry.section }}
+        nav.rail__nav
+          component(
+            v-for='item in entry.items',
+            :key='item.key',
+            :is="item.route ? 'router-link' : 'div'",
+            :to='item.route',
+            active-class='',
+            exact-active-class='',
+            :class="['rail__item', { 'rail__item--active': item.key === activeKey }]",
+            :role="item.route ? undefined : 'button'",
+            :tabindex='item.route ? undefined : 0',
+            @click="emit('select', item)",
+            @keydown.enter="emit('select', item)",
+            @keydown.space.prevent="emit('select', item)"
+          )
+            q-icon.rail__item-ico(v-if='item.icon', :name='item.icon')
+            span.rail__item-label {{ item.label }}
+            span.rail__item-meta(v-if='item.badge !== undefined') {{ item.badge }}
+            span.rail__item-meta(v-else-if='item.meta') {{ item.meta }}
+      nav.rail__nav(v-else)
+        component(
+          :is="(entry as RailItem).route ? 'router-link' : 'div'",
+          :to='(entry as RailItem).route',
+          active-class='',
+          exact-active-class='',
+          :class="['rail__item', { 'rail__item--active': (entry as RailItem).key === activeKey }]",
+          :role="(entry as RailItem).route ? undefined : 'button'",
+          :tabindex='(entry as RailItem).route ? undefined : 0',
+          @click="emit('select', entry as RailItem)",
+          @keydown.enter="emit('select', entry as RailItem)",
+          @keydown.space.prevent="emit('select', entry as RailItem)"
+        )
+          q-icon.rail__item-ico(v-if='(entry as RailItem).icon', :name='(entry as RailItem).icon!')
+          span.rail__item-label {{ (entry as RailItem).label }}
+          span.rail__item-meta(v-if='(entry as RailItem).badge !== undefined') {{ (entry as RailItem).badge }}
+          span.rail__item-meta(v-else-if='(entry as RailItem).meta') {{ (entry as RailItem).meta }}
 
-    <div class="rail__spacer" />
+  nav.rail__nav.rail__nav--flat(v-else)
+    component(
+      v-for='item in (items as RailItem[])',
+      :key='item.key',
+      :is="item.route ? 'router-link' : 'div'",
+      :to='item.route',
+      active-class='',
+      exact-active-class='',
+      :class="['rail__item', { 'rail__item--active': item.key === activeKey }]",
+      :role="item.route ? undefined : 'button'",
+      :tabindex='item.route ? undefined : 0',
+      @click="emit('select', item)",
+      @keydown.enter="emit('select', item)",
+      @keydown.space.prevent="emit('select', item)"
+    )
+      q-icon.rail__item-ico(v-if='item.icon', :name='item.icon')
+      span.rail__item-label {{ item.label }}
+      span.rail__item-meta(v-if='item.badge !== undefined') {{ item.badge }}
+      span.rail__item-meta(v-else-if='item.meta') {{ item.meta }}
 
-    <slot name="footer" />
-  </aside>
+  .rail__spacer
+
+  slot(name='footer')
 </template>
 
 <script setup lang="ts">

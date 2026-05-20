@@ -45,7 +45,7 @@ import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { useWalletStore } from 'src/entities/Wallet';
-import { useCmdkStore } from 'src/entities/CmdkMenu/model';
+import { useCmdkMenuStore } from 'src/entities/CmdkMenu/model';
 import { useActionsStore } from 'src/shared/lib/stores/actions.store';
 import { useLogoutUser } from 'src/features/User/Logout';
 import { useDepositDialog, DepositButton } from 'src/features/Wallet/DepositToWallet';
@@ -63,7 +63,7 @@ const systemStore = useSystemStore();
 const { info } = systemStore;
 const walletStore = useWalletStore();
 const actionsStore = useActionsStore();
-const cmdkStore = useCmdkStore();
+const cmdkStore = useCmdkMenuStore();
 
 // --- Адаптер: activeSecondLevelRoutes → RailItem[] -------------------------
 
