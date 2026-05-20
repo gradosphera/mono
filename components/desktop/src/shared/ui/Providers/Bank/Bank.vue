@@ -7,8 +7,9 @@ import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import QRCode from 'qrcode';
 import { copyToClipboard } from 'quasar';
 import { SuccessAlert } from 'src/shared/api';
+import { BaseInput } from 'src/shared/ui/base/BaseInput';
+import { BaseButton } from 'src/shared/ui/base/BaseButton';
 
-// Определяем интерфейс для orderData
 interface IOrderData {
   sum?: string;
   name?: string;
@@ -26,6 +27,7 @@ const props = defineProps<{
 }>();
 
 const qrElement = ref<HTMLCanvasElement | null>(null);
+const detailsOpen = ref<boolean>(false);
 
 const amount = computed(() => {
   return orderData.value.sum
@@ -37,15 +39,14 @@ const amount = computed(() => {
 
 const orderData = computed(() => {
   const dataString = (props.paymentOrder.payment_details?.data as string) || '';
-  const parsedDetails: IOrderData = {}; // Используем тип IOrderData
+  const parsedDetails: IOrderData = {};
 
-  // Разбираем строку на пары ключ=значение
   const parts = dataString.split('|');
 
   for (const part of parts) {
     const [key, value] = part.split('=');
     if (key) {
-      parsedDetails[key.toLowerCase() as keyof IOrderData] = value; // Ключи в нижнем регистре
+      parsedDetails[key.toLowerCase() as keyof IOrderData] = value;
     }
   }
 
@@ -97,9 +98,10 @@ const copyAll = () => {
   copy(data);
 };
 
-const copy = (data: any) => {
+const copy = (data: string | undefined) => {
+  if (!data) return;
   copyToClipboard(data)
-    .then(() => SuccessAlert('Реквизиты скопированы в буфер обмена'))
+    .then(() => SuccessAlert('Скопировано в буфер обмена'))
     .catch(console.log);
 };
 
@@ -116,86 +118,161 @@ const downloadQR = () => {
 </script>
 
 <template lang="pug">
-div
-  q-input(label='ИНН получателя', v-model='orderData.payeeinn', readonly)
-    template(v-slot:append)
-      q-btn(
-        icon='fas fa-copy',
-        @click='copy(orderData.payeeinn)',
-        size='xs',
-        flat
-      )
+.bank-pay
+  //- Главный экран: QR + ключевая сводка + действия.
+  //- Полные реквизиты — под спойлером ниже.
+  .bank-pay__summary
+    .bank-pay__summary-row
+      span.bank-pay__summary-label Получатель
+      span.bank-pay__summary-value {{ orderData.name }}
+    .bank-pay__summary-row
+      span.bank-pay__summary-label Сумма
+      span.bank-pay__summary-value.bank-pay__summary-amount {{ amount }}
+    .bank-pay__summary-row(v-if='orderData.purpose')
+      span.bank-pay__summary-label Назначение
+      span.bank-pay__summary-value {{ orderData.purpose }}
 
-  q-input(label='Получатель', v-model='orderData.name', readonly)
-    template(v-slot:append)
-      q-btn(icon='fas fa-copy', @click='copy(orderData.name)', size='xs', flat)
+  .bank-pay__qr
+    canvas#qr.bank-pay__qr-canvas
 
-  q-input(label='БИК', v-model='orderData.bic', readonly)
-    template(v-slot:append)
-      q-btn(icon='fas fa-copy', @click='copy(orderData.bic)', size='xs', flat)
+  .bank-pay__actions
+    BaseButton(variant='primary', @click='downloadQR')
+      q-icon.q-mr-xs(name='download', size='16px')
+      | Скачать QR
+    BaseButton(variant='secondary', @click='copyAll')
+      q-icon.q-mr-xs(name='content_copy', size='16px')
+      | Скопировать реквизиты
 
-  q-input(label='Банк получателя', v-model='orderData.bankname', readonly)
-    template(v-slot:append)
-      q-btn(
-        icon='fas fa-copy',
-        @click='copy(orderData.bankname)',
-        size='xs',
-        flat
-      )
-
-  q-input(label='КПП', v-model='orderData.kpp', readonly)
-    template(v-slot:append)
-      q-btn(icon='fas fa-copy', @click='copy(orderData.kpp)', size='xs', flat)
-
-  q-input(
-    label='Корреспондентский счёт',
-    v-model='orderData.correspacc',
-    readonly
+  q-expansion-item.bank-pay__details(
+    v-model='detailsOpen',
+    label='Реквизиты для ручного перевода',
+    icon='receipt_long',
+    expand-icon-class='bank-pay__chevron',
+    dense
   )
-    template(v-slot:append)
-      q-btn(
-        icon='fas fa-copy',
-        @click='copy(orderData.correspacc)',
-        size='xs',
-        flat
-      )
+    .bank-pay__details-list
+      .bank-pay__field
+        BaseInput(label='ИНН получателя', :model-value='orderData.payeeinn', readonly, mono)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.payeeinn)')
 
-  q-input(label='Номер счёта', v-model='orderData.personalacc', readonly)
-    template(v-slot:append)
-      q-btn(
-        icon='fas fa-copy',
-        @click='copy(orderData.personalacc)',
-        size='xs',
-        flat
-      )
+      .bank-pay__field
+        BaseInput(label='Получатель', :model-value='orderData.name', readonly)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.name)')
 
-  q-input(label='Cумма платежа', v-model='amount', readonly)
-    template(v-slot:append)
-      q-btn(icon='fas fa-copy', @click='copy(amount)', size='xs', flat)
+      .bank-pay__field
+        BaseInput(label='БИК', :model-value='orderData.bic', readonly, mono)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.bic)')
 
-  q-input(label='Назначение платежа', v-model='orderData.purpose', readonly)
-    template(v-slot:append)
-      q-btn(
-        icon='fas fa-copy',
-        @click='copy(orderData.purpose)',
-        size='xs',
-        flat
-      )
+      .bank-pay__field
+        BaseInput(label='Банк получателя', :model-value='orderData.bankname', readonly)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.bankname)')
 
-  .full-width.text-center.q-mt-md
-    canvas#qr
-  .full-width.text-center.q-gutter-sm
-    q-btn(@click='copyAll', push size='sm' color="secondary")
-      i.fa.fa-copy
-      span.q-ml-sm скопировать реквизиты
-    q-btn(@click='downloadQR', push size='sm' color="secondary")
-      i.fa.fa-download
-      span.q-ml-sm скачать QR
+      .bank-pay__field
+        BaseInput(label='КПП', :model-value='orderData.kpp', readonly, mono)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.kpp)')
+
+      .bank-pay__field
+        BaseInput(label='Корреспондентский счёт', :model-value='orderData.correspacc', readonly, mono)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.correspacc)')
+
+      .bank-pay__field
+        BaseInput(label='Номер счёта', :model-value='orderData.personalacc', readonly, mono)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.personalacc)')
+
+      .bank-pay__field
+        BaseInput(label='Сумма платежа', :model-value='amount', readonly, mono)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(amount)')
+
+      .bank-pay__field
+        BaseInput(label='Назначение платежа', :model-value='orderData.purpose', readonly)
+          template(#append)
+            q-btn(flat, dense, round, icon='content_copy', size='sm', @click='copy(orderData.purpose)')
 </template>
 
-<style>
-#qr {
-  width: 200px !important;
-  height: 200px !important;
+<style scoped>
+.bank-pay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-4, 16px);
+}
+
+/* Сводка ключевых полей сверху — то, по чему пользователь визуально
+   верифицирует платёж перед сканированием QR. */
+.bank-pay__summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
+  padding: var(--p-4, 16px);
+  background: var(--p-canvas-2, var(--p-canvas));
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-radius-md, 8px);
+}
+.bank-pay__summary-row {
+  display: flex;
+  gap: var(--p-3, 12px);
+  align-items: baseline;
+  font-size: var(--p-fs-body-sm, 13px);
+}
+.bank-pay__summary-label {
+  color: var(--p-ink-2);
+  flex: 0 0 110px;
+}
+.bank-pay__summary-value {
+  color: var(--p-ink);
+  font-weight: 500;
+  word-break: break-word;
+}
+.bank-pay__summary-amount {
+  font-size: var(--p-fs-body, 14px);
+  font-weight: 600;
+  color: var(--p-ink);
+}
+
+/* QR-блок: центрированный canvas в нейтральной surface-2 рамке. */
+.bank-pay__qr {
+  display: flex;
+  justify-content: center;
+  padding: var(--p-4, 16px);
+  background: #ffffff;
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-radius-md, 8px);
+}
+.bank-pay__qr-canvas {
+  width: 220px !important;
+  height: 220px !important;
+}
+
+.bank-pay__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--p-3, 12px);
+}
+
+/* Свёрнутый блок полных реквизитов под expansion-item. */
+.bank-pay__details {
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-radius-md, 8px);
+  background: var(--p-surface, var(--p-canvas-2));
+}
+.bank-pay__details :deep(.q-item) {
+  border-radius: var(--p-radius-md, 8px);
+}
+.bank-pay__details-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
+  padding: var(--p-3, 12px) var(--p-4, 16px) var(--p-4, 16px);
+}
+.bank-pay__field {
+  width: 100%;
 }
 </style>
