@@ -33,56 +33,75 @@
       </span>
     </button>
 
-    <!-- Пункты — плоский список или секции -->
-    <template v-for="(entry, idx) in items" :key="idx">
-      <template v-if="isSection(entry)">
-        <div class="rail__sect-label">{{ entry.section }}</div>
-        <nav class="rail__nav">
+    <!-- Пункты — плоский список (всегда обёрнут в .rail__nav) или секции -->
+    <template v-if="hasSections">
+      <template v-for="(entry, idx) in items" :key="idx">
+        <template v-if="isSection(entry)">
+          <div class="rail__sect-label">{{ entry.section }}</div>
+          <nav class="rail__nav">
+            <component
+              :is="item.route ? 'router-link' : 'div'"
+              v-for="item in entry.items"
+              :key="item.key"
+              :to="item.route"
+              active-class=""
+              exact-active-class=""
+              :class="['rail__item', { 'rail__item--active': item.key === activeKey }]"
+              :role="item.route ? undefined : 'button'"
+              :tabindex="item.route ? undefined : 0"
+              @click="emit('select', item)"
+              @keydown.enter="emit('select', item)"
+              @keydown.space.prevent="emit('select', item)"
+            >
+              <q-icon v-if="item.icon" :name="item.icon" class="rail__item-ico" />
+              <span class="rail__item-label">{{ item.label }}</span>
+              <span v-if="item.badge !== undefined" class="rail__item-meta">{{ item.badge }}</span>
+              <span v-else-if="item.meta" class="rail__item-meta">{{ item.meta }}</span>
+            </component>
+          </nav>
+        </template>
+        <nav v-else class="rail__nav">
           <component
-            :is="item.route ? 'router-link' : 'div'"
-            v-for="item in entry.items"
-            :key="item.key"
-            :to="item.route"
+            :is="(entry as RailItem).route ? 'router-link' : 'div'"
+            :to="(entry as RailItem).route"
             active-class=""
             exact-active-class=""
-            :class="['rail__item', { 'rail__item--active': item.key === activeKey }]"
-            :role="item.route ? undefined : 'button'"
-            :tabindex="item.route ? undefined : 0"
-            @click="emit('select', item)"
-            @keydown.enter="emit('select', item)"
-            @keydown.space.prevent="emit('select', item)"
+            :class="['rail__item', { 'rail__item--active': (entry as RailItem).key === activeKey }]"
+            :role="(entry as RailItem).route ? undefined : 'button'"
+            :tabindex="(entry as RailItem).route ? undefined : 0"
+            @click="emit('select', entry as RailItem)"
+            @keydown.enter="emit('select', entry as RailItem)"
+            @keydown.space.prevent="emit('select', entry as RailItem)"
           >
-            <q-icon v-if="item.icon" :name="item.icon" class="rail__item-ico" />
-            <span class="rail__item-label">{{ item.label }}</span>
-            <span v-if="item.badge !== undefined" class="rail__item-meta">{{ item.badge }}</span>
-            <span v-else-if="item.meta" class="rail__item-meta">{{ item.meta }}</span>
+            <q-icon v-if="(entry as RailItem).icon" :name="(entry as RailItem).icon!" class="rail__item-ico" />
+            <span class="rail__item-label">{{ (entry as RailItem).label }}</span>
+            <span v-if="(entry as RailItem).badge !== undefined" class="rail__item-meta">{{ (entry as RailItem).badge }}</span>
+            <span v-else-if="(entry as RailItem).meta" class="rail__item-meta">{{ (entry as RailItem).meta }}</span>
           </component>
         </nav>
       </template>
-
+    </template>
+    <nav v-else class="rail__nav rail__nav--flat">
       <component
-        v-else
-        :is="(entry as RailItem).route ? 'router-link' : 'div'"
-        :to="(entry as RailItem).route"
+        :is="(item as RailItem).route ? 'router-link' : 'div'"
+        v-for="(item) in (items as RailItem[])"
+        :key="item.key"
+        :to="item.route"
         active-class=""
         exact-active-class=""
-        :class="['rail__item', { 'rail__item--active': (entry as RailItem).key === activeKey }]"
-        :role="(entry as RailItem).route ? undefined : 'button'"
-        :tabindex="(entry as RailItem).route ? undefined : 0"
-        @click="emit('select', entry as RailItem)"
-        @keydown.enter="emit('select', entry as RailItem)"
-        @keydown.space.prevent="emit('select', entry as RailItem)"
+        :class="['rail__item', { 'rail__item--active': item.key === activeKey }]"
+        :role="item.route ? undefined : 'button'"
+        :tabindex="item.route ? undefined : 0"
+        @click="emit('select', item)"
+        @keydown.enter="emit('select', item)"
+        @keydown.space.prevent="emit('select', item)"
       >
-        <q-icon v-if="(entry as RailItem).icon" :name="(entry as RailItem).icon!" class="rail__item-ico" />
-        <span class="rail__item-label">{{ (entry as RailItem).label }}</span>
-        <span v-if="(entry as RailItem).badge !== undefined" class="rail__item-meta">
-          {{ (entry as RailItem).badge }}
-        </span>
-        <span v-else-if="(entry as RailItem).meta" class="rail__item-meta">
-          {{ (entry as RailItem).meta }}
-        </span>
+        <q-icon v-if="item.icon" :name="item.icon" class="rail__item-ico" />
+        <span class="rail__item-label">{{ item.label }}</span>
+        <span v-if="item.badge !== undefined" class="rail__item-meta">{{ item.badge }}</span>
+        <span v-else-if="item.meta" class="rail__item-meta">{{ item.meta }}</span>
       </component>
-    </template>
+    </nav>
 
     <div class="rail__spacer" />
 
@@ -91,9 +110,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { AppDrawerProps, RailItem, RailSection } from './AppDrawer.types';
 
-defineProps<AppDrawerProps>();
+const props = defineProps<AppDrawerProps>();
 
 const emit = defineEmits<{
   select: [item: RailItem];
@@ -104,9 +124,15 @@ function isSection(entry: RailItem | RailSection): entry is RailSection {
   return (entry as RailSection).section !== undefined;
 }
 
-// Canon-inline-стиль для cmdk: растянутая кнопка на ширину рейла с отступом 16px по бокам
+const hasSections = computed<boolean>(() =>
+  (props.items ?? []).some((e) => isSection(e)),
+);
+
+// Canon-inline-стиль для cmdk: выровнен по горизонтали с .rail__nav (padding 0 8px),
+// margin-bottom = 8px чтобы был визуальный gap между ⌘K и первым пунктом меню
+// (rail__nav сам добавит 4px padding-top, итого ~12px).
 const cmdkStyle = {
-  margin: '12px 16px 0',
+  margin: '12px 8px 8px',
   alignSelf: 'stretch',
   width: 'auto',
   height: '32px',
