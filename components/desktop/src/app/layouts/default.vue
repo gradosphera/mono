@@ -2,13 +2,13 @@
 q-layout(view='lHh LpR fff')
   Header(:showDrawer='showDrawer', @toggle-left-drawer='toggleLeftDrawer')
 
-  q-drawer(
+  q-drawer.app-left-drawer(
     v-if='showDrawer && loggedIn',
     v-model='leftDrawerOpen',
     side='left',
     bordered,
     persistent,
-    :width='200'
+    :width='240'
   )
     LeftDrawerMenu
 
