@@ -5,37 +5,37 @@ div
     title='Получите приватный ключ и надежно сохраните его для цифровой подписи',
     :done='store.isStepDone("GenerateAccount")'
   )
-    div
-      p.full-width Приватный ключ используется для входа в систему и подписи документов. Мы рекомендуем сохранить его в бесплатном менеджере паролей, таком как
-        a.q-ml-xs(href='https://bitwarden.com/download', target='_bank') Bitwarden
+    .generate
+      p.generate__hint Приватный ключ используется для входа в систему и подписи документов. Мы рекомендуем сохранить его в бесплатном менеджере паролей, таком как
+        a.generate__link(href='https://bitwarden.com/download', target='_blank') Bitwarden
         | .
 
-    q-input.q-mt-lg(
-      ref='privateKeyInput',
-      v-if='account.private_key',
-      :model-value='account.private_key',
-      label='Приватный ключ'
-    )
+      .generate__field(ref='privateKeyFieldRef' v-if='account.private_key')
+        BaseInput(
+          :model-value='account.private_key',
+          label='Приватный ключ',
+          mono,
+          readonly
+        )
+          template(#append)
+            q-btn(flat dense round icon='content_copy' size='sm' @click='copyMnemonic')
 
-    q-checkbox(v-model='i_save', label='Я сохранил ключ в надёжном месте')
+      BaseCheckbox(v-model='i_save')
+        | Я сохранил ключ в надёжном месте
 
-    .row.q-gutter-md.q-mt-lg.q-mb-lg
-      BaseButton(variant='ghost', @click='store.prev()')
-        i.fa.fa-arrow-left
-        span.q-ml-md назад
+      .generate__actions
+        BaseButton(variant='ghost', @click='store.prev()')
+          i.fa.fa-arrow-left
+          span.q-ml-md назад
 
-      BaseButton(variant='ghost', @click='copyMnemonic')
-        i.fa.fa-copy
-        span.q-ml-md скопировать
-
-      BaseButton(
-        variant='primary',
-        :disabled='!i_save',
-        :loading='isLoading',
-        @click='setAccount'
-      )
-        | Продолжить
-        q-tooltip подтвердите сохранение ключа для продолжения
+        BaseButton(
+          variant='primary',
+          :disabled='!i_save',
+          :loading='isLoading',
+          @click='setAccount'
+        )
+          | Продолжить
+          q-tooltip подтвердите сохранение ключа для продолжения
 </template>
 <script lang="ts" setup>
 import { ref, computed, nextTick, watch } from 'vue';
@@ -47,6 +47,8 @@ import { Classes } from '@coopenomics/sdk';
 import { updateOpenReplayUser } from 'src/shared/config';
 import { useSystemStore } from 'src/entities/System/model';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
+import { BaseInput } from 'src/shared/ui/base/BaseInput';
+import { BaseCheckbox } from 'src/shared/ui/base/BaseCheckbox';
 
 const store = useRegistratorStore();
 const system = useSystemStore();
@@ -56,7 +58,7 @@ import { FailAlert } from 'src/shared/api';
 const api = useCreateUser();
 const i_save = ref(false);
 const account = ref(store.state.account);
-const privateKeyInput = ref<any>();
+const privateKeyFieldRef = ref<HTMLElement | null>(null);
 const isLoading = ref(false);
 
 if (
@@ -74,8 +76,9 @@ watch(
   () => account.value.private_key,
   (newKey) => {
     if (newKey) {
-      nextTick(() => {
-        privateKeyInput.value?.select();
+      void nextTick(() => {
+        const input = privateKeyFieldRef.value?.querySelector('input');
+        input?.select();
       });
     }
   },
@@ -118,3 +121,35 @@ const setAccount = async () => {
   }
 };
 </script>
+
+<style scoped>
+.generate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-4, 16px);
+  margin: var(--p-4, 16px) 0;
+}
+.generate__hint {
+  font-size: var(--p-fs-body, 14px);
+  line-height: var(--p-lh-body, 1.55);
+  color: var(--p-ink);
+  margin: 0;
+}
+.generate__link {
+  margin-left: var(--p-1, 4px);
+  color: var(--p-primary);
+  text-decoration: none;
+}
+.generate__link:hover {
+  text-decoration: underline;
+}
+.generate__field {
+  width: 100%;
+}
+.generate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-3, 12px);
+  margin-top: var(--p-3, 12px);
+}
+</style>
