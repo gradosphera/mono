@@ -11,6 +11,9 @@
     @select='onSelect',
     @cmdk='onCmdk'
   )
+    template(#brand-icon)
+      span.left-drawer-menu__logo(v-html='logoSvg')
+
     template(#footer)
       RailUserCard(
         v-if='walletReady',
@@ -55,6 +58,7 @@ import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { AppDrawer } from 'src/shared/ui/layout/AppDrawer';
 import type { RailItem } from 'src/shared/ui/layout/AppDrawer';
 import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
+import logoSvg from 'src/assets/logo.svg?raw';
 
 const router = useRouter();
 const desktop = useDesktopStore();
@@ -271,6 +275,21 @@ async function onLogout(): Promise<void> {
   flex-direction: column;
 }
 .left-drawer-menu__rail {
+  height: 100%;
+}
+/* Системный лого ЦК внутри canon .rail__brand (32×32 primary-soft квадрат).
+   SVG прокинут через v-html чтобы `fill: currentColor` поймал canon-цвет
+   .rail__brand (color: var(--p-primary)). */
+.left-drawer-menu__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  line-height: 0;
+}
+.left-drawer-menu__logo :deep(svg) {
+  width: 100%;
   height: 100%;
 }
 /* Кнопки Deposit/Withdraw нужны нам только как держатели q-dialog'а
