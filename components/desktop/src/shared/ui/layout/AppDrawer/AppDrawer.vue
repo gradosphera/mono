@@ -26,49 +26,31 @@ aside.rail(role='navigation', aria-label='Главная навигация')
 
   //- Пункты — секции с заголовками ИЛИ плоский список (всегда в .rail__nav)
   template(v-if='hasSections')
-    template(v-for='(entry, idx) in items', :key='idx')
-      template(v-if='isSection(entry)')
-        .rail__sect-label {{ entry.section }}
-        nav.rail__nav
-          component(
-            v-for='item in entry.items',
-            :key='item.key',
-            :is="item.route ? 'router-link' : 'div'",
-            :to='item.route',
-            active-class='',
-            exact-active-class='',
-            :class="['rail__item', { 'rail__item--active': item.key === activeKey }]",
-            :role="item.route ? undefined : 'button'",
-            :tabindex='item.route ? undefined : 0',
-            @click="emit('select', item)",
-            @keydown.enter="emit('select', item)",
-            @keydown.space.prevent="emit('select', item)"
-          )
-            q-icon.rail__item-ico(v-if='item.icon', :name='item.icon')
-            span.rail__item-label {{ item.label }}
-            span.rail__item-meta(v-if='item.badge !== undefined') {{ item.badge }}
-            span.rail__item-meta(v-else-if='item.meta') {{ item.meta }}
-      nav.rail__nav(v-else)
+    template(v-for='(group, gIdx) in normalizedGroups', :key='gIdx')
+      .rail__sect-label(v-if='group.title') {{ group.title }}
+      nav.rail__nav
         component(
-          :is="(entry as RailItem).route ? 'router-link' : 'div'",
-          :to='(entry as RailItem).route',
+          v-for='item in group.items',
+          :key='item.key',
+          :is="item.route ? 'router-link' : 'div'",
+          :to='item.route',
           active-class='',
           exact-active-class='',
-          :class="['rail__item', { 'rail__item--active': (entry as RailItem).key === activeKey }]",
-          :role="(entry as RailItem).route ? undefined : 'button'",
-          :tabindex='(entry as RailItem).route ? undefined : 0',
-          @click="emit('select', entry as RailItem)",
-          @keydown.enter="emit('select', entry as RailItem)",
-          @keydown.space.prevent="emit('select', entry as RailItem)"
+          :class="['rail__item', { 'rail__item--active': item.key === activeKey }]",
+          :role="item.route ? undefined : 'button'",
+          :tabindex='item.route ? undefined : 0',
+          @click="emit('select', item)",
+          @keydown.enter="emit('select', item)",
+          @keydown.space.prevent="emit('select', item)"
         )
-          q-icon.rail__item-ico(v-if='(entry as RailItem).icon', :name='(entry as RailItem).icon!')
-          span.rail__item-label {{ (entry as RailItem).label }}
-          span.rail__item-meta(v-if='(entry as RailItem).badge !== undefined') {{ (entry as RailItem).badge }}
-          span.rail__item-meta(v-else-if='(entry as RailItem).meta') {{ (entry as RailItem).meta }}
+          q-icon.rail__item-ico(v-if='item.icon', :name='item.icon')
+          span.rail__item-label {{ item.label }}
+          span.rail__item-meta(v-if='item.badge !== undefined') {{ item.badge }}
+          span.rail__item-meta(v-else-if='item.meta') {{ item.meta }}
 
   nav.rail__nav.rail__nav--flat(v-else)
     component(
-      v-for='item in (items as RailItem[])',
+      v-for='item in flatItems',
       :key='item.key',
       :is="item.route ? 'router-link' : 'div'",
       :to='item.route',
@@ -109,6 +91,34 @@ function isSection(entry: RailItem | RailSection): entry is RailSection {
 const hasSections = computed<boolean>(() =>
   (props.items ?? []).some((e) => isSection(e)),
 );
+
+/** Плоский список — items приведённые к RailItem[]. */
+const flatItems = computed<RailItem[]>(() =>
+  (props.items ?? []).filter((e): e is RailItem => !isSection(e)),
+);
+
+/**
+ * Если в items замешаны секции и одиночные пункты, нормализуем в массив
+ * групп с одним опциональным заголовком: одиночные item оборачиваются в
+ * безымянную группу. Это позволяет шаблону работать одним циклом и не
+ * требует TS-кастов внутри pug.
+ */
+const normalizedGroups = computed<Array<{ title?: string; items: RailItem[] }>>(() => {
+  const out: Array<{ title?: string; items: RailItem[] }> = [];
+  for (const entry of props.items ?? []) {
+    if (isSection(entry)) {
+      out.push({ title: entry.section, items: entry.items });
+    } else {
+      const last = out[out.length - 1];
+      if (last && last.title === undefined) {
+        last.items.push(entry);
+      } else {
+        out.push({ items: [entry] });
+      }
+    }
+  }
+  return out;
+});
 
 // Canon-inline-стиль для cmdk: выровнен по горизонтали с .rail__nav (padding 0 8px),
 // margin-bottom = 8px чтобы был визуальный gap между ⌘K и первым пунктом меню
