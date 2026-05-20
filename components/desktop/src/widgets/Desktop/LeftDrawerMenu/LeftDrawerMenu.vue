@@ -279,10 +279,12 @@ async function onLogout(): Promise<void> {
 .left-drawer-menu__rail {
   height: 100%;
 }
-/* WorkspaceSwitcher переопределяет стандартный brand-row AppDrawer. */
+/* WorkspaceSwitcher переопределяет стандартный brand-row AppDrawer.
+   Уменьшены боковые отступы — чтобы «Стол вычислительных ресурсов»
+   влезал на три строки целиком. */
 .left-drawer-menu__ws {
-  margin: var(--p-1, 4px) var(--p-2, 8px) 0;
-  width: calc(100% - var(--p-4, 16px));
+  margin: var(--p-1, 4px) var(--p-1, 4px) 0;
+  width: calc(100% - var(--p-2, 8px));
 }
 /* Кнопки Deposit/Withdraw нужны нам только как держатели q-dialog'а
    (диалоги портятся в body независимо от родителя); сами кнопки прячем. */

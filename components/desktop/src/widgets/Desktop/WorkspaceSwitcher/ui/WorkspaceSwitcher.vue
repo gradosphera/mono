@@ -45,15 +45,40 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
 import logoSvg from 'src/assets/logo.svg?raw';
 
 const router = useRouter();
 const desktop = useDesktopStore();
 const system = useSystemStore();
+const session = useSessionStore();
 
-const workspaces = computed(() => desktop.workspaceMenus);
 const activeWorkspaceName = computed(() => desktop.activeWorkspaceName);
 const menuOpen = ref<boolean>(false);
+
+/**
+ * Иерархия ролей: chairman ⊇ member ⊇ user.
+ * Председатель видит столы любых ролей; член совета — user+member; пайщик — только user.
+ * Workspace без meta.roles или с пустым массивом — публичный.
+ */
+const ROLE_HIERARCHY = ['user', 'member', 'chairman'] as const;
+type RoleLevel = (typeof ROLE_HIERARCHY)[number];
+
+const currentRole = computed<RoleLevel>(() =>
+  session.isChairman ? 'chairman' : session.isMember ? 'member' : 'user',
+);
+
+const workspaces = computed(() => {
+  const userLevel = ROLE_HIERARCHY.indexOf(currentRole.value);
+  return desktop.workspaceMenus.filter((ws) => {
+    const roles = ws.meta?.roles as string[] | undefined;
+    if (!roles || roles.length === 0) return true;
+    return roles.some((r) => {
+      const lvl = ROLE_HIERARCHY.indexOf(r as RoleLevel);
+      return lvl >= 0 && lvl <= userLevel;
+    });
+  });
+});
 
 /**
  * «ПК «ВОСХОД»» — собрано из системных vars:
@@ -146,16 +171,16 @@ function onSelect(name: string): void {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Title допускает перенос на 2 строки максимум — для длинных
-   названий вроде «Стол вычислительных ресурсов». Дальше — ellipsis. */
+/* Title допускает перенос на 3 строки — чтобы «Стол вычислительных ресурсов»
+   полностью помещался. Дальше — ellipsis. */
 .ws-switcher__title {
   font-size: var(--p-fs-body, 14px);
   line-height: 1.25;
   font-weight: 600;
   color: var(--p-ink);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
