@@ -37,17 +37,16 @@ div
     div(v-else).text-center.q-mt-lg
       p.text-body1 Доступных программ не найдено
 
-    div.q-mt-lg
-      q-btn.col-md-6.col-xs-12(flat, @click='registratorStore.prev()')
+    .row.q-gutter-md.q-mt-lg.q-mb-lg
+      BaseButton(variant='ghost', @click='registratorStore.prev()')
         i.fa.fa-arrow-left
         span.q-ml-md назад
 
-      q-btn.q-mt-lg.q-mb-lg(
-        color='primary',
-        label='Продолжить',
+      BaseButton(
+        variant='primary',
         :disabled='!registratorStore.state.selectedProgramKey',
         @click='registratorStore.next()'
-      )
+      ) Продолжить
 </template>
 
 <script lang="ts" setup>
@@ -58,6 +57,7 @@ import { Loader } from 'src/shared/ui/Loader';
 import { FailAlert } from 'src/shared/api';
 import { client } from 'src/shared/api/client';
 import { Queries } from '@coopenomics/sdk';
+import { BaseButton } from 'src/shared/ui/base/BaseButton';
 
 const registratorStore = useRegistratorStore();
 const systemStore = useSystemStore();
