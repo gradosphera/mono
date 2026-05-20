@@ -698,39 +698,40 @@
       </div>
     </section>
 
-    <!-- ============ 20 CHANGE KEY — flow (E7) ============ -->
+    <!-- ============ 20 RESET KEY — двухэтапный flow (E7) ============ -->
     <section class="dev-ui__sect">
       <div class="dev-ui__sect-head">
         <span class="dev-ui__sect-num">20</span>
-        <h2 class="dev-ui__sect-title">Смена ключа (ChangeKey flow)</h2>
+        <h2 class="dev-ui__sect-title">Перевыпуск ключа (ResetKey flow)</h2>
         <p class="dev-ui__sect-sub">
-          Форма из <code>features/User/ChangeKey/ui/ChangeKeyForm</code> на
-          BaseForm + BaseInput + BaseBanner. Submit имитирует on-chain
-          <code>change-key</code> action и открывает диалог подтверждения с новым
-          WIF — закрытие только через «Я сохранил ключ». ESC/backdrop заблокированы.
+          Двухэтапный flow: пайщик вводит email — получает письмо со ссылкой —
+          переходит — видит уже сгенерированный приватный ключ — копирует и
+          подтверждает «Я сохранил ключ» — ключ устанавливается on-chain через
+          <code>resetKey({token, public_key})</code>. Текущий ключ ввести нельзя
+          (его нет — он потерян); новый ключ только генерируется в браузере.
         </p>
       </div>
-      <div class="dev-ui__stage">
-        <div class="ck-dev__wrap">
-          <ChangeKeyForm
-            ref="ckFormRef"
-            :loading="ckLoading"
-            @submit="onCkSubmit"
-            @generate="onCkGenerate"
-          />
+      <div class="dev-ui__stage rk-dev__stage">
+        <div class="rk-dev__frame">
+          <div class="rk-dev__caption">Шаг 1. Запрос восстановления (email)</div>
+          <LostKey />
         </div>
-        <div class="ck-dev__hint t-sm t-muted" style="margin-top: 12px">
-          Сабмит выполняет заглушку <code>useChangeKey().changeKey()</code> (≈600 мс),
-          по успеху открывает <code>ChangeKeySuccessDialog</code>.
+        <div class="rk-dev__frame">
+          <div class="rk-dev__caption">Шаг 2a. После submit — «проверьте почту»</div>
+          <ResetKeyForm mode="check-mail" :account="null" />
+        </div>
+        <div class="rk-dev__frame">
+          <div class="rk-dev__caption">Шаг 2b. Переход по ссылке — «сохраните ключ»</div>
+          <ResetKeyForm
+            mode="save-key"
+            :account="rkMockAccount"
+            :loading="rkLoading"
+            @submit="onRkMockSubmit"
+          />
         </div>
       </div>
     </section>
 
-    <ChangeKeySuccessDialog
-      v-model="ckDialogOpen"
-      :new-wif="ckGeneratedWif"
-      @confirmed="onCkConfirmed"
-    />
   </main>
 </template>
 
@@ -745,15 +746,12 @@ import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
 import { WalletCard } from 'src/shared/ui/domain/WalletCard';
 import { WalletCardMini } from 'src/widgets/wallet-card-mini';
 import { AuthCard } from 'src/shared/ui/domain/AuthCard';
-import {
-  ChangeKeyForm,
-  ChangeKeySuccessDialog,
-  useChangeKey,
-  type ChangeKeySubmitPayload,
-} from 'src/features/User/ChangeKey';
-import { Notify } from 'quasar';
+import { LostKey } from 'src/widgets/Registrator/LostKey';
+import { ResetKeyForm } from 'src/widgets/Registrator/ResetKey';
+import { useCreateUser } from 'src/features/User/CreateUser';
 import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
 import type { PageTab } from 'src/shared/ui/layout/PageTabs';
+import type { IGeneratedAccount } from 'src/shared/lib/types/user';
 
 /* === Token palette ============================================================
    Подмножество --p-* токенов, формирующих визуальную идентичность.
@@ -1018,46 +1016,18 @@ function onBalanceClick(): void {
   // dev-витрина — на проде это router.push на страницу кошелька
 }
 
-/* ============ ChangeKey flow (E7) ============ */
-const ckFormRef = ref<InstanceType<typeof ChangeKeyForm> | null>(null);
-const ckChangeKey = useChangeKey();
-const ckLoading = ref(false);
-const ckDialogOpen = ref(false);
-const ckGeneratedWif = ref('');
+/* ============ ResetKey flow (E7) ============ */
+// На проде ключ генерируется при заходе по email-ссылке внутри ResetKey
+// widget. В витрине просто разово генерируем для демонстрации.
+const rkLoading = ref(false);
+const rkMockAccount = ref<IGeneratedAccount | null>(useCreateUser().generateAccount());
 
-async function onCkSubmit(payload: ChangeKeySubmitPayload): Promise<void> {
-  ckLoading.value = true;
-  try {
-    const ok = await ckChangeKey.changeKey({
-      current_wif: payload.currentWif,
-      new_wif: payload.newWif,
-    });
-    if (ok) {
-      ckGeneratedWif.value = payload.newWif;
-      ckDialogOpen.value = true;
-    } else {
-      Notify.create({
-        message: 'Не удалось сменить ключ. Проверьте текущий WIF и повторите.',
-        type: 'negative',
-        position: 'top',
-      });
-    }
-  } finally {
-    ckLoading.value = false;
-  }
-}
-
-function onCkGenerate(): void {
-  const wif = ckChangeKey.generateWif();
-  ckGeneratedWif.value = wif;
-  ckFormRef.value?.applyGeneratedWif(wif);
-}
-
-function onCkConfirmed(): void {
-  // В реальном flow здесь router.push('/dashboard') — на витрине просто
-  // сбрасываем форму.
-  ckFormRef.value?.reset();
-  ckGeneratedWif.value = '';
+async function onRkMockSubmit(): Promise<void> {
+  rkLoading.value = true;
+  await new Promise((r) => setTimeout(r, 600));
+  rkLoading.value = false;
+  // На проде — router.push({ name: 'signin' }); тут просто регенерируем мок.
+  rkMockAccount.value = useCreateUser().generateAccount();
 }
 </script>
 
@@ -1318,9 +1288,22 @@ code {
   }
 }
 
-/* ChangeKey demo wrap — ограничиваем ширину формы, чтобы она не
-   растягивалась на весь stage и смотрелась реалистично. */
-.ck-dev__wrap {
-  max-width: 480px;
+/* ResetKey flow — три кадра подряд, каждый с подписью-шага */
+.rk-dev__stage {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.rk-dev__frame {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rk-dev__caption {
+  font-size: var(--p-fs-meta, 12px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--p-ink-3);
 }
 </style>
