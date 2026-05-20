@@ -12,13 +12,14 @@ div
     // eslint-disable-next-line vue/no-v-html
     div(ref='statementDiv' v-if='!isLoading' v-html='html').statement
 
-    div(v-if='!isLoading').q-gutter-sm
+    .agreements(v-if='!isLoading')
       //- Динамические галочки из конфигурации
       template(v-for='doc in registrationStore.registrationDocuments' :key='doc.id')
-        q-checkbox(
+        BaseCheckbox(
+          block
           :model-value='doc.accepted'
           @update:model-value='(val) => registrationStore.setAgreementAccepted(doc.id, val)'
-        ).full-width
+        )
           | {{ doc.checkbox_text }}
           ReadAgreementDialog(
             v-if='doc.link_text'
@@ -30,11 +31,10 @@ div
             div(v-html='doc.document.html').q-mb-lg
 
       //- Устав кооператива (всегда показывается)
-      q-checkbox(v-model='registratorStore.state.agreements.ustav').full-width
+      BaseCheckbox(block v-model='registratorStore.state.agreements.ustav')
         | Я прочитал и принимаю
-
-        a(v-if='hasStatuteLink' @click.stop='(event) => event.stopPropagation()' :href='statuteLink' target='_blank').q-ml-xs Устав кооператива
-        span(v-else).q-ml-xs Устав кооператива
+        a(v-if='hasStatuteLink' @click.stop='(event) => event.stopPropagation()' :href='statuteLink' target='_blank').agreements__link Устав кооператива
+        span(v-else).agreements__link Устав кооператива
 
     .row.q-gutter-md.q-mt-lg.q-mb-lg(v-if='!isLoading')
       BaseButton(variant='ghost', @click='back')
@@ -54,6 +54,7 @@ import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
+import { BaseCheckbox } from 'src/shared/ui/base/BaseCheckbox';
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { useRegistrationStore } from 'src/entities/Registration'
@@ -231,5 +232,21 @@ const hasStatuteLink = computed(() => {
   border: none;
   border-top: 1px solid var(--p-line);
   margin: var(--p-5, 20px) 0;
+}
+
+/* Контейнер согласий: вертикальный стек с canon-gap. */
+.agreements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
+  margin: var(--p-4, 16px) 0;
+}
+.agreements__link {
+  margin-left: var(--p-1, 4px);
+  color: var(--p-primary);
+  text-decoration: none;
+}
+.agreements__link:hover {
+  text-decoration: underline;
 }
 </style>
