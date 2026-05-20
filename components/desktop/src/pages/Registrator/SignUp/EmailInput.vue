@@ -10,6 +10,7 @@ div
         label='Введите email',
         :readonly='inLoading',
         :error='emailError',
+        autocomplete='email',
         @update:model-value='onEmailUpdate',
         @keypress.enter='setEmail'
       )
@@ -78,7 +79,10 @@ const setEmail = () => {
 
 <style scoped>
 .email-input__field {
-  margin-top: var(--p-5, 20px);
-  margin-bottom: var(--p-3, 12px);
+  margin-top: var(--p-4, 16px);
+  margin-bottom: var(--p-2, 8px);
+  /* Поле уже, чем тело stepper-step. На широких карточках читается лучше
+     если email-инпут не растягивается во всю ширину. */
+  max-width: 360px;
 }
 </style>
