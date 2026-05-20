@@ -11,8 +11,10 @@
     @select='onSelect',
     @cmdk='onCmdk'
   )
-    template(#brand-icon)
-      span.left-drawer-menu__logo(v-html='logoSvg')
+    //- Переопределяем стандартный brand-row на WorkspaceSwitcher:
+    //- кооп + текущий стол + меню переключения столов.
+    template(#brand)
+      WorkspaceSwitcher.left-drawer-menu__ws
 
     template(#footer)
       RailUserCard(
@@ -58,7 +60,7 @@ import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { AppDrawer } from 'src/shared/ui/layout/AppDrawer';
 import type { RailItem } from 'src/shared/ui/layout/AppDrawer';
 import { RailUserCard } from 'src/shared/ui/domain/RailUserCard';
-import logoSvg from 'src/assets/logo.svg?raw';
+import { WorkspaceSwitcher } from 'src/widgets/Desktop/WorkspaceSwitcher';
 
 const router = useRouter();
 const desktop = useDesktopStore();
@@ -277,20 +279,10 @@ async function onLogout(): Promise<void> {
 .left-drawer-menu__rail {
   height: 100%;
 }
-/* Системный лого ЦК внутри canon .rail__brand (32×32 primary-soft квадрат).
-   SVG прокинут через v-html чтобы `fill: currentColor` поймал canon-цвет
-   .rail__brand (color: var(--p-primary)). */
-.left-drawer-menu__logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  line-height: 0;
-}
-.left-drawer-menu__logo :deep(svg) {
-  width: 100%;
-  height: 100%;
+/* WorkspaceSwitcher переопределяет стандартный brand-row AppDrawer. */
+.left-drawer-menu__ws {
+  margin: var(--p-1, 4px) var(--p-2, 8px) 0;
+  width: calc(100% - var(--p-4, 16px));
 }
 /* Кнопки Deposit/Withdraw нужны нам только как держатели q-dialog'а
    (диалоги портятся в body независимо от родителя); сами кнопки прячем. */
