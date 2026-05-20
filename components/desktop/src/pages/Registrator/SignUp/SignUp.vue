@@ -1,7 +1,6 @@
 <template lang="pug">
 div
-  AuthCard(:maxWidth="1000")
-    p.text-h6.text-center.q-mb-md ВСТУПИТЬ В ПАЙЩИКИ
+  AuthCard(:max-width='1000', title='Вступить в пайщики')
     q-stepper(
       v-model='store.step',
       vertical,
@@ -41,7 +40,7 @@ import ReadStatement from './ReadStatement.vue';
 import PayInitial from './PayInitial.vue';
 import WaitingRegistration from './WaitingRegistration.vue';
 import SelectBranch from './SelectBranch.vue';
-import { AuthCard } from 'src/shared/ui/AuthCard';
+import { AuthCard } from 'src/shared/ui/domain/AuthCard';
 
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { useLogoutUser } from 'src/features/User/Logout';

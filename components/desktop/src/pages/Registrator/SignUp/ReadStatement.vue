@@ -36,12 +36,16 @@ div
         a(v-if='hasStatuteLink' @click.stop='(event) => event.stopPropagation()' :href='statuteLink' target='_blank').q-ml-xs Устав кооператива
         span(v-else).q-ml-xs Устав кооператива
 
-    div(v-if="!isLoading").q-mt-lg
-      q-btn.col-md-6.col-xs-12(flat @click='back')
+    .row.q-gutter-md.q-mt-lg.q-mb-lg(v-if='!isLoading')
+      BaseButton(variant='ghost', @click='back')
         i.fa.fa-arrow-left
         span.q-ml-md назад
 
-      q-btn.q-mt-lg.q-mb-lg(color='primary', label='Продолжить', :disabled='!agreeWithAll' @click='registratorStore.next()')
+      BaseButton(
+        variant='primary',
+        :disabled='!agreeWithAll',
+        @click='registratorStore.next()'
+      ) Продолжить
 </template>
 <script lang="ts" setup>
 import { ref, computed, watch, nextTick } from 'vue'
@@ -49,6 +53,7 @@ import { useCreateUser } from 'src/features/User/CreateUser'
 import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 import { ReadAgreementDialog } from 'src/features/Agreementer/ReadAgreementDialog';
+import { BaseButton } from 'src/shared/ui/base/BaseButton';
 
 import { useRegistratorStore } from 'src/entities/Registrator'
 import { useRegistrationStore } from 'src/entities/Registration'

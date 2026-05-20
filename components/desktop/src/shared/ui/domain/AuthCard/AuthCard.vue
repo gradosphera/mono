@@ -1,33 +1,28 @@
-<template>
-  <div class="auth-card-shell" :style="{ maxWidth: `${maxWidth ?? 480}px` }">
-    <q-card flat class="auth-card">
-      <q-card-section
-        v-if="title || subtitle || $slots.head"
-        class="auth-card__head"
-      >
-        <slot name="head">
-          <div>
-            <h1 v-if="title" class="auth-card__title">{{ title }}</h1>
-            <p v-if="subtitle" class="auth-card__sub">{{ subtitle }}</p>
-          </div>
-        </slot>
-      </q-card-section>
+<template lang="pug">
+.auth-card-shell(:style='shellStyle')
+  q-card.auth-card(flat)
+    q-card-section.auth-card__head(v-if='title || subtitle || $slots.head')
+      slot(name='head')
+        div
+          h1.auth-card__title(v-if='title') {{ title }}
+          p.auth-card__sub(v-if='subtitle') {{ subtitle }}
 
-      <q-card-section class="auth-card__body">
-        <slot />
-      </q-card-section>
+    q-card-section.auth-card__body
+      slot
 
-      <q-card-actions v-if="$slots.footer" align="center" class="auth-card__footer">
-        <slot name="footer" />
-      </q-card-actions>
-    </q-card>
-  </div>
+    q-card-actions.auth-card__footer(v-if='$slots.footer', align='center')
+      slot(name='footer')
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { AuthCardProps } from './AuthCard.types';
 
-defineProps<AuthCardProps>();
+const props = defineProps<AuthCardProps>();
+
+const shellStyle = computed(() => ({
+  maxWidth: `${props.maxWidth ?? 480}px`,
+}));
 </script>
 
 <style scoped>

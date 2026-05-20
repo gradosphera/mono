@@ -16,17 +16,14 @@ div
         :class='{ "signature-started": signatureStarted }'
       )
         p.signature-hint Оставьте собственноручную подпись в рамке
-      .q-mt-lg.q-mb-lg
-        q-btn.col-md-4.col-xs-12(flat, @click='store.prev()')
+      .row.q-gutter-md.q-mt-lg.q-mb-lg
+        BaseButton(variant='ghost', @click='store.prev()')
           i.fa.fa-arrow-left
           span.q-ml-md назад
-        q-btn.col-md-4.col-xs-12(flat, @click='clearCanvas')
-          span.q-ml-md очистить
-        q-btn.col-md-4.col-xs-12(
-          color='primary',
-          label='Продолжить',
-          @click='setSignature'
-        )
+
+        BaseButton(variant='ghost', @click='clearCanvas') очистить
+
+        BaseButton(variant='primary', @click='setSignature') Продолжить
 </template>
 
 <script lang="ts" setup>
@@ -35,6 +32,7 @@ import { FailAlert } from 'src/shared/api';
 import { Loader } from 'src/shared/ui/Loader';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { useCreateUser } from 'src/features/User/CreateUser';
+import { BaseButton } from 'src/shared/ui/base/BaseButton';
 
 // Импортируем класс
 import { Classes } from '@coopenomics/sdk';

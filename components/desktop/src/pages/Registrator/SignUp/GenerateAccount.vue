@@ -19,17 +19,17 @@ div
 
     q-checkbox(v-model='i_save', label='Я сохранил ключ в надёжном месте')
 
-    .q-mt-lg
-      q-btn.col-md-6.col-xs-12(flat, @click='store.prev()')
+    .row.q-gutter-md.q-mt-lg.q-mb-lg
+      BaseButton(variant='ghost', @click='store.prev()')
         i.fa.fa-arrow-left
         span.q-ml-md назад
 
-      q-btn.col-md-6.col-xs-12(flat, @click='copyMnemonic')
+      BaseButton(variant='ghost', @click='copyMnemonic')
         i.fa.fa-copy
         span.q-ml-md скопировать
 
-      q-btn.q-mt-lg.q-mb-lg(
-        color='primary',
+      BaseButton(
+        variant='primary',
         :disabled='!i_save',
         :loading='isLoading',
         @click='setAccount'
@@ -46,6 +46,7 @@ import { SuccessAlert } from 'src/shared/api';
 import { Classes } from '@coopenomics/sdk';
 import { updateOpenReplayUser } from 'src/shared/config';
 import { useSystemStore } from 'src/entities/System/model';
+import { BaseButton } from 'src/shared/ui/base/BaseButton';
 
 const store = useRegistratorStore();
 const system = useSystemStore();
