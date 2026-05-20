@@ -119,21 +119,22 @@ const downloadQR = () => {
 
 <template lang="pug">
 .bank-pay
-  //- Главный экран: QR + ключевая сводка + действия.
-  //- Полные реквизиты — под спойлером ниже.
-  .bank-pay__summary
+  //- Плоский layout без вложенных carousel-карточек.
+  //- Сводка - QR - действия - детали (свёрнуты).
+  dl.bank-pay__summary
     .bank-pay__summary-row
-      span.bank-pay__summary-label Получатель
-      span.bank-pay__summary-value {{ orderData.name }}
+      dt.bank-pay__summary-label Получатель
+      dd.bank-pay__summary-value {{ orderData.name }}
     .bank-pay__summary-row
-      span.bank-pay__summary-label Сумма
-      span.bank-pay__summary-value.bank-pay__summary-amount {{ amount }}
+      dt.bank-pay__summary-label Сумма
+      dd.bank-pay__summary-value.bank-pay__summary-amount {{ amount }}
     .bank-pay__summary-row(v-if='orderData.purpose')
-      span.bank-pay__summary-label Назначение
-      span.bank-pay__summary-value {{ orderData.purpose }}
+      dt.bank-pay__summary-label Назначение
+      dd.bank-pay__summary-value {{ orderData.purpose }}
 
-  .bank-pay__qr
-    canvas#qr.bank-pay__qr-canvas
+  //- QR-canvas центрирован без обёртки. Он сам белый+чёрный — это
+  //- функциональное требование контрастного сканирования, не дизайн.
+  canvas#qr.bank-pay__qr
 
   .bank-pay__actions
     BaseButton(variant='primary', @click='downloadQR')
@@ -198,22 +199,24 @@ const downloadQR = () => {
 </template>
 
 <style scoped>
+/* Плоский layout: между секциями — canon-gap, никаких вложенных surface-блоков. */
 .bank-pay {
   display: flex;
   flex-direction: column;
-  gap: var(--p-4, 16px);
+  gap: var(--p-5, 20px);
+  margin-top: var(--p-4, 16px);
 }
 
-/* Сводка ключевых полей сверху — то, по чему пользователь визуально
-   верифицирует платёж перед сканированием QR. */
+/* Сводка ключевых полей в виде definition list — плоско, без отдельного
+   подкрашенного контейнера. Просто строки label / value, дополнительно
+   разделённые тонкой линией снизу. */
 .bank-pay__summary {
   display: flex;
   flex-direction: column;
   gap: var(--p-2, 8px);
-  padding: var(--p-4, 16px);
-  background: var(--p-canvas-2, var(--p-canvas));
-  border: 1px solid var(--p-line);
-  border-radius: var(--p-radius-md, 8px);
+  margin: 0;
+  padding: 0 0 var(--p-4, 16px);
+  border-bottom: 1px solid var(--p-line);
 }
 .bank-pay__summary-row {
   display: flex;
@@ -224,11 +227,13 @@ const downloadQR = () => {
 .bank-pay__summary-label {
   color: var(--p-ink-2);
   flex: 0 0 110px;
+  font-weight: 400;
 }
 .bank-pay__summary-value {
   color: var(--p-ink);
   font-weight: 500;
   word-break: break-word;
+  margin: 0;
 }
 .bank-pay__summary-amount {
   font-size: var(--p-fs-body, 14px);
@@ -236,16 +241,11 @@ const downloadQR = () => {
   color: var(--p-ink);
 }
 
-/* QR-блок: центрированный canvas в нейтральной surface-2 рамке. */
+/* QR — просто центрированный canvas без обёртки/фона/рамки.
+   Сам canvas белый+чёрный, как и требуется для сканирования. */
 .bank-pay__qr {
-  display: flex;
-  justify-content: center;
-  padding: var(--p-4, 16px);
-  background: #ffffff;
-  border: 1px solid var(--p-line);
-  border-radius: var(--p-radius-md, 8px);
-}
-.bank-pay__qr-canvas {
+  display: block;
+  margin: 0 auto;
   width: 220px !important;
   height: 220px !important;
 }
@@ -257,20 +257,18 @@ const downloadQR = () => {
   gap: var(--p-3, 12px);
 }
 
-/* Свёрнутый блок полных реквизитов под expansion-item. */
-.bank-pay__details {
-  border: 1px solid var(--p-line);
-  border-radius: var(--p-radius-md, 8px);
-  background: var(--p-surface, var(--p-canvas-2));
-}
-.bank-pay__details :deep(.q-item) {
-  border-radius: var(--p-radius-md, 8px);
+/* Сворачиваемый блок реквизитов: минимальное оформление, без своего фона. */
+.bank-pay__details :deep(.q-expansion-item__container > .q-item) {
+  border-top: 1px solid var(--p-line);
+  border-bottom: 1px solid var(--p-line);
+  padding: var(--p-2, 8px) 0;
+  min-height: 0;
 }
 .bank-pay__details-list {
   display: flex;
   flex-direction: column;
   gap: var(--p-2, 8px);
-  padding: var(--p-3, 12px) var(--p-4, 16px) var(--p-4, 16px);
+  padding: var(--p-4, 16px) 0 0;
 }
 .bank-pay__field {
   width: 100%;

@@ -135,42 +135,53 @@ const hasStatuteLink = computed(() => {
 </script>
 
 <style scoped>
-/* HTML-документ заявления приходит из backend сгенерированный.
-   Локально нормализуем типографику под canon, чтобы не было монструозных H1
-   и рваных мета-блоков. */
+/* HTML-документ заявления приходит из backend сгенерированный, нередко
+   с inline-стилями и Quasar text-h* классами, которые перебивают
+   нашу типографику. Поэтому здесь — !important на ключевых правилах. */
 .statement {
   color: var(--p-ink);
   font-size: var(--p-fs-body, 14px);
   line-height: var(--p-lh-body, 1.55);
   margin: var(--p-4, 16px) 0;
 }
-.statement :deep(h1) {
-  font-size: var(--p-fs-h3, 20px);
-  line-height: var(--p-lh-h3, 1.3);
-  letter-spacing: 0;
-  font-weight: 600;
-  color: var(--p-ink);
-  text-align: center;
-  margin: var(--p-6, 24px) 0 var(--p-2, 8px);
+.statement :deep(h1),
+.statement :deep(.text-h1),
+.statement :deep(.text-h2),
+.statement :deep(.text-h3) {
+  font-size: var(--p-fs-h3, 20px) !important;
+  line-height: var(--p-lh-h3, 1.3) !important;
+  letter-spacing: 0 !important;
+  font-weight: 600 !important;
+  color: var(--p-ink) !important;
+  text-align: center !important;
+  margin: var(--p-6, 24px) 0 var(--p-2, 8px) !important;
 }
-.statement :deep(h2) {
-  font-size: var(--p-fs-h4, 16px);
-  line-height: var(--p-lh-h4, 1.4);
-  font-weight: 600;
-  color: var(--p-ink);
-  margin: var(--p-5, 20px) 0 var(--p-2, 8px);
+.statement :deep(h2),
+.statement :deep(.text-h4) {
+  font-size: var(--p-fs-h4, 16px) !important;
+  line-height: var(--p-lh-h4, 1.4) !important;
+  font-weight: 600 !important;
+  color: var(--p-ink) !important;
+  margin: var(--p-5, 20px) 0 var(--p-2, 8px) !important;
 }
-.statement :deep(h3) {
-  font-size: var(--p-fs-body, 14px);
-  font-weight: 600;
-  color: var(--p-ink);
-  margin: var(--p-4, 16px) 0 var(--p-1, 4px);
+.statement :deep(h3),
+.statement :deep(h4),
+.statement :deep(.text-h5),
+.statement :deep(.text-h6) {
+  font-size: var(--p-fs-body, 14px) !important;
+  line-height: var(--p-lh-body, 1.55) !important;
+  font-weight: 600 !important;
+  color: var(--p-ink) !important;
+  margin: var(--p-4, 16px) 0 var(--p-1, 4px) !important;
 }
 .statement :deep(p) {
-  margin: 0 0 var(--p-3, 12px);
+  margin: 0 0 var(--p-3, 12px) !important;
+  font-size: var(--p-fs-body, 14px) !important;
+  line-height: var(--p-lh-body, 1.55) !important;
+  color: var(--p-ink) !important;
 }
 .statement :deep(p:last-child) {
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 .statement :deep(strong),
 .statement :deep(b) {
@@ -184,14 +195,17 @@ const hasStatuteLink = computed(() => {
 .statement :deep(a:hover) {
   text-decoration: underline;
 }
-/* Мета-блок «УТВЕРЖДЕНО…» — обычно стоит справа отдельным абзацем.
-   Сжимаем визуально: меньший шрифт, ink-2, плотнее. */
+/* Quasar text-right + .approved/.meta-right помечаем сжатой ink-2 типографикой.
+   Backend может оборачивать «УТВЕРЖДЕНО…» через text-right класс — тогда
+   мы дополнительно сжимаем такие параграфы. */
+.statement :deep(p.text-right),
+.statement :deep(.text-right),
 .statement :deep(.approved),
 .statement :deep(.meta-right) {
-  font-size: var(--p-fs-body-sm, 13px);
-  color: var(--p-ink-2);
-  text-align: right;
-  line-height: 1.4;
+  font-size: var(--p-fs-body-sm, 13px) !important;
+  color: var(--p-ink-2) !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
 }
 .statement :deep(table) {
   width: 100%;
