@@ -1,39 +1,43 @@
-<template>
-  <div class="left-drawer-menu">
-    <AppDrawer
-      :items="railItems"
-      :active-key="activeKey"
-      :coop-name="coopShortName"
-      :coop-meta="coopMeta"
-      :show-cmdk="true"
-      cmdk-label="Найти"
-      cmdk-hint="Поиск (⌘K)"
-      class="left-drawer-menu__rail"
-      @select="onSelect"
-      @cmdk="onCmdk"
-    >
-      <template #footer>
-        <RailUserCard
-          v-if="walletReady"
-          :name="userName"
-          :role="userRoleLabel"
-          :balance="walletBalance"
-          :symbol="walletSymbol"
-          :locked-balance="walletLocked"
-          :balance-route="{ name: 'wallet', params: { coopname: info.coopname } }"
-          primary-action-label="Пополнить"
-          show-signout
-          signout-label="Выйти"
-          @primary-action="onDeposit"
-          @signout="onLogout"
-        />
-      </template>
-    </AppDrawer>
-  </div>
+<template lang="pug">
+.left-drawer-menu
+  AppDrawer.left-drawer-menu__rail(
+    :items='railItems',
+    :active-key='activeKey',
+    :coop-name='coopShortName',
+    :coop-meta='coopMeta',
+    :show-cmdk='true',
+    cmdk-label='Найти',
+    cmdk-hint='Поиск (⌘K)',
+    @select='onSelect',
+    @cmdk='onCmdk'
+  )
+    template(#footer)
+      RailUserCard(
+        v-if='walletReady',
+        v-model:collapsed='userCardCollapsed',
+        :name='userName',
+        :role='userRoleLabel',
+        :balance='walletBalance',
+        :symbol='walletSymbol',
+        :locked-balance='walletLocked',
+        :balance-route='{ name: "wallet", params: { coopname: info.coopname } }',
+        primary-action-label='Пополнить',
+        show-signout,
+        signout-label='Выйти',
+        @primary-action='onDeposit',
+        @signout='onLogout'
+      )
+
+  //- Невидимые носители canon-диалогов: рендерятся в q-portal,
+  //- открываются глобальными ref'ами через useDepositDialog().open() /
+  //- useWithdrawDialog().open() из onDeposit/onWithdraw выше.
+  .left-drawer-menu__hidden-dialogs(aria-hidden='true')
+    DepositButton(:micro='true')
+    WithdrawButton(:micro='true')
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
@@ -41,8 +45,11 @@ import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { useWalletStore } from 'src/entities/Wallet';
+import { useCmdkStore } from 'src/entities/CmdkMenu/model';
 import { useActionsStore } from 'src/shared/lib/stores/actions.store';
 import { useLogoutUser } from 'src/features/User/Logout';
+import { useDepositDialog, DepositButton } from 'src/features/Wallet/DepositToWallet';
+import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { AppDrawer } from 'src/shared/ui/layout/AppDrawer';
@@ -56,6 +63,7 @@ const systemStore = useSystemStore();
 const { info } = systemStore;
 const walletStore = useWalletStore();
 const actionsStore = useActionsStore();
+const cmdkStore = useCmdkStore();
 
 // --- Адаптер: activeSecondLevelRoutes → RailItem[] -------------------------
 
@@ -138,7 +146,6 @@ const activeKey = computed<string | undefined>(() => {
   for (const r of filteredRoutes.value) {
     if (r.name === currentName) return String(r.name);
     if (current.matched.some((m) => m.name === r.name)) return String(r.name);
-    // Группа маршрутов: project-* → projects-list
     if (r.name === 'projects-list' && currentName.startsWith('project-')) {
       return String(r.name);
     }
@@ -165,11 +172,8 @@ function onSelect(item: RailItem): void {
 }
 
 function onCmdk(): void {
-  // CmdkMenu смонтирован в default.vue и реагирует на ⌘K/keyboard.
-  // Здесь имитируем нажатие тех же клавиш через keyboard event.
-  window.dispatchEvent(
-    new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true }),
-  );
+  // Открываем глобальную панель поиска через её собственный store.
+  void cmdkStore.openDialog();
 }
 
 // --- Шапка рейла (бренд) ---------------------------------------------------
@@ -216,19 +220,36 @@ const userName = computed<string>(() => {
     return od?.short_name || od?.name || 'Организация';
   }
   const id = acc.individual_data as
-    | { first_name?: string; last_name?: string }
+    | { first_name?: string; last_name?: string; middle_name?: string }
     | undefined;
   if (id?.first_name || id?.last_name) {
-    return [id?.last_name, id?.first_name].filter(Boolean).join(' ').trim();
+    return [id?.last_name, id?.first_name, id?.middle_name].filter(Boolean).join(' ').trim();
   }
   return session.username || 'Пайщик';
 });
 const userRoleLabel = computed<string>(() =>
-  session.isChairman ? 'Председатель' : session.isMember ? 'Пайщик' : 'Гость',
+  session.isChairman ? 'Председатель' : session.isMember ? 'Член совета' : 'Пайщик',
 );
 
+// --- Свёртка кошелька (canon v-model:collapsed) ---------------------------
+
+const STORAGE_KEY_USERCARD_COLLAPSED = 'monocoop-left-drawer-usercard-collapsed';
+const userCardCollapsed = ref<boolean>(false);
+
+onMounted(() => {
+  const saved = localStorage.getItem(STORAGE_KEY_USERCARD_COLLAPSED);
+  if (saved !== null) userCardCollapsed.value = saved === 'true';
+});
+
+watch(userCardCollapsed, (val) => {
+  localStorage.setItem(STORAGE_KEY_USERCARD_COLLAPSED, String(val));
+});
+
+// --- Триггеры действий ----------------------------------------------------
+
 function onDeposit(): void {
-  actionsStore.executeAction('deposit');
+  // Открываем canon-диалог взноса через глобальный composable
+  useDepositDialog().open();
 }
 
 async function onLogout(): Promise<void> {
@@ -252,15 +273,9 @@ async function onLogout(): Promise<void> {
 .left-drawer-menu__rail {
   height: 100%;
 }
-
-/* Сужаем canon-margin .rail__usercard с 16px до 8px чтобы выровнять
-   левый край кошелька с пунктами меню (.rail__nav padding 0 8px). */
-.left-drawer-menu :deep(.rail__usercard) {
-  margin: 12px 8px;
-}
-/* Также сужаем canon-padding .rail__signout с 12px 20px до 12px 12px,
-   чтобы кнопка «Выйти» не торчала глубже остальных пунктов. */
-.left-drawer-menu :deep(.rail__signout) {
-  padding: 12px 12px;
+/* Кнопки Deposit/Withdraw нужны нам только как держатели q-dialog'а
+   (диалоги портятся в body независимо от родителя); сами кнопки прячем. */
+.left-drawer-menu__hidden-dialogs {
+  display: none;
 }
 </style>

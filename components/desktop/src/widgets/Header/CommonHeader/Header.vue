@@ -1,49 +1,38 @@
-<template>
-  <q-header class="app-q-header" :bordered="false">
-    <AppHeader
-      :show-menu-button="loggedIn"
-      :title="!loggedIn && coopTitle ? coopTitle : undefined"
-      @toggle-menu="emit('toggle-left-drawer')"
-    >
-      <template v-if="loggedIn" #crumb>
-        <BackButton />
-      </template>
+<template lang="pug">
+q-header.app-q-header(:bordered='false')
+  AppHeader(
+    :show-menu-button='loggedIn',
+    :title='!loggedIn && coopTitle ? coopTitle : undefined',
+    @toggle-menu="emit('toggle-left-drawer')"
+  )
+    template(v-if='loggedIn', #crumb)
+      BackButton
 
-      <template v-if="loggedIn && headerActions.length" #actions>
-        <component
-          :is="action.component"
-          v-for="action in headerActions"
-          :key="action.id"
-          v-bind="action.props"
-        />
-      </template>
+    template(v-if='loggedIn && headerActions.length', #actions)
+      component(
+        v-for='action in headerActions',
+        :key='action.id',
+        :is='action.component',
+        v-bind='action.props'
+      )
 
-      <template v-if="loggedIn && isClient" #notifications>
-        <NotificationCenter />
-      </template>
+    template(v-if='loggedIn && isClient', #notifications)
+      NotificationCenter
 
-      <template #theme>
-        <ToogleDarkLight :is-mobile="isMobile" :show-text="false" :as-button="true" />
-      </template>
+    template(#theme)
+      ToogleDarkLight(:is-mobile='isMobile', :show-text='false', :as-button='true')
 
-      <template v-if="!loggedIn" #profile>
-        <BaseButton
-          v-if="showRegisterButton && !is('signup') && !is('install')"
-          variant="primary"
-          @click="signup"
-        >
-          Регистрация
-        </BaseButton>
-        <BaseButton
-          v-if="showRegisterButton && is('signup')"
-          variant="primary"
-          @click="login"
-        >
-          Вход
-        </BaseButton>
-      </template>
-    </AppHeader>
-  </q-header>
+    template(v-if='!loggedIn', #profile)
+      BaseButton(
+        v-if="showRegisterButton && !is('signup') && !is('install')",
+        variant='primary',
+        @click='signup'
+      ) Регистрация
+      BaseButton(
+        v-if="showRegisterButton && is('signup')",
+        variant='primary',
+        @click='login'
+      ) Вход
 </template>
 
 <script setup lang="ts">

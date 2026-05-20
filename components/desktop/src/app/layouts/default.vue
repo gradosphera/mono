@@ -8,7 +8,7 @@ q-layout(view='lHh LpR fff')
     side='left',
     bordered,
     persistent,
-    :width='240'
+    :width='248'
   )
     LeftDrawerMenu
 
