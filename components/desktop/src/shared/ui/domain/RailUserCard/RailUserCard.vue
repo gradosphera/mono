@@ -1,69 +1,54 @@
-<template>
-  <div :class="['rail__usercard', { 'is-collapsed': collapsed }]">
-    <div class="rail__usertop">
-      <span class="rail__avatar">
-        <img v-if="avatarSrc" :src="avatarSrc" :alt="name" />
-        <template v-else>{{ initials }}</template>
-      </span>
-      <div class="rail__userinfo">
-        <b>{{ name }}</b>
-        <span v-if="role">{{ role }}</span>
-      </div>
-      <slot name="usertop-extra" />
-    </div>
+<template lang="pug">
+.rail__usercard(:class="{ 'is-collapsed': collapsed }")
+  .rail__usertop
+    span.rail__avatar
+      img(v-if='avatarSrc', :src='avatarSrc', :alt='name')
+      template(v-else) {{ initials }}
+    .rail__userinfo
+      b {{ name }}
+      span(v-if='role') {{ role }}
+    slot(name='usertop-extra')
 
-    <component
-      :is="balanceTag"
-      v-if="hasBalance"
-      class="rail__balance"
-      :class="{ 'rail__balance--clickable': isBalanceClickable }"
-      :to="balanceRoute"
-      @click="onBalanceClick"
-    >
-      <div class="rail__balance-label">{{ balanceLabel ?? 'Доступно' }}</div>
-      <div class="rail__balance-val">
-        <b>{{ balance }}</b>
-        <span v-if="symbol" class="ccy">{{ symbol }}</span>
-      </div>
-      <div v-if="lockedBalance !== undefined" class="rail__balance-locked">
-        <q-icon name="lock" />
-        {{ lockedLabel ?? 'Заблокировано' }}: <b>{{ lockedBalance }}</b>
-        <span v-if="symbol" class="ccy">&nbsp;{{ symbol }}</span>
-      </div>
-    </component>
+  component(
+    v-if='hasBalance',
+    :is='balanceTag',
+    :class="['rail__balance', { 'rail__balance--clickable': isBalanceClickable }]",
+    :to='balanceRoute',
+    @click='onBalanceClick'
+  )
+    .rail__balance-label {{ balanceLabel ?? 'Доступно' }}
+    .rail__balance-val
+      b {{ balance }}
+      span.ccy(v-if='symbol') {{ symbol }}
+    .rail__balance-locked(v-if='lockedBalance !== undefined')
+      q-icon(name='lock')
+      | {{ lockedLabel ?? 'Заблокировано' }}:&nbsp;
+      b {{ lockedBalance }}
+      span.ccy(v-if='symbol') &nbsp;{{ symbol }}
 
-    <div class="rail__actions">
-      <slot name="actions">
-        <button
-          class="rail__action rail__action--primary"
-          type="button"
-          @click="emit('primary-action')"
-        >
-          <q-icon name="add" />
-          {{ primaryActionLabel ?? 'Пополнить' }}
-        </button>
-      </slot>
-      <button
-        class="rail__usercard__collapse"
-        type="button"
-        :aria-label="collapsed ? 'Развернуть кошелёк' : 'Свернуть кошелёк'"
-        :aria-expanded="!collapsed"
-        @click="toggleCollapsed"
-      >
-        <q-icon name="expand_more" />
-      </button>
-    </div>
-  </div>
+  .rail__actions
+    slot(name='actions')
+      button.rail__action.rail__action--primary(
+        type='button',
+        @click="emit('primary-action')"
+      )
+        q-icon(name='add')
+        | {{ primaryActionLabel ?? 'Пополнить' }}
+    button.rail__usercard__collapse(
+      type='button',
+      :aria-label="collapsed ? 'Развернуть кошелёк' : 'Свернуть кошелёк'",
+      :aria-expanded='!collapsed',
+      @click='toggleCollapsed'
+    )
+      q-icon(name='expand_more')
 
-  <button
-    v-if="showSignout"
-    class="rail__signout"
-    type="button"
-    @click="emit('signout')"
-  >
-    <q-icon name="logout" />
-    {{ signoutLabel ?? 'Выйти' }}
-  </button>
+button.rail__signout(
+  v-if='showSignout',
+  type='button',
+  @click="emit('signout')"
+)
+  q-icon(name='logout')
+  | {{ signoutLabel ?? 'Выйти' }}
 </template>
 
 <script setup lang="ts">
@@ -116,12 +101,6 @@ function onBalanceClick(event: MouseEvent): void {
   transform: rotate(180deg);
 }
 
-/* Свёртка использует canon `display: none` для balance и primary —
-   мгновенный jump без анимации (попытка плавной max-height transition
-   давала baseline-skipping у крупной суммы). Chevron остаётся видимым
-   и через canon `.is-collapsed .rail__usercard__collapse` растягивается
-   на всю ширину (border-left снимается, width: 100%). */
-
 /* === Clickable balance ===
    Когда задан `balanceRoute`, оборачиваем содержимое в `<router-link>`
    и подсвечиваем кликабельность. */
@@ -145,7 +124,6 @@ function onBalanceClick(event: MouseEvent): void {
   width: 100%;
   text-align: left;
   background: transparent;
-  /* border-top из canon оставляем как есть, обнуляя только остальные */
   border-right: 0;
   border-bottom: 0;
   border-left: 0;
