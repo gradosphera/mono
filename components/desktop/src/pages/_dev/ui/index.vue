@@ -80,20 +80,20 @@
         </p>
       </div>
       <div class="dev-ui__stage">
-        <div class="row row--wrap row--gap-4">
+        <div class="u-row u-row--wrap u-row--gap-4">
           <BaseButton variant="primary">Совершить взнос</BaseButton>
           <BaseButton variant="secondary">Получить возврат</BaseButton>
           <BaseButton variant="ghost">Отменить</BaseButton>
           <BaseButton variant="danger">Удалить</BaseButton>
         </div>
-        <div class="row row--wrap row--gap-4" style="margin-top: 16px">
+        <div class="u-row u-row--wrap u-row--gap-4" style="margin-top: 16px">
           <BaseButton variant="primary" size="lg">Большая основная</BaseButton>
           <BaseButton variant="secondary" size="sm">Малая вторичная</BaseButton>
           <BaseButton variant="ghost" size="sm">Малая ghost</BaseButton>
           <BaseButton variant="secondary" icon-only aria-label="Копировать">⎘</BaseButton>
           <BaseButton variant="primary" disabled>Disabled</BaseButton>
         </div>
-        <div class="row row--wrap row--gap-4" style="margin-top: 16px; max-width: 320px">
+        <div class="u-row u-row--wrap u-row--gap-4" style="margin-top: 16px; max-width: 320px">
           <BaseButton variant="primary" block>Растянутая (block)</BaseButton>
         </div>
       </div>
@@ -160,7 +160,7 @@
       <div class="grid-2">
         <div class="dev-ui__stage">
           <div class="t-eyebrow" style="margin-bottom: 14px">Чипы</div>
-          <div class="row row--wrap row--gap-2">
+          <div class="u-row u-row--wrap u-row--gap-2">
             <BaseChip variant="pos">Завершён</BaseChip>
             <BaseChip variant="accent">Активный</BaseChip>
             <BaseChip variant="info">В обработке</BaseChip>
@@ -252,7 +252,7 @@
         </p>
       </div>
       <div class="dev-ui__stage">
-        <div class="row row--wrap row--gap-4">
+        <div class="u-row u-row--wrap u-row--gap-4">
           <BaseButton @click="dialogOpen = true">Открыть диалог</BaseButton>
         </div>
 
@@ -325,7 +325,7 @@
         </p>
       </div>
       <div class="dev-ui__stage">
-        <div class="row row--gap-6" style="align-items: center">
+        <div class="u-row u-row--gap-6" style="align-items: center">
           <Avatar name="Антон Председатель" size="xs" />
           <Avatar name="Антон Председатель" size="sm" />
           <Avatar name="Антон Председатель" />

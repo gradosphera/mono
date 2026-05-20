@@ -148,10 +148,4 @@ function submit(): void {
   margin: var(--p-2, 8px) 0;
   color: var(--p-ink);
 }
-/* Сжимаем зазор между галочкой и текстом — Quasar по умолчанию даёт
-   ~12-16px (через padding на .q-checkbox__inner), визуально это слишком
-   далеко для compact-формы сохранения ключа. */
-.rk-form__confirm :deep(.q-checkbox__label) {
-  padding-left: 4px;
-}
 </style>
