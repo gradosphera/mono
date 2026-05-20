@@ -62,7 +62,7 @@ import { useCreateUser } from 'src/features/User/CreateUser';
 import { useResetKey } from 'src/features/User/ResetKey/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { type IGeneratedAccount } from 'src/shared/lib/types/user';
-import { AuthCard } from 'src/shared/ui';
+import { AuthCard } from 'src/shared/ui/domain/AuthCard';
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
