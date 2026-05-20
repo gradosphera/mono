@@ -299,3 +299,21 @@
 .q-toggle__inner--truthy .q-toggle__track {
   color: var(--p-primary);
 }
+
+/* ===== Page background ====================================================
+   По умолчанию Quasar красит body--light в #ffffff, body--dark в #1d1d1d.
+   Это даёт визуальный сдвиг относительно нашей шапки/рейла, окрашенных
+   через `--p-canvas`. Чтобы вся страница совпадала с утверждённым canvas
+   из tokens.css, явно прокидываем токен на body и q-page-container.
+   --------------------------------------------------------------------- */
+body.body--light,
+body.body--dark {
+  background-color: var(--p-canvas);
+  color: var(--p-ink);
+}
+.q-layout,
+.q-page-container,
+.q-page {
+  background-color: var(--p-canvas);
+  color: var(--p-ink);
+}
