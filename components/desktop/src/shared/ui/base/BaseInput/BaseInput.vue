@@ -23,8 +23,20 @@
     class="base-input"
     @update:model-value="onUpdate"
   >
-    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
-      <slot :name="slotName" v-bind="slotProps" />
+    <template v-if="$slots.prepend" #prepend>
+      <slot name="prepend" />
+    </template>
+    <template v-if="$slots.append" #append>
+      <slot name="append" />
+    </template>
+    <template v-if="$slots.before" #before>
+      <slot name="before" />
+    </template>
+    <template v-if="$slots.after" #after>
+      <slot name="after" />
+    </template>
+    <template v-if="$slots.hint" #hint>
+      <slot name="hint" />
     </template>
   </q-input>
 </template>
