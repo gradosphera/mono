@@ -80,6 +80,11 @@ const hasFullMeta = computed((): boolean => {
 
 .identity-panel--compact {
   flex-wrap: wrap;
+  gap: var(--p-2, 8px);
+  padding: var(--p-2, 8px) var(--p-3, 12px);
+  background: var(--p-surface);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-md, 12px);
 }
 
 .identity-panel--full {
