@@ -732,6 +732,139 @@
       </div>
     </section>
 
+    <!-- ============ 21 ACCOUNT BADGE (E8.5) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">21</span>
+        <h2 class="dev-ui__sect-title">Бейдж аккаунта (AccountBadge)</h2>
+        <p class="dev-ui__sect-sub">
+          Имя on-chain аккаунта (12-символьный EOSIO username) в моноширинном шрифте.
+          Размеры <code>sm</code>/<code>md</code>, копирование в буфер, опциональная
+          ссылка на explorer.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="row q-col-gutter-md items-center">
+          <div class="col-auto">
+            <AccountBadge account-name="ivanov12345" />
+          </div>
+          <div class="col-auto">
+            <AccountBadge account-name="petrov54321" size="md" />
+          </div>
+          <div class="col-auto">
+            <AccountBadge account-name="kooperativ1" :copyable="false" />
+          </div>
+          <div class="col-auto">
+            <AccountBadge
+              account-name="explorer1234"
+              linkable
+              explorer-url="https://explorer.coopenomics.world/account/explorer1234"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 22 DATA ROW (E8.3) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">22</span>
+        <h2 class="dev-ui__sect-title">Строка данных (DataRow)</h2>
+        <p class="dev-ui__sect-sub">
+          Унифицированная пара <code>label: value</code> для реестровых карточек —
+          паспорт, ИНН, реквизиты, on-chain поля. Опционально mono-режим для ID/хешей,
+          опциональная copy-кнопка, slot <code>value-override</code> для нестандартного
+          рендера значения.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__data-stack">
+          <DataRow label="ФИО" value="Иванов Иван Иванович" />
+          <DataRow label="ИНН" value="772345678901" mono copyable />
+          <DataRow label="СНИЛС" value="123-456-789 00" mono />
+          <DataRow label="Email" value="ivanov@example.ru" copyable />
+          <DataRow label="Адрес" value="г. Москва, ул. Ленина, д. 1, кв. 23" hint="Адрес регистрации по паспорту" />
+          <DataRow label="On-chain аккаунт">
+            <template #value-override>
+              <AccountBadge account-name="ivanov12345" />
+            </template>
+          </DataRow>
+          <DataRow label="Дата регистрации" value="—" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 23 CONTACT SHEET (E8.2) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">23</span>
+        <h2 class="dev-ui__sect-title">Контакты (ContactSheet)</h2>
+        <p class="dev-ui__sect-sub">
+          Карточка контактов с типизированными иконками, кликабельными ссылками
+          (<code>mailto:</code>/<code>tel:</code>/<code>t.me</code>), копированием
+          и опциональной отметкой verified.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__data-stack">
+          <ContactSheet :contacts="contactsDemo" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 24 IDENTITY PANEL (E8.1) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">24</span>
+        <h2 class="dev-ui__sect-title">Идентификация (IdentityPanel)</h2>
+        <p class="dev-ui__sect-sub">
+          Карточка пайщика/контрагента: аватар + ФИО + on-chain badge + статус + роль.
+          Режим <code>compact</code> для шапок/списков, <code>full</code> — для реестров и кабинета.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__data-stack">
+          <IdentityPanel :identity="identityFullDemo">
+            <template #actions>
+              <BaseButton variant="ghost" size="sm">Открыть</BaseButton>
+            </template>
+          </IdentityPanel>
+          <IdentityPanel :identity="identityPendingDemo" />
+          <IdentityPanel :identity="identityBlockedDemo" />
+          <IdentityPanel compact :identity="identityCompactDemo" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 25 PERSON CARD (E8.4) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">25</span>
+        <h2 class="dev-ui__sect-title">Карточка человека (PersonCard)</h2>
+        <p class="dev-ui__sect-sub">
+          Презентация человека для реестров, собраний, дел: фото, ФИО, роль,
+          on-chain badge, контакты, slot <code>meta</code>. Режим
+          <code>compact</code> — одна строка для списков, <code>comfortable</code> —
+          полноценная карточка.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__person-grid">
+          <PersonCard :person="personFullDemo">
+            <template #meta>
+              Член кооператива с 12 марта 2022 г.
+            </template>
+          </PersonCard>
+          <PersonCard :person="personShortDemo" />
+          <div class="dev-ui__person-compact-list">
+            <PersonCard density="compact" :person="personFullDemo" />
+            <PersonCard density="compact" :person="personShortDemo" />
+            <PersonCard density="compact" :person="personMinDemo" />
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </template>
 
@@ -752,6 +885,9 @@ import { useCreateUser } from 'src/features/User/CreateUser';
 import type { RailItem, RailSection } from 'src/shared/ui/layout/AppDrawer';
 import type { PageTab } from 'src/shared/ui/layout/PageTabs';
 import type { IGeneratedAccount } from 'src/shared/lib/types/user';
+import type { ContactItem } from 'src/shared/ui/domain/ContactSheet';
+import type { Identity } from 'src/shared/ui/domain/IdentityPanel';
+import type { Person } from 'src/shared/ui/domain/PersonCard';
 
 /* === Token palette ============================================================
    Подмножество --p-* токенов, формирующих визуальную идентичность.
@@ -1029,6 +1165,64 @@ async function onRkMockSubmit(): Promise<void> {
   // На проде — router.push({ name: 'signin' }); тут просто регенерируем мок.
   rkMockAccount.value = useCreateUser().generateAccount();
 }
+
+/* ============ IdentityPanel demo (E8.1) ============ */
+const identityFullDemo: Identity = {
+  fullName: 'Иванов Иван Иванович',
+  email: 'ivanov@example.ru',
+  accountName: 'ivanov12345',
+  status: 'active',
+  role: 'Председатель',
+};
+const identityPendingDemo: Identity = {
+  fullName: 'Сидорова Анна Петровна',
+  email: 'sidorova@example.ru',
+  accountName: 'sidorovaaaa',
+  status: 'pending',
+  role: 'Пайщик',
+};
+const identityBlockedDemo: Identity = {
+  fullName: 'Петров Пётр',
+  accountName: 'petrov54321',
+  status: 'blocked',
+};
+const identityCompactDemo: Identity = {
+  fullName: 'Соколов Алексей',
+  accountName: 'sokolov11111',
+  status: 'active',
+};
+
+/* ============ PersonCard demo (E8.4) ============ */
+const personFullDemo: Person = {
+  fullName: 'Иванов Иван Иванович',
+  role: 'Председатель совета',
+  accountName: 'ivanov12345',
+  contacts: [
+    { type: 'email', value: 'ivanov@example.ru', verified: true },
+    { type: 'phone', value: '+7 (903) 123-45-67' },
+    { type: 'tg', value: '@ivanov' },
+  ],
+};
+const personShortDemo: Person = {
+  fullName: 'Сидорова Анна Петровна',
+  role: 'Пайщик',
+  accountName: 'sidorovaaaa',
+  contacts: [
+    { type: 'email', value: 'sidorova@example.ru' },
+  ],
+};
+const personMinDemo: Person = {
+  fullName: 'Соколов А.',
+};
+
+/* ============ ContactSheet demo (E8.2) ============ */
+const contactsDemo: ContactItem[] = [
+  { type: 'email', value: 'ivanov@example.ru', verified: true },
+  { type: 'phone', value: '+7 (903) 123-45-67' },
+  { type: 'tg', value: '@ivanov' },
+  { type: 'address', value: 'г. Москва, ул. Ленина, д. 1, кв. 23' },
+  { type: 'web', value: 'coopenomics.world', label: 'Сайт кооператива' },
+];
 </script>
 
 <style scoped>
@@ -1100,6 +1294,29 @@ async function onRkMockSubmit(): Promise<void> {
   border: 1px solid var(--p-line);
   border-radius: var(--p-r-md);
   padding: 24px;
+}
+
+.dev-ui__data-stack {
+  display: flex;
+  flex-direction: column;
+  max-width: 560px;
+}
+
+.dev-ui__person-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--p-4, 16px);
+  max-width: 880px;
+}
+
+.dev-ui__person-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-3, 12px);
+  padding: var(--p-4, 16px);
+  background: var(--p-surface);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-md, 12px);
 }
 
 code {
