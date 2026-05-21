@@ -46,7 +46,7 @@ struct ledger2_wallets {
   // wallet — паевой фонд + возвраты + ЦК
   static constexpr eosio::name SHARE_FUND_PAY       = "w.wal.share"_n;   ///< Паевой взнос пайщика (USER_SHARED)
   static constexpr eosio::name CK_MEMBER            = "w.wal.member"_n;  ///< ЦК — членская часть пайщика (USER_SHARED)
-  static constexpr eosio::name WITHDRAWALS_SINK     = "w.wal.wthdrw"_n;  ///< Возвраты паевых взносов пайщикам (sink TRANSFER, COOPERATIVE)
+  static constexpr eosio::name WITHDRAWALS_SINK     = "w.wal.wthdrw"_n;  ///< DEPRECATED 2026-05-21: после переключения o.wal.wthcpl с TRANSFER на BURN_BLOCKED кошелёк больше не получает новых средств. Оставлен в реестре для исторических L2-балансов (накопленные возвраты до перехода). Не использовать в новых операциях.
 
   // registrator — минимальный паевой + вступительные
   static constexpr eosio::name MIN_SHARE_FUND       = "w.reg.minshr"_n;  ///< Минимальный паевой взнос пайщика (USER_SHARED, без сверки соглашений)
@@ -109,7 +109,7 @@ inline constexpr std::array<Ledger2WalletMeta, 14> LEDGER2_WALLET_REGISTRY = {{
   // ломала convertsegm у пайщиков, чья доля выросла через CRPS.
   { ledger2_wallets::GENERATOR_FUND,    "ЦПП «Генератор» — единый кошелёк программы",               WalletKind::COOPERATIVE },
   { ledger2_wallets::ENTRANCE_FEES,     "Вступительные взносы",                                     WalletKind::COOPERATIVE },
-  { ledger2_wallets::WITHDRAWALS_SINK,  "Возвраты паевых взносов пайщикам",                         WalletKind::COOPERATIVE },
+  { ledger2_wallets::WITHDRAWALS_SINK,  "Возвраты паевых взносов пайщикам (deprecated, не используется в новых операциях)", WalletKind::COOPERATIVE },
   { ledger2_wallets::INFRA_FEES,        "Членские взносы за инфраструктуру кооп. платформы",        WalletKind::COOPERATIVE },
   { ledger2_wallets::DELEGATE_FEES,     "Делегатские членские взносы",                              WalletKind::COOPERATIVE },
   { ledger2_wallets::SOV_EXPENSES,      "Хозяйственные расходы из числа целевого финансирования",   WalletKind::COOPERATIVE },
