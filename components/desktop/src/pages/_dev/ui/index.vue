@@ -852,7 +852,7 @@
         <div class="dev-ui__person-grid">
           <PersonCard :person="personFullDemo">
             <template #meta>
-              Член кооператива с 12 марта 2022 г.
+              Пайщик с 12 марта 2022 г.
             </template>
           </PersonCard>
           <PersonCard :person="personShortDemo" />
