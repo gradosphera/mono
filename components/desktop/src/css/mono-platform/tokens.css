@@ -37,12 +37,11 @@
   --p-primary-line:   rgba(15, 118, 110, 0.24);
   --p-primary-strong: #064e44;
 
-  /* — Accent (warm orange) — второй цвет, для РЕДКОГО выделения:
-     ссылки batch_id, инлайн-подсветки и т.п. Совпадает с Quasar legacy
-     $accent (#D84315) → старый код, который красил `color="accent"` /
-     `var(--q-accent)`, продолжает работать без изменений. */
-  --p-accent:         #D84315;
-  --p-accent-soft:    rgba(216, 67, 21, 0.10);
+  /* — Accent (warm terracotta) — второй цвет, для РЕДКОГО выделения:
+     ссылки batch_id, инлайн-подсветки, ссылки-согласия. Спокойный
+     красно-коричневый: тёплый, но не ядовитый. */
+  --p-accent:         #B85C38;
+  --p-accent-soft:    rgba(184, 92, 56, 0.10);
 
   /* — Status — */
   --p-pos:           #15803d;
@@ -110,9 +109,9 @@
   --p-primary-line:   rgba(45, 212, 191, 0.30);
   --p-primary-strong: #99f6e4;
 
-  /* — Accent (warm orange — dark variant) — */
-  --p-accent:         #FF7043;
-  --p-accent-soft:    rgba(255, 112, 67, 0.14);
+  /* — Accent (warm terracotta — dark variant, мягче и приглушённее) — */
+  --p-accent:         #E89472;
+  --p-accent-soft:    rgba(232, 148, 114, 0.14);
 
   /* — Status — */
   --p-pos:           #34d399;
