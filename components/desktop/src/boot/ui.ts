@@ -1,10 +1,14 @@
 import { boot } from 'quasar/wrappers';
 
 import AccountBadge from 'src/shared/ui/domain/AccountBadge/AccountBadge.vue';
+import ActivityTimeline from 'src/shared/ui/domain/ActivityTimeline/ActivityTimeline.vue';
 import ContactSheet from 'src/shared/ui/domain/ContactSheet/ContactSheet.vue';
 import DataRow from 'src/shared/ui/domain/DataRow/DataRow.vue';
+import DocumentPreview from 'src/shared/ui/domain/DocumentPreview/DocumentPreview.vue';
+import DocumentRow from 'src/shared/ui/domain/DocumentRow/DocumentRow.vue';
 import IdentityPanel from 'src/shared/ui/domain/IdentityPanel/IdentityPanel.vue';
 import PersonCard from 'src/shared/ui/domain/PersonCard/PersonCard.vue';
+import SignatureCard from 'src/shared/ui/domain/SignatureCard/SignatureCard.vue';
 import BaseButton from 'src/shared/ui/base/BaseButton/BaseButton.vue';
 import BaseInput from 'src/shared/ui/base/BaseInput/BaseInput.vue';
 import BaseSelect from 'src/shared/ui/base/BaseSelect/BaseSelect.vue';
@@ -21,10 +25,14 @@ import ThemeToggle from 'src/shared/ui/base/ThemeToggle/ThemeToggle.vue';
 
 export default boot(({ app }) => {
   app.component('AccountBadge', AccountBadge);
+  app.component('ActivityTimeline', ActivityTimeline);
   app.component('ContactSheet', ContactSheet);
   app.component('DataRow', DataRow);
+  app.component('DocumentPreview', DocumentPreview);
+  app.component('DocumentRow', DocumentRow);
   app.component('IdentityPanel', IdentityPanel);
   app.component('PersonCard', PersonCard);
+  app.component('SignatureCard', SignatureCard);
   app.component('BaseButton', BaseButton);
   app.component('BaseInput', BaseInput);
   app.component('BaseSelect', BaseSelect);

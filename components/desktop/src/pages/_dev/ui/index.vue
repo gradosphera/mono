@@ -865,6 +865,90 @@
       </div>
     </section>
 
+    <!-- ============ 26 DOCUMENT ROW (E9.1) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">26</span>
+        <h2 class="dev-ui__sect-title">Строка документа (DocumentRow)</h2>
+        <p class="dev-ui__sect-sub">
+          Документ в списочном виде: иконка типа с tint'ом, заголовок, статус
+          через <code>BaseBadge</code>, дата/автор/описание. Клик emit
+          <code>open</code> (рутинг — в connected-обёртке).
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__data-stack">
+          <DocumentRow :document="docDraftDemo">
+            <template #actions>
+              <BaseButton variant="ghost" size="sm">…</BaseButton>
+            </template>
+          </DocumentRow>
+          <DocumentRow :document="docSignedDemo" />
+          <DocumentRow :document="docPendingDemo" />
+          <DocumentRow :document="docRejectedDemo" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 27 SIGNATURE CARD (E9.3) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">27</span>
+        <h2 class="dev-ui__sect-title">Карточка подписи (SignatureCard)</h2>
+        <p class="dev-ui__sect-sub">
+          Статус подписи документа: подписавший + on-chain аккаунт + статус.
+          Для <code>signed</code> — хеш в моно-блоке + ссылка на explorer; для
+          <code>rejected</code> — <code>BaseBanner</code> с причиной.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__data-stack">
+          <SignatureCard :signature="signatureSignedDemo" />
+          <SignatureCard :signature="signaturePendingDemo" />
+          <SignatureCard :signature="signatureRejectedDemo" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 28 ACTIVITY TIMELINE (E9.4) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">28</span>
+        <h2 class="dev-ui__sect-title">Хронология событий (ActivityTimeline)</h2>
+        <p class="dev-ui__sect-sub">
+          Вертикальный таймлайн событий с типизированными иконками. С
+          <code>groupByDate</code> — события группируются по дням (Сегодня,
+          Вчера, конкретные даты).
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__data-stack">
+          <ActivityTimeline :events="timelineDemo" group-by-date />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 29 DOCUMENT PREVIEW (E9.2) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">29</span>
+        <h2 class="dev-ui__sect-title">Превью документа (DocumentPreview)</h2>
+        <p class="dev-ui__sect-sub">
+          HTML/PDF/IMAGE/TXT. HTML прогоняется через DOMPurify (можно отключить
+          <code>:sanitize="false"</code>). <code>loading</code> и
+          <code>error</code> — стейты сверху.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__preview-grid">
+          <DocumentPreview :document="previewHtmlDemo" height="320px" />
+          <DocumentPreview :document="previewTxtDemo" height="320px" />
+          <DocumentPreview :document="{ type: 'pdf' }" loading height="200px" />
+          <DocumentPreview :document="{ type: 'pdf' }" error="Сервер вернул 503" height="200px" />
+        </div>
+      </div>
+    </section>
+
   </main>
 </template>
 
@@ -888,6 +972,10 @@ import type { IGeneratedAccount } from 'src/shared/lib/types/user';
 import type { ContactItem } from 'src/shared/ui/domain/ContactSheet';
 import type { Identity } from 'src/shared/ui/domain/IdentityPanel';
 import type { Person } from 'src/shared/ui/domain/PersonCard';
+import type { DocumentRowDoc } from 'src/shared/ui/domain/DocumentRow';
+import type { Signature } from 'src/shared/ui/domain/SignatureCard';
+import type { ActivityEvent } from 'src/shared/ui/domain/ActivityTimeline';
+import type { DocumentPreviewDoc } from 'src/shared/ui/domain/DocumentPreview';
 
 /* === Token palette ============================================================
    Подмножество --p-* токенов, формирующих визуальную идентичность.
@@ -1192,6 +1280,114 @@ const identityCompactDemo: Identity = {
   status: 'active',
 };
 
+/* ============ E9 demo data ============ */
+const docDraftDemo: DocumentRowDoc = {
+  type: 'docx',
+  title: 'Заявление о вступлении в кооператив',
+  status: 'draft',
+  date: '15 мая 2026',
+  author: 'Иванов И. И.',
+};
+const docSignedDemo: DocumentRowDoc = {
+  type: 'pdf',
+  title: 'Устав кооператива (редакция 3)',
+  status: 'signed',
+  date: '12 марта 2026',
+  description: 'Подписан 12 членами совета',
+};
+const docPendingDemo: DocumentRowDoc = {
+  type: 'html',
+  title: 'Решение об утверждении программы «Благорост»',
+  status: 'pending',
+  date: '20 мая 2026',
+};
+const docRejectedDemo: DocumentRowDoc = {
+  type: 'docx',
+  title: 'Заявление о выходе из кооператива',
+  status: 'rejected',
+  date: '18 мая 2026',
+  author: 'Петров П.',
+};
+
+const signatureSignedDemo: Signature = {
+  status: 'signed',
+  signer: { fullName: 'Иванов Иван Иванович', accountName: 'ivanov12345' },
+  signedAt: '21 мая 2026, 14:32',
+  hash: 'SIG_K1_KdNm8YzfxgkLRgZSdt9xZB6FBVvJ7tQXrqzPDS6m1HtR2WJaXLs9xUgEcLuJqW5Ts9hfXjcWf7Q4kVUj8Q4kvVPbm3TmgN',
+  txId: 'a3b1c8d9e0f1234567890abcdef1234567890abcdef1234567890abcdef12345',
+  explorerUrl: 'https://explorer.coopenomics.world/tx/a3b1c8d9e0',
+};
+const signaturePendingDemo: Signature = {
+  status: 'pending',
+  signer: { fullName: 'Сидорова Анна Петровна', accountName: 'sidorovaaaa' },
+};
+const signatureRejectedDemo: Signature = {
+  status: 'rejected',
+  signer: { fullName: 'Петров Пётр', accountName: 'petrov54321' },
+  signedAt: '20 мая 2026, 09:14',
+  rejectionReason: 'Сумма паевого взноса не соответствует положениям программы.',
+};
+
+const timelineDemo: ActivityEvent[] = [
+  {
+    id: '1',
+    type: 'create',
+    title: 'Проект создан',
+    description: 'Инициирована программа «Благорост — Восход 2026»',
+    actor: 'Иванов И. И.',
+    date: new Date().toISOString(),
+  },
+  {
+    id: '2',
+    type: 'sign',
+    title: 'Подписано председателем',
+    description: 'Устав программы утверждён общим собранием',
+    actor: 'Иванов И. И.',
+    date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: '3',
+    type: 'comment',
+    title: 'Комментарий пайщика',
+    description: '«Нужно уточнить пункт 4.2 о порядке возврата взносов»',
+    actor: 'Сидорова А. П.',
+    date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: '4',
+    type: 'update',
+    title: 'Внесены правки',
+    description: 'Пункт 4.2 переработан',
+    actor: 'Иванов И. И.',
+    date: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: '5',
+    type: 'transfer',
+    title: 'Зачислен паевой взнос',
+    description: '15 000 ₽ · ivanov12345 → программа «Благорост»',
+    date: new Date('2026-05-12T11:20:00').toISOString(),
+  },
+];
+
+const previewHtmlDemo: DocumentPreviewDoc = {
+  type: 'html',
+  html: `
+    <h2 style="text-align:center">УСТАВ ПОТРЕБИТЕЛЬСКОГО КООПЕРАТИВА «ВОСХОД»</h2>
+    <p><strong>1. Общие положения.</strong> Потребительский кооператив «Восход» является добровольным объединением пайщиков на основе совместного хозяйствования.</p>
+    <p><strong>2. Цели.</strong> Удовлетворение материальных и иных потребностей пайщиков, обеспечение условий для совместной деятельности.</p>
+    <table>
+      <tr><th>Параметр</th><th>Значение</th></tr>
+      <tr><td>Минимальный пай</td><td>1 000 ₽</td></tr>
+      <tr><td>Возврат</td><td>В соответствии с положениями Программы</td></tr>
+    </table>
+  `,
+};
+const previewTxtDemo: DocumentPreviewDoc = {
+  type: 'txt',
+  text: 'EOSIO chain id: aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906\nblock 113273322 → action_mroot = 0 (dirty window 11.05.2026)\nrecovered from snapshot: snapshot-2026-05-12-12:00.bin.zst',
+};
+
 /* ============ PersonCard demo (E8.4) ============ */
 const personFullDemo: Person = {
   fullName: 'Иванов Иван Иванович',
@@ -1317,6 +1513,12 @@ const contactsDemo: ContactItem[] = [
   background: var(--p-surface);
   border: 1px solid var(--p-line);
   border-radius: var(--p-r-md, 12px);
+}
+
+.dev-ui__preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: var(--p-4, 16px);
 }
 
 code {
