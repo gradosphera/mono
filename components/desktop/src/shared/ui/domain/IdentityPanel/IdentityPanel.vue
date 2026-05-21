@@ -5,24 +5,36 @@
     :src='identity.avatar',
     :size='compact ? "sm" : "lg"'
   )
-  .identity-panel__body
-    .identity-panel__head
-      h3.identity-panel__name {{ identity.fullName }}
-      BaseBadge(
-        v-if='identity.status',
-        :variant='statusVariant'
-      ) {{ statusLabel }}
-    .identity-panel__meta(v-if='hasMeta')
-      span.identity-panel__role(v-if='identity.role') {{ identity.role }}
-      AccountBadge(
-        v-if='identity.accountName',
-        :account-name='identity.accountName',
-        size='sm'
-      )
-      a.identity-panel__email(
-        v-if='!compact && identity.email',
-        :href='`mailto:${identity.email}`'
-      ) {{ identity.email }}
+  template(v-if='compact')
+    h3.identity-panel__name {{ identity.fullName }}
+    AccountBadge(
+      v-if='identity.accountName',
+      :account-name='identity.accountName',
+      size='sm'
+    )
+    BaseBadge(
+      v-if='identity.status',
+      :variant='statusVariant'
+    ) {{ statusLabel }}
+  template(v-else)
+    .identity-panel__body
+      .identity-panel__head
+        h3.identity-panel__name {{ identity.fullName }}
+        BaseBadge(
+          v-if='identity.status',
+          :variant='statusVariant'
+        ) {{ statusLabel }}
+      .identity-panel__meta(v-if='hasFullMeta')
+        span.identity-panel__role(v-if='identity.role') {{ identity.role }}
+        AccountBadge(
+          v-if='identity.accountName',
+          :account-name='identity.accountName',
+          size='sm'
+        )
+        a.identity-panel__email(
+          v-if='identity.email',
+          :href='`mailto:${identity.email}`'
+        ) {{ identity.email }}
   .identity-panel__actions(v-if='$slots.actions')
     slot(name='actions')
 </template>
@@ -52,25 +64,26 @@ const STATUS_LABEL: Record<IdentityStatus, string> = {
 const statusVariant = computed(() => props.identity.status ? STATUS_VARIANT[props.identity.status] : 'pos');
 const statusLabel = computed(() => props.identity.status ? STATUS_LABEL[props.identity.status] : '');
 
-const hasMeta = computed((): boolean => {
+const hasFullMeta = computed((): boolean => {
   const i = props.identity;
-  return Boolean(i.role || i.accountName || (!props.compact && i.email));
+  return Boolean(i.role || i.accountName || i.email);
 });
 </script>
 
 <style scoped>
 .identity-panel {
-  display: grid;
+  display: flex;
   align-items: center;
-  gap: var(--p-3, 12px);
+  gap: var(--p-2, 8px);
   color: var(--p-ink);
 }
 
 .identity-panel--compact {
-  grid-template-columns: auto 1fr auto;
+  flex-wrap: wrap;
 }
+
 .identity-panel--full {
-  grid-template-columns: auto 1fr auto;
+  gap: var(--p-3, 12px);
   padding: var(--p-4, 16px);
   background: var(--p-surface);
   border: 1px solid var(--p-line);
@@ -82,6 +95,7 @@ const hasMeta = computed((): boolean => {
 }
 
 .identity-panel__body {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -104,6 +118,7 @@ const hasMeta = computed((): boolean => {
 .identity-panel--compact .identity-panel__name {
   font-size: var(--p-fs-body, 14px);
   line-height: var(--p-lh-body, 1.55);
+  margin-right: var(--p-1, 4px);
 }
 
 .identity-panel__meta {
@@ -133,5 +148,6 @@ const hasMeta = computed((): boolean => {
   display: inline-flex;
   align-items: center;
   gap: var(--p-2, 8px);
+  margin-left: auto;
 }
 </style>
