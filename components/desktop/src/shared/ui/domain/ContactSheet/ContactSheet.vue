@@ -31,7 +31,7 @@ ul.contact-sheet(:class='`contact-sheet--${density}`')
 import { copyToClipboard, Notify } from 'quasar';
 import type { ContactItem, ContactSheetProps, ContactType } from './ContactSheet.types';
 
-const props = withDefaults(defineProps<ContactSheetProps>(), {
+withDefaults(defineProps<ContactSheetProps>(), {
   density: 'comfortable',
 });
 
@@ -136,8 +136,11 @@ async function onCopy(c: ContactItem): Promise<void> {
   display: inline-flex;
   align-items: center;
   gap: var(--p-2, 8px);
-  margin-top: 2px;
+  margin-top: var(--p-1, 4px);
   max-width: 100%;
+}
+.contact-sheet--comfortable .contact-sheet__value-row {
+  margin-top: var(--p-2, 8px);
 }
 
 .contact-sheet__value {

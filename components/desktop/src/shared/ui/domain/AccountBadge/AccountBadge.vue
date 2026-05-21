@@ -13,7 +13,7 @@ component(
     aria-label='Скопировать имя аккаунта',
     @click.stop.prevent='onCopy'
   )
-    q-icon(name='content_copy' size='12px')
+    q-icon(name='content_copy' size='14px')
 </template>
 
 <script setup lang="ts">
@@ -96,10 +96,11 @@ async function onCopy(): Promise<void> {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   padding: 0;
   margin-left: var(--p-1, 4px);
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: none;
   background: transparent;
   color: var(--p-ink-2);

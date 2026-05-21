@@ -59,7 +59,8 @@ async function onCopy(): Promise<void> {
 .data-row {
   display: grid;
   align-items: baseline;
-  gap: var(--p-1, 4px) var(--p-3, 12px);
+  row-gap: var(--p-1, 4px);
+  column-gap: var(--p-5, 20px);
   padding: var(--p-2, 8px) 0;
   border-bottom: 1px solid var(--p-line);
   color: var(--p-ink);
@@ -71,7 +72,7 @@ async function onCopy(): Promise<void> {
 }
 
 .data-row--horizontal {
-  grid-template-columns: minmax(140px, 1fr) 2fr;
+  grid-template-columns: minmax(160px, 1fr) 2fr;
 }
 .data-row--vertical {
   grid-template-columns: 1fr;
@@ -81,6 +82,7 @@ async function onCopy(): Promise<void> {
   color: var(--p-ink-2);
   font-size: var(--p-fs-body-sm, 13px);
   line-height: var(--p-lh-body-sm, 1.5);
+  padding-right: var(--p-2, 8px);
 }
 
 .data-row__value {
