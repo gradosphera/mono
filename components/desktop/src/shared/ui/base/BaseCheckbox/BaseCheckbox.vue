@@ -43,19 +43,15 @@ function onUpdate(value: boolean | null): void {
   line-height: var(--p-lh-body, 1.55);
 }
 
-/* block-вариант: чекбокс прижат к верху, label занимает всю ширину и
-   переносит длинный текст согласия многострочно. */
+/* block-вариант: q-checkbox растягивается на всю ширину, label переносит
+   длинный текст согласия многострочно. Не трогаем внутренний flex Quasar —
+   он сам выравнивает inner и label по центру первой строки. */
 .base-checkbox--block {
-  display: flex;
   width: 100%;
-  align-items: flex-start;
-}
-.base-checkbox--block :deep(.q-checkbox__inner) {
-  margin-top: 2px;
 }
 .base-checkbox--block :deep(.q-checkbox__label) {
-  flex: 1;
   white-space: normal;
+  padding-left: var(--p-2, 8px);
 }
 
 .base-checkbox__label {
