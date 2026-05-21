@@ -243,7 +243,7 @@ const hasStatuteLink = computed(() => {
 }
 .agreements__link {
   margin-left: var(--p-1, 4px);
-  color: var(--p-primary);
+  color: var(--p-accent);
   text-decoration: none;
 }
 .agreements__link:hover {
