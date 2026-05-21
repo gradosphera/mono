@@ -116,11 +116,17 @@ async function onCopy(c: ContactItem): Promise<void> {
 }
 
 .contact-sheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-1, 4px);
   min-width: 0;
+}
+.contact-sheet--comfortable .contact-sheet__body {
+  gap: var(--p-2, 8px);
 }
 
 .contact-sheet__head {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--p-1, 4px);
   color: var(--p-ink-2);
@@ -133,14 +139,10 @@ async function onCopy(c: ContactItem): Promise<void> {
 }
 
 .contact-sheet__value-row {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--p-2, 8px);
-  margin-top: var(--p-1, 4px);
   max-width: 100%;
-}
-.contact-sheet--comfortable .contact-sheet__value-row {
-  margin-top: var(--p-2, 8px);
 }
 
 .contact-sheet__value {
