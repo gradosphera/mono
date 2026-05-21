@@ -43,6 +43,15 @@ function onUpdate(value: boolean | null): void {
   line-height: var(--p-lh-body, 1.55);
 }
 
+/* Заливка галочки: q-checkbox по умолчанию красит __bg в --q-primary.
+   В dark теме это #2dd4bf — слишком ярко для маленького квадрата 18px,
+   выглядит ядовито. Берём --p-primary-press: глубже, спокойнее, читается
+   и в light, и в dark. Чек-символ остаётся белым. */
+.base-checkbox :deep(.q-checkbox__inner--truthy .q-checkbox__bg),
+.base-checkbox :deep(.q-checkbox__inner--indet .q-checkbox__bg) {
+  background: var(--p-primary-press);
+}
+
 /* block-вариант: q-checkbox растягивается на всю ширину, label переносит
    длинный текст согласия многострочно. Не трогаем внутренний flex Quasar —
    он сам выравнивает inner и label по центру первой строки. */
