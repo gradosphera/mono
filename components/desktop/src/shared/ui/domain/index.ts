@@ -5,6 +5,7 @@ export * from './ContactSheet';
 export * from './DataRow';
 export * from './DocumentPreview';
 export * from './DocumentRow';
+export * from './DocumentSignatures';
 export * from './IdentityPanel';
 export * from './PersonCard';
 export * from './RailUserCard';

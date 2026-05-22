@@ -17,18 +17,9 @@
       BaseChip(:variant='statusVariant') {{ statusLabel }}
       span.signature-card__date(v-if='signature.signedAt') {{ signature.signedAt }}
 
-  template(v-if='signature.status === "signed" && (signature.hash || signature.txId)')
-    .signature-card__hash(v-if='signature.hash')
-      span.signature-card__hash-label Хэш подписи
-      span.signature-card__hash-value {{ signature.hash }}
-    a.signature-card__explorer(
-      v-if='signature.txId && signature.explorerUrl',
-      :href='signature.explorerUrl',
-      target='_blank',
-      rel='noopener noreferrer'
-    )
-      q-icon(name='open_in_new' size='14px')
-      span Открыть в explorer
+  .signature-card__hash(v-if='signature.status === "signed" && signature.hash')
+    span.signature-card__hash-label Хэш подписи
+    span.signature-card__hash-value {{ signature.hash }}
 
   BaseBanner(
     v-if='signature.status === "rejected" && signature.rejectionReason',
@@ -127,19 +118,5 @@ const statusLabel = computed(() => STATUS_LABEL[props.signature.status]);
   font-size: var(--p-fs-mono-sm, 12px);
   color: var(--p-ink-1);
   word-break: break-all;
-}
-
-.signature-card__explorer {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--p-1, 4px);
-  color: var(--p-primary);
-  text-decoration: none;
-  font-size: var(--p-fs-body-sm, 13px);
-  line-height: var(--p-lh-body-sm, 1.5);
-}
-.signature-card__explorer:hover {
-  text-decoration: underline;
-  color: var(--p-primary-hover);
 }
 </style>

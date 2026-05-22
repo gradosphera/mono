@@ -6,6 +6,7 @@ import ContactSheet from 'src/shared/ui/domain/ContactSheet/ContactSheet.vue';
 import DataRow from 'src/shared/ui/domain/DataRow/DataRow.vue';
 import DocumentPreview from 'src/shared/ui/domain/DocumentPreview/DocumentPreview.vue';
 import DocumentRow from 'src/shared/ui/domain/DocumentRow/DocumentRow.vue';
+import DocumentSignatures from 'src/shared/ui/domain/DocumentSignatures/DocumentSignatures.vue';
 import IdentityPanel from 'src/shared/ui/domain/IdentityPanel/IdentityPanel.vue';
 import PersonCard from 'src/shared/ui/domain/PersonCard/PersonCard.vue';
 import SignatureCard from 'src/shared/ui/domain/SignatureCard/SignatureCard.vue';
@@ -30,6 +31,7 @@ export default boot(({ app }) => {
   app.component('DataRow', DataRow);
   app.component('DocumentPreview', DocumentPreview);
   app.component('DocumentRow', DocumentRow);
+  app.component('DocumentSignatures', DocumentSignatures);
   app.component('IdentityPanel', IdentityPanel);
   app.component('PersonCard', PersonCard);
   app.component('SignatureCard', SignatureCard);
