@@ -4,8 +4,6 @@ q-input.transcription-memo-editor(
   type="textarea"
   autogrow
   dense
-  :maxlength="4000"
-  counter
   label="Заметка о звонке"
   :readonly="isSaving || !canEditMemo"
   :hint="canEditMemo ? undefined : 'Редактирование доступно председателю и членам совета'"
