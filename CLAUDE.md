@@ -21,12 +21,6 @@
 
 ## Worktree-политика
 
-**Для mono-ai-1 (базовая ветка `dev`):** **не создавать git worktree.** Работать на feature-ветке прямо в основном чекауте `~/mono-ai-1`. Если bg-job хочет `EnterWorktree` по дефолту — пропускать.
-
-**Why:** `docker-compose.yaml` для `coopback` и `cooparser` использует bind-mount `./:/app` от основного чекаута + hot-reload. Правки в worktree контейнер **не видит**, чтобы прогнать `pnpm run reboot` / `docker compose up coopback` нужно сначала переносить ветку обратно (commit → `git worktree remove` → `git checkout <branch>` в основном).
-
-При первом действии — `pwd` + `git worktree list`; если cwd под `.claude/worktrees/...` — `ExitWorktree`.
-
 **Для mono-ai-4 (базовая ветка `marketplace2`, Стол заказов):** **worktree приветствуется** — изоляция работ + параллельные ветки. Если worktree пуст от `node_modules` и `.env` (pnpm их не дублирует):
 
 ```bash
