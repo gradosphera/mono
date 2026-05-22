@@ -3,11 +3,15 @@
 import type { AuthenticatedContext } from '../session/index.js'
 import type { IndexFile } from './index-store.js'
 
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
+
 import { createHash } from 'node:crypto'
 
 import { Queries, Zeus } from '@coopenomics/sdk'
 
 import { formatThrownValue, warn } from '../ui/output.js'
+import { findByHash } from './index-store.js'
 
 import {
   loadCommunicationCursors,
@@ -40,6 +44,20 @@ function toUpdatedIso(v: Date | string): string {
 
 function messageDayEntityHash(projectHash: string, utcDate: string): string {
   return createHash('sha256').update(`${projectHash}:${utcDate}`, 'utf8').digest('hex')
+}
+
+function transcriptionMemoEntityHash(transcriptionId: string): string {
+  return `${transcriptionId.toLowerCase()}:memo`
+}
+
+async function fileExistsAbs(abs: string): Promise<boolean> {
+  try {
+    await fs.access(abs)
+    return true
+  }
+  catch {
+    return false
+  }
 }
 
 function dateFromUnknown(value: unknown): Date | undefined {
@@ -253,6 +271,34 @@ export async function pullProjectCommunicationArtifacts(
           remoteUpdatedAt: toUpdatedIso(c.endedAt),
           label: `транскрипция ${c.id}`,
         })
+
+        const memoText = typeof tr.memo === 'string' ? tr.memo : ''
+        if (memoText.trim().length > 0) {
+          const memoRel = `${basePath}/meetings/${stem}.memo.md`
+          const memoHash = transcriptionMemoEntityHash(c.id)
+          const memoEntry = findByHash(index, 'call_transcription_memo', memoHash)
+          const memoAbs = path.join(ctx.root, memoRel)
+          const memoContent = memoText.endsWith('\n') ? memoText : `${memoText}\n`
+          const memoRemoteUpdatedAt = toUpdatedIso(dateFromUnknown(tr.updatedAt) ?? c.endedAt)
+          if (!memoEntry && (await fileExistsAbs(memoAbs))) {
+            warn(
+              `Локальный «${memoRel}» не индексирован — серверный memo транскрипции ${c.id} не записан, чтобы не затереть черновик. Удалите файл или опубликуйте локальный текст через «blago transcription memo», затем повторите pull.`,
+            )
+          }
+          else {
+            await syncEntityFile({
+              root: ctx.root,
+              index,
+              entityType: 'call_transcription_memo',
+              entityHash: memoHash,
+              relativePath: memoRel,
+              content: memoContent,
+              remoteUpdatedAt: memoRemoteUpdatedAt,
+              label: `memo транскрипции ${c.id}`,
+            })
+          }
+        }
+
         if (!maxEnded || c.endedAt > maxEnded) {
           maxEnded = c.endedAt
         }

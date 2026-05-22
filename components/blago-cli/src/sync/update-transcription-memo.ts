@@ -14,7 +14,15 @@ import * as path from 'node:path'
 import { Mutations } from '@coopenomics/sdk'
 
 import type { AuthenticatedContext } from '../session/index.js'
-import { findByRelativePath, type IndexFile, loadIndex, normalizeRelativePath } from './index-store.js'
+import { sha256Hex } from '../lib/hash.js'
+import {
+  findByRelativePath,
+  type IndexFile,
+  loadIndex,
+  normalizeRelativePath,
+  saveIndex,
+  upsertEntry,
+} from './index-store.js'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -104,6 +112,58 @@ async function readMemoText(
   }
 }
 
+function toIso(v: unknown, fallback: Date): string {
+  if (v instanceof Date) {
+    return v.toISOString()
+  }
+  if (typeof v === 'string' || typeof v === 'number') {
+    const d = new Date(v)
+    if (!Number.isNaN(d.getTime())) {
+      return d.toISOString()
+    }
+  }
+  return fallback.toISOString()
+}
+
+/**
+ * После успешной мутации записываем `meetings/<stem>.memo.md` рядом с meeting-файлом и
+ * заносим запись в `.blago/index.json` с типом `call_transcription_memo`, чтобы:
+ *  - следующий `blago pull` видел индексированный файл и шёл по штатной ветке syncEntityFile;
+ *  - `blago push` его не подхватывал — он внутри `meetings/`, исключённого через `pull-only-paths`.
+ * Это шаг только при наличии meeting-пути (sibling-резолв из <pathOrId>); UUID-режим без файла — пропускаем.
+ */
+async function persistSiblingAndIndex(
+  ctx: AuthenticatedContext,
+  resolved: ResolvedTranscription,
+  memoText: string,
+  remoteUpdatedAtIso: string,
+): Promise<{ siblingPath: string } | null> {
+  if (!resolved.meetingAbsPath) {
+    return null
+  }
+  const ext = path.extname(resolved.meetingAbsPath)
+  const stem = path.basename(resolved.meetingAbsPath, ext)
+  const siblingAbs = path.join(path.dirname(resolved.meetingAbsPath), `${stem}.memo.md`)
+  const content = memoText.endsWith('\n') ? memoText : `${memoText}\n`
+  await fs.mkdir(path.dirname(siblingAbs), { recursive: true })
+  await fs.writeFile(siblingAbs, content, 'utf8')
+
+  const rel = path.relative(ctx.root, siblingAbs)
+  if (rel.startsWith('..') || path.isAbsolute(rel)) {
+    return { siblingPath: siblingAbs }
+  }
+  const index = await loadIndex(ctx.root)
+  upsertEntry(index, {
+    entity_type: 'call_transcription_memo',
+    entity_hash: `${resolved.id}:memo`,
+    relative_path: normalizeRelativePath(rel),
+    remote_updated_at: remoteUpdatedAtIso,
+    content_etag_local: sha256Hex(content),
+  })
+  await saveIndex(ctx.root, index)
+  return { siblingPath: siblingAbs }
+}
+
 export async function runUpdateTranscriptionMemo(
   ctx: AuthenticatedContext,
   pathOrId: string,
@@ -118,15 +178,18 @@ export async function runUpdateTranscriptionMemo(
   const response = await ctx.client.Mutation(Mutations.ChatCoop.UpdateTranscriptionMemo.mutation, {
     variables: { data: { id: resolved.id, memo: memo.text } },
   })
-  const row = response[mutationName]
+  const row = response[mutationName] as { updatedAt?: unknown } | undefined
   if (!row) {
     throw new Error('Сервер вернул пустой ответ на chatcoopUpdateTranscriptionMemo.')
   }
+
+  const remoteUpdatedAtIso = toIso(row.updatedAt, new Date())
+  const persisted = await persistSiblingAndIndex(ctx, resolved, memo.text, remoteUpdatedAtIso)
 
   return {
     transcriptionId: resolved.id,
     memoLength: memo.text.length,
     memoSource: memo.source,
-    memoFile: memo.file,
+    memoFile: persisted?.siblingPath ?? memo.file,
   }
 }
