@@ -968,6 +968,194 @@
       </div>
     </section>
 
+    <!-- ============ 31 AMOUNT INPUT (E10.1) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">31</span>
+        <h2 class="dev-ui__sect-title">Денежный ввод (AmountInput)</h2>
+        <p class="dev-ui__sect-sub">
+          Символ валюты как суффикс, тысячные через неразрывный пробел,
+          <code>precision</code> приходит из marketplace asset config.
+          <code>showMax</code> + <code>balance</code> — кнопка «макс»,
+          подставляющая баланс.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__form-grid">
+          <AmountInput
+            v-model="amountDemo"
+            label="Сумма поддержки"
+            symbol="RUB"
+            :precision="2"
+            placeholder="0,00"
+          />
+          <AmountInput
+            v-model="amountMaxDemo"
+            label="Сумма перевода"
+            symbol="RUB"
+            :precision="2"
+            :balance="125342.5"
+            show-max
+            show-balance
+          />
+          <AmountInput
+            :model-value="50000"
+            label="С ошибкой превышения"
+            symbol="RUB"
+            :precision="2"
+            :max="40000"
+            error="Сумма больше доступного остатка"
+            @update:model-value="() => {}"
+          />
+          <AmountInput
+            :model-value="1234567.89"
+            label="Только чтение"
+            symbol="RUB"
+            :precision="2"
+            readonly
+            @update:model-value="() => {}"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 32 OTP INPUT (E10.2) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">32</span>
+        <h2 class="dev-ui__sect-title">OTP-ввод (OtpInput)</h2>
+        <p class="dev-ui__sect-sub">
+          6 ячеек, автопереход фокуса, Backspace откатывает на предыдущую,
+          <code>paste</code> заполняет все. Цифры из regex <code>/^\d$/</code>.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__otp-stack">
+          <div>
+            <h3 class="dev-ui__h3">обычное состояние</h3>
+            <OtpInput v-model="otpDemo" :length="6" />
+            <div class="dev-ui__meta-line">Текущее значение: <code>{{ otpDemo || '—' }}</code></div>
+          </div>
+          <div>
+            <h3 class="dev-ui__h3">ошибка</h3>
+            <OtpInput
+              :model-value="otpErrorDemo"
+              :length="6"
+              error="Код подтверждения не совпадает"
+              @update:model-value="(v) => otpErrorDemo = v"
+            />
+          </div>
+          <div>
+            <h3 class="dev-ui__h3">disabled</h3>
+            <OtpInput :model-value="'1234'" :length="6" disabled @update:model-value="() => {}" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 33 FILTER BAR (E10.3) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">33</span>
+        <h2 class="dev-ui__sect-title">Панель фильтров (FilterBar)</h2>
+        <p class="dev-ui__sect-sub">
+          Поиск (debounce 300мс) + dropdown-фильтры + chip'ы активных значений
+          с remove + «сбросить всё». Управляется через <code>v-model</code>
+          (значения) и <code>v-model:search</code>.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <FilterBar
+          v-model="filterValuesDemo"
+          v-model:search="filterSearchDemo"
+          :filters="filterDefsDemo"
+          search-placeholder="Поиск по реестру…"
+        />
+        <div class="dev-ui__meta-line">
+          search: <code>{{ filterSearchDemo || '—' }}</code> ·
+          values: <code>{{ JSON.stringify(filterValuesDemo) }}</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 34 FILE UPLOADER (E10.4) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">34</span>
+        <h2 class="dev-ui__sect-title">Загрузка файлов (FileUploader)</h2>
+        <p class="dev-ui__sect-sub">
+          Drag&drop зона или клик. Валидация по <code>accept</code>,
+          <code>maxSize</code>, <code>maxFiles</code> — нарушения уходят в
+          <code>@error</code>. Прогресс реальной загрузки — слот
+          <code>progress</code>, который заполняет connected-обёртка.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__form-grid">
+          <div>
+            <h3 class="dev-ui__h3">single</h3>
+            <FileUploader
+              v-model="singleFileDemo"
+              accept=".pdf,.docx"
+              :max-size="5 * 1024 * 1024"
+              hint="PDF или DOCX, до 5 МБ"
+              @error="(e) => uploadErrorDemo = e.message"
+            />
+          </div>
+          <div>
+            <h3 class="dev-ui__h3">multiple</h3>
+            <FileUploader
+              v-model="multiFilesDemo"
+              accept="image/*,.pdf"
+              multiple
+              :max-files="4"
+              :max-size="10 * 1024 * 1024"
+              hint="Изображения или PDF, до 4 файлов по 10 МБ"
+              @error="(e) => uploadErrorDemo = e.message"
+            />
+          </div>
+        </div>
+        <div v-if="uploadErrorDemo" class="dev-ui__meta-line dev-ui__meta-line--neg">
+          Ошибка: {{ uploadErrorDemo }}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 35 VERTICAL STEPPER (E10.5) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">35</span>
+        <h2 class="dev-ui__sect-title">Вертикальный степпер (VerticalStepper)</h2>
+        <p class="dev-ui__sect-sub">
+          Многошаговые сценарии: регистрация, создание проекта, договор.
+          Состояния: <code>pending</code>/<code>current</code>/<code>completed</code>/<code>error</code>.
+          По клику на завершённый шаг — emit <code>change</code> (возврат назад).
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__stepper-grid">
+          <div>
+            <h3 class="dev-ui__h3">регистрация</h3>
+            <VerticalStepper
+              :steps="stepperStepsDemo"
+              :active-key="stepperActiveDemo"
+              :completed="stepperCompletedDemo"
+              @change="(key) => stepperActiveDemo = key"
+            />
+          </div>
+          <div>
+            <h3 class="dev-ui__h3">с ошибкой и опциональным шагом</h3>
+            <VerticalStepper
+              :steps="stepperWithErrorSteps"
+              active-key="payment"
+              :completed="['main', 'participants']"
+              :errored="['payment']"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </template>
 
@@ -995,6 +1183,8 @@ import type { DocumentRowDoc } from 'src/shared/ui/domain/DocumentRow';
 import type { Signature } from 'src/shared/ui/domain/SignatureCard';
 import type { ActivityEvent } from 'src/shared/ui/domain/ActivityTimeline';
 import type { DocumentPreviewDoc } from 'src/shared/ui/domain/DocumentPreview';
+import type { FilterDefinition, FilterValues } from 'src/shared/ui/domain/FilterBar';
+import type { StepperStep } from 'src/shared/ui/domain/VerticalStepper';
 
 /* === Token palette ============================================================
    Подмножество --p-* токенов, формирующих визуальную идентичность.
@@ -1463,6 +1653,72 @@ const contactsDemo: ContactItem[] = [
   { type: 'address', value: 'г. Москва, ул. Ленина, д. 1, кв. 23' },
   { type: 'web', value: 'coopenomics.world', label: 'Сайт кооператива' },
 ];
+
+/* ============ AmountInput demo (E10.1) ============ */
+const amountDemo = ref<number | null>(null);
+const amountMaxDemo = ref<number | null>(null);
+
+/* ============ OtpInput demo (E10.2) ============ */
+const otpDemo = ref<string>('');
+const otpErrorDemo = ref<string>('1234');
+
+/* ============ FilterBar demo (E10.3) ============ */
+const filterSearchDemo = ref<string>('');
+const filterValuesDemo = ref<FilterValues>({ status: 'active', type: 'individual' });
+const filterDefsDemo: FilterDefinition[] = [
+  {
+    key: 'status',
+    label: 'Статус',
+    type: 'select',
+    options: [
+      { label: 'Активные', value: 'active' },
+      { label: 'Заблокированные', value: 'blocked' },
+      { label: 'Ожидают подтверждения', value: 'pending' },
+    ],
+  },
+  {
+    key: 'type',
+    label: 'Тип субъекта',
+    type: 'select',
+    options: [
+      { label: 'Физическое лицо', value: 'individual' },
+      { label: 'Организация', value: 'organization' },
+      { label: 'ИП', value: 'entrepreneur' },
+    ],
+  },
+  {
+    key: 'region',
+    label: 'Регион',
+    type: 'select',
+    options: [
+      { label: 'Москва', value: 'msk' },
+      { label: 'Санкт-Петербург', value: 'spb' },
+      { label: 'Новосибирск', value: 'nsk' },
+    ],
+  },
+];
+
+/* ============ FileUploader demo (E10.4) ============ */
+const singleFileDemo = ref<File | null>(null);
+const multiFilesDemo = ref<File[]>([]);
+const uploadErrorDemo = ref<string>('');
+
+/* ============ VerticalStepper demo (E10.5) ============ */
+const stepperStepsDemo: StepperStep[] = [
+  { key: 'phone', label: 'Подтверждение телефона', description: 'Получите код по SMS и введите его' },
+  { key: 'identity', label: 'Личные данные', description: 'ФИО, паспортные данные' },
+  { key: 'keys', label: 'Создание ключей', description: 'Сохраните мастер-ключ в безопасном месте' },
+  { key: 'review', label: 'Проверка и подача заявления', description: 'Финальный шаг' },
+];
+const stepperActiveDemo = ref<string>('keys');
+const stepperCompletedDemo = ref<string[]>(['phone', 'identity']);
+
+const stepperWithErrorSteps: StepperStep[] = [
+  { key: 'main', label: 'Основное' },
+  { key: 'participants', label: 'Участники', optional: true },
+  { key: 'payment', label: 'Оплата паевого взноса', description: 'Не удалось провести транзакцию — попробуйте ещё раз' },
+  { key: 'confirm', label: 'Подтверждение', disabled: true },
+];
 </script>
 
 <style scoped>
@@ -1569,6 +1825,35 @@ const contactsDemo: ContactItem[] = [
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: var(--p-4, 16px);
+}
+
+.dev-ui__form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--p-4, 16px);
+  align-items: start;
+}
+
+.dev-ui__otp-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-5, 20px);
+}
+
+.dev-ui__stepper-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--p-6, 24px);
+  align-items: start;
+}
+
+.dev-ui__meta-line {
+  margin-top: var(--p-3, 12px);
+  font-size: var(--p-fs-body-sm, 13px);
+  color: var(--p-ink-2);
+}
+.dev-ui__meta-line--neg {
+  color: var(--p-neg);
 }
 
 code {
