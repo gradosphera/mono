@@ -304,13 +304,16 @@ export async function pullProjectCommunicationArtifacts(
     try {
       const tKey = row.project_hash
       const tExIso = cursors.transcriptionLastEndedExclusiveByProject[tKey]
-      // Как сообщения с after=0: без курсора — полная выгрузка завершённых транскрипций в meetings/.
-      // (GitHub-синк при первом запуске только ставит курсор без файлов — для локального зеркала так не делаем.)
+      // Курсор `transcriptionLastEndedExclusiveByProject` влияет ТОЛЬКО на скачивание meeting.md
+      // (тяжёлый GetTranscription с сегментами). Sibling-файл `.memo.md` синхронизируется для всех
+      // COMPLETED-транскрипций каждый pull — поле `memo` приходит в лёгком GetTranscriptions.
       const lowerBoundExclusive = tExIso === undefined ? new Date(0) : new Date(tExIso)
 
       interface TranscriptionCandidate {
         id: string
         endedAt: Date
+        memo: string
+        updatedAt: Date | undefined
       }
       const byId = new Map<string, TranscriptionCandidate>()
       for (const roomId of matrixIds) {
@@ -323,18 +326,23 @@ export async function pullProjectCommunicationArtifacts(
           if (t.status !== Zeus.TranscriptionStatus.COMPLETED || !end) {
             continue
           }
-          if (!(end.getTime() > lowerBoundExclusive.getTime())) {
-            continue
-          }
           const prev = byId.get(t.id)
           if (!prev || end > prev.endedAt) {
-            byId.set(t.id, { id: t.id, endedAt: end })
+            byId.set(t.id, {
+              id: t.id,
+              endedAt: end,
+              memo: typeof t.memo === 'string' ? t.memo : '',
+              updatedAt: dateFromUnknown(t.updatedAt),
+            })
           }
         }
       }
-      const candidates = [...byId.values()].sort((a, b) => a.endedAt.getTime() - b.endedAt.getTime())
+      const allCompleted = [...byId.values()].sort((a, b) => a.endedAt.getTime() - b.endedAt.getTime())
+
+      // 1) meeting.md — только новые после курсора (тяжёлый GetTranscription с сегментами).
+      const newMeetings = allCompleted.filter(c => c.endedAt.getTime() > lowerBoundExclusive.getTime())
       let maxEnded: Date | null = null
-      for (const c of candidates) {
+      for (const c of newMeetings) {
         const packQ = await ctx.client.Query(Queries.ChatCoop.GetTranscription.query, {
           variables: { data: { id: c.id } },
         })
@@ -374,22 +382,27 @@ export async function pullProjectCommunicationArtifacts(
           label: `транскрипция ${c.id}`,
         })
 
-        const serverMemo = typeof tr.memo === 'string' ? tr.memo : ''
+        if (!maxEnded || c.endedAt > maxEnded) {
+          maxEnded = c.endedAt
+        }
+      }
+
+      // 2) sibling .memo.md — для ВСЕХ COMPLETED-транскрипций (бэкфил независимо от курсора).
+      //    Поле tr.memo пришло в лёгком GetTranscriptions, повторных запросов не делаем.
+      for (const c of allCompleted) {
+        const stem = transcriptionMeetingFileStemUtc(c.endedAt)
         const memoRel = `${basePath}/meetings/${stem}.memo.md`
-        const memoRemoteUpdatedAt = toUpdatedIso(dateFromUnknown(tr.updatedAt) ?? c.endedAt)
+        const memoRemoteUpdatedAt = toUpdatedIso(c.updatedAt ?? c.endedAt)
         await syncTranscriptionMemoFile({
           root: ctx.root,
           index,
           transcriptionId: c.id,
           relativePath: memoRel,
-          serverMemo,
+          serverMemo: c.memo,
           remoteUpdatedAtIso: memoRemoteUpdatedAt,
         })
-
-        if (!maxEnded || c.endedAt > maxEnded) {
-          maxEnded = c.endedAt
-        }
       }
+
       if (maxEnded) {
         cursors.transcriptionLastEndedExclusiveByProject[tKey] = maxEnded.toISOString()
       }
