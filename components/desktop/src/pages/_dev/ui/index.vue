@@ -1197,18 +1197,23 @@
         <span class="dev-ui__sect-num">37</span>
         <h2 class="dev-ui__sect-title">Палитра команд (CommandPalette)</h2>
         <p class="dev-ui__sect-sub">
-          ⌘K / Ctrl+K. Fuzzy-поиск, секции <code>recent</code>/<code>pages</code>/<code>actions</code>,
-          ↑↓ для навигации, Enter — выбрать, Esc — закрыть.
+          ⌘K / Ctrl+K. Иерархия <strong>рабочих столов</strong> и их страниц.
+          Активный стол sticky сверху с бейджем «Активный». Пустой запрос — иерархия,
+          с запросом — плоский список (со столом-префиксом у каждой страницы).
+          Стол отдельной строкой появляется только если запрос явно начинается
+          с его имени или содержит «стол»/«workspace».
         </p>
       </div>
       <div class="dev-ui__stage">
         <button type="button" class="dev-ui__btn" @click="commandPaletteOpen = true">
-          Открыть палитру команд
+          Открыть палитру (рабочие столы и страницы)
         </button>
         <p class="dev-ui__meta-line" v-if="commandLog">{{ commandLog }}</p>
         <CommandPalette
           v-model="commandPaletteOpen"
-          :commands="commandsDemo"
+          :workspaces="commandWorkspacesDemo"
+          @select-workspace="onSelectWorkspace"
+          @select-page="onSelectPage"
         />
       </div>
     </section>
@@ -1301,7 +1306,7 @@ import type { DocumentPreviewDoc } from 'src/shared/ui/domain/DocumentPreview';
 import type { FilterDefinition, FilterValues } from 'src/shared/ui/domain/FilterBar';
 import type { StepperStep } from 'src/shared/ui/domain/VerticalStepper';
 import type { NotificationItem } from 'src/shared/ui/domain/NotificationCenter';
-import type { CommandItem } from 'src/shared/ui/domain/CommandPalette';
+import type { CommandPaletteWorkspace } from 'src/shared/ui/domain/CommandPalette';
 
 /* === Token palette ============================================================
    Подмножество --p-* токенов, формирующих визуальную идентичность.
@@ -1861,17 +1866,51 @@ function onNotificationViewAll(): void {
 /* ============ CommandPalette demo (E11.2) ============ */
 const commandPaletteOpen = ref<boolean>(false);
 const commandLog = ref<string>('');
-const commandsDemo: CommandItem[] = [
-  { key: 'go-dashboard', label: 'Перейти на главную', section: 'pages', icon: 'home', action: () => { commandLog.value = 'Открыта главная'; } },
-  { key: 'go-wallet', label: 'Открыть кошелёк', section: 'pages', icon: 'account_balance_wallet', action: () => { commandLog.value = 'Открыт кошелёк'; } },
-  { key: 'go-projects', label: 'Проекты Благорост', section: 'pages', icon: 'rocket_launch', action: () => { commandLog.value = 'Открыты проекты'; } },
-  { key: 'go-meetings', label: 'Голосования и собрания', section: 'pages', icon: 'how_to_vote', action: () => { commandLog.value = 'Открыты собрания'; } },
-  { key: 'action-topup', label: 'Пополнить кошелёк', section: 'actions', icon: 'add', hotkey: '⌘P', action: () => { commandLog.value = 'Открыт диалог пополнения'; } },
-  { key: 'action-invest', label: 'Поддержать проект', section: 'actions', icon: 'volunteer_activism', action: () => { commandLog.value = 'Открыт диалог поддержки'; } },
-  { key: 'action-signout', label: 'Выйти из системы', section: 'actions', icon: 'logout', action: () => { commandLog.value = 'Выход выполнен'; } },
-  { key: 'recent-1', label: 'Договор пая № 0042', section: 'recent', icon: 'description', action: () => { commandLog.value = 'Открыт договор № 0042'; } },
-  { key: 'recent-2', label: 'Проект «Солнечные панели»', section: 'recent', icon: 'rocket_launch', action: () => { commandLog.value = 'Открыт проект Солнечные панели'; } },
+const commandWorkspacesDemo: CommandPaletteWorkspace[] = [
+  {
+    name: 'chairman',
+    title: 'Стол Председателя',
+    icon: 'person',
+    isActive: true,
+    pages: [
+      { name: 'chairman-onboarding', title: 'Онбординг', icon: 'rocket_launch' },
+      { name: 'chairman-approvals', title: 'Запросы одобрений', icon: 'check_circle' },
+      { name: 'chairman-marketplace', title: 'Магазин приложений', icon: 'extension' },
+      { name: 'chairman-startpages', title: 'Стартовые страницы', icon: 'home' },
+      { name: 'chairman-council', title: 'Члены совета', icon: 'groups' },
+      { name: 'chairman-areas', title: 'Кооперативные участки', icon: 'layers' },
+      { name: 'chairman-fees', title: 'Регистрационные взносы', icon: 'payments' },
+      { name: 'chairman-key', title: 'Ключ кооператива', icon: 'vpn_key' },
+    ],
+  },
+  {
+    name: 'member',
+    title: 'Стол пайщика',
+    icon: 'account_circle',
+    pages: [
+      { name: 'member-dashboard', title: 'Главная', icon: 'home' },
+      { name: 'member-wallet', title: 'Кошелёк', icon: 'account_balance_wallet', shortcut: '⌘W' },
+      { name: 'member-projects', title: 'Проекты Благорост', icon: 'rocket_launch' },
+      { name: 'member-voting', title: 'Голосования', icon: 'how_to_vote' },
+      { name: 'member-documents', title: 'Мои документы', icon: 'description' },
+    ],
+  },
+  {
+    name: 'reports',
+    title: 'Стол отчётности',
+    icon: 'analytics',
+    pages: [
+      { name: 'reports-kpi', title: 'KPI кооператива', icon: 'insights' },
+      { name: 'reports-export', title: 'Выгрузка реестров', icon: 'download' },
+    ],
+  },
 ];
+function onSelectWorkspace(name: string): void {
+  commandLog.value = `Переход на рабочий стол: ${name}`;
+}
+function onSelectPage(workspaceName: string, pageName: string): void {
+  commandLog.value = `Открыта страница ${pageName} (стол ${workspaceName})`;
+}
 
 /* ============ DetailsDrawer demo (E11.3) ============ */
 const drawerOpen = ref<boolean>(false);
