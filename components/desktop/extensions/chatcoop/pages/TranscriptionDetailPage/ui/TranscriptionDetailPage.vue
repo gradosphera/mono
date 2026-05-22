@@ -47,6 +47,7 @@ div.transcription-detail-page
           dd.detail-meta__value-num {{ transcription.transcription.participants?.length ?? 0 }}
 
     section.tr-section.tr-section--memo
+      h2.tr-section__label Заметка о звонке
       TranscriptionMemoEditor(
         :transcription-id="transcription.transcription.id"
         :memo="transcription.transcription.memo ?? ''"
