@@ -1334,8 +1334,6 @@ const signatureSignedDemo: Signature = {
   signer: { fullName: 'Иванов Иван Иванович', accountName: 'ivanov12345' },
   signedAt: '21 мая 2026, 14:32',
   hash: 'SIG_K1_KdNm8YzfxgkLRgZSdt9xZB6FBVvJ7tQXrqzPDS6m1HtR2WJaXLs9xUgEcLuJqW5Ts9hfXjcWf7Q4kVUj8Q4kvVPbm3TmgN',
-  txId: 'a3b1c8d9e0f1234567890abcdef1234567890abcdef1234567890abcdef12345',
-  explorerUrl: 'https://explorer.coopenomics.world/tx/a3b1c8d9e0',
 };
 const signaturePendingDemo: Signature = {
   status: 'pending',
@@ -1436,7 +1434,19 @@ const docSignaturesInvalidDemo = {
 };
 const previewTxtDemo: DocumentPreviewDoc = {
   type: 'txt',
-  text: 'EOSIO chain id: aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906\nblock 113273322 → action_mroot = 0 (dirty window 11.05.2026)\nrecovered from snapshot: snapshot-2026-05-12-12:00.bin.zst',
+  text: `Протокол № 10-04-2026
+Общее собрание пайщиков ПК «Восход»
+
+Повестка дня:
+  1. Утверждение программы «Благорост — Восход 2026».
+  2. Приём новых пайщиков (3 заявления).
+  3. Разное.
+
+Слушали: Иванова И. И. — о ходе программы.
+Постановили: программу утвердить, минимальный пай оставить 1 000 ₽.
+
+Председатель: Иванов И. И.
+Секретарь: Сидорова А. П.`,
 };
 
 /* ============ PersonCard demo (E8.4) ============ */
