@@ -1,19 +1,34 @@
-export type CommandSection = 'pages' | 'actions' | 'recent';
-
-export interface CommandItem {
-  key: string;
-  label: string;
-  section: CommandSection;
+export interface CommandPalettePage {
+  /** Внутренний идентификатор страницы (route name) */
+  name: string;
+  /** Отображаемое имя */
+  title: string;
+  /** Иконка (Material Symbols / FontAwesome name) */
   icon?: string;
-  hotkey?: string;
-  /** Действие при выборе команды. Компонент закрывается после вызова. */
-  action: () => void;
+  /** Шорткат справа (например «⌘P») */
+  shortcut?: string;
+}
+
+export interface CommandPaletteWorkspace {
+  /** Внутренний идентификатор рабочего стола */
+  name: string;
+  /** Отображаемое имя стола */
+  title: string;
+  /** Иконка стола */
+  icon: string;
+  /** Этот стол сейчас активен (sticky-баннер сверху + бейдж «Активный») */
+  isActive?: boolean;
+  /** Страницы стола */
+  pages: CommandPalettePage[];
 }
 
 export interface CommandPaletteProps {
   /** Управляющий v-model — palette открыто/закрыто */
   modelValue: boolean;
-  commands: CommandItem[];
+  /** Иерархия рабочих столов и их страниц */
+  workspaces: CommandPaletteWorkspace[];
   /** Плейсхолдер для поиска */
   placeholder?: string;
+  /** Подпись бейджа активного стола (default «Активный») */
+  activeLabel?: string;
 }
