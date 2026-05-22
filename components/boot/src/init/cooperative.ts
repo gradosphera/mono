@@ -4,7 +4,7 @@ import config, { GOVERN_SYMBOL, SYMBOL } from '../configs'
 import Blockchain from '../blockchain'
 import { generateRandomSHA256 } from '../utils/randomHash'
 import { processLastDecision } from '../tests/soviet/processLastDecision'
-import { signProgramAgreement } from '../tests/wallet/signProgramAgreement'
+import { signProgramAgreement } from './sign-program-agreement'
 import { walletDraftId, walletProgramId } from '../tests/capital/consts'
 
 const test_hash
