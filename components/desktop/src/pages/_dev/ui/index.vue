@@ -962,9 +962,8 @@
       <div class="dev-ui__stage">
         <div class="dev-ui__preview-grid">
           <DocumentPreview :document="previewHtmlDemo" height="320px" />
-          <DocumentPreview :document="previewTxtDemo" height="320px" />
-          <DocumentPreview :document="{ type: 'pdf' }" loading height="200px" />
-          <DocumentPreview :document="{ type: 'pdf' }" error="Сервер вернул 503" height="200px" />
+          <DocumentPreview :document="{ type: 'pdf' }" loading height="320px" />
+          <DocumentPreview :document="{ type: 'pdf' }" error="Сервер вернул 503" height="320px" />
         </div>
       </div>
     </section>
@@ -1431,22 +1430,6 @@ const docSignaturesInvalidDemo = {
       isValid: false,
     },
   ],
-};
-const previewTxtDemo: DocumentPreviewDoc = {
-  type: 'txt',
-  text: `Протокол № 10-04-2026
-Общее собрание пайщиков ПК «Восход»
-
-Повестка дня:
-  1. Утверждение программы «Благорост — Восход 2026».
-  2. Приём новых пайщиков (3 заявления).
-  3. Разное.
-
-Слушали: Иванова И. И. — о ходе программы.
-Постановили: программу утвердить, минимальный пай оставить 1 000 ₽.
-
-Председатель: Иванов И. И.
-Секретарь: Сидорова А. П.`,
 };
 
 /* ============ PersonCard demo (E8.4) ============ */

@@ -17,10 +17,6 @@
         :src='document.url',
         :title='`PDF превью`'
       )
-    template(v-else-if='document.type === "image" && document.url')
-      img.document-preview__image(:src='document.url' alt='Превью документа')
-    template(v-else-if='document.type === "txt" && document.text')
-      pre.document-preview__txt {{ document.text }}
     template(v-else)
       .document-preview__slot
         slot
@@ -121,28 +117,6 @@ const safeHtml = computed((): string => {
   flex: 1 1 auto;
   width: 100%;
   border: none;
-  background: var(--p-surface-2);
-}
-
-.document-preview__image {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 80vh;
-  object-fit: contain;
-  background: var(--p-surface-2);
-}
-
-.document-preview__txt {
-  flex: 1 1 auto;
-  margin: 0;
-  padding: var(--p-5, 20px);
-  font-family: var(--p-mono);
-  font-size: var(--p-fs-mono-sm, 12px);
-  line-height: 1.6;
-  color: var(--p-ink-1);
-  overflow: auto;
-  white-space: pre-wrap;
   background: var(--p-surface-2);
 }
 
