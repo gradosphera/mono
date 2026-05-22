@@ -11,8 +11,6 @@ export interface Signature {
   signer: SignatureSigner;
   signedAt?: string;
   hash?: string;
-  txId?: string;
-  explorerUrl?: string;
   rejectionReason?: string;
 }
 

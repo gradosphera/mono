@@ -928,10 +928,30 @@
       </div>
     </section>
 
-    <!-- ============ 29 DOCUMENT PREVIEW (E9.2) ============ -->
+    <!-- ============ 29 DOCUMENT SIGNATURES (E9.5 — реальная модель) ============ -->
     <section class="dev-ui__sect">
       <div class="dev-ui__sect-head">
         <span class="dev-ui__sect-num">29</span>
+        <h2 class="dev-ui__sect-title">Подписи документа (DocumentSignatures)</h2>
+        <p class="dev-ui__sect-sub">
+          Реальная модель: контрольная сумма, список приложенных подписей с
+          раскрытием деталей (подписант, публичный ключ, цифровая подпись,
+          статус верификации), кнопки «скачать» и «сверить». Встраивается
+          в <code>BaseDocument</code>.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__doc-sig-grid">
+          <DocumentSignatures v-bind="docSignaturesDemo" />
+          <DocumentSignatures v-bind="docSignaturesInvalidDemo" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 30 DOCUMENT PREVIEW (E9.2) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">30</span>
         <h2 class="dev-ui__sect-title">Превью документа (DocumentPreview)</h2>
         <p class="dev-ui__sect-sub">
           HTML/PDF/IMAGE/TXT. HTML прогоняется через DOMPurify (можно отключить
@@ -1373,15 +1393,46 @@ const timelineDemo: ActivityEvent[] = [
 const previewHtmlDemo: DocumentPreviewDoc = {
   type: 'html',
   html: `
-    <h2 style="text-align:center">УСТАВ ПОТРЕБИТЕЛЬСКОГО КООПЕРАТИВА «ВОСХОД»</h2>
-    <p><strong>1. Общие положения.</strong> Потребительский кооператив «Восход» является добровольным объединением пайщиков на основе совместного хозяйствования.</p>
-    <p><strong>2. Цели.</strong> Удовлетворение материальных и иных потребностей пайщиков, обеспечение условий для совместной деятельности.</p>
+    <h2 style="text-align:center">Устав кооператива «Восход»</h2>
+    <p><strong>1. Общие положения.</strong> Потребительский кооператив «Восход» — добровольное объединение пайщиков на основе совместного хозяйствования.</p>
+    <p><strong>2. Цели.</strong> Удовлетворение материальных и иных потребностей пайщиков.</p>
     <table>
       <tr><th>Параметр</th><th>Значение</th></tr>
       <tr><td>Минимальный пай</td><td>1 000 ₽</td></tr>
-      <tr><td>Возврат</td><td>В соответствии с положениями Программы</td></tr>
+      <tr><td>Возврат</td><td>По положениям Программы</td></tr>
     </table>
   `,
+};
+
+const docSignaturesDemo = {
+  docHash: '116929C059A3A6E2F44AEA38B4B64F72E9525EA54E49D4444D69DC7EE60706ED',
+  regeneratedHash: '116929C059A3A6E2F44AEA38B4B64F72E9525EA54E49D4444D69DC7EE60706ED',
+  signatures: [
+    {
+      signerName: 'Иванов Иван Иванович',
+      publicKey: 'PUB_K1_6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5BoDq63',
+      signature: 'SIG_K1_KgjUKhXYXarx9aQMrN54umSWyeWBqw82h59a8AYgHiqRCS1p9N9SkB2b6bBME61PaRWsc7HDMNCf4TE2voTM9DNA2cPznG',
+      isValid: true,
+    },
+  ],
+};
+const docSignaturesInvalidDemo = {
+  docHash: '116929C059A3A6E2F44AEA38B4B64F72E9525EA54E49D4444D69DC7EE60706ED',
+  regeneratedHash: '000000000000000000000000000000000000000000000000000000000000DEAD',
+  signatures: [
+    {
+      signerName: 'Иванов Иван Иванович',
+      publicKey: 'PUB_K1_6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5BoDq63',
+      signature: 'SIG_K1_KgjUKhXYXarx9aQMrN54umSWyeWBqw82h59a8AYgHiqRCS1p9N9SkB2b6bBME61PaRWsc7HDMNCf4TE2voTM9DNA2cPznG',
+      isValid: true,
+    },
+    {
+      signerName: 'Петров Пётр',
+      publicKey: 'PUB_K1_aXyZ123456789aXyZ123456789aXyZ123456789aXyZ123456789aaaa',
+      signature: 'SIG_K1_brokenAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      isValid: false,
+    },
+  ],
 };
 const previewTxtDemo: DocumentPreviewDoc = {
   type: 'txt',
@@ -1516,6 +1567,12 @@ const contactsDemo: ContactItem[] = [
 }
 
 .dev-ui__preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: var(--p-4, 16px);
+}
+
+.dev-ui__doc-sig-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: var(--p-4, 16px);

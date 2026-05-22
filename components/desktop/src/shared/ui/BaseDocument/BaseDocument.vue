@@ -10,84 +10,15 @@ q-card.dynamic-padding(
   div(v-if='!loading')
     ShadowHtml(:html='safeHtml', :styles='shadowStyles')
     .row.q-mt-lg.q-pa-sm.justify-center
-      q-card.col-md-8.col-xs-12.q-pa-sm.verify-card(
-        style='word-break: break-all !important; text-wrap: pretty',
-        flat
-      )
-        .q-mr-lg.q-mt-md
-          q-badge.text-center.q-pa-xs(
-            :color='documentAggregate?.document?.doc_hash == regeneratedHash ? "teal" : "red"'
-          )
-            q-icon.q-mr-sm(
-              :name='documentAggregate?.document?.doc_hash == regeneratedHash ? "check_circle" : "cancel"'
-            )
-            span контрольная сумма
-          p.q-mr-lg.q-ml-lg.text-grey {{ documentAggregate?.document?.doc_hash }}
-
-        // Показываем все подписи (если это агрегат документа)
-        template(
-          v-if='documentAggregate?.document?.signatures && documentAggregate.document.signatures.length > 0'
+      .col-md-8.col-xs-12
+        DocumentSignatures(
+          :doc-hash='documentAggregate?.document?.doc_hash ?? ""',
+          :regenerated-hash='regeneratedHash',
+          :signatures='canonSignatures',
+          :verifying='onRegenerate',
+          @download='download',
+          @verify='regenerate'
         )
-          .q-mr-lg.q-mt-md
-            q-badge.text-center.q-pa-xs(
-              :color='hasInvalidSignature ? "red" : "teal"'
-            )
-              q-icon.q-mr-sm(
-                :name='hasInvalidSignature ? "cancel" : "verified"'
-              )
-              span Подписи ({{ documentAggregate.document.signatures.length }})
-
-          // Список всех подписей
-          q-list(bordered, separator, dense)
-            q-expansion-item(
-              v-for='(signature, index) in documentAggregate.document.signatures',
-              :key='index',
-              :label='`Подпись ${index + 1}: ${getSignerName(signature.signer_certificate)}`',
-              header-class='signature-header',
-              dense
-            )
-              q-card(flat)
-                q-card-section
-                  .q-mb-sm
-                    q-badge.text-center.q-pa-xs(
-                      :color='signature.is_valid ? "teal" : "red"'
-                    )
-                      span Подписант
-                    p.q-mt-sm.q-ml-lg {{ getSignerName(signature.signer_certificate) }}
-
-                  .q-mb-sm(v-if='signature.public_key')
-                    q-badge.text-center.q-pa-xs(
-                      :color='signature.is_valid ? "teal" : "red"'
-                    )
-                      span Публичный ключ
-                    p.q-mt-sm.q-ml-lg {{ signature.public_key }}
-
-                  .q-mb-sm(v-if='signature.signature')
-                    q-badge.text-center.q-pa-xs(
-                      :color='signature.is_valid ? "teal" : "red"'
-                    )
-                      span Цифровая подпись
-                    p.q-mt-sm.q-ml-lg {{ signature.signature }}
-
-                  .q-mt-md
-                    q-badge.text-center.q-pa-xs(
-                      :color='signature.is_valid ? "teal" : "red"'
-                    )
-                      q-icon.q-mr-sm(
-                        :name='signature.is_valid ? "check_circle" : "cancel"'
-                      )
-                      span Статус подписи: {{ signature.is_valid ? 'Верифицирована' : 'Не верифицирована' }}
-
-        .text-center.q-gutter-sm.q-mt-md
-          q-btn(size='sm', color='primary', icon='download', @click='download') скачать
-          //- q-btn(size="sm" color="primary" icon="download" @click="download2") скачать2
-          q-btn(
-            size='sm',
-            color='primary',
-            icon='fa-solid fa-check-double',
-            @click='regenerate',
-            :loading='onRegenerate'
-          ) сверить
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
@@ -99,6 +30,7 @@ import { useWindowSize } from 'src/shared/hooks';
 import type { IDocumentAggregate } from 'src/entities/Document/model';
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { ShadowHtml } from '../ShadowHtml';
+import { DocumentSignatures, type DocumentSignatureEntry } from 'src/shared/ui/domain/DocumentSignatures';
 
 const props = defineProps({
   documentAggregate: {
@@ -305,11 +237,18 @@ async function download() {
   }
 }
 
-// Вычисляем, есть ли хотя бы одна невалидная подпись
-const hasInvalidSignature = computed(() =>
-  props.documentAggregate?.document?.signatures?.some(
-    (signature) => !signature.is_valid,
-  ),
+// Адаптер реальной модели подписи документа (signer_certificate + public_key
+// + signature + is_valid из IDocumentAggregate) в форму, которую ждёт canon-
+// компонент DocumentSignatures (signerName + publicKey + signature + isValid).
+// signer_certificate резолвится через getNameFromCertificate — caller знает
+// формат сертификата, canon-компонент остаётся props-only и не лезет в типы.
+const canonSignatures = computed<DocumentSignatureEntry[]>(() =>
+  (props.documentAggregate?.document?.signatures ?? []).map((s) => ({
+    signerName: getSignerName(s.signer_certificate),
+    publicKey: s.public_key,
+    signature: s.signature,
+    isValid: s.is_valid,
+  })),
 );
 </script>
 <style>
