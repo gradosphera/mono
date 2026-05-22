@@ -4,7 +4,7 @@
     input.otp-input__cell(
       v-for='(_, idx) in cells',
       :key='idx',
-      :ref='(el) => (refs[idx] = el as HTMLInputElement | null)',
+      :ref='(el) => setRef(idx, el)',
       type='text',
       inputmode='numeric',
       autocomplete='one-time-code',
@@ -13,8 +13,8 @@
       :disabled='disabled',
       :aria-label='`Цифра ${idx + 1}`',
       :name='name ? `${name}-${idx}` : undefined',
-      @input='(e) => onInput(idx, e as InputEvent)',
-      @keydown='(e) => onKeydown(idx, e as KeyboardEvent)',
+      @input='(e) => onInput(idx, e)',
+      @keydown='(e) => onKeydown(idx, e)',
       @paste='onPaste',
       @focus='onFocus'
     )
@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import type { OtpInputProps } from './OtpInput.types';
 
 const props = withDefaults(defineProps<OtpInputProps>(), {
@@ -66,7 +67,11 @@ function commit(next: string[]): void {
   }
 }
 
-function onInput(idx: number, event: InputEvent): void {
+function setRef(idx: number, el: Element | ComponentPublicInstance | null): void {
+  refs.value[idx] = el as HTMLInputElement | null;
+}
+
+function onInput(idx: number, event: Event): void {
   const input = event.target as HTMLInputElement;
   const raw = input.value;
   const digit = raw.replace(/\D/g, '').slice(-1);
