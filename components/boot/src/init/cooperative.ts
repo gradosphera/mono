@@ -4,6 +4,8 @@ import config, { GOVERN_SYMBOL, SYMBOL } from '../configs'
 import Blockchain from '../blockchain'
 import { generateRandomSHA256 } from '../utils/randomHash'
 import { processLastDecision } from '../tests/soviet/processLastDecision'
+import { signProgramAgreement } from '../tests/wallet/signProgramAgreement'
+import { walletDraftId, walletProgramId } from '../tests/capital/consts'
 
 const test_hash
   = '157192b276da23cc84ab078fc8755c051c5f0430bf4802e55718221e6b76c777'
@@ -156,13 +158,17 @@ export class CooperativeClass {
 
     console.log('Отправляем подписанное положение о ЦПП Кошелька оператору')
 
-    await this.blockchain.sendAgreement({
-      coopname: config.provider,
-      administrator: config.provider,
-      username: username!,
-      agreement_type: 'wallet',
+    // После Эпика 2 / компонента 48 soviet::sndagreement отказывается на
+    // program_id > 0; программные соглашения подписываются через
+    // wallet::signagree (auth: coopname@active).
+    await signProgramAgreement(
+      this.blockchain,
+      config.provider,
+      username!,
+      walletProgramId,
+      walletDraftId,
       document,
-    })
+    )
 
     console.log('Переводим аккаунт в кооператив')
 
