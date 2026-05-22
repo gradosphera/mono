@@ -10,8 +10,9 @@ import { createHash } from 'node:crypto'
 
 import { Queries, Zeus } from '@coopenomics/sdk'
 
+import { sha256Hex } from '../lib/hash.js'
 import { formatThrownValue, warn } from '../ui/output.js'
-import { findByHash } from './index-store.js'
+import { findByHash, normalizeRelativePath, upsertEntry } from './index-store.js'
 
 import {
   loadCommunicationCursors,
@@ -50,14 +51,115 @@ function transcriptionMemoEntityHash(transcriptionId: string): string {
   return `${transcriptionId.toLowerCase()}:memo`
 }
 
-async function fileExistsAbs(abs: string): Promise<boolean> {
+async function readFileIfExists(abs: string): Promise<string | null> {
   try {
-    await fs.access(abs)
-    return true
+    return await fs.readFile(abs, 'utf8')
   }
   catch {
-    return false
+    return null
   }
+}
+
+function normalizeMemoContent(memo: string): string {
+  if (memo.length === 0) {
+    return ''
+  }
+  return memo.endsWith('\n') ? memo : `${memo}\n`
+}
+
+/**
+ * Гарантирует наличие файла `meetings/<stem>.memo.md` после pull.
+ *
+ * Файл создаётся **всегда** (даже если на сервере memo пуст), чтобы пользователь мог редактировать
+ * sibling «в одно касание», а команда `blago transcription memo` всегда находила его. Конфликты с
+ * локальными правками разруливаются:
+ *
+ *  - индекс есть → штатный `syncEntityFile` (он умеет merge-markers «<<<<<<< blago/local …»);
+ *  - индекса нет, файла нет → пишем серверный memo и индексируем (baseline = сервер);
+ *  - индекса нет, файл есть, содержимое совпадает с сервером → просто индексируем (baseline = совпавший контент);
+ *  - индекса нет, файл есть, серверный memo пустой → оставляем локальный черновик и индексируем его (baseline = локальный);
+ *  - индекса нет, файл есть, оба непустые и различаются → пишем merge-markers, индексируем merged.
+ */
+async function syncTranscriptionMemoFile(params: {
+  root: string
+  index: IndexFile
+  transcriptionId: string
+  relativePath: string
+  serverMemo: string
+  remoteUpdatedAtIso: string
+}): Promise<void> {
+  const { root, index, transcriptionId, relativePath, serverMemo, remoteUpdatedAtIso } = params
+  const rel = normalizeRelativePath(relativePath)
+  const abs = path.join(root, rel)
+  const entityHash = transcriptionMemoEntityHash(transcriptionId)
+  const serverContent = normalizeMemoContent(serverMemo)
+  const prev = findByHash(index, 'call_transcription_memo', entityHash)
+
+  if (prev) {
+    await syncEntityFile({
+      root,
+      index,
+      entityType: 'call_transcription_memo',
+      entityHash,
+      relativePath: rel,
+      content: serverContent,
+      remoteUpdatedAt: remoteUpdatedAtIso,
+      label: `memo транскрипции ${transcriptionId}`,
+    })
+    return
+  }
+
+  await fs.mkdir(path.dirname(abs), { recursive: true })
+  const local = await readFileIfExists(abs)
+
+  if (local === null) {
+    await fs.writeFile(abs, serverContent, 'utf8')
+    upsertEntry(index, {
+      entity_type: 'call_transcription_memo',
+      entity_hash: entityHash,
+      relative_path: rel,
+      remote_updated_at: remoteUpdatedAtIso,
+      content_etag_local: sha256Hex(serverContent),
+    })
+    return
+  }
+
+  if (local === serverContent) {
+    upsertEntry(index, {
+      entity_type: 'call_transcription_memo',
+      entity_hash: entityHash,
+      relative_path: rel,
+      remote_updated_at: remoteUpdatedAtIso,
+      content_etag_local: sha256Hex(local),
+    })
+    return
+  }
+
+  if (serverContent.trim().length === 0) {
+    // Сервер ничего не знает — берём локальный черновик как baseline. Опубликовать его можно
+    // через `blago transcription memo <meeting-path>`.
+    upsertEntry(index, {
+      entity_type: 'call_transcription_memo',
+      entity_hash: entityHash,
+      relative_path: rel,
+      remote_updated_at: remoteUpdatedAtIso,
+      content_etag_local: sha256Hex(local),
+    })
+    return
+  }
+
+  const merged = `<<<<<<< blago/local\n${local}\n=======\n${serverContent}\n>>>>>>> blago/remote\n`
+  await fs.writeFile(abs, merged, 'utf8')
+  upsertEntry(index, {
+    entity_type: 'call_transcription_memo',
+    entity_hash: entityHash,
+    relative_path: rel,
+    remote_updated_at: remoteUpdatedAtIso,
+    content_etag_local: sha256Hex(merged),
+  })
+  warn(
+    `Конфликт memo транскрипции ${transcriptionId}: локальный черновик и серверная версия различаются. В «${rel}» записаны маркеры слияния («<<<<<<< blago/local» … «>>>>>>> blago/remote»). Оставьте одну версию текста и опубликуйте через «blago transcription memo».`,
+  )
 }
 
 function dateFromUnknown(value: unknown): Date | undefined {
@@ -272,32 +374,17 @@ export async function pullProjectCommunicationArtifacts(
           label: `транскрипция ${c.id}`,
         })
 
-        const memoText = typeof tr.memo === 'string' ? tr.memo : ''
-        if (memoText.trim().length > 0) {
-          const memoRel = `${basePath}/meetings/${stem}.memo.md`
-          const memoHash = transcriptionMemoEntityHash(c.id)
-          const memoEntry = findByHash(index, 'call_transcription_memo', memoHash)
-          const memoAbs = path.join(ctx.root, memoRel)
-          const memoContent = memoText.endsWith('\n') ? memoText : `${memoText}\n`
-          const memoRemoteUpdatedAt = toUpdatedIso(dateFromUnknown(tr.updatedAt) ?? c.endedAt)
-          if (!memoEntry && (await fileExistsAbs(memoAbs))) {
-            warn(
-              `Локальный «${memoRel}» не индексирован — серверный memo транскрипции ${c.id} не записан, чтобы не затереть черновик. Удалите файл или опубликуйте локальный текст через «blago transcription memo», затем повторите pull.`,
-            )
-          }
-          else {
-            await syncEntityFile({
-              root: ctx.root,
-              index,
-              entityType: 'call_transcription_memo',
-              entityHash: memoHash,
-              relativePath: memoRel,
-              content: memoContent,
-              remoteUpdatedAt: memoRemoteUpdatedAt,
-              label: `memo транскрипции ${c.id}`,
-            })
-          }
-        }
+        const serverMemo = typeof tr.memo === 'string' ? tr.memo : ''
+        const memoRel = `${basePath}/meetings/${stem}.memo.md`
+        const memoRemoteUpdatedAt = toUpdatedIso(dateFromUnknown(tr.updatedAt) ?? c.endedAt)
+        await syncTranscriptionMemoFile({
+          root: ctx.root,
+          index,
+          transcriptionId: c.id,
+          relativePath: memoRel,
+          serverMemo,
+          remoteUpdatedAtIso: memoRemoteUpdatedAt,
+        })
 
         if (!maxEnded || c.endedAt > maxEnded) {
           maxEnded = c.endedAt

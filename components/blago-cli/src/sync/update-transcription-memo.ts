@@ -107,7 +107,7 @@ async function readMemoText(
   }
   catch {
     throw new Error(
-      `Рядом с «${path.basename(resolved.meetingAbsPath)}» нет файла «${path.basename(siblingAbs)}». Создайте его или передайте --file / --text.`,
+      `Рядом с «${path.basename(resolved.meetingAbsPath)}» нет файла «${path.basename(siblingAbs)}». Выполните «blago pull» (он создаст sibling-файл; пустой, если на сервере memo пустой), затем отредактируйте и повторите команду — либо передайте --file / --text.`,
     )
   }
 }
