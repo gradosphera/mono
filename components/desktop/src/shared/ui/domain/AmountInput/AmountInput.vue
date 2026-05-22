@@ -17,12 +17,11 @@
     :disable='disabled',
     :name='name',
     :for='resolvedId',
+    :suffix='symbol',
     input-class='amount-input__native',
     @update:model-value='onInput',
     @blur='onBlur'
   )
-    template(v-if='symbol' #append)
-      span.amount-input__symbol {{ symbol }}
     template(v-if='showMax && balance != null' #after)
       button.amount-input__max(
         type='button',
@@ -157,23 +156,6 @@ function applyMax(): void {
   font-feature-settings: 'tnum' 1;
   text-align: right;
   font-weight: 500;
-  font-size: var(--p-fs-body, 14px);
-  line-height: 1.4;
-}
-
-.amount-input :deep(.q-field__control),
-.amount-input :deep(.q-field__append),
-.amount-input :deep(.q-field__after) {
-  align-items: center;
-}
-
-.amount-input__symbol {
-  font-size: var(--p-fs-body-sm, 13px);
-  color: var(--p-ink-2);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  line-height: 1.4;
-  align-self: center;
 }
 
 .amount-input__max {
