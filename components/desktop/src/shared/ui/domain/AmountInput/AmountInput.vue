@@ -156,7 +156,15 @@ function applyMax(): void {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
   text-align: right;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: var(--p-fs-body, 14px);
+  line-height: 1.4;
+}
+
+.amount-input :deep(.q-field__control),
+.amount-input :deep(.q-field__append),
+.amount-input :deep(.q-field__after) {
+  align-items: center;
 }
 
 .amount-input__symbol {
@@ -164,6 +172,8 @@ function applyMax(): void {
   color: var(--p-ink-2);
   font-weight: 500;
   letter-spacing: 0.02em;
+  line-height: 1.4;
+  align-self: center;
 }
 
 .amount-input__max {
