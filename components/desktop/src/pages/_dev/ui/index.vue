@@ -1156,6 +1156,113 @@
       </div>
     </section>
 
+    <!-- ============ 36 NOTIFICATION CENTER (E11.1) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">36</span>
+        <h2 class="dev-ui__sect-title">Центр уведомлений (NotificationCenter)</h2>
+        <p class="dev-ui__sect-sub">
+          Panel-content для popover в шапке. Группировка по категориям
+          (системные/финансовые/голосования/сообщения), unread bullet,
+          «Прочитать все», EmptyState и «Показать все».
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__notification-grid">
+          <div>
+            <h3 class="dev-ui__h3">с уведомлениями</h3>
+            <NotificationCenter
+              :notifications="notificationsDemo"
+              @markAllRead="onMarkAllRead"
+              @open="onNotificationOpen"
+              @viewAll="onNotificationViewAll"
+            />
+            <p class="dev-ui__meta-line" v-if="notificationLog">{{ notificationLog }}</p>
+          </div>
+          <div>
+            <h3 class="dev-ui__h3">пустой</h3>
+            <NotificationCenter :notifications="[]" />
+          </div>
+          <div>
+            <h3 class="dev-ui__h3">загрузка</h3>
+            <NotificationCenter :notifications="[]" :loading="true" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 37 COMMAND PALETTE (E11.2) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">37</span>
+        <h2 class="dev-ui__sect-title">Палитра команд (CommandPalette)</h2>
+        <p class="dev-ui__sect-sub">
+          ⌘K / Ctrl+K. Fuzzy-поиск, секции <code>recent</code>/<code>pages</code>/<code>actions</code>,
+          ↑↓ для навигации, Enter — выбрать, Esc — закрыть.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <button type="button" class="dev-ui__btn" @click="commandPaletteOpen = true">
+          Открыть палитру команд
+        </button>
+        <p class="dev-ui__meta-line" v-if="commandLog">{{ commandLog }}</p>
+        <CommandPalette
+          v-model="commandPaletteOpen"
+          :commands="commandsDemo"
+        />
+      </div>
+    </section>
+
+    <!-- ============ 38 DETAILS DRAWER (E11.3) ============ -->
+    <section class="dev-ui__sect">
+      <div class="dev-ui__sect-head">
+        <span class="dev-ui__sect-num">38</span>
+        <h2 class="dev-ui__sect-title">Side-sheet детализации (DetailsDrawer)</h2>
+        <p class="dev-ui__sect-sub">
+          Боковая панель справа 480px для quick-view документа/договора/пайщика.
+          Slots: <code>default</code> + <code>actions</code> в шапке + <code>footer</code>.
+          На xs — fullscreen.
+        </p>
+      </div>
+      <div class="dev-ui__stage">
+        <div class="dev-ui__drawer-controls">
+          <button type="button" class="dev-ui__btn" @click="drawerOpen = true">
+            Открыть DetailsDrawer
+          </button>
+          <button type="button" class="dev-ui__btn" @click="drawerWideOpen = true">
+            Открыть широкий (640px)
+          </button>
+        </div>
+
+        <DetailsDrawer
+          v-model="drawerOpen"
+          title="Договор пая № 0001"
+        >
+          <template #actions>
+            <button type="button" class="dev-ui__btn dev-ui__btn--ghost">Скачать</button>
+          </template>
+          <DataRow label="Подписан" value="12 мая 2026" />
+          <DataRow label="Сумма пая" value="50 000,00 RUB" />
+          <DataRow label="Статус" value="Действует" />
+          <p style="margin-top: 16px; color: var(--p-ink-2);">
+            Содержимое drawer'а скроллится при переполнении. Закрывается Esc,
+            кликом по backdrop или крестиком в шапке.
+          </p>
+          <template #footer>
+            <button type="button" class="dev-ui__btn">Перейти к договору</button>
+          </template>
+        </DetailsDrawer>
+
+        <DetailsDrawer
+          v-model="drawerWideOpen"
+          title="Реестр пайщика"
+          :width="640"
+        >
+          <p>Drawer с увеличенной шириной — для длинных таблиц/реестров.</p>
+        </DetailsDrawer>
+      </div>
+    </section>
+
   </main>
 </template>
 
@@ -1175,6 +1282,9 @@ import { OtpInput } from 'src/shared/ui/domain/OtpInput';
 import { FilterBar } from 'src/shared/ui/domain/FilterBar';
 import { FileUploader } from 'src/shared/ui/domain/FileUploader';
 import { VerticalStepper } from 'src/shared/ui/domain/VerticalStepper';
+import { NotificationCenter } from 'src/shared/ui/domain/NotificationCenter';
+import { CommandPalette } from 'src/shared/ui/domain/CommandPalette';
+import { DetailsDrawer } from 'src/shared/ui/domain/DetailsDrawer';
 import { LostKey } from 'src/widgets/Registrator/LostKey';
 import { ResetKeyForm } from 'src/widgets/Registrator/ResetKey';
 import { useCreateUser } from 'src/features/User/CreateUser';
@@ -1190,6 +1300,8 @@ import type { ActivityEvent } from 'src/shared/ui/domain/ActivityTimeline';
 import type { DocumentPreviewDoc } from 'src/shared/ui/domain/DocumentPreview';
 import type { FilterDefinition, FilterValues } from 'src/shared/ui/domain/FilterBar';
 import type { StepperStep } from 'src/shared/ui/domain/VerticalStepper';
+import type { NotificationItem } from 'src/shared/ui/domain/NotificationCenter';
+import type { CommandItem } from 'src/shared/ui/domain/CommandPalette';
 
 /* === Token palette ============================================================
    Подмножество --p-* токенов, формирующих визуальную идентичность.
@@ -1724,6 +1836,46 @@ const stepperWithErrorSteps: StepperStep[] = [
   { key: 'payment', label: 'Оплата паевого взноса', description: 'Не удалось провести транзакцию — попробуйте ещё раз' },
   { key: 'confirm', label: 'Подтверждение', disabled: true },
 ];
+
+/* ============ NotificationCenter demo (E11.1) ============ */
+const now = Date.now();
+const notificationsDemo = ref<NotificationItem[]>([
+  { id: 'n1', category: 'system', title: 'Обновление ключей', description: 'Ваш мастер-ключ был обновлён 10 минут назад', date: new Date(now - 10 * 60_000), read: false },
+  { id: 'n2', category: 'system', title: 'Новый IP-адрес входа', description: 'Авторизация с устройства MacBook (Москва)', date: new Date(now - 3 * 3600_000), read: true },
+  { id: 'n3', category: 'financial', title: 'Поступление паевого взноса', description: '50 000 RUB зачислено на ваш кошелёк', date: new Date(now - 30 * 60_000), read: false },
+  { id: 'n4', category: 'voting', title: 'Голосование по проекту «Электрозарядка»', description: 'Открыто голосование, осталось 2 дня', date: new Date(now - 86400_000), read: false },
+  { id: 'n5', category: 'message', title: 'Сообщение от Председателя', description: 'Прошу ознакомиться с повесткой ОАП', date: new Date(now - 2 * 86400_000), read: true },
+]);
+const notificationLog = ref<string>('');
+function onMarkAllRead(): void {
+  notificationsDemo.value = notificationsDemo.value.map((n) => ({ ...n, read: true }));
+  notificationLog.value = 'Все уведомления помечены прочитанными';
+}
+function onNotificationOpen(id: string): void {
+  notificationLog.value = `Открыто уведомление ${id}`;
+}
+function onNotificationViewAll(): void {
+  notificationLog.value = 'Переход на /notifications';
+}
+
+/* ============ CommandPalette demo (E11.2) ============ */
+const commandPaletteOpen = ref<boolean>(false);
+const commandLog = ref<string>('');
+const commandsDemo: CommandItem[] = [
+  { key: 'go-dashboard', label: 'Перейти на главную', section: 'pages', icon: 'home', action: () => { commandLog.value = 'Открыта главная'; } },
+  { key: 'go-wallet', label: 'Открыть кошелёк', section: 'pages', icon: 'account_balance_wallet', action: () => { commandLog.value = 'Открыт кошелёк'; } },
+  { key: 'go-projects', label: 'Проекты Благорост', section: 'pages', icon: 'rocket_launch', action: () => { commandLog.value = 'Открыты проекты'; } },
+  { key: 'go-meetings', label: 'Голосования и собрания', section: 'pages', icon: 'how_to_vote', action: () => { commandLog.value = 'Открыты собрания'; } },
+  { key: 'action-topup', label: 'Пополнить кошелёк', section: 'actions', icon: 'add', hotkey: '⌘P', action: () => { commandLog.value = 'Открыт диалог пополнения'; } },
+  { key: 'action-invest', label: 'Поддержать проект', section: 'actions', icon: 'volunteer_activism', action: () => { commandLog.value = 'Открыт диалог поддержки'; } },
+  { key: 'action-signout', label: 'Выйти из системы', section: 'actions', icon: 'logout', action: () => { commandLog.value = 'Выход выполнен'; } },
+  { key: 'recent-1', label: 'Договор пая № 0042', section: 'recent', icon: 'description', action: () => { commandLog.value = 'Открыт договор № 0042'; } },
+  { key: 'recent-2', label: 'Проект «Солнечные панели»', section: 'recent', icon: 'rocket_launch', action: () => { commandLog.value = 'Открыт проект Солнечные панели'; } },
+];
+
+/* ============ DetailsDrawer demo (E11.3) ============ */
+const drawerOpen = ref<boolean>(false);
+const drawerWideOpen = ref<boolean>(false);
 </script>
 
 <style scoped>
@@ -1850,6 +2002,46 @@ const stepperWithErrorSteps: StepperStep[] = [
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--p-6, 24px);
   align-items: start;
+}
+
+.dev-ui__notification-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, max-content));
+  gap: var(--p-6, 24px);
+  align-items: start;
+}
+
+.dev-ui__drawer-controls {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--p-3, 12px);
+  margin-bottom: var(--p-4, 16px);
+}
+
+.dev-ui__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-2, 8px);
+  padding: 0 var(--p-4, 16px);
+  height: 36px;
+  border: 1px solid var(--p-primary);
+  border-radius: var(--p-r-sm, 8px);
+  background: var(--p-primary);
+  color: var(--p-ink-on-primary, #fff);
+  font-size: var(--p-fs-body-sm, 13px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--p-dur-fast, 120ms) var(--p-ease-standard);
+}
+.dev-ui__btn:hover {
+  background: var(--p-primary-hover, var(--p-primary));
+}
+.dev-ui__btn--ghost {
+  background: transparent;
+  color: var(--p-primary);
+}
+.dev-ui__btn--ghost:hover {
+  background: var(--p-primary-soft);
 }
 
 .dev-ui__meta-line {
