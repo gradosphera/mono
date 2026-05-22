@@ -247,7 +247,7 @@ const canonSignatures = computed<DocumentSignatureEntry[]>(() =>
     signerName: getSignerName(s.signer_certificate),
     publicKey: s.public_key,
     signature: s.signature,
-    isValid: s.is_valid,
+    isValid: s.is_valid ?? undefined,
   })),
 );
 </script>
