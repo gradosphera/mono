@@ -20,5 +20,9 @@
     }
   },
   "include": ["src/**/*.ts", "scripts/*.ts", "tests/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  }
 }
