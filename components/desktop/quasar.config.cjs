@@ -153,9 +153,9 @@ module.exports = configure(function (ctx) {
         [
           'vite-plugin-checker',
           {
-            vueTsc: {
-              tsconfigPath: 'tsconfig.vue-tsc.json',
-            },
+            // vueTsc отключён в dev — пожирал 100% CPU/RAM на больших правках
+            // (Quasar + Vue 3 + Milkdown/BPMN/VueFlow/Mermaid/OpenLayers).
+            // Типы проверяем отдельно: `pnpm typecheck` и в IDE через Volar.
             eslint: {
               lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"',
             },
