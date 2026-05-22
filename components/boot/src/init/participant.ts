@@ -1,15 +1,11 @@
-import axios from 'axios'
-import { describe, expect, it } from 'vitest'
-import { Registry } from '@coopenomics/factory'
-import { RegistratorContract, Cooperative as TCooperative } from 'cooptypes'
-import type { Account, Contract, Keys } from '../types'
-import config, { GOVERN_SYMBOL, SYMBOL } from '../configs'
+import config from '../configs'
 import Blockchain from '../blockchain'
-import { sendPostToCoopbackWithSecret, sleep } from '../utils'
 import { generateRandomSHA256 } from '../utils/randomHash'
 import { fakeDocument } from '../tests/shared/fakeDocument'
-import { signProgramAgreement } from '../tests/wallet/signProgramAgreement'
+import { signProgramAgreement } from './sign-program-agreement'
 import { walletDraftId, walletProgramId } from '../tests/capital/consts'
+import { RegistratorContract } from 'cooptypes'
+import type { Keys } from '../types'
 
 export class ParticipantsClass {
   public blockchain: Blockchain
