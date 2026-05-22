@@ -1,10 +1,9 @@
-export type DocumentPreviewType = 'html' | 'pdf' | 'docx' | 'image' | 'txt';
+export type DocumentPreviewType = 'html' | 'pdf' | 'docx';
 
 export interface DocumentPreviewDoc {
   type: DocumentPreviewType;
   url?: string;
   html?: string;
-  text?: string;
 }
 
 export interface DocumentPreviewProps {
