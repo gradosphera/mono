@@ -3,10 +3,9 @@ q-card.dynamic-padding(
   :flat='isMobile',
   style='word-break: break-all !important; white-space: normal !important'
 )
-  .full-width.text-center(v-if='loading')
-    .flex.q-pa-sm.full-width.text-center(style='margin: auto')
-      q-spinner
-      span.q-ml-sm.text-grey подговка {{ doc?.meta?.title }}
+  .base-document__loader(v-if='loading')
+    q-spinner(color='primary', size='32px')
+    span.base-document__loader-label Формируем документ{{ doc?.meta?.title ? ` «${doc.meta.title}»` : '' }}…
   div(v-if='!loading')
     ShadowHtml(:html='safeHtml', :styles='shadowStyles')
     .row.q-mt-lg.q-pa-sm.justify-center
@@ -261,5 +260,23 @@ const canonSignatures = computed<DocumentSignatureEntry[]>(() =>
   .dynamic-padding {
     padding: 10px !important;
   }
+}
+
+.base-document__loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--p-3, 12px);
+  min-height: 360px;
+  width: 100%;
+  text-align: center;
+}
+
+.base-document__loader-label {
+  color: var(--p-ink-2);
+  font-size: var(--p-fs-body, 14px);
+  line-height: var(--p-lh-body, 1.5);
+  max-width: 480px;
 }
 </style>
