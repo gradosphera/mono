@@ -2,9 +2,12 @@
 q-header.app-q-header(:bordered='false')
   AppHeader(
     :show-menu-button='loggedIn',
-    :title='!loggedIn && coopTitle ? coopTitle : undefined',
     @toggle-menu="emit('toggle-left-drawer')"
   )
+    template(v-if='!loggedIn && coopTitle', #brand)
+      img.app-q-header__logo(:src='logoSrc', alt='', aria-hidden='true')
+      b {{ coopTitle }}
+
     template(v-if='loggedIn', #crumb)
       BackButton
 
@@ -47,6 +50,7 @@ import { AppHeader } from 'src/shared/ui/layout/AppHeader';
 import { ToogleDarkLight } from 'src/shared/ui/ToogleDarkLight';
 import { BackButton } from 'src/widgets/Header/BackButton';
 import { NotificationCenter } from 'src/widgets/NotificationCenter';
+import logoSrc from 'src/assets/logo.svg';
 
 defineProps({
   showDrawer: {
@@ -110,5 +114,10 @@ function login(): void {
   background: var(--p-canvas);
   color: var(--p-ink);
   box-shadow: none;
+}
+.app-q-header__logo {
+  width: 24px;
+  height: 24px;
+  display: block;
 }
 </style>

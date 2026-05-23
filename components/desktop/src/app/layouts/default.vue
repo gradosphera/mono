@@ -107,7 +107,7 @@ const buttonStyle = computed(() => ({
 
 .fixed-top-right {
   position: fixed !important;
-  top: 51px; // Под header'ом
+  top: var(--p-topbar-h); // Под header'ом (canon: 56px)
   right: 0px;
   z-index: 10;
 }
