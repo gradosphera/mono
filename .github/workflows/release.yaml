@@ -34,7 +34,16 @@ permissions:
   contents: write
 
 jobs:
+  # Гейт TS-типов перед сборкой образов. Reusable workflow `typecheck.yaml`
+  # запускает vue-tsc на desktop и tsc --noEmit на controller. Нужно потому,
+  # что `lerna run build` в корневом Dockerfile НЕ ловит TS-ошибки:
+  # quasar build идёт через esbuild с выключенным vueTsc, а у controller'а
+  # build-скрипта вообще нет (ts-node в рантайме).
+  typecheck:
+    uses: ./.github/workflows/typecheck.yaml
+
   release:
+    needs: typecheck
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.resolve.outputs.tag_name }}
