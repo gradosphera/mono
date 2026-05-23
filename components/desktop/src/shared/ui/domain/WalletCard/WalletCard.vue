@@ -44,7 +44,7 @@ const props = withDefaults(defineProps<WalletCardProps>(), {
 
 const DEFAULT_TITLES: Record<WalletProgram, string> = {
   blagorost: 'Благорост',
-  wallet: 'Кошелёк',
+  wallet: 'Главный кошелёк',
   generator: 'Генератор',
 };
 
