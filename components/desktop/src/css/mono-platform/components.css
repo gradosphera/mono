@@ -316,15 +316,10 @@ body {
   font-weight: 600;
   color: var(--p-ink);
   letter-spacing: -0.005em;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  hyphens: auto;
 }
 .wallet__sub {
   font-size: var(--p-fs-meta);
   color: var(--p-ink-2);
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 .wallet__amount {
   display: flex;
