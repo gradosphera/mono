@@ -9,8 +9,14 @@ header.topbar(role='banner')
   )
     q-icon(name='menu')
 
+  //- Бренд: логотип + название (используется на экранах без авторизации,
+  //- когда нет иерархии страниц и нет крошки). Опциональный slot —
+  //- если страница его не заполняет, ничего не рендерится.
+  .topbar__brand(v-if='hasBrand')
+    slot(name='brand')
+
   //- Крошка: либо одиночный `<b>title</b>`, либо breadcrumb с chevron'ами
-  .topbar__crumb
+  .topbar__crumb(v-if='!hasBrand')
     slot(name='crumb')
       template(v-if='breadcrumbs && breadcrumbs.length')
         template(v-for='(crumb, idx) in breadcrumbs', :key='idx')
@@ -57,6 +63,7 @@ const emit = defineEmits<{
 }>();
 
 const slots = useSlots();
+const hasBrand = computed(() => !!slots.brand);
 const hasActions = computed(() => !!slots.actions);
 const hasRight = computed(
   () => !!(slots.right || slots.notifications || slots.theme || slots.profile),
