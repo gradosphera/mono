@@ -1,18 +1,9 @@
 <template lang="pug">
 .wallet-programs(v-if='canonPrograms.length > 0 || minimumBalance')
-  WalletCard(
-    v-for='entry in canonPrograms',
-    :key='entry.zeusType',
-    :program='entry.program',
-    :balance='entry.balance',
-    :symbol='entry.symbol',
-    :locked-balance='entry.locked'
-  )
-
-  //- Карточка минимального неснижаемого остатка — отдельная сущность,
-  //- не баланс программы. Та же canon-разметка .wallet, чтобы визуально
-  //- встать в общую сетку, но с нейтральной подсветкой иконки
-  //- (--prog-bg/--prog-fg переопределены на нейтральные токены).
+  //- Минимальный неснижаемый остаток — отдельная сущность пайщика
+  //- (паевой взнос). Та же canon-разметка .wallet, чтобы встать
+  //- в общую сетку, но с нейтральной подсветкой иконки. Первым,
+  //- т.к. это базовая защита средств пайщика — раньше кошельков.
   .wallet.wallet--minimum(v-if='minimumBalance')
     span.wallet__icon
       q-icon(name='savings')
@@ -25,6 +16,15 @@
           | {{ minimumBalance.amount }}
           span.ccy &nbsp;{{ minimumBalance.symbol }}
         .wallet__metric-label Зарезервировано
+
+  WalletCard(
+    v-for='entry in canonPrograms',
+    :key='entry.zeusType',
+    :program='entry.program',
+    :balance='entry.balance',
+    :symbol='entry.symbol',
+    :locked-balance='entry.locked'
+  )
 
 EmptyState(
   v-else,
