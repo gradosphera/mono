@@ -22,7 +22,7 @@
   "include": ["src/**/*.ts", "scripts/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
-    "transpileOnly": true,
+    "swc": true,
     "files": true
   }
 }
