@@ -316,16 +316,15 @@ body {
   font-weight: 600;
   color: var(--p-ink);
   letter-spacing: -0.005em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 .wallet__sub {
   font-size: var(--p-fs-meta);
   color: var(--p-ink-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .wallet__amount {
   display: flex;
@@ -397,6 +396,14 @@ body {
 .wallet--row .wallet__icon { width: 32px; height: 32px; border-radius: var(--p-r-xs); }
 .wallet--row .wallet__icon svg { width: 16px; height: 16px; }
 .wallet--row .wallet__metric-val { font-size: 16px; }
+.wallet--row .wallet__title,
+.wallet--row .wallet__sub {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: normal;
+  overflow-wrap: normal;
+}
 
 /* ---- Table ---- */
 .table-wrap {
