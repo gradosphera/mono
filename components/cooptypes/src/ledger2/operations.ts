@@ -11,11 +11,11 @@
  *
  * Идентификаторы кошельков (`wallet_from`/`wallet_to`) — eosio::name с
  * префиксом `w.<contract>.<waltype>` (см. `./wallets.ts`). Пустая строка
- * (`""`) — sentinel «кошелёк вне системы» для ISSUE и BURN.
+ * (`""`) — sentinel «кошелёк вне системы» для ISSUE, BURN и BURN_BLOCKED.
  */
 import type { IName } from '../interfaces/ledger2'
 
-export type WalletOp = 'ISSUE' | 'TRANSFER' | 'BLOCK' | 'UNBLOCK' | 'BURN' | 'NONE'
+export type WalletOp = 'ISSUE' | 'TRANSFER' | 'BLOCK' | 'UNBLOCK' | 'BURN' | 'BURN_BLOCKED' | 'NONE'
 
 export interface OperationMeta {
   /** Машинный идентификатор — eosio::name в контракте. */
@@ -34,7 +34,7 @@ export interface OperationMeta {
   wallet_op: WalletOp | null
   /** Кошелёк-источник (null для ISSUE и для adjustment-операций). */
   wallet_from: IName | null
-  /** Кошелёк-приёмник (null для BLOCK/UNBLOCK/BURN и для adjustment-операций). */
+  /** Кошелёк-приёмник (null для BLOCK/UNBLOCK/BURN/BURN_BLOCKED и для adjustment-операций). */
   wallet_to: IName | null
   /** Код счёта Дт (null без бухпроводки, ADR-003: ⇔ credit == null). */
   debit: number | null
@@ -84,7 +84,7 @@ export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
     human_name: 'Разблокировка паевого после отклонения запроса на возврат' },
 
   { code: 'o.wal.wthcpl',  process_type: 'p.wal.wthdrw',  contract: 'wallet',
-    name: 'COMPLETE_WITHDRAW', wallet_op: 'TRANSFER', wallet_from: 'w.wal.share', wallet_to: 'w.wal.wthdrw',
+    name: 'COMPLETE_WITHDRAW', wallet_op: 'BURN_BLOCKED', wallet_from: 'w.wal.share', wallet_to: null,
     debit: 80, credit: 51,
     human_name: 'Возврат паевого взноса пайщику' },
 

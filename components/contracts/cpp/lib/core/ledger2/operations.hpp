@@ -61,7 +61,7 @@ namespace operations {
   // wallet
   namespace wallet {
     inline constexpr eosio::name COMPLETE_DEPOSIT  = "o.wal.depcpl"_n;  ///< Завершение внесения паевого взноса (Dr 51 / Cr 80, ISSUE SHARE_FUND_PAY).
-    inline constexpr eosio::name COMPLETE_WITHDRAW = "o.wal.wthcpl"_n;  ///< Завершение возврата паевого взноса (Dr 80 / Cr 51, TRANSFER SHARE_FUND_PAY → WITHDRAWALS_SINK).
+    inline constexpr eosio::name COMPLETE_WITHDRAW = "o.wal.wthcpl"_n;  ///< Завершение возврата паевого взноса (Dr 80 / Cr 51, BURN_BLOCKED SHARE_FUND_PAY — деньги уходят из системы, без wallet_to).
     inline constexpr eosio::name REQUEST_WITHDRAW  = "o.wal.wthreq"_n;  ///< Запрос на возврат паевого: BLOCK на SHARE_FUND_PAY (без Dr/Cr).
     inline constexpr eosio::name DECLINE_WITHDRAW  = "o.wal.wthdec"_n;  ///< Отклонение запроса на возврат: UNBLOCK на SHARE_FUND_PAY (без Dr/Cr).
   }
@@ -130,12 +130,13 @@ namespace operations {
  * Compile-time правило `(debit==0) ⇔ (credit==0)` ловит смешанные пары.
  */
 enum class WalletOp : uint8_t {
-  ISSUE    = 0, ///< первичный вход средств на кошелёк wallet_to (wallet_from = empty)
-  TRANSFER = 1, ///< перемещение wallet_from → wallet_to (с Dr/Cr ИЛИ без — по парам account_id)
-  BLOCK    = 2, ///< available-=amount, blocked+=amount на wallet_from
-  UNBLOCK  = 3, ///< blocked-=amount, available+=amount на wallet_from
-  BURN     = 4, ///< изъятие amount с wallet_from, без wallet_to. Покрывает оба кейса: (a) штатное сжигание как бизнес-операция в OPERATION_REGISTRY; (b) зеркало ISSUE при `ledger2::revert` (различие — через operation_code: `o.adj.rev` для adjustment-mirror).
-  NONE     = 5, ///< только бухпроводка без перемещения средств (wallet_from = empty, wallet_to = empty, debit ≠ 0, credit ≠ 0). Покрывает кейсы внутрибалансовых проводок типа Dr 04 / Cr 08 (приём РИД в НМА), когда кошелёк уже на нужном программном фонде.
+  ISSUE        = 0, ///< первичный вход средств на кошелёк wallet_to (wallet_from = empty)
+  TRANSFER     = 1, ///< перемещение wallet_from → wallet_to (с Dr/Cr ИЛИ без — по парам account_id)
+  BLOCK        = 2, ///< available-=amount, blocked+=amount на wallet_from
+  UNBLOCK      = 3, ///< blocked-=amount, available+=amount на wallet_from
+  BURN         = 4, ///< изъятие amount с wallet_from->available, без wallet_to. Покрывает оба кейса: (a) штатное сжигание как бизнес-операция в OPERATION_REGISTRY; (b) зеркало ISSUE при `ledger2::revert` (различие — через operation_code: `o.adj.rev` для adjustment-mirror).
+  NONE         = 5, ///< только бухпроводка без перемещения средств (wallet_from = empty, wallet_to = empty, debit ≠ 0, credit ≠ 0). Покрывает кейсы внутрибалансовых проводок типа Dr 04 / Cr 08 (приём РИД в НМА), когда кошелёк уже на нужном программном фонде.
+  BURN_BLOCKED = 6, ///< изъятие amount из wallet_from->blocked, без wallet_to. Используется при завершении возврата паевого (`o.wal.wthcpl`): средства предварительно заблокированы через BLOCK (REQUEST_WITHDRAW), на завершении сжигаются — выходят из системы (получателя на цепи нет). На L3 синхронно: from_uw->blocked -= amount.
 };
 
 /**
@@ -144,7 +145,7 @@ enum class WalletOp : uint8_t {
  * Семантика полей по `wallet_op`:
  *   - ISSUE:   wallet_from = eosio::name{}, wallet_to = required.
  *   - TRANSFER: wallet_from = required, wallet_to = required (≠ from).
- *   - BLOCK / UNBLOCK / BURN: wallet_from = required, wallet_to = eosio::name{}.
+ *   - BLOCK / UNBLOCK / BURN / BURN_BLOCKED: wallet_from = required, wallet_to = eosio::name{}.
  *
  * Семантика бух.проводки:
  *   - Без проводок: debit_account_id == 0 И credit_account_id == 0.
@@ -156,7 +157,7 @@ struct OperationRegistryEntry {
   eosio::name    process_type;       ///< тип процесса с префиксом `p.<contract>.<noun>`
   WalletOp       wallet_op;
   eosio::name    wallet_from;        ///< пустое имя для ISSUE
-  eosio::name    wallet_to;          ///< пустое имя для BLOCK/UNBLOCK/BURN
+  eosio::name    wallet_to;          ///< пустое имя для BLOCK/UNBLOCK/BURN/BURN_BLOCKED
   uint64_t       debit_account_id;   ///< 0 если без бухпроводки (тогда credit_account_id тоже == 0)
   uint64_t       credit_account_id;  ///< 0 если без бухпроводки (тогда debit_account_id тоже == 0)
   const char*    human_name;
@@ -183,9 +184,12 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
     ledger2_accounts::BANK_ACCOUNT, ledger2_accounts::SHARE_FUND,
     "Внесение пайщиком паевого взноса" },
 
-  // 4. Возврат паевого взноса: Dr 80 / Cr 51, TRANSFER SHARE_FUND_PAY → WITHDRAWALS_SINK
-  { operations::wallet::COMPLETE_WITHDRAW, processes::wallet::WITHDRAW, WalletOp::TRANSFER,
-    ledger2_wallets::SHARE_FUND_PAY, ledger2_wallets::WITHDRAWALS_SINK,
+  // 4. Возврат паевого взноса: Dr 80 / Cr 51, BURN_BLOCKED SHARE_FUND_PAY.
+  // Сжигание из заблокированной суммы пайщика (BLOCK был на REQUEST_WITHDRAW):
+  // деньги уходят из системы (банковский перевод пайщику), получателя на цепи нет.
+  // Бухгалтерия: паевой фонд уменьшается (Дт 80), расчётный счёт уменьшается (Кт 51).
+  { operations::wallet::COMPLETE_WITHDRAW, processes::wallet::WITHDRAW, WalletOp::BURN_BLOCKED,
+    ledger2_wallets::SHARE_FUND_PAY, eosio::name{},
     ledger2_accounts::SHARE_FUND, ledger2_accounts::BANK_ACCOUNT,
     "Возврат паевого взноса пайщику" },
 
@@ -336,7 +340,7 @@ static constexpr size_t OPERATION_REGISTRY_SIZE = sizeof(OPERATION_REGISTRY) / s
 //     оба существуют в `LEDGER2_ACCOUNT_MAP`.
 //  4. Для TRANSFER: `wallet_from` ≠ `wallet_to`, оба ≠ 0.
 //  5. Для ISSUE: `wallet_from` == 0 и `wallet_to` ≠ 0.
-//  6. Для BLOCK / UNBLOCK / BURN: `wallet_from` ≠ 0, `wallet_to` == 0.
+//  6. Для BLOCK / UNBLOCK / BURN / BURN_BLOCKED: `wallet_from` ≠ 0, `wallet_to` == 0.
 //  7. Все id кошельков из записей существуют в `LEDGER2_WALLET_REGISTRY`.
 namespace ledger2_registry_detail {
   constexpr bool operation_codes_unique() {
@@ -380,11 +384,11 @@ namespace ledger2_registry_detail {
     return true;
   }
 
-  // Правило 6: BURN — wallet_from required, wallet_to == 0 (ADR-003).
+  // Правило 6: BURN / BURN_BLOCKED — wallet_from required, wallet_to == 0 (ADR-003).
   constexpr bool burn_pattern_correct() {
     for (size_t i = 0; i < OPERATION_REGISTRY_SIZE; ++i) {
       const auto& e = OPERATION_REGISTRY[i];
-      if (e.wallet_op != WalletOp::BURN) continue;
+      if (e.wallet_op != WalletOp::BURN && e.wallet_op != WalletOp::BURN_BLOCKED) continue;
       if (e.wallet_from.value == 0) return false;
       if (e.wallet_to.value != 0)   return false;
     }
@@ -436,7 +440,7 @@ static_assert(ledger2_registry_detail::dr_ne_cr_when_posting(),
 static_assert(ledger2_registry_detail::transfer_wallet_from_ne_to(),
               "OPERATION_REGISTRY: TRANSFER с wallet_from == wallet_to или одним из них == 0");
 static_assert(ledger2_registry_detail::burn_pattern_correct(),
-              "OPERATION_REGISTRY: BURN требует wallet_from ≠ 0 и wallet_to == 0");
+              "OPERATION_REGISTRY: BURN / BURN_BLOCKED требует wallet_from ≠ 0 и wallet_to == 0");
 static_assert(ledger2_registry_detail::none_pattern_correct(),
               "OPERATION_REGISTRY: NONE требует wallet_from == 0, wallet_to == 0 и обе проводки заполненными");
 static_assert(ledger2_registry_detail::accounts_exist_in_map(),

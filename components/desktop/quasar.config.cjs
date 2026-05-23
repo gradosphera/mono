@@ -121,6 +121,17 @@ module.exports = configure(function (ctx) {
             unhandledErrors: true,
             logLevels: ['error', 'warn', 'info', 'log', 'debug'],
           };
+          // Vite 5.4+ блокирует cross-origin Host без явного allowedHosts.
+          // В dev-loop ходим через L7-прокси voskhod-dev.coopenomics.world,
+          // partner-dev.coopenomics.world и api-dev.coopenomics.world — без
+          // этой опции SSR/HMR-сервер возвращает 403 «Blocked request».
+          viteConf.server.allowedHosts = [
+            'voskhod-dev.coopenomics.world',
+            'partner-dev.coopenomics.world',
+            'api-dev.coopenomics.world',
+            'localhost',
+            '127.0.0.1',
+          ];
         }
 
         if (!isClient) {
@@ -147,9 +158,9 @@ module.exports = configure(function (ctx) {
         [
           'vite-plugin-checker',
           {
-            vueTsc: {
-              tsconfigPath: 'tsconfig.vue-tsc.json',
-            },
+            // vueTsc отключён в dev — пожирал 100% CPU/RAM на больших правках
+            // (Quasar + Vue 3 + Milkdown/BPMN/VueFlow/Mermaid/OpenLayers).
+            // Типы проверяем отдельно: `pnpm typecheck` и в IDE через Volar.
             eslint: {
               lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"',
             },
