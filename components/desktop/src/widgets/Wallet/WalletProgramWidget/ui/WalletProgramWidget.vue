@@ -55,23 +55,23 @@ function splitAsset(asset?: string | null): { amount: string; symbol: string } {
 }
 
 const canonPrograms = computed<CanonProgramEntry[]>(() =>
-  walletStore.program_wallets
-    .map((w) => {
-      const program = ZEUS_TO_CANON[w.program_type as Zeus.ProgramType];
-      if (!program) return undefined;
-      const available = splitAsset(w.available);
-      const blocked = splitAsset(w.blocked);
-      const hasBlocked = parseFloat(w.blocked || '0') > 0;
-      return {
+  walletStore.program_wallets.flatMap<CanonProgramEntry>((w) => {
+    const program = ZEUS_TO_CANON[w.program_type as Zeus.ProgramType];
+    if (!program) return [];
+    const available = splitAsset(w.available);
+    const blocked = splitAsset(w.blocked);
+    const hasBlocked = parseFloat(w.blocked || '0') > 0;
+    return [
+      {
         zeusType: w.program_type as Zeus.ProgramType,
         program,
         balance: available.amount,
         symbol:
           available.symbol || info.symbols?.root_govern_symbol || 'RUB',
         locked: hasBlocked ? blocked.amount : undefined,
-      };
-    })
-    .filter((e): e is CanonProgramEntry => e !== undefined),
+      },
+    ];
+  }),
 );
 </script>
 
