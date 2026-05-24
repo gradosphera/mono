@@ -5921,6 +5921,8 @@ export type ValueTypes = {
 	['...on IndividualCertificate']?: Omit<ValueTypes["IndividualCertificate"], "...on IndividualCertificate">
 }>;
 	["Init"]: {
+	/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null | Variable<any, string>,
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ValueTypes["CreateInitOrganizationDataInput"] | Variable<any, string>
 };
@@ -6052,8 +6054,6 @@ export type ValueTypes = {
 	["Ledger2Wallet"]: AliasType<{
 	/** Доступный баланс */
 	available?:boolean | `@${string}`,
-	/** Заблокированный баланс */
-	blocked?:boolean | `@${string}`,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id?:boolean | `@${string}`,
 	/** Название кошелька */
@@ -7503,8 +7503,6 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 	available?:boolean | `@${string}`,
 	/** Номер блока последнего обновления */
 	blockNum?:boolean | `@${string}`,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked?:boolean | `@${string}`,
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Уникальный идентификатор кошелька в блокчейне */
@@ -9118,7 +9116,7 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 	id: string | Variable<any, string>,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string | Variable<any, string>
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -14227,6 +14225,8 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Init"]: {
+	/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null,
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ResolverInputTypes["CreateInitOrganizationDataInput"]
 };
@@ -14350,8 +14350,6 @@ export type ResolverInputTypes = {
 	["Ledger2Wallet"]: AliasType<{
 	/** Доступный баланс */
 	available?:boolean | `@${string}`,
-	/** Заблокированный баланс */
-	blocked?:boolean | `@${string}`,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id?:boolean | `@${string}`,
 	/** Название кошелька */
@@ -15737,8 +15735,6 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 	available?:boolean | `@${string}`,
 	/** Номер блока последнего обновления */
 	blockNum?:boolean | `@${string}`,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked?:boolean | `@${string}`,
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Уникальный идентификатор кошелька в блокчейне */
@@ -17311,7 +17307,7 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 	id: string,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -22291,6 +22287,8 @@ export type ModelTypes = {
 	username: string
 };
 	["Init"]: {
+	/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null,
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ModelTypes["CreateInitOrganizationDataInput"]
 };
@@ -22402,8 +22400,6 @@ export type ModelTypes = {
 	["Ledger2Wallet"]: {
 		/** Доступный баланс */
 	available: string,
-	/** Заблокированный баланс */
-	blocked: string,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id: string,
 	/** Название кошелька */
@@ -23037,7 +23033,7 @@ export type ModelTypes = {
 	chatcoopUpdateCalendarEvent: ModelTypes["ChatCoopCalendarEvent"],
 	/** Обновить заметку (memo) к транскрипции звонка
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	chatcoopUpdateTranscriptionMemo: ModelTypes["CallTranscription"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки)
 
@@ -24176,8 +24172,6 @@ export type ModelTypes = {
 	available: string,
 	/** Номер блока последнего обновления */
 	blockNum?: number | undefined | null,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked: string,
 	/** Имя кооператива */
 	coopname: string,
 	/** Уникальный идентификатор кошелька в блокчейне */
@@ -25899,7 +25893,7 @@ export type ModelTypes = {
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 	id: string,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -31106,7 +31100,9 @@ export type GraphQLTypes = {
 	['...on IndividualCertificate']: Omit<GraphQLTypes["IndividualCertificate"], "...on IndividualCertificate">
 };
 	["Init"]: {
-		/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
+		/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null,
+	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: GraphQLTypes["CreateInitOrganizationDataInput"]
 };
 	["Install"]: {
@@ -31238,8 +31234,6 @@ export type GraphQLTypes = {
 	__typename: "Ledger2Wallet",
 	/** Доступный баланс */
 	available: string,
-	/** Заблокированный баланс */
-	blocked: string,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id: string,
 	/** Название кошелька */
@@ -31901,7 +31895,7 @@ export type GraphQLTypes = {
 	chatcoopUpdateCalendarEvent: GraphQLTypes["ChatCoopCalendarEvent"],
 	/** Обновить заметку (memo) к транскрипции звонка
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	chatcoopUpdateTranscriptionMemo: GraphQLTypes["CallTranscription"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки)
 
@@ -33161,8 +33155,6 @@ export type GraphQLTypes = {
 	available: string,
 	/** Номер блока последнего обновления */
 	blockNum?: number | undefined | null,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked: string,
 	/** Имя кооператива */
 	coopname: string,
 	/** Уникальный идентификатор кошелька в блокчейне */
@@ -34973,7 +34965,7 @@ export type GraphQLTypes = {
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 		id: string,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -35614,6 +35606,7 @@ export enum PaymentDirection {
 }
 /** Статус платежа */
 export enum PaymentStatus {
+	AWAITING_AUTHORIZATION = "AWAITING_AUTHORIZATION",
 	CANCELLED = "CANCELLED",
 	COMPLETED = "COMPLETED",
 	EXPIRED = "EXPIRED",

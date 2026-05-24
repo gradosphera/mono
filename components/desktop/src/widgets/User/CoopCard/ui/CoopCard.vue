@@ -39,11 +39,6 @@
             q-item-label(caption) Минимальный паевый счёт
             q-item-label.text-bold(style='font-size: 20px') {{ session.participantAccount?.minimum_amount }}
 
-        //- q-item
-        //-   q-item-section
-        //-     q-item-label(caption) Заблокировано в целевых программах
-        //-     q-item-label(style="font-size: 20px;").text-bold {{ walletStore.wallet.blocked }}
-
         q-item(
           v-for='program_wallet of walletStore.program_wallets',
           :key='program_wallet.id'

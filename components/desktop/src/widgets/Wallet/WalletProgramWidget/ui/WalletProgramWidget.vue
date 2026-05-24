@@ -18,9 +18,6 @@
           .balance-available
             .balance-label Доступно
             .balance-value {{ getFormattedAvailable(program) }}
-          .balance-blocked(v-if='hasBlocked(program)')
-            .balance-label Заблокировано
-            .balance-value {{ getFormattedBlocked(program) }}
 
   .empty-programs(v-else)
     .empty-icon
@@ -86,19 +83,6 @@ const getProgramIcon = (program: any): string => {
 const getFormattedAvailable = (program: any) => {
   const available = program?.available || '0';
   return formatAsset2Digits(`${available} ${info.symbols.root_govern_symbol}`);
-};
-
-
-// Форматированная сумма заблокированных средств для программы.
-// Видимость блока — через hasBlocked(); сюда попадаем только если blocked > 0.
-const getFormattedBlocked = (program: any) => {
-  return formatAsset2Digits(`${program?.blocked || '0'} ${info.symbols.root_govern_symbol}`);
-};
-
-// Показать блок «Заблокировано» только если сумма реально > 0.
-// minimum_amount пайщика — отдельная сущность (минимальный паевой), к blocked не примешиваем.
-const hasBlocked = (program: any): boolean => {
-  return parseFloat(program?.blocked || '0') > 0;
 };
 
 </script>
@@ -169,8 +153,7 @@ const hasBlocked = (program: any): boolean => {
         }
 
         .program-balances {
-          .balance-available,
-          .balance-blocked {
+          .balance-available {
             margin-bottom: 16px;
 
             &:last-child {
@@ -198,25 +181,6 @@ const hasBlocked = (program: any): boolean => {
 
               .body--dark & {
                 color: rgba(255, 255, 255, 0.9);
-              }
-            }
-          }
-
-          .balance-blocked {
-            .balance-label {
-              color: rgba(0, 0, 0, 0.4);
-
-              .body--dark & {
-                color: rgba(255, 255, 255, 0.5);
-              }
-            }
-
-            .balance-value {
-              font-size: 18px;
-              color: rgba(0, 0, 0, 0.7);
-
-              .body--dark & {
-                color: rgba(255, 255, 255, 0.7);
               }
             }
           }
@@ -274,16 +238,9 @@ const hasBlocked = (program: any): boolean => {
           }
 
           .program-balances {
-            .balance-available,
-            .balance-blocked {
+            .balance-available {
               .balance-value {
                 font-size: 18px;
-              }
-            }
-
-            .balance-blocked {
-              .balance-value {
-                font-size: 16px;
               }
             }
           }
