@@ -1,35 +1,20 @@
 <template lang="pug">
 .wallet-page
   WalletProgramWidget
+
+//- Действия страницы в шапке — через canon Teleport в слот-host шапки.
+//- defer: target (#header-actions-host) живёт в layout-шапке, смонтированной
+//- раньше страницы. Сами кнопки сами решают свою видимость (DepositButton
+//- скрыт, пока пайщик не принят — status !== 'active').
+Teleport(to='#header-actions-host', defer)
+  DepositButton
+  WithdrawButton
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, markRaw } from 'vue';
 import { WalletProgramWidget } from 'src/widgets/Wallet';
 import { DepositButton } from 'src/features/Wallet/DepositToWallet';
 import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
-import { useHeaderActions } from 'src/shared/hooks';
-
-const headerButtons = computed(() => [
-  {
-    id: 'wallet-deposit-button',
-    component: markRaw(DepositButton),
-    order: 1,
-  },
-  {
-    id: 'wallet-withdraw-button',
-    component: markRaw(WithdrawButton),
-    order: 2,
-  },
-]);
-
-const { registerAction } = useHeaderActions();
-
-onMounted(() => {
-  headerButtons.value.forEach((button) => {
-    registerAction(button);
-  });
-});
 </script>
 
 <style lang="scss" scoped>

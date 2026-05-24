@@ -12,13 +12,18 @@ q-header.app-q-header(:bordered='false')
     template(v-if='loggedIn', #crumb)
       BackButton
 
-    template(v-if='loggedIn && headerActions.length', #actions)
+    template(v-if='loggedIn', #actions)
+      //- Старый механизм (useHeaderActions store) — для страниц, ещё не
+      //- переведённых на Teleport; удалим, когда мигрируем все.
       component(
         v-for='action in headerActions',
         :key='action.id',
         :is='action.component',
         v-bind='action.props'
       )
+      //- Новый механизм: страница телепортирует свои действия сюда
+      //- через <Teleport to="#header-actions-host">.
+      span#header-actions-host.header-actions-host
 
     template(v-if='loggedIn && isClient', #notifications)
       NotificationCenter
@@ -140,5 +145,10 @@ function login(): void {
 .app-q-header__logo-svg :deep(svg) {
   width: 100%;
   height: 100%;
+}
+/* Teleport-host для действий страницы: прозрачен для layout —
+   телепортированные кнопки становятся прямыми flex-детьми .topbar__actions. */
+.header-actions-host {
+  display: contents;
 }
 </style>

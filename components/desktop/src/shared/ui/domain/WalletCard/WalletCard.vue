@@ -8,8 +8,8 @@
     </span>
 
     <div class="wallet__main">
-      <div class="wallet__title">{{ resolvedTitle }}</div>
-      <div v-if="subtitle" class="wallet__sub">{{ subtitle }}</div>
+      <div class="wallet__title" :title="resolvedTitle">{{ resolvedTitle }}</div>
+      <div v-if="subtitle" class="wallet__sub" :title="subtitle">{{ subtitle }}</div>
     </div>
 
     <div class="wallet__amount">
