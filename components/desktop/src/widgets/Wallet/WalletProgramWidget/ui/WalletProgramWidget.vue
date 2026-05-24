@@ -8,8 +8,8 @@
     span.wallet__icon
       q-icon(name='savings')
     .wallet__main
-      .wallet__title Минимальный неснижаемый остаток
-      .wallet__sub Возвращается при выходе из кооператива
+      .wallet__title(title='Минимальный неснижаемый остаток') Минимальный неснижаемый остаток
+      .wallet__sub(title='Возвращается при выходе из кооператива') Возвращается при выходе из кооператива
     .wallet__amount
       .wallet__metric
         .wallet__metric-val
@@ -111,21 +111,17 @@ const minimumBalance = computed<MinimumBalance | undefined>(() => {
 </script>
 
 <style lang="scss" scoped>
+/* Кошельки — список во всю ширину страницы (одна колонка), а не сетка.
+   Каждая карточка-строка вмещает заголовок в одну строку; если не влезает —
+   ellipsis + нативный tooltip (title) показывает целиком при наведении. */
 .wallet-programs {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--p-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-3, 12px);
 }
 
 .wallet--minimum {
   --prog-bg: var(--p-canvas-2);
   --prog-fg: var(--p-ink-2);
-}
-
-@media (max-width: 768px) {
-  .wallet-programs {
-    grid-template-columns: 1fr;
-    gap: var(--p-3, 12px);
-  }
 }
 </style>
