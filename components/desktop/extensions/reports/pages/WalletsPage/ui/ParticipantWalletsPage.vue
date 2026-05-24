@@ -115,27 +115,25 @@ function programTypeFor(colName: string): string {
 
 function totalFor(username: string): IWalletCell {
   const row = data.value.matrix[username]
-  if (!row) return { available: 0, blocked: 0 }
-  let a = 0, b = 0
+  if (!row) return { available: 0 }
+  let a = 0
   for (const c of Object.values(row)) {
     a += c.available
-    b += c.blocked
   }
-  return { available: a, blocked: b }
+  return { available: a }
 }
 
 const grandTotal = computed<IWalletCell>(() => {
-  let a = 0, b = 0
+  let a = 0
   for (const c of Object.values(data.value.totals)) {
     a += c.available
-    b += c.blocked
   }
-  return { available: a, blocked: b }
+  return { available: a }
 })
 
 function cellClass(cell?: IWalletCell): string {
   if (!cell) return 'cell-empty'
-  if (cell.available === 0 && cell.blocked === 0) return 'cell-zero'
+  if (cell.available === 0) return 'cell-zero'
   return 'cell-has-value'
 }
 
@@ -149,7 +147,7 @@ const columns = computed(() => {
     label: prog.title,
     field: (row: IAccount) => {
       const c = data.value.matrix[row.username]?.[prog.id]
-      return c ? c.available + c.blocked : 0
+      return c ? c.available : 0
     },
     sortable: true,
   }))
@@ -168,7 +166,7 @@ const columns = computed(() => {
       label: 'Итого',
       field: (row: IAccount) => {
         const t = totalFor(row.username)
-        return t.available + t.blocked
+        return t.available
       },
       sortable: true,
     },
@@ -182,9 +180,8 @@ const columns = computed(() => {
   ]
 })
 
-// Inline-рендер ячейки «available / blocked с иконками». Вынесен в h-function,
-// чтобы не таскать ещё одну SFC. Иконки: lock-open / lock + q-tooltip — чтобы
-// без подписей было понятно где «доступно», где «заблокировано».
+// Inline-рендер ячейки «доступно». Вынесен в h-function, чтобы не таскать ещё
+// одну SFC. Иконка lock-open + q-tooltip «Доступно».
 const WalletCell = {
   name: 'WalletCell',
   props: {
@@ -197,26 +194,17 @@ const WalletCell = {
       if (!c) {
         return h('div', { class: 'cell-dash' }, '—')
       }
-      const renderLine = (
-        amount: number,
-        kind: 'avail' | 'blocked',
-      ) => {
-        const valueClass = amount > 0 ? `value-${kind}` : 'value-zero'
-        const tooltip = kind === 'avail' ? 'Доступно' : 'Заблокировано'
-        const icon = kind === 'avail' ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'
-        return h(
+      const valueClass = c.available > 0 ? 'value-avail' : 'value-zero'
+      return h('div', { class: 'wallet-cell' }, [
+        h(
           'div',
           { class: ['cell-line', valueClass, props.bold ? 'bold' : ''].join(' ') },
           [
-            h(QIcon, { name: icon, size: '12px', class: 'cell-icon' }),
-            h('span', { class: 'cell-value' }, formatAsset2Digits(`${amount} RUB`)),
-            h(QTooltip, { anchor: 'top middle', self: 'bottom middle', delay: 200 }, () => tooltip),
+            h(QIcon, { name: 'fa-solid fa-lock-open', size: '12px', class: 'cell-icon' }),
+            h('span', { class: 'cell-value' }, formatAsset2Digits(`${c.available} RUB`)),
+            h(QTooltip, { anchor: 'top middle', self: 'bottom middle', delay: 200 }, () => 'Доступно'),
           ],
-        )
-      }
-      return h('div', { class: 'wallet-cell' }, [
-        renderLine(c.available, 'avail'),
-        renderLine(c.blocked, 'blocked'),
+        ),
       ])
     }
   },
@@ -315,7 +303,7 @@ onMounted(() => void reload())
 </style>
 
 <!--
-  «available + blocked» рендерятся через render-функцию `WalletCell`,
+  «available» рендерится через render-функцию `WalletCell`,
   у которой нет своего scoped-id. scoped + :deep до неё не доходит
   стабильно, поэтому стили лежат в global-блоке. Класс `.wallet-cell`
   достаточно специфичен — конфликтов с другими компонентами нет.
@@ -337,7 +325,6 @@ onMounted(() => void reload())
     font-weight: 500;
 
     &.value-avail { color: var(--q-positive); }
-    &.value-blocked { color: var(--q-warning); }
     &.value-zero {
       color: rgba(0, 0, 0, 0.55);
       font-weight: 400;
