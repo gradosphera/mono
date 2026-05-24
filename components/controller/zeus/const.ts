@@ -3343,7 +3343,6 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	Ledger2Wallet:{
 		available:"String",
-		blocked:"String",
 		id:"String",
 		name:"String"
 	},
@@ -4041,7 +4040,6 @@ export const ReturnTypes: Record<string,any> = {
 		agreement_id:"ID",
 		available:"String",
 		blockNum:"Float",
-		blocked:"String",
 		coopname:"String",
 		id:"ID",
 		membership_contribution:"String",

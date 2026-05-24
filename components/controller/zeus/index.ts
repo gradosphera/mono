@@ -5921,6 +5921,8 @@ export type ValueTypes = {
 	['...on IndividualCertificate']?: Omit<ValueTypes["IndividualCertificate"], "...on IndividualCertificate">
 }>;
 	["Init"]: {
+	/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null | Variable<any, string>,
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ValueTypes["CreateInitOrganizationDataInput"] | Variable<any, string>
 };
@@ -9114,7 +9116,7 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 	id: string | Variable<any, string>,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string | Variable<any, string>
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -14223,6 +14225,8 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["Init"]: {
+	/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null,
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ResolverInputTypes["CreateInitOrganizationDataInput"]
 };
@@ -17303,7 +17307,7 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 	id: string,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -22283,6 +22287,8 @@ export type ModelTypes = {
 	username: string
 };
 	["Init"]: {
+	/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null,
 	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: ModelTypes["CreateInitOrganizationDataInput"]
 };
@@ -23027,7 +23033,7 @@ export type ModelTypes = {
 	chatcoopUpdateCalendarEvent: ModelTypes["ChatCoopCalendarEvent"],
 	/** Обновить заметку (memo) к транскрипции звонка
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	chatcoopUpdateTranscriptionMemo: ModelTypes["CallTranscription"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки)
 
@@ -25887,7 +25893,7 @@ export type ModelTypes = {
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 	id: string,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -31094,7 +31100,9 @@ export type GraphQLTypes = {
 	['...on IndividualCertificate']: Omit<GraphQLTypes["IndividualCertificate"], "...on IndividualCertificate">
 };
 	["Init"]: {
-		/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
+		/** Признак того, что инициализация выполняется со стороны провайдера. При true coopback ставит init_by_server=true (org_data становится readonly для пользовательского визарда). Поле передаёт provider в callInitSystemMutation. */
+	is_server_init?: boolean | undefined | null,
+	/** Объект организации кооператива, которая обслуживает данный экземпляр программного обеспечения MONO */
 	organization_data: GraphQLTypes["CreateInitOrganizationDataInput"]
 };
 	["Install"]: {
@@ -31887,7 +31895,7 @@ export type GraphQLTypes = {
 	chatcoopUpdateCalendarEvent: GraphQLTypes["ChatCoopCalendarEvent"],
 	/** Обновить заметку (memo) к транскрипции звонка
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	chatcoopUpdateTranscriptionMemo: GraphQLTypes["CallTranscription"],
 	/** Выполнить шаг онбординга capital (создание предложения повестки)
 
@@ -34957,7 +34965,7 @@ export type GraphQLTypes = {
 };
 	["UpdateCallTranscriptionMemoInput"]: {
 		id: string,
-	/** Текст заметки (до 4000 символов) */
+	/** Текст заметки */
 	memo: string
 };
 	["UpdateChatCoopCalendarEventInput"]: {
@@ -35598,6 +35606,7 @@ export enum PaymentDirection {
 }
 /** Статус платежа */
 export enum PaymentStatus {
+	AWAITING_AUTHORIZATION = "AWAITING_AUTHORIZATION",
 	CANCELLED = "CANCELLED",
 	COMPLETED = "COMPLETED",
 	EXPIRED = "EXPIRED",
