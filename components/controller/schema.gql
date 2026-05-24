@@ -6906,9 +6906,6 @@ type Ledger2Wallet {
   """Доступный баланс"""
   available: String!
 
-  """Заблокированный баланс"""
-  blocked: String!
-
   """eosio::name-идентификатор кошелька (w.<contract>.<waltype>)"""
   id: String!
 
@@ -9197,9 +9194,6 @@ type ProgramWallet {
 
   """Номер блока последнего обновления"""
   blockNum: Float
-
-  """Заблокированный баланс (формат: "100.0000 RUB")"""
-  blocked: String!
 
   """Имя кооператива"""
   coopname: String!

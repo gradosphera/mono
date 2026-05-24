@@ -6052,8 +6052,6 @@ export type ValueTypes = {
 	["Ledger2Wallet"]: AliasType<{
 	/** Доступный баланс */
 	available?:boolean | `@${string}`,
-	/** Заблокированный баланс */
-	blocked?:boolean | `@${string}`,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id?:boolean | `@${string}`,
 	/** Название кошелька */
@@ -7503,8 +7501,6 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 	available?:boolean | `@${string}`,
 	/** Номер блока последнего обновления */
 	blockNum?:boolean | `@${string}`,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked?:boolean | `@${string}`,
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Уникальный идентификатор кошелька в блокчейне */
@@ -14350,8 +14346,6 @@ export type ResolverInputTypes = {
 	["Ledger2Wallet"]: AliasType<{
 	/** Доступный баланс */
 	available?:boolean | `@${string}`,
-	/** Заблокированный баланс */
-	blocked?:boolean | `@${string}`,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id?:boolean | `@${string}`,
 	/** Название кошелька */
@@ -15737,8 +15731,6 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 	available?:boolean | `@${string}`,
 	/** Номер блока последнего обновления */
 	blockNum?:boolean | `@${string}`,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked?:boolean | `@${string}`,
 	/** Имя кооператива */
 	coopname?:boolean | `@${string}`,
 	/** Уникальный идентификатор кошелька в блокчейне */
@@ -22402,8 +22394,6 @@ export type ModelTypes = {
 	["Ledger2Wallet"]: {
 		/** Доступный баланс */
 	available: string,
-	/** Заблокированный баланс */
-	blocked: string,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id: string,
 	/** Название кошелька */
@@ -24176,8 +24166,6 @@ export type ModelTypes = {
 	available: string,
 	/** Номер блока последнего обновления */
 	blockNum?: number | undefined | null,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked: string,
 	/** Имя кооператива */
 	coopname: string,
 	/** Уникальный идентификатор кошелька в блокчейне */
@@ -31238,8 +31226,6 @@ export type GraphQLTypes = {
 	__typename: "Ledger2Wallet",
 	/** Доступный баланс */
 	available: string,
-	/** Заблокированный баланс */
-	blocked: string,
 	/** eosio::name-идентификатор кошелька (w.<contract>.<waltype>) */
 	id: string,
 	/** Название кошелька */
@@ -33161,8 +33147,6 @@ export type GraphQLTypes = {
 	available: string,
 	/** Номер блока последнего обновления */
 	blockNum?: number | undefined | null,
-	/** Заблокированный баланс (формат: "100.0000 RUB") */
-	blocked: string,
 	/** Имя кооператива */
 	coopname: string,
 	/** Уникальный идентификатор кошелька в блокчейне */
