@@ -5,7 +5,8 @@ q-header.app-q-header(:bordered='false')
     @toggle-menu="emit('toggle-left-drawer')"
   )
     template(v-if='!loggedIn && coopTitle', #brand)
-      img.app-q-header__logo(:src='logoSrc', alt='', aria-hidden='true')
+      span.app-q-header__logo
+        span.app-q-header__logo-svg(v-html='logoSvg', aria-hidden='true')
       b {{ coopTitle }}
 
     template(v-if='loggedIn', #crumb)
@@ -50,7 +51,7 @@ import { AppHeader } from 'src/shared/ui/layout/AppHeader';
 import { ToogleDarkLight } from 'src/shared/ui/ToogleDarkLight';
 import { BackButton } from 'src/widgets/Header/BackButton';
 import { NotificationCenter } from 'src/widgets/NotificationCenter';
-import logoSrc from 'src/assets/logo.svg';
+import logoSvg from 'src/assets/logo.svg?raw';
 
 defineProps({
   showDrawer: {
@@ -115,9 +116,29 @@ function login(): void {
   color: var(--p-ink);
   box-shadow: none;
 }
+/* Бренд-логотип на странице без логина — тот же приём, что в личном
+   кабинете (WorkspaceSwitcher): inline-SVG через v-html в зелёном квадрате,
+   logo.svg на fill:currentColor наследует color. Зелёный одинаков в обеих
+   темах, поэтому переключение темы не требуется. */
 .app-q-header__logo {
-  width: 24px;
-  height: 24px;
-  display: block;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--p-primary-soft);
+  color: var(--p-primary);
+  border-radius: var(--p-r-sm, 8px);
+}
+.app-q-header__logo-svg {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  line-height: 0;
+}
+.app-q-header__logo-svg :deep(svg) {
+  width: 100%;
+  height: 100%;
 }
 </style>
