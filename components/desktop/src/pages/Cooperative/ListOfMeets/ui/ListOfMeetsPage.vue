@@ -4,7 +4,7 @@ div
   template(v-else)
     Teleport(v-if='canCreateMeet', to='#header-actions-host', defer)
       CreateMeetButton(:is-chairman='session.isChairman', :micro='isMobile')
-    .q-pa-md.meet-list-page
+    .meet-list-page
       MeetCardsList(:meets='meets', :loading='loading')
 </template>
 
@@ -59,9 +59,13 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+/* Полная ширина контента, как на canon-страницах документов/платежей. */
 .meet-list-page {
-  max-width: 960px;
-  margin-left: auto;
-  margin-right: auto;
+  padding: var(--p-6, 24px);
+}
+@media (max-width: 768px) {
+  .meet-list-page {
+    padding: var(--p-4, 16px);
+  }
 }
 </style>

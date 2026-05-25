@@ -1,5 +1,5 @@
 <template lang="pug">
-.q-pa-md.meet-details-page
+.meet-details-page
   //- Canon back-link под шапкой, слева (вместо кнопки «Назад» в топбаре).
   button.meet-back(type='button', @click='goBack')
     q-icon(name='arrow_back', size='18px')
@@ -135,10 +135,14 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @import 'src/shared/ui/CardStyles/index.scss';
 
+/* Полная ширина контента, как на canon-страницах документов/платежей. */
 .meet-details-page {
-  max-width: 960px;
-  margin-left: auto;
-  margin-right: auto;
+  padding: var(--p-6, 24px);
+}
+@media (max-width: 768px) {
+  .meet-details-page {
+    padding: var(--p-4, 16px);
+  }
 }
 
 .meet-back {
