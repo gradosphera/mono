@@ -1,57 +1,45 @@
 <template lang="pug">
-.contacts-page.q-pa-lg
-  .page-header.q-mb-lg
-    .eyebrow Контактные данные
-    .title {{ contacts?.full_name || 'Организация' }}
+.contacts-page
+  header.contacts-page__header
+    span.contacts-page__eyebrow Контактные данные
+    h1.contacts-page__title {{ contacts?.full_name || 'Организация' }}
 
-  .row.q-col-gutter-md.q-mb-md(v-if='chairman')
-    .col-12
-      ColorCard(color='orange')
-        .card-section.chairman-card
-          .card-section-title Председатель совета
-          .info-list
-            .info-row
-              .label ФИО
-              .value {{ chairman }}
+  .contacts-card
+    //- Реквизиты
+    section.contacts-card__sec
+      .contacts-card__sec-head
+        q-icon(name='badge', size='18px')
+        span Реквизиты
+      dl.contacts-rows
+        .contacts-row
+          dt.contacts-row__label ИНН
+          dd.contacts-row__value {{ displayValue(contacts?.details?.inn) }}
+        .contacts-row
+          dt.contacts-row__label ОГРН
+          dd.contacts-row__value {{ displayValue(contacts?.details?.ogrn) }}
 
-  .row.q-col-gutter-md.q-mb-md
-    .col-md-4.col-sm-6.col-12
-      ColorCard(color='indigo')
-        .card-section
-          .card-section-title Регистрационные данные
-          .info-list
-            .info-row
-              .label ИНН
-              .value {{ displayValue(contacts?.details?.inn) }}
-            .info-row
-              .label ОГРН
-              .value {{ displayValue(contacts?.details?.ogrn) }}
+    //- Контакты — canon ContactSheet (копирование, mailto/tel)
+    section.contacts-card__sec
+      .contacts-card__sec-head
+        q-icon(name='contact_page', size='18px')
+        span Контакты
+      ContactSheet(:contacts='contactItems')
 
-    .col-md-4.col-sm-6.col-12
-      ColorCard(color='teal')
-        .card-section
-          .card-section-title Контакты
-          .info-list
-            .info-row
-              .label Телефон
-              .value {{ displayValue(contacts?.phone) }}
-            .info-row
-              .label Электронная почта
-              .value {{ displayValue(contacts?.email) }}
-
-    .col-md-4.col-sm-12.col-12
-      ColorCard(color='blue')
-        .card-section
-          .card-section-title Адрес
-          .info-list
-            .info-row
-              .label Юридический адрес
-              .value {{ displayValue(contacts?.full_address) }}
+    //- Руководство
+    section.contacts-card__sec(v-if='chairman')
+      .contacts-card__sec-head
+        q-icon(name='person', size='18px')
+        span Руководство
+      dl.contacts-rows
+        .contacts-row
+          dt.contacts-row__label Председатель совета
+          dd.contacts-row__value {{ chairman }}
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import ColorCard from 'src/shared/ui/ColorCard/ui/ColorCard.vue';
+import { ContactSheet } from 'src/shared/ui/domain/ContactSheet';
+import type { ContactItem } from 'src/shared/ui/domain/ContactSheet';
 import { useSystemStore } from 'src/entities/System/model';
 
 const { info } = useSystemStore();
@@ -63,76 +51,108 @@ const chairman = computed(() => {
   if (!chair) {
     return '';
   }
-  return [chair.last_name, chair.first_name, chair.middle_name].filter(Boolean).join(' ');
+  return [chair.last_name, chair.first_name, chair.middle_name]
+    .filter(Boolean)
+    .join(' ');
+});
+
+// Собираем телефон/почту/адрес в canon ContactSheet (только заполненные).
+const contactItems = computed<ContactItem[]>(() => {
+  const items: ContactItem[] = [];
+  if (contacts.value?.phone) {
+    items.push({ type: 'phone', value: contacts.value.phone });
+  }
+  if (contacts.value?.email) {
+    items.push({ type: 'email', value: contacts.value.email });
+  }
+  if (contacts.value?.full_address) {
+    items.push({ type: 'address', value: contacts.value.full_address });
+  }
+  return items;
 });
 
 const displayValue = (value?: string | null) => value || '—';
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+/* Полная ширина, как на canon-страницах документов/платежей. */
 .contacts-page {
-  width: 100%;
+  padding: var(--p-6, 24px);
+}
+@media (max-width: 768px) {
+  .contacts-page {
+    padding: var(--p-4, 16px);
+  }
 }
 
-.page-header {
+.contacts-page__header {
   display: grid;
-  gap: 4px;
+  gap: var(--p-1, 4px);
+  margin-bottom: var(--p-5, 20px);
 }
-
-.eyebrow {
+.contacts-page__eyebrow {
+  font-size: var(--p-fs-eyebrow, 11px);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 12px;
-  opacity: 0.7;
+  color: var(--p-ink-3);
 }
-
-.title {
-  font-size: 24px;
+.contacts-page__title {
+  margin: 0;
+  font-size: var(--p-fs-h1, 24px);
   font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--p-ink);
 }
 
-.card-section {
-  display: grid;
-  gap: 8px;
-}
-
-.card-section-title {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.info-list {
-  display: grid;
-  gap: 6px;
-}
-
-.info-row {
+/* Единая спокойная поверхность с секциями через hairline. */
+.contacts-card {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.02);
+  flex-direction: column;
+  background: var(--p-surface);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-lg, 16px);
+  overflow: hidden;
 }
-
-.label {
-  font-size: 12px;
-  opacity: 0.7;
+.contacts-card__sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-3, 12px);
+  padding: var(--p-5, 20px);
 }
-
-.value {
-  font-size: 14px;
+.contacts-card__sec + .contacts-card__sec {
+  border-top: 1px solid var(--p-line);
+}
+.contacts-card__sec-head {
+  display: flex;
+  align-items: center;
+  gap: var(--p-2, 8px);
+  color: var(--p-ink-2);
+  font-size: var(--p-fs-body-sm, 13px);
   font-weight: 600;
+}
+
+.contacts-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-3, 12px);
+  margin: 0;
+}
+.contacts-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--p-4, 16px);
+}
+.contacts-row__label {
+  font-size: var(--p-fs-body-sm, 13px);
+  color: var(--p-ink-3);
+}
+.contacts-row__value {
+  margin: 0;
+  font-size: var(--p-fs-body, 14px);
+  font-weight: 500;
   text-align: right;
-  max-width: 60%;
-  word-break: break-word;
-}
-
-.q-dark .info-row {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.chairman-card .info-row {
-  background: rgba(255, 152, 0, 0.08);
+  color: var(--p-ink-1);
+  overflow-wrap: anywhere;
 }
 </style>
