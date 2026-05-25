@@ -342,8 +342,9 @@ jobs:
   # coopenomics переехал на Gitea (C9S/coopenomics); его publish-docs.yaml
   # клонирует mono и пересобирает сайт. Gitea НЕ имеет API для
   # repository_dispatch — только workflow_dispatch, поэтому дёргаем целевой
-  # workflow через Gitea API с PAT (secret GITEA_DISPATCH_TOKEN, права write
-  # на C9S/coopenomics). Целевой workflow слушает workflow_dispatch с входами
+  # workflow через Gitea API с PAT (secret DOCS_DISPATCH_TOKEN — префикс GITEA_
+  # у секретов зарезервирован Gitea, нельзя; права write на C9S/coopenomics).
+  # Целевой workflow слушает workflow_dispatch с входами
   # mono_sha/mono_ref.
   # ============================================================================
   trigger-coopenomics-docs:
@@ -354,7 +355,25 @@ jobs:
       - name: Trigger coopenomics website rebuild (Gitea workflow_dispatch)
         run: |
           curl -fsSL -X POST \
-            -H "Authorization: token ${{ secrets.GITEA_DISPATCH_TOKEN }}" \
+            -H "Authorization: token ${{ secrets.DOCS_DISPATCH_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{"ref":"master","inputs":{"mono_sha":"${{ github.sha }}","mono_ref":"${{ github.ref }}"}}' \
             "${{ github.server_url }}/api/v1/repos/C9S/coopenomics/actions/workflows/publish-docs.yaml/dispatches"
+
+  # ============================================================================
+  # trigger-mono-docs — деплой ВТОРОЙ документации (сайт доков mono) через
+  # webhook DOCS_DEPLOY_WEBHOOK_URL. Отдельная от coopenomics публикация —
+  # обе доки уезжают синхронно по релизу. Извлечён из бывшего publish-docs:
+  # gh-pages на github.com выпилен как мёртвый, остался реальный deploy-webhook
+  # (приёмник деплоит доки на своей стороне). Гейт: не-alpha + ветка main.
+  # ============================================================================
+  trigger-mono-docs:
+    needs: release
+    if: ${{ !contains(github.ref, '-alpha') && needs.release.outputs.branch == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger docs deployment webhook
+        run: |
+          curl -fsSL -X POST "${{ vars.DOCS_DEPLOY_WEBHOOK_URL }}" \
+            -H 'Content-Type: application/json' \
+            -d '{"ref":"${{ github.ref }}","sha":"${{ github.sha }}","branch":"${{ github.ref_name }}"}'
