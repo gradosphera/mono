@@ -134,8 +134,14 @@ jobs:
         run: |
           SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO="sudo"
           $SUDO apt-get update
+          # build-essential — для host-компилятора (project() в CMakeLists);
+          # libz3-4/libtinfo6/libxml2/zlib1g — рантайм бинарей CDT (clang-9,
+          # ld.lld и т.д.). Пакет cdt объявляет только libcurl4-gnutls-dev,
+          # поэтому остальные .so ставим явно — в образе dicoop/blockchain они
+          # были из сборки исходников, из .deb не тянутся.
           $SUDO apt-get install -y --no-install-recommends \
-            curl ca-certificates cmake make build-essential
+            curl ca-certificates cmake make build-essential \
+            libz3-4 libtinfo6 libxml2 zlib1g
           curl -fsSL -o /tmp/cdt.deb \
             https://git.coopenomics.world/C9S/cdt/releases/download/v4.2.0/cdt_4.2.0-1_amd64.deb
           $SUDO apt-get install -y /tmp/cdt.deb
