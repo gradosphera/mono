@@ -342,6 +342,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateProjectPropertyInput:{
 
 	},
+	CreateSecretaryRoomInput:{
+
+	},
 	CreateSovietIndividualDataInput:{
 		passport:"PassportInput"
 	},
@@ -617,6 +620,7 @@ export const AllTypesProps: Record<string,any> = {
 	MakeClearanceInput:{
 		document:"SignedDigitalDocumentInput"
 	},
+	ManagedRoomKind: "enum" as const,
 	MarkReportPeriodInput:{
 		mark:"ReportSubmissionMark",
 		reportType:"ReportType"
@@ -899,8 +903,14 @@ export const AllTypesProps: Record<string,any> = {
 		chatcoopCreateCalendarEvent:{
 			data:"CreateChatCoopCalendarEventInput"
 		},
+		chatcoopCreateSecretaryRoom:{
+			data:"CreateSecretaryRoomInput"
+		},
 		chatcoopDeleteCalendarEvent:{
 
+		},
+		chatcoopRemoveSecretaryRoom:{
+			data:"RemoveSecretaryRoomInput"
 		},
 		chatcoopUpdateCalendarEvent:{
 			data:"UpdateChatCoopCalendarEventInput"
@@ -1214,6 +1224,7 @@ export const AllTypesProps: Record<string,any> = {
 			input:"WalmoveInput"
 		}
 	},
+	NonProjectRoomKind: "enum" as const,
 	NotificationWorkflowRecipientInput:{
 
 	},
@@ -1643,6 +1654,9 @@ export const AllTypesProps: Record<string,any> = {
 		statement:"ParticipantApplicationSignedDocumentInput",
 		user_agreement:"SignedDigitalDocumentInput",
 		wallet_agreement:"SignedDigitalDocumentInput"
+	},
+	RemoveSecretaryRoomInput:{
+
 	},
 	ReportHistoryFilterInput:{
 		reportType:"ReportType"
@@ -2920,6 +2934,11 @@ export const ReturnTypes: Record<string,any> = {
 		displayLabel:"String",
 		matrixRoomId:"String"
 	},
+	ChatcoopNonProjectCommunicationRoom:{
+		displayLabel:"String",
+		kind:"NonProjectRoomKind",
+		matrixRoomId:"String"
+	},
 	ChatcoopProjectCommunicationRoom:{
 		displayLabel:"String",
 		matrixRoomId:"String"
@@ -2930,6 +2949,14 @@ export const ReturnTypes: Record<string,any> = {
 		coopUsername:"String",
 		kind:"RoomMessageKind",
 		originServerTs:"Float"
+	},
+	ChatcoopSecretaryRoom:{
+		displayLabel:"String",
+		editable:"Boolean",
+		encrypted:"Boolean",
+		kind:"ManagedRoomKind",
+		matrixRoomId:"String",
+		secretaryInRoom:"Boolean"
 	},
 	ContactsDTO:{
 		chairman:"PublicChairman",
@@ -3559,7 +3586,9 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopCreateAccount:"Boolean",
 		chatcoopCreateCalendarEvent:"ChatCoopCalendarEvent",
 		chatcoopCreateCalendarIcsSubscription:"ChatCoopCalendarIcsUrlResponse",
+		chatcoopCreateSecretaryRoom:"ChatcoopSecretaryRoom",
 		chatcoopDeleteCalendarEvent:"Boolean",
+		chatcoopRemoveSecretaryRoom:"String",
 		chatcoopUpdateCalendarEvent:"ChatCoopCalendarEvent",
 		chatcoopUpdateTranscriptionMemo:"CallTranscription",
 		completeCapitalOnboardingStep:"CapitalOnboardingState",
@@ -4128,7 +4157,9 @@ export const ReturnTypes: Record<string,any> = {
 		chatcoopGetTranscriptions:"CallTranscription",
 		chatcoopListCalendarEvents:"ChatCoopCalendarEvent",
 		chatcoopListCalendarRooms:"ChatCoopCalendarRoomOption",
+		chatcoopListNonProjectCommunicationRooms:"ChatcoopNonProjectCommunicationRoom",
 		chatcoopListProjectCommunicationRooms:"ChatcoopProjectCommunicationRoom",
+		chatcoopListSecretaryRooms:"ChatcoopSecretaryRoom",
 		chatcoopListUtcDatesWithNewRoomMessages:"String",
 		checkReportReadiness:"ReportReadinessView",
 		cooperativeAgreements:"CoopAgreement",
