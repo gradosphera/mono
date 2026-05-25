@@ -14,9 +14,8 @@
             :model-value='typeForToggle',
             @update:model-value='onTypeChange',
             spread,
-            toggle-color='teal',
-            color='white',
-            text-color='black',
+            unelevated,
+            toggle-color='primary',
             :options='[ { label: "Все входящие", value: "newsubmitted" }, { label: "Только утверждённые", value: "newresolved" }, ]'
           )
 </template>

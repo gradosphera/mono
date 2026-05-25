@@ -19,7 +19,7 @@
       .payment-amount
         .amount {{ payment.quantity }} {{ payment.symbol }}
         .status
-          q-badge(:color='getStatusColor(payment.status)') {{ payment.status_label }}
+          BaseBadge(:variant='getStatusVariant(payment.status)') {{ payment.status_label }}
 
     q-slide-transition
       div(v-show='expanded')
@@ -58,8 +58,9 @@ import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetO
 import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
-import 'src/shared/ui/CardStyles/index.scss';
 import { PaymentDetails } from 'src/shared/ui';
+import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
+import type { BaseBadgeVariant } from 'src/shared/ui/base/BaseBadge';
 import type { IPayment } from 'src/entities/Payment';
 import { Zeus } from '@coopenomics/sdk';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
@@ -89,20 +90,19 @@ const getDirectionColor = (direction?: string | null) => {
   return direction === Zeus.PaymentDirection.INCOMING ? 'positive' : 'negative';
 };
 
-const statusColors: Record<string, string> = {
-  [Zeus.PaymentStatus.COMPLETED]: 'teal',
-  [Zeus.PaymentStatus.PENDING]: 'orange',
-  [Zeus.PaymentStatus.FAILED]: 'red',
-  [Zeus.PaymentStatus.PAID]: 'blue',
-  [Zeus.PaymentStatus.REFUNDED]: 'grey',
-  [Zeus.PaymentStatus.EXPIRED]: 'grey',
+// Статус платежа → canon-вариант бейджа (точка + цвет из дизайн-токенов).
+const statusVariants: Record<string, BaseBadgeVariant> = {
+  [Zeus.PaymentStatus.COMPLETED]: 'pos',
+  [Zeus.PaymentStatus.PENDING]: 'warn',
+  [Zeus.PaymentStatus.FAILED]: 'neg',
+  [Zeus.PaymentStatus.PAID]: 'info',
+  [Zeus.PaymentStatus.REFUNDED]: 'neutral',
+  [Zeus.PaymentStatus.EXPIRED]: 'neutral',
 };
 
-const getStatusColor = (status?: string | null) => {
-  if (!status) {
-    return 'grey';
-  }
-  return statusColors[status] || 'grey';
+const getStatusVariant = (status?: string | null): BaseBadgeVariant => {
+  if (!status) return 'neutral';
+  return statusVariants[status] || 'neutral';
 };
 </script>
 
@@ -113,11 +113,11 @@ const getStatusColor = (status?: string | null) => {
 }
 
 .payment-card {
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease-in-out;
+  border-radius: var(--p-r-lg, 16px);
+  border: 1px solid var(--p-line);
+  transition: box-shadow var(--p-dur-base, 0.2s) ease-in-out, transform var(--p-dur-base, 0.2s) ease-in-out;
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--p-shadow-card);
     transform: translateY(-1px);
   }
 }
@@ -141,7 +141,7 @@ const getStatusColor = (status?: string | null) => {
 
 .payment-title .subtitle {
   font-size: 12px;
-  color: #757575;
+  color: var(--p-ink-3);
 }
 
 .payment-amount {
@@ -166,6 +166,6 @@ const getStatusColor = (status?: string | null) => {
 
 .actions-section {
   padding: 12px 16px !important;
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: var(--p-surface-2);
 }
 </style>
