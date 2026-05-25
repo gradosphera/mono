@@ -13,11 +13,12 @@
           tr
             th.col-toggle
             th.col-id ID
+            th.col-sort.col-date(@click='toggleSort') Дата {{ sortMark }}
             th Документ
             th.col-signers Подписи
             th.col-action Действия
         tbody
-          template(v-for='row in documents', :key='rowId(row)')
+          template(v-for='row in sortedDocuments', :key='rowId(row)')
             tr.data-row(@click='toggleExpand(rowId(row))')
               td.col-toggle
                 button.icon-btn(
@@ -26,11 +27,23 @@
                   @click.stop='toggleExpand(rowId(row))'
                 )
                   q-icon(:name='expanded.get(rowId(row)) ? "expand_more" : "chevron_right"')
-              td.col-id
-                span.mono {{ getDocumentHash(row).substring(0, 10) }}
+              td.col-id(@click.stop)
+                EntityIdBadge(
+                  :raw-id='shortHash(row)',
+                  :copy-value='getDocumentHash(row)',
+                  copy-on-click
+                )
+              td.col-date {{ getDocumentDate(row) }}
               td
                 .doc-primary {{ getDocumentTitle(row) }}
-              td.col-signers {{ getSignersFromDocumentPackage(row) }}
+              td.col-signers
+                .signers(v-if='getSigners(row).length')
+                  BaseBadge(
+                    v-for='(name, i) in getSigners(row)',
+                    :key='i',
+                    variant='neutral'
+                  ) {{ name }}
+                span.no-signers(v-else) —
               td.col-action(@click.stop)
                 button.icon-btn(
                   type='button',
@@ -41,7 +54,7 @@
                   q-icon(name='download')
 
             tr.expand-row(v-if='expanded.get(rowId(row))')
-              td(colspan='5')
+              td(colspan='6')
                 ComplexDocument(:documents='row')
 
     .table-foot
@@ -64,14 +77,16 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
+import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
+import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { FailAlert } from 'src/shared/api';
 import {
   prepareDocumentPackageArchive,
-  getSignersFromDocumentPackage,
+  getSignersListFromDocumentPackage,
 } from 'src/shared/lib/document';
 import type { IDocumentPackageAggregate } from 'src/entities/Document/model';
 
@@ -102,21 +117,65 @@ function rowId(row: IDocumentPackageAggregate): string {
   );
 }
 
+// Метаданные документа (распарсенный объект) — из заявления или решения.
+function getMeta(row: IDocumentPackageAggregate): Record<string, any> | undefined {
+  return (
+    (row.statement?.documentAggregate?.document?.meta as any) ||
+    (row.decision?.documentAggregate?.document?.meta as any) ||
+    undefined
+  );
+}
+
+// Чистое наименование — из meta.title; запасной вариант — full_title.
 function getDocumentTitle(row: IDocumentPackageAggregate): string {
   return (
+    getMeta(row)?.title ||
     row.statement?.documentAggregate?.rawDocument?.full_title ||
     row.decision?.documentAggregate?.rawDocument?.full_title ||
     'Документ без заголовка'
   );
 }
 
+function getDocumentDate(row: IDocumentPackageAggregate): string {
+  return getMeta(row)?.created_at || '';
+}
+
+// block_num монотонно растёт со временем — надёжный ключ хронологической сортировки.
+function getBlockNum(row: IDocumentPackageAggregate): number {
+  return Number(getMeta(row)?.block_num ?? 0);
+}
+
 function getDocumentHash(row: IDocumentPackageAggregate): string {
   return (
     row.statement?.documentAggregate?.rawDocument?.hash ||
     row.decision?.documentAggregate?.rawDocument?.hash ||
-    'нет хеша'
+    ''
   );
 }
+
+function shortHash(row: IDocumentPackageAggregate): string {
+  const h = getDocumentHash(row);
+  return h ? h.substring(0, 10) : '—';
+}
+
+function getSigners(row: IDocumentPackageAggregate): string[] {
+  return getSignersListFromDocumentPackage(row);
+}
+
+// Сортировка по дате (block_num); по умолчанию — свежие сверху.
+const sortDir = ref<'asc' | 'desc'>('desc');
+const sortMark = computed(() => (sortDir.value === 'asc' ? '↑' : '↓'));
+const toggleSort = (): void => {
+  sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
+};
+const sortedDocuments = computed(() => {
+  const list = [...props.documents];
+  list.sort((a, b) => {
+    const diff = getBlockNum(a) - getBlockNum(b);
+    return sortDir.value === 'asc' ? diff : -diff;
+  });
+  return list;
+});
 
 const hasMore = computed(
   () => (props.pagination?.currentPage ?? 1) < (props.pagination?.totalPages ?? 1),
@@ -183,7 +242,7 @@ const downloadPackage = async (
 
 .table {
   table-layout: fixed;
-  min-width: 760px;
+  min-width: 880px;
 }
 
 .col-toggle {
@@ -191,25 +250,36 @@ const downloadPackage = async (
   text-align: center;
 }
 .col-id {
-  width: 130px;
+  width: 150px;
+}
+.col-date {
+  width: 150px;
+  white-space: nowrap;
 }
 .col-signers {
-  width: 200px;
-  overflow-wrap: anywhere;
+  width: 220px;
 }
 .col-action {
   width: 110px;
   text-align: center;
 }
 
-.mono {
-  font-family: var(--p-mono);
-  font-size: var(--p-fs-mono-sm, 12px);
-  color: var(--p-ink-2);
+.col-sort {
+  cursor: pointer;
+  user-select: none;
 }
 
 .doc-primary {
   overflow-wrap: anywhere;
+}
+
+.signers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.no-signers {
+  color: var(--p-ink-3);
 }
 
 .data-row {
