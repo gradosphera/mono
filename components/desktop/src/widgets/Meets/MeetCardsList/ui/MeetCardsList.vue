@@ -56,7 +56,7 @@ const navigateToMeetDetails = (meet: IMeet) => {
 .meet-cards-list__items {
   display: flex;
   flex-direction: column;
-  gap: var(--p-4, 16px);
+  gap: var(--p-5, 20px);
 }
 .meet-cards-list__skel {
   display: block;

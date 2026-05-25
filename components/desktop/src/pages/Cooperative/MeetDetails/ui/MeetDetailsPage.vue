@@ -9,11 +9,13 @@
     q-skeleton.q-mb-md.rounded-borders(type='rect', height='220px')
     q-skeleton.q-mb-md.rounded-borders(type='rect', height='140px', v-for='i in 2', :key='i')
 
-  .empty-state.q-pa-xl.card-container(v-else-if='!meet')
-    .empty-icon
-      q-icon(name='search_off', size='56px', color='grey-5')
-    .empty-text Собрание не найдено
-    .empty-subtitle Проверьте правильность хеша или вернитесь к списку собраний
+  EmptyState(
+    v-else-if='!meet',
+    title='Собрание не найдено',
+    body='Проверьте правильность ссылки или вернитесь к списку собраний.'
+  )
+    template(#icon)
+      q-icon(name='search_off', size='48px')
 
   div(v-else)
     MeetDetailsInfo.q-mb-lg(:meet='meet')
@@ -49,6 +51,7 @@ import { MeetDetailsActions } from 'src/widgets/Meets/MeetDetailsActions';
 import { MeetDetailsAgenda } from 'src/widgets/Meets/MeetDetailsAgenda';
 import { MeetDetailsVoting } from 'src/widgets/Meets/MeetDetailsVoting';
 import { MeetDetailsResults } from 'src/widgets/Meets/MeetDetailsResults';
+import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { useMeetStore } from 'src/entities/Meet';
 import { useDesktopStore } from 'src/entities/Desktop';
 import { useVoteOnMeet } from 'src/features/Meet/VoteOnMeet';
@@ -133,8 +136,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/shared/ui/CardStyles/index.scss';
-
 /* Полная ширина контента, как на canon-страницах документов/платежей. */
 .meet-details-page {
   padding: var(--p-6, 24px);
@@ -160,10 +161,5 @@ onUnmounted(() => {
 }
 .meet-back:hover {
   color: var(--p-ink);
-}
-
-.empty-state.card-container {
-  padding: 48px 24px;
-  text-align: center;
 }
 </style>
