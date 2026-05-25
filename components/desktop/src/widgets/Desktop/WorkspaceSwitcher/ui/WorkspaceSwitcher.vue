@@ -173,6 +173,9 @@ function onSelect(name: string): void {
   line-height: 1.25;
   font-weight: 600;
   color: var(--p-ink);
+  /* Единый регистр названий столов: первая буква каждого слова — заглавная,
+     независимо от того, как заведена строка в реестре workspace'ов. */
+  text-transform: capitalize;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   line-clamp: 3;
@@ -203,6 +206,10 @@ function onSelect(name: string): void {
 .ws-switcher__item :deep(.q-item__section--avatar) {
   min-width: 32px;
   padding-right: var(--p-2, 8px);
+}
+/* Тот же единый регистр для подписей пунктов списка. */
+.ws-switcher__item :deep(.q-item__label) {
+  text-transform: capitalize;
 }
 
 /* Затемнение фона за menu — не сливаемся с контентом за drawer'ом. */
