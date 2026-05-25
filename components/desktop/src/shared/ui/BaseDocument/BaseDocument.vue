@@ -10,11 +10,15 @@ q-card.dynamic-padding(
     ShadowHtml(:html='safeHtml', :styles='shadowStyles')
     .row.q-mt-lg.q-pa-sm.justify-center
       .col-md-8.col-xs-12
+        //- Кнопка «Сверить» (локальная пересборка + сверка хеша) временно скрыта
+        //- через :hide-verify. Чтобы вернуть — убрать :hide-verify (обработчик @verify
+        //- остаётся подключённым).
         DocumentSignatures(
           :doc-hash='documentAggregate?.document?.doc_hash ?? ""',
           :regenerated-hash='regeneratedHash',
           :signatures='canonSignatures',
           :verifying='onRegenerate',
+          :hide-verify='true',
           @download='download',
           @verify='regenerate'
         )
