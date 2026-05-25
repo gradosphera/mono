@@ -3852,6 +3852,16 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on ChatCoopCalendarRoomOption']?: Omit<ValueTypes["ChatCoopCalendarRoomOption"], "...on ChatCoopCalendarRoomOption">
 }>;
+	["ChatcoopNonProjectCommunicationRoom"]: AliasType<{
+	/** Подпись для отображения комнаты */
+	displayLabel?:boolean | `@${string}`,
+	/** Тип комнаты (пайщики / совет / секретарь) */
+	kind?:boolean | `@${string}`,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ChatcoopNonProjectCommunicationRoom']?: Omit<ValueTypes["ChatcoopNonProjectCommunicationRoom"], "...on ChatcoopNonProjectCommunicationRoom">
+}>;
 	["ChatcoopProjectCommunicationRoom"]: AliasType<{
 	/** Подпись для отображения (комната / проект Capital) */
 	displayLabel?:boolean | `@${string}`,
@@ -3872,6 +3882,22 @@ export type ValueTypes = {
 	originServerTs?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on ChatcoopRoomMessageLine']?: Omit<ValueTypes["ChatcoopRoomMessageLine"], "...on ChatcoopRoomMessageLine">
+}>;
+	["ChatcoopSecretaryRoom"]: AliasType<{
+	/** Название комнаты */
+	displayLabel?:boolean | `@${string}`,
+	/** Можно ли удалить комнату из интерфейса (только комнаты секретаря) */
+	editable?:boolean | `@${string}`,
+	/** Комната зашифрована (E2EE) — секретарь не транскрибирует такие комнаты */
+	encrypted?:boolean | `@${string}`,
+	/** Тип комнаты */
+	kind?:boolean | `@${string}`,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId?:boolean | `@${string}`,
+	/** Секретарь присутствует в комнате */
+	secretaryInRoom?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ChatcoopSecretaryRoom']?: Omit<ValueTypes["ChatcoopSecretaryRoom"], "...on ChatcoopSecretaryRoom">
 }>;
 	["CheckMatrixUsernameInput"]: {
 	username: string | Variable<any, string>
@@ -4604,6 +4630,12 @@ export type ValueTypes = {
 	property_hash: string | Variable<any, string>,
 	/** Имя пользователя */
 	username: string | Variable<any, string>
+};
+	["CreateSecretaryRoomInput"]: {
+	/** Название комнаты */
+	displayName: string | Variable<any, string>,
+	/** Публичная комната (любой может войти) либо приватная (вход по приглашению создателя) */
+	isPublic: boolean | Variable<any, string>
 };
 	["CreateSovietIndividualDataInput"]: {
 	/** Дата рождения */
@@ -6143,6 +6175,8 @@ export type ValueTypes = {
 	/** Имя пользователя */
 	username: string | Variable<any, string>
 };
+	/** Тип комнаты: пайщики, совет, проект Capital, комната секретаря */
+["ManagedRoomKind"]:ManagedRoomKind;
 	["MarkReportPeriodInput"]: {
 	mark?: ValueTypes["ReportSubmissionMark"] | undefined | null | Variable<any, string>,
 	period?: number | undefined | null | Variable<any, string>,
@@ -6466,7 +6500,9 @@ chatcoopCreateCalendarEvent?: [{	data: ValueTypes["CreateChatCoopCalendarEventIn
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopCreateCalendarIcsSubscription?:ValueTypes["ChatCoopCalendarIcsUrlResponse"],
+chatcoopCreateSecretaryRoom?: [{	data: ValueTypes["CreateSecretaryRoomInput"] | Variable<any, string>},ValueTypes["ChatcoopSecretaryRoom"]],
 chatcoopDeleteCalendarEvent?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
+chatcoopRemoveSecretaryRoom?: [{	data: ValueTypes["RemoveSecretaryRoomInput"] | Variable<any, string>},boolean | `@${string}`],
 chatcoopUpdateCalendarEvent?: [{	data: ValueTypes["UpdateChatCoopCalendarEventInput"] | Variable<any, string>},ValueTypes["ChatCoopCalendarEvent"]],
 chatcoopUpdateTranscriptionMemo?: [{	data: ValueTypes["UpdateCallTranscriptionMemoInput"] | Variable<any, string>},ValueTypes["CallTranscription"]],
 completeCapitalOnboardingStep?: [{	data: ValueTypes["CapitalOnboardingStepInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
@@ -6566,6 +6602,8 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 		__typename?: boolean | `@${string}`,
 	['...on Mutation']?: Omit<ValueTypes["Mutation"], "...on Mutation">
 }>;
+	/** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
+["NonProjectRoomKind"]:NonProjectRoomKind;
 	["NotificationWorkflowRecipientInput"]: {
 	/** Username получателя */
 	username: string | Variable<any, string>
@@ -7774,7 +7812,15 @@ chatcoopGetTranscriptions?: [{	data?: ValueTypes["GetTranscriptionsInput"] | und
 
 Требуемые роли: chairman, member.  */
 	chatcoopListCalendarRooms?:ValueTypes["ChatCoopCalendarRoomOption"],
+	/** Комнаты Matrix вне проектов Capital (пайщики/совет/секретарь) — для синхронизации в blago
+
+Требуемые роли: chairman, member, user.  */
+	chatcoopListNonProjectCommunicationRooms?:ValueTypes["ChatcoopNonProjectCommunicationRoom"],
 chatcoopListProjectCommunicationRooms?: [{	data: ValueTypes["GetProjectCommunicationRoomsInput"] | Variable<any, string>},ValueTypes["ChatcoopProjectCommunicationRoom"]],
+	/** Все комнаты реестра ChatCoop (системные/проектные — read-only, комнаты секретаря — удаляемые)
+
+Требуемые роли: chairman, member.  */
+	chatcoopListSecretaryRooms?:ValueTypes["ChatcoopSecretaryRoom"],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithNewRoomMessagesInput"] | Variable<any, string>},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportReadinessView"]],
 cooperativeAgreements?: [{	coopname: string | Variable<any, string>},ValueTypes["CoopAgreement"]],
@@ -8047,6 +8093,10 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationProgram']?: Omit<ValueTypes["RegistrationProgram"], "...on RegistrationProgram">
 }>;
+	["RemoveSecretaryRoomInput"]: {
+	/** Идентификатор комнаты Matrix, которую нужно удалить */
+	matrixRoomId: string | Variable<any, string>
+};
 	["ReportCalendarPeriodEntry"]: AliasType<{
 	dueDate?:boolean | `@${string}`,
 	dueMonth?:boolean | `@${string}`,
@@ -12195,6 +12245,15 @@ export type ResolverInputTypes = {
 	matrixRoomId?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ChatcoopNonProjectCommunicationRoom"]: AliasType<{
+	/** Подпись для отображения комнаты */
+	displayLabel?:boolean | `@${string}`,
+	/** Тип комнаты (пайщики / совет / секретарь) */
+	kind?:boolean | `@${string}`,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["ChatcoopProjectCommunicationRoom"]: AliasType<{
 	/** Подпись для отображения (комната / проект Capital) */
 	displayLabel?:boolean | `@${string}`,
@@ -12212,6 +12271,21 @@ export type ResolverInputTypes = {
 	kind?:boolean | `@${string}`,
 	/** origin_server_ts из Matrix (мс) */
 	originServerTs?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ChatcoopSecretaryRoom"]: AliasType<{
+	/** Название комнаты */
+	displayLabel?:boolean | `@${string}`,
+	/** Можно ли удалить комнату из интерфейса (только комнаты секретаря) */
+	editable?:boolean | `@${string}`,
+	/** Комната зашифрована (E2EE) — секретарь не транскрибирует такие комнаты */
+	encrypted?:boolean | `@${string}`,
+	/** Тип комнаты */
+	kind?:boolean | `@${string}`,
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId?:boolean | `@${string}`,
+	/** Секретарь присутствует в комнате */
+	secretaryInRoom?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["CheckMatrixUsernameInput"]: {
@@ -12940,6 +13014,12 @@ export type ResolverInputTypes = {
 	property_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CreateSecretaryRoomInput"]: {
+	/** Название комнаты */
+	displayName: string,
+	/** Публичная комната (любой может войти) либо приватная (вход по приглашению создателя) */
+	isPublic: boolean
 };
 	["CreateSovietIndividualDataInput"]: {
 	/** Дата рождения */
@@ -14435,6 +14515,8 @@ export type ResolverInputTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	/** Тип комнаты: пайщики, совет, проект Capital, комната секретаря */
+["ManagedRoomKind"]:ManagedRoomKind;
 	["MarkReportPeriodInput"]: {
 	mark?: ResolverInputTypes["ReportSubmissionMark"] | undefined | null,
 	period?: number | undefined | null,
@@ -14749,7 +14831,9 @@ chatcoopCreateCalendarEvent?: [{	data: ResolverInputTypes["CreateChatCoopCalenda
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopCreateCalendarIcsSubscription?:ResolverInputTypes["ChatCoopCalendarIcsUrlResponse"],
+chatcoopCreateSecretaryRoom?: [{	data: ResolverInputTypes["CreateSecretaryRoomInput"]},ResolverInputTypes["ChatcoopSecretaryRoom"]],
 chatcoopDeleteCalendarEvent?: [{	id: string},boolean | `@${string}`],
+chatcoopRemoveSecretaryRoom?: [{	data: ResolverInputTypes["RemoveSecretaryRoomInput"]},boolean | `@${string}`],
 chatcoopUpdateCalendarEvent?: [{	data: ResolverInputTypes["UpdateChatCoopCalendarEventInput"]},ResolverInputTypes["ChatCoopCalendarEvent"]],
 chatcoopUpdateTranscriptionMemo?: [{	data: ResolverInputTypes["UpdateCallTranscriptionMemoInput"]},ResolverInputTypes["CallTranscription"]],
 completeCapitalOnboardingStep?: [{	data: ResolverInputTypes["CapitalOnboardingStepInput"]},ResolverInputTypes["CapitalOnboardingState"]],
@@ -14848,6 +14932,8 @@ voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetIn
 walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputTypes["Ledger2AdjustmentResult"]],
 		__typename?: boolean | `@${string}`
 }>;
+	/** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
+["NonProjectRoomKind"]:NonProjectRoomKind;
 	["NotificationWorkflowRecipientInput"]: {
 	/** Username получателя */
 	username: string
@@ -16002,7 +16088,15 @@ chatcoopGetTranscriptions?: [{	data?: ResolverInputTypes["GetTranscriptionsInput
 
 Требуемые роли: chairman, member.  */
 	chatcoopListCalendarRooms?:ResolverInputTypes["ChatCoopCalendarRoomOption"],
+	/** Комнаты Matrix вне проектов Capital (пайщики/совет/секретарь) — для синхронизации в blago
+
+Требуемые роли: chairman, member, user.  */
+	chatcoopListNonProjectCommunicationRooms?:ResolverInputTypes["ChatcoopNonProjectCommunicationRoom"],
 chatcoopListProjectCommunicationRooms?: [{	data: ResolverInputTypes["GetProjectCommunicationRoomsInput"]},ResolverInputTypes["ChatcoopProjectCommunicationRoom"]],
+	/** Все комнаты реестра ChatCoop (системные/проектные — read-only, комнаты секретаря — удаляемые)
+
+Требуемые роли: chairman, member.  */
+	chatcoopListSecretaryRooms?:ResolverInputTypes["ChatcoopSecretaryRoom"],
 chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDatesWithNewRoomMessagesInput"]},boolean | `@${string}`],
 checkReportReadiness?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportReadinessView"]],
 cooperativeAgreements?: [{	coopname: string},ResolverInputTypes["CoopAgreement"]],
@@ -16268,6 +16362,10 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	title?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["RemoveSecretaryRoomInput"]: {
+	/** Идентификатор комнаты Matrix, которую нужно удалить */
+	matrixRoomId: string
+};
 	["ReportCalendarPeriodEntry"]: AliasType<{
 	dueDate?:boolean | `@${string}`,
 	dueMonth?:boolean | `@${string}`,
@@ -20304,6 +20402,14 @@ export type ModelTypes = {
 		displayLabel: string,
 	matrixRoomId: string
 };
+	["ChatcoopNonProjectCommunicationRoom"]: {
+		/** Подпись для отображения комнаты */
+	displayLabel: string,
+	/** Тип комнаты (пайщики / совет / секретарь) */
+	kind: ModelTypes["NonProjectRoomKind"],
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId: string
+};
 	["ChatcoopProjectCommunicationRoom"]: {
 		/** Подпись для отображения (комната / проект Capital) */
 	displayLabel: string,
@@ -20320,6 +20426,20 @@ export type ModelTypes = {
 	kind: ModelTypes["RoomMessageKind"],
 	/** origin_server_ts из Matrix (мс) */
 	originServerTs: number
+};
+	["ChatcoopSecretaryRoom"]: {
+		/** Название комнаты */
+	displayLabel: string,
+	/** Можно ли удалить комнату из интерфейса (только комнаты секретаря) */
+	editable: boolean,
+	/** Комната зашифрована (E2EE) — секретарь не транскрибирует такие комнаты */
+	encrypted: boolean,
+	/** Тип комнаты */
+	kind: ModelTypes["ManagedRoomKind"],
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId: string,
+	/** Секретарь присутствует в комнате */
+	secretaryInRoom: boolean
 };
 	["CheckMatrixUsernameInput"]: {
 	username: string
@@ -21039,6 +21159,12 @@ export type ModelTypes = {
 	property_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CreateSecretaryRoomInput"]: {
+	/** Название комнаты */
+	displayName: string,
+	/** Публичная комната (любой может войти) либо приватная (вход по приглашению создателя) */
+	isPublic: boolean
 };
 	["CreateSovietIndividualDataInput"]: {
 	/** Дата рождения */
@@ -22479,6 +22605,7 @@ export type ModelTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	["ManagedRoomKind"]:ManagedRoomKind;
 	["MarkReportPeriodInput"]: {
 	mark?: ModelTypes["ReportSubmissionMark"] | undefined | null,
 	period?: number | undefined | null,
@@ -23023,10 +23150,18 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopCreateCalendarIcsSubscription: ModelTypes["ChatCoopCalendarIcsUrlResponse"],
+	/** Создать комнату с секретарём (публичную или приватную); секретарь подключается сразу
+
+Требуемые роли: chairman, member.  */
+	chatcoopCreateSecretaryRoom: ModelTypes["ChatcoopSecretaryRoom"],
 	/** Удалить событие календаря
 
 Требуемые роли: chairman, member.  */
 	chatcoopDeleteCalendarEvent: boolean,
+	/** Удалить комнату секретаря: вывести секретаря и снять комнату с синхронизации (возвращает matrixRoomId)
+
+Требуемые роли: chairman, member.  */
+	chatcoopRemoveSecretaryRoom: string,
 	/** Обновить событие календаря
 
 Требуемые роли: chairman, member.  */
@@ -23352,6 +23487,7 @@ export type ModelTypes = {
 Требуемые роли: chairman.  */
 	walmoveWallets: ModelTypes["Ledger2AdjustmentResult"]
 };
+	["NonProjectRoomKind"]:NonProjectRoomKind;
 	["NotificationWorkflowRecipientInput"]: {
 	/** Username получателя */
 	username: string
@@ -24514,10 +24650,18 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	chatcoopListCalendarRooms: Array<ModelTypes["ChatCoopCalendarRoomOption"]>,
+	/** Комнаты Matrix вне проектов Capital (пайщики/совет/секретарь) — для синхронизации в blago
+
+Требуемые роли: chairman, member, user.  */
+	chatcoopListNonProjectCommunicationRooms: Array<ModelTypes["ChatcoopNonProjectCommunicationRoom"]>,
 	/** Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop)
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopListProjectCommunicationRooms: Array<ModelTypes["ChatcoopProjectCommunicationRoom"]>,
+	/** Все комнаты реестра ChatCoop (системные/проектные — read-only, комнаты секретаря — удаляемые)
+
+Требуемые роли: chairman, member.  */
+	chatcoopListSecretaryRooms: Array<ModelTypes["ChatcoopSecretaryRoom"]>,
 	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix
 
 Требуемые роли: chairman, member, user.  */
@@ -24890,6 +25034,10 @@ export type ModelTypes = {
 	requirements?: string | undefined | null,
 	/** Название программы для отображения */
 	title: string
+};
+	["RemoveSecretaryRoomInput"]: {
+	/** Идентификатор комнаты Matrix, которую нужно удалить */
+	matrixRoomId: string
 };
 	["ReportCalendarPeriodEntry"]: {
 		dueDate: string,
@@ -29031,6 +29179,16 @@ export type GraphQLTypes = {
 	matrixRoomId: string,
 	['...on ChatCoopCalendarRoomOption']: Omit<GraphQLTypes["ChatCoopCalendarRoomOption"], "...on ChatCoopCalendarRoomOption">
 };
+	["ChatcoopNonProjectCommunicationRoom"]: {
+	__typename: "ChatcoopNonProjectCommunicationRoom",
+	/** Подпись для отображения комнаты */
+	displayLabel: string,
+	/** Тип комнаты (пайщики / совет / секретарь) */
+	kind: GraphQLTypes["NonProjectRoomKind"],
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId: string,
+	['...on ChatcoopNonProjectCommunicationRoom']: Omit<GraphQLTypes["ChatcoopNonProjectCommunicationRoom"], "...on ChatcoopNonProjectCommunicationRoom">
+};
 	["ChatcoopProjectCommunicationRoom"]: {
 	__typename: "ChatcoopProjectCommunicationRoom",
 	/** Подпись для отображения (комната / проект Capital) */
@@ -29051,6 +29209,22 @@ export type GraphQLTypes = {
 	/** origin_server_ts из Matrix (мс) */
 	originServerTs: number,
 	['...on ChatcoopRoomMessageLine']: Omit<GraphQLTypes["ChatcoopRoomMessageLine"], "...on ChatcoopRoomMessageLine">
+};
+	["ChatcoopSecretaryRoom"]: {
+	__typename: "ChatcoopSecretaryRoom",
+	/** Название комнаты */
+	displayLabel: string,
+	/** Можно ли удалить комнату из интерфейса (только комнаты секретаря) */
+	editable: boolean,
+	/** Комната зашифрована (E2EE) — секретарь не транскрибирует такие комнаты */
+	encrypted: boolean,
+	/** Тип комнаты */
+	kind: GraphQLTypes["ManagedRoomKind"],
+	/** Идентификатор комнаты Matrix */
+	matrixRoomId: string,
+	/** Секретарь присутствует в комнате */
+	secretaryInRoom: boolean,
+	['...on ChatcoopSecretaryRoom']: Omit<GraphQLTypes["ChatcoopSecretaryRoom"], "...on ChatcoopSecretaryRoom">
 };
 	["CheckMatrixUsernameInput"]: {
 		username: string
@@ -29783,6 +29957,12 @@ export type GraphQLTypes = {
 	property_hash: string,
 	/** Имя пользователя */
 	username: string
+};
+	["CreateSecretaryRoomInput"]: {
+		/** Название комнаты */
+	displayName: string,
+	/** Публичная комната (любой может войти) либо приватная (вход по приглашению создателя) */
+	isPublic: boolean
 };
 	["CreateSovietIndividualDataInput"]: {
 		/** Дата рождения */
@@ -31322,6 +31502,8 @@ export type GraphQLTypes = {
 	/** Имя пользователя */
 	username: string
 };
+	/** Тип комнаты: пайщики, совет, проект Capital, комната секретаря */
+["ManagedRoomKind"]: ManagedRoomKind;
 	["MarkReportPeriodInput"]: {
 		mark?: GraphQLTypes["ReportSubmissionMark"] | undefined | null,
 	period?: number | undefined | null,
@@ -31885,10 +32067,18 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopCreateCalendarIcsSubscription: GraphQLTypes["ChatCoopCalendarIcsUrlResponse"],
+	/** Создать комнату с секретарём (публичную или приватную); секретарь подключается сразу
+
+Требуемые роли: chairman, member.  */
+	chatcoopCreateSecretaryRoom: GraphQLTypes["ChatcoopSecretaryRoom"],
 	/** Удалить событие календаря
 
 Требуемые роли: chairman, member.  */
 	chatcoopDeleteCalendarEvent: boolean,
+	/** Удалить комнату секретаря: вывести секретаря и снять комнату с синхронизации (возвращает matrixRoomId)
+
+Требуемые роли: chairman, member.  */
+	chatcoopRemoveSecretaryRoom: string,
 	/** Обновить событие календаря
 
 Требуемые роли: chairman, member.  */
@@ -32215,6 +32405,8 @@ export type GraphQLTypes = {
 	walmoveWallets: GraphQLTypes["Ledger2AdjustmentResult"],
 	['...on Mutation']: Omit<GraphQLTypes["Mutation"], "...on Mutation">
 };
+	/** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
+["NonProjectRoomKind"]: NonProjectRoomKind;
 	["NotificationWorkflowRecipientInput"]: {
 		/** Username получателя */
 	username: string
@@ -33506,10 +33698,18 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	chatcoopListCalendarRooms: Array<GraphQLTypes["ChatCoopCalendarRoomOption"]>,
+	/** Комнаты Matrix вне проектов Capital (пайщики/совет/секретарь) — для синхронизации в blago
+
+Требуемые роли: chairman, member, user.  */
+	chatcoopListNonProjectCommunicationRooms: Array<GraphQLTypes["ChatcoopNonProjectCommunicationRoom"]>,
 	/** Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop)
 
 Требуемые роли: chairman, member, user.  */
 	chatcoopListProjectCommunicationRooms: Array<GraphQLTypes["ChatcoopProjectCommunicationRoom"]>,
+	/** Все комнаты реестра ChatCoop (системные/проектные — read-only, комнаты секретаря — удаляемые)
+
+Требуемые роли: chairman, member.  */
+	chatcoopListSecretaryRooms: Array<GraphQLTypes["ChatcoopSecretaryRoom"]>,
 	/** UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix
 
 Требуемые роли: chairman, member, user.  */
@@ -33895,6 +34095,10 @@ export type GraphQLTypes = {
 	/** Название программы для отображения */
 	title: string,
 	['...on RegistrationProgram']: Omit<GraphQLTypes["RegistrationProgram"], "...on RegistrationProgram">
+};
+	["RemoveSecretaryRoomInput"]: {
+		/** Идентификатор комнаты Matrix, которую нужно удалить */
+	matrixRoomId: string
 };
 	["ReportCalendarPeriodEntry"]: {
 	__typename: "ReportCalendarPeriodEntry",
@@ -35589,6 +35793,19 @@ export enum LogEventType {
 	VOTING_COMPLETED = "VOTING_COMPLETED",
 	VOTING_STARTED = "VOTING_STARTED"
 }
+/** Тип комнаты: пайщики, совет, проект Capital, комната секретаря */
+export enum ManagedRoomKind {
+	CAPITAL_PROJECT = "CAPITAL_PROJECT",
+	COUNCIL = "COUNCIL",
+	MEMBERS = "MEMBERS",
+	SECRETARY = "SECRETARY"
+}
+/** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
+export enum NonProjectRoomKind {
+	COUNCIL = "COUNCIL",
+	MEMBERS = "MEMBERS",
+	SECRETARY = "SECRETARY"
+}
 /** Тип юридического лица */
 export enum OrganizationType {
 	AO = "AO",
@@ -35856,6 +36073,7 @@ type ZEUS_VARIABLES = {
 	["CreateProjectInput"]: ValueTypes["CreateProjectInput"];
 	["CreateProjectInvestInput"]: ValueTypes["CreateProjectInvestInput"];
 	["CreateProjectPropertyInput"]: ValueTypes["CreateProjectPropertyInput"];
+	["CreateSecretaryRoomInput"]: ValueTypes["CreateSecretaryRoomInput"];
 	["CreateSovietIndividualDataInput"]: ValueTypes["CreateSovietIndividualDataInput"];
 	["CreateStoryInput"]: ValueTypes["CreateStoryInput"];
 	["CreateSubscriptionInput"]: ValueTypes["CreateSubscriptionInput"];
@@ -35953,9 +36171,11 @@ type ZEUS_VARIABLES = {
 	["LoginInput"]: ValueTypes["LoginInput"];
 	["LogoutInput"]: ValueTypes["LogoutInput"];
 	["MakeClearanceInput"]: ValueTypes["MakeClearanceInput"];
+	["ManagedRoomKind"]: ValueTypes["ManagedRoomKind"];
 	["MarkReportPeriodInput"]: ValueTypes["MarkReportPeriodInput"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
 	["MoveCapitalIssueToComponentInput"]: ValueTypes["MoveCapitalIssueToComponentInput"];
+	["NonProjectRoomKind"]: ValueTypes["NonProjectRoomKind"];
 	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
 	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
 	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];
@@ -36001,6 +36221,7 @@ type ZEUS_VARIABLES = {
 	["RegisterAccountInput"]: ValueTypes["RegisterAccountInput"];
 	["RegisterContributorInput"]: ValueTypes["RegisterContributorInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
+	["RemoveSecretaryRoomInput"]: ValueTypes["RemoveSecretaryRoomInput"];
 	["ReportHistoryFilterInput"]: ValueTypes["ReportHistoryFilterInput"];
 	["ReportPreviewInput"]: ValueTypes["ReportPreviewInput"];
 	["ReportSubmissionMark"]: ValueTypes["ReportSubmissionMark"];

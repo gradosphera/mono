@@ -24,6 +24,10 @@ export interface ChatcoopManagedMatrixRoomRepository {
   findByKind(kind: ChatcoopManagedMatrixRoomKind): Promise<ManagedMatrixRoomDomainEntity[]>;
   /** Комнаты проекта Capital (kind capital_project, projectHash задан). */
   findByProjectHash(projectHash: string): Promise<ManagedMatrixRoomDomainEntity[]>;
+  /** Все комнаты реестра (для интерфейса управления присутствием секретаря). */
+  findAll(): Promise<ManagedMatrixRoomDomainEntity[]>;
+  /** Комнаты, не привязанные к проекту Capital (members/council/secretary) — для синхронизации в blago. */
+  findNonProjectCommunicationRooms(): Promise<ManagedMatrixRoomDomainEntity[]>;
   /** Комнаты, в которых секретарь может участвовать в звонке и писать plaintext в Matrix */
   findEligibleForSecretaryTranscription(): Promise<ManagedMatrixRoomDomainEntity[]>;
   /** Обновить флаг членства секретаря (после успешного join или проверки Matrix) */

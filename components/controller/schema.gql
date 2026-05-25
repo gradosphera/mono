@@ -3798,6 +3798,17 @@ type ChatCoopCalendarRoomOption {
   matrixRoomId: String!
 }
 
+type ChatcoopNonProjectCommunicationRoom {
+  """Подпись для отображения комнаты"""
+  displayLabel: String!
+
+  """Тип комнаты (пайщики / совет / секретарь)"""
+  kind: NonProjectRoomKind!
+
+  """Идентификатор комнаты Matrix"""
+  matrixRoomId: String!
+}
+
 type ChatcoopProjectCommunicationRoom {
   """Подпись для отображения (комната / проект Capital)"""
   displayLabel: String!
@@ -3819,6 +3830,26 @@ type ChatcoopRoomMessageLine {
 
   """origin_server_ts из Matrix (мс)"""
   originServerTs: Float!
+}
+
+type ChatcoopSecretaryRoom {
+  """Название комнаты"""
+  displayLabel: String!
+
+  """Можно ли удалить комнату из интерфейса (только комнаты секретаря)"""
+  editable: Boolean!
+
+  """Комната зашифрована (E2EE) — секретарь не транскрибирует такие комнаты"""
+  encrypted: Boolean!
+
+  """Тип комнаты"""
+  kind: ManagedRoomKind!
+
+  """Идентификатор комнаты Matrix"""
+  matrixRoomId: String!
+
+  """Секретарь присутствует в комнате"""
+  secretaryInRoom: Boolean!
 }
 
 input CheckMatrixUsernameInput {
@@ -4886,6 +4917,16 @@ input CreateProjectPropertyInput {
 
   """Имя пользователя"""
   username: String!
+}
+
+input CreateSecretaryRoomInput {
+  """Название комнаты"""
+  displayName: String!
+
+  """
+  Публичная комната (любой может войти) либо приватная (вход по приглашению создателя)
+  """
+  isPublic: Boolean!
 }
 
 input CreateSovietIndividualDataInput {
@@ -7083,6 +7124,14 @@ input MakeClearanceInput {
   username: String!
 }
 
+"""Тип комнаты: пайщики, совет, проект Capital, комната секретаря"""
+enum ManagedRoomKind {
+  CAPITAL_PROJECT
+  COUNCIL
+  MEMBERS
+  SECRETARY
+}
+
 input MarkReportPeriodInput {
   mark: ReportSubmissionMark
   period: Int
@@ -7963,11 +8012,25 @@ type Mutation {
   chatcoopCreateCalendarIcsSubscription: ChatCoopCalendarIcsUrlResponse!
 
   """
+  Создать комнату с секретарём (публичную или приватную); секретарь подключается сразу
+  
+  Требуемые роли: chairman, member. 
+  """
+  chatcoopCreateSecretaryRoom(data: CreateSecretaryRoomInput!): ChatcoopSecretaryRoom!
+
+  """
   Удалить событие календаря
   
   Требуемые роли: chairman, member. 
   """
   chatcoopDeleteCalendarEvent(id: String!): Boolean!
+
+  """
+  Удалить комнату секретаря: вывести секретаря и снять комнату с синхронизации (возвращает matrixRoomId)
+  
+  Требуемые роли: chairman, member. 
+  """
+  chatcoopRemoveSecretaryRoom(data: RemoveSecretaryRoomInput!): String!
 
   """
   Обновить событие календаря
@@ -8538,6 +8601,13 @@ type Mutation {
   Требуемые роли: chairman. 
   """
   walmoveWallets(input: WalmoveInput!): Ledger2AdjustmentResult!
+}
+
+"""Тип комнаты вне проекта: пайщики, совет, комната секретаря"""
+enum NonProjectRoomKind {
+  COUNCIL
+  MEMBERS
+  SECRETARY
 }
 
 input NotificationWorkflowRecipientInput {
@@ -10264,11 +10334,25 @@ type Query {
   chatcoopListCalendarRooms: [ChatCoopCalendarRoomOption!]!
 
   """
+  Комнаты Matrix вне проектов Capital (пайщики/совет/секретарь) — для синхронизации в blago
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  chatcoopListNonProjectCommunicationRooms: [ChatcoopNonProjectCommunicationRoom!]!
+
+  """
   Комнаты Matrix, привязанные к проекту Capital (реестр ChatCoop)
   
   Требуемые роли: chairman, member, user. 
   """
   chatcoopListProjectCommunicationRooms(data: GetProjectCommunicationRoomsInput!): [ChatcoopProjectCommunicationRoom!]!
+
+  """
+  Все комнаты реестра ChatCoop (системные/проектные — read-only, комнаты секретаря — удаляемые)
+  
+  Требуемые роли: chairman, member. 
+  """
+  chatcoopListSecretaryRooms: [ChatcoopSecretaryRoom!]!
 
   """
   UTC-даты (YYYY-MM-DD), в которых есть сообщения новее afterOriginServerTsExclusive, для комнаты Matrix
@@ -10880,6 +10964,11 @@ type RegistrationProgram {
 
   """Название программы для отображения"""
   title: String!
+}
+
+input RemoveSecretaryRoomInput {
+  """Идентификатор комнаты Matrix, которую нужно удалить"""
+  matrixRoomId: String!
 }
 
 type ReportCalendarPeriodEntry {
