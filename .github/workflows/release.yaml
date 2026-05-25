@@ -233,6 +233,17 @@ jobs:
       - name: Build and push contracts image
         working-directory: components/contracts
         run: |
+          # Ретрай push'а: резолвинг registry-1.docker.io на runner'е изредка
+          # моргает (DNS-таймаут к 127.0.0.53) — 3 попытки с паузой.
+          dpush() {
+            local ref="$1" n=1
+            until docker push "$ref"; do
+              [ "$n" -ge 3 ] && { echo "::error::docker push $ref не удался после $n попыток"; return 1; }
+              echo "::warning::docker push $ref упал (попытка $n/3) — повтор через 10с"
+              n=$((n+1)); sleep 10
+            done
+          }
+
           IMAGE="dicoop/contracts"
           SHORT_SHA="${SHA::7}"
           docker build \
@@ -241,14 +252,14 @@ jobs:
             --label "build.mode=$BUILD_MODE" \
             -t "$IMAGE:$CONTRACTS_TAG" \
             ./docker/.context
-          docker push "$IMAGE:$CONTRACTS_TAG"
+          dpush "$IMAGE:$CONTRACTS_TAG"
 
           docker tag "$IMAGE:$CONTRACTS_TAG" "$IMAGE:$CONTRACTS_TAG-$SHORT_SHA"
-          docker push "$IMAGE:$CONTRACTS_TAG-$SHORT_SHA"
+          dpush "$IMAGE:$CONTRACTS_TAG-$SHORT_SHA"
 
           if [ -n "$CONTRACTS_EXTRA" ]; then
             docker tag "$IMAGE:$CONTRACTS_TAG" "$IMAGE:$CONTRACTS_EXTRA"
-            docker push "$IMAGE:$CONTRACTS_EXTRA"
+            dpush "$IMAGE:$CONTRACTS_EXTRA"
           fi
 
       - name: Verify pushed contracts image
@@ -261,15 +272,31 @@ jobs:
 
       - name: Build and push base image
         run: |
+          dpush() {
+            local ref="$1" n=1
+            until docker push "$ref"; do
+              [ "$n" -ge 3 ] && { echo "::error::docker push $ref не удался после $n попыток"; return 1; }
+              echo "::warning::docker push $ref упал (попытка $n/3) — повтор через 10с"
+              n=$((n+1)); sleep 10
+            done
+          }
           docker build --target runtime -t "dicoop/mono-base:$TAG_NAME" .
-          docker push "dicoop/mono-base:$TAG_NAME"
+          dpush "dicoop/mono-base:$TAG_NAME"
           if [ "$IS_PROD" = "true" ]; then
             docker tag "dicoop/mono-base:$TAG_NAME" dicoop/mono-base:latest
-            docker push dicoop/mono-base:latest
+            dpush dicoop/mono-base:latest
           fi
 
       - name: Build and push service images
         run: |
+          dpush() {
+            local ref="$1" n=1
+            until docker push "$ref"; do
+              [ "$n" -ge 3 ] && { echo "::error::docker push $ref не удался после $n попыток"; return 1; }
+              echo "::warning::docker push $ref упал (попытка $n/3) — повтор через 10с"
+              n=$((n+1)); sleep 10
+            done
+          }
           build_service() {
             local SVC="$1" PKG="$2" CMD="$3"
             local DOCKERFILE="Dockerfile.$SVC"
@@ -278,10 +305,10 @@ jobs:
               echo "CMD [\"pnpm\", \"-F\", \"$PKG\", \"run\", \"$CMD\"]"
             } > "$DOCKERFILE"
             docker build -t "dicoop/$SVC:$TAG_NAME" -f "$DOCKERFILE" .
-            docker push "dicoop/$SVC:$TAG_NAME"
+            dpush "dicoop/$SVC:$TAG_NAME"
             if [ "$IS_PROD" = "true" ]; then
               docker tag "dicoop/$SVC:$TAG_NAME" "dicoop/$SVC:latest"
-              docker push "dicoop/$SVC:latest"
+              dpush "dicoop/$SVC:latest"
             fi
           }
 
