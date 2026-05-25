@@ -4,8 +4,12 @@
   .table-toolbar(v-if='$slots.top')
     slot(name='top')
 
-  .table-loading(v-if='loading && !documents.length')
-    q-spinner(size='32px', color='primary')
+  TableSkeleton(
+    v-if='loading && !documents.length',
+    :columns='skeletonColumns',
+    :rows='6',
+    min-width='880px'
+  )
   .table-wrap(v-else-if='documents.length')
     .table-scroll
       table.table
@@ -83,6 +87,8 @@ import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
+import { TableSkeleton } from 'src/shared/ui/base/TableSkeleton';
+import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
 import { FailAlert } from 'src/shared/api';
 import {
   prepareDocumentPackageArchive,
@@ -106,6 +112,17 @@ const emit = defineEmits<{
   (e: 'load'): void;
   (e: 'toggle-expand', id: string): void;
 }>();
+
+// Колонки скелетона повторяют шапку реальной таблицы — каркас не дёргается,
+// когда подгружаются документы.
+const skeletonColumns: TableSkeletonColumn[] = [
+  { class: 'col-toggle', cell: 'icon' },
+  { label: 'ID', class: 'col-id', cell: 'badge' },
+  { label: 'Дата', class: 'col-date', cell: 'text', cellWidth: '84px' },
+  { label: 'Документ', cell: 'text' },
+  { label: 'Подписи', class: 'col-signers', cell: 'badge' },
+  { label: 'Действия', class: 'col-action', cell: 'icon' },
+];
 
 const expanded = reactive(new Map<string, boolean>());
 const downloadingPackages = reactive(new Map<string, boolean>());
@@ -227,12 +244,6 @@ const downloadPackage = async (
 
 .table-toolbar {
   margin-bottom: var(--p-3, 12px);
-}
-
-.table-loading {
-  display: flex;
-  justify-content: center;
-  padding: var(--p-8, 32px);
 }
 
 /* Горизонтальный скролл на узких экранах вместо мобильной карточной верстки. */
