@@ -356,5 +356,5 @@ jobs:
           curl -fsSL -X POST \
             -H "Authorization: token ${{ secrets.GITEA_DISPATCH_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"ref":"main","inputs":{"mono_sha":"${{ github.sha }}","mono_ref":"${{ github.ref }}"}}' \
+            -d '{"ref":"master","inputs":{"mono_sha":"${{ github.sha }}","mono_ref":"${{ github.ref }}"}}' \
             "${{ github.server_url }}/api/v1/repos/C9S/coopenomics/actions/workflows/publish-docs.yaml/dispatches"
