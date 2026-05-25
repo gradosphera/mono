@@ -131,27 +131,35 @@ const displayValue = (value?: string | null) => value || '—';
   font-weight: 600;
 }
 
+/* Тот же ритм, что у ContactSheet: подпись сверху, значение под ней,
+   слева, с hairline между строками — единая раскладка по всей карточке. */
 .contacts-rows {
   display: flex;
   flex-direction: column;
-  gap: var(--p-3, 12px);
   margin: 0;
 }
 .contacts-row {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--p-4, 16px);
+  flex-direction: column;
+  gap: var(--p-1, 4px);
+  padding: var(--p-3, 12px) 0;
+  border-bottom: 1px solid var(--p-line);
+}
+.contacts-row:first-child {
+  padding-top: 0;
+}
+.contacts-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 .contacts-row__label {
-  font-size: var(--p-fs-body-sm, 13px);
-  color: var(--p-ink-3);
+  font-size: var(--p-fs-meta, 12px);
+  color: var(--p-ink-2);
 }
 .contacts-row__value {
   margin: 0;
   font-size: var(--p-fs-body, 14px);
   font-weight: 500;
-  text-align: right;
   color: var(--p-ink-1);
   overflow-wrap: anywhere;
 }
