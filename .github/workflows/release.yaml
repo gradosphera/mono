@@ -5,8 +5,12 @@ name: Release
 # Порядок (через jobs.needs):
 #   1) release             — контракты + контейнеры + webhook деплоя (атомарно)
 #   2) publish-packages    — npm publish через lerna (если не -alpha)
-#   3) publish-docs        — mkdocs + standards-site → gh-pages (если не -alpha + ветка main)
-#   4) trigger-coopenomics — repository_dispatch в coopenomics/coopenomics (тот же гейт, что docs)
+#   3) trigger-coopenomics — workflow_dispatch сборки сайта C9S/coopenomics на
+#                            Gitea (если не -alpha + ветка main); он сам тянет
+#                            mono и пересобирает доки.
+#
+# publish-docs (gh-pages на github.com) удалён 2026-05-25 — после переезда на
+# Gitea Pages-публикация невалидна; доки деплоятся через C9S/coopenomics.
 #
 # Зачем последовательно: пакеты/доки/внешний триггер не должны уезжать,
 # если релиз контрактов или контейнеров провалился. Раньше четыре workflow'а
@@ -332,149 +336,25 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # ============================================================================
-  # publish-docs — mkdocs + standards-site → gh-pages (бывший publish-docs.yaml).
+  # trigger-coopenomics-docs — пересборка сайта C9S/coopenomics.
   # Гейт: не-alpha + ветка main.
-  # ВНИМАНИЕ: gh-pages step пушит на github.com/coopenomics/mono — это GitHub
-  # Pages. При переезде на Gitea Actions нужно будет либо подложить PAT для
-  # внешнего push'а в GitHub, либо переключить публикацию на Gitea Pages.
-  # ============================================================================
-  publish-docs:
-    needs: release
-    if: ${{ !contains(github.ref, '-alpha') && needs.release.outputs.branch == 'main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Версия pnpm берётся из `packageManager` корневого package.json,
-      # синхронно с publish-packages job'ом и Dockerfile'ами.
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install Python requirements
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install mkdocs-material mkdocs-macros-plugin mkdocs-section-index pymdown-extensions
-        working-directory: ./components/docs
-
-      - name: Install Node.js dependencies
-        run: pnpm install
-        working-directory: ./components/docs
-
-      - name: Patch spectaql-config.yml for CI
-        run: |
-          sed -i.bak "0,/url:.*/s|url:.*|url: 'https://testnet.coopenomics.world/backend/v1/graphql'|" spectaql-config.yml
-        working-directory: ./components/controller
-
-      - name: Show patched spectaql-config.yml
-        run: cat spectaql-config.yml
-        working-directory: ./components/controller
-
-      - name: Build cooptypes
-        run: pnpm run build
-        working-directory: ./components/cooptypes
-
-      - name: Generate controller docs
-        run: pnpm run docs
-        working-directory: ./components/controller
-
-      - name: Copy controller docs
-        run: |
-          mkdir -p ./components/docs/docs/graphql
-          cp -r ./components/controller/docs/* ./components/docs/docs/graphql/
-
-      - name: Generate sdk docs
-        run: pnpm run docs
-        working-directory: ./components/sdk
-
-      - name: Copy sdk docs
-        run: |
-          mkdir -p ./components/docs/docs/sdk
-          cp -r ./components/sdk/docs/* ./components/docs/docs/sdk/
-
-      - name: Generate cooptypes docs
-        run: pnpm run docs
-        working-directory: ./components/cooptypes
-
-      - name: Copy cooptypes docs
-        run: |
-          mkdir -p ./components/docs/docs/cooptypes
-          cp -r ./components/cooptypes/docs/* ./components/docs/docs/cooptypes/
-
-      # ── standards-site → /standards/ на docs.цифровой-кооператив.рф ──
-      # Отдельный Vue-сайт с BPMN-графом кооперативных стандартов,
-      # публикуется как поддиректория на том же домене. Vite собирает
-      # с base='/standards/' (см. vite.config.ts), относительные пути
-      # внутри dist/ и hash-router работают корректно.
-      # dist кладём в docs/standards/ ДО mkdocs build — так же, как
-      # graphql/sdk/cooptypes; mkdocs сам включит его в итоговый site/.
-      - name: Build standards-site
-        run: pnpm run build
-        working-directory: ./components/contracts/standards-site
-
-      - name: Copy standards-site into docs/standards
-        run: |
-          mkdir -p ./components/docs/docs/standards
-          cp -r ./components/contracts/standards-site/dist/* ./components/docs/docs/standards/
-
-      - name: Build docs (mkdocs)
-        run: |
-          source venv/bin/activate
-          mkdocs build
-        working-directory: ./components/docs
-
-      - name: Remove specific large file before publishing
-        run: |
-          rm -f ./components/docs/site/sdk/typedoc.json
-          if [ -f "./components/docs/site/sdk/typedoc.json" ]; then
-            echo "ERROR: typedoc.json still exists!"
-            exit 1
-          else
-            echo "SUCCESS: typedoc.json removed successfully"
-          fi
-
-      - name: Publish to GitHub Pages
-        run: npx gh-pages --nojekyll -d site --repo https://x-access-token:${GITHUB_TOKEN}@github.com/coopenomics/mono.git
-        working-directory: ./components/docs
-        env:
-          GIT_AUTHOR_NAME: github-actions
-          GIT_AUTHOR_EMAIL: github-actions@github.com
-          GIT_COMMITTER_NAME: github-actions
-          GIT_COMMITTER_EMAIL: github-actions@github.com
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Trigger docs deployment webhook
-        if: ${{ success() }}
-        run: |
-          curl -X POST "${{ vars.DOCS_DEPLOY_WEBHOOK_URL }}" \
-            -H 'Content-Type: application/json' \
-            -d '{"ref":"${{ github.ref }}","sha":"${{ github.sha }}","branch":"${{ github.ref_name }}"}'
-
-  # ============================================================================
-  # trigger-coopenomics-docs — repository_dispatch в coopenomics/coopenomics
-  # (бывший build-contracts-docs.yaml). Гейт идентичен publish-docs.
+  #
+  # coopenomics переехал на Gitea (C9S/coopenomics); его publish-docs.yaml
+  # клонирует mono и пересобирает сайт. Gitea НЕ имеет API для
+  # repository_dispatch — только workflow_dispatch, поэтому дёргаем целевой
+  # workflow через Gitea API с PAT (secret GITEA_DISPATCH_TOKEN, права write
+  # на C9S/coopenomics). Целевой workflow слушает workflow_dispatch с входами
+  # mono_sha/mono_ref.
   # ============================================================================
   trigger-coopenomics-docs:
     needs: release
     if: ${{ !contains(github.ref, '-alpha') && needs.release.outputs.branch == 'main' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Coopenomics deployment
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.COOPENOMICS_PAT }}
-          repository: coopenomics/coopenomics
-          event-type: deploy_from_mono
-          client-payload: '{"repository": "${{ github.repository }}", "sha": "${{ github.sha }}", "ref": "${{ github.ref }}", "actor": "${{ github.actor }}"}'
+      - name: Trigger coopenomics website rebuild (Gitea workflow_dispatch)
+        run: |
+          curl -fsSL -X POST \
+            -H "Authorization: token ${{ secrets.GITEA_DISPATCH_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"ref":"main","inputs":{"mono_sha":"${{ github.sha }}","mono_ref":"${{ github.ref }}"}}' \
+            "${{ github.server_url }}/api/v1/repos/C9S/coopenomics/actions/workflows/publish-docs.yaml/dispatches"
