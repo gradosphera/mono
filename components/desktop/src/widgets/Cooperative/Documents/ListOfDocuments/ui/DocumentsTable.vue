@@ -1,5 +1,5 @@
 <template lang="pug">
-.scroll-area(style='height: calc(100% - $toolbar-min-height); overflow-y: auto')
+.scroll-area
   q-table.q-mb-md.documents-table(
     ref='tableRef',
     flat,
@@ -45,8 +45,8 @@
           )
 
         q-td {{ getDocumentHash(props.row).substring(0, 10) || '' }}
-        q-td(style="max-width: 400px; word-wrap: break-word; white-space: normal") {{ getDocumentTitle(props.row) }}
-        q-td(style="max-width: 200px; word-wrap: break-word; white-space: normal") {{ getSignersFromDocumentPackage(props.row) }}
+        q-td.cell-title {{ getDocumentTitle(props.row) }}
+        q-td.cell-signers {{ getSignersFromDocumentPackage(props.row) }}
         q-td.text-center
           q-btn(
             size='sm',
@@ -199,8 +199,24 @@ const downloadPackage = async (packageAggregate: IDocumentPackageAggregate) => {
   }
 };
 </script>
-<style>
-.documents-table .q-table__top {
-  padding: 0px !important;
+<style scoped lang="scss">
+.scroll-area {
+  overflow-y: auto;
+}
+
+/* Перенос длинного заголовка/списка подписантов без распирания таблицы. */
+.cell-title {
+  max-width: 400px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+.cell-signers {
+  max-width: 200px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.documents-table :deep(.q-table__top) {
+  padding: 0;
 }
 </style>

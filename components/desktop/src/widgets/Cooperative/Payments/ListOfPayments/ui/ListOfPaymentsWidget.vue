@@ -2,9 +2,7 @@
 
 .row.justify-center
   .col-12
-    .scroll-area(
-      style='height: calc(100% - $toolbar-min-height); overflow-y: auto'
-    )
+    .scroll-area
       q-table.q-mb-md(
         v-if='payments && payments.items',
         ref='tableRef',
@@ -48,9 +46,7 @@
                 :expanded='expanded.get(props.row.id)',
                 @click='toggleExpand(props.row.id)'
               )
-            q-td(
-              style='max-width: 150px; word-wrap: break-word; white-space: normal'
-            ) {{ getShortNameFromCertificate(props.row.username_certificate) || props.row.username }}
+            q-td.cell-wrap {{ getShortNameFromCertificate(props.row.username_certificate) || props.row.username }}
 
             q-td {{ formatDateToHumanDateTime(props.row.created_at) }}
 
@@ -66,7 +62,7 @@
               span {{ props.row.direction_label }}
 
             q-td
-              q-badge(:color='getStatusColor(props.row.status)') {{ props.row.status_label }}
+              BaseBadge(:variant='getStatusVariant(props.row.status)') {{ props.row.status_label }}
 
             q-td.q-gutter-x-sm
 
@@ -78,7 +74,7 @@
                 v-if='!hideActions && ["EXPIRED", "PENDING", "FAILED"].includes(props.row.status)',
                 :id='props.row.id'
               )
-              span.text-grey(v-else-if='!hideActions') нет доступных действий
+              span.no-actions(v-else-if='!hideActions') нет доступных действий
 
           q-tr.q-virtual-scroll--with-prev(
             no-hover,
@@ -99,25 +95,26 @@ import PaymentCard from './PaymentCard.vue';
 import { PaymentDetails } from 'src/shared/ui';
 import { useWindowSize } from 'src/shared/hooks';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
+import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
+import type { BaseBadgeVariant } from 'src/shared/ui/base/BaseBadge';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
 import { Zeus } from '@coopenomics/sdk';
 // import { getName } from 'src/shared/lib/utils';
 
-const statusColors: Record<string, string> = {
-  [Zeus.PaymentStatus.COMPLETED]: 'teal',
-  [Zeus.PaymentStatus.PENDING]: 'orange',
-  [Zeus.PaymentStatus.FAILED]: 'red',
-  [Zeus.PaymentStatus.PAID]: 'blue',
-  [Zeus.PaymentStatus.REFUNDED]: 'grey',
-  [Zeus.PaymentStatus.EXPIRED]: 'grey',
+// Статус платежа → canon-вариант бейджа (точка + цвет из дизайн-токенов).
+const statusVariants: Record<string, BaseBadgeVariant> = {
+  [Zeus.PaymentStatus.COMPLETED]: 'pos',
+  [Zeus.PaymentStatus.PENDING]: 'warn',
+  [Zeus.PaymentStatus.FAILED]: 'neg',
+  [Zeus.PaymentStatus.PAID]: 'info',
+  [Zeus.PaymentStatus.REFUNDED]: 'neutral',
+  [Zeus.PaymentStatus.EXPIRED]: 'neutral',
 };
 
-const getStatusColor = (status?: string | null) => {
-  if (!status) {
-    return 'grey';
-  }
-  return statusColors[status] || 'grey';
+const getStatusVariant = (status?: string | null): BaseBadgeVariant => {
+  if (!status) return 'neutral';
+  return statusVariants[status] || 'neutral';
 };
 
 const getDirectionIcon = (direction?: string | null) => {
@@ -308,9 +305,20 @@ const tableRef = ref(null);
 const pagination = ref({ rowsPerPage: 0 });
 </script>
 
-<style>
-.q-list--dense > .q-item,
-.q-item--dense {
-  padding: 0px !important;
+<style scoped lang="scss">
+.scroll-area {
+  overflow-y: auto;
+}
+
+/* Перенос длинного имени пайщика в ячейке без распирания таблицы. */
+.cell-wrap {
+  max-width: 150px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.no-actions {
+  color: var(--p-ink-3);
+  font-size: var(--p-fs-body-sm, 13px);
 }
 </style>

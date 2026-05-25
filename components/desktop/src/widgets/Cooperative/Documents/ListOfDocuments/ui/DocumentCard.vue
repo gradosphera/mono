@@ -30,7 +30,6 @@
 import { useQuasar } from 'quasar';
 import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
 import type { IDocumentPackageAggregate } from 'src/entities/Document/model';
-import 'src/shared/ui/CardStyles/index.scss';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 
 const $q = useQuasar();
@@ -70,19 +69,14 @@ function getDocumentHash(doc: IDocumentPackageAggregate) {
 }
 
 .document-card {
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease-in-out;
+  border-radius: var(--p-r-lg, 16px);
+  border: 1px solid var(--p-line);
+  box-shadow: var(--p-shadow-card);
+  transition: box-shadow var(--p-dur-base, 0.2s) ease-in-out, transform var(--p-dur-base, 0.2s) ease-in-out;
 
   &:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--p-shadow-pop);
     transform: translateY(-2px);
-  }
-
-  .q-dark & {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -106,7 +100,7 @@ function getDocumentHash(doc: IDocumentPackageAggregate) {
 
     .subtitle {
       font-size: 12px;
-      color: var(--q-gray);
+      color: var(--p-ink-3);
       margin-top: 4px;
     }
   }
