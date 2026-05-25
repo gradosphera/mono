@@ -11,6 +11,10 @@ q-header.app-q-header(:bordered='false')
 
     template(v-if='loggedIn', #crumb)
       BackButton
+      //- Название текущей страницы — крошка слева (тот же meta.title,
+      //- что подсвечен в меню). Появляется рядом с действиями, поэтому
+      //- кнопки действий и сдвинуты вправо.
+      b.topbar__page-title(v-if='pageTitle') {{ pageTitle }}
 
     template(v-if='loggedIn', #actions)
       //- Старый механизм (useHeaderActions store) — для страниц, ещё не
@@ -81,6 +85,11 @@ const isClient = computed(() => Boolean(process.env.CLIENT));
 const loggedIn = computed(
   () => session.isRegistrationComplete && session.isAuth,
 );
+
+// Название текущей страницы для крошки в шапке. vue-router сливает meta
+// всех совпавших записей — у вложенного маршрута title перекрывает
+// родительский, поэтому здесь оказывается имя конечной страницы.
+const pageTitle = computed<string>(() => (route.meta?.title as string) ?? '');
 
 const coopTitle = computed<string>(() => {
   const status = systemStore.info.system_status;

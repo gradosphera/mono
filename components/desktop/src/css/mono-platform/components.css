@@ -1509,7 +1509,7 @@ body {
   color: var(--p-ink-2);
   min-width: 0;
 }
-.topbar__crumb b { color: var(--p-ink); font-weight: 600; letter-spacing: -0.005em; }
+.topbar__crumb b { color: var(--p-ink); font-weight: 600; letter-spacing: -0.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .topbar__crumb svg { width: 12px; height: 12px; color: var(--p-ink-4); flex-shrink: 0; }
 .topbar__brand {
   display: flex;
