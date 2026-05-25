@@ -4,6 +4,7 @@
     DocumentsTable(
       :documents='documentStore.documents',
       :loading='documentStore.loading',
+      :pagination='documentStore.pagination',
       @toggle-expand='toggleExpand',
       @load='loadMoreDocuments'
     )
