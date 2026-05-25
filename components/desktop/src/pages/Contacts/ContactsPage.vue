@@ -5,41 +5,33 @@
     h1.contacts-page__title {{ contacts?.full_name || 'Организация' }}
 
   .contacts-card
-    //- Реквизиты
-    section.contacts-card__sec
-      .contacts-card__sec-head
-        q-icon(name='badge', size='18px')
-        span Реквизиты
-      dl.contacts-rows
-        .contacts-row
-          dt.contacts-row__label ИНН
-          dd.contacts-row__value {{ displayValue(contacts?.details?.inn) }}
-        .contacts-row
-          dt.contacts-row__label ОГРН
-          dd.contacts-row__value {{ displayValue(contacts?.details?.ogrn) }}
+    //- Реквизиты и председатель — единая сетка полей.
+    .contacts-grid
+      .field
+        span.field__label ИНН
+        span.field__value {{ displayValue(contacts?.details?.inn) }}
+      .field
+        span.field__label ОГРН
+        span.field__value {{ displayValue(contacts?.details?.ogrn) }}
+      .field(v-if='chairman')
+        span.field__label Председатель совета
+        span.field__value {{ chairman }}
 
-    //- Контакты — canon ContactSheet (копирование, mailto/tel)
-    section.contacts-card__sec
-      .contacts-card__sec-head
-        q-icon(name='contact_page', size='18px')
-        span Контакты
-      ContactSheet(:contacts='contactItems')
-
-    //- Руководство
-    section.contacts-card__sec(v-if='chairman')
-      .contacts-card__sec-head
-        q-icon(name='person', size='18px')
-        span Руководство
-      dl.contacts-rows
-        .contacts-row
-          dt.contacts-row__label Председатель совета
-          dd.contacts-row__value {{ chairman }}
+    //- Контакты — те же поля, значения-ссылки, без иконок и заголовка.
+    .contacts-grid.contacts-grid--contacts
+      .field(v-if='contacts?.phone')
+        span.field__label Телефон
+        a.field__value.field__value--link(:href='`tel:${phoneHref}`') {{ contacts.phone }}
+      .field(v-if='contacts?.email')
+        span.field__label Email
+        a.field__value.field__value--link(:href='`mailto:${contacts.email}`') {{ contacts.email }}
+      .field.field--wide(v-if='contacts?.full_address')
+        span.field__label Адрес
+        span.field__value {{ contacts.full_address }}
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { ContactSheet } from 'src/shared/ui/domain/ContactSheet';
-import type { ContactItem } from 'src/shared/ui/domain/ContactSheet';
 import { useSystemStore } from 'src/entities/System/model';
 
 const { info } = useSystemStore();
@@ -56,20 +48,9 @@ const chairman = computed(() => {
     .join(' ');
 });
 
-// Собираем телефон/почту/адрес в canon ContactSheet (только заполненные).
-const contactItems = computed<ContactItem[]>(() => {
-  const items: ContactItem[] = [];
-  if (contacts.value?.phone) {
-    items.push({ type: 'phone', value: contacts.value.phone });
-  }
-  if (contacts.value?.email) {
-    items.push({ type: 'email', value: contacts.value.email });
-  }
-  if (contacts.value?.full_address) {
-    items.push({ type: 'address', value: contacts.value.full_address });
-  }
-  return items;
-});
+const phoneHref = computed(() =>
+  (contacts.value?.phone || '').replace(/\s+/g, ''),
+);
 
 const displayValue = (value?: string | null) => value || '—';
 </script>
@@ -104,63 +85,51 @@ const displayValue = (value?: string | null) => value || '—';
   color: var(--p-ink);
 }
 
-/* Единая спокойная поверхность с секциями через hairline. */
+/* Единая спокойная поверхность; одна линия делит реквизиты и контакты. */
 .contacts-card {
-  display: flex;
-  flex-direction: column;
   background: var(--p-surface);
   border: 1px solid var(--p-line);
   border-radius: var(--p-r-lg, 16px);
-  overflow: hidden;
-}
-.contacts-card__sec {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-3, 12px);
   padding: var(--p-5, 20px);
 }
-.contacts-card__sec + .contacts-card__sec {
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--p-4, 16px) var(--p-6, 24px);
+}
+.contacts-grid--contacts {
+  margin-top: var(--p-5, 20px);
+  padding-top: var(--p-5, 20px);
   border-top: 1px solid var(--p-line);
 }
-.contacts-card__sec-head {
-  display: flex;
-  align-items: center;
-  gap: var(--p-2, 8px);
-  color: var(--p-ink-2);
-  font-size: var(--p-fs-body-sm, 13px);
-  font-weight: 600;
-}
 
-/* Тот же ритм, что у ContactSheet: подпись сверху, значение под ней,
-   слева, с hairline между строками — единая раскладка по всей карточке. */
-.contacts-rows {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-}
-.contacts-row {
+.field {
   display: flex;
   flex-direction: column;
   gap: var(--p-1, 4px);
-  padding: var(--p-3, 12px) 0;
-  border-bottom: 1px solid var(--p-line);
+  min-width: 0;
 }
-.contacts-row:first-child {
-  padding-top: 0;
+.field--wide {
+  grid-column: 1 / -1;
 }
-.contacts-row:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-.contacts-row__label {
+.field__label {
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
 }
-.contacts-row__value {
-  margin: 0;
+.field__value {
   font-size: var(--p-fs-body, 14px);
   font-weight: 500;
   color: var(--p-ink-1);
   overflow-wrap: anywhere;
+}
+a.field__value--link {
+  color: var(--p-primary);
+  text-decoration: none;
+  transition: color var(--p-dur-fast, 120ms) var(--p-ease-standard);
+}
+a.field__value--link:hover {
+  color: var(--p-primary-hover);
+  text-decoration: underline;
 }
 </style>
