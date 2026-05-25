@@ -13,11 +13,11 @@ name: Typecheck
 #
 # Триггеры:
 #  - pull_request на dev — гейт перед мерджем в основную ветку;
-#  - workflow_call — переиспользуется из release.yaml как `needs:` у release-job,
-#    чтобы битый тэг не уехал в DockerHub.
+#  - workflow_call — оставлен для переиспользования, но release.yaml его
+#    больше НЕ вызывает (гейт из релиза убран как избыточный — типы
+#    проверяются на PR в dev до того, как код доедет до тэга).
 #
-# Push в dev/testnet/main НЕ триггерит — намеренно (PR-гейт достаточен,
-# а тэги покрывает workflow_call из release.yaml).
+# Push в dev/testnet/main НЕ триггерит — намеренно (PR-гейт на dev достаточен).
 
 on:
   pull_request:
