@@ -1,7 +1,5 @@
 <template lang="pug">
 .payment-methods
-  p.payment-methods__lead Указанные реквизиты используются при платежах от кооператива в пользу пайщика.
-
   template(v-if='wallet.methods && wallet.methods.length > 0')
     BaseCard(
       v-for='method in wallet.methods',
@@ -101,13 +99,6 @@ function methodTitle(method: { method_type: string }): string {
   flex-direction: column;
   gap: var(--p-3, 12px);
   padding: var(--p-6, 24px);
-}
-
-.payment-methods__lead {
-  margin: 0;
-  color: var(--p-ink-2);
-  font-size: var(--p-fs-body-sm, 13px);
-  line-height: var(--p-lh-body-sm, 1.5);
 }
 
 @media (max-width: 768px) {

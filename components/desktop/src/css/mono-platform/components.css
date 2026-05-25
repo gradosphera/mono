@@ -1536,6 +1536,10 @@ body {
   display: none;
 }
 .topbar__actions:has(> .header-actions-host:only-child:empty) + .topbar__right {
+  /* actions скрыт (display:none), но adjacent-селектор `.topbar__actions +
+     .topbar__right` всё равно матчится и обнуляет margin-left — поэтому здесь
+     возвращаем auto, иначе правая группа прилипает влево к крошке. */
+  margin-left: auto;
   border-left: 0;
   padding-left: 0;
 }
