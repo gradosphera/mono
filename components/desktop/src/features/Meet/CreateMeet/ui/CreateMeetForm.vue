@@ -154,10 +154,19 @@ q-dialog(
                   span.meet-review__label Доп. информация
                   span.meet-review__value {{ formData.details }}
               .meet-review__agenda-title Повестка ({{ agendaPoints.length }})
-              ol.meet-review__agenda
-                li.meet-review__agenda-item(v-for='(p, i) in agendaPoints', :key='i')
-                  .meet-review__agenda-q {{ p.title }}
-                  .meet-review__agenda-d {{ p.decision }}
+              .meet-review__agenda
+                .meet-agenda-card(v-for='(p, i) in agendaPoints', :key='i')
+                  .meet-agenda-card__head
+                    span.meet-agenda-card__num Вопрос {{ i + 1 }}
+                  .meet-review__field
+                    span.meet-review__field-label Вопрос
+                    span.meet-review__field-value {{ p.title || '—' }}
+                  .meet-review__field
+                    span.meet-review__field-label Проект решения
+                    span.meet-review__field-value {{ p.decision || '—' }}
+                  .meet-review__field(v-if='p.context')
+                    span.meet-review__field-label Приложения
+                    span.meet-review__field-value {{ p.context }}
 
     //- ===== Подвал: навигация =====
     footer.meet-wizard__foot
@@ -517,21 +526,24 @@ const handleSubmit = () => {
   margin-bottom: var(--p-2, 8px);
 }
 .meet-review__agenda {
-  list-style: decimal;
-  margin: 0;
-  padding-left: var(--p-5, 20px);
   display: flex;
   flex-direction: column;
   gap: var(--p-3, 12px);
 }
-.meet-review__agenda-q {
-  font-size: var(--p-fs-body, 14px);
-  color: var(--p-ink-1);
+.meet-review__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-.meet-review__agenda-d {
-  font-size: var(--p-fs-body-sm, 13px);
+.meet-review__field-label {
+  font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
-  margin-top: 2px;
+}
+.meet-review__field-value {
+  font-size: var(--p-fs-body-sm, 13px);
+  color: var(--p-ink-1);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 /* ===== Подвал ===== */

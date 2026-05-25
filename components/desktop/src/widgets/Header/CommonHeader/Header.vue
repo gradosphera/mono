@@ -56,6 +56,7 @@ import config from 'src/app/config';
 import { useSessionStore } from 'src/entities/Session';
 import { useSystemStore } from 'src/entities/System/model';
 import { useWindowSize, useHeaderActionsReader } from 'src/shared/hooks';
+import { useDesktopStore } from 'src/entities/Desktop/model';
 import { AppHeader } from 'src/shared/ui/layout/AppHeader';
 import { ToogleDarkLight } from 'src/shared/ui/ToogleDarkLight';
 import { BackButton } from 'src/widgets/Header/BackButton';
@@ -79,6 +80,7 @@ const session = useSessionStore();
 const systemStore = useSystemStore();
 const { isMobile } = useWindowSize();
 const { headerActions } = useHeaderActionsReader();
+const desktopStore = useDesktopStore();
 
 const isClient = computed(() => Boolean(process.env.CLIENT));
 
@@ -89,7 +91,12 @@ const loggedIn = computed(
 // Название текущей страницы для крошки в шапке. vue-router сливает meta
 // всех совпавших записей — у вложенного маршрута title перекрывает
 // родительский, поэтому здесь оказывается имя конечной страницы.
-const pageTitle = computed<string>(() => (route.meta?.title as string) ?? '');
+// Detail-страница может задать своё имя в шапке (например название
+// собрания) через desktopStore.setPageTitleOverride — оно перекрывает
+// route.meta.title.
+const pageTitle = computed<string>(
+  () => desktopStore.pageTitleOverride ?? (route.meta?.title as string) ?? '',
+);
 
 const coopTitle = computed<string>(() => {
   const status = systemStore.info.system_status;
