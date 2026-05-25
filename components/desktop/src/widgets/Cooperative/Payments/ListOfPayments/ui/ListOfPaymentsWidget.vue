@@ -1,7 +1,11 @@
 <template lang="pug">
 .payments-table
-  .table-loading(v-if='onLoading && !items.length')
-    q-spinner(size='32px', color='primary')
+  TableSkeleton(
+    v-if='onLoading && !items.length',
+    :columns='skeletonColumns',
+    :rows='6',
+    :min-width='hideActions ? "880px" : "1000px"'
+  )
   .table-wrap(v-else-if='items.length')
     .table-scroll
       table.table(:class='{ "table--actions": !hideActions }')
@@ -75,6 +79,8 @@ import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import type { BaseBadgeVariant } from 'src/shared/ui/base/BaseBadge';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
+import { TableSkeleton } from 'src/shared/ui/base/TableSkeleton';
+import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
 import { Zeus } from '@coopenomics/sdk';
@@ -118,6 +124,24 @@ const getDirectionIcon = (direction?: string | null) => {
     ? 'fa-solid fa-arrow-down'
     : 'fa-solid fa-arrow-up';
 };
+
+// Колонки скелетона повторяют шапку реальной таблицы платежей; колонка
+// «Действия» появляется только когда экшены не скрыты — как и в таблице.
+const skeletonColumns = computed<TableSkeletonColumn[]>(() => {
+  const cols: TableSkeletonColumn[] = [
+    { class: 'col-toggle', cell: 'icon' },
+    { label: 'Пайщик', cell: 'text' },
+    { label: 'Дата создания', cell: 'text', cellWidth: '120px' },
+    { label: 'Сумма', class: 'col-num', cell: 'text', cellWidth: '64px' },
+    { label: 'Тип платежа', cell: 'text' },
+    { label: 'Направление', cell: 'text', cellWidth: '90px' },
+    { label: 'Статус', cell: 'badge' },
+  ];
+  if (!props.hideActions) {
+    cols.push({ label: 'Действия', class: 'col-action', cell: 'icon' });
+  }
+  return cols;
+});
 
 const sortState = reactive({ sortBy: '', sortDir: '' as '' | 'asc' | 'desc' });
 
@@ -193,12 +217,6 @@ onMounted(() => {
 <style lang="scss" scoped>
 .payments-table {
   width: 100%;
-}
-
-.table-loading {
-  display: flex;
-  justify-content: center;
-  padding: var(--p-8, 32px);
 }
 
 /* Горизонтальный скролл на узких экранах — вместо отдельной мобильной
