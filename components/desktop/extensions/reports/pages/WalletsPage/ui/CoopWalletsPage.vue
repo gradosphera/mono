@@ -29,7 +29,7 @@ div.page-shell
           q-td.text-right {{ formatAsset2Digits(props.row.blocked) }}
           q-td.text-right(auto-width)
             q-btn(
-              v-if='isChairman'
+              v-if='isChairman && transferEnabled'
               flat dense round size='sm' color='primary'
               icon='fa-solid fa-arrow-right-arrow-left'
               @click='openTransferFor(props.row.id)'
@@ -149,6 +149,13 @@ const ledger2Store = useLedger2Store()
 const session = useSessionStore()
 const { isChairman } = storeToRefs(session)
 
+// Переводы между кошельками временно скрыты. Текущий UI открывал перевод
+// с любого кошелька, включая L3-кошельки пайщиков (w.wal.member) — это
+// неверно: переводы должны быть доступны только между кооперативными
+// кошельками. Вернём, когда определим допустимые пары источник→назначение.
+// Весь код перевода (диалог, обработчики, колонка) сохранён под этим флагом.
+const transferEnabled = false
+
 const { registerAction, unregisterAction } = useHeaderActions()
 const HEADER_ACTION_ID = 'reports-wallets-coop-transfer'
 
@@ -210,7 +217,7 @@ const columns = computed<any[]>(() => {
     { name: 'available', align: 'right', label: 'Доступно', field: 'available', sortable: true },
     { name: 'blocked', align: 'right', label: 'Заблокировано', field: 'blocked', sortable: true },
   ]
-  if (isChairman.value) {
+  if (isChairman.value && transferEnabled) {
     base.push({ name: 'actions', align: 'right', label: '', field: 'actions', sortable: false })
   }
   return base
@@ -273,7 +280,8 @@ onMounted(async () => {
 
   // Кнопка «Перевести» в шапке сайта — только председателю.
   // Регистрируем после загрузки, чтобы не мигала на ходу.
-  if (isChairman.value) {
+  // transferEnabled=false — переводы временно скрыты целиком (см. выше).
+  if (isChairman.value && transferEnabled) {
     registerAction({
       id: HEADER_ACTION_ID,
       component: markRaw(TransferWalletsButton),

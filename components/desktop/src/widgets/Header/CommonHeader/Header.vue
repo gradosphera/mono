@@ -11,10 +11,16 @@ q-header.app-q-header(:bordered='false')
 
     template(v-if='loggedIn', #crumb)
       BackButton
-      //- Название текущей страницы — крошка слева (тот же meta.title,
-      //- что подсвечен в меню). Появляется рядом с действиями, поэтому
-      //- кнопки действий и сдвинуты вправо.
-      b.topbar__page-title(v-if='pageTitle') {{ pageTitle }}
+      //- Хлебные крошки: путь внутри рабочего стола (например
+      //- «Отчётность › Календарь»). Последняя крошка — текущая страница
+      //- (ink, bold), предыдущие — приглушённый родитель, между ними
+      //- chevron. Корень стола в крошку не выводим. Detail-страница может
+      //- задать своё имя через desktopStore.setPageTitleOverride — тогда
+      //- крошка одна (название сущности).
+      template(v-for='(crumb, idx) in crumbs', :key='idx')
+        b(v-if='idx === crumbs.length - 1') {{ crumb }}
+        span(v-else) {{ crumb }}
+        q-icon(v-if='idx < crumbs.length - 1', name='chevron_right')
 
     template(v-if='loggedIn', #actions)
       //- Старый механизм (useHeaderActions store) — для страниц, ещё не
@@ -88,15 +94,20 @@ const loggedIn = computed(
   () => session.isRegistrationComplete && session.isAuth,
 );
 
-// Название текущей страницы для крошки в шапке. vue-router сливает meta
-// всех совпавших записей — у вложенного маршрута title перекрывает
-// родительский, поэтому здесь оказывается имя конечной страницы.
-// Detail-страница может задать своё имя в шапке (например название
-// собрания) через desktopStore.setPageTitleOverride — оно перекрывает
-// route.meta.title.
-const pageTitle = computed<string>(
-  () => desktopStore.pageTitleOverride ?? (route.meta?.title as string) ?? '',
-);
+// Хлебные крошки: путь внутри рабочего стола. route.matched — цепочка
+// совпавших записей от корня стола до листа; берём те, у кого задан
+// meta.title. Первый сегмент — корень рабочего стола («Стол бухгалтера»,
+// «Капитал») — в крошку не выводим: нужен путь ВНУТРИ стола, поэтому при
+// наличии хотя бы одного вложенного уровня отбрасываем его. Для плоской
+// страницы (один уровень) остаётся одна крошка — как было раньше.
+// Detail-страница задаёт своё имя через desktopStore.setPageTitleOverride —
+// оно перекрывает цепочку (крошка одна: название сущности).
+const crumbs = computed<string[]>(() => {
+  if (desktopStore.pageTitleOverride) return [desktopStore.pageTitleOverride];
+  const titled = route.matched.filter((r) => r.meta?.title);
+  const trail = titled.length > 1 ? titled.slice(1) : titled;
+  return trail.map((r) => r.meta!.title as string);
+});
 
 const coopTitle = computed<string>(() => {
   const status = systemStore.info.system_status;
