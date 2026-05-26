@@ -78,7 +78,7 @@ const open = () => {
 
 .app-card__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--p-3, 12px);
 }
 
@@ -104,6 +104,15 @@ const open = () => {
   font-weight: 600;
   letter-spacing: var(--p-ls-h3, 0);
   color: var(--p-ink);
+  // Резервируем ровно две строки под заголовок, чтобы статус и описание
+  // на всех карточках начинались на одной линии (без скачков при переносе).
+  line-height: 1.3;
+  min-height: 2.6em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .app-card__desc {
