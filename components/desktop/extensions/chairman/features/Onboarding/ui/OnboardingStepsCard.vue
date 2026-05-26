@@ -285,13 +285,18 @@ onMounted(init);
   flex-direction: column;
   gap: var(--p-2, 8px);
 }
+// Подписи секций — надстрочные метки (eyebrow): отдельный типографический
+// ярус ниже заголовка окна и заметно отличный от него, чтобы не казаться
+// конкурирующим заголовком на фоне крупного заголовка самого документа.
 .agenda-dialog__label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   font-size: var(--p-fs-body-sm);
   font-weight: 600;
-  color: var(--p-ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--p-ink-3);
 
   .q-icon {
     color: var(--p-primary);
@@ -299,6 +304,7 @@ onMounted(init);
 }
 .agenda-dialog__question {
   font-size: var(--p-fs-body);
+  line-height: 1.5;
   color: var(--p-ink);
 }
 .agenda-dialog__decision {
