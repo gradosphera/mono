@@ -2,22 +2,18 @@
 .extension-logs
   //- Фильтр по диапазону дат
   .extension-logs__filters
-    q-input.extension-logs__date(
+    BaseInput.extension-logs__date(
       v-model="dateFrom"
       type="date"
       label="Дата от"
-      outlined
-      dense
       clearable
       @clear="handleFilterChange"
       @update:model-value="handleFilterChange"
     )
-    q-input.extension-logs__date(
+    BaseInput.extension-logs__date(
       v-model="dateTo"
       type="date"
       label="Дата до"
-      outlined
-      dense
       clearable
       @clear="handleFilterChange"
       @update:model-value="handleFilterChange"
@@ -70,6 +66,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useExtensionStore, type IExtensionLogsResult } from 'src/entities/Extension/model/store'
 import { BaseButton } from 'src/shared/ui/base/BaseButton'
+import { BaseInput } from 'src/shared/ui/base/BaseInput'
 import { EmptyState } from 'src/shared/ui/base/EmptyState'
 import { date } from 'quasar'
 

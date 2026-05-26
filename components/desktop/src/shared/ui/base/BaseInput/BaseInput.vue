@@ -16,12 +16,14 @@
     :suffix="suffix"
     :readonly="readonly"
     :disable="disabled"
+    :clearable="clearable"
     :autocomplete="autocomplete"
     :name="name"
     :for="resolvedId"
     :input-class="mono ? 'base-input__native--mono' : undefined"
     class="base-input"
     @update:model-value="onUpdate"
+    @clear="$emit('clear')"
   >
     <template v-if="$slots.prepend" #prepend>
       <slot name="prepend" />
@@ -55,6 +57,7 @@ const props = withDefaults(defineProps<BaseInputProps>(), {
 
 const emit = defineEmits<{
   'update:modelValue': [value: string];
+  clear: [];
 }>();
 
 const autoId = useId();
