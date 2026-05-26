@@ -1,19 +1,17 @@
 <template lang="pug">
 .desktops-list(v-if='desktops && desktops.length > 0')
-  .q-mt-md
-    q-separator.q-mb-sm
-    .text-subtitle2.text-grey-7.q-mt-md.q-pl-sm.text-center.q-mb-md Рабочие столы
-    q-list(dense)
-      q-item(
-        v-for='(desktop, index) in desktops',
-        :key='desktop.name || index'
-      )
-        q-item-section(avatar)
-          q-avatar(size='md')
-            q-icon(:name='desktop.icon || "fa-solid fa-desktop"', size='sm')
-        q-item-section
-          q-item-label {{ desktop.title || 'Без названия' }}
-          //- q-item-label(caption, v-if='desktop.name') {{ desktop.name }}
+  q-separator.desktops-list__sep
+  .desktops-list__title Рабочие столы
+  q-list(dense)
+    q-item(
+      v-for='(desktop, index) in desktops',
+      :key='desktop.name || index'
+    )
+      q-item-section(avatar)
+        q-avatar(size='md')
+          q-icon(:name='desktop.icon || "fa-solid fa-desktop"', size='sm')
+      q-item-section
+        q-item-label {{ desktop.title || 'Без названия' }}
 </template>
 
 <script setup lang="ts">
@@ -29,6 +27,17 @@ defineProps<Props>()
 <style scoped lang="scss">
 .desktops-list {
   width: 100%;
+}
+.desktops-list__sep {
+  margin: var(--p-2, 8px) 0 var(--p-3, 12px);
+}
+.desktops-list__title {
+  font-size: var(--p-fs-meta);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--p-ink-3);
+  margin-bottom: var(--p-2, 8px);
 }
 </style>
 

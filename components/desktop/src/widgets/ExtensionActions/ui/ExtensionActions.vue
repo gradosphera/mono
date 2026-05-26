@@ -1,58 +1,55 @@
 <template lang="pug">
-.row(v-if='isSettings')
-  SaveButton(
-    :extension-name='extension?.name',
-    :extension-enabled='extension?.enabled ?? false',
-    :config='config',
-    :my-form-ref='formRef',
-    :is-empty='isEmpty ?? false'
-  )
-.q-gutter-sm.text-center(v-if='isMain && !extension.is_installed')
-  q-btn.full-width(
-    color='teal',
-    @click='router.push({ name: "extension-install" })'
-  ) установить
+.ext-actions
+  //- Режим настроек: только кнопка сохранения.
+  template(v-if='isSettings')
+    SaveButton(
+      :extension-name='extension?.name',
+      :extension-enabled='extension?.enabled ?? false',
+      :config='config',
+      :my-form-ref='formRef',
+      :is-empty='isEmpty ?? false'
+    )
 
-  // Показываем список рабочих столов под кнопкой
-  DesktopsList(:desktops='extension.desktops')
+  //- Главная, ещё не установлено: кнопка «установить» + список столов.
+  template(v-if='isMain && !extension.is_installed')
+    q-btn.full-width(
+      color='primary',
+      unelevated,
+      no-caps,
+      @click='router.push({ name: "extension-install" })'
+    ) Установить
+    DesktopsList(:desktops='extension.desktops')
 
-.q-gutter-sm.text-center(v-if='isInstall && !extension.is_installed')
-  // это установка
-  InstallButton(
-    :extension-name='extension?.name',
-    :config='config',
-    :my-form-ref='formRef'
-  )
+  //- Шаг установки.
+  template(v-if='isInstall && !extension.is_installed')
+    InstallButton(
+      :extension-name='extension?.name',
+      :config='config',
+      :my-form-ref='formRef'
+    )
+    DesktopsList(:desktops='extension.desktops')
 
-  // Показываем список рабочих столов под кнопкой установки
-  DesktopsList(:desktops='extension.desktops')
-
-div(v-if='isMain && extension.is_installed')
-  SettingsButton
-  .q-mt-sm(v-if='extension.is_builtin')
-    p.text-center.text-grey минимальное расширение
-  .row(v-else)
-    .col-6.q-pa-sm
+  //- Главная, установлено: настройки / вкл-выкл / удаление.
+  template(v-if='isMain && extension.is_installed')
+    SettingsButton
+    p.ext-actions__note(v-if='extension.is_builtin') Минимальное расширение
+    .ext-actions__toggle(v-else)
       DisableButton(
-        v-if='extension.enabled'
+        v-if='extension.enabled',
         :extension='extension',
         :disabled='extension.is_builtin'
       )
       EnableButton(
-        v-if='!extension.enabled'
+        v-if='!extension.enabled',
         :extension-name='extension.name',
         :config='extension.config',
         :disabled='extension.is_builtin'
       )
-
-    .col-6.q-pa-sm
       UninstallButton(
         :extension-name='extension.name',
         :disabled='extension.is_builtin'
       )
-
-  // Показываем список рабочих столов под кнопками настроек
-  DesktopsList(:desktops='extension.desktops')
+    DesktopsList(:desktops='extension.desktops')
 </template>
 
 <script lang="ts" setup>
@@ -84,3 +81,24 @@ const isMain = computed(() => props.mode === 'main');
 const isInstall = computed(() => props.mode === 'install');
 const isSettings = computed(() => props.mode === 'settings');
 </script>
+
+<style scoped lang="scss">
+.ext-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-3, 12px);
+}
+
+.ext-actions__toggle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
+}
+
+.ext-actions__note {
+  margin: 0;
+  text-align: center;
+  font-size: var(--p-fs-body-sm);
+  color: var(--p-ink-3);
+}
+</style>
