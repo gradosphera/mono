@@ -1,6 +1,6 @@
 <template lang="pug">
 div.page-shell
-  q-card.q-mt-md(flat)
+  q-card(flat)
     q-table.full-height(
       flat
       :grid='isMobile'
@@ -298,11 +298,8 @@ onBeforeUnmount(() => {
   white-space: normal;
   word-break: break-word;
 }
-// Приглушённый caption-цвет, согласованный с темой. Не использовать
-// quasar `text-grey-6` — он не реагирует на body--dark и плохо читается
-// на тёмной теме.
+// Канон-токен --p-ink-2 сам адаптируется к тёмной теме.
 .caption-muted {
-  color: rgba(0, 0, 0, 0.6);
-  .body--dark & { color: rgba(255, 255, 255, 0.6); }
+  color: var(--p-ink-2);
 }
 </style>
