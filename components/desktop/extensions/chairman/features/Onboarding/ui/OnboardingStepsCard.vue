@@ -11,8 +11,8 @@ OnboardingCompletionCelebration(
 )
 
 // Показываем шаги если онбординг не завершен и данные загружены
-q-card.onboarding(v-else flat)
-  q-card-section.onboarding__head
+.onboarding(v-else)
+  .onboarding__head
     h2.onboarding__title Адаптируйте кооператив к работе на платформе
     p.onboarding__lead
       | Чтобы кооператив начал работать в цифровом контуре платформы, совет
@@ -27,10 +27,9 @@ q-card.onboarding(v-else flat)
       q-icon(name="fa-regular fa-clock" size="15px")
       span {{ countdownLabel ? `Срок адаптации: ${countdownLabel}` : 'Отсчёт появится после получения данных' }}
 
-  q-separator
+  q-separator.onboarding__sep
 
-  q-card-section
-    .stepper.stepper--v
+  .stepper.stepper--v
       .step(
         v-for="(step, index) in steps"
         :key="step.key"
@@ -48,7 +47,7 @@ q-card.onboarding(v-else flat)
             q-icon(name="fa-solid fa-hourglass-half" size="12px")
             span {{ getPendingText(step) }}
 
-          .step__content(v-if="showAction(index)")
+          .step__action(v-if="showAction(index)")
             BaseButton(
               v-if="step.type === 'agenda'"
               variant="primary"
@@ -231,6 +230,10 @@ onMounted(init);
 </script>
 
 <style scoped lang="scss">
+.onboarding {
+  display: flex;
+  flex-direction: column;
+}
 .onboarding__head {
   display: flex;
   flex-direction: column;
@@ -245,10 +248,17 @@ onMounted(init);
 }
 .onboarding__lead {
   margin: 0;
-  max-width: 70ch;
   font-size: var(--p-fs-body);
   line-height: 1.55;
   color: var(--p-ink-2);
+}
+// Разделитель между шапкой и степпером — канон-воздух сверху/снизу.
+.onboarding__sep {
+  margin: var(--p-5, 20px) 0;
+}
+// Действие шага — без обрамляющей рамки, просто отступ сверху.
+.step__action {
+  margin-top: var(--p-3, 12px);
 }
 // Срок адаптации — спокойная плашка-предупреждение, отсчёт виден сразу.
 .onboarding__deadline {
