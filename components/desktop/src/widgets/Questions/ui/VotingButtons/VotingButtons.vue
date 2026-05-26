@@ -16,14 +16,16 @@
         :key='getVoterKey(c)'
       ) {{ getShortNameFromCertificate(c) }}
 
-  //- Индикатор принятия решения советом
-  .vote-divider
-    q-icon(
-      v-if='approved',
-      name='verified',
-      size='18px'
+  //- Индикатор принятия решения советом — галочка закрашивается,
+  //- когда собрано достаточно голосов «за».
+  .vote-status
+    q-checkbox(
+      :model-value='approved',
+      disable,
+      color='primary',
+      size='md'
     )
-      q-tooltip Решение принято советом
+      q-tooltip {{ approved ? 'Решение принято советом' : 'Решение ещё не принято советом' }}
 
   //- За
   .vote-side
@@ -147,11 +149,10 @@ const getVoterKey = (certificate: any) => {
   opacity: 0.45;
 }
 
-.vote-divider {
+.vote-status {
   display: flex;
   align-items: center;
   height: 34px;
-  color: var(--p-primary);
 }
 
 .vote-voters {

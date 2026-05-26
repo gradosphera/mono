@@ -1,6 +1,6 @@
 <template lang="pug">
 .question-card
-  .question-card__head(@click='toggleExpand')
+  .question-card__head
     .question-card__icon
       q-icon(name='how_to_vote', size='20px')
 
@@ -12,34 +12,39 @@
       span.question-card__expires {{ formatToFromNow(agenda.table.expired_at) }}
       span.status-chip(:class='statusChipClass') {{ statusText }}
 
-    ExpandToggleButton.question-card__toggle(
-      :expanded='expanded',
-      variant='card',
-      @click='toggleExpand'
+  //- Управление голосованием — на верхнем уровне, голосовать можно
+  //- без раскрытия. Раскрытие нужно только для просмотра документа.
+  .question-card__vote
+    VotingButtons(
+      :decision='agenda.table',
+      :is-voted-for='isVotedFor',
+      :is-voted-against='isVotedAgainst',
+      :is-voted-any='isVotedAny',
+      @vote-for='$emit("vote-for")',
+      @vote-against='$emit("vote-against")'
+    )
+    template(v-if='isChairman')
+      BaseButton(
+        variant='primary',
+        size='sm',
+        :disabled='!agenda.table.approved',
+        :loading='isProcessing',
+        @click='$emit("authorize")'
+      ) Утвердить
+      .question-card__hint(v-if='!agenda.table.approved')
+        | Для утверждения решение должно быть принято советом
+
+  //- Явный переключатель документа — раскрывает только содержимое документа.
+  button.question-card__doc-toggle(type='button', @click='toggleExpand')
+    q-icon(name='description', size='16px')
+    span Документ
+    q-icon.question-card__doc-chevron(
+      :name='expanded ? "expand_less" : "expand_more"',
+      size='18px'
     )
 
   q-slide-transition
-    .question-card__body(v-show='expanded')
-      .question-card__voting
-        VotingButtons(
-          :decision='agenda.table',
-          :is-voted-for='isVotedFor',
-          :is-voted-against='isVotedAgainst',
-          :is-voted-any='isVotedAny',
-          @vote-for='$emit("vote-for")',
-          @vote-against='$emit("vote-against")'
-        )
-        template(v-if='isChairman')
-          BaseButton(
-            variant='primary',
-            size='sm',
-            :disabled='!agenda.table.approved',
-            :loading='isProcessing',
-            @click='$emit("authorize")'
-          ) Утвердить
-          .question-card__hint(v-if='!agenda.table.approved')
-            | Для утверждения решение должно быть принято советом
-
+    .question-card__doc(v-show='expanded')
       ComplexDocument(:documents='agenda.documents')
 
       component(
@@ -58,7 +63,6 @@ import { VotingButtons } from '../VotingButtons';
 import { useSessionStore } from 'src/entities/Session';
 import type { IAgenda } from 'src/entities/Agenda/model';
 import { Cooperative } from 'cooptypes';
-import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { decisionFactory } from 'src/shared/lib/decision-factory';
 
@@ -186,7 +190,7 @@ const statusChipClass = computed(() => {
   align-items: flex-start;
   gap: var(--p-3, 12px);
   padding: var(--p-4, 16px);
-  cursor: pointer;
+  padding-bottom: var(--p-3, 12px);
 }
 
 .question-card__icon {
@@ -232,11 +236,6 @@ const statusChipClass = computed(() => {
   white-space: nowrap;
 }
 
-.question-card__toggle {
-  flex: 0 0 auto;
-  margin-top: -2px;
-}
-
 /* Чип статуса голосования — токены вместо q-badge */
 .status-chip {
   display: inline-flex;
@@ -260,18 +259,13 @@ const statusChipClass = computed(() => {
   color: var(--p-ink-2);
 }
 
-.question-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-4, 16px);
-  padding: var(--p-4, 16px);
-  border-top: 1px solid var(--p-line);
-}
-.question-card__voting {
+/* Голосование — на верхнем уровне карточки, без раскрытия */
+.question-card__vote {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--p-3, 12px);
+  padding: 0 var(--p-4, 16px) var(--p-4, 16px);
 }
 .question-card__hint {
   font-size: var(--p-fs-meta, 12px);
@@ -279,6 +273,35 @@ const statusChipClass = computed(() => {
   text-align: center;
   color: var(--p-ink-3);
   max-width: 320px;
+}
+
+/* Переключатель документа — раскрывает только содержимое документа */
+.question-card__doc-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--p-2, 8px);
+  width: 100%;
+  padding: var(--p-3, 12px) var(--p-4, 16px);
+  border: none;
+  border-top: 1px solid var(--p-line);
+  background: transparent;
+  color: var(--p-ink-2);
+  font: inherit;
+  font-size: var(--p-fs-body-sm, 13px);
+  cursor: pointer;
+  transition: color var(--p-dur-fast, 120ms) var(--p-ease-standard),
+    background-color var(--p-dur-fast, 120ms) var(--p-ease-standard);
+}
+.question-card__doc-toggle:hover {
+  background: var(--p-surface-2);
+  color: var(--p-ink);
+}
+.question-card__doc-chevron {
+  margin-left: auto;
+}
+.question-card__doc {
+  padding: var(--p-4, 16px);
+  border-top: 1px solid var(--p-line);
 }
 
 @media (max-width: 599px) {
