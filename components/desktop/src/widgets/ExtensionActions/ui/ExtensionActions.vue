@@ -1,6 +1,6 @@
 <template lang="pug">
 .ext-actions
-  //- Режим настроек: только кнопка сохранения.
+  //- Режим настроек: сохранить + отменить (вернуться без сохранения).
   template(v-if='isSettings')
     SaveButton(
       :extension-name='extension?.name',
@@ -9,6 +9,7 @@
       :my-form-ref='formRef',
       :is-empty='isEmpty ?? false'
     )
+    CancelButton
 
   //- Главная, ещё не установлено: кнопка «установить» + список столов.
   template(v-if='isMain && !extension.is_installed')
@@ -59,6 +60,7 @@ import type { IExtension } from 'src/entities/Extension/model/types';
 import {
   SaveButton,
   SettingsButton,
+  CancelButton,
 } from 'src/features/Extension/UpdateExtension';
 import { UninstallButton } from 'src/features/Extension/UninstallExtension';
 import { InstallButton } from 'src/features/Extension/InstallExtension';

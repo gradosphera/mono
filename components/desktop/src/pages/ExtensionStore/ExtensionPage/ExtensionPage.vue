@@ -4,38 +4,39 @@
     q-icon(name='fa-solid fa-chevron-left' size='13px')
     span Назад
 
-  .extension-page__grid
-    aside.extension-page__side
-      AutoAvatar.extension-page__logo(
-        :username='extension.name || extension.title',
-        :size='96',
-        radius='var(--p-r-lg, 14px)',
-        background='var(--p-surface-2)',
-        :ring-color='ringPalette',
-        animated
-      )
-      ExtensionActions(
-        :extension='extension',
-        :mode='currentMode',
-        :config='data',
-        :form-ref='myFormRef',
-        :is-empty='isEmpty'
-      )
+  .extension-page__panel
+    .extension-page__grid
+      aside.extension-page__side
+        AutoAvatar.extension-page__logo(
+          :username='extension.name || extension.title',
+          :size='96',
+          radius='var(--p-r-lg, 14px)',
+          background='var(--p-surface-2)',
+          :ring-color='ringPalette',
+          animated
+        )
+        ExtensionActions(
+          :extension='extension',
+          :mode='currentMode',
+          :config='data',
+          :form-ref='myFormRef',
+          :is-empty='isEmpty'
+        )
 
-    .extension-page__main
-      ExtensionInfo(v-if='isMain', :extension='extension')
-      ExtensionSettings(
-        v-if='isSettings && extension.schema',
-        :schema='extension.schema',
-        v-model:config='data',
-        :form-ref='myFormRef'
-      )
-      ExtensionInstall(
-        v-if='isInstall',
-        :schema='extension.schema',
-        v-model:config='data',
-        :form-ref='myFormRef'
-      )
+      .extension-page__main
+        ExtensionInfo(v-if='isMain', :extension='extension')
+        ExtensionSettings(
+          v-if='isSettings && extension.schema',
+          :schema='extension.schema',
+          v-model:config='data',
+          :form-ref='myFormRef'
+        )
+        ExtensionInstall(
+          v-if='isInstall',
+          :schema='extension.schema',
+          v-model:config='data',
+          :form-ref='myFormRef'
+        )
 </template>
 <script lang="ts" setup>
 import { useExtensionStore } from 'src/entities/Extension/model';
@@ -120,6 +121,16 @@ const ringPalette = ['5b9aa0', '6f8fae', '74a08c', '9a8fb0', '8aa0a8', 'a8967e']
   transition: color 0.15s ease;
   &:hover {
     color: var(--p-ink);
+  }
+}
+
+.extension-page__panel {
+  background: var(--p-surface, #fff);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-lg, 14px);
+  padding: var(--p-6, 24px);
+  @media (max-width: 768px) {
+    padding: var(--p-4, 16px);
   }
 }
 
