@@ -3,17 +3,13 @@
   //- Верхняя строка кликабельна — раскрывает документ. Исключение — зона
   //- кнопок голосования (@click.stop): по ним голосуют, документ не раскрывают.
   .question-card__row(@click='toggleExpand')
-    .question-card__icon
-      q-icon(name='how_to_vote', size='20px')
+    //- Номер вопроса на зелёной плашке — он же идентификатор: клик копирует.
+    button.question-card__id-avatar(type='button', @click.stop='copyId')
+      | {{ agenda.table.id }}
+      q-tooltip Скопировать № {{ agenda.table.id }}
 
     .question-card__main
-      .question-card__title
-        EntityIdBadge.question-card__id(
-          :raw-id='`#${agenda.table.id}`',
-          :copy-value='String(agenda.table.id)',
-          copy-on-click
-        )
-        span.question-card__title-text {{ getDocumentTitle() }}
+      .question-card__title {{ getDocumentTitle() }}
       .question-card__applicant {{ getApplicantName() }}
 
     //- Кнопки голосования — прижаты к правому краю строки.
@@ -67,7 +63,8 @@ import { useSessionStore } from 'src/entities/Session';
 import type { IAgenda } from 'src/entities/Agenda/model';
 import { Cooperative } from 'cooptypes';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
-import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
+import { copyToClipboard } from 'quasar';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { decisionFactory } from 'src/shared/lib/decision-factory';
 
 const props = defineProps({
@@ -102,6 +99,16 @@ const isChairman = computed(() => session.isChairman);
 const expanded = ref(false);
 const toggleExpand = () => {
   expanded.value = !expanded.value;
+};
+
+// Копирование идентификатора вопроса по клику на плашку с номером.
+const copyId = async () => {
+  try {
+    await copyToClipboard(String(props.agenda.table.id));
+    SuccessAlert('Скопировано');
+  } catch {
+    FailAlert('Не удалось скопировать');
+  }
 };
 
 // Компонент дополнительной информации для конкретного типа решения.
@@ -176,16 +183,28 @@ const getApplicantName = () => {
   background: var(--p-surface-2);
 }
 
-.question-card__icon {
+/* Плашка с номером вопроса — кликабельна, копирует идентификатор */
+.question-card__id-avatar {
   flex: 0 0 40px;
   width: 40px;
   height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: none;
   border-radius: var(--p-r-sm, 8px);
   background: var(--p-primary-soft);
   color: var(--p-primary);
+  font: inherit;
+  font-size: var(--p-fs-body, 14px);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--p-dur-fast, 120ms) var(--p-ease-standard),
+    color var(--p-dur-fast, 120ms) var(--p-ease-standard);
+}
+.question-card__id-avatar:hover {
+  background: var(--p-primary);
+  color: var(--p-ink-on-primary);
 }
 
 .question-card__main {
@@ -203,10 +222,6 @@ const getApplicantName = () => {
   margin-top: 2px;
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
-}
-.question-card__id {
-  margin-right: var(--p-2, 8px);
-  vertical-align: middle;
 }
 .question-card__expires {
   font-size: var(--p-fs-meta, 12px);
