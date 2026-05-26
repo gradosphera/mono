@@ -100,10 +100,9 @@ const ringPalette = ['5b9aa0', '6f8fae', '74a08c', '9a8fb0', '8aa0a8', 'a8967e']
 
 <style scoped lang="scss">
 .extension-page {
-  padding: var(--p-6, 24px);
-  @media (max-width: 768px) {
-    padding: var(--p-4, 16px);
-  }
+  // Без собственного padding: страница уже внутри .catalog-shell__content,
+  // который задаёт отступы. Иначе — двойной зазор от шапки.
+  min-width: 0;
 }
 
 .extension-page__back {
