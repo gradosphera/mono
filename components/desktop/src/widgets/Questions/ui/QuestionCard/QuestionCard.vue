@@ -1,7 +1,7 @@
 <template lang="pug">
 .question-card
-  //- Вся строка кликабельна — раскрывает документ. Исключение — зона органов
-  //- управления (@click.stop): клик по ним голосует/утверждает и не раскрывает.
+  //- Верхняя строка кликабельна — раскрывает документ. Исключение — зона
+  //- кнопок голосования (@click.stop): по ним голосуют, документ не раскрывают.
   .question-card__row(@click='toggleExpand')
     .question-card__icon
       q-icon(name='how_to_vote', size='20px')
@@ -9,8 +9,12 @@
     .question-card__main
       .question-card__title {{ getDocumentTitle() }}
       .question-card__applicant {{ getApplicantName() }}
+      .question-card__meta
+        span.question-card__expires {{ formatToFromNow(agenda.table.expired_at) }}
+        span.status-chip(:class='statusChipClass') {{ statusText }}
 
-    .question-card__controls(@click.stop)
+    //- Кнопки голосования — прижаты к правому краю строки.
+    .question-card__voting(@click.stop)
       VotingButtons(
         :decision='agenda.table',
         :is-voted-for='isVotedFor',
@@ -19,24 +23,23 @@
         @vote-for='$emit("vote-for")',
         @vote-against='$emit("vote-against")'
       )
-      .question-card__approve(v-if='isChairman')
-        BaseButton(
-          variant='primary',
-          size='sm',
-          :disabled='!agenda.table.approved',
-          :loading='isProcessing',
-          @click='$emit("authorize")'
-        ) Утвердить
-        q-tooltip(v-if='!agenda.table.approved') Для утверждения решение должно быть принято советом
-
-    .question-card__aside
-      span.question-card__expires {{ formatToFromNow(agenda.table.expired_at) }}
-      span.status-chip(:class='statusChipClass') {{ statusText }}
 
     q-icon.question-card__chevron(
       :name='expanded ? "expand_less" : "expand_more"',
       size='20px'
     )
+
+  //- Действие председателя — отдельной строкой снизу, не теснит данные.
+  .question-card__footer(v-if='isChairman', @click.stop)
+    .question-card__approve
+      BaseButton(
+        variant='primary',
+        size='sm',
+        :disabled='!agenda.table.approved',
+        :loading='isProcessing',
+        @click='$emit("authorize")'
+      ) Утвердить
+      q-tooltip(v-if='!agenda.table.approved') Для утверждения решение должно быть принято советом
 
   q-slide-transition
     .question-card__doc(v-show='expanded')
@@ -180,12 +183,11 @@ const statusChipClass = computed(() => {
   border-color: var(--p-line-2, var(--p-line));
 }
 
-/* Единая строка: инфо слева, органы управления + срок/статус + шеврон справа */
 .question-card__row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--p-4, 16px);
-  padding: var(--p-3, 12px) var(--p-4, 16px);
+  padding: var(--p-4, 16px);
   cursor: pointer;
   transition: background-color var(--p-dur-fast, 120ms) var(--p-ease-standard);
 }
@@ -197,7 +199,6 @@ const statusChipClass = computed(() => {
   flex: 0 0 40px;
   width: 40px;
   height: 40px;
-  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -209,7 +210,6 @@ const statusChipClass = computed(() => {
 .question-card__main {
   flex: 1 1 auto;
   min-width: 0;
-  align-self: flex-start;
 }
 .question-card__title {
   font-size: var(--p-fs-h3, 15px);
@@ -223,26 +223,12 @@ const statusChipClass = computed(() => {
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
 }
-
-/* Органы управления — компактный блок действий, не часть аккордеона */
-.question-card__controls {
+/* Срок и статус голоса — слева, под заголовком */
+.question-card__meta {
   display: flex;
   align-items: center;
-  gap: var(--p-4, 16px);
-  flex: 0 0 auto;
-  cursor: default;
-}
-.question-card__approve {
-  display: inline-flex;
-}
-
-.question-card__aside {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--p-1, 4px);
-  flex: 0 0 auto;
-  text-align: right;
+  gap: var(--p-2, 8px);
+  margin-top: var(--p-2, 8px);
 }
 .question-card__expires {
   font-size: var(--p-fs-meta, 12px);
@@ -250,9 +236,28 @@ const statusChipClass = computed(() => {
   white-space: nowrap;
 }
 
+/* Кнопки голосования — у правого края, отдельная зона действий */
+.question-card__voting {
+  flex: 0 0 auto;
+  cursor: default;
+}
+
 .question-card__chevron {
   flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: 2px;
   color: var(--p-ink-3);
+}
+
+/* Утвердить — отдельной строкой снизу, справа */
+.question-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--p-3, 12px) var(--p-4, 16px);
+  border-top: 1px solid var(--p-line);
+}
+.question-card__approve {
+  display: inline-flex;
 }
 
 /* Чип статуса голосования — токены вместо q-badge */
@@ -284,19 +289,17 @@ const statusChipClass = computed(() => {
   border-top: 1px solid var(--p-line);
 }
 
-/* На узких экранах органы управления и мета переносятся под заголовок */
+/* На узких экранах кнопки голосования переносятся под заголовок */
 @media (max-width: 768px) {
   .question-card__row {
     flex-wrap: wrap;
   }
   .question-card__main {
-    flex: 1 1 60%;
+    flex: 1 1 70%;
   }
-  .question-card__controls {
+  .question-card__voting {
     order: 4;
     flex: 1 1 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
   }
 }
 </style>
