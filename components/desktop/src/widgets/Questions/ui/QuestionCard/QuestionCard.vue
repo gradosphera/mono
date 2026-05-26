@@ -9,6 +9,11 @@
     .question-card__main
       .question-card__title {{ getDocumentTitle() }}
       .question-card__applicant {{ getApplicantName() }}
+      EntityIdBadge.question-card__id(
+        :raw-id='`#${agenda.table.id}`',
+        :copy-value='String(agenda.table.id)',
+        copy-on-click
+      )
 
     //- Кнопки голосования — прижаты к правому краю строки.
     .question-card__voting(@click.stop)
@@ -61,6 +66,7 @@ import { useSessionStore } from 'src/entities/Session';
 import type { IAgenda } from 'src/entities/Agenda/model';
 import { Cooperative } from 'cooptypes';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
+import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
 import { decisionFactory } from 'src/shared/lib/decision-factory';
 
 const props = defineProps({
@@ -196,6 +202,9 @@ const getApplicantName = () => {
   margin-top: 2px;
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
+}
+.question-card__id {
+  margin-top: var(--p-2, 8px);
 }
 .question-card__expires {
   font-size: var(--p-fs-meta, 12px);
