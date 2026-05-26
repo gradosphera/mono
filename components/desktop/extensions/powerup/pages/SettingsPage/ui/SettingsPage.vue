@@ -112,7 +112,7 @@ const saveSettings = async () => {
 
 <style lang="scss" scoped>
 .settings-page {
-  padding: 1rem;
+  padding: var(--p-6, 24px);
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -121,6 +121,12 @@ const saveSettings = async () => {
   .settings-container {
     max-width: 1000px;
     margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: var(--p-4, 16px);
   }
 }
 </style>
