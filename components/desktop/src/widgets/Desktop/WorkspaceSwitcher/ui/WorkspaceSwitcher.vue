@@ -1,5 +1,6 @@
 <template lang="pug">
 button.ws-switcher(
+  v-bind='$attrs',
   type='button',
   :aria-haspopup='workspaces.length > 1 ? "menu" : undefined'
 )
@@ -45,6 +46,12 @@ import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import logoSvg from 'src/assets/logo.svg?raw';
+
+// Шаблон двухкорневой (кнопка + Teleport для затемнения), поэтому
+// автонаследование атрибутов отключаем и вручную направляем class и
+// прочие внешние атрибуты на корневую кнопку — иначе Vue ругается, что
+// class некуда применить.
+defineOptions({ inheritAttrs: false });
 
 const router = useRouter();
 const desktop = useDesktopStore();
