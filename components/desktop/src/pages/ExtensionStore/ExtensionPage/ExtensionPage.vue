@@ -1,5 +1,9 @@
 <template lang="pug">
 .extension-page(v-if='extension')
+  button.extension-page__back(type='button', @click='goBack')
+    q-icon(name='fa-solid fa-chevron-left' size='13px')
+    span Назад
+
   .extension-page__grid
     aside.extension-page__side
       AutoAvatar.extension-page__logo(
@@ -37,7 +41,6 @@
 import { useExtensionStore } from 'src/entities/Extension/model';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useBackButton } from 'src/shared/lib/navigation';
 import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
 import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
 import { ExtensionActions } from 'src/widgets/ExtensionActions';
@@ -52,8 +55,8 @@ const data = ref({});
 const myFormRef = ref();
 
 
-// Настраиваем кнопку "Назад" в хедере
-const backButtonClick = () => {
+// Кнопка «Назад» живёт на самой странице (под шапкой), а не в топбаре.
+const goBack = () => {
   if (route.name === 'one-extension') {
     // На главной странице расширения - возвращаемся к списку расширений
     router.push({ name: 'extensions' });
@@ -62,12 +65,6 @@ const backButtonClick = () => {
     router.push({ name: 'one-extension', params: { name: route.params.name } });
   }
 };
-
-useBackButton({
-  text: 'Назад',
-  componentId: 'extension-page',
-  onClick: backButtonClick
-});
 
 onMounted(async () => {
   if (route.params.name) {
@@ -108,6 +105,24 @@ const ringPalette = ['5b9aa0', '6f8fae', '74a08c', '9a8fb0', '8aa0a8', 'a8967e']
   }
 }
 
+.extension-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1, 4px);
+  margin-bottom: var(--p-5, 20px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--p-fs-body-sm);
+  font-weight: 600;
+  color: var(--p-ink-2);
+  transition: color 0.15s ease;
+  &:hover {
+    color: var(--p-ink);
+  }
+}
+
 .extension-page__grid {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -125,7 +140,8 @@ const ringPalette = ['5b9aa0', '6f8fae', '74a08c', '9a8fb0', '8aa0a8', 'a8967e']
 }
 
 .extension-page__logo {
-  // Приглушаем генеративный знак так же, как в карточке каталога.
+  // Центрируем логотип в колонке и приглушаем как в карточке каталога.
+  align-self: center;
   filter: saturate(0.5);
   opacity: 0.85;
 }
