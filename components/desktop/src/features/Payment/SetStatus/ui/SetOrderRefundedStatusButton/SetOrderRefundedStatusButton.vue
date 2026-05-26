@@ -1,5 +1,5 @@
 <template lang="pug">
-BaseButton(variant="danger" size="sm" block @click="showDialog=true")
+BaseButton(variant="danger" size="sm" @click="showDialog=true")
   template(#icon-left)
     q-icon(name="cancel" size="14px").q-mr-xs
   | Отклонить

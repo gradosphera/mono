@@ -1,5 +1,5 @@
 <template lang="pug">
-BaseButton(variant="primary" size="sm" block @click="showDialog=true")
+BaseButton(variant="primary" size="sm" @click="showDialog=true")
   template(#icon-left)
     q-icon(name="fa-regular fa-square-check" size="14px").q-mr-xs
   | Подтвердить
