@@ -1,8 +1,15 @@
 <template lang="pug">
-.row(v-if='extension')
-  .col-md-3.col-sm-4.col-xs-12.q-pa-md
-    ExtensionImage(:image='extension?.image ?? undefined')
-    .q-mt-md
+.extension-page(v-if='extension')
+  .extension-page__grid
+    aside.extension-page__side
+      AutoAvatar.extension-page__logo(
+        :username='extension.name || extension.title',
+        :size='96',
+        radius='var(--p-r-lg, 14px)',
+        background='var(--p-surface-2)',
+        :ring-color='ringPalette',
+        animated
+      )
       ExtensionActions(
         :extension='extension',
         :mode='currentMode',
@@ -11,20 +18,20 @@
         :is-empty='isEmpty'
       )
 
-  .col-md-9.col-sm-8.col-xs-12.q-pa-md
-    ExtensionInfo(v-if='isMain', :extension='extension')
-    ExtensionSettings(
-      v-if='isSettings && extension.schema',
-      :schema='extension.schema',
-      v-model:config='data',
-      :form-ref='myFormRef'
-    )
-    ExtensionInstall(
-      v-if='isInstall',
-      :schema='extension.schema',
-      v-model:config='data',
-      :form-ref='myFormRef'
-    )
+    .extension-page__main
+      ExtensionInfo(v-if='isMain', :extension='extension')
+      ExtensionSettings(
+        v-if='isSettings && extension.schema',
+        :schema='extension.schema',
+        v-model:config='data',
+        :form-ref='myFormRef'
+      )
+      ExtensionInstall(
+        v-if='isInstall',
+        :schema='extension.schema',
+        v-model:config='data',
+        :form-ref='myFormRef'
+      )
 </template>
 <script lang="ts" setup>
 import { useExtensionStore } from 'src/entities/Extension/model';
@@ -32,7 +39,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useBackButton } from 'src/shared/lib/navigation';
 import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
-import { ExtensionImage } from 'src/widgets/ExtensionImage';
+import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
 import { ExtensionActions } from 'src/widgets/ExtensionActions';
 import { ExtensionInfo } from 'src/widgets/ExtensionInfo';
 import { ExtensionSettings } from 'src/widgets/ExtensionSettings';
@@ -88,7 +95,45 @@ const currentMode = computed(() => {
 });
 
 const isEmpty = computed(() => isExtensionSchemaEmpty(extension.value?.schema));
+
+// Та же приглушённая палитра колец, что и в карточке каталога.
+const ringPalette = ['5b9aa0', '6f8fae', '74a08c', '9a8fb0', '8aa0a8', 'a8967e'];
 </script>
+
+<style scoped lang="scss">
+.extension-page {
+  padding: var(--p-6, 24px);
+  @media (max-width: 768px) {
+    padding: var(--p-4, 16px);
+  }
+}
+
+.extension-page__grid {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: var(--p-6, 24px);
+  align-items: start;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.extension-page__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-5, 20px);
+}
+
+.extension-page__logo {
+  // Приглушаем генеративный знак так же, как в карточке каталога.
+  filter: saturate(0.5);
+  opacity: 0.85;
+}
+
+.extension-page__main {
+  min-width: 0;
+}
+</style>
 
 <style>
 .description h1 {
