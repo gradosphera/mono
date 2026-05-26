@@ -10,8 +10,7 @@
       .question-card__title {{ getDocumentTitle() }}
       .question-card__applicant {{ getApplicantName() }}
       .question-card__meta
-        span.question-card__expires {{ formatToFromNow(agenda.table.expired_at) }}
-        span.status-chip(:class='statusChipClass') {{ statusText }}
+        span.question-card__expires Истекает {{ formatToFromNow(agenda.table.expired_at) }}
 
     //- Кнопки голосования — прижаты к правому краю строки.
     .question-card__voting(@click.stop)
@@ -144,31 +143,6 @@ const getApplicantName = () => {
   }
   return `Аккаунт: ${props.agenda.table.username}`;
 };
-
-// Статус голосования текущего пайщика
-const statusText = computed(() => {
-  try {
-    if (props.isVotedAny(props.agenda.table)) {
-      if (props.isVotedFor(props.agenda.table)) return 'Вы за';
-      if (props.isVotedAgainst(props.agenda.table)) return 'Вы против';
-    }
-  } catch (error) {
-    console.warn('Ошибка при проверке статуса голосования:', error);
-  }
-  return 'Не голосовали';
-});
-
-const statusChipClass = computed(() => {
-  try {
-    if (props.isVotedAny(props.agenda.table)) {
-      if (props.isVotedFor(props.agenda.table)) return 'status-chip--pos';
-      if (props.isVotedAgainst(props.agenda.table)) return 'status-chip--neg';
-    }
-  } catch {
-    // ignore
-  }
-  return 'status-chip--neutral';
-});
 </script>
 
 <style lang="scss" scoped>
@@ -258,29 +232,6 @@ const statusChipClass = computed(() => {
 }
 .question-card__approve {
   display: inline-flex;
-}
-
-/* Чип статуса голосования — токены вместо q-badge */
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: var(--p-fs-eyebrow, 11px);
-  font-weight: 600;
-  white-space: nowrap;
-}
-.status-chip--pos {
-  background: var(--p-pos-soft);
-  color: var(--p-pos);
-}
-.status-chip--neg {
-  background: var(--p-neg-soft);
-  color: var(--p-neg);
-}
-.status-chip--neutral {
-  background: var(--p-surface-2);
-  color: var(--p-ink-2);
 }
 
 /* Раскрываемое содержимое документа */
