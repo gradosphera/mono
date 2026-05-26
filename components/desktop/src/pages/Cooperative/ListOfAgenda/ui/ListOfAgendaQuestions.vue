@@ -1,5 +1,5 @@
 <template lang="pug">
-q-card(flat)
+.agenda-page
   QuestionsTable(
     :decisions='decisions',
     :loading='loading',
@@ -132,3 +132,15 @@ const interval = setInterval(
 );
 onBeforeUnmount(() => clearInterval(interval));
 </script>
+
+<style lang="scss" scoped>
+/* Полная ширина контента, как на canon-страницах документов/собраний. */
+.agenda-page {
+  padding: var(--p-6, 24px);
+}
+@media (max-width: 768px) {
+  .agenda-page {
+    padding: var(--p-4, 16px);
+  }
+}
+</style>
