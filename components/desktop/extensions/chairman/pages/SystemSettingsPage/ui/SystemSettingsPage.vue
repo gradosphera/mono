@@ -1,8 +1,10 @@
 <template lang="pug">
 .settings-page
-  .settings-page__head
-    h2.settings-page__title Стартовые страницы
-    p.settings-page__sub
+  //- Заголовок страницы не дублируем — он уже показан крошкой в шапке.
+  //- Пояснение размещаем на канон-поверхности (.banner), а не на голом фоне.
+  .banner
+    q-icon.banner__icon(name='fa-solid fa-circle-info' size='18px')
+    .banner__body
       | Настройте рабочие столы и страницы, которые будут открываться по
       | умолчанию для новых пользователей при входе на сайт. Единый стиль
       | помогает быстрее понять, что важно сделать в первую очередь.
@@ -46,7 +48,7 @@ const onError = (error: Error) => {
 </script>
 
 <style scoped lang="scss">
-// Канон-отступы страницы + единый заголовок-шапка (как на прочих столах).
+// Канон-отступы страницы (как на прочих столах).
 .settings-page {
   display: flex;
   flex-direction: column;
@@ -55,23 +57,5 @@ const onError = (error: Error) => {
   @media (max-width: 768px) {
     padding: var(--p-4, 16px);
   }
-}
-.settings-page__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-2, 8px);
-}
-.settings-page__title {
-  margin: 0;
-  font-size: var(--p-fs-h2);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--p-ink);
-}
-.settings-page__sub {
-  margin: 0;
-  font-size: var(--p-fs-body);
-  line-height: 1.55;
-  color: var(--p-ink-2);
 }
 </style>
