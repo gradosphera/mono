@@ -77,6 +77,13 @@ const open = () => {
   }
 }
 
+// Анимация логотипа запускается при наведении на всю карточку, а не только
+// на сам SVG. Сегменты .ring-seg живут внутри v-html, поэтому :deep.
+.app-card:hover :deep(.ring-seg) {
+  animation: ringSegWobble 1.3s ease-in-out;
+  animation-delay: calc(var(--seg, 0) * 40ms);
+}
+
 .app-card__head {
   display: flex;
   align-items: flex-start;
