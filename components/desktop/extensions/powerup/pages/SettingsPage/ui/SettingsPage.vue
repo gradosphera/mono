@@ -2,7 +2,7 @@
 .settings-page
 
   .settings-content(v-if='extension')
-    .settings-container.q-pa-md
+    .settings-container
       ExtensionSettings(
         :schema='extension.schema',
         :config='extension.config',
