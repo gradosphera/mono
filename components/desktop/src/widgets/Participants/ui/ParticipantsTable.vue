@@ -1,5 +1,5 @@
 <template lang="pug">
-q-table.full-height(
+q-table(
   flat,
   :grid='isMobile',
   :rows='accounts',
