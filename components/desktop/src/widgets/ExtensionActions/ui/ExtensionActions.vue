@@ -91,8 +91,12 @@ const isSettings = computed(() => props.mode === 'settings');
 
 .ext-actions__toggle {
   display: flex;
-  flex-direction: column;
   gap: var(--p-2, 8px);
+}
+// Кнопки вкл/выкл и удаления делят строку поровну (full-width внутри).
+.ext-actions__toggle > * {
+  flex: 1;
+  min-width: 0;
 }
 
 .ext-actions__note {
