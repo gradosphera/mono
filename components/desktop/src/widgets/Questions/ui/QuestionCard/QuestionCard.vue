@@ -7,13 +7,14 @@
       q-icon(name='how_to_vote', size='20px')
 
     .question-card__main
-      .question-card__title {{ getDocumentTitle() }}
+      .question-card__title
+        EntityIdBadge.question-card__id(
+          :raw-id='`#${agenda.table.id}`',
+          :copy-value='String(agenda.table.id)',
+          copy-on-click
+        )
+        span.question-card__title-text {{ getDocumentTitle() }}
       .question-card__applicant {{ getApplicantName() }}
-      EntityIdBadge.question-card__id(
-        :raw-id='`#${agenda.table.id}`',
-        :copy-value='String(agenda.table.id)',
-        copy-on-click
-      )
 
     //- Кнопки голосования — прижаты к правому краю строки.
     .question-card__voting(@click.stop)
@@ -204,7 +205,8 @@ const getApplicantName = () => {
   color: var(--p-ink-2);
 }
 .question-card__id {
-  margin-top: var(--p-2, 8px);
+  margin-right: var(--p-2, 8px);
+  vertical-align: middle;
 }
 .question-card__expires {
   font-size: var(--p-fs-meta, 12px);
