@@ -45,7 +45,7 @@ const isInstalled = computed(
 // Уникальный генеративный логотип (DiceBear rings) вместо подбираемых
 // вручную изображений: рисунок и цвет колец детерминированы именем
 // расширения, поэтому каждое приложение получает свой неповторимый знак.
-const ringPalette = ['4db6ac', '5c6bc0', '66bb6a', 'ffa726', '26c6da', 'ec407a'];
+const ringPalette = ['5b9aa0', '6f8fae', '74a08c', '9a8fb0', '8aa0a8', 'a8967e'];
 
 const open = () => {
   if (props.extension.is_available)
@@ -85,6 +85,10 @@ const open = () => {
 
 .app-card__avatar {
   flex: none;
+  // Генеративный знак держим тихим: гасим насыщенность и чуть приглушаем,
+  // чтобы он читался как текстура, а не перетягивал внимание.
+  filter: saturate(0.5);
+  opacity: 0.85;
 }
 
 .app-card__body {
