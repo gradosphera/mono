@@ -13,7 +13,7 @@
           tr
             th.col-toggle
             th.col-sort(@click='onSort("username")') Пайщик {{ sortMark('username') }}
-            th.col-sort(@click='onSort("created_at")') Дата создания {{ sortMark('created_at') }}
+            th.col-sort.col-date(@click='onSort("created_at")') Дата создания {{ sortMark('created_at') }}
             th.col-sort.col-num(@click='onSort("quantity")') Сумма {{ sortMark('quantity') }}
             th Тип платежа
             th Направление
@@ -40,7 +40,7 @@
               td
                 BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
               td.col-action(v-if='!hideActions', @click.stop)
-                template(v-if='["EXPIRED", "PENDING", "FAILED"].includes(row.status)')
+                .cell-actions(v-if='["EXPIRED", "PENDING", "FAILED"].includes(row.status)')
                   SetOrderPaidStatusButton(:id='row.id')
                   SetOrderRefundedStatusButton(:id='row.id')
                 span.no-actions(v-else) —
@@ -227,24 +227,34 @@ onMounted(() => {
 
 .table {
   table-layout: fixed;
-  min-width: 880px;
+  min-width: 860px;
 }
 .table--actions {
-  min-width: 1000px;
+  min-width: 980px;
 }
 
 .col-toggle {
   width: 44px;
   text-align: center;
 }
-.col-action {
+.col-date {
   width: 132px;
   white-space: nowrap;
+}
+.col-action {
+  width: 156px;
 }
 
 .col-sort {
   cursor: pointer;
   user-select: none;
+}
+
+/* Действия над платежом — друг под другом, на всю ширину колонки */
+.cell-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
 }
 
 .cell-name {

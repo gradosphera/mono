@@ -253,7 +253,7 @@ const downloadPackage = async (
 
 .table {
   table-layout: fixed;
-  min-width: 880px;
+  min-width: 720px;
 }
 
 .col-toggle {
@@ -261,17 +261,17 @@ const downloadPackage = async (
   text-align: center;
 }
 .col-id {
-  width: 150px;
+  width: 124px;
 }
 .col-date {
-  width: 150px;
+  width: 116px;
   white-space: nowrap;
 }
 .col-signers {
-  width: 220px;
+  width: 150px;
 }
 .col-action {
-  width: 110px;
+  width: 56px;
   text-align: center;
 }
 
