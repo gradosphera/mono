@@ -242,7 +242,8 @@ onMounted(() => {
   white-space: nowrap;
 }
 .col-action {
-  width: 156px;
+  width: 168px;
+  text-align: right;
 }
 
 .col-sort {
@@ -250,10 +251,13 @@ onMounted(() => {
   user-select: none;
 }
 
-/* Действия над платежом — друг под другом, на всю ширину колонки */
+/* Действия над платежом — компактной стопкой, прижатой к правому краю
+   колонки (td выровнен вправо). Равная ширина кнопок — через align-items:
+   stretch внутри inline-flex; слева остаётся воздух от статуса. */
 .cell-actions {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--p-2, 8px);
 }
 
