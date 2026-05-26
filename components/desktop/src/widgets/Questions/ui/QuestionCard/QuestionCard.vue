@@ -9,8 +9,6 @@
     .question-card__main
       .question-card__title {{ getDocumentTitle() }}
       .question-card__applicant {{ getApplicantName() }}
-      .question-card__meta
-        span.question-card__expires Истекает {{ formatToFromNow(agenda.table.expired_at) }}
 
     //- Кнопки голосования — прижаты к правому краю строки.
     .question-card__voting(@click.stop)
@@ -28,9 +26,11 @@
       size='20px'
     )
 
-  //- Действие председателя — отдельной строкой снизу, не теснит данные.
-  .question-card__footer(v-if='isChairman', @click.stop)
-    .question-card__approve
+  //- Нижняя полоска: срок слева, действие председателя справа.
+  //- У обычного пайщика — только срок, узкая панелька.
+  .question-card__footer(@click.stop)
+    span.question-card__expires Истекает {{ formatToFromNow(agenda.table.expired_at) }}
+    .question-card__approve(v-if='isChairman')
       BaseButton(
         variant='primary',
         size='sm',
@@ -197,13 +197,6 @@ const getApplicantName = () => {
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
 }
-/* Срок и статус голоса — слева, под заголовком */
-.question-card__meta {
-  display: flex;
-  align-items: center;
-  gap: var(--p-2, 8px);
-  margin-top: var(--p-2, 8px);
-}
 .question-card__expires {
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-3);
@@ -223,10 +216,12 @@ const getApplicantName = () => {
   color: var(--p-ink-3);
 }
 
-/* Утвердить — отдельной строкой снизу, справа */
+/* Нижняя полоска: срок слева, «Утвердить» справа */
 .question-card__footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p-3, 12px);
   padding: var(--p-3, 12px) var(--p-4, 16px);
   border-top: 1px solid var(--p-line);
 }
