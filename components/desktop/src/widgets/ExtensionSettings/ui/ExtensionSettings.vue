@@ -9,7 +9,7 @@
       template(#icon)
         q-icon(name='settings', size='48px')
 
-    BaseCard(v-else, title='Настройки')
+    BaseCard(v-else)
       ZodForm(
         :schema='schema',
         :model-value='config',
