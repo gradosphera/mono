@@ -1,10 +1,9 @@
 <template lang="pug">
-div.page-shell
-  q-card.hero-card(flat)
-    .hero-title Члены совета
-    .hero-subtitle
-      | Состав членов совета должен быть утвержден общим собранием пайщиков.
-
+.members-page
+  .members-page__head
+    h2.members-page__title Члены совета
+    p.members-page__sub
+      | Состав членов совета должен быть утверждён общим собранием пайщиков.
 
   CooperativeMembers
 </template>
@@ -27,41 +26,31 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.page-shell {
-  width: 100%;
-  padding: 24px 12px 32px;
+.members-page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--p-5, 20px);
+  padding: var(--p-6, 24px);
+  @media (max-width: 768px) {
+    padding: var(--p-4, 16px);
+  }
 }
-
-.hero-card {
-  border-radius: 18px;
-  padding: 18px 20px;
+.members-page__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
 }
-
-.hero-title {
-  font-size: 22px;
+.members-page__title {
+  margin: 0;
+  font-size: var(--p-fs-h2);
   font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--p-ink);
 }
-
-.hero-subtitle {
+.members-page__sub {
+  margin: 0;
+  font-size: var(--p-fs-body);
   line-height: 1.55;
-  max-width: 820px;
-}
-
-.table-head {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.banner-title {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.banner-meta {
-  line-height: 1.4;
+  color: var(--p-ink-2);
 }
 </style>
