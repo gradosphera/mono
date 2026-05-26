@@ -1,8 +1,9 @@
 <template lang="pug">
 .members-page
-  .members-page__head
-    h2.members-page__title Члены совета
-    p.members-page__sub
+  //- Заголовок не дублируем (он в шапке-крошке); пояснение — на канон-поверхности.
+  .banner
+    q-icon.banner__icon(name='fa-solid fa-circle-info' size='18px')
+    .banner__body
       | Состав членов совета должен быть утверждён общим собранием пайщиков.
 
   CooperativeMembers
@@ -34,23 +35,5 @@ onMounted(() => {
   @media (max-width: 768px) {
     padding: var(--p-4, 16px);
   }
-}
-.members-page__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-2, 8px);
-}
-.members-page__title {
-  margin: 0;
-  font-size: var(--p-fs-h2);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--p-ink);
-}
-.members-page__sub {
-  margin: 0;
-  font-size: var(--p-fs-body);
-  line-height: 1.55;
-  color: var(--p-ink-2);
 }
 </style>
