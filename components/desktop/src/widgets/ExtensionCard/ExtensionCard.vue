@@ -4,7 +4,13 @@ article.app-card(
   @click='open'
 )
   .app-card__top
-    .app-card__mono(:style='monoStyle') {{ monogram }}
+    AutoAvatar.app-card__avatar(
+      :username='extension.name || extension.title',
+      :size='48',
+      radius='var(--p-r-md, 12px)',
+      background='var(--p-surface-2)',
+      :ring-color='ringPalette'
+    )
     span.badge.badge--pos(v-if='isInstalled')
       q-icon(name='fa-solid fa-check' size='11px')
       | Установлено
@@ -26,6 +32,7 @@ article.app-card(
 import type { IExtension } from 'src/entities/Extension/model/types';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
 
 const props = defineProps<{ extension: IExtension }>();
 
@@ -35,26 +42,10 @@ const isInstalled = computed(
   () => props.extension.is_installed && props.extension.is_available,
 );
 
-// Монограмма-плитка вместо подбираемых вручную изображений:
-// первая буква названия на детерминированном по имени мягком фоне.
-const monogram = computed(
-  () => (props.extension.title || props.extension.name || '?').trim().charAt(0).toUpperCase(),
-);
-
-const palette: [string, string][] = [
-  ['var(--p-primary-soft)', 'var(--p-primary)'],
-  ['var(--p-info-soft)', 'var(--p-info)'],
-  ['var(--p-pos-soft)', 'var(--p-pos)'],
-  ['var(--p-warn-soft)', 'var(--p-warn)'],
-];
-
-const monoStyle = computed(() => {
-  const key = props.extension.name || props.extension.title || '';
-  let hash = 0;
-  for (let i = 0; i < key.length; i += 1) hash = (hash + key.charCodeAt(i)) % palette.length;
-  const [bg, fg] = palette[hash];
-  return { background: bg, color: fg };
-});
+// Уникальный генеративный логотип (DiceBear rings) вместо подбираемых
+// вручную изображений: рисунок и цвет колец детерминированы именем
+// расширения, поэтому каждое приложение получает свой неповторимый знак.
+const ringPalette = ['4db6ac', '5c6bc0', '66bb6a', 'ffa726', '26c6da', 'ec407a'];
 
 const open = () => {
   if (props.extension.is_available)
@@ -92,17 +83,8 @@ const open = () => {
   gap: var(--p-2, 8px);
 }
 
-.app-card__mono {
+.app-card__avatar {
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--p-r-md, 12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
 }
 
 .app-card__body {
