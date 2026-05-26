@@ -67,7 +67,19 @@ const onUpdate = (newData: IIndividualData | IOrganizationData | IEntrepreneurDa
 </script>
 
 <style lang="scss" scoped>
+/* Развёрнутые данные пайщика — спокойная вложенная панель с дыханием между полями */
 .participant-details {
-  padding: var(--p-4, 16px);
+  padding: var(--p-5, 20px) var(--p-6, 24px);
+  background: var(--p-surface-2);
+}
+
+/* Форму держим читаемой шириной, не растягиваем на весь экран */
+.participant-details :deep(.q-form) {
+  max-width: 640px;
+}
+
+/* Вертикальный ритм между полями ввода */
+.participant-details :deep(.q-field) {
+  margin-bottom: var(--p-2, 8px);
 }
 </style>
