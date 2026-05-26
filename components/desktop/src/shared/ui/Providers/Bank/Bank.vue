@@ -213,6 +213,13 @@ const downloadQR = () => {
   flex-direction: column;
   gap: var(--p-5, 20px);
   margin-top: var(--p-4, 16px);
+  /* Ограничиваем ширину панели: иначе длинное «Назначение» в shrink-to-fit
+     диалоге раздувает форму до max-content и она выглядит непропорционально
+     широкой. С max-width значение переносится по строкам внутри панели. */
+  width: 100%;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Сводка ключевых полей в виде definition list — плоско, без отдельного
@@ -240,7 +247,8 @@ const downloadQR = () => {
 .bank-pay__summary-value {
   color: var(--p-ink);
   font-weight: 500;
-  word-break: break-word;
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin: 0;
 }
 .bank-pay__summary-amount {
