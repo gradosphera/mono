@@ -3,7 +3,7 @@ article.app-card(
   :class='{ "app-card--clickable": extension.is_available }',
   @click='open'
 )
-  .app-card__top
+  .app-card__head
     AutoAvatar.app-card__avatar(
       :username='extension.name || extension.title',
       :size='48',
@@ -11,16 +11,16 @@ article.app-card(
       background='var(--p-surface-2)',
       :ring-color='ringPalette'
     )
-    span.badge.badge--pos(v-if='isInstalled')
-      q-icon(name='fa-solid fa-check' size='11px')
-      | Установлено
-    span.badge.badge--warn(v-else-if='!extension.is_available')
-      q-icon(name='fa-solid fa-screwdriver-wrench' size='11px')
-      | В разработке
+    .app-card__heading
+      h3.app-card__title {{ extension.title }}
+      span.badge.badge--pos(v-if='isInstalled')
+        q-icon(name='fa-solid fa-check' size='11px')
+        | Установлено
+      span.badge.badge--warn(v-else-if='!extension.is_available')
+        q-icon(name='fa-solid fa-screwdriver-wrench' size='11px')
+        | В разработке
 
-  .app-card__body
-    h3.app-card__title {{ extension.title }}
-    p.app-card__desc(v-if='extension.description') {{ extension.description }}
+  p.app-card__desc(v-if='extension.description') {{ extension.description }}
 
   .app-card__foot(v-if='extension.is_available')
     span.app-card__more
@@ -76,11 +76,10 @@ const open = () => {
   }
 }
 
-.app-card__top {
+.app-card__head {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--p-2, 8px);
+  align-items: center;
+  gap: var(--p-3, 12px);
 }
 
 .app-card__avatar {
@@ -91,11 +90,12 @@ const open = () => {
   opacity: 0.85;
 }
 
-.app-card__body {
+.app-card__heading {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--p-1, 4px);
-  flex: 1;
+  min-width: 0;
 }
 
 .app-card__title {
@@ -121,6 +121,7 @@ const open = () => {
 .app-card__foot {
   display: flex;
   align-items: center;
+  margin-top: auto;
 }
 
 .app-card__more {
