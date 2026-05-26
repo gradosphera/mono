@@ -27,7 +27,6 @@ import {
 const accountStore = useAccountStore();
 const onLoading = ref(false);
 const expanded = reactive(new Map<string, boolean>());
-const currentTab = reactive<Record<string, string>>({});
 
 // Инжектим кнопку добавления пользователя в заголовок
 const { registerAction } = useHeaderActions();
@@ -47,7 +46,6 @@ onMounted(() => {
 
 const toggleExpand = (id: string) => {
   expanded.set(id, !expanded.get(id));
-  if (!currentTab[id]) currentTab[id] = 'info';
 };
 
 const loadParticipants = async () => {
