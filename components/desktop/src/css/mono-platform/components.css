@@ -2712,3 +2712,39 @@ body {
   margin-top: 4px;
   font-family: var(--p-mono);
 }
+
+/* ── AutoAvatar: генеративный знак DiceBear rings ──────────────────────
+   Глобально (не scoped) — стили достают до инлайн-SVG, вставленного через
+   v-html, у которого нет scope-атрибутов. */
+.auto-avatar__svg,
+.auto-avatar__svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+}
+
+/* Каждый сегмент-дуга вращается вокруг центра картинки (50 50). */
+.ring-seg {
+  transform-box: view-box;
+  transform-origin: center;
+}
+
+/* При наведении на логотип сегменты на секунду расходятся: «прямые» и
+   зеркальные (под matrix-flip) от одного и того же поворота идут в разные
+   стороны; лёгкий стаггер по индексу делает движение живым. */
+.auto-avatar--animated:hover .ring-seg {
+  animation: ringSegWobble 1.3s ease-in-out;
+  animation-delay: calc(var(--seg, 0) * 40ms);
+}
+
+@keyframes ringSegWobble {
+  0%   { transform: rotate(0deg); }
+  35%  { transform: rotate(30deg); }
+  70%  { transform: rotate(-15deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auto-avatar--animated:hover .ring-seg { animation: none; }
+}

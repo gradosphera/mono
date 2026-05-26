@@ -9,7 +9,8 @@ article.app-card(
       :size='48',
       radius='var(--p-r-md, 12px)',
       background='var(--p-surface-2)',
-      :ring-color='ringPalette'
+      :ring-color='ringPalette',
+      animated
     )
     .app-card__heading
       h3.app-card__title {{ extension.title }}
