@@ -1,43 +1,148 @@
 <template lang="pug">
-div.q-pa-md
-  q-card(flat bordered @click="open").hover-card.q-pa-md
-    p.text-h6.no-margin {{extension.title}}
+article.app-card(
+  :class='{ "app-card--clickable": extension.is_available }',
+  @click='open'
+)
+  .app-card__top
+    .app-card__mono(:style='monoStyle') {{ monogram }}
+    span.badge.badge--pos(v-if='isInstalled')
+      q-icon(name='fa-solid fa-check' size='11px')
+      | Установлено
+    span.badge.badge--warn(v-else-if='!extension.is_available')
+      q-icon(name='fa-solid fa-screwdriver-wrench' size='11px')
+      | В разработке
 
-    div
-      q-chip(outline  v-for="tag in extension.tags" v-bind:key="tag" dense size="sm") {{tag}}
+  .app-card__body
+    h3.app-card__title {{ extension.title }}
+    p.app-card__desc(v-if='extension.description') {{ extension.description }}
 
-    q-img(v-if="extension.image" :src="extension.image")
-
-
-    p.q-mt-md {{extension.description}}
-    div.flex.justify-between.items-center
-      div
-        q-chip(square dense size="md" color="green" outline v-if="extension.is_installed && extension.is_available").q-ml-sm установлено
-
-      div
-        q-btn(dense size="sm" v-if="extension.is_available" flat @click="open")
-          span подробнее
-          q-icon(name="fa fa-arrow-right").q-ml-sm
-
-        q-chip(size="md" dense color="orange" v-if="!extension.is_available" outline) в разработке
-
+  .app-card__foot(v-if='extension.is_available')
+    span.app-card__more
+      | Подробнее
+      q-icon(name='fa-solid fa-arrow-right' size='12px')
 </template>
+
 <script lang="ts" setup>
 import type { IExtension } from 'src/entities/Extension/model/types';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-const props = defineProps({
-  extension: {
-    required: true,
-    type: Object as () => IExtension
-  }
-})
+const props = defineProps<{ extension: IExtension }>();
 
+const router = useRouter();
 
-const router = useRouter()
+const isInstalled = computed(
+  () => props.extension.is_installed && props.extension.is_available,
+);
+
+// Монограмма-плитка вместо подбираемых вручную изображений:
+// первая буква названия на детерминированном по имени мягком фоне.
+const monogram = computed(
+  () => (props.extension.title || props.extension.name || '?').trim().charAt(0).toUpperCase(),
+);
+
+const palette: [string, string][] = [
+  ['var(--p-primary-soft)', 'var(--p-primary)'],
+  ['var(--p-info-soft)', 'var(--p-info)'],
+  ['var(--p-pos-soft)', 'var(--p-pos)'],
+  ['var(--p-warn-soft)', 'var(--p-warn)'],
+];
+
+const monoStyle = computed(() => {
+  const key = props.extension.name || props.extension.title || '';
+  let hash = 0;
+  for (let i = 0; i < key.length; i += 1) hash = (hash + key.charCodeAt(i)) % palette.length;
+  const [bg, fg] = palette[hash];
+  return { background: bg, color: fg };
+});
 
 const open = () => {
   if (props.extension.is_available)
-    router.push({name: 'one-extension', params: {name: props.extension.name}})
-}
+    router.push({ name: 'one-extension', params: { name: props.extension.name } });
+};
 </script>
+
+<style scoped lang="scss">
+.app-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-3, 12px);
+  height: 100%;
+  min-height: 200px;
+  padding: var(--p-5, 20px);
+  background: var(--p-surface, #fff);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-lg, 14px);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.app-card--clickable {
+  cursor: pointer;
+  &:hover {
+    border-color: var(--p-primary-line, var(--p-primary));
+    box-shadow: var(--p-shadow-pop, 0 8px 28px rgba(0, 0, 0, 0.1));
+    transform: translateY(-2px);
+  }
+}
+
+.app-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--p-2, 8px);
+}
+
+.app-card__mono {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--p-r-md, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-1, 4px);
+  flex: 1;
+}
+
+.app-card__title {
+  margin: 0;
+  font-size: var(--p-fs-h3);
+  font-weight: 600;
+  letter-spacing: var(--p-ls-h3, 0);
+  color: var(--p-ink);
+}
+
+.app-card__desc {
+  margin: 0;
+  font-size: var(--p-fs-body-sm);
+  line-height: 1.5;
+  color: var(--p-ink-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.app-card__foot {
+  display: flex;
+  align-items: center;
+}
+
+.app-card__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1, 4px);
+  font-size: var(--p-fs-body-sm);
+  font-weight: 600;
+  color: var(--p-primary);
+}
+</style>
