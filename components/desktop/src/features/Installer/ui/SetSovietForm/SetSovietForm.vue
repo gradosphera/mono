@@ -21,6 +21,7 @@
         q-input(
           autofocus,
           outlined,
+          dense,
           color='primary',
           v-model='installStore.soviet[index].individual_data.email',
           label='Электронная почта',

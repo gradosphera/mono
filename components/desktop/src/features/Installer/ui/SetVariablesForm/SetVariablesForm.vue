@@ -10,6 +10,7 @@
       q-input(
         autofocus,
         outlined,
+        dense,
         color='primary',
         v-model='installStore.vars.name',
         label='Собственное наименование кооператива',
@@ -19,6 +20,7 @@
       )
       q-input(
         outlined,
+        dense,
         color='primary',
         v-model='installStore.vars.full_abbr',
         label='ОПФ+ в именительном падеже',
@@ -27,6 +29,7 @@
       )
       q-input(
         outlined,
+        dense,
         color='primary',
         v-model='installStore.vars.full_abbr_genitive',
         label='ОПФ+ в родительном падеже',
@@ -35,6 +38,7 @@
       )
       q-input(
         outlined,
+        dense,
         color='primary',
         v-model='installStore.vars.full_abbr_dative',
         label='ОПФ+ в дательном падеже',
@@ -43,6 +47,7 @@
       )
       q-input(
         outlined,
+        dense,
         color='primary',
         v-model='installStore.vars.short_abbr',
         label='Краткая аббревиатура ОПФ+',
@@ -57,6 +62,7 @@
     .vars-section__fields
       q-input(
         outlined,
+        dense,
         color='primary',
         v-model='installStore.vars.statute_link',
         label='Ссылка на устав кооператива',
@@ -84,6 +90,7 @@
     .vars-section__fields
       q-input(
         outlined,
+        dense,
         color='primary',
         v-model='installStore.vars.confidential_email',
         label='Email по вопросам конфиденциальности',

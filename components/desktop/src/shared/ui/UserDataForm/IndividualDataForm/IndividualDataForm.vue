@@ -1,14 +1,14 @@
 <template lang="pug">
 .user-data-stack(v-if="userData.individual_data")
   slot(name="top")
-  q-input(ref="firstInput" :autofocus="!slots.top" v-model="userData.individual_data.last_name" outlined color="primary" label="Фамилия" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
-  q-input(v-model="userData.individual_data.first_name" outlined color="primary" label="Имя" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
-  q-input(v-model="userData.individual_data.middle_name" outlined color="primary" label="Отчество" :rules="[val => validatePersonalName(val)]" autocomplete="off")
+  q-input(ref="firstInput" :autofocus="!slots.top" v-model="userData.individual_data.last_name" outlined dense color="primary" label="Фамилия" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.individual_data.first_name" outlined dense color="primary" label="Имя" :rules="[val => notEmpty(val), val => validatePersonalName(val)]" autocomplete="off")
+  q-input(v-model="userData.individual_data.middle_name" outlined dense color="primary" label="Отчество" :rules="[val => validatePersonalName(val)]" autocomplete="off")
 
-  q-input(v-model="userData.individual_data.full_address" outlined color="primary" label="Адрес регистрации (как в паспорте)" :rules="[val => notEmpty(val)]" autocomplete="off")
+  q-input(v-model="userData.individual_data.full_address" outlined dense color="primary" label="Адрес регистрации (как в паспорте)" :rules="[val => notEmpty(val)]" autocomplete="off")
 
   q-input(
-    outlined color="primary"
+    outlined dense color="primary"
     v-model="userData.individual_data.birthdate"
     mask="date"
     label="Дата рождения (год/месяц/день)"
@@ -22,7 +22,7 @@
             .row.items-center.justify-end
               q-btn(v-close-popup label="Close" color="primary" flat)
 
-  q-input(v-model="userData.individual_data.phone" outlined color="primary" mask="+7 (###) ###-##-##" fill-mask label="Номер телефона" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
+  q-input(v-model="userData.individual_data.phone" outlined dense color="primary" mask="+7 (###) ###-##-##" fill-mask label="Номер телефона" :rules="[val => notEmpty(val), val => notEmptyPhone(val)]" autocomplete="off")
 
 </template>
 <script setup lang="ts">
