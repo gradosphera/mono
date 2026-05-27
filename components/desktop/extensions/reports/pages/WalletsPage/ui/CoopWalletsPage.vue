@@ -26,7 +26,6 @@ div.page-shell
             WalletIdCell(:wallet-name='props.row.id')
           q-td {{ props.row.name }}
           q-td.text-right {{ formatAsset2Digits(props.row.available) }}
-          q-td.text-right {{ formatAsset2Digits(props.row.blocked) }}
           q-td.text-right(auto-width)
             q-btn(
               v-if='isChairman && transferEnabled'
@@ -114,9 +113,6 @@ div.page-shell
               .col-6
                 .text-caption.caption-muted Доступно
                 .text-body2.text-weight-medium {{ formatAsset2Digits(props.row.available) }}
-              .col-6
-                .text-caption.caption-muted Заблокировано
-                .text-body2.text-weight-medium {{ formatAsset2Digits(props.row.blocked) }}
 
   WalletTransferDialog(
     v-model='transferDialog.open'
@@ -215,7 +211,6 @@ const columns = computed<any[]>(() => {
     { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
     { name: 'name', align: 'left', label: 'Наименование', field: 'name', sortable: true },
     { name: 'available', align: 'right', label: 'Доступно', field: 'available', sortable: true },
-    { name: 'blocked', align: 'right', label: 'Заблокировано', field: 'blocked', sortable: true },
   ]
   if (isChairman.value && transferEnabled) {
     base.push({ name: 'actions', align: 'right', label: '', field: 'actions', sortable: false })

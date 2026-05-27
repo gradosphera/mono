@@ -82,9 +82,6 @@ export const useWalletStore = defineStore(namespace, (): IWalletStore => {
           if (entry.available_delta) {
             item.available = applyAssetDelta(item.available ?? '0.0000 RUB', entry.available_delta);
           }
-          if (entry.blocked_delta) {
-            item.blocked = applyAssetDelta(item.blocked ?? '0.0000 RUB', entry.blocked_delta);
-          }
         }
       }
     }
