@@ -30,6 +30,21 @@ const session = useSessionStore();
 
 const processingDecisions = ref<Record<number, boolean>>({});
 
+// После голоса бэкенду нужно несколько секунд, чтобы учесть голос из блокчейна.
+// Если нажать «Утвердить» сразу — утверждение упадёт с ошибкой «голос ещё не
+// учтён». Поэтому после успешного голоса держим кнопки строки (в т.ч.
+// «Утвердить») в состоянии загрузки ещё столько миллисекунд.
+const VOTE_SETTLE_MS = 3000;
+
+// Реактивно проставляет/снимает состояние загрузки по пункту повестки
+// (замена ручному мутированию + setTimeout-хаку для триггера реактивности).
+const setProcessing = (decision_id: number, value: boolean) => {
+  processingDecisions.value = {
+    ...processingDecisions.value,
+    [decision_id]: value,
+  };
+};
+
 // Инжектим кнопку создания решения в заголовок
 const { registerAction } = useHeaderActions();
 
@@ -74,7 +89,7 @@ const decisions = computed(() =>
 // Обработчики событий
 const onAuthorizeDecision = async (row) => {
   const decision_id = Number(row.table.id);
-  processingDecisions.value[decision_id] = true;
+  setProcessing(decision_id, true);
 
   try {
     await authorizeAndExecuteDecision(row);
@@ -85,19 +100,13 @@ const onAuthorizeDecision = async (row) => {
   } catch (e) {
     FailAlert(e);
   } finally {
-    // Гарантированно сбрасываем состояние загрузки
-    processingDecisions.value[decision_id] = false;
-
-    // Добавляем таймаут для гарантии обновления UI
-    setTimeout(() => {
-      processingDecisions.value = { ...processingDecisions.value };
-    }, 100);
+    setProcessing(decision_id, false);
   }
 };
 
 const onVoteFor = async (row) => {
   const decision_id = Number(row.table.id);
-  processingDecisions.value[decision_id] = true;
+  setProcessing(decision_id, true);
 
   try {
     await voteForDecision(row);
@@ -105,23 +114,19 @@ const onVoteFor = async (row) => {
     // помечается отметкой голоса. Обновляем список тихо (без скелетонов).
     SuccessAlert('Голос принят');
     await loadDecisions(route.params.coopname as string, true);
+    // Держим загрузку ещё VOTE_SETTLE_MS, чтобы «Утвердить» нельзя было нажать
+    // до того, как бэкенд учтёт голос (иначе утверждение упадёт с ошибкой).
+    setTimeout(() => setProcessing(decision_id, false), VOTE_SETTLE_MS);
   } catch (e) {
     console.error(e)
     FailAlert(e);
-  } finally {
-    // Гарантированно сбрасываем состояние загрузки
-    processingDecisions.value[decision_id] = false;
-
-    // Добавляем таймаут для гарантии обновления UI
-    setTimeout(() => {
-      processingDecisions.value = { ...processingDecisions.value };
-    }, 100);
+    setProcessing(decision_id, false);
   }
 };
 
 const onVoteAgainst = async (row) => {
   const decision_id = Number(row.table.id);
-  processingDecisions.value[decision_id] = true;
+  setProcessing(decision_id, true);
 
   try {
     await voteAgainstDecision(row);
@@ -129,17 +134,13 @@ const onVoteAgainst = async (row) => {
     // помечается отметкой голоса. Обновляем список тихо (без скелетонов).
     SuccessAlert('Голос принят');
     await loadDecisions(route.params.coopname as string, true);
+    // Держим загрузку ещё VOTE_SETTLE_MS, чтобы «Утвердить» нельзя было нажать
+    // до того, как бэкенд учтёт голос (иначе утверждение упадёт с ошибкой).
+    setTimeout(() => setProcessing(decision_id, false), VOTE_SETTLE_MS);
   } catch (e) {
     console.error(e)
     FailAlert(e);
-  } finally {
-    // Гарантированно сбрасываем состояние загрузки
-    processingDecisions.value[decision_id] = false;
-
-    // Добавляем таймаут для гарантии обновления UI
-    setTimeout(() => {
-      processingDecisions.value = { ...processingDecisions.value };
-    }, 100);
+    setProcessing(decision_id, false);
   }
 };
 
