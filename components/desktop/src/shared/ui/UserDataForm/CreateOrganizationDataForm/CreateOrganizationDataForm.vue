@@ -308,7 +308,8 @@ onMounted(async () => {
 .user-data-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--p-3, 12px);
+  /* gap не задаём: reserve-hint-space у q-input уже даёт ~24px снизу под
+     error/hint — дополнительный gap делает расстояние избыточным (канон BaseForm). */
   margin-top: var(--p-4, 16px);
 }
 </style>
