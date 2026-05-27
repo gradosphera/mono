@@ -39,6 +39,12 @@ AuthCard.invite(
   title='Приглашение',
   subtitle='Вы получили приглашение на подключение к кооперативу'
 )
+  p.invite__instruction
+    | Чтобы продолжить, перейдите по персональной ссылке из письма-приглашения.
+    | В ней содержится одноразовый код, по которому для вас будет выпущен ключ
+    | доступа.
+  .invite__actions
+    BaseButton(variant='ghost', @click='goToSignin') Перейти ко входу
 </template>
 
 <script lang="ts" setup>
@@ -77,6 +83,10 @@ const copyMnemonic = () => {
     .catch((e) => {
       console.log(e);
     });
+};
+
+const goToSignin = () => {
+  router.push({ name: 'signin' });
 };
 
 const finish = async () => {
