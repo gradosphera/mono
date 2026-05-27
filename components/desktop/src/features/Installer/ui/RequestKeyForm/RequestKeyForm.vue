@@ -57,7 +57,7 @@ const submit = async () => {
 .request-key {
   display: flex;
   flex-direction: column;
-  gap: var(--p-3, 12px);
+  /* gap не задаём: reserve-hint-space у BaseInput уже отделяет кнопку (канон BaseForm). */
   width: 100%;
 }
 </style>

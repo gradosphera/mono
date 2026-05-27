@@ -214,7 +214,7 @@ const next = async () => {
 .vars-section__fields {
   display: flex;
   flex-direction: column;
-  gap: var(--p-2, 8px);
+  /* gap не задаём: reserve-hint-space у q-input уже разделяет поля (канон BaseForm). */
   margin-top: var(--p-3, 12px);
 }
 
