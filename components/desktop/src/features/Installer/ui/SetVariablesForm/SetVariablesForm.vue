@@ -25,7 +25,7 @@
         color='primary',
         v-model='installStore.vars.full_abbr',
         label='ОПФ+ в именительном падеже',
-        placeholder='Потребительский Кооператив',
+        placeholder='Потребительский Кооператив Социального Комплекса',
         :rules='[val => notEmpty(val)]'
       )
       q-input(
@@ -35,7 +35,7 @@
         color='primary',
         v-model='installStore.vars.full_abbr_genitive',
         label='ОПФ+ в родительном падеже',
-        placeholder='Потребительского Кооператива',
+        placeholder='Потребительского Кооператива Социального Комплекса',
         :rules='[val => notEmpty(val)]'
       )
       q-input(
@@ -45,7 +45,7 @@
         color='primary',
         v-model='installStore.vars.full_abbr_dative',
         label='ОПФ+ в дательном падеже',
-        placeholder='Потребительскому Кооперативу',
+        placeholder='Потребительскому Кооперативу Социального Комплекса',
         :rules='[val => notEmpty(val)]'
       )
       q-input(
