@@ -11,47 +11,51 @@
         autofocus,
         outlined,
         dense,
+        reserve-hint-space,
         color='primary',
         v-model='installStore.vars.name',
         label='Собственное наименование кооператива',
         placeholder='Ромашка',
-        hint='Название кооператива без кавычек, которое будет добавляться к ОПФ+',
         :rules='[val => notEmpty(val)]'
       )
       q-input(
         outlined,
         dense,
+        reserve-hint-space,
         color='primary',
         v-model='installStore.vars.full_abbr',
         label='ОПФ+ в именительном падеже',
-        hint='Например: Потребительский Кооператив Социального Комплекса',
+        placeholder='Потребительский Кооператив',
         :rules='[val => notEmpty(val)]'
       )
       q-input(
         outlined,
         dense,
+        reserve-hint-space,
         color='primary',
         v-model='installStore.vars.full_abbr_genitive',
         label='ОПФ+ в родительном падеже',
-        hint='Например: Потребительского Кооператива Социального Комплекса',
+        placeholder='Потребительского Кооператива',
         :rules='[val => notEmpty(val)]'
       )
       q-input(
         outlined,
         dense,
+        reserve-hint-space,
         color='primary',
         v-model='installStore.vars.full_abbr_dative',
         label='ОПФ+ в дательном падеже',
-        hint='Например: Потребительскому Кооперативу Социального Комплекса',
+        placeholder='Потребительскому Кооперативу',
         :rules='[val => notEmpty(val)]'
       )
       q-input(
         outlined,
         dense,
+        reserve-hint-space,
         color='primary',
         v-model='installStore.vars.short_abbr',
         label='Краткая аббревиатура ОПФ+',
-        hint='Например: ПКСК',
+        placeholder='ПКСК',
         :rules='[val => notEmpty(val)]'
       )
 
@@ -63,6 +67,7 @@
       q-input(
         outlined,
         dense,
+        reserve-hint-space,
         color='primary',
         v-model='installStore.vars.statute_link',
         label='Ссылка на устав кооператива',
@@ -91,6 +96,7 @@
       q-input(
         outlined,
         dense,
+        reserve-hint-space,
         color='primary',
         v-model='installStore.vars.confidential_email',
         label='Email по вопросам конфиденциальности',
