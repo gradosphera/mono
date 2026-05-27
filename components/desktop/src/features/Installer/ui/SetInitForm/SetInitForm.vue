@@ -37,6 +37,7 @@
             ref='emailInput',
             autofocus,
             outlined,
+            dense,
             color='primary',
             v-model='organizationEmail',
             label='Email организации',
