@@ -55,8 +55,20 @@ const {
   formatDecisionTitle,
 } = decisionProcessor;
 
+// Пункты, по которым текущий пользователь только что совершил действие
+// (проголосовал «за»/«против» или утвердил). Повестка на бэкенде такие пункты
+// уже не отдаёт, но данные из блокчейна доходят с задержкой — поэтому поллинг
+// (или немедленный рефетч) может на мгновение вернуть уже отработанный пункт.
+// Держим его скрытым локально, чтобы убрать «исчез → вернулся → исчез».
+// В пределах сессии страницы обратно не показываем — это намеренно просто.
+const actedDecisionIds = ref<Set<number>>(new Set());
+
 // Данные
-const decisions = computed(() => decisionProcessor.decisions.value);
+const decisions = computed(() =>
+  decisionProcessor.decisions.value.filter(
+    (row) => !actedDecisionIds.value.has(Number(row.table?.id)),
+  ),
+);
 
 // Обработчики событий
 const onAuthorizeDecision = async (row) => {
@@ -65,8 +77,10 @@ const onAuthorizeDecision = async (row) => {
 
   try {
     await authorizeAndExecuteDecision(row);
+    // Оптимистично прячем пункт и обновляем список тихо (без скелетонов).
+    actedDecisionIds.value.add(decision_id);
     SuccessAlert('Решение принято и исполнено');
-    await loadDecisions(route.params.coopname as string);
+    await loadDecisions(route.params.coopname as string, true);
   } catch (e) {
     FailAlert(e);
   } finally {
@@ -81,18 +95,21 @@ const onAuthorizeDecision = async (row) => {
 };
 
 const onVoteFor = async (row) => {
-  processingDecisions.value[row.table.id] = true;
+  const decision_id = Number(row.table.id);
+  processingDecisions.value[decision_id] = true;
 
   try {
     await voteForDecision(row);
+    // Оптимистично прячем пункт и обновляем список тихо (без скелетонов).
+    actedDecisionIds.value.add(decision_id);
     SuccessAlert('Голос принят');
-    await loadDecisions(route.params.coopname as string);
+    await loadDecisions(route.params.coopname as string, true);
   } catch (e) {
     console.error(e)
     FailAlert(e);
   } finally {
     // Гарантированно сбрасываем состояние загрузки
-    processingDecisions.value[row.table.id] = false;
+    processingDecisions.value[decision_id] = false;
 
     // Добавляем таймаут для гарантии обновления UI
     setTimeout(() => {
@@ -102,18 +119,21 @@ const onVoteFor = async (row) => {
 };
 
 const onVoteAgainst = async (row) => {
-  processingDecisions.value[row.table.id] = true;
+  const decision_id = Number(row.table.id);
+  processingDecisions.value[decision_id] = true;
 
   try {
     await voteAgainstDecision(row);
+    // Оптимистично прячем пункт и обновляем список тихо (без скелетонов).
+    actedDecisionIds.value.add(decision_id);
     SuccessAlert('Голос принят');
-    await loadDecisions(route.params.coopname as string);
+    await loadDecisions(route.params.coopname as string, true);
   } catch (e) {
     console.error(e)
     FailAlert(e);
   } finally {
     // Гарантированно сбрасываем состояние загрузки
-    processingDecisions.value[row.table.id] = false;
+    processingDecisions.value[decision_id] = false;
 
     // Добавляем таймаут для гарантии обновления UI
     setTimeout(() => {
