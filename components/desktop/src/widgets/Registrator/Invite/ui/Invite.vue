@@ -1,12 +1,13 @@
 <template lang="pug">
 AuthCard.invite(
   v-if='token',
-  :max-width='560',
+  :max-width='480',
   title='Сохраните ключ',
   subtitle='Новый приватный ключ доступа и цифровой подписи сгенерирован для вас'
 )
   p.invite__instruction
-    | Пожалуйста, подтвердите надёжное сохранение ключа. Мы рекомендуем сохранить его в бесплатном менеджере паролей, таком как
+    | Подтвердите, что надёжно сохранили ключ. Рекомендуем хранить его в
+    | бесплатном менеджере паролей, например
     a.q-ml-xs.invite__link(href='https://bitwarden.com/download', target='_blank') Bitwarden
     | .
 
@@ -17,21 +18,28 @@ AuthCard.invite(
       readonly,
       mono
     )
-    .invite__copy
-      BaseButton(variant='ghost', size='sm', @click='copyMnemonic')
-        q-icon.q-mr-xs(name='content_copy', size='16px')
-        | Скопировать
+      template(#append)
+        q-btn(
+          flat,
+          dense,
+          round,
+          size='sm',
+          color='primary',
+          icon='content_copy',
+          aria-label='Скопировать ключ',
+          @click='copyMnemonic'
+        )
+          q-tooltip Скопировать
 
-  .invite__confirm
-    q-checkbox(v-model='i_save', label='Я сохранил ключ')
+  q-checkbox.invite__confirm(v-model='i_save', label='Я сохранил ключ', dense)
 
-  .invite__actions
-    BaseButton(
-      variant='primary',
-      :disabled='!i_save',
-      :loading='loading',
-      @click='finish'
-    ) Установить ключ
+  BaseButton.invite__submit(
+    variant='primary',
+    block,
+    :disabled='!i_save',
+    :loading='loading',
+    @click='finish'
+  ) Установить ключ
 
 AuthCard.invite(
   v-else,
@@ -117,7 +125,7 @@ const finish = async () => {
   color: var(--p-ink-2);
   font-size: var(--p-fs-body-sm, 13px);
   line-height: var(--p-lh-body, 1.55);
-  margin: 0 0 var(--p-5, 20px);
+  margin: 0 0 var(--p-4, 16px);
 }
 .invite__link {
   color: var(--p-primary);
@@ -127,18 +135,10 @@ const finish = async () => {
 .invite__link:hover {
   text-decoration: underline;
 }
-.invite__key {
-  margin-bottom: var(--p-5, 20px);
-}
-.invite__copy {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--p-1, 4px);
-}
+/* reserve-hint-space у BaseInput уже даёт отступ снизу — лишний margin не нужен. */
 .invite__confirm {
   display: flex;
-  justify-content: center;
-  margin-bottom: var(--p-5, 20px);
+  margin-bottom: var(--p-4, 16px);
 }
 .invite__actions {
   display: flex;
