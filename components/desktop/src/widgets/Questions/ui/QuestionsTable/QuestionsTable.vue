@@ -2,7 +2,10 @@
 .questions-list
   slot(name='top')
 
-  .questions-list__items(v-if='loading')
+  //- Скелетоны — только на ПЕРВОЙ загрузке (списка ещё нет). При фоновых
+  //- обновлениях (голосование, поллинг) список уже показан и подменять его
+  //- скелетонами нельзя — иначе вся страница «моргает».
+  .questions-list__items(v-if='loading && !decisions.length')
     span.skel.questions-list__skel(v-for='i in 3', :key='i')
 
   EmptyState(
