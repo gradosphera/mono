@@ -1,5 +1,6 @@
 <template lang="pug">
 q-btn(
+  v-if='walletStore.isWalletAgreementSigned',
   @click='showDialog = true',
   :color='micro ? "accent" : "primary"',
   :flat='micro',
