@@ -97,6 +97,22 @@ const buttonStyle = computed(() => ({
 </script>
 
 <style lang="scss">
+/* Левый дровер фиксированный — горизонтального скролла быть не должно.
+   У .rail есть собственный border-right (1px), который при content-box даёт
+   ~1px overflow внутри контента дровера и порождает паразитный горизонтальный
+   скроллбар; трекпадом его можно «оттянуть», обнажая правую границу.
+   Гасим overflow-x и эластичное оттягивание, а .rail приводим к border-box. */
+.app-left-drawer {
+  .q-drawer__content {
+    overflow-x: hidden;
+    overscroll-behavior-x: contain;
+  }
+  .rail {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
 .drawer-right {
   border-left: 1px solid #00800038 !important;
 }
