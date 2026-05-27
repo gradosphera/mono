@@ -2265,7 +2265,6 @@ export const ReturnTypes: Record<string,any> = {
 		createdAt:"DateTime",
 		endedAt:"DateTime",
 		id:"String",
-		matrixRoomId:"String",
 		memo:"String",
 		participants:"String",
 		roomId:"String",
@@ -2954,8 +2953,8 @@ export const ReturnTypes: Record<string,any> = {
 		displayLabel:"String",
 		editable:"Boolean",
 		encrypted:"Boolean",
+		id:"String",
 		kind:"ManagedRoomKind",
-		matrixRoomId:"String",
 		secretaryInRoom:"Boolean"
 	},
 	ContactsDTO:{
