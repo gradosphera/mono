@@ -51,7 +51,6 @@ module.exports = configure(function (ctx) {
       'mono-platform/tokens.css',
       'mono-platform/components.css',
       'mono-platform/quasar-canon.css',
-      'legacy-stylers.scss',
       '../app/styles/app.scss',
       '../app/styles/style.css',
       '../app/styles/variables.sass',
