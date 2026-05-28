@@ -319,10 +319,12 @@ body.body--dark {
 }
 
 /* ===== Notification (q-notification, Quasar Notify) ============================
-   Canon-тост: нейтральная поверхность, тонкая рамка, 3px accent-полоска
-   слева (positive/negative/warning/info), без «цветной заливки карточки».
-   Позиция и таймаут задаются в `shared/api/alerts.ts`, визуал — здесь
-   (один источник правды для всех Notify.create в проекте).
+   Canon-тост по MONO Platform v2 (shared/MONO Design System.html → .toast):
+   тёмный фон (var(--p-ink) для нейтрального; deep-tinted #052e16/#4c0a0a/
+   #3d2400/#0c1e3f для positive/negative/warning/info), светлый текст,
+   ЦВЕТНАЯ ИКОНКА по типу (--p-pos/--p-neg/--p-warn/--p-info). Появление
+   bottom-right, max-width 420px. Позиция и таймаут — в shared/api/alerts.ts,
+   визуал — здесь (один источник правды для всех Notify.create).
    --------------------------------------------------------------------- */
 .q-notifications__list--bottom-right,
 .q-notifications__list--bottom-left,
@@ -335,81 +337,91 @@ body.body--dark {
   padding: 24px 24px 0;
 }
 .q-notification {
-  background: var(--p-surface) !important;
-  color: var(--p-ink) !important;
-  border: 1px solid var(--p-line-1);
-  border-left: 3px solid var(--p-info);
-  border-radius: var(--p-r-md, 12px);
-  box-shadow: var(--p-elev-2, 0 8px 24px rgba(0, 0, 0, 0.12));
-  padding: 12px 14px 12px 16px;
+  background: var(--p-ink) !important;
+  color: var(--p-canvas) !important;
+  border: 0;
+  border-radius: var(--p-r-sm, 8px);
+  box-shadow: var(--p-shadow-pop, 0 8px 28px rgba(0, 0, 0, 0.18));
+  padding: 12px 14px;
   min-height: auto;
   max-width: 420px;
   font-family: var(--p-sans, inherit);
   font-size: var(--p-fs-body-sm, 13px);
-  line-height: var(--p-lh-body-sm, 1.45);
+  line-height: 1.45;
+  gap: 12px;
 }
 .q-notification__message {
-  color: var(--p-ink);
+  color: inherit;
   font-weight: 500;
   padding: 2px 0;
 }
 .q-notification__caption {
-  color: var(--p-ink-2);
-  font-size: var(--p-fs-caption, 12px);
+  color: inherit;
+  opacity: 0.7;
+  font-size: var(--p-fs-meta, 12px);
   line-height: 1.45;
   padding-top: 2px;
 }
 .q-notification__icon {
-  color: var(--p-ink-2);
-  font-size: 20px;
+  color: inherit;
+  opacity: 0.7;
+  font-size: 18px;
   margin-right: 4px;
+  margin-top: 1px;
 }
 .q-notification__avatar {
   margin-right: 4px;
 }
 .q-notification__actions {
-  color: var(--p-ink-3);
+  color: inherit;
   padding: 0;
   margin-left: 4px;
 }
 .q-notification__actions .q-btn {
+  background: transparent !important;
+  color: inherit !important;
   min-height: 28px;
   padding: 0 8px;
-  color: var(--p-ink-3) !important;
+  opacity: 0.85;
+  font-weight: 500;
 }
 .q-notification__actions .q-btn:hover {
-  background: var(--p-surface-2);
-  color: var(--p-ink) !important;
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Accent-полоска по типу */
+/* Цветной deep-tinted фон + цветная иконка по типу */
 .q-notification.bg-positive,
 .q-notification--standard.bg-positive {
-  border-left-color: var(--p-pos);
+  background: #052e16 !important;
 }
 .q-notification.bg-positive .q-notification__icon {
   color: var(--p-pos);
+  opacity: 1;
 }
 .q-notification.bg-negative,
 .q-notification--standard.bg-negative {
-  border-left-color: var(--p-neg);
+  background: #4c0a0a !important;
 }
 .q-notification.bg-negative .q-notification__icon {
   color: var(--p-neg);
+  opacity: 1;
 }
 .q-notification.bg-warning,
 .q-notification--standard.bg-warning {
-  border-left-color: var(--p-warn);
+  background: #3d2400 !important;
 }
 .q-notification.bg-warning .q-notification__icon {
   color: var(--p-warn);
+  opacity: 1;
 }
 .q-notification.bg-info,
 .q-notification--standard.bg-info {
-  border-left-color: var(--p-info);
+  background: #0c1e3f !important;
 }
 .q-notification.bg-info .q-notification__icon {
   color: var(--p-info);
+  opacity: 1;
 }
 
 /* Мобильник: тост на всю ширину минус 16px полей */

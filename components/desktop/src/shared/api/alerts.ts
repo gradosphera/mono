@@ -5,11 +5,11 @@ import { extractGraphQLErrorMessages } from './errors';
  * Canon-тосты платформы. Единый визуал и поведение для всех типов
  * уведомлений: бизнес-успех, бизнес-ошибка, входящий push (Novu).
  *
- * Канон (см. mono-design-system v2 → toast):
- *  - Позиция: правый НИЖНИЙ угол (bottom-right) — не top-right.
- *  - Контейнер: нейтральная поверхность + левая 3px accent-полоска
- *    (positive/negative/warning/info), без «цветной заливки карточки»
- *    (см. UX-spec stop-signals §19.1).
+ * Канон (см. shared/MONO Design System.html → .toast):
+ *  - Позиция: правый НИЖНИЙ угол (bottom-right).
+ *  - Контейнер: тёмный фон (var(--p-ink) для нейтрального; deep-tinted
+ *    #052e16 / #4c0a0a / #3d2400 / #0c1e3f для positive/negative/warning
+ *    /info), светлый текст, ЦВЕТНАЯ иконка по типу.
  *  - Иконка слева, заголовок + опциональный sub.
  *  - Закрытие крестиком справа, авто-таймаут.
  *
@@ -21,9 +21,10 @@ const POSITION = 'bottom-right' as const;
 const TIMEOUT_INFO = 5000;
 const TIMEOUT_ERROR = 7000;
 
+// Цвет close-крестика и CTA-action не задаём — они наследуют светлый
+// тон от тёмного фона тоста (см. .q-notification в quasar-canon.css).
 const CLOSE_ACTION = {
   icon: 'close',
-  color: 'grey-7',
   round: true,
   size: 'sm',
   flat: true,
@@ -43,7 +44,6 @@ export function SuccessAlert(
   const ctaAction = action
     ? {
         ...(action.text ? { label: action.text } : { icon: action.icon || 'launch' }),
-        color: 'positive',
         size: 'sm',
         flat: true,
         handler: action.handler,
