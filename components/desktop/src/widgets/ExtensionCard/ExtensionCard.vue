@@ -33,7 +33,7 @@ article.app-card(
 import type { IExtension } from 'src/entities/Extension/model/types';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
+import { AutoAvatar } from 'src/shared/ui/domain/AutoAvatar';
 
 const props = defineProps<{ extension: IExtension }>();
 
