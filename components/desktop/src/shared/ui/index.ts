@@ -7,6 +7,7 @@ export * from './PaymentDetails';
 export * from './ClientOnly';
 export * from './Loader';
 export * from './MeetCompactCard';
+export * from './ModalBase';
 export * from './Editor';
 export * from './WrappedEditor';
 export * from './AutoSaveIndicator';
