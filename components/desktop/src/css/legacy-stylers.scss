@@ -1,9 +1,10 @@
-// Legacy-стайлеры extensions/capital — глобально загружаются для всех страниц,
-// чтобы не таскать side-effect import'ы по каждому файлу.
-// Слиты из бывших shared/ui/TitleStyles + shared/ui/CardStyles.
-// Долг: переписать на canon-токены (--p-*) и снести этот файл.
+// Legacy-стайлеры — глобально подгружаются через quasar.config.cjs.
+// Переведены на canon-токены (--p-*); тёмная тема переключается через
+// [data-theme="dark"] в tokens.css (не через .body--dark / .q-dark).
+// Цель файла — пережить миграцию страниц/виджетов на canon-компоненты;
+// после полной миграции (живые классы → scoped или canon-виджеты) удалить.
 
-// === TitleStyles — ограничение ширины заголовков в таблицах ===
+// Ограничение ширины заголовка в таблицах (TimeStatsWidget, TimeIssuesWidget).
 .title-container {
   max-width: 300px;
   min-width: 150px;
@@ -37,419 +38,97 @@
   }
 }
 
-// === CardStyles — общие стили для карточек ===
+// Общая обёртка карточки (TariffCard).
 .card-container {
-  border-radius: 16px;
   width: 100%;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: var(--q-surface);
-
-  .body--dark &,
-  .q-dark & {
-    border: 1px solid rgba(255, 255, 255, 0.34);
-    background-color: color-mix(
-      in srgb,
-      var(--q-dark-page, #1f1c1c) 92%,
-      var(--q-primary) 8%
-    );
-  }
+  border-radius: var(--p-r-lg);
+  border: 1px solid var(--p-line-1);
+  background-color: var(--p-surface);
 }
 
+// Info-карточка (UnionMembershipStep, MeetInfoCard, ResourceInfoWidget).
 .info-card {
-  background-color: rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-
-  .body--dark &,
-  .q-dark & {
-    background-color: color-mix(
-      in srgb,
-      var(--q-dark-page, #1f1c1c) 90%,
-      var(--q-primary) 10%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.26);
-  }
+  background-color: var(--p-surface-2);
+  border: 1px solid var(--p-line-1);
+  border-radius: var(--p-r-md);
+  padding: var(--p-4);
+  margin-bottom: var(--p-3);
 
   &:last-child {
     margin-bottom: 0;
   }
 }
 
-.info-card-hover {
-  transition: all 0.2s ease;
+// Заголовок секции (CooperativeDataForm, CapitalRegistrationPage).
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--p-6);
 
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-    .body--dark &,
-    .q-dark & {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-}
-
-.page-main-card {
-  .body--dark &,
-  .q-dark & {
-    border: 1px solid rgba(255, 255, 255, 0.34);
-    background-color: color-mix(
-      in srgb,
-      var(--q-dark-page, #1f1c1c) 92%,
-      var(--q-primary) 8%
-    );
+  .section-icon,
+  .header-icon {
+    margin-right: var(--p-3);
   }
 
-  .page-header {
-    display: flex;
-    align-items: center;
-
-    .page-icon {
-      margin-right: 16px;
-    }
-
-    .page-title {
-      .title {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
-
-      .subtitle {
-        font-size: 14px;
-        opacity: 0.6;
-      }
-    }
-  }
-}
-
-.profile-section {
-  .section-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 24px;
-
-    .header-icon {
-      margin-right: 12px;
-    }
-
-    .header-title {
-      font-size: 20px;
-      font-weight: 600;
-    }
-  }
-
-  .info-content {
-    .info-group {
-      .info-item {
-        background: rgba(0, 0, 0, 0.02);
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 12px;
-        border-left: 3px solid #1976d2;
-
-        .body--dark &,
-        .q-dark & {
-          background: rgba(255, 255, 255, 0.03);
-        }
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-
-        .info-label {
-          font-size: 12px;
-          margin-bottom: 4px;
-          text-transform: uppercase;
-          font-weight: 500;
-          opacity: 0.6;
-        }
-
-        .info-value {
-          font-size: 16px;
-          font-weight: 500;
-          word-break: break-word;
-
-          &.large {
-            font-size: 24px;
-            font-weight: 700;
-          }
-
-          &.with-action {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-
-            .value-text {
-              font-size: 16px;
-              font-weight: 500;
-              word-break: break-all;
-              flex: 1;
-            }
-
-            .action-button {
-              flex-shrink: 0;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 12px;
-
-  &.large {
-    font-size: 20px;
+  .section-title,
+  .header-title {
+    font-size: var(--p-fs-h2);
     font-weight: 600;
+    color: var(--p-ink);
   }
 }
 
-.card-label {
-  font-size: 14px;
-  margin-bottom: 4px;
-  opacity: 0.6;
+// Самостоятельный section-title (без .section-header вокруг) —
+// формы reports + ParticipantsImportDialog + ResultPreviewCard + Efs1Form.
+.section-title {
+  font-size: var(--p-fs-h2);
+  font-weight: 600;
+  color: var(--p-ink);
+}
 
-  &.small {
-    font-size: 12px;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
+// Пары label/value в карточках. Глобальный стиль работает для USE-ONLY
+// потребителей (Edit{HoursPerDay,About,RatePerHour}Input,
+// CreateResultDecisionInfoWidget, ProjectContributorsList, InvitationsPage);
+// большинство остальных компонентов переопределяют локально через <style scoped>.
+.card-label {
+  font-size: var(--p-fs-body);
+  color: var(--p-ink-2);
+  margin-bottom: var(--p-1);
 }
 
 .card-value {
   font-size: 16px;
   font-weight: 500;
-  margin-bottom: 8px;
+  color: var(--p-ink);
+  margin-bottom: var(--p-2);
 }
 
-.card-action-btn {
-  border-radius: 8px;
-}
-
-.balance-card {
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 12px;
-
-  .balance-label {
-    font-size: 14px;
-    margin-bottom: 6px;
-    opacity: 0.6;
-  }
-
-  .balance-value {
-    font-size: 24px;
-    font-weight: 700;
-  }
-}
-
-.balance-card-primary {
-  background: rgba(25, 118, 210, 0.08);
-  border-left: 4px solid #1976d2;
-
-  .body--dark &,
-  .q-dark & {
-    background: rgba(25, 118, 210, 0.15);
-  }
-}
-
-.balance-card-warning {
-  background: rgba(255, 152, 0, 0.08);
-  border-left: 4px solid #ff9800;
-
-  .body--dark &,
-  .q-dark & {
-    background: rgba(255, 152, 0, 0.15);
-  }
-}
-
+// Пустое состояние (CmdkMenu, ReportsCalendar).
 .empty-state {
+  padding: var(--p-8) var(--p-5);
   text-align: center;
-  padding: 40px 20px;
 
   .empty-icon {
-    margin-bottom: 16px;
+    margin-bottom: var(--p-4);
   }
 
   .empty-text {
-    font-size: 18px;
+    font-size: var(--p-fs-h2);
     font-weight: 500;
-    margin-bottom: 8px;
-    opacity: 0.7;
+    margin-bottom: var(--p-2);
+    color: var(--p-ink-1);
   }
 
   .empty-subtitle {
-    font-size: 14px;
-    opacity: 0.5;
-  }
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 24px;
-
-  .section-icon {
-    margin-right: 12px;
-  }
-
-  .section-title {
-    font-size: 18px;
-    font-weight: 600;
-
-    &.large {
-      .section-title {
-        font-size: 20px;
-      }
-    }
-  }
-}
-
-.info-warning-card {
-  background: rgba(255, 152, 0, 0.05);
-  border: 1px solid rgba(255, 152, 0, 0.2);
-  border-radius: 12px;
-  padding: 16px;
-
-  .body--dark &,
-  .q-dark & {
-    background: rgba(255, 152, 0, 0.08);
-    border: 1px solid rgba(255, 152, 0, 0.3);
-  }
-
-  .warning-info {
-    display: flex;
-    align-items: center;
-
-    .warning-icon {
-      margin-right: 12px;
-    }
-
-    .warning-content {
-      .warning-label {
-        font-size: 14px;
-        margin-bottom: 2px;
-        opacity: 0.7;
-      }
-
-      .warning-value {
-        font-size: 16px;
-        font-weight: 500;
-      }
-    }
-  }
-}
-
-.section-card-warning {
-  border-radius: 16px;
-  border: 1px solid rgba(255, 152, 0, 0.2);
-  background: rgba(255, 152, 0, 0.05);
-
-  .body--dark &,
-  .q-dark & {
-    border: 1px solid rgba(255, 152, 0, 0.3);
-    background: rgba(255, 152, 0, 0.08);
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 24px;
-
-    .section-icon {
-      margin-right: 12px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-    }
-  }
-
-  .section-content {
-    .info-item {
-      background: rgba(255, 152, 0, 0.08);
-      border: 1px solid rgba(255, 152, 0, 0.15);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-      transition: all 0.2s ease;
-
-      .body--dark &,
-      .q-dark & {
-        background: rgba(255, 152, 0, 0.12);
-        border: 1px solid rgba(255, 152, 0, 0.25);
-      }
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      &:hover {
-        background: rgba(255, 152, 0, 0.12);
-        transform: translateY(-2px);
-
-        .body--dark &,
-        .q-dark & {
-          background: rgba(255, 152, 0, 0.18);
-        }
-      }
-
-      .info-label {
-        font-size: 14px;
-        margin-bottom: 6px;
-        font-weight: 500;
-        opacity: 0.6;
-      }
-
-      .info-value {
-        font-size: 16px;
-        font-weight: 600;
-        word-break: break-word;
-      }
-    }
+    font-size: var(--p-fs-body);
+    color: var(--p-ink-2);
   }
 }
 
 @media (max-width: 768px) {
-  .profile-section .info-content .info-group .info-item {
-    margin-bottom: 8px;
-    padding: 12px;
-
-    .info-value.large {
-      font-size: 20px;
-    }
-  }
-
-  .balance-card .balance-value {
-    font-size: 20px;
-  }
-
-  .section-header .section-title {
-    font-size: 16px;
-  }
-
-  .card-title.large {
-    font-size: 18px;
-  }
-
-  .page-main-card .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-
-    .page-icon {
-      margin-right: 0;
-      margin-bottom: 12px;
-    }
-  }
-
-  .section-card .section-header .section-title {
-    font-size: 16px;
+  .section-title,
+  .section-header .section-title,
+  .section-header .header-title {
+    font-size: var(--p-fs-h3);
   }
 }
