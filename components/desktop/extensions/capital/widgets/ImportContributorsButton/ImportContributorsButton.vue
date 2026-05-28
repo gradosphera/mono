@@ -1,6 +1,18 @@
 <template lang="pug">
-q-btn(color="primary" @click="showDialog = true" icon="file_upload") Импорт из CSV
-  q-dialog(v-model='showDialog', @hide='clear' maximized)
+//- Canon header-кнопка: на мобильном — иконка-only + tooltip.
+q-btn(
+  @click='showDialog = true',
+  :color='isMobile ? "accent" : "primary"',
+  :flat='isMobile',
+  :dense='isMobile',
+  :size='isMobile ? "sm" : undefined',
+  icon='file_upload',
+  :label='isMobile ? undefined : "Импорт из CSV"',
+  no-wrap
+)
+  q-tooltip(v-if='isMobile') Импорт участников из CSV
+
+q-dialog(v-model='showDialog', @hide='clear' maximized)
     ModalBase(:title='"Импорт участников"')
       .q-pa-md
         q-card(v-if='!hasConfig' flat)
@@ -139,6 +151,9 @@ import { FailAlert, NotifyAlert, SuccessAlert } from 'src/shared/api/alerts';
 import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
 import { useSystemStore } from 'src/entities/System/model';
 import { ModalBase } from 'src/shared/ui/ModalBase';
+import { useWindowSize } from 'src/shared/hooks';
+
+const { isMobile } = useWindowSize();
 
 // Определение колонок для предварительного просмотра
 const previewColumns: QTableProps['columns'] = [

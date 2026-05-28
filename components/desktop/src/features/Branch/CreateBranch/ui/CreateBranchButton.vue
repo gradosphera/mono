@@ -1,15 +1,19 @@
 <template lang="pug">
-div.header-action
-  q-btn(
-    color='primary',
-    :stretch='isMobile',
-    :size='isMobile ? "sm" : "md"',
-    no-wrap,
-    @click='show = true'
-  )
-    i.fa-solid.fa-plus
-    span.q-pl-sm добавить участок
-  q-dialog(v-model='show', persistent, :maximized='false')
+//- Canon header-кнопка: на мобильном — только иконка + tooltip,
+//- на десктопе — иконка + лейбл.
+q-btn(
+  @click='show = true',
+  :color='isMobile ? "accent" : "primary"',
+  :flat='isMobile',
+  :dense='isMobile',
+  :size='isMobile ? "sm" : undefined',
+  no-wrap
+)
+  q-icon(name='fa-solid fa-plus')
+  span.q-ml-sm(v-if='!isMobile') Добавить участок
+  q-tooltip(v-if='isMobile') Добавить участок
+
+q-dialog(v-model='show', persistent, :maximized='false')
     ModalBase(
       style='width: 500px; max-width: 100% !important',
       :title='"Создать кооперативный участок"',
@@ -122,10 +126,3 @@ const clear = () => {
 };
 </script>
 
-<style scoped lang="scss">
-.header-action {
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-</style>
