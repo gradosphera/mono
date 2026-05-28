@@ -81,6 +81,7 @@ import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { TableSkeleton } from 'src/shared/ui/base/TableSkeleton';
 import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
+import type { IPayment } from 'src/entities/Payment/model/types';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
 import { Zeus } from '@coopenomics/sdk';
@@ -99,7 +100,13 @@ const props = defineProps({
 
 const paymentStore = usePaymentStore();
 const payments = computed(() => paymentStore.payments);
-const items = computed(() => payments.value?.items ?? []);
+// Cast через unknown: zeus-output типизирует items слабее, чем нужно
+// шаблону (поля row.id/username/quantity/... TSC видит как unknown).
+// Реальная форма строки соответствует IPayment — закрепляем это явно,
+// чтобы template/handlers получили строгие типы.
+const items = computed<IPayment[]>(
+  () => (payments.value?.items ?? []) as unknown as IPayment[],
+);
 const onLoading = ref(false);
 
 // Статус платежа → canon-вариант бейджа (точка + цвет из дизайн-токенов).
