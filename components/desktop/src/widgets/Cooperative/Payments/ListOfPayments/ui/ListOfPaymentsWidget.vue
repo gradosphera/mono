@@ -100,12 +100,13 @@ const props = defineProps({
 
 const paymentStore = usePaymentStore();
 const payments = computed(() => paymentStore.payments);
-// Cast через unknown: zeus-output типизирует items слабее, чем нужно
-// шаблону (поля row.id/username/quantity/... TSC видит как unknown).
-// Реальная форма строки соответствует IPayment — закрепляем это явно,
-// чтобы template/handlers получили строгие типы.
-const items = computed<IPayment[]>(
-  () => (payments.value?.items ?? []) as unknown as IPayment[],
+// Zeus scalar ID не имеет резолвера → IPayment.id типизирован как unknown,
+// что ломает шаблонные expanded.get/.set(row.id) и :id-биндинги. Внутри
+// виджета сужаем id до string (UI-форма строки): на проводе это всегда
+// строковый ID платежа.
+type IPaymentRow = Omit<IPayment, 'id'> & { id: string };
+const items = computed<IPaymentRow[]>(
+  () => (payments.value?.items ?? []) as unknown as IPaymentRow[],
 );
 const onLoading = ref(false);
 
