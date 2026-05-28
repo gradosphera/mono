@@ -52,7 +52,6 @@ div
 import { onMounted, ref, computed } from 'vue';
 import { useSystemStore } from 'src/entities/System/model';
 import { useExpandableState } from 'src/shared/lib/composables';
-import 'src/shared/ui/TitleStyles';
 import { WindowLoader } from 'src/shared/ui/Loader';
 import { ColorCard } from 'src/shared/ui/ColorCard/ui';
 import { ResultSubmissionSegmentsWidget, ResultSubmissionActionsWidget } from 'app/extensions/capital/widgets';
@@ -150,3 +149,18 @@ onMounted(async () => {
   loadSegmentsExpandedState();
 });
 </script>
+
+<style lang="scss" scoped>
+.card-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--p-ink);
+  margin-bottom: var(--p-2);
+}
+
+.card-label {
+  font-size: var(--p-fs-body);
+  color: var(--p-ink-2);
+  margin-bottom: var(--p-1);
+}
+</style>

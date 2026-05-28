@@ -32,13 +32,14 @@
 </template>
 
 <script setup lang="ts">
+import type { PropType } from 'vue';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { Cooperative } from 'cooptypes';
 import { QuestionCard } from '../QuestionCard';
 
 const props = defineProps({
   decisions: {
-    type: Array,
+    type: Array as PropType<Cooperative.Document.IComplexAgenda[]>,
     required: true,
   },
   loading: {

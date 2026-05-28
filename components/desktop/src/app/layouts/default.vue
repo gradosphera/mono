@@ -2,11 +2,13 @@
 q-layout(view='lHh LpR fff')
   Header(:showDrawer='showDrawer', @toggle-left-drawer='toggleLeftDrawer')
 
+  //- Левый дровер: .rail внутри LeftDrawerMenu сам рисует canon-границу
+  //- (border-right из var(--p-line)) — q-drawer bordered убран, чтобы
+  //- не было двойной линии.
   q-drawer.app-left-drawer(
     v-if='showDrawer && loggedIn',
     v-model='leftDrawerOpen',
     side='left',
-    bordered,
     persistent,
     :width='248'
   )
@@ -114,24 +116,13 @@ const buttonStyle = computed(() => ({
 }
 
 .drawer-right {
-  border-left: 1px solid #00800038 !important;
-}
-
-.drawer-left {
-  border-right: 1px solid #00800038 !important;
+  border-left: 1px solid var(--p-line) !important;
 }
 
 .fixed-top-right {
   position: fixed !important;
-  top: var(--p-topbar-h); // Под header'ом (canon: 56px)
-  right: 0px;
-  z-index: 10;
-}
-
-.drawer-close-btn {
-  position: absolute !important;
-  top: 16px;
-  right: 16px;
+  top: var(--p-topbar-h);
+  right: 0;
   z-index: 10;
 }
 </style>
