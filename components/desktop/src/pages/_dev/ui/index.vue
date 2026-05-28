@@ -363,8 +363,8 @@
         <span class="dev-ui__sect-num">12</span>
         <h2 class="dev-ui__sect-title">Боковая панель (AppDrawer)</h2>
         <p class="dev-ui__sect-sub">
-          Solid surface (no gradient), активный пункт — soft-accent заливка
-          пилюлей + 2-px рейл слева. Принимает <code>items</code> и
+          Solid surface (no gradient), активный пункт — soft-primary заливка
+          пилюлей + 2-px рейл слева (deep teal). Принимает <code>items</code> и
           <code>activeKey</code> через props.
         </p>
       </div>

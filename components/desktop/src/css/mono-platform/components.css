@@ -1317,8 +1317,9 @@ body {
 .rail__spacer { flex: 1; }
 
 /* ---- User card (sidebar bottom) — premium mini-wallet ----------------
-   Identity row + accent-tinted balance block + split actions. Replaces
-   the dashed-separator approach which looked too "office".
+   Identity row + primary-tinted balance block + split actions.
+   Сохраняем primary (deep teal) на avatar/balance, а не accent —
+   в навигаторе оранжевый только бы рассеивал внимание.
    --------------------------------------------------------------------- */
 .rail__usercard {
   margin: 16px;
