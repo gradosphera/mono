@@ -2,11 +2,7 @@ import type { Queries, Zeus } from '@coopenomics/sdk';
 
 export type IPaymentPaginationResult =
   Queries.Gateway.GetPayments.IOutput[typeof Queries.Gateway.GetPayments.name];
-// Zeus типизирует скаляр ID как unknown — переопределяем поле id на string,
-// чтобы шаблоны (expanded.get/.set, :id-биндинги) получали узкий тип.
-export type IPayment = Omit<IPaymentPaginationResult['items'][number], 'id'> & {
-  id: string;
-};
+export type IPayment = IPaymentPaginationResult['items'][number];
 
 export type IGetPaymentsInputData = Queries.Gateway.GetPayments.IInput['data'];
 export type IGetPaymentsInputOptions =
