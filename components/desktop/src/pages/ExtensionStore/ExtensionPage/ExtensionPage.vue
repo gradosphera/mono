@@ -43,7 +43,7 @@ import { useExtensionStore } from 'src/entities/Extension/model';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
-import { AutoAvatar } from 'src/shared/ui/AutoAvatar';
+import { AutoAvatar } from 'src/shared/ui/domain/AutoAvatar';
 import { ExtensionActions } from 'src/widgets/ExtensionActions';
 import { ExtensionInfo } from 'src/widgets/ExtensionInfo';
 import { ExtensionSettings } from 'src/widgets/ExtensionSettings';
