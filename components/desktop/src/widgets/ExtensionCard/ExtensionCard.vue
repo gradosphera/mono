@@ -5,7 +5,7 @@ article.app-card(
 )
   .app-card__head
     AutoAvatar.app-card__avatar(
-      :username='extension.name || extension.title',
+      :username='extension.name || extension.title || ""',
       :size='48',
       radius='var(--p-r-md, 12px)',
       background='var(--p-surface-2)',

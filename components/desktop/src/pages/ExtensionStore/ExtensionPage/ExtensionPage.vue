@@ -8,7 +8,7 @@
     .extension-page__grid
       aside.extension-page__side
         AutoAvatar.extension-page__logo(
-          :username='extension.name || extension.title',
+          :username='extension.name || extension.title || ""',
           :size='96',
           radius='var(--p-r-lg, 14px)',
           background='var(--p-surface-2)',
