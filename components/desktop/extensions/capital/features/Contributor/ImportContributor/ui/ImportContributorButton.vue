@@ -1,20 +1,25 @@
 <template lang="pug">
-//- Canon header-кнопка: на мобильном — иконка-only + tooltip.
-q-btn(
-  @click='showDialog = true',
-  :color='isMobile ? "accent" : "primary"',
-  :flat='isMobile',
-  :dense='isMobile',
-  :size='isMobile ? "sm" : undefined',
-  :loading='loading',
-  icon='add',
-  :label='isMobile ? undefined : "Добавить"',
-  no-wrap
-)
-  q-tooltip(v-if='isMobile') Добавить участника
+div
+  //- Canon header-кнопка: на мобильном — иконка-only + tooltip.
+  q-btn(
+    @click='showDialog = true',
+    :color='isMobile ? "accent" : "primary"',
+    :flat='isMobile',
+    :dense='isMobile',
+    :size='isMobile ? "sm" : undefined',
+    :loading='loading',
+    icon='add',
+    :label='isMobile ? undefined : "Добавить"',
+    no-wrap
+  )
+    q-tooltip(v-if='isMobile') Добавить участника
 
-q-dialog(v-model='showDialog', @hide='clear')
-  ModalBase(:title='"Импорт участника"')
+  BaseDialog(
+    v-model='showDialog',
+    title='Импорт участника',
+    size='md',
+    @update:model-value='(v) => !v && clear()'
+  )
     Form.q-pa-md(
       :handler-submit='handleImportContributor',
       :is-submitting='isSubmitting',
@@ -78,7 +83,7 @@ q-dialog(v-model='showDialog', @hide='clear')
 import { ref } from 'vue';
 import { useImportContributor } from '../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api/alerts';
-import { ModalBase } from 'src/shared/ui/ModalBase';
+import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { Form } from 'src/shared/ui/Form';
 import { useSystemStore } from 'src/entities/System/model';
 import { useWindowSize } from 'src/shared/hooks';
