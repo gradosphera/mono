@@ -10,7 +10,7 @@ import { SignedDocumentBackfillService } from './services/signed-document-backfi
  * backfill — разовый перенос истории. Репозиторий (SIGNED_DOCUMENT_REPOSITORY) и генератор
  * предоставляются глобальными модулями (TypeOrmModule / GeneratorInfrastructureModule).
  *
- * Следующая итерация: перевод `searchDocuments` и `getDocuments` на этот репозиторий + снос OpenSearch.
+ * Это единый источник для getDocuments (read-path) и searchDocuments — OpenSearch удалён.
  */
 @Module({
   imports: [DocumentDomainModule],

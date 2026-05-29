@@ -15,7 +15,6 @@ import { NovuModule } from './infrastructure/novu/novu.module';
 import { EventsInfrastructureModule } from './infrastructure/events/events.module';
 import { FreeDecisionInfrastructureModule } from './infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from './infrastructure/decision-tracking/decision-tracking-infrastructure.module';
-import { SearchInfrastructureModule } from './infrastructure/search/search-infrastructure.module';
 import { FileStorageInfrastructureModule } from './infrastructure/file-storage';
 
 // Domain modules
@@ -100,7 +99,6 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     GeneratorInfrastructureModule,
     RedisModule,
     NovuModule,
-    SearchInfrastructureModule,
     EventsInfrastructureModule,
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
