@@ -1,26 +1,32 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { SovietContract } from 'cooptypes';
-import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service';
+import { Cooperative, SovietContract } from 'cooptypes';
+import { DocumentPackageAggregator } from '~/domain/document/aggregators/document-package.aggregator';
 import {
   SIGNED_DOCUMENT_REPOSITORY,
   type SignedDocumentRepository,
-  type SignedDocumentUpsertInput,
 } from '~/domain/document/repository/signed-document.repository';
 import { SignedDocumentStatus } from '~/domain/document/enums/signed-document-status.enum';
+import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
 import config from '~/config/config';
 import type { IAction } from '~/types/common';
 
 const SOVIET = SovietContract.contractName.production;
+const Registry = SovietContract.Actions.Registry;
 
 export type IngestResult = 'created' | 'updated' | 'skipped';
 
 /**
  * Наполнение реестра подписанных документов (Postgres-проекция, C28-21).
  *
- * Источник — внутренняя событийная шина (EventEmitter2). Парсер ретранслирует blockchain-события
- * контракта soviet как `action::soviet::*`; мы подписываемся и обновляем PG-сущность.
- * Парсер при этом не трогаем (parser1→parser2 прозрачно для подписчика).
+ * Источник — внутренняя событийная шина (EventEmitter2): парсер ретранслирует blockchain-события
+ * контракта soviet как `action::soviet::*`. На каждое релевантное событие собирается ГОТОВЫЙ агрегат
+ * пакета (DocumentPackageAggregator) и кладётся в PG целиком — чтобы getDocuments/поиск работали
+ * из Postgres без сборки на лету. Парсер не трогаем (parser1→parser2 прозрачно для подписчика).
+ *
+ * - newsubmitted/newresolved/newdeclined — несут заявление: пересобираем агрегат + ставим статус;
+ * - newdecision/newact/newlink — досборка: пересобираем агрегат по сохранённому действию-носителю,
+ *   статус не меняем.
  */
 @Injectable()
 export class SignedDocumentIngestionService {
@@ -28,120 +34,140 @@ export class SignedDocumentIngestionService {
 
   constructor(
     @Inject(SIGNED_DOCUMENT_REPOSITORY) private readonly repository: SignedDocumentRepository,
-    private readonly generator: GeneratorInfrastructureService
+    private readonly aggregator: DocumentPackageAggregator
   ) {}
 
-  @OnEvent(`action::${SOVIET}::${SovietContract.Actions.Registry.NewSubmitted.actionName}`)
+  @OnEvent(`action::${SOVIET}::${Registry.NewSubmitted.actionName}`)
   async onNewSubmitted(action: IAction): Promise<void> {
-    await this.safeIngest(action, SignedDocumentStatus.Submitted, 'newsubmitted');
+    await this.safeStatusEvent(action, SignedDocumentStatus.Submitted, Registry.NewSubmitted.actionName);
   }
 
-  @OnEvent(`action::${SOVIET}::${SovietContract.Actions.Registry.NewResolved.actionName}`)
+  @OnEvent(`action::${SOVIET}::${Registry.NewResolved.actionName}`)
   async onNewResolved(action: IAction): Promise<void> {
-    await this.safeIngest(action, SignedDocumentStatus.Resolved, 'newresolved');
+    await this.safeStatusEvent(action, SignedDocumentStatus.Resolved, Registry.NewResolved.actionName);
   }
 
-  // ВНИМАНИЕ: `newdeclined` пока не экспортирован как registry-action в cooptypes
-  // (есть только интерфейс INewdeclined). Подписываемся по строке-литералу на будущее —
-  // как только действие начнёт приходить на шину, статус declined будет ловиться (см. C28-21).
-  @OnEvent(`action::${SOVIET}::newdeclined`)
+  @OnEvent(`action::${SOVIET}::${Registry.NewDeclined.actionName}`)
   async onNewDeclined(action: IAction): Promise<void> {
-    await this.safeIngest(action, SignedDocumentStatus.Declined, 'newdeclined');
+    await this.safeStatusEvent(action, SignedDocumentStatus.Declined, Registry.NewDeclined.actionName);
+  }
+
+  @OnEvent(`action::${SOVIET}::${Registry.NewDecision.actionName}`)
+  async onNewDecision(action: IAction): Promise<void> {
+    await this.safeReassemble(action, Registry.NewDecision.actionName);
+  }
+
+  @OnEvent(`action::${SOVIET}::${Registry.NewAct.actionName}`)
+  async onNewAct(action: IAction): Promise<void> {
+    await this.safeReassemble(action, Registry.NewAct.actionName);
+  }
+
+  @OnEvent(`action::${SOVIET}::${Registry.NewLink.actionName}`)
+  async onNewLink(action: IAction): Promise<void> {
+    await this.safeReassemble(action, Registry.NewLink.actionName);
   }
 
   /**
-   * Идемпотентно записывает действие в реестр.
+   * Идемпотентно записывает действие-носитель заявления в реестр.
    * Используется и листенерами шины, и backfill'ом.
    */
   async ingestAction(action: IAction, status: SignedDocumentStatus): Promise<IngestResult> {
     const data = (action?.data ?? {}) as Record<string, any>;
     const packageHash: string | undefined = data.package;
-    const docHash: string | undefined = data.document?.hash;
-    if (!packageHash || !docHash) return 'skipped';
+    if (!packageHash) return 'skipped';
 
     const coopname: string = data.coopname || config.coopname;
     const current = await this.repository.getStatus(coopname, packageHash);
 
-    // Не понижаем статус: submitted не перетирает уже resolved/declined.
+    // Не понижаем статус: submitted не перетирает resolved/declined.
     if (status === SignedDocumentStatus.Submitted && current && current !== SignedDocumentStatus.Submitted) {
       return 'skipped';
     }
     // Тот же статус уже стоит — идемпотентно выходим (повторный backfill безопасен).
     if (current === status) return 'skipped';
 
-    // Запись есть и это смена статуса (не submitted) — меняем поле без перезагрузки контента.
-    if (current && status !== SignedDocumentStatus.Submitted) {
-      const ok = await this.repository.setStatus(coopname, packageHash, status);
-      if (ok) return 'updated';
-    }
-
-    const input = await this.buildInput(action, status, coopname, packageHash, docHash);
-    await this.repository.upsert(input);
+    await this.assembleAndUpsert(action, status, coopname, packageHash);
     return current ? 'updated' : 'created';
   }
 
-  private async safeIngest(action: IAction, status: SignedDocumentStatus, label: string): Promise<void> {
+  private async safeStatusEvent(action: IAction, status: SignedDocumentStatus, label: string): Promise<void> {
     try {
       const result = await this.ingestAction(action, status);
       if (result !== 'skipped') {
-        this.logger.log(`[${label}] запись реестра ${result}: package=${action?.data?.package?.substring?.(0, 8)}`);
+        this.logger.log(`[${label}] запись реестра ${result}: package=${this.shortPackage(action)}`);
       }
     } catch (error: any) {
       this.logger.warn(`Ошибка ingestion события ${label}: ${error?.message}`);
     }
   }
 
-  private async buildInput(
-    action: IAction,
+  private async safeReassemble(action: IAction, label: string): Promise<void> {
+    try {
+      const data = (action?.data ?? {}) as Record<string, any>;
+      const packageHash: string | undefined = data.package;
+      if (!packageHash) return;
+
+      const coopname: string = data.coopname || config.coopname;
+      const current = await this.repository.getStatus(coopname, packageHash);
+      if (!current) return; // ещё нет заявления по пакету — нечего дособирать
+
+      const source = await this.repository.getSourceActionData(coopname, packageHash);
+      if (!source) return;
+
+      await this.assembleAndUpsert(source as unknown as IAction, current, coopname, packageHash);
+      this.logger.log(`[${label}] агрегат пересобран: package=${this.shortPackage(action)}`);
+    } catch (error: any) {
+      this.logger.warn(`Ошибка пересборки агрегата по событию ${label}: ${error?.message}`);
+    }
+  }
+
+  private async assembleAndUpsert(
+    sourceAction: IAction,
     status: SignedDocumentStatus,
     coopname: string,
-    packageHash: string,
-    docHash: string
-  ): Promise<SignedDocumentUpsertInput> {
-    let doc: Awaited<ReturnType<GeneratorInfrastructureService['getDocument']>> = null;
-    try {
-      doc = await this.generator.getDocument({ hash: docHash });
-    } catch (error: any) {
-      this.logger.debug(`Документ ${docHash.substring(0, 8)} не получен из MongoDB: ${error?.message}`);
-    }
+    packageHash: string
+  ): Promise<void> {
+    const aggregate = await this.buildAggregateSafe(sourceAction);
+    const data = (sourceAction?.data ?? {}) as Record<string, any>;
+    const statement = aggregate?.statement;
+    const rawDoc = statement?.documentAggregate?.rawDocument;
+    const meta = (rawDoc?.meta ?? {}) as Record<string, any>;
 
-    const meta = (doc?.meta ?? {}) as Record<string, any>;
-    const html = doc?.html ?? '';
-
-    return {
+    await this.repository.upsert({
       coopname,
       packageHash,
-      hash: docHash,
-      username: meta.username || (action?.data?.username as string) || '',
+      hash: statement?.documentAggregate?.hash || data.document?.hash || data.document?.doc_hash || '',
+      username: meta.username || data.username || '',
       status,
+      action: data.action || '',
       registry_id: typeof meta.registry_id === 'number' ? meta.registry_id : 0,
-      full_title: doc?.full_title ?? '',
-      content_text: this.stripHtml(html),
-      html: html || null,
-      pdf: this.toPdfBuffer(doc?.binary),
-      block_num: this.resolveBlockNum(meta.block_num, action?.block_num),
-      document_aggregate: null,
-      meta: doc?.meta ? (doc.meta as unknown as Record<string, unknown>) : null,
+      full_title: rawDoc?.full_title || '',
+      content_text: this.stripHtml(rawDoc?.html || ''),
+      block_num: this.resolveBlockNum(meta.block_num, sourceAction?.block_num),
       document_created_at: meta.created_at ? new Date(meta.created_at) : null,
-    };
+      document_aggregate: aggregate,
+      source_action_data: sourceAction as unknown as Record<string, unknown>,
+    });
+  }
+
+  private async buildAggregateSafe(action: IAction): Promise<DocumentPackageAggregateDomainInterface | null> {
+    try {
+      return await this.aggregator.buildDocumentPackageAggregate(action as unknown as Cooperative.Blockchain.IAction);
+    } catch (error: any) {
+      this.logger.debug(`Не удалось собрать агрегат пакета: ${error?.message}`);
+      return null;
+    }
+  }
+
+  private shortPackage(action: IAction): string {
+    const pkg = (action?.data as Record<string, any>)?.package;
+    return typeof pkg === 'string' ? pkg.substring(0, 8) : '?';
   }
 
   private resolveBlockNum(metaBlockNum: unknown, actionBlockNum: unknown): string | null {
     if (metaBlockNum !== undefined && metaBlockNum !== null) return String(metaBlockNum);
     if (actionBlockNum !== undefined && actionBlockNum !== null) return String(actionBlockNum);
     return null;
-  }
-
-  private toPdfBuffer(binary: unknown): Buffer | null {
-    if (!binary) return null;
-    try {
-      const anyBin = binary as any;
-      if (Buffer.isBuffer(anyBin)) return anyBin;
-      // BSON Binary хранит байты в .buffer; Uint8Array/ArrayBuffer Buffer.from принимает напрямую.
-      return Buffer.from(anyBin.buffer ?? anyBin);
-    } catch {
-      return null;
-    }
   }
 
   private stripHtml(html: string): string {

@@ -1,7 +1,12 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { DocumentDomainService } from '~/domain/document/services/document-domain.service';
+import {
+  SIGNED_DOCUMENT_REPOSITORY,
+  type SignedDocumentRepository,
+} from '~/domain/document/repository/signed-document.repository';
 import { SignedDocumentStatus } from '~/domain/document/enums/signed-document-status.enum';
 import { SignedDocumentIngestionService } from './signed-document-ingestion.service';
+import config from '~/config/config';
 import type { IAction } from '~/types/common';
 
 export interface BackfillStats {
@@ -33,24 +38,38 @@ const PAGE_LIMIT = 100;
  * для каждого достаёт документ из factory-Mongo и складывает в Postgres-проекцию.
  * Идемпотентен по (coopname, package) — повторный прогон безопасен.
  *
- * Запуск — по флагу окружения `SIGNED_DOCS_BACKFILL_ON_BOOT=true` (operator opt-in), детачем,
- * чтобы не блокировать старт приложения. Метод `run()` пригоден и для отдельного CLI-энтрипойнта.
+ * Запуск автоматически ОДИН РАЗ при первом старте с этой фичей: если реестр по кооперативу пуст —
+ * затягиваем всю историю. Принудительный повторный прогон — флагом `SIGNED_DOCS_BACKFILL_ON_BOOT=true`.
+ * Выполняется детачем в onApplicationBootstrap (после инициализации всех модулей — генератор уже
+ * подключён к Mongo), чтобы не блокировать старт. Метод `run()` пригоден и для отдельного CLI.
  */
 @Injectable()
-export class SignedDocumentBackfillService implements OnModuleInit {
+export class SignedDocumentBackfillService implements OnApplicationBootstrap {
   private readonly logger = new Logger(SignedDocumentBackfillService.name);
 
   constructor(
     private readonly documentDomainService: DocumentDomainService,
-    private readonly ingestion: SignedDocumentIngestionService
+    private readonly ingestion: SignedDocumentIngestionService,
+    @Inject(SIGNED_DOCUMENT_REPOSITORY) private readonly repository: SignedDocumentRepository
   ) {}
 
-  onModuleInit(): void {
-    if (process.env.SIGNED_DOCS_BACKFILL_ON_BOOT === 'true') {
-      this.run().catch((error) => {
-        this.logger.error(`Ошибка фонового backfill реестра: ${error?.message}`);
-      });
+  onApplicationBootstrap(): void {
+    // Детачем: не блокируем старт приложения долгим сканом истории.
+    this.maybeRunOnBoot().catch((error) => {
+      this.logger.error(`Ошибка фонового backfill реестра: ${error?.message}`);
+    });
+  }
+
+  private async maybeRunOnBoot(): Promise<void> {
+    const forced = process.env.SIGNED_DOCS_BACKFILL_ON_BOOT === 'true';
+    if (!forced) {
+      const existing = await this.repository.count(config.coopname);
+      if (existing > 0) {
+        this.logger.log(`Реестр подписанных документов не пуст (${existing}) — авто-backfill пропущен.`);
+        return;
+      }
     }
+    await this.run();
   }
 
   async run(): Promise<BackfillStats> {

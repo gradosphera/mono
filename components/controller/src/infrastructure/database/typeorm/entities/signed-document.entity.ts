@@ -7,15 +7,19 @@ import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/
  *
  * Одна строка = один пакет документа (поле `package` связывает submitted↔resolved↔declined).
  * Наполняется ingestion-листенером blockchain-событий контракта soviet и разовым backfill'ом.
- * Контент (full_title/html/pdf) и статус лежат вместе — отсюда честный поиск и сборка агрегата
- * без обращений к explorer/Mongo на каждый запрос.
  *
- * Примечание: имя TS-поля `packageHash` (а не `package`) — `package` зарезервировано в strict-mode,
- * ломает shorthand/деструктуризацию; в БД колонка называется `package`.
+ * `document_aggregate` хранит ГОТОВЫЙ агрегат пакета (statement/decision/acts/links вместе с
+ * контентом и бинарём) — отсюда `getDocuments` отдаёт список без сборки на лету и без обращений
+ * к explorer/Mongo. Колонки `full_title`/`content_text`/`action`/… — денормализованная проекция
+ * для индексируемого поиска и фильтрации.
+ *
+ * Примечание: имя TS-поля `packageHash` (а не `package`) — `package` зарезервировано в strict-mode;
+ * в БД колонка называется `package`.
  */
 @Entity('signed_documents')
 @Index(['coopname', 'package'], { unique: true })
 @Index(['coopname', 'status'])
+@Index(['coopname', 'status', 'action'])
 @Index(['coopname', 'username'])
 export class SignedDocumentEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -36,37 +40,35 @@ export class SignedDocumentEntity {
   @Column({ type: 'varchar', length: 20, default: SignedDocumentStatus.Submitted })
   status!: SignedDocumentStatus;
 
+  /** Под-действие soviet (`data.action`) — для фильтра getDocuments по типам документов */
+  @Column({ type: 'varchar', length: 20, default: '' })
+  action!: string;
+
   @Column({ type: 'int', default: 0 })
   registry_id!: number;
 
   @Column({ type: 'text', default: '' })
   full_title!: string;
 
-  /** html, очищенный от тегов — индекс для ILIKE-поиска */
+  /** html заявления без тегов — индекс для ILIKE-поиска */
   @Column({ type: 'text', default: '' })
   content_text!: string;
-
-  @Column({ type: 'text', nullable: true })
-  html!: string | null;
-
-  /** PDF-бинарь как есть (~40–50 КБ; Postgres TOAST'ит и сжимает) */
-  @Column({ type: 'bytea', nullable: true })
-  pdf!: Buffer | null;
 
   @Column({ type: 'bigint', nullable: true })
   block_num!: string | null;
 
-  /** денормализованный готовый агрегат пакета (statement/decision/acts/links) */
+  /** дата создания документа (из meta.created_at) — для сортировки списка */
+  @Column({ type: 'timestamptz', nullable: true })
+  document_created_at!: Date | null;
+
+  /** ГОТОВЫЙ агрегат пакета: statement/decision/acts/links c контентом и бинарём (PDF base64) */
   @Column({ type: 'jsonb', nullable: true })
   document_aggregate!: DocumentPackageAggregateDomainInterface | null;
 
-  /** мета документа (IMetaDocument) */
+  /** действие-носитель заявления (newsubmitted/newresolved/newdeclined) целиком — для пересборки
+   * агрегата при доприходе newdecision/newact/newlink по тому же пакету */
   @Column({ type: 'jsonb', nullable: true })
-  meta!: Record<string, unknown> | null;
-
-  /** дата создания самого документа (из meta.created_at), отдельно от created_at записи */
-  @Column({ type: 'timestamptz', nullable: true })
-  document_created_at!: Date | null;
+  source_action_data!: Record<string, unknown> | null;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at!: Date;

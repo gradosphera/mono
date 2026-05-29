@@ -3,12 +3,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SignedDocumentEntity } from '../entities/signed-document.entity';
 import { SignedDocumentStatus } from '~/domain/document/enums/signed-document-status.enum';
+import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/interfaces/document-package-aggregate-domain.interface';
 import type {
+  SignedDocumentListParams,
+  SignedDocumentListResult,
   SignedDocumentRepository,
   SignedDocumentSearchHit,
   SignedDocumentSearchParams,
   SignedDocumentUpsertInput,
 } from '~/domain/document/repository/signed-document.repository';
+
+const EMPTY_AGGREGATE: DocumentPackageAggregateDomainInterface = {
+  statement: null,
+  decision: null,
+  acts: [],
+  links: [],
+};
 
 /**
  * Реализация репозитория реестра подписанных документов на базе TypeORM.
@@ -52,6 +62,18 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
     return count > 0;
   }
 
+  async count(coopname: string): Promise<number> {
+    return this.repository.count({ where: { coopname } });
+  }
+
+  async getSourceActionData(coopname: string, packageHash: string): Promise<Record<string, unknown> | null> {
+    const entity = await this.repository.findOne({
+      where: { coopname, packageHash },
+      select: ['source_action_data'],
+    });
+    return entity?.source_action_data ?? null;
+  }
+
   async search(params: SignedDocumentSearchParams): Promise<SignedDocumentSearchHit[]> {
     const qb = this.repository.createQueryBuilder('d').where('d.coopname = :coopname', { coopname: params.coopname });
 
@@ -75,6 +97,36 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
     }));
   }
 
+  async findAggregates(params: SignedDocumentListParams): Promise<SignedDocumentListResult> {
+    const qb = this.repository.createQueryBuilder('d').where('d.coopname = :coopname', { coopname: params.coopname });
+
+    if (params.status) {
+      qb.andWhere('d.status = :status', { status: params.status });
+    }
+    if (params.actions && params.actions.length > 0) {
+      qb.andWhere('d.action IN (:...actions)', { actions: params.actions });
+    }
+    if (params.username) {
+      qb.andWhere('d.username = :username', { username: params.username });
+    }
+    if (params.afterBlock !== undefined) {
+      qb.andWhere('d.block_num IS NOT NULL AND d.block_num >= :afterBlock', { afterBlock: params.afterBlock });
+    }
+    if (params.beforeBlock !== undefined) {
+      qb.andWhere('d.block_num IS NOT NULL AND d.block_num <= :beforeBlock', { beforeBlock: params.beforeBlock });
+    }
+
+    qb.orderBy('d.document_created_at', 'DESC', 'NULLS LAST').addOrderBy('d.created_at', 'DESC');
+    qb.skip((params.page - 1) * params.limit).take(params.limit);
+
+    const [rows, total] = await qb.getManyAndCount();
+
+    return {
+      items: rows.map((row) => row.document_aggregate ?? EMPTY_AGGREGATE),
+      total,
+    };
+  }
+
   private toColumns(input: SignedDocumentUpsertInput): Partial<SignedDocumentEntity> {
     return {
       coopname: input.coopname,
@@ -82,15 +134,14 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
       hash: input.hash,
       username: input.username,
       status: input.status,
+      action: input.action,
       registry_id: input.registry_id,
       full_title: input.full_title,
       content_text: input.content_text,
-      html: input.html,
-      pdf: input.pdf,
       block_num: input.block_num,
-      document_aggregate: input.document_aggregate,
-      meta: input.meta,
       document_created_at: input.document_created_at,
+      document_aggregate: input.document_aggregate,
+      source_action_data: input.source_action_data,
     };
   }
 }

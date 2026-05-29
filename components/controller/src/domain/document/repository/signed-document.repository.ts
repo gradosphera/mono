@@ -13,21 +13,19 @@ export interface SignedDocumentUpsertInput {
   hash: string;
   username: string;
   status: SignedDocumentStatus;
+  /** под-действие soviet (`data.action`) — для фильтрации списка по типам документов */
+  action: string;
   registry_id: number;
   full_title: string;
-  /** html, очищенный от тегов — для полнотекстового ILIKE-поиска */
+  /** html заявления без тегов — для ILIKE-поиска */
   content_text: string;
-  /** исходный html для предпросмотра */
-  html: string | null;
-  /** PDF-бинарь как есть (bytea) */
-  pdf: Buffer | null;
   /** bigint из блокчейна приходит строкой */
   block_num: string | null;
-  /** мета документа (IMetaDocument) целиком */
-  meta: Record<string, unknown> | null;
-  /** денормализованный готовый агрегат пакета (заполняется на этапе сборки) */
-  document_aggregate: DocumentPackageAggregateDomainInterface | null;
   document_created_at: Date | null;
+  /** готовый агрегат пакета (statement/decision/acts/links) — отдаётся getDocuments как есть */
+  document_aggregate: DocumentPackageAggregateDomainInterface | null;
+  /** data действия-носителя заявления — для пересборки агрегата при доприходе decision/act/link */
+  source_action_data: Record<string, unknown> | null;
 }
 
 export interface SignedDocumentSearchParams {
@@ -37,8 +35,7 @@ export interface SignedDocumentSearchParams {
 }
 
 /**
- * Результат поиска — повторяет контракт SearchResultDTO (GraphQL `searchDocuments`),
- * чтобы переключение резолвера на Postgres было прямой заменой источника.
+ * Результат поиска — повторяет контракт SearchResultDTO (GraphQL `searchDocuments`).
  */
 export interface SignedDocumentSearchHit {
   hash: string;
@@ -50,10 +47,28 @@ export interface SignedDocumentSearchHit {
   highlights: string[];
 }
 
+/** Параметры выборки готовых агрегатов для списка документов (read-path getDocuments). */
+export interface SignedDocumentListParams {
+  coopname: string;
+  status?: SignedDocumentStatus;
+  /** фильтр по под-действиям (data.action) */
+  actions?: string[];
+  /** фильтр по пайщику */
+  username?: string;
+  afterBlock?: number;
+  beforeBlock?: number;
+  page: number;
+  limit: number;
+}
+
+export interface SignedDocumentListResult {
+  items: DocumentPackageAggregateDomainInterface[];
+  total: number;
+}
+
 /**
  * Репозиторий реестра подписанных документов (Postgres-проекция).
- * Наполняется ловлей blockchain-событий контракта soviet (ingestion) и разовым backfill'ом;
- * используется как единый источник для отображения и поиска (задача C28-21).
+ * Единый источник для отображения (getDocuments) и поиска (searchDocuments) — задача C28-21.
  */
 export interface SignedDocumentRepository {
   /** Вставить или обновить запись по (coopname, packageHash). */
@@ -68,8 +83,17 @@ export interface SignedDocumentRepository {
   /** Есть ли уже запись по пакету (для идемпотентного backfill). */
   exists(coopname: string, packageHash: string): Promise<boolean>;
 
+  /** Кол-во записей реестра по кооперативу (для авто-триггера backfill на пустой базе). */
+  count(coopname: string): Promise<number>;
+
+  /** data действия-носителя заявления — для пересборки агрегата (decision/act/link). */
+  getSourceActionData(coopname: string, packageHash: string): Promise<Record<string, unknown> | null>;
+
   /** Поиск по реестру (ILIKE по full_title/username/content_text). */
   search(params: SignedDocumentSearchParams): Promise<SignedDocumentSearchHit[]>;
+
+  /** Список готовых агрегатов с пагинацией и фильтрами (read-path getDocuments). */
+  findAggregates(params: SignedDocumentListParams): Promise<SignedDocumentListResult>;
 }
 
 /** Токен для инъекции зависимости репозитория реестра подписанных документов. */
