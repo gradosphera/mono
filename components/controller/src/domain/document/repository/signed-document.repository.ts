@@ -3,13 +3,14 @@ import type { DocumentPackageAggregateDomainInterface } from '../interfaces/docu
 
 /**
  * Данные для записи/обновления одной записи реестра подписанных документов.
- * Одна запись = один пакет документа (`packageHash` связывает submitted↔resolved↔declined).
+ * Одна запись = ОДИН документ-заявление (ключ — `hash`). `packageHash` — идентификатор процесса,
+ * общий для нескольких заявлений пакета (submitted↔resolved↔declined трекаются по `hash` документа).
  */
 export interface SignedDocumentUpsertInput {
   coopname: string;
-  /** checksum256 пакета документа (`package` в blockchain-action; связывает все стадии) */
+  /** checksum256 процесса (`package` в blockchain-action; НЕ уникален — группирует заявления) */
   packageHash: string;
-  /** checksum256 самого документа-заявления */
+  /** checksum256 самого документа-заявления — УНИКАЛЬНЫЙ ключ записи */
   hash: string;
   username: string;
   status: SignedDocumentStatus;
@@ -70,30 +71,33 @@ export interface SignedDocumentListResult {
   total: number;
 }
 
+/** Строка реестра для пересборки агрегата: документ-заявление пакета + его действие-носитель. */
+export interface SignedDocumentPackageRow {
+  hash: string;
+  status: SignedDocumentStatus;
+  sourceActionData: Record<string, unknown> | null;
+}
+
 /**
  * Репозиторий реестра подписанных документов (Postgres-проекция).
  * Единый источник для отображения (getDocuments) и поиска (searchDocuments) — задача C28-21.
+ * Запись = один документ-заявление (ключ `hash`); `package` группирует заявления одного процесса.
  */
 export interface SignedDocumentRepository {
-  /** Вставить или обновить запись по (coopname, packageHash). */
+  /** Вставить или обновить запись по (coopname, hash). */
   upsert(input: SignedDocumentUpsertInput): Promise<void>;
 
-  /** Сменить статус записи по пакету. Возвращает true, если запись найдена. */
-  setStatus(coopname: string, packageHash: string, status: SignedDocumentStatus): Promise<boolean>;
-
-  /** Текущий статус записи по пакету или null, если записи нет. */
-  getStatus(coopname: string, packageHash: string): Promise<SignedDocumentStatus | null>;
-
-  /** Есть ли уже запись по пакету (для идемпотентного backfill). */
-  exists(coopname: string, packageHash: string): Promise<boolean>;
+  /** Текущий статус документа по его hash или null, если записи нет. */
+  getStatus(coopname: string, hash: string): Promise<SignedDocumentStatus | null>;
 
   /** Кол-во записей реестра по кооперативу (для авто-триггера backfill на пустой базе). */
   count(coopname: string): Promise<number>;
 
-  /** data действия-носителя заявления — для пересборки агрегата (decision/act/link). */
-  getSourceActionData(coopname: string, packageHash: string): Promise<Record<string, unknown> | null>;
+  /** Все заявления одного процесса (package) — для пересборки агрегатов при доприходе
+   *  decision/act/link (на пакет может приходиться несколько заявлений с разными подписантами). */
+  findByPackage(coopname: string, packageHash: string): Promise<SignedDocumentPackageRow[]>;
 
-  /** Поиск по реестру (ILIKE по full_title/username/content_text). */
+  /** Поиск по реестру (ILIKE по signers_text/full_title/content_text/username). */
   search(params: SignedDocumentSearchParams): Promise<SignedDocumentSearchHit[]>;
 
   /** Список готовых агрегатов с пагинацией и фильтрами (read-path getDocuments). */

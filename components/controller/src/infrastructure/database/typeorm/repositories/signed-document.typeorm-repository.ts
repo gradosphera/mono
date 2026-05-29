@@ -7,6 +7,7 @@ import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/
 import type {
   SignedDocumentListParams,
   SignedDocumentListResult,
+  SignedDocumentPackageRow,
   SignedDocumentRepository,
   SignedDocumentSearchHit,
   SignedDocumentSearchParams,
@@ -32,7 +33,7 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
 
   async upsert(input: SignedDocumentUpsertInput): Promise<void> {
     const existing = await this.repository.findOne({
-      where: { coopname: input.coopname, packageHash: input.packageHash },
+      where: { coopname: input.coopname, hash: input.hash },
     });
 
     if (existing) {
@@ -44,34 +45,28 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
     await this.repository.save(this.repository.create(this.toColumns(input)));
   }
 
-  async setStatus(coopname: string, packageHash: string, status: SignedDocumentStatus): Promise<boolean> {
-    const result = await this.repository.update({ coopname, packageHash }, { status });
-    return (result.affected ?? 0) > 0;
-  }
-
-  async getStatus(coopname: string, packageHash: string): Promise<SignedDocumentStatus | null> {
+  async getStatus(coopname: string, hash: string): Promise<SignedDocumentStatus | null> {
     const entity = await this.repository.findOne({
-      where: { coopname, packageHash },
+      where: { coopname, hash },
       select: ['status'],
     });
     return entity ? entity.status : null;
-  }
-
-  async exists(coopname: string, packageHash: string): Promise<boolean> {
-    const count = await this.repository.count({ where: { coopname, packageHash } });
-    return count > 0;
   }
 
   async count(coopname: string): Promise<number> {
     return this.repository.count({ where: { coopname } });
   }
 
-  async getSourceActionData(coopname: string, packageHash: string): Promise<Record<string, unknown> | null> {
-    const entity = await this.repository.findOne({
+  async findByPackage(coopname: string, packageHash: string): Promise<SignedDocumentPackageRow[]> {
+    const rows = await this.repository.find({
       where: { coopname, packageHash },
-      select: ['source_action_data'],
+      select: ['hash', 'status', 'source_action_data'],
     });
-    return entity?.source_action_data ?? null;
+    return rows.map((row) => ({
+      hash: row.hash,
+      status: row.status,
+      sourceActionData: row.source_action_data ?? null,
+    }));
   }
 
   async search(params: SignedDocumentSearchParams): Promise<SignedDocumentSearchHit[]> {

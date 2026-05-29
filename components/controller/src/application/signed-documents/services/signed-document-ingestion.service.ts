@@ -73,11 +73,14 @@ export class SignedDocumentIngestionService {
    */
   async ingestAction(action: IAction, status: SignedDocumentStatus): Promise<IngestResult> {
     const data = (action?.data ?? {}) as Record<string, any>;
-    const packageHash: string | undefined = data.package;
-    if (!packageHash) return 'skipped';
+    // Ключ записи — hash документа-заявления (а НЕ package: на один package может приходиться
+    // несколько заявлений с разными подписантами — напр. обмен в marketplace).
+    const hash: string | undefined = data.document?.hash;
+    if (!hash) return 'skipped';
+    const packageHash: string = data.package || '';
 
     const coopname: string = data.coopname || config.coopname;
-    const current = await this.repository.getStatus(coopname, packageHash);
+    const current = await this.repository.getStatus(coopname, hash);
 
     // Не понижаем статус: submitted не перетирает resolved/declined.
     if (status === SignedDocumentStatus.Submitted && current && current !== SignedDocumentStatus.Submitted) {
@@ -86,7 +89,7 @@ export class SignedDocumentIngestionService {
     // Тот же статус уже стоит — идемпотентно выходим (повторный backfill безопасен).
     if (current === status) return 'skipped';
 
-    await this.assembleAndUpsert(action, status, coopname, packageHash);
+    await this.assembleAndUpsert(action, status, coopname, hash, packageHash);
     return current ? 'updated' : 'created';
   }
 
@@ -108,14 +111,27 @@ export class SignedDocumentIngestionService {
       if (!packageHash) return;
 
       const coopname: string = data.coopname || config.coopname;
-      const current = await this.repository.getStatus(coopname, packageHash);
-      if (!current) return; // ещё нет заявления по пакету — нечего дособирать
+      // decision/act/link относятся к процессу (package), а не к конкретному заявлению.
+      // Пересобираем агрегаты ВСЕХ заявлений пакета (их может быть несколько с разными
+      // подписантами), сохраняя статус каждого.
+      const rows = await this.repository.findByPackage(coopname, packageHash);
+      if (rows.length === 0) return; // заявлений по пакету ещё нет — нечего дособирать
 
-      const source = await this.repository.getSourceActionData(coopname, packageHash);
-      if (!source) return;
-
-      await this.assembleAndUpsert(source as unknown as IAction, current, coopname, packageHash);
-      this.logger.log(`[${label}] агрегат пересобран: package=${this.shortPackage(action)}`);
+      let rebuilt = 0;
+      for (const row of rows) {
+        if (!row.sourceActionData) continue;
+        await this.assembleAndUpsert(
+          row.sourceActionData as unknown as IAction,
+          row.status,
+          coopname,
+          row.hash,
+          packageHash
+        );
+        rebuilt++;
+      }
+      if (rebuilt > 0) {
+        this.logger.log(`[${label}] пересобрано агрегатов: ${rebuilt}, package=${this.shortPackage(action)}`);
+      }
     } catch (error: any) {
       this.logger.warn(`Ошибка пересборки агрегата по событию ${label}: ${error?.message}`);
     }
@@ -125,6 +141,7 @@ export class SignedDocumentIngestionService {
     sourceAction: IAction,
     status: SignedDocumentStatus,
     coopname: string,
+    hash: string,
     packageHash: string
   ): Promise<void> {
     const aggregate = await this.buildAggregateSafe(sourceAction);
@@ -136,7 +153,7 @@ export class SignedDocumentIngestionService {
     await this.repository.upsert({
       coopname,
       packageHash,
-      hash: statement?.documentAggregate?.hash || data.document?.hash || data.document?.doc_hash || '',
+      hash,
       username: meta.username || data.username || '',
       status,
       action: data.action || '',

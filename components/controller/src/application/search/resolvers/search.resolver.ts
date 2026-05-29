@@ -7,6 +7,8 @@ import {
   type SignedDocumentRepository,
 } from '~/domain/document/repository/signed-document.repository';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
+import { RolesGuard } from '~/application/auth/guards/roles.guard';
+import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import config from '~/config/config';
 
 @Resolver()
@@ -15,8 +17,11 @@ export class SearchResolver {
     @Inject(SIGNED_DOCUMENT_REPOSITORY) private readonly signedDocuments: SignedDocumentRepository
   ) {}
 
+  // Поиск по документам кооператива — инструмент совета (видит весь документооборот).
+  // Доступен только председателю и членам совета; поиск пайщиком по своим документам пока не делаем.
   @Query(() => [SearchResultDTO], { description: 'Полнотекстовый поиск по документам кооператива' })
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
   async searchDocuments(@Args('data') input: SearchDocumentsInputDTO): Promise<SearchResultDTO[]> {
     const hits = await this.signedDocuments.search({
       coopname: config.coopname,

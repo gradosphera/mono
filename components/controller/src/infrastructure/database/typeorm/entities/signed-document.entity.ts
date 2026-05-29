@@ -5,7 +5,10 @@ import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/
 /**
  * Реестр подписанных документов (Postgres-проекция, задача C28-21).
  *
- * Одна строка = один пакет документа (поле `package` связывает submitted↔resolved↔declined).
+ * Одна строка = ОДИН документ-заявление (уникальность по `hash` — хэшу документа). Поле `package`
+ * — это идентификатор ПРОЦЕССА (пакета), в который может входить НЕСКОЛЬКО заявлений с разными
+ * подписантами (напр. обмен в marketplace: два newsubmitted с одним package). Поэтому `package`
+ * НЕ уникален — это группирующая колонка (решение/акты/связи процесса тянутся по нему в агрегат).
  * Наполняется ingestion-листенером blockchain-событий контракта soviet и разовым backfill'ом.
  *
  * `document_aggregate` хранит ГОТОВЫЙ агрегат пакета (statement/decision/acts/links вместе с
@@ -17,7 +20,8 @@ import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/
  * в БД колонка называется `package`.
  */
 @Entity('signed_documents')
-@Index(['coopname', 'package'], { unique: true })
+@Index(['coopname', 'hash'], { unique: true })
+@Index(['coopname', 'package'])
 @Index(['coopname', 'status'])
 @Index(['coopname', 'status', 'action'])
 @Index(['coopname', 'username'])
