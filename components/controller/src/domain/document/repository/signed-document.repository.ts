@@ -8,9 +8,11 @@ import type { DocumentPackageAggregateDomainInterface } from '../interfaces/docu
  */
 export interface SignedDocumentUpsertInput {
   coopname: string;
-  /** checksum256 процесса (`package` в blockchain-action; НЕ уникален — группирует заявления) */
+  /** checksum256 процесса (`package` в blockchain-action; НЕ уникален — группирует документы) */
   packageHash: string;
-  /** checksum256 самого документа-заявления — УНИКАЛЬНЫЙ ключ записи */
+  /** checksum256 содержимого документа — УНИКАЛЬНЫЙ ключ записи (без учёта подписей) */
+  doc_hash: string;
+  /** checksum256 подписанной версии (включает подписи) — крайняя версия документа */
   hash: string;
   username: string;
   status: SignedDocumentStatus;
@@ -35,6 +37,8 @@ export interface SignedDocumentSearchParams {
   coopname: string;
   query: string;
   limit: number;
+  /** ограничить поиск документами этого пайщика (для не-членов совета); undefined — весь кооператив */
+  username?: string;
 }
 
 /**
@@ -71,8 +75,16 @@ export interface SignedDocumentListResult {
   total: number;
 }
 
-/** Строка реестра для пересборки агрегата: документ-заявление пакета + его действие-носитель. */
+/** Состояние записи для guard'ов ingestion (не понижать статус / не откатывать версию подписи). */
+export interface SignedDocumentState {
+  status: SignedDocumentStatus;
+  /** номер блока крайней версии (для сравнения «новее ли пришедшая версия») */
+  blockNum: number | null;
+}
+
+/** Строка реестра для пересборки агрегата: документ пакета + его действие-носитель. */
 export interface SignedDocumentPackageRow {
+  doc_hash: string;
   hash: string;
   status: SignedDocumentStatus;
   sourceActionData: Record<string, unknown> | null;
@@ -84,11 +96,12 @@ export interface SignedDocumentPackageRow {
  * Запись = один документ-заявление (ключ `hash`); `package` группирует заявления одного процесса.
  */
 export interface SignedDocumentRepository {
-  /** Вставить или обновить запись по (coopname, hash). */
+  /** Вставить или обновить запись по (coopname, doc_hash). */
   upsert(input: SignedDocumentUpsertInput): Promise<void>;
 
-  /** Текущий статус документа по его hash или null, если записи нет. */
-  getStatus(coopname: string, hash: string): Promise<SignedDocumentStatus | null>;
+  /** Статус + номер блока крайней версии документа по его doc_hash (для guard'ов ingestion);
+   *  null, если записи нет. */
+  getState(coopname: string, docHash: string): Promise<SignedDocumentState | null>;
 
   /** Кол-во записей реестра по кооперативу (для авто-триггера backfill на пустой базе). */
   count(coopname: string): Promise<number>;

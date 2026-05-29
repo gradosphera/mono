@@ -73,24 +73,45 @@ export class SignedDocumentIngestionService {
    */
   async ingestAction(action: IAction, status: SignedDocumentStatus): Promise<IngestResult> {
     const data = (action?.data ?? {}) as Record<string, any>;
-    // Ключ записи — hash документа-заявления (а НЕ package: на один package может приходиться
-    // несколько заявлений с разными подписантами — напр. обмен в marketplace).
-    const hash: string | undefined = data.document?.hash;
-    if (!hash) return 'skipped';
+    // Ключ записи — doc_hash (идентичность документа). hash включает подписи, поэтому у одного
+    // документа бывает несколько hash (версии по мере накопления подписей — напр. акт приёма-передачи:
+    // первая/вторая подпись дают разные hash при одном doc_hash). Держим КРАЙНЮЮ версию по номеру блока,
+    // иначе документ задвоился бы в списке. package НЕ ключ: в одном процессе бывает несколько разных
+    // документов с разными подписантами (обмен в marketplace).
+    const docHash: string | undefined = data.document?.doc_hash;
+    if (!docHash) return 'skipped';
+    const hash: string = data.document?.hash || '';
     const packageHash: string = data.package || '';
-
     const coopname: string = data.coopname || config.coopname;
-    const current = await this.repository.getStatus(coopname, hash);
+    const incomingBlock = this.toBlockNum(action?.block_num);
 
-    // Не понижаем статус: submitted не перетирает resolved/declined.
-    if (status === SignedDocumentStatus.Submitted && current && current !== SignedDocumentStatus.Submitted) {
-      return 'skipped';
+    const existing = await this.repository.getState(coopname, docHash);
+    if (existing) {
+      // Не понижаем статус: submitted не перетирает resolved/declined.
+      if (status === SignedDocumentStatus.Submitted && existing.status !== SignedDocumentStatus.Submitted) {
+        return 'skipped';
+      }
+      // Не откатываем на более старую версию подписи (меньший номер блока).
+      if (incomingBlock !== null && existing.blockNum !== null && incomingBlock < existing.blockNum) {
+        return 'skipped';
+      }
+      // Идемпотентность: тот же статус и не новее по блоку — обновлять нечего (повторный backfill безопасен).
+      if (
+        existing.status === status &&
+        (incomingBlock === null || existing.blockNum === null || incomingBlock <= existing.blockNum)
+      ) {
+        return 'skipped';
+      }
     }
-    // Тот же статус уже стоит — идемпотентно выходим (повторный backfill безопасен).
-    if (current === status) return 'skipped';
 
-    await this.assembleAndUpsert(action, status, coopname, hash, packageHash);
-    return current ? 'updated' : 'created';
+    await this.assembleAndUpsert(action, status, coopname, docHash, hash, packageHash);
+    return existing ? 'updated' : 'created';
+  }
+
+  private toBlockNum(value: unknown): number | null {
+    if (value === undefined || value === null) return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
   }
 
   private async safeStatusEvent(action: IAction, status: SignedDocumentStatus, label: string): Promise<void> {
@@ -124,6 +145,7 @@ export class SignedDocumentIngestionService {
           row.sourceActionData as unknown as IAction,
           row.status,
           coopname,
+          row.doc_hash,
           row.hash,
           packageHash
         );
@@ -141,6 +163,7 @@ export class SignedDocumentIngestionService {
     sourceAction: IAction,
     status: SignedDocumentStatus,
     coopname: string,
+    docHash: string,
     hash: string,
     packageHash: string
   ): Promise<void> {
@@ -153,6 +176,7 @@ export class SignedDocumentIngestionService {
     await this.repository.upsert({
       coopname,
       packageHash,
+      doc_hash: docHash,
       hash,
       username: meta.username || data.username || '',
       status,

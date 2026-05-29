@@ -11,6 +11,7 @@ import type {
   SignedDocumentRepository,
   SignedDocumentSearchHit,
   SignedDocumentSearchParams,
+  SignedDocumentState,
   SignedDocumentUpsertInput,
 } from '~/domain/document/repository/signed-document.repository';
 
@@ -33,7 +34,7 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
 
   async upsert(input: SignedDocumentUpsertInput): Promise<void> {
     const existing = await this.repository.findOne({
-      where: { coopname: input.coopname, hash: input.hash },
+      where: { coopname: input.coopname, doc_hash: input.doc_hash },
     });
 
     if (existing) {
@@ -45,12 +46,13 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
     await this.repository.save(this.repository.create(this.toColumns(input)));
   }
 
-  async getStatus(coopname: string, hash: string): Promise<SignedDocumentStatus | null> {
+  async getState(coopname: string, docHash: string): Promise<SignedDocumentState | null> {
     const entity = await this.repository.findOne({
-      where: { coopname, hash },
-      select: ['status'],
+      where: { coopname, doc_hash: docHash },
+      select: ['status', 'block_num'],
     });
-    return entity ? entity.status : null;
+    if (!entity) return null;
+    return { status: entity.status, blockNum: entity.block_num != null ? Number(entity.block_num) : null };
   }
 
   async count(coopname: string): Promise<number> {
@@ -60,9 +62,10 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
   async findByPackage(coopname: string, packageHash: string): Promise<SignedDocumentPackageRow[]> {
     const rows = await this.repository.find({
       where: { coopname, packageHash },
-      select: ['hash', 'status', 'source_action_data'],
+      select: ['doc_hash', 'hash', 'status', 'source_action_data'],
     });
     return rows.map((row) => ({
+      doc_hash: row.doc_hash,
       hash: row.hash,
       status: row.status,
       sourceActionData: row.source_action_data ?? null,
@@ -71,6 +74,11 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
 
   async search(params: SignedDocumentSearchParams): Promise<SignedDocumentSearchHit[]> {
     const qb = this.repository.createQueryBuilder('d').where('d.coopname = :coopname', { coopname: params.coopname });
+
+    // Скоуп по пайщику: не-член совета ищет только в своих документах (см. SearchResolver).
+    if (params.username) {
+      qb.andWhere('d.username = :username', { username: params.username });
+    }
 
     const query = params.query?.trim();
     if (query) {
@@ -133,6 +141,7 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
     return {
       coopname: input.coopname,
       packageHash: input.packageHash,
+      doc_hash: input.doc_hash,
       hash: input.hash,
       username: input.username,
       status: input.status,

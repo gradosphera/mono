@@ -5,11 +5,17 @@ import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/
 /**
  * Реестр подписанных документов (Postgres-проекция, задача C28-21).
  *
- * Одна строка = ОДИН документ-заявление (уникальность по `hash` — хэшу документа). Поле `package`
- * — это идентификатор ПРОЦЕССА (пакета), в который может входить НЕСКОЛЬКО заявлений с разными
- * подписантами (напр. обмен в marketplace: два newsubmitted с одним package). Поэтому `package`
- * НЕ уникален — это группирующая колонка (решение/акты/связи процесса тянутся по нему в агрегат).
- * Наполняется ingestion-листенером blockchain-событий контракта soviet и разовым backfill'ом.
+ * Одна строка = ОДИН документ (уникальность по `doc_hash` — хэшу содержимого документа). Тонкость:
+ * `doc_hash` — это сам документ, а `hash` включает наложенные подписи, поэтому ОДИН документ может
+ * иметь несколько `hash` (версий по мере накопления подписей — напр. акт приёма-передачи: первая
+ * подпись даёт один `hash`, вторая — другой, но `doc_hash` тот же). В реестре держим КРАЙНЮЮ версию
+ * (по номеру блока) — иначе документ задвоился бы в списке. `hash` хранится как версия последней
+ * подписи (для фильтра по конкретной версии и отображения).
+ *
+ * `package` — идентификатор ПРОЦЕССА (пакета), в который может входить НЕСКОЛЬКО разных документов
+ * с разными подписантами (напр. обмен в marketplace: два newsubmitted с одним package). Поэтому
+ * `package` НЕ уникален — это группирующая колонка (решение/акты/связи процесса тянутся по нему
+ * в агрегат). Наполняется ingestion-листенером blockchain-событий soviet и разовым backfill'ом.
  *
  * `document_aggregate` хранит ГОТОВЫЙ агрегат пакета (statement/decision/acts/links вместе с
  * контентом и бинарём) — отсюда `getDocuments` отдаёт список без сборки на лету и без обращений
@@ -20,7 +26,8 @@ import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/
  * в БД колонка называется `package`.
  */
 @Entity('signed_documents')
-@Index(['coopname', 'hash'], { unique: true })
+@Index(['coopname', 'doc_hash'], { unique: true })
+@Index(['coopname', 'hash'])
 @Index(['coopname', 'package'])
 @Index(['coopname', 'status'])
 @Index(['coopname', 'status', 'action'])
@@ -35,6 +42,11 @@ export class SignedDocumentEntity {
   @Column({ name: 'package', length: 64 })
   packageHash!: string;
 
+  /** checksum256 содержимого документа — УНИКАЛЬНАЯ идентичность документа (без учёта подписей) */
+  @Column({ length: 64, default: '' })
+  doc_hash!: string;
+
+  /** checksum256 подписанной версии (включает подписи) — крайняя версия документа */
   @Column({ length: 64 })
   hash!: string;
 
