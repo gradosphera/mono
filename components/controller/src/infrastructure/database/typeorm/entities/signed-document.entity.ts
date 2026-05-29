@@ -54,6 +54,11 @@ export class SignedDocumentEntity {
   @Column({ type: 'text', default: '' })
   content_text!: string;
 
+  /** ФИО/наименования всех подписантов пакета (из signer_certificate всех частей агрегата) —
+   * основной индекс для поиска по фамилии подписанта + их username */
+  @Column({ type: 'text', default: '' })
+  signers_text!: string;
+
   @Column({ type: 'bigint', nullable: true })
   block_num!: string | null;
 

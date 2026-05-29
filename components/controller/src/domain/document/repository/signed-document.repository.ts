@@ -19,6 +19,8 @@ export interface SignedDocumentUpsertInput {
   full_title: string;
   /** html заявления без тегов — для ILIKE-поиска */
   content_text: string;
+  /** ФИО/наименования всех подписантов пакета + их username — для поиска по подписанту */
+  signers_text: string;
   /** bigint из блокчейна приходит строкой */
   block_num: string | null;
   document_created_at: Date | null;

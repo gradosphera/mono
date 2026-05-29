@@ -143,6 +143,7 @@ export class SignedDocumentIngestionService {
       registry_id: typeof meta.registry_id === 'number' ? meta.registry_id : 0,
       full_title: rawDoc?.full_title || '',
       content_text: this.stripHtml(rawDoc?.html || ''),
+      signers_text: this.collectSignersText(aggregate),
       block_num: this.resolveBlockNum(meta.block_num, sourceAction?.block_num),
       document_created_at: meta.created_at ? new Date(meta.created_at) : null,
       document_aggregate: aggregate,
@@ -157,6 +158,38 @@ export class SignedDocumentIngestionService {
       this.logger.debug(`Не удалось собрать агрегат пакета: ${error?.message}`);
       return null;
     }
+  }
+
+  /**
+   * Собирает ФИО/наименования всех подписантов пакета из signer_certificate всех частей агрегата
+   * (заявление/решение/акты/связанные). Это и есть основной индекс поиска по подписанту —
+   * соподписанты (председатель/совет) подписывают решение и акты, а не тело заявления,
+   * поэтому content_text их не покрывает. Username добавляется тоже (редкий поиск по нему).
+   */
+  private collectSignersText(aggregate: DocumentPackageAggregateDomainInterface | null): string {
+    if (!aggregate) return '';
+
+    const docAggregates = [
+      aggregate.statement?.documentAggregate,
+      aggregate.decision?.documentAggregate,
+      ...aggregate.acts.map((act) => act?.documentAggregate),
+      ...aggregate.links,
+    ];
+
+    const parts = new Set<string>();
+    for (const da of docAggregates) {
+      const signatures = da?.document?.signatures ?? [];
+      for (const sig of signatures) {
+        if (sig?.signer) parts.add(String(sig.signer));
+        const cert = sig?.signer_certificate as Record<string, any> | null | undefined;
+        if (!cert) continue;
+        for (const key of ['last_name', 'first_name', 'middle_name', 'short_name']) {
+          if (cert[key]) parts.add(String(cert[key]));
+        }
+      }
+    }
+
+    return Array.from(parts).join(' ');
   }
 
   private shortPackage(action: IAction): string {

@@ -79,7 +79,10 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
 
     const query = params.query?.trim();
     if (query) {
-      qb.andWhere('(d.full_title ILIKE :q OR d.username ILIKE :q OR d.content_text ILIKE :q)', { q: `%${query}%` });
+      qb.andWhere(
+        '(d.signers_text ILIKE :q OR d.full_title ILIKE :q OR d.content_text ILIKE :q OR d.username ILIKE :q)',
+        { q: `%${query}%` }
+      );
     }
 
     qb.orderBy('d.document_created_at', 'DESC', 'NULLS LAST').limit(params.limit);
@@ -138,6 +141,7 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
       registry_id: input.registry_id,
       full_title: input.full_title,
       content_text: input.content_text,
+      signers_text: input.signers_text,
       block_num: input.block_num,
       document_created_at: input.document_created_at,
       document_aggregate: input.document_aggregate,
