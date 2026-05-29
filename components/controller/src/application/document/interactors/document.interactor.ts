@@ -41,7 +41,8 @@ export class DocumentInteractor {
       coopname: config.coopname,
       status: this.mapTypeToStatus(type),
       actions: actions && actions.length > 0 ? (actions as unknown as string[]) : undefined,
-      username: this.extractUsernameFilter(query),
+      username: this.extractReceiverScope(query),
+      hash: this.extractHashFilter(query),
       afterBlock: after_block,
       beforeBlock: before_block,
       page,
@@ -61,11 +62,23 @@ export class DocumentInteractor {
     return type === 'newresolved' ? SignedDocumentStatus.Resolved : SignedDocumentStatus.Submitted;
   }
 
-  // Опциональный фильтр по пайщику из data.filter (ключи `data.username`/`username`).
-  // Прочие произвольные ключи прежнего explorer-фильтра в PG-read-path не поддерживаются.
-  private extractUsernameFilter(query: Record<string, unknown>): string | undefined {
-    const value = (query['data.username'] ?? query['username']) as unknown;
-    return typeof value === 'string' && value.length > 0 ? value : undefined;
+  // Скоуп выборки повторяет прежний explorer-фильтр `receiver: username` из DocumentService.
+  // Документ soviet через require_recipient уведомляет И кооператив, И пайщика-субъекта, поэтому:
+  //   receiver === coopname → весь кооператив (фильтр только по coopname — как и было);
+  //   receiver === <пайщик> → его документы (колонка username = субъект заявления).
+  private extractReceiverScope(query: Record<string, unknown>): string | undefined {
+    const receiver = query['receiver'];
+    if (typeof receiver === 'string' && receiver.length > 0 && receiver !== config.coopname) {
+      return receiver;
+    }
+    return undefined;
+  }
+
+  // Фильтр по конкретному документу: Union-страница шлёт filter.document.hash (upper-case).
+  private extractHashFilter(query: Record<string, unknown>): string | undefined {
+    const document = query['document'] as Record<string, unknown> | undefined;
+    const hash = (document?.['hash'] ?? query['hash']) as unknown;
+    return typeof hash === 'string' && hash.length > 0 ? hash : undefined;
   }
 
   /**

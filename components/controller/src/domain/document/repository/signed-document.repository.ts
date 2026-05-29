@@ -57,6 +57,8 @@ export interface SignedDocumentListParams {
   actions?: string[];
   /** фильтр по пайщику */
   username?: string;
+  /** фильтр по хэшу конкретного документа-заявления */
+  hash?: string;
   afterBlock?: number;
   beforeBlock?: number;
   page: number;

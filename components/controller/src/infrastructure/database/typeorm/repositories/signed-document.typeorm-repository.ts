@@ -112,6 +112,10 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
     if (params.username) {
       qb.andWhere('d.username = :username', { username: params.username });
     }
+    if (params.hash) {
+      // Фронт шлёт хэш в upper-case, в реестре он хранится как пришёл из агрегата — сверяем регистронезависимо.
+      qb.andWhere('UPPER(d.hash) = UPPER(:hash)', { hash: params.hash });
+    }
     if (params.afterBlock !== undefined) {
       qb.andWhere('d.block_num IS NOT NULL AND d.block_num >= :afterBlock', { afterBlock: params.afterBlock });
     }
