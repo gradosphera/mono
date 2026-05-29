@@ -57,9 +57,13 @@ export class DocumentInteractor {
     };
   }
 
-  // Имя действия-носителя заявления соответствует статусу записи в реестре.
-  private mapTypeToStatus(type?: 'newsubmitted' | 'newresolved'): SignedDocumentStatus {
-    return type === 'newresolved' ? SignedDocumentStatus.Resolved : SignedDocumentStatus.Submitted;
+  // Прежний фильтр был по ИМЕНИ действия, не по статусу-партиции:
+  //   «Все входящие» (newsubmitted) — у каждого пакета есть submitted-действие, поэтому это ВСЕ
+  //     документы кооператива (решённые/аннулированные тоже входят) → статус НЕ ограничиваем;
+  //   «Только утверждённые» (newresolved) — лишь решённые → status=Resolved.
+  // (Партиция по статусу скрыла бы решённые документы из вкладки «Все входящие» — регрессия.)
+  private mapTypeToStatus(type?: 'newsubmitted' | 'newresolved'): SignedDocumentStatus | undefined {
+    return type === 'newresolved' ? SignedDocumentStatus.Resolved : undefined;
   }
 
   // Скоуп выборки повторяет прежний explorer-фильтр `receiver: username` из DocumentService.

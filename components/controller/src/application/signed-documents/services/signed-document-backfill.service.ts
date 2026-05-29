@@ -90,9 +90,13 @@ export class SignedDocumentBackfillService implements OnApplicationBootstrap {
     let page = 1;
 
     while (true) {
+      // Скоуп ровно как у прежнего chairman-пути getDocuments: {name: type, receiver: coopname}.
+      // Без receiver explorer вернул бы все трейсы каждого действия (receiver=soviet/пайщик) и,
+      // возможно, другие кооперативы — лишняя обработка и чужие данные. receiver=coopname даёт
+      // один трейс на документ и только наш кооператив (coopname — всегда получатель soviet-документа).
       const response = await this.documentDomainService.getImmutableSignedDocuments({
         type: pass.type,
-        query: {},
+        query: { receiver: config.coopname },
         page,
         limit: PAGE_LIMIT,
       });
