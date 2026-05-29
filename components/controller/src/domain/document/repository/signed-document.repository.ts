@@ -3,8 +3,9 @@ import type { DocumentPackageAggregateDomainInterface } from '../interfaces/docu
 
 /**
  * Данные для записи/обновления одной записи реестра подписанных документов.
- * Одна запись = ОДИН документ-заявление (ключ — `hash`). `packageHash` — идентификатор процесса,
- * общий для нескольких заявлений пакета (submitted↔resolved↔declined трекаются по `hash` документа).
+ * Одна запись = ОДИН документ (ключ — `doc_hash`, идентичность содержимого без подписей).
+ * `hash` — крайняя подписанная версия (накопленные подписи), `packageHash` — идентификатор процесса,
+ * общий для нескольких заявлений пакета (submitted↔resolved↔declined трекаются по `doc_hash`).
  */
 export interface SignedDocumentUpsertInput {
   coopname: string;
@@ -93,7 +94,7 @@ export interface SignedDocumentPackageRow {
 /**
  * Репозиторий реестра подписанных документов (Postgres-проекция).
  * Единый источник для отображения (getDocuments) и поиска (searchDocuments) — задача C28-21.
- * Запись = один документ-заявление (ключ `hash`); `package` группирует заявления одного процесса.
+ * Запись = один документ (ключ `doc_hash`); `package` группирует заявления одного процесса.
  */
 export interface SignedDocumentRepository {
   /** Вставить или обновить запись по (coopname, doc_hash). */

@@ -185,7 +185,7 @@ export class SignedDocumentIngestionService {
       full_title: rawDoc?.full_title || '',
       content_text: this.stripHtml(rawDoc?.html || ''),
       signers_text: this.collectSignersText(aggregate),
-      block_num: this.resolveBlockNum(meta.block_num, sourceAction?.block_num),
+      block_num: this.resolveBlockNum(sourceAction?.block_num, meta.block_num),
       document_created_at: meta.created_at ? new Date(meta.created_at) : null,
       document_aggregate: aggregate,
       source_action_data: sourceAction as unknown as Record<string, unknown>,
@@ -238,9 +238,17 @@ export class SignedDocumentIngestionService {
     return typeof pkg === 'string' ? pkg.substring(0, 8) : '?';
   }
 
-  private resolveBlockNum(metaBlockNum: unknown, actionBlockNum: unknown): string | null {
-    if (metaBlockNum !== undefined && metaBlockNum !== null) return String(metaBlockNum);
+  /**
+   * Номер блока для колонки block_num — ось упорядочивания ВЕРСИЙ подписи одного doc_hash.
+   * Это блок ON-CHAIN ДЕЙСТВИЯ (action.block_num), а НЕ блок генерации документа (meta.block_num):
+   * guard'ы в ingestAction сравнивают пришедший action.block_num с хранимым block_num, поэтому обе
+   * стороны должны мерить одну величину. Иначе (meta.block_num — блок генерации, всегда ≤ блока
+   * подачи в цепь) защита от отката на старую версию и идемпотентность по блоку не срабатывают.
+   * meta.block_num — только запасной вариант, если у действия нет block_num.
+   */
+  private resolveBlockNum(actionBlockNum: unknown, metaBlockNum: unknown): string | null {
     if (actionBlockNum !== undefined && actionBlockNum !== null) return String(actionBlockNum);
+    if (metaBlockNum !== undefined && metaBlockNum !== null) return String(metaBlockNum);
     return null;
   }
 
