@@ -78,6 +78,7 @@ import { SettingsApplicationModule } from './application/settings/settings.modul
 import { RegistrationModule } from './application/registration/registration.module';
 import { OnboardingApplicationModule } from './application/onboarding/onboarding-application.module';
 import { SearchModule } from './application/search/search.module';
+import { SignedDocumentsModule } from './application/signed-documents/signed-documents.module';
 import { MutationLoggingInterceptor } from './application/common/interceptors/mutation-logging.interceptor';
 
 @Module({
@@ -170,6 +171,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     RegistrationModule,
     OnboardingApplicationModule,
     SearchModule,
+    SignedDocumentsModule,
   ],
   providers: [
     {
