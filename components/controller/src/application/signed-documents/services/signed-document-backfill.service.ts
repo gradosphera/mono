@@ -107,8 +107,15 @@ export class SignedDocumentBackfillService implements OnApplicationBootstrap {
 
       for (const action of results) {
         stats.scanned++;
-        const result = await this.ingestion.ingestAction(action, pass.status);
-        stats[result === 'created' ? 'created' : result === 'updated' ? 'updated' : 'skipped']++;
+        try {
+          const result = await this.ingestion.ingestAction(action, pass.status);
+          stats[result === 'created' ? 'created' : result === 'updated' ? 'updated' : 'skipped']++;
+        } catch (error: any) {
+          // Одна битая запись (напр. не-парсибельная дата у legacy-документа) не должна ронять
+          // весь прогон backfill — логируем и идём дальше.
+          stats.skipped++;
+          this.logger.warn(`Пропущен документ при backfill (${pass.type}): ${error?.message}`);
+        }
       }
 
       if (results.length < PAGE_LIMIT) break;
