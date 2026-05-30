@@ -50,7 +50,7 @@ q-dialog(v-model='isOpen' position='top' transition-show='slide-down' transition
 import { ref, watch } from 'vue'
 import { client } from 'src/shared/api/client'
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge'
-import { useDocumentNavigation } from '../model/useDocumentNavigation'
+import { DocumentModel } from 'src/entities/Document'
 
 const props = defineProps<{
   modelValue: boolean
@@ -106,7 +106,7 @@ function onSearch(query: string | number | null) {
   }, 300)
 }
 
-const { openDocument: navigateToDocument } = useDocumentNavigation()
+const { openDocument: navigateToDocument } = DocumentModel.useDocumentNavigation()
 
 // Открываем отдельную страницу документа по hash и закрываем диалог.
 // Страница сама загрузит документ (работает и при прямом переходе по ссылке).

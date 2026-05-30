@@ -1,23 +1,25 @@
 <template lang="pug">
 .document-details-page
-  //- Canon back-link под шапкой, слева (вместо кнопки «Назад» в топбаре).
-  button.document-back(type='button', @click='goBack')
-    q-icon(name='arrow_back', size='18px')
-    span К реестру документов
+  //- Липкий бар с кнопкой «Назад» — всегда виден при прокрутке документа.
+  .document-details-page__bar
+    button.document-back(type='button', @click='goBack')
+      q-icon(name='arrow_back', size='18px')
+      span К реестру документов
 
-  div(v-if='loading')
-    q-skeleton.q-mb-md.rounded-borders(type='rect', height='220px')
-    q-skeleton.q-mb-md.rounded-borders(type='rect', height='140px')
+  .document-details-page__content
+    div(v-if='loading')
+      q-skeleton.q-mb-md.rounded-borders(type='rect', height='220px')
+      q-skeleton.q-mb-md.rounded-borders(type='rect', height='140px')
 
-  ComplexDocument(v-else-if='document', :documents='document')
+    ComplexDocument(v-else-if='document', :documents='document')
 
-  EmptyState(
-    v-else,
-    title='Документ не найден',
-    body='Проверьте правильность ссылки или вернитесь к реестру документов.'
-  )
-    template(#icon)
-      q-icon(name='search_off', size='48px')
+    EmptyState(
+      v-else,
+      title='Документ не найден',
+      body='Проверьте правильность ссылки или вернитесь к реестру документов.'
+    )
+      template(#icon)
+        q-icon(name='search_off', size='48px')
 </template>
 
 <script setup lang="ts">
@@ -95,12 +97,26 @@ onUnmounted(() => desktopStore.clearPageTitleOverride());
 </script>
 
 <style lang="scss" scoped>
-/* Полная ширина контента, как на canon-страницах документов/платежей. */
-.document-details-page {
+/* Липкий бар во всю ширину — отступы несут бар и контент раздельно.
+   top = высота фиксированного топбара (--p-topbar-h), иначе бар уезжает под него. */
+.document-details-page__bar {
+  position: sticky;
+  top: var(--p-topbar-h, 56px);
+  z-index: 2;
+  background: var(--p-canvas);
+  border-bottom: 1px solid var(--p-line);
+  padding: var(--p-3, 12px) var(--p-6, 24px);
+}
+
+.document-details-page__content {
   padding: var(--p-6, 24px);
 }
+
 @media (max-width: 768px) {
-  .document-details-page {
+  .document-details-page__bar {
+    padding: var(--p-3, 12px) var(--p-4, 16px);
+  }
+  .document-details-page__content {
     padding: var(--p-4, 16px);
   }
 }
@@ -109,7 +125,6 @@ onUnmounted(() => desktopStore.clearPageTitleOverride());
   display: inline-flex;
   align-items: center;
   gap: var(--p-1, 4px);
-  margin-bottom: var(--p-4, 16px);
   padding: 0;
   border: none;
   background: transparent;
