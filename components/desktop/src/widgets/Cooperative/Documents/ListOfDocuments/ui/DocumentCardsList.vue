@@ -101,10 +101,14 @@ function getBlockNum(row: IDocumentPackageAggregate): number {
   return Number(getMeta(row)?.block_num ?? 0);
 }
 
+// Хеш ПОДПИСАННОГО документа — колонка `hash` в реестре, по ней бэкенд фильтрует
+// при загрузке одного документа (UPPER(d.hash) = UPPER(:hash)) и её же отдаёт поиск.
+// ВНИМАНИЕ: rawDocument.hash — это doc_hash (хеш содержимого), он НЕ совпадает с
+// колонкой hash, поэтому для навигации берём именно document.hash.
 function getDocumentHash(row: IDocumentPackageAggregate): string {
   return (
-    row.statement?.documentAggregate?.rawDocument?.hash ||
-    row.decision?.documentAggregate?.rawDocument?.hash ||
+    row.statement?.documentAggregate?.document?.hash ||
+    row.decision?.documentAggregate?.document?.hash ||
     ''
   );
 }
