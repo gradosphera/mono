@@ -337,8 +337,14 @@ body.body--dark {
   padding: 24px 24px 0;
 }
 .q-notification {
-  background: var(--p-ink) !important;
-  color: var(--p-canvas) !important;
+  /* Тост — ВСЕГДА тёмная всплывающая поверхность в обеих темах. Фоны типов
+     зашиты тёмными deep-tint (#052e16/#4c0a0a/#3d2400/#0c1e3f ниже), поэтому
+     фон и текст здесь — фиксированные литералы, НЕ var(--p-ink)/var(--p-canvas):
+     на dark-теме эти токены инвертируются и текст уходил в тёмный на тёмном —
+     нечитаемо (баг 2026-05-28). Цветные иконки по типу остаются на токенах
+     (--p-pos/--p-neg/--p-warn/--p-info) — они яркие в обеих темах. */
+  background: #18181b !important;
+  color: #fafafa !important;
   border: 0;
   border-radius: var(--p-r-sm, 8px);
   box-shadow: var(--p-shadow-pop, 0 8px 28px rgba(0, 0, 0, 0.18));
@@ -349,6 +355,16 @@ body.body--dark {
   font-size: var(--p-fs-body-sm, 13px);
   line-height: 1.45;
   gap: 12px;
+}
+/* Выделение текста внутри тоста: глобальный ::selection красит текст в
+   var(--p-ink) (на свет-теме тёмный) поверх полупрозрачного фона — на тёмной
+   поверхности тоста выделенный текст пропадает. Тост — фикс. тёмная поверхность,
+   поэтому и выделение фиксированное: полупрозрачная светлая подложка + светлый
+   текст, читаемо на всех типах (#052e16/#4c0a0a/#3d2400/#0c1e3f/нейтральный). */
+.q-notification ::selection,
+.q-notification ::-moz-selection {
+  background: rgba(250, 250, 250, 0.28);
+  color: #fafafa;
 }
 .q-notification__message {
   color: inherit;
