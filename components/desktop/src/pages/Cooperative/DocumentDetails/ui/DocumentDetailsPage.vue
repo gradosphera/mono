@@ -51,13 +51,15 @@ const documentTitle = computed(() => {
   return title || 'Документ';
 });
 
+// Раздел выводим из имени роута (детерминированно даже при холодном deep-link,
+// в отличие от activeWorkspaceName, который инициализируется асинхронно).
 // Стол совета видит весь документооборот кооператива; пайщик — только свои документы.
-const isCouncilWorkspace = computed(() => desktopStore.activeWorkspaceName === 'soviet');
+const isCouncilDocument = computed(() => route.name === 'document-details');
 const scopeUsername = computed(() =>
-  isCouncilWorkspace.value ? coopname.value : session.username,
+  isCouncilDocument.value ? coopname.value : session.username,
 );
 const targetRouteName = computed(() =>
-  isCouncilWorkspace.value ? 'documents' : 'user-documents',
+  isCouncilDocument.value ? 'documents' : 'user-documents',
 );
 
 // Возврат к реестру документов (back-link под шапкой).
