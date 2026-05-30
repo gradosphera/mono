@@ -47,8 +47,11 @@ export interface SignedDocumentSearchParams {
  */
 export interface SignedDocumentSearchHit {
   hash: string;
+  /** Чистое наименование документа (meta.title), без служебного хвоста ` - - дата.pdf`. */
   full_title: string;
   username: string;
+  /** ФИО подписанта-субъекта («Иванов Иван Иванович») для отображения вместо username. */
+  signer: string;
   coopname: string;
   registry_id: number;
   created_at: string | null;

@@ -30,14 +30,11 @@ q-dialog(v-model='isOpen' position='top' transition-show='slide-down' transition
           @click='openDocument(result)'
         )
           q-item-section
-            q-item-label {{ result.full_title }}
+            q-item-label.doc-title {{ result.full_title }}
             q-item-label(caption)
-              span.text-grey-7 {{ result.username }} · {{ formatDate(result.created_at) }}
-            .text-caption.text-grey-7(
-              v-if='result.highlights.length > 0'
-              v-html='result.highlights[0]'
-              style='margin-top: 4px'
-            )
+              .row.items-center(style='gap: 8px; margin-top: 4px')
+                BaseBadge(v-if='result.signer' variant='neutral') {{ result.signer }}
+                span.text-grey-7 {{ formatDate(result.created_at) }}
 
     q-card-section(v-else-if='searchQuery.length >= 2 && !loading')
       .text-center.text-grey-6(style='padding: 24px')
@@ -52,6 +49,7 @@ q-dialog(v-model='isOpen' position='top' transition-show='slide-down' transition
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { client } from 'src/shared/api/client'
+import { BaseBadge } from 'src/shared/ui/base/BaseBadge'
 
 const props = defineProps<{
   modelValue: boolean
@@ -89,6 +87,7 @@ function onSearch(query: string | number | null) {
             hash: true,
             full_title: true,
             username: true,
+            signer: true,
             coopname: true,
             registry_id: true,
             created_at: true,

@@ -94,13 +94,45 @@ export class SignedDocumentTypeormRepository implements SignedDocumentRepository
 
     return rows.map((row) => ({
       hash: row.hash,
-      full_title: row.full_title,
+      // Чистое наименование из meta.title (как в реестре на главной), запасной вариант — full_title.
+      full_title: this.extractTitle(row.document_aggregate, row.full_title),
       username: row.username,
+      signer: this.extractSignerFio(row.document_aggregate, row.username),
       coopname: row.coopname,
       registry_id: row.registry_id,
       created_at: row.document_created_at ? row.document_created_at.toISOString() : null,
       highlights: [],
     }));
+  }
+
+  /** Наименование документа из meta.title готового агрегата; fallback — сохранённый full_title. */
+  private extractTitle(
+    aggregate: DocumentPackageAggregateDomainInterface | null,
+    fallback: string
+  ): string {
+    const meta = aggregate?.statement?.documentAggregate?.document?.meta as Record<string, any> | undefined;
+    const title = typeof meta?.title === 'string' ? meta.title : '';
+    return title || fallback || '';
+  }
+
+  /**
+   * ФИО подписанта-субъекта для выдачи поиска (вместо username). Берём подпись самого субъекта
+   * (signer === username), иначе — первую; из её signer_certificate собираем «Фамилия Имя Отчество»
+   * (для организации — short_name). Источник тот же, что у чипов подписей в реестре на главной.
+   */
+  private extractSignerFio(
+    aggregate: DocumentPackageAggregateDomainInterface | null,
+    username: string
+  ): string {
+    const signatures = aggregate?.statement?.documentAggregate?.document?.signatures ?? [];
+    const signature = signatures.find((s) => s?.signer === username) ?? signatures[0];
+    const cert = signature?.signer_certificate;
+    if (!cert) return '';
+    if ('short_name' in cert && cert.short_name) return String(cert.short_name);
+    if ('last_name' in cert) {
+      return [cert.last_name, cert.first_name, cert.middle_name].filter(Boolean).join(' ');
+    }
+    return '';
   }
 
   async findAggregates(params: SignedDocumentListParams): Promise<SignedDocumentListResult> {

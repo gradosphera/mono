@@ -40,6 +40,7 @@ export class SearchResolver {
       hash: hit.hash,
       full_title: hit.full_title,
       username: hit.username,
+      signer: hit.signer,
       coopname: hit.coopname,
       registry_id: hit.registry_id,
       created_at: hit.created_at ?? undefined,
