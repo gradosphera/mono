@@ -28,7 +28,7 @@ import type { DocumentPackageAggregateDomainInterface } from '~/domain/document/
 @Entity('signed_documents')
 @Index(['coopname', 'doc_hash'], { unique: true })
 @Index(['coopname', 'hash'])
-@Index(['coopname', 'package'])
+@Index(['coopname', 'packageHash'])
 @Index(['coopname', 'status'])
 @Index(['coopname', 'status', 'action'])
 @Index(['coopname', 'username'])
