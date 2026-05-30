@@ -21,7 +21,7 @@ q-dialog(v-model='isOpen' position='top' transition-show='slide-down' transition
       .row.justify-center.items-center(style='height: 100px')
         q-spinner(color='primary' size='32px')
 
-    q-card-section(v-else-if='results.length > 0' style='max-height: 60vh; overflow-y: auto')
+    q-card-section.q-pt-none(v-else-if='results.length > 0' style='max-height: 60vh; overflow-y: auto')
       q-list(separator)
         q-item(
           v-for='result in results'
