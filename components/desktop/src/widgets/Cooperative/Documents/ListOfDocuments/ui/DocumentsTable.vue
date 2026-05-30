@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 import { ComplexDocument } from 'src/shared/ui/ComplexDocument';
 import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
@@ -106,6 +106,8 @@ const props = defineProps<{
   documents: IDocumentPackageAggregate[];
   loading: boolean;
   pagination?: IPagination;
+  // hash документа, который надо авто-раскрыть (наведение из поиска).
+  expandHash?: string;
 }>();
 
 const emit = defineEmits<{
@@ -209,6 +211,20 @@ const toggleExpand = (id: string): void => {
   expanded.set(id, !expanded.get(id));
   emit('toggle-expand', id);
 };
+
+// Авто-раскрытие документа, на который навёл поиск (?document=<hash>): как только
+// отфильтрованный список загружен, разворачиваем найденную строку. Сопоставляем без
+// учёта регистра — в реестре hash хранится в верхнем регистре.
+watch(
+  () => [props.expandHash, props.documents] as const,
+  ([hash, docs]) => {
+    if (!hash) return;
+    const target = hash.toUpperCase();
+    const row = docs.find((r) => getDocumentHash(r).toUpperCase() === target);
+    if (row) expanded.set(rowId(row), true);
+  },
+  { immediate: true, deep: true },
+);
 
 const downloadPackage = async (
   packageAggregate: IDocumentPackageAggregate,

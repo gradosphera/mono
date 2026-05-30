@@ -1,1 +1,2 @@
-export { SearchButton, SearchHeaderAction, DocumentSearchDialog } from './ui'
+export { SearchButton, SearchHeaderAction, DocumentSearchDialog, SearchedDocumentBanner } from './ui'
+export { useDocumentRouteFilter, useDocumentNavigation } from './model/useDocumentRouteFilter'
