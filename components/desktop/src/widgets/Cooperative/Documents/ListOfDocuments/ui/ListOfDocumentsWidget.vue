@@ -3,7 +3,6 @@ DocumentsTable(
   :documents='documentStore.documents',
   :loading='documentStore.loading',
   :pagination='documentStore.pagination',
-  :expand-hash='documentHash',
   @toggle-expand='toggleExpand',
   @load='loadMoreDocuments'
 )
@@ -21,7 +20,7 @@ DocumentsTable(
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch, onBeforeUnmount } from 'vue';
+import { onMounted, ref, onBeforeUnmount } from 'vue';
 import { DocumentModel } from 'src/entities/Document';
 import { DocumentsTable } from '../ui';
 import { FailAlert } from 'src/shared/api';
@@ -56,16 +55,6 @@ const documentStore = DocumentModel.useDocumentStore();
 
 // Переменная для отслеживания типа в интерфейсе
 const typeForToggle = ref<DocumentType>(props.initialDocumentType);
-
-// Реестр может быть наведён на конкретный документ из поиска: filter.document.hash.
-const documentHash = computed<string>(() => String((props.filter as any)?.document?.hash ?? ''));
-const hasDocumentFilter = computed<boolean>(() => documentHash.value.length > 0);
-
-// При фильтре по одному документу не ограничиваем статус (newsubmitted = все статусы),
-// иначе на вкладке «только утверждённые» неутверждённый документ из поиска не нашёлся бы.
-const effectiveType = computed<DocumentType>(() =>
-  hasDocumentFilter.value ? 'newsubmitted' : typeForToggle.value,
-);
 
 // Обработчик изменения типа документов
 async function onTypeChange(newType: DocumentType) {
@@ -108,27 +97,14 @@ function toggleExpand(document: any) {
 // Периодическое обновление данных
 let interval: number | null = null;
 
-// Перезагрузка списка с текущим фильтром и эффективным типом (форс newsubmitted при hash-фильтре).
-async function reload() {
-  documentStore.resetDocuments();
-  try {
-    await documentStore.changeDocumentType(effectiveType.value, props.username, props.filter);
-  } catch (e) {
-    FailAlert(e);
-  }
-}
-
 // Загрузка документов при монтировании
-onMounted(reload);
-
-// Наведение реестра на документ из поиска меняет filter — перезагружаем список.
-watch(
-  () => props.filter,
-  () => {
-    void reload();
-  },
-  { deep: true },
-);
+onMounted(() => {
+  // Начальная загрузка документов
+  documentStore.resetDocuments();
+  documentStore
+    .changeDocumentType(typeForToggle.value, props.username, props.filter)
+    .catch((e) => FailAlert(e));
+});
 
 // Очистка таймера при размонтировании компонента
 onBeforeUnmount(() => {

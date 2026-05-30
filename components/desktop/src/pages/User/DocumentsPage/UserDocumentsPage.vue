@@ -1,9 +1,8 @@
 <template lang="pug">
 q-page.documents-page
-  SearchedDocumentBanner(v-if="documentHash" @clear="clearDocumentFilter")
   ListOfDocumentsWidget(
     :username="username"
-    :filter="documentFilter"
+    :filter="{}"
     :showFilter="false"
     :initialDocumentType="typeForToggle"
   )
@@ -18,15 +17,12 @@ q-page.documents-page
 import { ref, computed } from 'vue'
 import { useSessionStore } from 'src/entities/Session'
 import { ListOfDocumentsWidget } from 'src/widgets/Cooperative/Documents/ListOfDocuments/ui'
-import { SearchHeaderAction, SearchedDocumentBanner, useDocumentRouteFilter } from 'src/features/DocumentSearch'
+import { SearchHeaderAction } from 'src/features/DocumentSearch'
 import type { DocumentType } from 'src/entities/Document/model/types'
 
 const session = useSessionStore()
 const username = computed(() => session.username)
 const typeForToggle = ref<DocumentType>('newsubmitted')
-
-// Фильтр по документу, выбранному в поиске (?document=<hash>).
-const { documentHash, documentFilter, clearDocumentFilter } = useDocumentRouteFilter()
 </script>
 
 <style lang="scss" scoped>

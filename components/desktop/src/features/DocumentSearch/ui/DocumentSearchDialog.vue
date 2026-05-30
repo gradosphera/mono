@@ -50,7 +50,7 @@ q-dialog(v-model='isOpen' position='top' transition-show='slide-down' transition
 import { ref, watch } from 'vue'
 import { client } from 'src/shared/api/client'
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge'
-import { useDocumentNavigation } from '../model/useDocumentRouteFilter'
+import { useDocumentNavigation } from '../model/useDocumentNavigation'
 
 const props = defineProps<{
   modelValue: boolean
@@ -108,8 +108,8 @@ function onSearch(query: string | number | null) {
 
 const { openDocument: navigateToDocument } = useDocumentNavigation()
 
-// Наводим реестр на выбранный документ через ?document=<hash> и закрываем диалог.
-// Страница реестра сама подхватит параметр и отфильтрует список до одного документа.
+// Открываем отдельную страницу документа по hash и закрываем диалог.
+// Страница сама загрузит документ (работает и при прямом переходе по ссылке).
 function openDocument(result: any) {
   if (result?.hash) navigateToDocument(String(result.hash))
   close()
