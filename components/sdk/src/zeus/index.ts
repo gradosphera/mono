@@ -1929,6 +1929,16 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on Authority']?: Omit<ValueTypes["Authority"], "...on Authority">
 }>;
+	["AuthorizeDecisionInput"]: {
+	/** Имя аккаунта председателя совета */
+	chairman: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Подписанный председателем документ утверждения решения */
+	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
+};
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
 	/** Время последней успешной генерации (UTC) */
@@ -6417,6 +6427,7 @@ acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, 
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addPaymentMethod?: [{	data: ValueTypes["AddPaymentMethodInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
+authorizeDecision?: [{	data: ValueTypes["AuthorizeDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
@@ -10383,6 +10394,16 @@ export type ResolverInputTypes = {
 	waits?:ResolverInputTypes["WaitWeight"],
 		__typename?: boolean | `@${string}`
 }>;
+	["AuthorizeDecisionInput"]: {
+	/** Имя аккаунта председателя совета */
+	chairman: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Подписанный председателем документ утверждения решения */
+	document: ResolverInputTypes["SignedDigitalDocumentInput"]
+};
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
 	/** Время последней успешной генерации (UTC) */
@@ -14750,6 +14771,7 @@ acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},Resolve
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addPaymentMethod?: [{	data: ResolverInputTypes["AddPaymentMethodInput"]},ResolverInputTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
+authorizeDecision?: [{	data: ResolverInputTypes["AuthorizeDecisionInput"]},ResolverInputTypes["Transaction"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
@@ -18603,6 +18625,16 @@ export type ModelTypes = {
 	threshold: number,
 	/** Вес ожидания */
 	waits: Array<ModelTypes["WaitWeight"]>
+};
+	["AuthorizeDecisionInput"]: {
+	/** Имя аккаунта председателя совета */
+	chairman: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Подписанный председателем документ утверждения решения */
+	document: ModelTypes["SignedDigitalDocumentInput"]
 };
 	["AvailableReport"]: {
 		deadline: string,
@@ -22840,6 +22872,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	addTrustedAccount: ModelTypes["Branch"],
+	/** Утвердить и исполнить решение совета
+
+Требуемые роли: chairman.  */
+	authorizeDecision: ModelTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -27261,6 +27297,16 @@ export type GraphQLTypes = {
 	/** Вес ожидания */
 	waits: Array<GraphQLTypes["WaitWeight"]>,
 	['...on Authority']: Omit<GraphQLTypes["Authority"], "...on Authority">
+};
+	["AuthorizeDecisionInput"]: {
+		/** Имя аккаунта председателя совета */
+	chairman: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Подписанный председателем документ утверждения решения */
+	document: GraphQLTypes["SignedDigitalDocumentInput"]
 };
 	["AvailableReport"]: {
 	__typename: "AvailableReport",
@@ -31759,6 +31805,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	addTrustedAccount: GraphQLTypes["Branch"],
+	/** Утвердить и исполнить решение совета
+
+Требуемые роли: chairman.  */
+	authorizeDecision: GraphQLTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -36009,6 +36059,7 @@ type ZEUS_VARIABLES = {
 	["AssetContributionStatementGenerateDocumentInput"]: ValueTypes["AssetContributionStatementGenerateDocumentInput"];
 	["AssetContributionStatementSignedDocumentInput"]: ValueTypes["AssetContributionStatementSignedDocumentInput"];
 	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
+	["AuthorizeDecisionInput"]: ValueTypes["AuthorizeDecisionInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["BuhotchSignerType"]: ValueTypes["BuhotchSignerType"];

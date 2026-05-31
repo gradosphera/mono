@@ -122,6 +122,9 @@ export const AllTypesProps: Record<string,any> = {
 	AssetContributionStatementSignedMetaDocumentInput:{
 		request:"CommonRequestInput"
 	},
+	AuthorizeDecisionInput:{
+		document:"SignedDigitalDocumentInput"
+	},
 	BankAccountDetailsInput:{
 
 	},
@@ -643,6 +646,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		addTrustedAccount:{
 			data:"AddTrustedAccountInput"
+		},
+		authorizeDecision:{
+			data:"AuthorizeDecisionInput"
 		},
 		cancelRequest:{
 			data:"CancelRequestInput"
@@ -3505,6 +3511,7 @@ export const ReturnTypes: Record<string,any> = {
 		addParticipant:"Account",
 		addPaymentMethod:"PaymentMethod",
 		addTrustedAccount:"Branch",
+		authorizeDecision:"Transaction",
 		cancelRequest:"Transaction",
 		capitalAddAuthor:"CapitalProject",
 		capitalApproveCommit:"CapitalCommit",
