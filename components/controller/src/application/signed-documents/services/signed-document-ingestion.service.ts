@@ -4,6 +4,7 @@ import { Cooperative, SovietContract } from 'cooptypes';
 import { DocumentPackageAggregator } from '~/domain/document/aggregators/document-package.aggregator';
 import {
   SIGNED_DOCUMENT_REPOSITORY,
+  type SignedDocumentPackageRow,
   type SignedDocumentRepository,
 } from '~/domain/document/repository/signed-document.repository';
 import { SignedDocumentStatus } from '~/domain/document/enums/signed-document-status.enum';
@@ -141,16 +142,7 @@ export class SignedDocumentIngestionService {
 
       let rebuilt = 0;
       for (const row of rows) {
-        if (!row.sourceActionData) continue;
-        await this.assembleAndUpsert(
-          row.sourceActionData as unknown as IAction,
-          row.status,
-          coopname,
-          row.doc_hash,
-          row.hash,
-          packageHash
-        );
-        rebuilt++;
+        if (await this.reassembleRow(row, coopname)) rebuilt++;
       }
       if (rebuilt > 0) {
         this.logger.log(`[${label}] пересобрано агрегатов: ${rebuilt}, package=${this.shortPackage(action)}`);
@@ -158,6 +150,26 @@ export class SignedDocumentIngestionService {
     } catch (error: any) {
       this.logger.warn(`Ошибка пересборки агрегата по событию ${label}: ${error?.message}`);
     }
+  }
+
+  /**
+   * Пересобирает агрегат ОДНОЙ записи пакета по её сохранённому действию-носителю и обновляет
+   * ТОЛЬКО агрегат-производные колонки. Статус/версию/source НЕ трогаем — ими владеют статус-события
+   * (иначе пересборка, конкурентная с newresolved, откатила бы resolved→submitted). Если агрегат не
+   * собрался (null) — запись не портим, оставляем прежний агрегат.
+   */
+  private async reassembleRow(row: SignedDocumentPackageRow, coopname: string): Promise<boolean> {
+    if (!row.sourceActionData) return false;
+    const aggregate = await this.buildAggregateSafe(row.sourceActionData as unknown as IAction);
+    if (!aggregate) return false;
+    const rawDoc = aggregate.statement?.documentAggregate?.rawDocument;
+    await this.repository.updateAggregate(coopname, row.doc_hash, {
+      document_aggregate: aggregate,
+      full_title: rawDoc?.full_title || '',
+      content_text: this.stripHtml(rawDoc?.html || ''),
+      signers_text: this.collectSignersText(aggregate),
+    });
+    return true;
   }
 
   private async assembleAndUpsert(
