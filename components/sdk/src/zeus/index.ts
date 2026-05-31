@@ -8639,6 +8639,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	highlights?:boolean | `@${string}`,
 	/** ID реестра документа */
 	registry_id?:boolean | `@${string}`,
+	/** ФИО подписанта документа */
+	signer?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
@@ -16893,6 +16895,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	highlights?:boolean | `@${string}`,
 	/** ID реестра документа */
 	registry_id?:boolean | `@${string}`,
+	/** ФИО подписанта документа */
+	signer?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -25548,6 +25552,8 @@ export type ModelTypes = {
 	highlights: Array<string>,
 	/** ID реестра документа */
 	registry_id: number,
+	/** ФИО подписанта документа */
+	signer: string,
 	/** Имя пользователя */
 	username: string
 };
@@ -34643,6 +34649,8 @@ export type GraphQLTypes = {
 	highlights: Array<string>,
 	/** ID реестра документа */
 	registry_id: number,
+	/** ФИО подписанта документа */
+	signer: string,
 	/** Имя пользователя */
 	username: string,
 	['...on SearchResult']: Omit<GraphQLTypes["SearchResult"], "...on SearchResult">
