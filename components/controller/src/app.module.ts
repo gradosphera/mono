@@ -67,6 +67,7 @@ import { MeetModule } from './application/meet/meet.module';
 import { GatewayModule } from './application/gateway/gateway.module';
 import { WalletModule } from './application/wallet/wallet.module';
 import { NotificationModule } from './application/notification/notification.module';
+import { NotificationCenterModule } from './application/notification-center/notification-center.module';
 import { LedgerModule } from './application/ledger/ledger.module';
 import { Ledger2Module } from './application/ledger2/ledger2.module';
 import { ProcessRegistryModule } from './application/process-registry/process-registry.module';
@@ -160,6 +161,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     GatewayModule,
     WalletModule,
     NotificationModule,
+    NotificationCenterModule,
     LedgerModule,
     Ledger2Module,
     ProcessRegistryModule,

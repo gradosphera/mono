@@ -42,8 +42,9 @@ export class NotificationOutboxTypeormEntity implements NotificationOutboxDomain
   @Column('varchar', { length: 255, nullable: true })
   recipientUsername?: string;
 
+  // Record<string, any> (не unknown) — TypeORM QueryDeepPartialEntity не принимает unknown-значения при insert.
   @Column('json', { nullable: true })
-  payload?: Record<string, unknown>;
+  payload?: Record<string, any>;
 
   @Column('varchar', { length: 255, nullable: true })
   actorSubscriberId?: string;
