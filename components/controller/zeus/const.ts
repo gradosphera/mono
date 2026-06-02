@@ -1121,6 +1121,12 @@ export const AllTypesProps: Record<string,any> = {
 		logout:{
 			data:"LogoutInput"
 		},
+		markAllNotificationsRead:{
+
+		},
+		markNotificationRead:{
+
+		},
 		markReportPeriod:{
 			data:"MarkReportPeriodInput"
 		},
@@ -1153,6 +1159,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		registerParticipant:{
 			data:"RegisterParticipantInput"
+		},
+		resendNotification:{
+
 		},
 		resetKey:{
 			data:"ResetKeyInput"
@@ -1231,8 +1240,15 @@ export const AllTypesProps: Record<string,any> = {
 		}
 	},
 	NonProjectRoomKind: "enum" as const,
+	NotificationChannel: "enum" as const,
+	NotificationDeliveryStatus: "enum" as const,
+	NotificationOutboxStatus: "enum" as const,
 	NotificationWorkflowRecipientInput:{
 
+	},
+	NotificationsFilterInput:{
+		channel:"NotificationChannel",
+		status:"NotificationOutboxStatus"
 	},
 	NotifyOnAnnualGeneralMeetInput:{
 		notification:"AnnualGeneralMeetingNotificationSignedDocumentInput"
@@ -1539,6 +1555,9 @@ export const AllTypesProps: Record<string,any> = {
 		getExtensions:{
 			data:"GetExtensionsInput"
 		},
+		getInboxNotifications:{
+			pagination:"PaginationInput"
+		},
 		getInstallationStatus:{
 			data:"GetInstallationStatusInput"
 		},
@@ -1565,6 +1584,13 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getMeets:{
 			data:"GetMeetsInput"
+		},
+		getNotification:{
+
+		},
+		getNotifications:{
+			filter:"NotificationsFilterInput",
+			pagination:"PaginationInput"
 		},
 		getPaymentMethods:{
 			data:"GetPaymentMethodsInput"
@@ -1603,6 +1629,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		getReportPreview:{
 			input:"ReportPreviewInput"
+		},
+		getUnreadNotificationsCount:{
+
 		},
 		getUserWebPushSubscriptions:{
 			data:"GetUserSubscriptionsInput"
@@ -3289,6 +3318,23 @@ export const ReturnTypes: Record<string,any> = {
 		reportType:"ReportType",
 		year:"Int"
 	},
+	InboxNotification:{
+		actorSubscriberId:"String",
+		body:"String",
+		createdAt:"DateTime",
+		id:"String",
+		isRead:"Boolean",
+		payload:"JSON",
+		readAt:"DateTime",
+		title:"String",
+		workflowId:"String"
+	},
+	InboxNotificationPaginationResult:{
+		currentPage:"Int",
+		items:"InboxNotification",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
 	Individual:{
 		birthdate:"String",
 		email:"String",
@@ -3655,6 +3701,8 @@ export const ReturnTypes: Record<string,any> = {
 		installSystem:"SystemInfo",
 		login:"RegisteredAccount",
 		logout:"Boolean",
+		markAllNotificationsRead:"UnreadNotificationsCount",
+		markNotificationRead:"InboxNotification",
 		markReportPeriod:"Boolean",
 		moderateRequest:"Transaction",
 		notifyOnAnnualGeneralMeet:"MeetAggregate",
@@ -3666,6 +3714,7 @@ export const ReturnTypes: Record<string,any> = {
 		refresh:"RegisteredAccount",
 		registerAccount:"RegisteredAccount",
 		registerParticipant:"Account",
+		resendNotification:"Notification",
 		resetKey:"Boolean",
 		restartAnnualGeneralMeet:"MeetAggregate",
 		saveReportDraft:"ReportDraft",
@@ -3691,6 +3740,47 @@ export const ReturnTypes: Record<string,any> = {
 		verifyEmail:"Boolean",
 		voteOnAnnualGeneralMeet:"MeetAggregate",
 		walmoveWallets:"Ledger2AdjustmentResult"
+	},
+	Notification:{
+		attempts:"Int",
+		channel:"NotificationChannel",
+		coopname:"String",
+		createdAt:"DateTime",
+		id:"String",
+		lastError:"String",
+		recipientSubscriberId:"String",
+		recipientUsername:"String",
+		status:"NotificationOutboxStatus",
+		updatedAt:"DateTime",
+		workflowId:"String"
+	},
+	NotificationAttempt:{
+		attemptNumber:"Int",
+		createdAt:"DateTime",
+		error:"String",
+		id:"String",
+		providerResponse:"String",
+		status:"NotificationDeliveryStatus"
+	},
+	NotificationDetail:{
+		attempts:"Int",
+		channel:"NotificationChannel",
+		coopname:"String",
+		createdAt:"DateTime",
+		deliveries:"NotificationAttempt",
+		id:"String",
+		lastError:"String",
+		recipientSubscriberId:"String",
+		recipientUsername:"String",
+		status:"NotificationOutboxStatus",
+		updatedAt:"DateTime",
+		workflowId:"String"
+	},
+	NotificationPaginationResult:{
+		currentPage:"Int",
+		items:"Notification",
+		totalCount:"Int",
+		totalPages:"Int"
 	},
 	OneCoopDocumentOutput:{
 		action:"String",
@@ -4188,6 +4278,7 @@ export const ReturnTypes: Record<string,any> = {
 		getExtensionLogs:"ExtensionLogsPaginationResult",
 		getExtensionOnboardingState:"ExtensionOnboardingState",
 		getExtensions:"Extension",
+		getInboxNotifications:"InboxNotificationPaginationResult",
 		getInstallationStatus:"InstallationStatus",
 		getLedger:"LedgerState",
 		getLedger2Accounts:"Ledger2Account",
@@ -4197,6 +4288,8 @@ export const ReturnTypes: Record<string,any> = {
 		getLedgerHistory:"LedgerHistoryResponse",
 		getMeet:"MeetAggregate",
 		getMeets:"MeetAggregate",
+		getNotification:"NotificationDetail",
+		getNotifications:"NotificationPaginationResult",
 		getPaymentMethods:"PaymentMethodPaginationResult",
 		getPayments:"PaginatedGatewayPaymentsPaginationResult",
 		getProgramWallet:"ProgramWallet",
@@ -4212,6 +4305,7 @@ export const ReturnTypes: Record<string,any> = {
 		getReportPreview:"ReportPreview",
 		getReportRequisites:"ReportRequisitesView",
 		getSystemInfo:"SystemInfo",
+		getUnreadNotificationsCount:"UnreadNotificationsCount",
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
 		listReportDrafts:"ReportDraft",
@@ -4490,6 +4584,9 @@ export const ReturnTypes: Record<string,any> = {
 		speakerName:"String",
 		startOffset:"Float",
 		text:"String"
+	},
+	UnreadNotificationsCount:{
+		count:"Int"
 	},
 	UserAccount:{
 		meta:"String",

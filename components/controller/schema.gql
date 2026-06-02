@@ -6723,6 +6723,49 @@ input ImportContributorInput {
   username: String!
 }
 
+type InboxNotification {
+  """Инициатор уведомления (от кого)"""
+  actorSubscriberId: String
+
+  """Тело уведомления"""
+  body: String!
+
+  """Когда получено"""
+  createdAt: DateTime!
+
+  """Идентификатор уведомления инбокса"""
+  id: String!
+
+  """Прочитано получателем"""
+  isRead: Boolean!
+
+  """Исходные данные (deep-link / доп-рендер)"""
+  payload: JSON
+
+  """Когда отмечено прочитанным"""
+  readAt: DateTime
+
+  """Заголовок"""
+  title: String!
+
+  """Тип уведомления (Workflows.<Type>.id)"""
+  workflowId: String!
+}
+
+type InboxNotificationPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [InboxNotification!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type Individual {
   """Дата рождения"""
   birthdate: String!
@@ -8431,6 +8474,20 @@ type Mutation {
   logout(data: LogoutInput!): Boolean!
 
   """
+  Отметить все уведомления инбокса прочитанными
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  markAllNotificationsRead(coopname: String!): UnreadNotificationsCount!
+
+  """
+  Отметить уведомление инбокса прочитанным
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  markNotificationRead(id: String!): InboxNotification!
+
+  """
   Поставить или снять отметку на ячейку календаря. mark=null — снять. Сейчас поддерживается только NOT_REQUIRED («не надо сдавать»).
   
   Требуемые роли: chairman. 
@@ -8484,6 +8541,13 @@ type Mutation {
   Требуемые роли: chairman, member. 
   """
   registerParticipant(data: RegisterParticipantInput!): Account!
+
+  """
+  Переотправить уведомление (force-постановка новой строки в очередь доставки)
+  
+  Требуемые роли: chairman. 
+  """
+  resendNotification(id: String!): Notification!
 
   """Заменить приватный ключ аккаунта"""
   resetKey(data: ResetKeyInput!): Boolean!
@@ -8634,9 +8698,155 @@ enum NonProjectRoomKind {
   SECRETARY
 }
 
+type Notification {
+  """Сделано попыток"""
+  attempts: Int!
+
+  """Канал доставки"""
+  channel: NotificationChannel!
+
+  """Кооператив-владелец"""
+  coopname: String!
+
+  """Когда поставлено в очередь"""
+  createdAt: DateTime!
+
+  """Идентификатор уведомления"""
+  id: String!
+
+  """Текст последней ошибки"""
+  lastError: String
+
+  """Идентификатор получателя"""
+  recipientSubscriberId: String!
+
+  """Имя аккаунта получателя"""
+  recipientUsername: String
+
+  """Статус доставки"""
+  status: NotificationOutboxStatus!
+
+  """Когда обновлено"""
+  updatedAt: DateTime!
+
+  """Тип уведомления"""
+  workflowId: String!
+}
+
+type NotificationAttempt {
+  """Номер попытки (1-based)"""
+  attemptNumber: Int!
+
+  """Когда выполнена попытка"""
+  createdAt: DateTime!
+
+  """Текст ошибки при провале"""
+  error: String
+
+  """Идентификатор попытки"""
+  id: String!
+
+  """Ответ провайдера (message-id / push-status)"""
+  providerResponse: String
+
+  """Исход попытки"""
+  status: NotificationDeliveryStatus!
+}
+
+"""Канал доставки уведомления"""
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  PUSH
+}
+
+"""Исход одной попытки доставки"""
+enum NotificationDeliveryStatus {
+  FAILED
+  SENT
+}
+
+type NotificationDetail {
+  """Сделано попыток"""
+  attempts: Int!
+
+  """Канал доставки"""
+  channel: NotificationChannel!
+
+  """Кооператив-владелец"""
+  coopname: String!
+
+  """Когда поставлено в очередь"""
+  createdAt: DateTime!
+
+  """История попыток доставки"""
+  deliveries: [NotificationAttempt!]!
+
+  """Идентификатор уведомления"""
+  id: String!
+
+  """Текст последней ошибки"""
+  lastError: String
+
+  """Идентификатор получателя"""
+  recipientSubscriberId: String!
+
+  """Имя аккаунта получателя"""
+  recipientUsername: String
+
+  """Статус доставки"""
+  status: NotificationOutboxStatus!
+
+  """Когда обновлено"""
+  updatedAt: DateTime!
+
+  """Тип уведомления"""
+  workflowId: String!
+}
+
+"""Статус строки очереди доставки уведомления"""
+enum NotificationOutboxStatus {
+  CANCELED
+  FAILED
+  PENDING
+  SENDING
+  SENT
+}
+
+type NotificationPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [Notification!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 input NotificationWorkflowRecipientInput {
   """Username получателя"""
   username: String!
+}
+
+input NotificationsFilterInput {
+  """Канал доставки"""
+  channel: NotificationChannel
+
+  """Кооператив-владелец"""
+  coopname: String!
+
+  """Идентификатор получателя"""
+  recipientSubscriberId: String
+
+  """Статус доставки"""
+  status: NotificationOutboxStatus
+
+  """Тип уведомления"""
+  workflowId: String
 }
 
 input NotifyOnAnnualGeneralMeetInput {
@@ -10508,6 +10718,13 @@ type Query {
   """
   getExtensions(data: GetExtensionsInput): [Extension!]!
 
+  """
+  Лента личного инбокса текущего пользователя
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  getInboxNotifications(coopname: String!, pagination: PaginationInput!): InboxNotificationPaginationResult!
+
   """Получить статус установки кооператива с приватными данными"""
   getInstallationStatus(data: GetInstallationStatusInput!): InstallationStatus!
 
@@ -10566,6 +10783,20 @@ type Query {
   Требуемые роли: chairman, member, user. 
   """
   getMeets(data: GetMeetsInput!): [MeetAggregate!]!
+
+  """
+  Детализация одного уведомления с историей попыток доставки
+  
+  Требуемые роли: chairman, member. 
+  """
+  getNotification(id: String!): NotificationDetail!
+
+  """
+  Журнал уведомлений кооператива с фильтрами и пагинацией
+  
+  Требуемые роли: chairman, member. 
+  """
+  getNotifications(filter: NotificationsFilterInput!, pagination: PaginationInput!): NotificationPaginationResult!
 
   """
   Получить список методов оплаты
@@ -10661,6 +10892,13 @@ type Query {
 
   """Получить сводную публичную информацию о системе"""
   getSystemInfo: SystemInfo!
+
+  """
+  Число непрочитанных уведомлений в инбоксе (бейдж на колоколе)
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  getUnreadNotificationsCount(coopname: String!): UnreadNotificationsCount!
 
   """
   Получить веб-пуш подписки пользователя
@@ -12405,6 +12643,11 @@ input UnpublishRequestInput {
 
   """Имя аккаунта пользователя"""
   username: String!
+}
+
+type UnreadNotificationsCount {
+  """Число непрочитанных уведомлений"""
+  count: Int!
 }
 
 input Update {
