@@ -1,6 +1,8 @@
-# C28-28 · Naming Proposal v2 — универсальное шасси расхода
+# C28-28 · Naming Proposal v3 — универсальное шасси расхода
 
-**Изменения v2 (после голосового пользователя 2026-06-02):** контракт делается универсальным — не вводим новых счетов (60/71 отвергнуты), используем существующие 04/08/51/58/80/86; источник средств и operation_code передаются **извне** в payload, контракт ничего не «знает» про Благорост или хозрасходы; матрица 5 операций (вместо 6).
+**Изменения v3 (2026-06-02, второй раунд голосового):** (1) контракт `expense` ничего не знает про `capital` — callback на финализацию устанавливается при создании СЗ как **переменная** (`callback_contract` + `callback_action` + опц. `callback_data`), хардкод запрещён; (2) проводка расхода для ОБЕИХ механик Благороста — **Дт 08 / Кт 51** (не 80) — паевой фонд при расходе не трогается, меняется только форма актива 51 → 08; (3) `o.exp.advrpt` без бухпроводки — она уже сделана при выдаче (canal 08/51 второй раз не строим); (4) document2 — только 2010/2011, 2012/2013/2014 = файлы MinIO.
+
+**Изменения v2 (первый раунд):** контракт делается универсальным — не вводим новых счетов (60/71 отвергнуты), используем существующие 04/08/51/58/80/86; источник средств и operation_code передаются **извне** в payload, контракт ничего не «знает» про Благорост или хозрасходы; матрица 5 операций (вместо 6).
 
 **Канон:** `feedback_kanon_naming_soglasovyvat` — имена в ontology согласовываются ДО реализации; прецедент 2026-05-19.
 
@@ -48,21 +50,29 @@
 
 | # | C++ константа | eosio::name | WalletOp | wallet_from → wallet_to | Dr / Cr | human_name |
 |---|---|---|---|---|---|---|
-| 3.1 | `operations::expense::BLAGO_ADVANCE` | `o.exp.blgadv` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | 08 / 80 | «Выдача подотчётных из ЦПП «Благорост»» |
-| 3.2 | `operations::expense::BLAGO_DIRECT` | `o.exp.blgdir` | BURN | `BLAGOROST_FUND` → ∅ | 08 / 51 | «Прямая оплата из ЦПП «Благорост» (DIRECT)» |
-| 3.3 | `operations::expense::ADVANCE_REPORT` | `o.exp.advrpt` | BURN | `w.exp.adv` → ∅ | 0 / 0 | «Закрытие подотчёта пайщика по отчёту» |
-| 3.4 | `operations::expense::ADVANCE_RETURN` | `o.exp.advret` | TRANSFER | `w.exp.adv` → `BLAGOROST_FUND` | 80 / 08 | «Возврат неиспользованного подотчёта в ЦПП «Благорост»» |
-| 3.5 | `operations::expense::OVERSPEND` | `o.exp.over` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | 08 / 80 | «Доплата сверх подотчёта (перерасход)» |
+| 3.1 | `operations::expense::BLAGO_ADVANCE` | `o.exp.blgadv` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | **08 / 51** | «Выдача подотчётных из ЦПП «Благорост»» |
+| 3.2 | `operations::expense::BLAGO_DIRECT` | `o.exp.blgdir` | BURN | `BLAGOROST_FUND` → ∅ | **08 / 51** | «Прямая оплата из ЦПП «Благорост» (DIRECT)» |
+| 3.3 | `operations::expense::ADVANCE_REPORT` | `o.exp.advrpt` | BURN | `w.exp.adv` → ∅ | 0 / 0 | «Закрытие подотчёта пайщика по отчёту (canal 08/51 уже сделан на blgadv)» |
+| 3.4 | `operations::expense::ADVANCE_RETURN` | `o.exp.advret` | TRANSFER | `w.exp.adv` → `BLAGOROST_FUND` | **51 / 08** | «Возврат неиспользованного подотчёта в ЦПП «Благорост» (зеркало blgadv)» |
+| 3.5 | `operations::expense::OVERSPEND` | `o.exp.over` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | **08 / 51** | «Доплата сверх подотчёта (перерасход)» |
 
 **Process_type:** один — `processes::expense::PROPOSAL = "p.exp.proposal"_n`. Все 5 кодов привязаны к нему.
 
 ### Объяснение проводок
 
-- **3.1 BLAGO_ADVANCE (Dr 08 / Cr 80):** `w.cap.blago` сидит на 80 (паевой фонд); подотчёт = инвестиция в РИД-проект (вложение во внеоборотные → 08). Зеркало паттерна `o.cap.commit`.
-- **3.2 BLAGO_DIRECT (Dr 08 / Cr 51):** прямая оплата вне пайщика — деньги уходят с расчётного счёта (51), сразу попадают в WIP-проект (08). BURN с `w.cap.blago` — резерв пула сжигается.
-- **3.3 ADVANCE_REPORT (0/0):** бухпроводка уже сделана на blgadv/blgdir. При отчёте только BURN подотчётного кошелька — без новых проводок. Аналог `o.cap.accept` (WalletOp::NONE для зеркала). Здесь BURN, потому что кошелёк пайщика очищается.
-- **3.4 ADVANCE_RETURN (Dr 80 / Cr 08):** возврат в `w.cap.blago` — обратная операция. Восстановление пула.
-- **3.5 OVERSPEND (Dr 08 / Cr 80):** добавочная выдача — зеркало 3.1. После `o.exp.over` сразу `o.exp.advrpt` закрывает.
+**Базовое состояние Благороста ДО расхода** (поднял `p.cap.invest.standard.yaml` и `operations.hpp`):
+
+- Денежная инвестиция (`o.cap.invest`): TRANSFER `w.wal.share` → `w.cap.blago`, **без бухпроводки** (оба счёт 80). Деньги физически на 51 с момента изначального `o.wal.depcpl` (Dr 51 / Cr 80).
+- РИД-имущество (`o.cap.import`/`actprp`): Dr 04 / Cr 80, наполняет НМА.
+- **08 пустой** на момент инвестиции деньгами — никто туда ничего не клал.
+
+**Принцип расхода:** деньги физически уходят с 51 → Cr 51. Появляется WIP-стоимость проекта → Dr 08. Паевой фонд (80) **не меняется** — это бух-инвариант (форма актива переходит 51 → 08, ценность остаётся в фонде).
+
+- **3.1 BLAGO_ADVANCE (Дт 08 / Кт 51):** деньги физически уходят пайщику (Cr 51), стоимость капитализируется в WIP проекта (Dr 08). Кошелёк-резерв `w.exp.adv` фиксирует ответственность пайщика (USER_SHARED) до отчёта.
+- **3.2 BLAGO_DIRECT (Дт 08 / Кт 51):** прямая оплата организации — Cr 51 как раз эта оплата, Dr 08 капитализирует стоимость. BURN `w.cap.blago` — резерв пула.
+- **3.3 ADVANCE_REPORT (0/0):** проводка 08/51 **уже сделана** на blgadv. При отчёте — только BURN подотчётного кошелька. Никаких canal 08/51 второй раз.
+- **3.4 ADVANCE_RETURN (Дт 51 / Кт 08):** деньги возвращаются на банк, WIP-стоимость уменьшается. Зеркало blgadv. Кошелёк-резерв TRANSFER обратно в `w.cap.blago`.
+- **3.5 OVERSPEND (Дт 08 / Кт 51):** добавочная выдача после `OVERSPEND` сразу закрывается `o.exp.advrpt` — это две последовательные записи в `expense::overspendexp`.
 
 ### Расширяемость
 
@@ -92,13 +102,44 @@ static constexpr eosio::name ADVANCE_HOLD = "w.exp.adv"_n;   ///< Подотчё
 
 `w.mkt.payout` **не трогаем** — занят `o.mkt.recv` (Dr 80 / Cr 51, TRANSFER SHARE_FUND_PAY → SUPPLIER_PAYMENTS).
 
-## 5. Capital trigger — payload-флаг
+## 5. Callback на финализацию — переменная при создании СЗ
 
-`expense::reportexp(proposal_hash, ?wip_project_hash)` принимает **необязательное** поле. Если есть — после `ledger2::apply(o.exp.advrpt | o.exp.blgdir)` контракт шлёт `eosio::action::send_inline` на `capital::onexpreport(wip_project_hash, amount)`. Capital сам решает, как зачесть.
+Контракт `expense` **не знает** о `capital`. Никаких импортов `capital::*`, никакого хардкода имени action.
 
-Если поля нет — расход просто закрывается, никакой капитализации.
+При создании СЗ (`expense::createexp`) в payload передаётся опциональный блок-callback:
 
-**Двусвязности нет:** `expense` ничего не знает про `capital::programs`. Он только дёргает action по имени, если ему передали хэш проекта.
+```cpp
+struct callback_handler {
+    eosio::name   contract;   ///< кто слушает финализацию (например, "capital"_n)
+    eosio::name   action;     ///< что вызвать (например, "onexpreport"_n)
+    std::vector<char> data;   ///< опц. payload (например, packed wip_project_hash)
+};
+```
+
+Поле хранится в таблице `expense.proposals` рядом с `proposal_hash`. При финализации (`expense::reportexp` или `closeexp`) контракт:
+
+```cpp
+if (proposal.callback.contract != name{}) {
+  eosio::action::send_inline(
+    proposal.callback.contract,
+    proposal.callback.action,
+    {{ self, "active"_n }},
+    std::tuple(proposal_hash, amount, proposal.callback.data)
+  );
+}
+```
+
+`expense` дёргает callback **как переменную** — куда сказали при создании, туда и шлёт. Capital у себя сам распарсит `data` (там его `wip_project_hash`) и решит что делать.
+
+**Никаких:**
+- Хардкода имени `capital::onexpreport` в коде `expense`.
+- Полей с capital-семантикой (`wip_project_hash`) в схеме `expense`.
+- Условных веток «если source = Благорост, то...» — `expense` агностичен к источнику.
+
+**Альтернативы (отвергнуты):**
+- Флаг в payload reportexp — отказ: не масштабируется (один флаг на один контракт-слушатель).
+- Event-bus с подписчиками — отказ: для on-chain контрактов EOSIO нет такого паттерна без отдельного event-router'а; перекладывает сложность вне scope MVP.
+- Хардкод `capital::onexpreport` — отказ пользователем явно.
 
 ## 6. Универсальный поток
 
@@ -108,34 +149,30 @@ static constexpr eosio::name ADVANCE_HOLD = "w.exp.adv"_n;   ///< Подотчё
      BLAGOROST_FUND + ADVANCE → o.exp.blgadv
      BLAGOROST_FUND + DIRECT  → o.exp.blgdir
      SOV_EXPENSES + DIRECT    → o.exp.sovdir (будущее)
-3. expense::payexp(proposal_hash, item_hash, operation_code, amount, ?wip_project_hash)
-4. Контракт валидирует: operation_code ∈ OPERATION_REGISTRY, process_type == p.exp.proposal.
-5. Контракт зовёт ledger2::apply(operation_code, sum, from?, to?). Реестр сам подставляет правильные wallets и Dr/Cr.
-6. Для ADVANCE — фронт пайщика прикладывает чек → expense::reportexp → o.exp.advrpt.
-7. Для DIRECT — backend сразу после payexp вызывает reportexp (внутренне, без UI).
-8. Если в payload есть wip_project_hash — после reportexp inline action в capital.
+3. expense::createexp(proposal_hash, items[], ?callback{contract, action, data})
+     — для расходов в РИД-проект Благороста UI/backend заполняет callback = {"capital", "onexpreport", packed(wip_project_hash)}.
+4. expense::payexp(proposal_hash, item_hash, operation_code, amount)
+5. Контракт валидирует: operation_code ∈ OPERATION_REGISTRY, process_type == p.exp.proposal.
+6. Контракт зовёт ledger2::apply(operation_code, sum, from?, to?). Реестр сам подставляет правильные wallets и Dr/Cr.
+7. Для ADVANCE — фронт пайщика прикладывает чек → expense::reportexp → o.exp.advrpt.
+8. Для DIRECT — backend сразу после payexp вызывает reportexp (внутренне, без UI).
+9. Если в proposal сохранён callback — после reportexp inline action на (callback.contract, callback.action, data).
 ```
 
 Контракт `expense` агностичен:
 - к **источнику** (передаётся operation_code, который сам несёт `wallet_from` в реестре);
-- к **программе-получателю** (передаётся `wip_project_hash` в payload, опционально);
+- к **программе-получателю** (callback-handler — переменная);
 - к **бухгалтерским счетам** (выводятся из реестра по operation_code).
 
-## 7. Acceptance Criteria для C28-28 v2
+## 7. Acceptance Criteria для C28-28 v3 — все ack получены
 
-- [ ] §1 ack: контракт `expense` (ед.ч.).
-- [ ] §2 ack: 60/71 не вводим, используем существующие 04/08/51/58/80/86.
-- [ ] §3 ack: 5 op-кодов в реестре (`o.exp.blgadv`, `o.exp.blgdir`, `o.exp.advrpt`, `o.exp.advret`, `o.exp.over`); хозрасходы (sov-источники) — отдельный эпик.
-- [ ] §4 ack: один новый кошелёк `w.exp.adv` USER_SHARED; `w.exp.sup` отменён; `w.mkt.payout` не трогаем.
-- [ ] §5 ack: capital trigger — payload-флаг `wip_project_hash`, не отдельная операция.
-- [ ] §6 ack: контракт универсальный, operation_code определяется фронтом/backend при сборке СЗ.
-
-## 8. Открытые точки на ack
-
-1. **`w.exp.adv` USER_SHARED.** Подотчётные числятся на пайщике-получателе (зеркало `w.wal.wpend`). OK?
-2. **`o.exp.advrpt` без Dr/Cr (0/0, WalletOp::BURN).** Проводка уже сделана на момент `blgadv`/`blgdir`. При отчёте только BURN кошелька — без двойного учёта. OK?
-3. **Capital trigger через payload `wip_project_hash`, не отдельный operation_code.** OK?
-4. **Минимум 5 кодов сейчас (только Благорост).** Хозрасходы из членских (`o.exp.sov*`) — отдельный эпик после MVP. OK?
+- [x] §1: контракт `expense` (ед.ч.). Ack 2026-06-02.
+- [x] §2: 60/71 не вводим, существующие 04/08/51/58/80/86. Ack 2026-06-02.
+- [x] §3 матрица: 5 op-кодов; обе механики Благороста Дт 08 / Кт 51 (не 08/80); хозрасходы (sov-источники) — отдельный эпик. Ack 2026-06-02.
+- [x] §4 кошельки: один новый `w.exp.adv` USER_SHARED; `w.exp.sup` отменён; `w.mkt.payout` не трогаем. Ack 2026-06-02.
+- [x] §5 callback: не payload-флаг, а **переменная** `callback{contract, action, data}` в `expense.proposals`, заполняется при createexp; `expense` ничего не знает про `capital`. Ack 2026-06-02 («если так тогда ок»).
+- [x] §6: контракт универсальный, operation_code определяется фронтом/backend.
+- [x] Document2: только 2010/2011; 2012/2013/2014 — файлы MinIO, не шаблоны. Ack 2026-06-02.
 
 ---
 
