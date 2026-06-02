@@ -11,6 +11,7 @@ import { EXPENSE_FILE_REPOSITORY } from './domain/repositories/expense-file.repo
 import { ExpenseProposalSyncService } from './application/syncers/expense-proposal-sync.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ExpensesMutationsService } from './application/services/expenses-mutations.service';
+import { ExpensesCapitalTriggerService } from './application/services/expenses-capital-trigger.service';
 import { ExpenseFilesService } from './application/services/expense-files.service';
 import { ExpenseProposalResolver } from './application/resolvers/expense-proposal.resolver';
 import { ExpenseMutationsResolver } from './application/resolvers/expense-mutations.resolver';
@@ -53,6 +54,7 @@ import { ExpenseFilesResolver } from './application/resolvers/expense-files.reso
     ExpenseProposalSyncService,
     ExpensesManagementService,
     ExpensesMutationsService,
+    ExpensesCapitalTriggerService,
     ExpenseFilesService,
     ExpenseProposalResolver,
     ExpenseMutationsResolver,

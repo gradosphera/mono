@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import { AbstractEntitySyncService } from '~/shared/services/abstract-entity-sync.service';
+import type { ISyncResult } from '~/shared/interfaces/blockchain-sync.interface';
 import { ExpenseProposalDomainEntity } from '../../domain/entities/expense-proposal.entity';
 import {
   ExpenseProposalRepository,
@@ -54,5 +55,36 @@ export class ExpenseProposalSyncService
   @OnEvent('fork::*')
   async handleExpenseProposalFork(forkData: { block_num: number }): Promise<void> {
     await this.handleFork(forkData.block_num);
+  }
+
+  /**
+   * Emit `entitysynced::expense::proposals` после успешного save в PG.
+   *
+   * Канал per-contract (см. controller/CLAUDE.md «Subscription anti-patterns»):
+   * pubsub-канал расширения отделён от глобальной шины `delta::*`. Слушают
+   * business-side-effect listeners (capital-trigger → capitalization Благороста,
+   * notification, audit).
+   */
+  public override async handleSyncDelta(
+    syncKey: string,
+    syncValue: string,
+    blockchainData: IExpenseProposalBlockchainData,
+    blockNum: number,
+    present = true
+  ): Promise<ISyncResult> {
+    const result = await super.handleSyncDelta(syncKey, syncValue, blockchainData, blockNum, present);
+
+    if (result.created || result.updated) {
+      const entity = await (this.repository as ExpenseProposalRepository).findBySyncKey(syncKey, syncValue);
+      if (entity) {
+        this.eventEmitter.emit('entitysynced::expense::proposals', {
+          entity,
+          blockNum,
+          syncResult: result,
+        });
+      }
+    }
+
+    return result;
   }
 }
