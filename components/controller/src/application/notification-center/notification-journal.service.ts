@@ -1,7 +1,8 @@
 import { createHash } from 'crypto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import config from '~/config/config';
 import { NotificationOutboxTypeormEntity } from '~/infrastructure/database/typeorm/entities/notification-outbox.typeorm-entity';
 import { NotificationDeliveryTypeormEntity } from '~/infrastructure/database/typeorm/entities/notification-delivery.typeorm-entity';
 import { NotificationOutboxStatus } from '~/domain/notification/interfaces/notification-outbox.domain.interface';
@@ -33,6 +34,10 @@ export class NotificationJournalService {
     filter: NotificationsFilterInput,
     pagination: PaginationInputDTO
   ): Promise<PaginationResult<NotificationDTO>> {
+    // Federation-инвариант: контроллер обслуживает один кооператив. Журнал чужого
+    // кооператива недоступен даже председателю (канон-паттерн coopname-guard).
+    this.assertOwnCoop(filter.coopname);
+
     const page = pagination.page ?? 1;
     const limit = pagination.limit ?? 10;
 
@@ -60,6 +65,7 @@ export class NotificationJournalService {
   async getNotification(id: string): Promise<NotificationDetailDTO> {
     const row = await this.outboxRepository.findOne({ where: { id } });
     if (!row) throw new NotFoundException(`Уведомление '${id}' не найдено`);
+    this.assertOwnCoop(row.coopname);
 
     const deliveries = await this.deliveryRepository.find({
       where: { outboxId: id },
@@ -80,6 +86,7 @@ export class NotificationJournalService {
   async resendNotification(id: string): Promise<NotificationDTO> {
     const source = await this.outboxRepository.findOne({ where: { id } });
     if (!source) throw new NotFoundException(`Уведомление '${id}' не найдено`);
+    this.assertOwnCoop(source.coopname);
 
     const resend = this.outboxRepository.create({
       coopname: source.coopname,
@@ -98,6 +105,13 @@ export class NotificationJournalService {
     });
     const saved = await this.outboxRepository.save(resend);
     return this.toNotificationDTO(saved);
+  }
+
+  /** Доступ только к журналу собственного кооператива контроллера. */
+  private assertOwnCoop(coopname: string): void {
+    if (coopname !== config.coopname) {
+      throw new ForbiddenException('Журнал уведомлений чужого кооператива недоступен');
+    }
   }
 
   private resendIdempotencyKey(source: NotificationOutboxTypeormEntity): string {
