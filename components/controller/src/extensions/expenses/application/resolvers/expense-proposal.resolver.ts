@@ -10,6 +10,7 @@ import {
 } from '~/application/common/dto/pagination.dto';
 import { ExpensesManagementService } from '../services/expenses-management.service';
 import { ExpenseProposalOutputDTO } from '../dto/expense-proposal.output';
+import type { ExpenseProposalDomainEntity } from '../../domain/entities/expense-proposal.entity';
 
 const paginatedExpenseProposalsResult = createPaginationResult(
   ExpenseProposalOutputDTO,
@@ -24,6 +25,9 @@ const paginatedExpenseProposalsResult = createPaginationResult(
  *
  * Пагинация — единый паттерн controller'а (см. controller/CLAUDE.md «Пагинация — единый паттерн»):
  * input `PaginationInputDTO`, выход `PaginationResult<T>` через `createPaginationResult`.
+ *
+ * Документы (заявление + решение совета) выгружаются как полные `DocumentAggregate`
+ * через `ExpensesManagementService.buildProposalDocumentAggregates(entity)`.
  */
 @Resolver(() => ExpenseProposalOutputDTO)
 export class ExpenseProposalResolver {
@@ -40,7 +44,9 @@ export class ExpenseProposalResolver {
     @Args('proposal_hash', { type: () => String }) proposalHash: string
   ): Promise<ExpenseProposalOutputDTO | null> {
     const entity = await this.expenses.getProposalByHash(proposalHash);
-    return entity ? ExpenseProposalOutputDTO.fromDomain(entity) : null;
+    if (!entity) return null;
+    const aggregates = await this.expenses.buildProposalDocumentAggregates(entity);
+    return ExpenseProposalOutputDTO.fromDomain(entity, aggregates);
   }
 
   @Query(() => paginatedExpenseProposalsResult, {
@@ -54,10 +60,7 @@ export class ExpenseProposalResolver {
     @Args('options', { type: () => PaginationInputDTO, nullable: true }) options?: PaginationInputDTO
   ): Promise<PaginationResult<ExpenseProposalOutputDTO>> {
     const result = await this.expenses.listProposalsByCooperativePaginated(coopname, options);
-    return {
-      ...result,
-      items: result.items.map((e) => ExpenseProposalOutputDTO.fromDomain(e)),
-    };
+    return { ...result, items: await this.mapItemsWithDocuments(result.items) };
   }
 
   @Query(() => paginatedExpenseProposalsResult, {
@@ -72,9 +75,17 @@ export class ExpenseProposalResolver {
     @Args('options', { type: () => PaginationInputDTO, nullable: true }) options?: PaginationInputDTO
   ): Promise<PaginationResult<ExpenseProposalOutputDTO>> {
     const result = await this.expenses.listProposalsByMemberPaginated(coopname, username, options);
-    return {
-      ...result,
-      items: result.items.map((e) => ExpenseProposalOutputDTO.fromDomain(e)),
-    };
+    return { ...result, items: await this.mapItemsWithDocuments(result.items) };
+  }
+
+  private async mapItemsWithDocuments(
+    entities: ExpenseProposalDomainEntity[]
+  ): Promise<ExpenseProposalOutputDTO[]> {
+    return Promise.all(
+      entities.map(async (e) => {
+        const aggregates = await this.expenses.buildProposalDocumentAggregates(e);
+        return ExpenseProposalOutputDTO.fromDomain(e, aggregates);
+      })
+    );
   }
 }

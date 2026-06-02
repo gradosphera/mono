@@ -1,5 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { BaseOutputDTO } from '~/shared/dto/base.dto';
+import { DocumentAggregateDTO } from '~/application/document/dto/document-aggregate.dto';
 import { ExpenseProposalStatus } from '../../domain/enums/expense-proposal-status.enum';
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum';
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum';
@@ -7,13 +8,17 @@ import { ExpenseItemStatus } from '../../domain/enums/expense-item-status.enum';
 import { ExpenseItemOutputDTO } from './expense-item.output';
 import type { ExpenseProposalDomainEntity } from '../../domain/entities/expense-proposal.entity';
 import type { IExpenseItemBlockchainData } from '../../domain/interfaces/expense-proposal-blockchain.interface';
+import type { ExpenseProposalDocumentAggregates } from '../services/expenses-management.service';
 
 /**
  * Output DTO СЗ-расхода. Сборка из доменной сущности через `fromDomain`.
  *
- * Документы (`statement_doc` / `decision_doc`) пока не выгружаются как
- * `DocumentAggregateDTO` — отдельный шаг (нужен ExpensesDocumentAggregation),
- * сейчас просто флаги «документ есть».
+ * `statement_doc` / `decision_doc` — полные `DocumentAggregateDTO` (заявление
+ * пайщика + решение совета), собираются `DocumentAggregationService` из chain-mirror
+ * `signed_document`-структур. Резолвер вызывает `ExpensesManagementService
+ * .buildProposalDocumentAggregates(entity)` и передаёт результат в `fromDomain`.
+ * Если агрегаты не переданы — поля остаются `undefined` (например в spec'ах /
+ * test-фикстурах, чтобы не тащить полный document-stack).
  */
 @ObjectType('ExpenseProposal', { description: 'Смета расхода (СЗ).' })
 export class ExpenseProposalOutputDTO extends BaseOutputDTO {
@@ -56,13 +61,22 @@ export class ExpenseProposalOutputDTO extends BaseOutputDTO {
   @Field(() => String, { nullable: true, description: 'Время последнего обновления (chain).' })
   updated_at?: string;
 
-  @Field(() => Boolean, { description: 'СЗ имеет приложенное заявление.' })
-  has_statement_doc!: boolean;
+  @Field(() => DocumentAggregateDTO, {
+    nullable: true,
+    description: 'Заявление пайщика о расходе (DocumentAggregate).',
+  })
+  statement_doc?: DocumentAggregateDTO | null;
 
-  @Field(() => Boolean, { description: 'СЗ имеет приложенное решение совета.' })
-  has_decision_doc!: boolean;
+  @Field(() => DocumentAggregateDTO, {
+    nullable: true,
+    description: 'Решение совета о расходе (DocumentAggregate).',
+  })
+  decision_doc?: DocumentAggregateDTO | null;
 
-  static fromDomain(entity: ExpenseProposalDomainEntity): ExpenseProposalOutputDTO {
+  static fromDomain(
+    entity: ExpenseProposalDomainEntity,
+    aggregates?: ExpenseProposalDocumentAggregates
+  ): ExpenseProposalOutputDTO {
     const dto = new ExpenseProposalOutputDTO();
     dto._id = (entity as unknown as { _id: string })._id;
     dto._created_at = (entity as unknown as { _created_at: Date })._created_at;
@@ -82,8 +96,16 @@ export class ExpenseProposalOutputDTO extends BaseOutputDTO {
     dto.total_actual = entity.total_actual;
     dto.created_at = entity.created_at;
     dto.updated_at = entity.updated_at;
-    dto.has_statement_doc = Boolean(entity.statement_doc);
-    dto.has_decision_doc = Boolean(entity.decision_doc);
+    dto.statement_doc = aggregates?.statement_doc
+      ? new DocumentAggregateDTO(aggregates.statement_doc)
+      : aggregates?.statement_doc === null
+        ? null
+        : undefined;
+    dto.decision_doc = aggregates?.decision_doc
+      ? new DocumentAggregateDTO(aggregates.decision_doc)
+      : aggregates?.decision_doc === null
+        ? null
+        : undefined;
     return dto;
   }
 

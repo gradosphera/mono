@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { FileStorageInfrastructureModule } from '~/infrastructure/file-storage';
+import { DocumentDomainModule } from '~/domain/document/document.module';
 import { ExpensesDatabaseModule } from './infrastructure/database/expenses-database.module';
 import { ExpenseContractInfoService } from './infrastructure/services/expense-contract-info.service';
 import { ExpenseProposalDeltaMapper } from './infrastructure/blockchain/mappers/expense-proposal-delta.mapper';
@@ -31,7 +32,11 @@ import { ExpenseFilesResolver } from './application/resolvers/expense-files.reso
  * Подробности и план реализации — см. `README.md` рядом.
  */
 @Module({
-  imports: [ExpensesDatabaseModule, FileStorageInfrastructureModule.forFeature([ExpenseFilesService])],
+  imports: [
+    ExpensesDatabaseModule,
+    DocumentDomainModule,
+    FileStorageInfrastructureModule.forFeature([ExpenseFilesService]),
+  ],
   providers: [
     ExpenseContractInfoService,
     ExpenseProposalDeltaMapper,
