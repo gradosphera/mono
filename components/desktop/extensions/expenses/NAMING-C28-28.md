@@ -1,133 +1,152 @@
-# C28-28 · Naming Proposal (text-only, до кода)
+# C28-28 · Naming Proposal v2 — универсальное шасси расхода
 
-**Назначение:** консолидировать 5 открытых вопросов по Эпику 0 (ledger2 P0 action-codes) в один документ — пользователь ack/redirect, после чего разблокируются C28-29 (контракт `expenses`) и C28-31 (backend extension).
+**Изменения v2 (после голосового пользователя 2026-06-02):** контракт делается универсальным — не вводим новых счетов (60/71 отвергнуты), используем существующие 04/08/51/58/80/86; источник средств и operation_code передаются **извне** в payload, контракт ничего не «знает» про Благорост или хозрасходы; матрица 5 операций (вместо 6).
 
-**Канон:** `feedback_kanon_naming_soglasovyvat` — имена в onthology/стандартах согласовываются ДО реализации; прецедент 2026-05-19 (`seize`/`wroff`/`seizecollat` отвергнуты).
+**Канон:** `feedback_kanon_naming_soglasovyvat` — имена в ontology согласовываются ДО реализации; прецедент 2026-05-19.
 
-**Источник правды по существующему стилю:** `components/contracts/cpp/lib/core/ledger2/{accounts,wallets,operations}.hpp` mono-ai-2 (`feat/expense-chassis-mvp`).
+**Источник правды:** `components/contracts/cpp/lib/core/ledger2/{accounts,wallets,operations}.hpp` mono-ai-2 (`feat/expense-chassis-mvp`).
 
 ---
 
-## 0. Сводка вопросов на ack
+## 0. Что изменилось v1 → v2
 
-| # | Вопрос | Предложение | Альтернатива |
+| Точка | v1 | v2 | Причина |
 |---|---|---|---|
-| 1 | Имя контракта-владельца кодов | `expenses` (префикс операций `o.exp.*`, кошельков `w.exp.*`, процессов `p.exp.*`) | `expense` (без `s`) |
-| 2 | Новые account_id в `LEDGER2_ACCOUNT_MAP` | добавить `SETTLEMENTS_WITH_SUPPLIERS` (60) и `SETTLEMENTS_WITH_ACCOUNTABLES` (71) | оставить только 71, для 60 использовать BANK_ACCOUNT-овский синтетический проход (хуже — теряем счёт 60 в балансе) |
-| 3 | Новые кошельки | `w.exp.adv` (подотчётные средства у пайщика, USER_SHARED) + `w.exp.sup` (расчёты с поставщиком, COOPERATIVE) | один общий `w.exp.hold` без разреза по контрагенту (плохо — невозможно сводить 71 по пайщику) |
-| 4 | Posting-моделирование DIRECT-механики | **2 op-кода** (`DIRECT_PAYMENT` + `DIRECT_REPORTED`) — issue упускает второй | один код Dr 08/Cr 51 без транзита через 60 (плохо — теряем счёт 60, не соответствует ПБУ) |
-| 5 | `capwip`-флаг (capitalize-WIP) | НЕ заводить на уровне action-code — решает контракт `capital` через свой trigger (см. C28-29 §«capital trigger») | флаг внутри `expenses::reportexp` — двусвязность контрактов, отказ |
-
-Дополнительно (§3.6) — скрытый insight, которого нет в issue: для замыкания 60-го счёта при DIRECT нужен **второй** action-code `DIRECT_REPORTED`. Без него Дт 60 не закрывается → балансовая ошибка. Issue фиксирует 5 кодов, фактически нужно **6**.
+| Имя контракта | `expenses` (мн.ч.) | **`expense`** (ед.ч.) | пользователь §1 |
+| Счета 60/71 | новые account_id | **не вводим** | пользователь §2 — план счетов фиксирован 04/08/51/58/80/86 |
+| Кошелёк `w.exp.sup` | COOPERATIVE для расчётов с поставщиком | **отменён** | `w.mkt.payout` занят, `w.exp.sup` дублирует семантику без выгоды |
+| Operation codes | 6 в реестре с хардкод-источниками | **5**, по матрице source × mechanic; источник определяется при выборе кода | универсальность шасси, расширение без правки контракта |
+| `o.exp.compen` (12 char) | основной | **`o.exp.over`** | пользователь §7.1 — короче, понятнее |
+| capwip-флаг | отдельная политика | **payload-флаг `wip_project_hash`** | пользователь §5 — capital trigger только если payload содержит project_hash |
+| Расширение реестра | ADD COLUMN | реестр расширяемый — каждая новая пара (source, mechanic) = новая `o.exp.*` запись | хардкод-only constraint OPERATION_REGISTRY |
 
 ---
 
 ## 1. Контракт-владелец
 
-**Предложение:** `expenses` (множ. число — как `wallets2`/`accounts`/`marketplace` в существующем коде; единственное число — `marketplace`/`registrator` тоже встречается, но «расходы» в русском всегда мн.ч.). Префиксы:
+`expense` (ед.ч.). Префиксы:
+- `[[eosio::action]]`: `expense::createexp`, `submitexp`, `authexp`, `payexp`, `reportexp`, `closeexp`, `declexp`, `returnexp`, `overspendexp`.
+- Operation codes: `o.exp.*` (§3).
+- Wallets: `w.exp.adv` (один — §4).
+- Processes: `p.exp.proposal`.
 
-- `[[eosio::action]]` actions: `expenses::createexp`, `submitexp`, `authexp`, `payexp`, `reportexp`, `closeexp`, `declexp`, `returnexp`, `overspendexp` (12-char ограничение eosio::name — соблюдено).
-- Operation codes (это другое — `o.exp.*`, см. §3).
-- Wallets — `w.exp.*` (§4).
-- Processes — `p.exp.proposal` (один процесс на всё ССЗ-предложение).
+## 2. План счетов — без новых записей
 
-## 2. План счетов — новые account_id
+Существующие из `accounts.hpp`:
+- **04** НМА (А) — если расход капитализируется в РИД
+- **08** Вложения во внеоборотные активы (А) — WIP-проект РИД
+- **51** Расчётный счёт (А)
+- **58** Финансовые вложения (А) — займы
+- **80** Паевой фонд (П)
+- **86** Целевое финансирование (П) — членские, хозрасходы
 
-Добавить в `accounts.hpp` (между `FINANCIAL_INVESTMENTS=58000` и `SHARE_FUND=80000`):
+**60/71 отвергнуты.** Подотчёт пайщика моделируется кошельком-резервом (`w.exp.adv` USER_SHARED) аналогично `w.wal.wpend` — без отдельного бух.счёта.
 
-```cpp
-static constexpr uint64_t SETTLEMENTS_WITH_SUPPLIERS    = 60 * 1000; // 60 — Расчёты с поставщиками (А/П, активно-пассивный)
-static constexpr uint64_t SETTLEMENTS_WITH_ACCOUNTABLES = 71 * 1000; // 71 — Расчёты с подотчётными лицами (А/П, активно-пассивный)
-```
+## 3. Operation codes — 5 в реестре, матрица source × mechanic
 
-`AccountType` в текущем enum только `ACTIVE`/`PASSIVE`. **Открытый вопрос:** заводить `ACTIVE_PASSIVE` или фиксировать обе записи как `ACTIVE` (фактический остаток на 71/60 у нас всегда дебетовый — кооператив выдал, ждёт отчёта). **Предложение:** `ACTIVE` — соответствует фактической семантике, не плодить enum-значение.
-
-`LEDGER2_ACCOUNT_MAP` пополняем двумя строками с человекочитаемыми именами:
-- «Расчёты с поставщиками»
-- «Расчёты с подотчётными лицами»
-
-## 3. Operation codes — 6 (не 5)
-
-В реестре `OPERATION_REGISTRY[]` добавить (имена соблюдают канон `o.<contract>.<verb>` ≤12 char):
+В `OPERATION_REGISTRY[]`:
 
 | # | C++ константа | eosio::name | WalletOp | wallet_from → wallet_to | Dr / Cr | human_name |
 |---|---|---|---|---|---|---|
-| 3.1 | `operations::expenses::ADVANCE_PAYOUT` | `o.exp.payadv` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | 71 / 51 | «Выдача подотчётных пайщику» |
-| 3.2 | `operations::expenses::DIRECT_PAYMENT` | `o.exp.paydir` | TRANSFER | `BLAGOROST_FUND` → `w.exp.sup` | 60 / 51 | «Прямая оплата поставщику» |
-| 3.3 | `operations::expenses::ADVANCE_REPORTED` | `o.exp.rptadv` | BURN | `w.exp.adv` → ∅ | 08 / 71 | «Закрытие подотчёта пайщика (РИД-имущество)» |
-| 3.4 | `operations::expenses::DIRECT_REPORTED` | `o.exp.rptdir` | BURN | `w.exp.sup` → ∅ | 08 / 60 | «Закрытие расчётов с поставщиком (РИД-имущество)» |
-| 3.5 | `operations::expenses::ADVANCE_RETURN` | `o.exp.retadv` | TRANSFER | `w.exp.adv` → `BLAGOROST_FUND` | 51 / 71 | «Возврат неиспользованного подотчёта» |
-| 3.6 | `operations::expenses::OVERSPEND_COMPENSATION` | `o.exp.compen` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | 08 / 71 | «Доплата сверх подотчёта (перерасход)» — затем `ADVANCE_REPORTED` закрывает |
+| 3.1 | `operations::expense::BLAGO_ADVANCE` | `o.exp.blgadv` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | 08 / 80 | «Выдача подотчётных из ЦПП «Благорост»» |
+| 3.2 | `operations::expense::BLAGO_DIRECT` | `o.exp.blgdir` | BURN | `BLAGOROST_FUND` → ∅ | 08 / 51 | «Прямая оплата из ЦПП «Благорост» (DIRECT)» |
+| 3.3 | `operations::expense::ADVANCE_REPORT` | `o.exp.advrpt` | BURN | `w.exp.adv` → ∅ | 0 / 0 | «Закрытие подотчёта пайщика по отчёту» |
+| 3.4 | `operations::expense::ADVANCE_RETURN` | `o.exp.advret` | TRANSFER | `w.exp.adv` → `BLAGOROST_FUND` | 80 / 08 | «Возврат неиспользованного подотчёта в ЦПП «Благорост»» |
+| 3.5 | `operations::expense::OVERSPEND` | `o.exp.over` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | 08 / 80 | «Доплата сверх подотчёта (перерасход)» |
 
-**Insight по §3.6 (overspend):** «доплата» — это **TRANSFER** на `w.exp.adv`, потому что сначала надо «выдать» пайщику добавочные деньги (формально Dr 71/Cr 51), потом сразу закрыть их `ADVANCE_REPORTED` (Dr 08/Cr 71). Альтернатива — атомарная op с Dr 08/Cr 51 — нарушает «одна op = одна пара проводок» (см. ADR-003 в `operations.hpp:42`). **Предложение:** оставить две последовательные операции (`OVERSPEND_COMPENSATION` + `ADVANCE_REPORTED` уже сразу из `expenses::overspendexp`).
+**Process_type:** один — `processes::expense::PROPOSAL = "p.exp.proposal"_n`. Все 5 кодов привязаны к нему.
 
-**Process_type:** единственный — `processes::expenses::PROPOSAL = "p.exp.proposal"_n`. Все 6 кодов привязаны к нему. Один process_hash на одно ССЗ-предложение, шаги differentiated по `operation_code`.
+### Объяснение проводок
 
-**Insight по §3.2 vs §3.4:** issue в C28-28 говорит «только 5 кодов, DIRECT_PAYMENT — это Dr 60/Cr 51». Это оставляет 60-й счёт открытым. Backend `expenses::reportexp` в DIRECT-механике должен вызвать **второй** ledger2-op (`DIRECT_REPORTED`) сразу после `payexp` (без UI-шага «приложить чек» — для DIRECT это фоновая операция). См. E2E.md (C28-34) Journey A шаг 8: «для DIRECT-механики backend сразу делает reportexp». Если выберем модель «5 кодов» — теряем 60.
+- **3.1 BLAGO_ADVANCE (Dr 08 / Cr 80):** `w.cap.blago` сидит на 80 (паевой фонд); подотчёт = инвестиция в РИД-проект (вложение во внеоборотные → 08). Зеркало паттерна `o.cap.commit`.
+- **3.2 BLAGO_DIRECT (Dr 08 / Cr 51):** прямая оплата вне пайщика — деньги уходят с расчётного счёта (51), сразу попадают в WIP-проект (08). BURN с `w.cap.blago` — резерв пула сжигается.
+- **3.3 ADVANCE_REPORT (0/0):** бухпроводка уже сделана на blgadv/blgdir. При отчёте только BURN подотчётного кошелька — без новых проводок. Аналог `o.cap.accept` (WalletOp::NONE для зеркала). Здесь BURN, потому что кошелёк пайщика очищается.
+- **3.4 ADVANCE_RETURN (Dr 80 / Cr 08):** возврат в `w.cap.blago` — обратная операция. Восстановление пула.
+- **3.5 OVERSPEND (Dr 08 / Cr 80):** добавочная выдача — зеркало 3.1. После `o.exp.over` сразу `o.exp.advrpt` закрывает.
 
-**Альтернатива** (5 кодов): DIRECT_PAYMENT = Dr 08/Cr 51 без транзита через 60. Тогда счёт 60 не появляется. **Минус:** не соответствует ПБУ (поставщик — это расчёты, 60), нельзя сводить акты сверки с поставщиками.
+### Расширяемость
 
-## 4. Кошельки — новые записи в `wallets.hpp`
+Новый источник (хозрасходы из членских 86, фонд развития, AXN) — это **новая пара кодов** в реестре:
+
+| Будущее | source | target | пример имени |
+|---|---|---|---|
+| Хозрасходы DIRECT | `w.sov.expns` (86) | банк | `o.exp.sovdir` (Dr 26\*/Cr 51 или прямой Dr 86/Cr 51) |
+| Хозрасходы ADVANCE | `w.sov.expns` | пайщик-подотчёт | `o.exp.sovadv` |
+| Фонд развития DIRECT | `w.sov.devfnd` (новый) | банк | `o.exp.devdir` |
+
+Контракт `expense` не меняется — только реестр ledger2 расширяется. Сейчас в MVP — только Благорост (3.1–3.5).
+
+\* Счёт 26 в плане отсутствует. Если когда-то понадобится — добавится отдельным эпиком; для MVP хозрасходов из членских делаем прямо Dr 86 / Cr 51 без транзита через 26.
+
+## 4. Кошельки — один новый
 
 ```cpp
-// w.exp.* — Шасси расходов (расчёты с подотчётными и поставщиками)
-static constexpr eosio::name ADVANCE_HOLD     = "w.exp.adv"_n;   ///< Подотчётные средства у пайщика (USER_SHARED; Dr 71 source)
-static constexpr eosio::name SUPPLIER_HOLD    = "w.exp.sup"_n;   ///< Расчёты с поставщиком — pending-выплата (COOPERATIVE; Dr 60 source)
+// w.exp.* — Шасси расходов (подотчёт пайщика)
+static constexpr eosio::name ADVANCE_HOLD = "w.exp.adv"_n;   ///< Подотчётные средства у пайщика (USER_SHARED, резерв-pattern; зеркало w.wal.wpend)
 ```
 
-**`LEDGER2_WALLET_REGISTRY`:**
-- `ADVANCE_HOLD` — «Подотчётные средства пайщика» — `USER_SHARED` (разрез по пайщику-получателю, чтобы вести 71-й по каждому).
-- `SUPPLIER_HOLD` — «Расчёты с поставщиком» — `COOPERATIVE` (поставщик — внешнее лицо, не пайщик; 60-й сводится в пул кооператива).
+`LEDGER2_WALLET_REGISTRY`:
+- `ADVANCE_HOLD` — «Подотчётные средства пайщика» — **USER_SHARED** (разрез по пайщику-получателю; именно он держит ответственность за отчёт).
 
-**`LEDGER2_WALLET_TO_PROGRAM`:** оба — `0` (не привязаны к программе). Программу несёт `BLAGOROST_FUND`-источник через `process_hash`.
+`w.exp.sup` (расчёты с поставщиком) **не заводим** — DIRECT обходится без транзитного кошелька.
 
-## 5. `capwip`-флаг
+`w.mkt.payout` **не трогаем** — занят `o.mkt.recv` (Dr 80 / Cr 51, TRANSFER SHARE_FUND_PAY → SUPPLIER_PAYMENTS).
 
-`capwip` (capitalize-WIP) — это решение Благороста, что отчёт по подотчёту увеличивает РИД-баланс пайщика на `w.cap.gen` (Dr 08/Cr 71 → переходит в `o.cap.commit` через capital-trigger).
+## 5. Capital trigger — payload-флаг
 
-**Предложение:** **НЕ заводить** флаг на уровне action-code шасси. Контракт `expenses` агностичен к программе-источнику. Капитализация — обязанность контракта `capital` через **trigger** (C28-29 §«capital trigger»):
+`expense::reportexp(proposal_hash, ?wip_project_hash)` принимает **необязательное** поле. Если есть — после `ledger2::apply(o.exp.advrpt | o.exp.blgdir)` контракт шлёт `eosio::action::send_inline` на `capital::onexpreport(wip_project_hash, amount)`. Capital сам решает, как зачесть.
+
+Если поля нет — расход просто закрывается, никакой капитализации.
+
+**Двусвязности нет:** `expense` ничего не знает про `capital::programs`. Он только дёргает action по имени, если ему передали хэш проекта.
+
+## 6. Универсальный поток
 
 ```
-expenses::reportexp(proposal_hash) →
-  ledger2::apply(o.exp.rptadv | o.exp.rptdir) →
-  (если source_wallet == w.cap.blago И target == capital::programs.BLAGOROST_POOL)
-    capital::onexpreport(proposal_hash) →
-      ledger2::apply(o.cap.commit) на ту же сумму
+1. UI собирает СЗ. Выбор источника (UI dropdown → BLAGOROST_FUND / SOV_EXPENSES / ...).
+2. UI определяет operation_code по матрице (source × mechanic):
+     BLAGOROST_FUND + ADVANCE → o.exp.blgadv
+     BLAGOROST_FUND + DIRECT  → o.exp.blgdir
+     SOV_EXPENSES + DIRECT    → o.exp.sovdir (будущее)
+3. expense::payexp(proposal_hash, item_hash, operation_code, amount, ?wip_project_hash)
+4. Контракт валидирует: operation_code ∈ OPERATION_REGISTRY, process_type == p.exp.proposal.
+5. Контракт зовёт ledger2::apply(operation_code, sum, from?, to?). Реестр сам подставляет правильные wallets и Dr/Cr.
+6. Для ADVANCE — фронт пайщика прикладывает чек → expense::reportexp → o.exp.advrpt.
+7. Для DIRECT — backend сразу после payexp вызывает reportexp (внутренне, без UI).
+8. Если в payload есть wip_project_hash — после reportexp inline action в capital.
 ```
 
-Триггер вызывается из `expenses::reportexp` через `eosio::action::send_inline` к `capital::onexpreport`. Контракт `expenses` не знает про РИД; контракт `capital` сам решает, капитализировать или нет.
+Контракт `expense` агностичен:
+- к **источнику** (передаётся operation_code, который сам несёт `wallet_from` в реестре);
+- к **программе-получателю** (передаётся `wip_project_hash` в payload, опционально);
+- к **бухгалтерским счетам** (выводятся из реестра по operation_code).
 
-**Альтернатива:** флаг `bool capwip` в payload `reportexp` — отказ, потому что:
-1. Двусвязность: контракт `expenses` ссылается на сущности `capital`.
-2. Решение «капитализировать или нет» — программная политика, она меняется со временем; зашивать в action-payload = ломать обратную совместимость.
+## 7. Acceptance Criteria для C28-28 v2
 
-## 6. Acceptance Criteria для C28-28 (уточнённые)
+- [ ] §1 ack: контракт `expense` (ед.ч.).
+- [ ] §2 ack: 60/71 не вводим, используем существующие 04/08/51/58/80/86.
+- [ ] §3 ack: 5 op-кодов в реестре (`o.exp.blgadv`, `o.exp.blgdir`, `o.exp.advrpt`, `o.exp.advret`, `o.exp.over`); хозрасходы (sov-источники) — отдельный эпик.
+- [ ] §4 ack: один новый кошелёк `w.exp.adv` USER_SHARED; `w.exp.sup` отменён; `w.mkt.payout` не трогаем.
+- [ ] §5 ack: capital trigger — payload-флаг `wip_project_hash`, не отдельная операция.
+- [ ] §6 ack: контракт универсальный, operation_code определяется фронтом/backend при сборке СЗ.
 
-- [ ] §1 ack: контракт `expenses` с указанными префиксами.
-- [ ] §2 ack: 60 и 71 заводятся как `ACTIVE` (не `ACTIVE_PASSIVE`); или ack варианта `ACTIVE_PASSIVE` с расширением enum.
-- [ ] §3 ack: 6 op-кодов (не 5); если выбран вариант «5 кодов без 60», переписать §3.2 и удалить §3.4.
-- [ ] §4 ack: имена кошельков `w.exp.adv` / `w.exp.sup`, kinds USER_SHARED / COOPERATIVE.
-- [ ] §5 ack: `capwip` — через `capital::onexpreport` trigger, не флаг в payload.
+## 8. Открытые точки на ack
 
-После ack:
-- C28-29 расшивается на ledger2-инструкции (§3 даёт точную карту).
-- C28-31 backend EventEmitter маппит 6 op-кодов на 9 шасси-событий из INTEGRATIONS.md §2.
-
-## 7. Спорные точки для пользователя
-
-1. **Нумерация `o.exp.*` против ограничения 12 символов.** `o.exp.compen` — 12 символов ровно (`o`+`.`+`exp`+`.`+`compen`). Альтернатива покороче: `o.exp.over`.
-2. **`SUPPLIER_HOLD` vs `SUPPLIER_PAYMENTS`** (`w.mkt.payout`, marketplace). Семантически близко, но `w.mkt.payout` — sink (платёж ушёл, $0 после `o.mkt.recv`), а `w.exp.sup` — pending (платёж ещё не подтверждён актом). Объединять опасно — нарушим инвариант marketplace. **Предложение:** держать раздельно.
-3. **`ADVANCE_RETURN` BURN vs TRANSFER.** Сейчас в таблице (§3.5) — TRANSFER в `BLAGOROST_FUND` (возврат в пул). Альтернатива — BURN с `w.exp.adv` без `wallet_to`, если возврат идёт сразу на 51 без захода в Благорост. **Предложение:** TRANSFER (пайщик вернул в источник = пул).
-4. **Источник для не-Благорост-потребителей.** Сейчас зашит `BLAGOROST_FUND`. Когда появится второй потребитель (Маркетплейс), `o.exp.payadv` должен принимать любой `source_wallet`. **Предложение:** в реестре `wallet_from = eosio::name{}` (динамически), `wallet_to = w.exp.adv`. Хардкод `BLAGOROST_FUND` в реестре противоречит §5 (контракт `expenses` агностичен).
-
-**Sub-insight по §7.4:** если `wallet_from` — пустое имя в реестре, нужно расширить `OperationRegistryEntry` или ввести флаг `dynamic_source`. Это — отдельный архитектурный вопрос; **на ack: расширить ли реестр или зашить `BLAGOROST_FUND` для MVP и переделать в Эпике 2**.
+1. **`w.exp.adv` USER_SHARED.** Подотчётные числятся на пайщике-получателе (зеркало `w.wal.wpend`). OK?
+2. **`o.exp.advrpt` без Dr/Cr (0/0, WalletOp::BURN).** Проводка уже сделана на момент `blgadv`/`blgdir`. При отчёте только BURN кошелька — без двойного учёта. OK?
+3. **Capital trigger через payload `wip_project_hash`, не отдельный operation_code.** OK?
+4. **Минимум 5 кодов сейчас (только Благорост).** Хозрасходы из членских (`o.exp.sov*`) — отдельный эпик после MVP. OK?
 
 ---
 
-## Roadmap после ack
+## 9. Roadmap после ack
 
-1. C28-28 → код в `ledger2/operations.hpp` + `accounts.hpp` + `wallets.hpp` + `processes.hpp` (1 файл — `OPERATION_REGISTRY` дополнить).
-2. cooptypes regen (`pnpm -w build` cooptypes).
-3. CI-тест `ledger2_actions_registry_test` обновить ожидания (6 новых кодов).
-4. C28-29 расшивается (имена операций ↔ имена C++ actions контракта).
-5. C28-31 backend `expenses` extension использует cooptypes enums (`OperationCode.EXP_PAYADV` и т.д.).
+1. C28-28 → C++:
+   - `accounts.hpp` — без изменений
+   - `wallets.hpp` — `+w.exp.adv`
+   - `processes.hpp` — `+p.exp.proposal`
+   - `operations.hpp` — `+5 entries` в `OPERATION_REGISTRY[]` под namespace `operations::expense`
+2. CI-тест `ledger2_actions_registry_test` — ожидать 5 новых кодов.
+3. `pnpm -w build` cooptypes — auto-regen enum `OperationCode`.
+4. C28-29 расшивается на ledger2-инструкции (имена операций ↔ имена C++ actions контракта).
+5. C28-31 backend `expense` extension использует cooptypes enums.
