@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationOutboxTypeormEntity } from '~/infrastructure/database/typeorm/entities/notification-outbox.typeorm-entity';
 import { NotificationDeliveryTypeormEntity } from '~/infrastructure/database/typeorm/entities/notification-delivery.typeorm-entity';
@@ -21,8 +21,13 @@ import { WebPushChannelAdapter } from './channels/web-push-channel.adapter';
  *
  * Экспортирует {@link NOTIFICATION_PORT} → {@link NotificationService}: consumer-сервисы
  * инжектят порт и шлют уведомления через `notify()`, не зная про каналы и провайдеров.
- * Каналы и worker отправки добавляются в эпиках 2–3.
+ *
+ * `@Global` — порт cross-cutting: ~12 consumer-модулей (agenda/wallet/gateway/meet/
+ * participant/chairman/chatcoop/…) инжектят `NOTIFICATION_PORT` без импорта этого
+ * модуля у себя (эпик 4, drop-in миграция с `NOVU_WORKFLOW_PORT`). Ср. глобальный
+ * `NOTIFICATION_SUBSCRIPTION_PORT` из typeorm.module.
  */
+@Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([

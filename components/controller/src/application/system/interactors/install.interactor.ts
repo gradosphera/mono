@@ -20,9 +20,7 @@ import { VARS_REPOSITORY, VarsRepository } from '~/domain/common/repositories/va
 import { MONO_STATUS_REPOSITORY, MonoStatusRepository } from '~/domain/common/repositories/mono-status.repository';
 import { SystemStatus } from '~/application/system/dto/system-status.dto';
 import { AccountDomainService, ACCOUNT_DOMAIN_SERVICE } from '~/domain/account/services/account-domain.service';
-import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
-import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
-import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
+import { NOTIFICATION_PORT, type NotificationPort } from '~/domain/notification/interfaces/notify.port';
 import { Workflows } from '@coopenomics/notifications';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import { normalizeUserEmail } from '~/utils/normalize-user-email';
@@ -33,7 +31,7 @@ export class InstallInteractor {
     @Inject(VARS_REPOSITORY) private readonly varsRepository: VarsRepository,
     @Inject(MONO_STATUS_REPOSITORY) private readonly monoStatusRepository: MonoStatusRepository,
     @Inject(ACCOUNT_DOMAIN_SERVICE) private readonly accountDomainService: AccountDomainService,
-    @Inject(NOVU_WORKFLOW_PORT) private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
+    @Inject(NOTIFICATION_PORT) private readonly notificationPort: NotificationPort,
     @Inject(BLOCKCHAIN_PORT) private readonly blockchainPort: BlockchainPort,
     @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
     private readonly tokenApplicationService: TokenApplicationService,
@@ -220,7 +218,7 @@ export class InstallInteractor {
         const subscriberId = user.subscriber_id?.trim();
         if (!subscriberId) {
           throw new Error(
-            `subscriber_id не задан для пользователя ${user.username} — нельзя отправить приглашение через Novu`
+            `subscriber_id не задан для пользователя ${user.username} — нельзя отправить приглашение`
           );
         }
         const token = await this.tokenApplicationService.generateInviteToken(inviteEmail, user.id);
@@ -230,16 +228,16 @@ export class InstallInteractor {
           inviteUrl,
         };
 
-        const triggerData: WorkflowTriggerDomainInterface = {
-          name: Workflows.Invite.id,
+        await this.notificationPort.notify({
+          coopname: config.coopname,
+          workflowId: Workflows.Invite.id,
           to: {
             subscriberId,
             email: inviteEmail,
+            username: user.username,
           },
           payload,
-        };
-
-        await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+        });
       }
     } catch (e: any) {
       // Откат изменений в случае ошибки
