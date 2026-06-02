@@ -6,6 +6,8 @@ import { ExpenseProposalTypeormRepository } from './infrastructure/repositories/
 import { ExpenseFileTypeormRepository } from './infrastructure/repositories/expense-file.typeorm-repository';
 import { EXPENSE_PROPOSAL_REPOSITORY } from './domain/repositories/expense-proposal.repository';
 import { EXPENSE_FILE_REPOSITORY } from './domain/repositories/expense-file.repository';
+import { ExpenseProposalSyncService } from './application/syncers/expense-proposal-sync.service';
+import { ExpensesManagementService } from './application/services/expenses-management.service';
 
 /**
  * Шасси расходов цифрового кооператива (MVP — Благорост).
@@ -37,12 +39,16 @@ import { EXPENSE_FILE_REPOSITORY } from './domain/repositories/expense-file.repo
       provide: EXPENSE_FILE_REPOSITORY,
       useClass: ExpenseFileTypeormRepository,
     },
+    ExpenseProposalSyncService,
+    ExpensesManagementService,
   ],
   exports: [
     ExpenseContractInfoService,
     ExpenseProposalDeltaMapper,
     EXPENSE_PROPOSAL_REPOSITORY,
     EXPENSE_FILE_REPOSITORY,
+    ExpenseProposalSyncService,
+    ExpensesManagementService,
   ],
 })
 export class ExpensesExtensionModule {}
