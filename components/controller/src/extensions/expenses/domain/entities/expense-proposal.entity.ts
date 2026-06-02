@@ -79,6 +79,14 @@ export class ExpenseProposalDomainEntity
     return this.block_num;
   }
 
+  public static getPrimaryKey(): string {
+    return ExpenseProposalDomainEntity.primary_key;
+  }
+
+  public static getSyncKey(): string {
+    return ExpenseProposalDomainEntity.sync_key;
+  }
+
   getPrimaryKey(): string {
     return ExpenseProposalDomainEntity.primary_key;
   }
