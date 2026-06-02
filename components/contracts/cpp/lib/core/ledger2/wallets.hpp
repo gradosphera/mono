@@ -67,6 +67,12 @@ struct ledger2_wallets {
 
   // marketplace — выплаты
   static constexpr eosio::name SUPPLIER_PAYMENTS    = "w.mkt.payout"_n;  ///< Выплаты поставщикам (sink RECEIVE_CONFIRM, COOPERATIVE)
+
+  // expense — шасси расходов (подотчёт пайщика, USER_SHARED)
+  // Зеркало паттерна w.wal.wpend: кошелёк-резерв на пайщике-получателе ADVANCE-механики.
+  // На момент выдачи аванса фиксирует ответственность пайщика; на отчёте — BURN без новой бухпроводки
+  // (canal Дт 08 / Кт 51 уже сделан на o.exp.blgadv).
+  static constexpr eosio::name ADVANCE_HOLD         = "w.exp.adv"_n;     ///< Подотчётные средства пайщика (USER_SHARED; резерв при ADVANCE-механике шасси расходов)
 };
 
 /**
@@ -95,15 +101,16 @@ struct Ledger2WalletMeta {
   WalletKind       kind;
 };
 
-inline constexpr std::array<Ledger2WalletMeta, 15> LEDGER2_WALLET_REGISTRY = {{
-  // USER_SHARED (5) — L3-разрез по пайщику
+inline constexpr std::array<Ledger2WalletMeta, 16> LEDGER2_WALLET_REGISTRY = {{
+  // USER_SHARED (6) — L3-разрез по пайщику
   { ledger2_wallets::MIN_SHARE_FUND,    "Минимальный паевой взнос",                                 WalletKind::USER_SHARED },
   { ledger2_wallets::SHARE_FUND_PAY,    "Паевой взнос пайщика",                                     WalletKind::USER_SHARED },
   { ledger2_wallets::CK_MEMBER,         "ЦК — членская часть пайщика",                              WalletKind::USER_SHARED },
   { ledger2_wallets::BLAGOROST_FUND,    "ЦПП «Благорост» — единый кошелёк программы у пайщика",     WalletKind::USER_SHARED },
   { ledger2_wallets::PREIMP_FUND,       "Первичный учёт РИД-взносов до перехода на электронный учёт", WalletKind::USER_SHARED },
+  { ledger2_wallets::ADVANCE_HOLD,      "Подотчётные средства пайщика",                             WalletKind::USER_SHARED },
 
-  // COOPERATIVE (10) — единый кооперативный баланс, без L3
+  // COOPERATIVE (10) — единый кооперативный баланс, без L3 (Generator + 9 «единых пулов»)
   // GENERATOR_FUND переведён сюда из USER_SHARED (см. wallets.hpp:64) —
   // CRPS-распределение между сегментами проекта не поддерживает per-user
   // компенсирующие TRANSFER на approvecmmt, поэтому L3-проверка walletop
@@ -230,13 +237,14 @@ struct Ledger2WalletProgramMapping {
   uint64_t    required_program_id; // 0 = исключение (без проверки)
 };
 
-inline constexpr std::array<Ledger2WalletProgramMapping, 6> LEDGER2_USER_SHARED_PROGRAM_MAPPING = {{
+inline constexpr std::array<Ledger2WalletProgramMapping, 7> LEDGER2_USER_SHARED_PROGRAM_MAPPING = {{
   { ledger2_wallets::MIN_SHARE_FUND,    0 /* w.reg.minshr — без проверки */    },
   { ledger2_wallets::SHARE_FUND_PAY,    1 /* ЦК */                              },
   { ledger2_wallets::CK_MEMBER,         1 /* ЦК */                              },
   { ledger2_wallets::BLAGOROST_FUND,    4 /* Благорост */                       },
   { ledger2_wallets::GENERATOR_FUND,    3 /* Генератор */                       },
   { ledger2_wallets::PREIMP_FUND,       0 /* w.cap.preimp — РИД-учёт до перехода на электронный учёт, без проверки */ },
+  { ledger2_wallets::ADVANCE_HOLD,      0 /* w.exp.adv — подотчёт пайщика по СЗ; программа-источник проверена контрактом expense, повторная gate не нужна */ },
 }};
 
 /**

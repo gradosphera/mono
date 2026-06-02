@@ -60,6 +60,11 @@ namespace processes {
     inline constexpr eosio::name REQUEST   = "p.mkt.reqst"_n;    ///< Цикл запроса маркетплейса (o.mkt.supply + o.mkt.recv).
   }
 
+  // expense — шасси расходов (СЗ → авторизация → платёж → отчёт → закрытие)
+  namespace expense {
+    inline constexpr eosio::name PROPOSAL  = "p.exp.expns"_n;    ///< Цикл расхода по СЗ: o.exp.blgadv|blgdir (платёж) + опц. o.exp.over (перерасход) + o.exp.advrpt (отчёт ADVANCE) + опц. o.exp.advret (возврат). Анкер процесса — proposal_hash.
+  }
+
   // soviet
   namespace soviet {
     inline constexpr eosio::name AXN_CONVERT = "p.sov.axncnv"_n; ///< Конвертация паевого RUB → делегатский ЧВ (одноактовый).
