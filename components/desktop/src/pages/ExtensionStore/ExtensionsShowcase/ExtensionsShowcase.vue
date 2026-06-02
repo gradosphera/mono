@@ -1,4 +1,11 @@
 <template lang="pug">
+.epic9-hint
+  q-banner.bg-info.text-white.q-mb-md(rounded)
+    template(#avatar)
+      q-icon(name='fa-solid fa-rocket')
+    | Epic 9 — magazin приложений. Скоро здесь появятся remote-пакеты от
+    | сторонних разработчиков с подпиской (1000 RUB/мес). Bundle-extensions
+    | ниже — нативные, оплачивать не нужно.
 .catalog-grid
   ExtensionCard(
     v-for='extension in filteredExtensions',
