@@ -20,7 +20,7 @@ export class AppsCatalogRemotePackageDTO {
   })
   compatibleSubnets!: string[];
 
-  @Field({
+  @Field(() => String, {
     nullable: true,
     description: 'Последняя активная версия (semver). null = релизов ещё нет.',
   })
