@@ -22,21 +22,20 @@
 | 4 | `igor` | подписать СЗ (2010, signact1) | document2 signed_by_first=true |
 | 5 | `council[]` | mock authorize (signact2) | proposal.status = `authorized`, document2 type=2011 |
 | 6 | `igor` | `/voskhod/expenses/cashier`, таб «Готово к оплате» | строка видна |
-| 7 | `igor` | «Оплатил» → upload платёжки (2012) | item.status = `paid`, ledger2 op = `DIRECT_PAYMENT` (Д60 К51) |
-| 8 | `igor` | для DIRECT-механики backend сразу делает `reportexp` (фон, без UI) | proposal.status = `reporting`, ledger2 op = `ADVANCE_REPORTED` (Д08 К60) |
-| 9 | `igor` | submit СЗ-отчёт (2013) | proposal.status = `report_submitted` |
-| 10 | `council[]` | authorize (2014) | proposal.status = `closed` |
+| 7 | `igor` | «Оплатил» → upload платёжки (файл, не document2) | item.status = `paid`, ledger2 op = `o.exp.blgdir` (Дт 08 / Кт 51) |
+| 8 | `igor` | submit «Отчёт о расходе» (UI-форма с числами + файлом-чеком) | proposal.status = `report_submitted` |
+| 9 | `council[]` | authorize | proposal.status = `closed` |
 
 **Ledger2 assertions (по hash расхода):**
-- `DIRECT_PAYMENT` × 1, amount=8000, Д60 / К51
-- `ADVANCE_REPORTED` × 1, amount=8000, Д08 / К60
+- `o.exp.blgdir` × 1, amount=8000, Дт 08 / Кт 51
 
 **Document2 assertions:**
 - type=2010 (СЗ-смета), signact1=igor, signact2=<council>
 - type=2011 (протокол-1 авторизации)
-- type=2012 (платёжное поручение, attached_files=[receipt])
-- type=2013 (СЗ-отчёт), signact1=igor
-- type=2014 (протокол-2 закрытия)
+
+**Файлы-приложения (MinIO, НЕ document2):**
+- платёжное поручение / чек оплаты на item
+- (отчёт о расходе закрывается одним UI-шагом без отдельного протокола закрытия)
 
 ## 2. Journey B — ADVANCE другому пайщику
 
@@ -47,23 +46,24 @@
 | 1 | `master` | login → «Создать расход» → items: `[{amount: 5000, description: 'Сбер-кабинет', mechanics: 'ADVANCE', recipient: 'self'}, {amount: 3000, description: 'Light Lab', mechanics: 'ADVANCE', recipient: 'svetlana'}]`, source=BLAGOROST_POOL | форма валидна |
 | 2 | `master` | submit + signact1 | proposal.status = `created` |
 | 3 | `council[]` | authorize | proposal.status = `authorized` |
-| 4 | `cashier` | `/voskhod/expenses/cashier`, оплатить item(a) → 2012 | item(a).status = `paid`, notification → master |
-| 5 | `cashier` | оплатить item(b) → 2012 | item(b).status = `paid`, notification → svetlana |
-| 6 | `master` | login → `/voskhod/expenses/my/advances` → item(a) → «Приложить чек» (FileUploader → MinIO → `reportexp`) | item(a).status = `reported` |
-| 7 | `svetlana` | login → `/voskhod/expenses/my/advances` → item(b) → чек → reportexp | item(b).status = `reported` |
-| 8 | `master` | submitreport (2013) | proposal.status = `report_submitted` |
-| 9 | `council[]` | authorize (2014) | proposal.status = `closed` |
+| 4 | `cashier` | `/voskhod/expenses/cashier`, оплатить item(a) → upload файл-платёжка | item(a).status = `paid`, ledger2 op = `o.exp.blgadv` (Дт 08 / Кт 51), notification → master |
+| 5 | `cashier` | оплатить item(b) → файл-платёжка | item(b).status = `paid`, ledger2 op = `o.exp.blgadv`, notification → svetlana |
+| 6 | `master` | login → `/voskhod/expenses/my/advances` → item(a) → «Приложить чек» (FileUploader → MinIO → `reportexp`) | item(a).status = `reported`, ledger2 op = `o.exp.advrpt` (BURN, без проводки) |
+| 7 | `svetlana` | login → `/voskhod/expenses/my/advances` → item(b) → чек → reportexp | item(b).status = `reported`, ledger2 op = `o.exp.advrpt` |
+| 8 | `master` | submitreport | proposal.status = `report_submitted` |
+| 9 | `council[]` | authorize | proposal.status = `closed` |
 
 **Ledger2 assertions:**
-- `ADVANCE_PAYOUT` × 2 (5000 для master, 3000 для svetlana), Д71 / К51
-- `ADVANCE_REPORTED` × 2, Д08 / К71
+- `o.exp.blgadv` × 2 (5000 master, 3000 svetlana), Дт 08 / Кт 51
+- `o.exp.advrpt` × 2, без проводки (только BURN `w.exp.adv`)
 
 **Document2 assertions:**
 - type=2010, items=2
 - type=2011
-- type=2012 × 2
-- expense_files (MinIO) × 2 (чеки от master и svetlana)
-- type=2013, type=2014
+
+**Файлы-приложения (MinIO, НЕ document2):**
+- платёжки × 2 (от кассира при оплате каждому)
+- чеки × 2 (от master и svetlana при ADVANCE-отчёте)
 
 ## 3. Common helpers
 
@@ -72,8 +72,8 @@
 // 1. loginAs(account: 'igor' | 'master' | 'svetlana')
 // 2. seedBlagorostPool(amount: number)
 // 3. mockCouncilAuthorize(proposal_hash: string)
-// 4. fixturePaymentSlip(): File   // 2012
-// 5. fixtureReceipt(): File       // expense_file
+// 4. fixturePaymentSlip(): File   // файл-платёжка (MinIO)
+// 5. fixtureReceipt(): File       // файл-чек ADVANCE-отчёта (MinIO)
 // 6. assertLedgerOp({ action_code, amount, debit, credit })
 // 7. assertDocument2({ type, signed_by, ... })
 ```
@@ -89,7 +89,7 @@
 |---|---|
 | C28-28 | ledger2 action-codes зарегистрированы (иначе assertion `DIRECT_PAYMENT`/`ADVANCE_PAYOUT`/`ADVANCE_REPORTED` падает) |
 | C28-29 | контракт `expenses` + capital trigger |
-| C28-30 | ✅ document2 2010/2011 (готово); нужны ещё 2012/2013/2014 (отдельные тикеты, не входят в C28-30) |
+| C28-30 | ✅ document2 2010/2011 (готово); 2012/2013/2014 НЕ заводим — это файлы (MinIO), не шаблоны |
 | C28-31 | backend GraphQL — без него Cypress не получит данные для assertion |
 | C28-32 | UI расшит (страницы из stub'а → реальные таблицы/формы) |
 | C28-33 | Notification Center подключён к 9 событиям шасси |
