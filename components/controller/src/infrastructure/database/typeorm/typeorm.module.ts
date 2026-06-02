@@ -90,6 +90,8 @@ import { UserWalletIndexInitializer } from './blockchain/services/user-wallet-in
 import { SignedDocumentEntity } from './entities/signed-document.entity';
 import { SIGNED_DOCUMENT_REPOSITORY } from '~/domain/document/repository/signed-document.repository';
 import { SignedDocumentTypeormRepository } from './repositories/signed-document.typeorm-repository';
+import { NotificationOutboxTypeormEntity } from './entities/notification-outbox.typeorm-entity';
+import { NotificationDeliveryTypeormEntity } from './entities/notification-delivery.typeorm-entity';
 
 @Global()
 @Module({
@@ -138,6 +140,8 @@ import { SignedDocumentTypeormRepository } from './repositories/signed-document.
       UserAgreementTypeormEntity,
       UserWalletTypeormEntity,
       SignedDocumentEntity,
+      NotificationOutboxTypeormEntity,
+      NotificationDeliveryTypeormEntity,
     ]),
   ],
   providers: [
