@@ -11,6 +11,7 @@ import {
 } from '~/domain/notification/interfaces/channel.ports';
 import { NotificationModule } from '~/application/notification/notification.module';
 import { NotificationService } from './notification.service';
+import { OutboxWorkerService } from './outbox-worker.service';
 import { EmailChannelAdapter } from './channels/email-channel.adapter';
 import { InAppChannelAdapter } from './channels/in-app-channel.adapter';
 import { WebPushChannelAdapter } from './channels/web-push-channel.adapter';
@@ -33,6 +34,7 @@ import { WebPushChannelAdapter } from './channels/web-push-channel.adapter';
   ],
   providers: [
     NotificationService,
+    OutboxWorkerService,
     EmailChannelAdapter,
     InAppChannelAdapter,
     WebPushChannelAdapter,

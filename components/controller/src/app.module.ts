@@ -1,6 +1,7 @@
 // app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 // Infrastructure modules
@@ -93,6 +94,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
         limit: 50,
       },
     ]),
+    ScheduleModule.forRoot(), // @Interval/@Cron — нужен outbox-worker'у Центра уведомлений
     // Infrastructure modules
     MongooseModule.forRoot(config.mongoose.url),
     DatabaseModule,
