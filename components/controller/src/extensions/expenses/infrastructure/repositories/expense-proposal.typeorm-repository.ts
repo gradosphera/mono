@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { BaseBlockchainRepository } from '~/shared/sync/repositories/base-blockchain.repository';
 import { EntityVersioningService } from '~/shared/sync/services/entity-versioning.service';
 import type { IBlockchainSyncRepository } from '~/shared/interfaces/blockchain-sync.interface';
+import type { PaginationInputDTO } from '~/application/common/dto/pagination.dto';
 import { ExpenseProposalDomainEntity } from '../../domain/entities/expense-proposal.entity';
 import { ExpenseProposalTypeormEntity } from '../entities/expense-proposal.typeorm-entity';
 import { ExpenseProposalMapper } from '../mappers/expense-proposal.mapper';
@@ -61,5 +62,41 @@ export class ExpenseProposalTypeormRepository
   async findByUsername(coopname: string, username: string): Promise<ExpenseProposalDomainEntity[]> {
     const entities = await this.repository.find({ where: { coopname, username } });
     return entities.map((e) => ExpenseProposalMapper.toDomain(e));
+  }
+
+  async findByCoopnamePaginated(
+    coopname: string,
+    options?: PaginationInputDTO
+  ): Promise<{ items: ExpenseProposalDomainEntity[]; totalCount: number }> {
+    return this.paginate({ coopname }, options);
+  }
+
+  async findByUsernamePaginated(
+    coopname: string,
+    username: string,
+    options?: PaginationInputDTO
+  ): Promise<{ items: ExpenseProposalDomainEntity[]; totalCount: number }> {
+    return this.paginate({ coopname, username }, options);
+  }
+
+  private async paginate(
+    where: Record<string, unknown>,
+    options?: PaginationInputDTO
+  ): Promise<{ items: ExpenseProposalDomainEntity[]; totalCount: number }> {
+    const page = Math.max(1, options?.page ?? 1);
+    const limit = Math.max(1, Math.min(200, options?.limit ?? 10));
+    const sortBy = options?.sortBy ?? '_created_at';
+    const sortOrder = options?.sortOrder ?? 'DESC';
+
+    const [entities, totalCount] = await this.repository.findAndCount({
+      where,
+      order: { [sortBy]: sortOrder },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return {
+      items: entities.map((e) => ExpenseProposalMapper.toDomain(e)),
+      totalCount,
+    };
   }
 }

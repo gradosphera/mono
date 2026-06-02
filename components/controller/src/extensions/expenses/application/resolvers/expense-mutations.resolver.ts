@@ -8,6 +8,7 @@ import { ExpensesMutationsService } from '../services/expenses-mutations.service
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
+import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input';
 
 /**
  * GraphQL Mutation-резолвер контракта `expense` (платёж / отчёт / возврат).
@@ -54,5 +55,17 @@ export class ExpenseMutationsResolver {
     @Args('data', { type: () => ReturnExpenseItemInputDTO }) data: ReturnExpenseItemInputDTO
   ): Promise<TransactionDTO> {
     return this.expensesMutations.returnExpenseItem(data);
+  }
+
+  @Mutation(() => TransactionDTO, {
+    name: 'submitExpenseReport',
+    description: 'Финализировать СЗ-отчёт по смете расхода (все items закрыты — оплата/чек/возврат).',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async submitExpenseReport(
+    @Args('data', { type: () => SubmitExpenseReportInputDTO }) data: SubmitExpenseReportInputDTO
+  ): Promise<TransactionDTO> {
+    return this.expensesMutations.submitExpenseReport(data);
   }
 }

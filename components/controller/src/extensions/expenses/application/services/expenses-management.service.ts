@@ -4,6 +4,10 @@ import {
   EXPENSE_PROPOSAL_REPOSITORY,
 } from '../../domain/repositories/expense-proposal.repository';
 import { ExpenseProposalDomainEntity } from '../../domain/entities/expense-proposal.entity';
+import {
+  PaginationInputDTO,
+  PaginationResult,
+} from '~/application/common/dto/pagination.dto';
 
 /**
  * Read-сервис расходов: список и просмотр смет.
@@ -28,5 +32,37 @@ export class ExpensesManagementService {
 
   async listProposalsByMember(coopname: string, username: string): Promise<ExpenseProposalDomainEntity[]> {
     return this.proposals.findByUsername(coopname, username);
+  }
+
+  async listProposalsByCooperativePaginated(
+    coopname: string,
+    options?: PaginationInputDTO
+  ): Promise<PaginationResult<ExpenseProposalDomainEntity>> {
+    const { items, totalCount } = await this.proposals.findByCoopnamePaginated(coopname, options);
+    return this.toPaginationResult(items, totalCount, options);
+  }
+
+  async listProposalsByMemberPaginated(
+    coopname: string,
+    username: string,
+    options?: PaginationInputDTO
+  ): Promise<PaginationResult<ExpenseProposalDomainEntity>> {
+    const { items, totalCount } = await this.proposals.findByUsernamePaginated(coopname, username, options);
+    return this.toPaginationResult(items, totalCount, options);
+  }
+
+  private toPaginationResult<T>(
+    items: T[],
+    totalCount: number,
+    options?: PaginationInputDTO
+  ): PaginationResult<T> {
+    const page = Math.max(1, options?.page ?? 1);
+    const limit = Math.max(1, options?.limit ?? 10);
+    return {
+      items,
+      totalCount,
+      totalPages: limit > 0 ? Math.ceil(totalCount / limit) : 0,
+      currentPage: page,
+    };
   }
 }
