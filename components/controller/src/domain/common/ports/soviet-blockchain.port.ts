@@ -25,6 +25,14 @@ export interface SovietBlockchainPort {
   confirmAgreement(data: SovietContract.Actions.Agreements.ConfirmAgreement.IConfirmAgreement): Promise<TransactResult>;
 
   declineAgreement(data: SovietContract.Actions.Agreements.DeclineAgreement.IDeclineAgreement): Promise<TransactResult>;
+
+  // Утверждение + исполнение решения совета одной транзакцией ключом кооператива
+  // (soviet::authorize + soviet::exec). Согласие председателя — в подписанном им
+  // документе внутри authorizeData.document.
+  authorizeDecision(
+    authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize,
+    execData: SovietContract.Actions.Decisions.Exec.IExec
+  ): Promise<TransactResult>;
 }
 
 export const SOVIET_BLOCKCHAIN_PORT = Symbol('SovietBlockchainPort');

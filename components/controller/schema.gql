@@ -1160,6 +1160,20 @@ type Authority {
   waits: [WaitWeight!]!
 }
 
+input AuthorizeDecisionInput {
+  """Имя аккаунта председателя совета"""
+  chairman: String!
+
+  """Имя аккаунта кооператива"""
+  coopname: String!
+
+  """Идентификатор решения"""
+  decision_id: Int!
+
+  """Подписанный председателем документ утверждения решения"""
+  document: SignedDigitalDocumentInput!
+}
+
 type AvailableReport {
   deadline: String!
 
@@ -7465,6 +7479,13 @@ type Mutation {
   Требуемые роли: chairman. 
   """
   addTrustedAccount(data: AddTrustedAccountInput!): Branch!
+
+  """
+  Утвердить и исполнить решение совета
+  
+  Требуемые роли: chairman. 
+  """
+  authorizeDecision(data: AuthorizeDecisionInput!): Transaction!
 
   """Отменить заявку"""
   cancelRequest(data: CancelRequestInput!): Transaction!

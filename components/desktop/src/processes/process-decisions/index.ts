@@ -1,7 +1,7 @@
 import { Cooperative, SovietContract } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
-import { useGlobalStore } from 'src/shared/store';
+import { api as authorizeDecisionApi } from 'src/features/Decision/AuthorizeAndExecDecision/api';
 import { useVoteForDecision } from 'src/features/Decision/VoteForDecision';
 import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecision';
 import { computed } from 'vue';
@@ -178,49 +178,16 @@ export function useDecisionProcessor() {
     const digitalDocument = new DigitalDocument(document);
     const signedDocument = await digitalDocument.sign(session.username);
 
-    // Подготавливаем данные для транзакций
-    const authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize =
-      {
-        coopname: info.coopname,
-        chairman: session.username,
-        decision_id,
-        document: {
-          ...signedDocument,
-          meta: JSON.stringify(signedDocument.meta),
-        },
-      };
-
-    const execData: SovietContract.Actions.Decisions.Exec.IExec = {
-      executer: session.username,
+    // Утверждение + исполнение проводит контроллер ключом кооператива
+    // (мутация authorizeDecision). meta передаём объектом — бэкенд сам
+    // сериализует при сборке chain-action; подпись председателя на документе
+    // сохраняется и проверяется контрактом.
+    await authorizeDecisionApi.authorizeDecision({
       coopname: info.coopname,
-      decision_id: decision_id,
-    };
-
-    // Выполняем транзакции
-    await useGlobalStore().transact([
-      {
-        account: SovietContract.contractName.production,
-        name: SovietContract.Actions.Decisions.Authorize.actionName,
-        authorization: [
-          {
-            actor: session.username,
-            permission: 'active',
-          },
-        ],
-        data: authorizeData,
-      },
-      {
-        account: SovietContract.contractName.production,
-        name: SovietContract.Actions.Decisions.Exec.actionName,
-        authorization: [
-          {
-            actor: session.username,
-            permission: 'active',
-          },
-        ],
-        data: execData,
-      },
-    ]);
+      chairman: session.username,
+      decision_id,
+      document: signedDocument,
+    });
 
     return true;
   }
