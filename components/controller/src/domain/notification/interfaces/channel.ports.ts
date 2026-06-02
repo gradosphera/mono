@@ -11,6 +11,8 @@
 
 /** Сообщение к доставке по одному каналу (развёрнуто из outbox-строки). */
 export interface ChannelMessage {
+  /** Outbox-строка, из которой развёрнуто сообщение (трассировка / persist инбокса). */
+  outboxId: string;
   /** Кооператив-владелец (federation-инвариант). */
   coopname: string;
   /** Тип уведомления — ключ каталога (шаблон/тексты берутся по нему). */
@@ -23,6 +25,8 @@ export interface ChannelMessage {
   };
   /** Данные для подстановки в шаблон. */
   payload?: Record<string, unknown>;
+  /** Инициатор уведомления (для «от кого» в инбоксе). */
+  actorSubscriberId?: string;
 }
 
 /** Исход доставки по каналу — пишется в журнал `notification_deliveries`. */

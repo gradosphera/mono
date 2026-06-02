@@ -2,14 +2,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationOutboxTypeormEntity } from '~/infrastructure/database/typeorm/entities/notification-outbox.typeorm-entity';
 import { NotificationDeliveryTypeormEntity } from '~/infrastructure/database/typeorm/entities/notification-delivery.typeorm-entity';
+import { NotificationInboxTypeormEntity } from '~/infrastructure/database/typeorm/entities/notification-inbox.typeorm-entity';
 import { NOTIFICATION_PORT } from '~/domain/notification/interfaces/notify.port';
 import {
   EMAIL_CHANNEL_PORT,
+  IN_APP_CHANNEL_PORT,
   WEB_PUSH_CHANNEL_PORT,
 } from '~/domain/notification/interfaces/channel.ports';
 import { NotificationModule } from '~/application/notification/notification.module';
 import { NotificationService } from './notification.service';
 import { EmailChannelAdapter } from './channels/email-channel.adapter';
+import { InAppChannelAdapter } from './channels/in-app-channel.adapter';
 import { WebPushChannelAdapter } from './channels/web-push-channel.adapter';
 
 /**
@@ -21,12 +24,17 @@ import { WebPushChannelAdapter } from './channels/web-push-channel.adapter';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([NotificationOutboxTypeormEntity, NotificationDeliveryTypeormEntity]),
+    TypeOrmModule.forFeature([
+      NotificationOutboxTypeormEntity,
+      NotificationDeliveryTypeormEntity,
+      NotificationInboxTypeormEntity,
+    ]),
     NotificationModule, // WebPushService для web-push канала
   ],
   providers: [
     NotificationService,
     EmailChannelAdapter,
+    InAppChannelAdapter,
     WebPushChannelAdapter,
     {
       provide: NOTIFICATION_PORT,
@@ -37,10 +45,20 @@ import { WebPushChannelAdapter } from './channels/web-push-channel.adapter';
       useExisting: EmailChannelAdapter,
     },
     {
+      provide: IN_APP_CHANNEL_PORT,
+      useExisting: InAppChannelAdapter,
+    },
+    {
       provide: WEB_PUSH_CHANNEL_PORT,
       useExisting: WebPushChannelAdapter,
     },
   ],
-  exports: [NOTIFICATION_PORT, EMAIL_CHANNEL_PORT, WEB_PUSH_CHANNEL_PORT, NotificationService],
+  exports: [
+    NOTIFICATION_PORT,
+    EMAIL_CHANNEL_PORT,
+    IN_APP_CHANNEL_PORT,
+    WEB_PUSH_CHANNEL_PORT,
+    NotificationService,
+  ],
 })
 export class NotificationCenterModule {}
