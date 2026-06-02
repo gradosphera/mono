@@ -8,6 +8,7 @@ import { EXPENSE_PROPOSAL_REPOSITORY } from './domain/repositories/expense-propo
 import { EXPENSE_FILE_REPOSITORY } from './domain/repositories/expense-file.repository';
 import { ExpenseProposalSyncService } from './application/syncers/expense-proposal-sync.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
+import { ExpenseProposalResolver } from './application/resolvers/expense-proposal.resolver';
 
 /**
  * Шасси расходов цифрового кооператива (MVP — Благорост).
@@ -41,6 +42,7 @@ import { ExpensesManagementService } from './application/services/expenses-manag
     },
     ExpenseProposalSyncService,
     ExpensesManagementService,
+    ExpenseProposalResolver,
   ],
   exports: [
     ExpenseContractInfoService,
