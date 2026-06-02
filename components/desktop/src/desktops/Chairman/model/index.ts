@@ -1,4 +1,5 @@
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
+import { NotificationsJournalPage } from 'src/pages/Chairman/NotificationsJournalPage';
 import { markRaw } from 'vue';
 
 export const manifest = {
@@ -27,6 +28,17 @@ export const manifest = {
           children: [],
         }
       ],
+    },
+    {
+      meta: {
+        title: 'Журнал уведомлений',
+        icon: 'notifications',
+        roles: ['chairman'],
+      },
+      path: '/:coopname/notifications-journal',
+      name: 'chairman-notifications-journal',
+      component: markRaw(NotificationsJournalPage),
+      children: [],
     },
   ],
   'config': {
