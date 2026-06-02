@@ -163,13 +163,118 @@ Bootstrap не претендует на «настоящий» сценарий
 - Дизайн UI «магазина» в ExtensionStore (мы переиспользуем существующие страницы, только добавляем kind/version поля).
 - Pricing / биллинг внутри Mono — каталог уже это решает (контракт apps + ca-admin).
 
-## 8. Следующие шаги (порядок)
+## 8. Решение V1: не мигрируем, делаем демо-пилот
 
-1. **Bootstrap-пакет @voskhod/test-app** — закрыть инфра-проверку.
-2. **Manifest для одного native extension'а (chatcoop)** в mono — добавить `package.json` с `catalog.kind=bundle`.
-3. **POST /v1/admin/bundled-packages/sync** — endpoint в apps-catalog (новый, добавляется в Epic 9).
-4. **Скрипт `tools/sync-bundled-packages.ts`** в mono — собирает 7 manifest'ов и шлёт в ca-admin.
-5. **Поле `kind` в pages/ExtensionStore** — рендерит "уже установлено" для bundle, "Подписаться" для remote.
-6. **Миграция chatcoop bundle → remote** — pilot story (отдельная ветка от apps-catalog в mono).
+**Утверждено 2026-06-02.** Native extensions трогать не будем. Вместо bundle→remote миграции собираем минимальное демо-приложение, ставим его сами как внешний разработчик и проводим полный цикл с оплатой. Это снимает риски с native и подтверждает контур end-to-end.
 
-Каждый шаг = отдельный коммит в зонтичной ветке `apps-catalog` mono'а + parallel story в apps-catalog репо (Epic 9 «Bundle/remote coexistence»).
+### Решения по содержанию пилота
+
+| Тема | Решение | Замечание |
+|---|---|---|
+| Что делает demo-app | Вариант A — пустой Hello-стол с одним роутом + иконкой | Минимум контента, максимум инфра-трубы |
+| `package_id` | `@voskhod/demo-app` | scope = coopname-разработчик |
+| Разработчик (`owner_username`) | `voskhod` (кооператив-аккаунт) | Публикует **chairman voskhod** через `@active` |
+| Pricing | `default` = **1000 RUB / месяц** prod / **60 сек dev** | period в `globals.min_payment_period_seconds` |
+| Trial | **15 минут** в dev (нет prod-trial в V1) | `globals.lead_time_seconds=900` |
+| Покупатель-пилот | `partner1` (поднимается через `pnpm boot:extra` в mono-ai-5) | Та же цепь voskhod'а, не отдельная chain |
+| Self-subscription (voskhod) | Видит свой demo-app, подписывается без оплаты | Bypass: если `tenant_coop == package.owner_coop` → charge skip |
+| Кэш tarball'ов | Без кэша — каждый desktop boot качает заново | Простой sync-loop, без storage |
+| UI магазина | Переиспользуем `pages/ExtensionStore` (минимальные правки) | Добавляем поле `kind=bundle\|remote` |
+| Стол разработчика | **Новый bundle-extension `developer`**, виден только chairman'у оператора | UI публикации + список подписчиков + pricing |
+
+### Инфра для одновременной работы двух кооперативов
+
+Сценарий «оператор-разработчик ↔ кооператив-потребитель» требует двух **независимых UI-окружений** в одной dev-машине:
+- voskhod's desktop+coopback — на mono-ai-5 (`COOPNAME=voskhod`, порты 3038/3039).
+- partner1's desktop+coopback — поднимаем **через docker-compose overlay в apps-catalog** (`COOPNAME=partner1`, порты 3048/3049), указывающие на ту же node mono-ai-5:8930 (`CHAIN_URL=http://node:8888`).
+- Никакой второй chain не нужен. partner1 активируется на воскод-цепи через `pnpm boot:extra` (`mono-ai-5/components/boot/src/init/infra.ts:584`).
+
+Это компромисс: coopback/desktop single-coopname остаются как есть, multi-tenancy откладываем.
+
+## 9. Epic 9 «MVP demo-app pilot E2E»
+
+Зонтичный эпик. Параллельная работа в двух репозиториях:
+- **apps-catalog** — `examples/demo-app/`, overlay для partner1, self-sub bypass, dev-seed.
+- **mono-ai-5** ветка `apps-catalog` — стол разработчика, remote-loader в init-installed-extensions, минимальные правки ExtensionStore.
+
+### Stories
+
+**9.1 examples/demo-app/ в apps-catalog**
+- Скаффолд: `package.json` с `catalog.kind=remote, workspaces=['demo']`, `install.ts` с одним IWorkspaceConfig (стол «Demo», роут `/:coopname/demo` с Hello-страницей).
+- Builder: `pnpm pack` → `demo-app-0.1.0.tgz`.
+- README с инструкцией публикации.
+
+**9.2 docker-compose.partner1.overlay.yml в apps-catalog**
+- Overlay для dev-stack: `coopback-partner1` (порт 3048, COOPNAME=partner1, MONGO_PARTNER1_DB), `desktop-partner1` (порт 3049, тот же coopback-partner1).
+- Подключение к `mono-shared` сети с aliases.
+- Скрипт `pnpm dev:stack:up-partner1` поднимает overlay поверх базового.
+- Документация: «партнерский desktop по `http://localhost:3049`, входить как admin partner1 (WIF из docs-harness/state/cooperatives/partner1.json)».
+
+**9.3 Стол Разработчика в mono (`extensions/developer`)**
+- Bundle-extension в `components/desktop/extensions/developer/`:
+  - install.ts: workspace `developer`, роуты «Мои пакеты», «Опубликовать релиз», «Подписчики», «Pricing».
+  - Виден только chairman'у кооператива-оператора через `meta.roles=['chairman']` + grants на бэкенде.
+- Backend модуль `controller/src/extensions/developer/`:
+  - Поднимается в `AppRegistry` как `is_internal=true, is_available=true`.
+  - GraphQL: `myPackages`, `publishPackage`, `setReleasePricing`, `packageSubscribers`.
+  - Делегирует в ca-admin через HTTP с админ-ключом.
+- Self-sub bypass: «У вас уже доступ как разработчику» (без отдельной кнопки).
+
+**9.4 Remote-loader в `processes/init-installed-extensions`**
+- После bundle-pass — запрос в coopback `getInstalledRemotePackages(coopname) → [{package_id, version, tarballUrl}]`.
+- Для каждого: pull tarball через ca-auth pull-proxy с JWT кооператива.
+- Распаковка в памяти (не на диск — без кэша).
+- `Function('return ' + installSource)()` или dynamic `eval` install.ts → `IWorkspaceConfig[]` → `router.addRoute('base', ...)`.
+- Ошибка на одном extension'е не валит остальные (try-catch вокруг каждого).
+
+**9.5 pages/ExtensionStore: поле `kind` + новые кнопки**
+- Расширить DTO ответа `extensions catalogList` полями `kind: 'bundle'|'remote'`, `version`, `pricingRubPerMonth`, `isSelfOwned`.
+- `kind=bundle` → «Уже установлено».
+- `kind=remote && isSelfOwned` → «Доступно как разработчику» (без оплаты).
+- `kind=remote && !isSelfOwned && !subscribed` → «Подписаться 1000 RUB/мес».
+- `kind=remote && subscribed` → «Активная подписка до DD.MM».
+- Резолвер дёргает coopback'овский новый endpoint, который ходит в ca-auth `GET /v1/registry/packages`.
+
+**9.6 Self-subscription bypass в pricing-watcher**
+- В `apps-catalog/apps/ca-admin/src/modules/pricing-watcher/application/request-charge.use-case.ts`:
+  - Перед cadence-check — проверка `tenantCoopname === packageOwnerCoopname`.
+  - Если match → outcome=`'skip-self-subscription'`, sub продлевается через `extendsub` без charge.
+  - Audit-log: `pricing.self_subscription_skipped` с `package_id` + `coopname`.
+- Тест: `request-charge.use-case.spec.ts` — voskhod подписан на свой `@voskhod/demo-app` → tick → no charge, sub.end_at += period.
+
+**9.7 dev-seed: globals + pricing**
+- Скрипт `apps-catalog/scripts/seed-dev-pricing.ts`:
+  - `apps::setglobals` `lead_time=900`, `min_payment_period=60`, `retry_max=3`.
+  - `apps::setpricing @voskhod/demo-app default plan {RUB 1000}`.
+- Запускается из `dev:stack:up`.
+
+**9.8 E2E smoke test demo-app pilot**
+- Скрипт `test/e2e/demo-app-pilot.sh`:
+  1. Поднимаем стенд + partner1 overlay.
+  2. chairman voskhod публикует через стол разработчика → `apps::regpkg` + tarball в Nexus + `apps::setrelease`.
+  3. partner1 admin подписывается через `pages/ExtensionStore` → `apps::regsub`.
+  4. Ждём 70 секунд (один pricing-watcher тик) → проверка `apps::charge_intents` появилась запись → `extendsub` прошёл.
+  5. Перезагрузка `desktop-partner1` → remote-loader тянет tarball → стол «Demo» в drawer'e.
+  6. `apps::cancelsub` → следующий тик → стол исчезает.
+- Pass criteria: все 6 шагов зелёные.
+
+### Order of execution
+
+```
+9.1 (examples/demo-app)            ──┐
+9.2 (partner1 overlay)              ─├─→ 9.7 (dev-seed) ─→ 9.8 (E2E smoke)
+9.6 (self-sub bypass в ca-admin)   ──┘                       ↑
+                                                              │
+mono-сторона:                                                 │
+9.3 (стол разработчика) ─→ 9.5 (ExtensionStore) ─→ 9.4 (remote-loader) ─┘
+```
+
+Все mono-stories идут в зонтичный PR `apps-catalog` → dev в mono'е (один PR на эпик).
+Все apps-catalog-stories идут в зонтичный PR `feat/E9-demo-app-pilot` → dev в apps-catalog.
+
+### Не входит в Epic 9
+
+- Реальная миграция native extensions (отложена на Epic 10+).
+- Sandbox-изоляция remote-модулей (Epic 11, открытый вопрос #3).
+- Production-pricing с реальным RUB-токеном / реальным биллингом — V1 крутит in-chain RUB-like asset.
+- Multi-tenancy coopback'а (отложена; в V1 = два отдельных coopback'а).
