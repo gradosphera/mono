@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { FileStorageInfrastructureModule } from '~/infrastructure/file-storage';
 import { ExpensesDatabaseModule } from './infrastructure/database/expenses-database.module';
 import { ExpenseContractInfoService } from './infrastructure/services/expense-contract-info.service';
 import { ExpenseProposalDeltaMapper } from './infrastructure/blockchain/mappers/expense-proposal-delta.mapper';
@@ -9,8 +10,10 @@ import { EXPENSE_FILE_REPOSITORY } from './domain/repositories/expense-file.repo
 import { ExpenseProposalSyncService } from './application/syncers/expense-proposal-sync.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ExpensesMutationsService } from './application/services/expenses-mutations.service';
+import { ExpenseFilesService } from './application/services/expense-files.service';
 import { ExpenseProposalResolver } from './application/resolvers/expense-proposal.resolver';
 import { ExpenseMutationsResolver } from './application/resolvers/expense-mutations.resolver';
+import { ExpenseFilesResolver } from './application/resolvers/expense-files.resolver';
 
 /**
  * Шасси расходов цифрового кооператива (MVP — Благорост).
@@ -28,7 +31,7 @@ import { ExpenseMutationsResolver } from './application/resolvers/expense-mutati
  * Подробности и план реализации — см. `README.md` рядом.
  */
 @Module({
-  imports: [ExpensesDatabaseModule],
+  imports: [ExpensesDatabaseModule, FileStorageInfrastructureModule.forFeature([ExpenseFilesService])],
   providers: [
     ExpenseContractInfoService,
     ExpenseProposalDeltaMapper,
@@ -45,8 +48,10 @@ import { ExpenseMutationsResolver } from './application/resolvers/expense-mutati
     ExpenseProposalSyncService,
     ExpensesManagementService,
     ExpensesMutationsService,
+    ExpenseFilesService,
     ExpenseProposalResolver,
     ExpenseMutationsResolver,
+    ExpenseFilesResolver,
   ],
   exports: [
     ExpenseContractInfoService,
@@ -56,6 +61,7 @@ import { ExpenseMutationsResolver } from './application/resolvers/expense-mutati
     ExpenseProposalSyncService,
     ExpensesManagementService,
     ExpensesMutationsService,
+    ExpenseFilesService,
   ],
 })
 export class ExpensesExtensionModule {}
