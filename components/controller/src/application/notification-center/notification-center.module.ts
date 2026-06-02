@@ -24,7 +24,7 @@ import { WebPushChannelAdapter } from './channels/web-push-channel.adapter';
  *
  * `@Global` — порт cross-cutting: ~12 consumer-модулей (agenda/wallet/gateway/meet/
  * participant/chairman/chatcoop/…) инжектят `NOTIFICATION_PORT` без импорта этого
- * модуля у себя (эпик 4, drop-in миграция с `NOVU_WORKFLOW_PORT`). Ср. глобальный
+ * модуля у себя (эпик 4, drop-in миграция со старого порта уведомлений). Ср. глобальный
  * `NOTIFICATION_SUBSCRIPTION_PORT` из typeorm.module.
  */
 @Global()

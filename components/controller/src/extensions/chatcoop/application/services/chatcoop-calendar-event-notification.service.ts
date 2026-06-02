@@ -13,10 +13,10 @@ import config from '~/config/config';
 import { DateUtils } from '~/shared/utils/date-utils';
 import { isEligibleForActiveCoopCalendarBroadcast } from '~/domain/account/utils/participant-mass-notification.util';
 
-type CalendarNovuRecipient = { username: string; email: string; subscriberId: string };
+type CalendarRecipient = { username: string; email: string; subscriberId: string };
 
 /**
- * Реализация {@link InterCoopCalendarEventNotificationPort}: Novu по выбранным получателям.
+ * Реализация {@link InterCoopCalendarEventNotificationPort}: по выбранным получателям.
  * Комнаты capital_project + projectHash — только с подтверждённым допуском к проекту (Capital / inter).
  * Остальные комнаты — все подходящие пайщики со статусом active в Mono (не registered без активации).
  */
@@ -59,11 +59,11 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
   }
 
   /** Рассылка по кооперативу: только active в Mono + email + subscriber_id. */
-  private async listRecipientsCoopWideActiveOnly(): Promise<CalendarNovuRecipient[]> {
+  private async listRecipientsCoopWideActiveOnly(): Promise<CalendarRecipient[]> {
     const batchSize = 100;
     let currentPage = 1;
     let hasMorePages = true;
-    const allAccounts: CalendarNovuRecipient[] = [];
+    const allAccounts: CalendarRecipient[] = [];
 
     while (hasMorePages) {
       const accountsPage = await this.accountPort.getAccounts(
@@ -78,7 +78,7 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
           email: account.provider_account?.email?.trim() ?? '',
           subscriberId: account.provider_account?.subscriber_id?.trim() ?? '',
         }))
-        .filter((m): m is CalendarNovuRecipient => m.email.includes('@') && m.subscriberId !== '');
+        .filter((m): m is CalendarRecipient => m.email.includes('@') && m.subscriberId !== '');
 
       allAccounts.push(...mappings);
 
@@ -93,9 +93,9 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
   }
 
   /** Комната проекта Capital: допуск из appendix + active + email + subscriber_id. */
-  private async listRecipientsForCapitalProjectRoom(projectHash: string): Promise<CalendarNovuRecipient[]> {
+  private async listRecipientsForCapitalProjectRoom(projectHash: string): Promise<CalendarRecipient[]> {
     const usernames = await this.projectCapitalClearance.listUsernamesWithConfirmedProjectClearance(projectHash);
-    const recipients: CalendarNovuRecipient[] = [];
+    const recipients: CalendarRecipient[] = [];
     const seen = new Set<string>();
 
     for (const raw of usernames) {
@@ -128,9 +128,9 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
     return recipients;
   }
 
-  private async resolveCalendarNovuRecipients(
+  private async resolveCalendarRecipients(
     input: InterCoopCalendarEventNotificationInput
-  ): Promise<CalendarNovuRecipient[]> {
+  ): Promise<CalendarRecipient[]> {
     const ph = input.projectHash?.trim();
     if (input.roomKind === 'capital_project' && ph) {
       return this.listRecipientsForCapitalProjectRoom(ph);
@@ -160,7 +160,7 @@ export class ChatcoopCalendarEventNotificationService implements InterCoopCalend
     workflowId: string,
     input: InterCoopCalendarEventNotificationInput
   ): Promise<void> {
-    const users = await this.resolveCalendarNovuRecipients(input);
+    const users = await this.resolveCalendarRecipients(input);
     if (users.length === 0) {
       this.logger.warn(
         'Нет получателей для уведомления календаря (active Mono + email + subscriber_id; для комнаты проекта — также допуск Capital)'

@@ -12,7 +12,6 @@ import config from '~/config/config';
 import { BlockchainModule } from './infrastructure/blockchain/blockchain.module';
 import { GeneratorInfrastructureModule } from './infrastructure/generator/generator.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
-import { NovuModule } from './infrastructure/novu/novu.module';
 import { EventsInfrastructureModule } from './infrastructure/events/events.module';
 import { FreeDecisionInfrastructureModule } from './infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from './infrastructure/decision-tracking/decision-tracking-infrastructure.module';
@@ -36,7 +35,6 @@ import { DesktopDomainModule } from './domain/desktop/desktop-domain.module';
 import { MeetDomainModule } from './domain/meet/meet-domain.module';
 import { GatewayDomainModule } from './domain/gateway/gateway-domain.module';
 import { VaultDomainModule } from './domain/vault/vault-domain.module';
-import { NotificationDomainModule } from './domain/notification/notification-domain.module';
 import { LedgerDomainModule } from './domain/ledger/ledger-domain.module';
 import { ProcessRegistryDomainModule } from './domain/process-registry/process-registry-domain.module';
 import { ParserDomainModule } from './domain/parser/parser-domain.module';
@@ -102,7 +100,6 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     BlockchainModule,
     GeneratorInfrastructureModule,
     RedisModule,
-    NovuModule,
     EventsInfrastructureModule,
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
@@ -134,7 +131,6 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     MeetDomainModule,
     GatewayDomainModule,
     VaultDomainModule,
-    NotificationDomainModule,
     LedgerDomainModule,
     ProcessRegistryDomainModule,
     ParserDomainModule,

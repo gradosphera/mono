@@ -7,7 +7,6 @@ import { PaymentController } from './controllers/payment.controller';
 import { GatewayInteractor } from './interactors/gateway.interactor';
 import { GatewayNotificationHandler } from './handlers/gateway-notification.handler';
 import { GatewayDomainModule } from '~/domain/gateway/gateway-domain.module';
-import { NovuModule } from '~/infrastructure/novu/novu.module';
 import { UserDomainModule } from '~/domain/user/user-domain.module';
 import { AccountInfrastructureModule } from '~/infrastructure/account/account-infrastructure.module';
 import { SystemModule } from '~/application/system/system.module';
@@ -19,7 +18,6 @@ import { RedisModule } from '~/infrastructure/redis/redis.module';
   imports: [
     forwardRef(() => GatewayDomainModule),
     forwardRef(() => GatewayInfrastructureModule),
-    NovuModule,
     UserInfrastructureModule,
     UserDomainModule,
     AccountInfrastructureModule,

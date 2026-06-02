@@ -47,7 +47,7 @@ export class WalletNotificationService implements OnModuleInit {
       const chairmanEmail = chairman.provider_account?.email;
       const chairmanSubscriberId = chairman.provider_account?.subscriber_id?.trim();
       if (!chairmanSubscriberId) {
-        this.logger.warn(`subscriber_id председателя ${chairman.username} не найден — пропуск Novu`);
+        this.logger.warn(`subscriber_id председателя ${chairman.username} не найден`);
         return;
       }
       if (!chairmanEmail) {

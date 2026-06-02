@@ -334,9 +334,6 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.2
         version: 10.0.2(@nestjs/common@10.4.22(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.22)(reflect-metadata@0.1.14)(rxjs@7.8.2)(typeorm@0.3.20(ioredis@5.10.1)(pg@8.20.0)(ts-node@10.9.2(@swc/core@1.15.33(@swc/helpers@0.5.19))(@types/node@20.19.37)(typescript@5.9.3)))
-      '@novu/api':
-        specifier: ^1.4.0
-        version: 1.8.0
       '@octokit/rest':
         specifier: ^22.0.1
         version: 22.0.1
@@ -1209,12 +1206,6 @@ importers:
 
   components/notifications:
     dependencies:
-      axios:
-        specifier: ^1.7.7
-        version: 1.13.6
-      dotenv:
-        specifier: ^17.1.0
-        version: 17.3.1
       transliteration:
         specifier: ^2.3.5
         version: 2.6.1
@@ -5409,15 +5400,6 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
-
-  '@novu/api@1.8.0':
-    resolution: {integrity: sha512-ba/+fogM+a380AfJ2SSGBQSnHJe0H2Io2NWOf7LeJwFhWIjiYlNAZ1N5DaFv+jNRkaKh33jXDoWWkqqgQUu5lw==}
-    hasBin: true
-    peerDependencies:
-      '@modelcontextprotocol/sdk': '>=1.5.0 <1.10.0'
-    peerDependenciesMeta:
-      '@modelcontextprotocol/sdk':
-        optional: true
 
   '@novu/js@3.14.1':
     resolution: {integrity: sha512-Og9IrPPunw3XleaMl8nkV0vSu0rGXE75CO/CP/upEQWpbK+KvMZbN6rF9+KTrcO1EDG6DwNjI+jhZO83KaIQNg==}
@@ -24410,10 +24392,6 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
-
-  '@novu/api@1.8.0':
-    dependencies:
-      zod: 3.25.76
 
   '@novu/js@3.14.1(react@19.2.4)':
     dependencies:

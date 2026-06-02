@@ -8,7 +8,7 @@ import type { NotifyInput, NotifyResult } from './notify-input.domain.interface'
  * пишет строки в `notification_outbox` (транзакционный outbox), фактическую
  * отправку по каналам выполняет фоновый worker.
  *
- * Заменяет `NovuWorkflowPort.triggerWorkflow`. Старый порт сохраняется до
+ * Единственный порт постановки уведомлений в очередь доставки.
  * завершения миграции consumer-сервисов (эпик 4) и удаляется в эпике 5.
  */
 export interface NotificationPort {

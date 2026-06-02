@@ -103,7 +103,7 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
       const subscriberId = userAccount.provider_account?.subscriber_id?.trim();
 
       if (!subscriberId) {
-        this.logger.warn(`subscriber_id пайщика ${username} не найден — пропуск Novu`);
+        this.logger.warn(`subscriber_id пайщика ${username} не найден`);
         return;
       }
 

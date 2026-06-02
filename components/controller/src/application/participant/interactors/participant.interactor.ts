@@ -21,10 +21,6 @@ import { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/sig
 import { GatewayInteractorPort, GATEWAY_INTERACTOR_PORT } from '~/domain/wallet/ports/gateway-interactor.port';
 import type { CreateInitialPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-initial-payment-input-domain.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
-import {
-  NOTIFICATION_DOMAIN_SERVICE,
-  NotificationDomainService,
-} from '~/domain/notification/services/notification-domain.service';
 import { NotificationSenderService } from '~/application/notification/services/notification-sender.service';
 import { Workflows } from '@coopenomics/notifications';
 import {
@@ -50,7 +46,6 @@ export class ParticipantInteractor {
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
     @Inject(GATEWAY_INTERACTOR_PORT)
     private readonly gatewayInteractorPort: GatewayInteractorPort,
-    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
     private readonly notificationSenderService: NotificationSenderService,
     @Inject(forwardRef(() => DOCUMENT_VALIDATION_SERVICE))
     private readonly documentValidationService: DocumentValidationService,
@@ -300,11 +295,11 @@ export class ParticipantInteractor {
 
     await this.accountDomainService.addProviderAccount(newAccount);
 
-    // Настраиваем подписчика NOVU для участника
+    // Настраиваем identity получателя для участника
     try {
       await this.accountDomainService.setupNotificationSubscriber(data.username, 'участника');
     } catch (error: any) {
-      this.logger.error(`Ошибка настройки подписчика NOVU для участника ${data.username}: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка настройки identity получателя для участника ${data.username}: ${error.message}`, error.stack);
     }
 
     await this.accountDomainService.addParticipantAccount({

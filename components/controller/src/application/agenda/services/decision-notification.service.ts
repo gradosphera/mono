@@ -58,7 +58,7 @@ export class DecisionNotificationService implements OnModuleInit {
       const userEmail = user.provider_account?.email;
       const subscriberId = user.provider_account?.subscriber_id?.trim();
       if (!subscriberId) {
-        this.logger.warn(`subscriber_id пользователя ${username} не найден — пропуск Novu`);
+        this.logger.warn(`subscriber_id пользователя ${username} не найден`);
         return;
       }
       if (!userEmail) {

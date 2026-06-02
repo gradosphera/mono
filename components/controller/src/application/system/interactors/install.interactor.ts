@@ -176,7 +176,7 @@ export class InstallInteractor {
         try {
           await this.accountDomainService.setupNotificationSubscriber(username, 'члена совета');
         } catch (error: any) {
-          logger.error(`Ошибка настройки подписчика NOVU для члена совета ${username}: ${error.message}`, error.stack);
+          logger.error(`Ошибка настройки identity получателя для члена совета ${username}: ${error.message}`, error.stack);
         }
 
         // Добавляем в массив членов для отправки в блокчейн

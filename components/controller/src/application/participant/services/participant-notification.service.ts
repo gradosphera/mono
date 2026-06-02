@@ -36,7 +36,7 @@ export class ParticipantNotificationService implements OnModuleInit {
       const userEmail = user.provider_account?.email;
       const subscriberId = user.provider_account?.subscriber_id?.trim();
       if (!subscriberId) {
-        this.logger.warn(`subscriber_id пользователя ${username} не найден — пропуск Novu`);
+        this.logger.warn(`subscriber_id пользователя ${username} не найден`);
         return;
       }
       if (!userEmail) {
@@ -92,7 +92,7 @@ export class ParticipantNotificationService implements OnModuleInit {
       const chairmanEmail = chairman.provider_account?.email;
       const chairmanSubscriberId = chairman.provider_account?.subscriber_id?.trim();
       if (!chairmanSubscriberId) {
-        this.logger.warn(`subscriber_id председателя ${chairman.username} не найден — пропуск Novu`);
+        this.logger.warn(`subscriber_id председателя ${chairman.username} не найден`);
         return;
       }
       if (!chairmanEmail) {

@@ -103,7 +103,7 @@ export class ApprovalResponseNotificationService implements OnModuleInit {
       const authorSubscriberId = authorAccount.provider_account?.subscriber_id?.trim();
 
       if (!authorSubscriberId) {
-        this.logger.warn(`subscriber_id автора запроса ${authorUsername} не найден — пропуск Novu`);
+        this.logger.warn(`subscriber_id автора запроса ${authorUsername} не найден`);
         return;
       }
 
