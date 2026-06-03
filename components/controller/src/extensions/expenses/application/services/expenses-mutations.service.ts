@@ -3,6 +3,7 @@ import type { TransactResult } from '@wharfkit/session'
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
+import { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input'
 import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
 import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input'
 import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input'
@@ -12,9 +13,10 @@ import {
 } from '../../domain/interfaces/expenses-blockchain.port'
 
 /**
- * Write-сервис расходов (`expense::payexp` / `reportexp` / `returnexp` / `closeexp` / `declexp`).
+ * Write-сервис расходов (6 actions: `payexp` / `reportexp` / `returnexp` / `overspendexp` /
+ * `closeexp` / `declexp`).
  *
- * 5 из 6 mutations работают через `ExpensesBlockchainPort` (после Эпика 0 cooptypes).
+ * 6 из 7 mutations работают через `ExpensesBlockchainPort` (после Эпика 0 cooptypes).
  * `authorizeExpenseReport` (`expense::authexp`) ждёт document2 `decision_doc` (type=2011)
  * от signature-pipeline UI Эпика 2 — пока NotImplementedException с явным reason.
  *
@@ -52,6 +54,15 @@ export class ExpensesMutationsService {
       proposal_hash: input.proposal_hash,
       item_hash: input.item_hash,
       return_amount: input.return_amount,
+    })
+  }
+
+  async overspendExpenseItem(input: OverspendExpenseItemInputDTO): Promise<TransactResult> {
+    return this.chain.overspendExp({
+      coopname: input.coopname,
+      proposal_hash: input.proposal_hash,
+      item_hash: input.item_hash,
+      overspend_amount: input.overspend_amount,
     })
   }
 

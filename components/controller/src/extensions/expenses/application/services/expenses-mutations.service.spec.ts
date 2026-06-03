@@ -4,12 +4,13 @@ import type { ExpensesBlockchainPort } from '../../domain/interfaces/expenses-bl
 import type { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
 import type { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
 import type { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
+import type { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input'
 import type { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
 import type { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input'
 import type { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input'
 
 /**
- * Контракт-тест: 5 mutations пробрасывают payload в `ExpensesBlockchainPort`
+ * Контракт-тест: 6 mutations пробрасывают payload в `ExpensesBlockchainPort`
  * и проверяют action-mapping; `authorizeExpenseReport` ждёт document2 → 501.
  */
 describe('ExpensesMutationsService', () => {
@@ -23,6 +24,7 @@ describe('ExpensesMutationsService', () => {
       payExp: jest.fn().mockResolvedValue(fakeResult),
       reportExp: jest.fn().mockResolvedValue(fakeResult),
       returnExp: jest.fn().mockResolvedValue(fakeResult),
+      overspendExp: jest.fn().mockResolvedValue(fakeResult),
       closeExp: jest.fn().mockResolvedValue(fakeResult),
       declineExp: jest.fn().mockResolvedValue(fakeResult),
     }
@@ -78,6 +80,24 @@ describe('ExpensesMutationsService', () => {
       proposal_hash: '0xabc',
       item_hash: '0xdef',
       return_amount: '50.0000 RUB',
+    })
+  })
+
+  it('overspendExpenseItem → chain.overspendExp({coopname, proposal_hash, item_hash, overspend_amount})', async () => {
+    const input = {
+      coopname: 'voskhod',
+      proposal_hash: '0xabc',
+      item_hash: '0xdef',
+      overspend_amount: '200.0000 RUB',
+    } as OverspendExpenseItemInputDTO
+
+    await service.overspendExpenseItem(input)
+
+    expect(chain.overspendExp).toHaveBeenCalledWith({
+      coopname: 'voskhod',
+      proposal_hash: '0xabc',
+      item_hash: '0xdef',
+      overspend_amount: '200.0000 RUB',
     })
   })
 

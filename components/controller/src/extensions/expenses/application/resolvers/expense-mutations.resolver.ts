@@ -8,6 +8,7 @@ import { ExpensesMutationsService } from '../services/expenses-mutations.service
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
+import { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input';
 import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input';
 import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input';
 import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input';
@@ -57,6 +58,18 @@ export class ExpenseMutationsResolver {
     @Args('data', { type: () => ReturnExpenseItemInputDTO }) data: ReturnExpenseItemInputDTO
   ): Promise<TransactionDTO> {
     return this.expensesMutations.returnExpenseItem(data);
+  }
+
+  @Mutation(() => TransactionDTO, {
+    name: 'overspendExpenseItem',
+    description: 'Доплатить сумму перерасхода по строке расхода (ADVANCE-механика).',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async overspendExpenseItem(
+    @Args('data', { type: () => OverspendExpenseItemInputDTO }) data: OverspendExpenseItemInputDTO
+  ): Promise<TransactionDTO> {
+    return this.expensesMutations.overspendExpenseItem(data);
   }
 
   @Mutation(() => TransactionDTO, {

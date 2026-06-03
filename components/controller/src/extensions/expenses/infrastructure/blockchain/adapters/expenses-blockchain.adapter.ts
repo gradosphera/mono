@@ -11,8 +11,8 @@ import { ExpensesBlockchainPort } from '../../../domain/interfaces/expenses-bloc
  * Адаптер блокчейн-порта `expense`. Канон взят с `CapitalBlockchainAdapter`:
  * подпись ключом кооператива (`active` permission), `account = contractName.production`.
  *
- * 5 actions без document2:
- * `payexp` / `reportexp` / `returnexp` / `closeexp` / `declexp`.
+ * 6 actions без document2:
+ * `payexp` / `reportexp` / `returnexp` / `overspendexp` / `closeexp` / `declexp`.
  *
  * `createexp` + `authexp` подключатся отдельным шагом после расшивки
  * signature-pipeline UI Эпика 2 (document2 type=2010/2011).
@@ -57,6 +57,16 @@ export class ExpensesBlockchainAdapter implements ExpensesBlockchainPort {
     return this.blockchainService.transact({
       account: ExpenseContract.contractName.production,
       name: ExpenseContract.Actions.ReturnExp.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    })
+  }
+
+  async overspendExp(data: ExpenseContract.Actions.OverspendExp.IOverspendExp): Promise<TransactResult> {
+    await this.initWithCoopKey(data.coopname)
+    return this.blockchainService.transact({
+      account: ExpenseContract.contractName.production,
+      name: ExpenseContract.Actions.OverspendExp.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     })
