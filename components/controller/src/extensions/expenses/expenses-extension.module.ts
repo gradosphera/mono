@@ -21,6 +21,7 @@ import { ExpenseFilesService } from './application/services/expense-files.servic
 import { ExpenseProposalResolver } from './application/resolvers/expense-proposal.resolver';
 import { ExpenseMutationsResolver } from './application/resolvers/expense-mutations.resolver';
 import { ExpenseFilesResolver } from './application/resolvers/expense-files.resolver';
+import { ExpensesInterExpenseChassisAdapter } from './infrastructure/inter/expenses-inter-expense-chassis.adapter';
 
 /**
  * Шасси расходов цифрового кооператива (MVP — Благорост).
@@ -71,6 +72,7 @@ import { ExpenseFilesResolver } from './application/resolvers/expense-files.reso
     ExpenseProposalResolver,
     ExpenseMutationsResolver,
     ExpenseFilesResolver,
+    ExpensesInterExpenseChassisAdapter,
   ],
   exports: [
     ExpenseContractInfoService,
@@ -81,6 +83,7 @@ import { ExpenseFilesResolver } from './application/resolvers/expense-files.reso
     ExpensesManagementService,
     ExpensesMutationsService,
     ExpenseFilesService,
+    ExpensesInterExpenseChassisAdapter,
   ],
 })
 export class ExpensesExtensionModule {}
