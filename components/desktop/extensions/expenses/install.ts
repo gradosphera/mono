@@ -10,9 +10,9 @@ import {
   MyAdvancesPage,
 } from './pages';
 
-// Шасси расходов — UI scaffold (C28-32).
-// Расширение НЕ зарегистрировано в src/processes/init-installed-extensions/extensions-registry.ts
-// до закрытия C28-31 (backend GraphQL + SDK Zeus typings). См. README.md.
+// Шасси расходов — UI scaffold (C28-32). Зарегистрировано в
+// src/processes/init-installed-extensions/extensions-registry.ts после
+// расшивки 5 mutations C28-31 (b4dd4b335ac). См. README.md.
 export default async function (): Promise<IWorkspaceConfig[]> {
   return [{
     workspace: 'expenses',
