@@ -41,14 +41,17 @@ auto find_proposal(D::proposals_index& tbl, const eosio::checksum256& proposal_h
 
 void send_callback_if_any(const D::callback_handler& cb,
                           const eosio::checksum256& proposal_hash,
+                          uint8_t status,
                           const eosio::asset& amount,
                           eosio::name self) {
   if (cb.contract.value == 0) return;
+  // Payload: (proposal_hash, status, total_actual, data).
+  // status = ExpenseDomain::ProposalStatus — инициатор различает CLOSED vs DECLINED.
   eosio::action(
     eosio::permission_level{self, "active"_n},
     cb.contract,
     cb.action,
-    std::make_tuple(proposal_hash, amount, cb.data)
+    std::make_tuple(proposal_hash, status, amount, cb.data)
   ).send();
 }
 
@@ -133,6 +136,11 @@ void expense::declexp(name coopname, checksum256 proposal_hash, std::string reas
     row.status     = static_cast<uint8_t>(D::ProposalStatus::DECLINED);
     row.updated_at = eosio::current_time_point();
   });
+
+  // Callback инициатору (capital::onpgexpdone и т.п.) — total_actual на момент decline.
+  send_callback_if_any(it->callback, proposal_hash,
+                       static_cast<uint8_t>(D::ProposalStatus::DECLINED),
+                       it->total_actual, get_self());
 }
 
 void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_hash,
@@ -245,8 +253,10 @@ void expense::closeexp(name coopname, checksum256 proposal_hash) {
     row.updated_at = eosio::current_time_point();
   });
 
-  // Callback на финализацию (capital::onexpreport и т.п.) — если был установлен при createexp.
-  send_callback_if_any(it->callback, proposal_hash, it->total_actual, get_self());
+  // Callback на финализацию (capital::onpgexpdone и т.п.) — если был установлен при createexp.
+  send_callback_if_any(it->callback, proposal_hash,
+                       static_cast<uint8_t>(D::ProposalStatus::CLOSED),
+                       it->total_actual, get_self());
 }
 
 void expense::returnexp(name coopname, checksum256 proposal_hash, checksum256 item_hash,

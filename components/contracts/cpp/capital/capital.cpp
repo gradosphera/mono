@@ -95,13 +95,11 @@
 #include "app/debt_managment/create_debt/declinedebt.cpp"
 #include "app/debt_managment/settle_debt/settledebt.cpp"
 
-// Управление программными расходами
+// Управление программными расходами через шасси expense.
+// capital — инициатор + получатель callback, шасси обслуживает весь flow.
 #include "app/expense_managment/program_expenses/topupprogexp.cpp"
 #include "app/expense_managment/program_expenses/createpgexp.cpp"
-#include "app/expense_managment/program_expenses/apprvpgexp.cpp"
-#include "app/expense_managment/program_expenses/authpgexp.cpp"
-#include "app/expense_managment/program_expenses/pgexppay.cpp"
-#include "app/expense_managment/program_expenses/declpgexp.cpp"
+#include "app/expense_managment/program_expenses/onpgexpdone.cpp"
 
 // Управление расходами
 #include "app/expense_managment/create_expense/approveexpns.cpp"
