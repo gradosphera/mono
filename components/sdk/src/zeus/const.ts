@@ -1338,6 +1338,9 @@ export const AllTypesProps: Record<string,any> = {
 			filter:"AgreementFilter",
 			options:"PaginationInput"
 		},
+		appsCatalogRemotePackages:{
+
+		},
 		buildInitialReportEdits:{
 			reportType:"ReportType"
 		},
@@ -2039,6 +2042,15 @@ export const ReturnTypes: Record<string,any> = {
 		present:"Boolean",
 		status:"ApprovalStatus",
 		username:"String"
+	},
+	AppsCatalogRemotePackageDTO:{
+		compatibleSubnets:"String",
+		description:"String",
+		lastActiveVersion:"String",
+		packageId:"String",
+		publisher:"String",
+		rubPerMonth:"Float",
+		title:"String"
 	},
 	AuthSequence:{
 		account:"String",
@@ -4118,6 +4130,7 @@ export const ReturnTypes: Record<string,any> = {
 	Query:{
 		agreementTemplates:"AgreementTemplate",
 		agreements:"PaginatedAgreementsPaginationResult",
+		appsCatalogRemotePackages:"AppsCatalogRemotePackageDTO",
 		buildInitialReportEdits:"BuildInitialReportEdits",
 		candidates:"PaginatedCandidatesPaginationResult",
 		capitalCandidates:"PaginatedCapitalCandidatesPaginationResult",
