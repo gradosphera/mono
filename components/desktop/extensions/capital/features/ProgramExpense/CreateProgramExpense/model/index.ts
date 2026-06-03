@@ -2,11 +2,14 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
 import type { Cooperative } from 'cooptypes';
-import { Zeus } from '@coopenomics/sdk';
+import { Mutations, Zeus } from '@coopenomics/sdk';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
+import { formatToAsset } from 'src/shared/lib/utils/formatToAsset';
 import { generateExpenseProposalStatementDocument } from 'app/extensions/expenses/api';
 import { createProgramExpense } from '../api';
 import { useProgramExpenseStore } from 'app/extensions/capital/entities/ProgramExpense/model';
+
+type GenerateStatementInput = Mutations.Expense.GenerateExpenseProposalStatementDocument.IInput['data'];
 
 export interface ICreateProgramExpenseDraftItem {
   number: string;
@@ -26,6 +29,24 @@ export interface ICreateProgramExpenseDraft {
   items: ICreateProgramExpenseDraftItem[];
 }
 
+/**
+ * Карта `operation_code → source_wallet_code` для UI-рендера документа.
+ *
+ * Временно на фронте — должен выводить backend по operation_code (issue R3:
+ * `refactor(expense): backend derives source_wallet from operation_code`).
+ * Пока вся capital-логика на `w.cap.blago` — расширяется добавлением кодов.
+ */
+const SOURCE_WALLET_BY_OPERATION: Record<string, string> = {
+  'o.exp.blgadv': 'w.cap.blago',
+  'o.exp.blgdir': 'w.cap.blago',
+};
+
+function resolveSourceWallet(operationCode: string): string {
+  const code = SOURCE_WALLET_BY_OPERATION[operationCode];
+  if (!code) throw new Error(`Не задан source_wallet для operation_code "${operationCode}"`);
+  return code;
+}
+
 export function useCreateProgramExpense() {
   const { info } = useSystemStore();
   const session = useSessionStore();
@@ -34,8 +55,10 @@ export function useCreateProgramExpense() {
   async function submitProgramExpense(draft: ICreateProgramExpenseDraft) {
     const expense_hash = await generateUniqueHash();
 
+    const symbol = info.symbols.root_govern_symbol;
+    const precision = info.symbols.root_govern_precision;
     const totalAmount = draft.items.reduce((sum, it) => sum + parseFloat(it.amount || '0'), 0);
-    const total_amount = `${totalAmount.toFixed(4)} RUB`;
+    const total_amount = formatToAsset(totalAmount, symbol, precision);
 
     const itemsForDoc = draft.items.map((it, idx) => ({
       number: String(idx + 1),
@@ -47,20 +70,20 @@ export function useCreateProgramExpense() {
       requisites: it.requisites ?? '',
     }));
 
-    const generated = await generateExpenseProposalStatementDocument({
+    const generateInput: GenerateStatementInput = {
       coopname: info.coopname,
       username: session.username,
       proposal: {
         description: draft.description,
         total_amount,
         items_count: draft.items.length,
-        source_wallet: 'w.cap.blago',
+        source_wallet: resolveSourceWallet(draft.operation_code),
       },
       items: itemsForDoc,
-    } as any);
+    };
 
-    const docKey = 'generateExpenseProposalStatementDocument' as const;
-    const generatedDoc = (generated as any)[docKey];
+    const { [Mutations.Expense.GenerateExpenseProposalStatementDocument.name]: generatedDoc } =
+      await generateExpenseProposalStatementDocument(generateInput);
 
     const digital = new DigitalDocument(generatedDoc);
     const signed = await digital.sign<Cooperative.Registry.ExpenseProposalStatement.Meta>(
@@ -74,7 +97,7 @@ export function useCreateProgramExpense() {
       recipient_type: it.recipient_type,
       recipient: it.recipient_account ?? it.recipient_name ?? session.username,
       description: it.description,
-      planned_amount: it.amount,
+      planned_amount: formatToAsset(it.amount, symbol, precision),
     }));
 
     const result = await createProgramExpense({

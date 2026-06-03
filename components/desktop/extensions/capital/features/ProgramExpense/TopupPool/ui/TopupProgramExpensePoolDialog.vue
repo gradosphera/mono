@@ -10,7 +10,7 @@ BaseDialog(
     BaseInput(
       v-model='amount',
       label='Сумма пополнения',
-      placeholder='10000.0000 RUB',
+      :placeholder='amountPlaceholder',
       required
     )
     .hint Средства списываются с `global_available_invest_pool` и зачисляются в `program_expense_pool`.
@@ -29,6 +29,7 @@ BaseDialog(
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { useSystemStore } from 'src/entities/System/model';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseInput } from 'src/shared/ui/base/BaseInput';
@@ -40,10 +41,16 @@ const emit = defineEmits<{
   (e: 'topped-up'): void;
 }>();
 
+const system = useSystemStore();
 const { submitTopup } = useTopupProgramExpensePool();
 
 const amount = ref('');
 const submitting = ref(false);
+
+const amountPlaceholder = computed(() => {
+  const symbol = system.info?.symbols?.root_govern_symbol ?? 'RUB';
+  return `10000 (${symbol})`;
+});
 
 const canSubmit = computed(() => amount.value.trim().length > 0);
 

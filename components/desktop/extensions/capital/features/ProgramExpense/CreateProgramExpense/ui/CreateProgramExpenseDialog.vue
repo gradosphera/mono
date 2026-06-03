@@ -83,7 +83,7 @@ BaseDialog(
               BaseInput(
                 v-model='item.amount',
                 label='Сумма (план)',
-                placeholder='1000.0000 RUB',
+                :placeholder='amountPlaceholder',
                 required
               )
             .col-12
@@ -114,6 +114,7 @@ BaseDialog(
 import { computed, reactive, ref } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { useSystemStore } from 'src/entities/System/model';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseInput } from 'src/shared/ui/base/BaseInput';
@@ -129,7 +130,13 @@ const emit = defineEmits<{
   (e: 'created'): void;
 }>();
 
+const system = useSystemStore();
 const { submitProgramExpense } = useCreateProgramExpense();
+
+const amountPlaceholder = computed(() => {
+  const symbol = system.info?.symbols?.root_govern_symbol ?? 'RUB';
+  return `1000 (${symbol})`;
+});
 
 const form = reactive({
   description: '',
