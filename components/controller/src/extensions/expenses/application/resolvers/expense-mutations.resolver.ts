@@ -5,6 +5,7 @@ import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { ExpensesMutationsService } from '../services/expenses-mutations.service';
+import { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input';
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
@@ -23,6 +24,18 @@ import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.inpu
 @Resolver()
 export class ExpenseMutationsResolver {
   constructor(private readonly expensesMutations: ExpensesMutationsService) {}
+
+  @Mutation(() => TransactionDTO, {
+    name: 'createExpenseProposal',
+    description: 'Подать СЗ-расход (создать смету с подписью пайщика/председателя).',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async createExpenseProposal(
+    @Args('data', { type: () => CreateExpenseProposalInputDTO }) data: CreateExpenseProposalInputDTO
+  ): Promise<TransactionDTO> {
+    return this.expensesMutations.createExpenseProposal(data);
+  }
 
   @Mutation(() => TransactionDTO, {
     name: 'payExpenseItem',

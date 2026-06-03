@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotImplementedException } from '@nestjs/common'
 import type { TransactResult } from '@wharfkit/session'
+import { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
@@ -16,9 +17,10 @@ import {
  * Write-сервис расходов (6 actions: `payexp` / `reportexp` / `returnexp` / `overspendexp` /
  * `closeexp` / `declexp`).
  *
- * 6 из 7 mutations работают через `ExpensesBlockchainPort` (после Эпика 0 cooptypes).
- * `authorizeExpenseReport` (`expense::authexp`) ждёт document2 `decision_doc` (type=2011)
- * от signature-pipeline UI Эпика 2 — пока NotImplementedException с явным reason.
+ * 6 из 8 mutations работают через `ExpensesBlockchainPort` (после Эпика 0 cooptypes).
+ * Stub до signature-pipeline UI Эпика 2:
+ *   - `createExpenseProposal` (`expense::createexp`) — ждёт document2 `statement_doc` (type=2010);
+ *   - `authorizeExpenseReport` (`expense::authexp`) — ждёт document2 `decision_doc` (type=2011).
  *
  * Adapter подписывает ключом кооператива (`active`), `account = expense`. Для пайщик-actions
  * (`reportexp` / `returnexp`) — тот же канон, что в capital (`createCommit` пайщика
@@ -30,6 +32,12 @@ export class ExpensesMutationsService {
     @Inject(EXPENSES_BLOCKCHAIN_PORT)
     private readonly chain: ExpensesBlockchainPort
   ) {}
+
+  async createExpenseProposal(_input: CreateExpenseProposalInputDTO): Promise<TransactResult> {
+    throw new NotImplementedException(
+      'createExpenseProposal: ждёт document2 statement_doc (type=2010) от signature-pipeline UI Эпика 2.'
+    )
+  }
 
   async payExpenseItem(input: PayExpenseItemInputDTO): Promise<TransactResult> {
     return this.chain.payExp({

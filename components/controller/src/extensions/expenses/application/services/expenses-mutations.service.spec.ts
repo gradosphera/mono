@@ -7,11 +7,13 @@ import type { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input
 import type { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input'
 import type { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
 import type { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input'
+import type { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
 import type { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input'
 
 /**
  * Контракт-тест: 6 mutations пробрасывают payload в `ExpensesBlockchainPort`
- * и проверяют action-mapping; `authorizeExpenseReport` ждёт document2 → 501.
+ * и проверяют action-mapping; `createExpenseProposal`/`authorizeExpenseReport`
+ * ждут document2 → 501.
  */
 describe('ExpensesMutationsService', () => {
   let service: ExpensesMutationsService
@@ -135,5 +137,12 @@ describe('ExpensesMutationsService', () => {
 
     await expect(service.authorizeExpenseReport(input)).rejects.toBeInstanceOf(NotImplementedException)
     await expect(service.authorizeExpenseReport(input)).rejects.toThrow(/decision_doc/)
+  })
+
+  it('createExpenseProposal → NotImplementedException + ссылка на statement_doc/Эпик 2', async () => {
+    const input = { coopname: 'voskhod', proposal_hash: '0xabc' } as CreateExpenseProposalInputDTO
+
+    await expect(service.createExpenseProposal(input)).rejects.toBeInstanceOf(NotImplementedException)
+    await expect(service.createExpenseProposal(input)).rejects.toThrow(/statement_doc/)
   })
 })
