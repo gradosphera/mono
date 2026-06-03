@@ -4,6 +4,8 @@ import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
 import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input';
+import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input';
+import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input';
 
 /**
  * Write-сервис расходов (`expense::payexp` / `reportexp` / `returnexp`).
@@ -39,6 +41,18 @@ export class ExpensesMutationsService {
   async submitExpenseReport(_input: SubmitExpenseReportInputDTO): Promise<TransactionDTO> {
     throw new NotImplementedException(
       'submitExpenseReport: chain-submit подключится после Эпика 0 (cooptypes regen для expense::closeexp).'
+    );
+  }
+
+  async authorizeExpenseReport(_input: AuthorizeExpenseReportInputDTO): Promise<TransactionDTO> {
+    throw new NotImplementedException(
+      'authorizeExpenseReport: chain-submit подключится после Эпика 0 (cooptypes regen для expense::authexp).'
+    );
+  }
+
+  async declineExpenseReport(_input: DeclineExpenseReportInputDTO): Promise<TransactionDTO> {
+    throw new NotImplementedException(
+      'declineExpenseReport: chain-submit подключится после Эпика 0 (cooptypes regen для expense::declineexp).'
     );
   }
 }

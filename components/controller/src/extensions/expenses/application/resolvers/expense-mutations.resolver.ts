@@ -9,6 +9,8 @@ import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
 import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input';
+import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input';
+import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input';
 
 /**
  * GraphQL Mutation-резолвер контракта `expense` (платёж / отчёт / возврат).
@@ -67,5 +69,29 @@ export class ExpenseMutationsResolver {
     @Args('data', { type: () => SubmitExpenseReportInputDTO }) data: SubmitExpenseReportInputDTO
   ): Promise<TransactionDTO> {
     return this.expensesMutations.submitExpenseReport(data);
+  }
+
+  @Mutation(() => TransactionDTO, {
+    name: 'authorizeExpenseReport',
+    description: 'Утвердить СЗ-отчёт (закрытие сметы). Триггерит капитализацию РИД в Благоросте.',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async authorizeExpenseReport(
+    @Args('data', { type: () => AuthorizeExpenseReportInputDTO }) data: AuthorizeExpenseReportInputDTO
+  ): Promise<TransactionDTO> {
+    return this.expensesMutations.authorizeExpenseReport(data);
+  }
+
+  @Mutation(() => TransactionDTO, {
+    name: 'declineExpenseReport',
+    description: 'Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async declineExpenseReport(
+    @Args('data', { type: () => DeclineExpenseReportInputDTO }) data: DeclineExpenseReportInputDTO
+  ): Promise<TransactionDTO> {
+    return this.expensesMutations.declineExpenseReport(data);
   }
 }
