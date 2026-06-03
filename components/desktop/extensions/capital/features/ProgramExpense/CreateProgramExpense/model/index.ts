@@ -2,22 +2,18 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { DigitalDocument } from 'src/shared/lib/document';
 import type { Cooperative } from 'cooptypes';
+import { Zeus } from '@coopenomics/sdk';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import { generateExpenseProposalStatementDocument } from 'app/extensions/expenses/api';
 import { createProgramExpense } from '../api';
 import { useProgramExpenseStore } from 'app/extensions/capital/entities/ProgramExpense/model';
 
-/** Recipient-тип Item (зеркало контрактного enum). */
-export type IProgramExpenseRecipientType = 'SELF' | 'MEMBER' | 'ORG';
-/** Mechanics Item (зеркало контрактного enum). */
-export type IProgramExpenseMechanics = 'ADVANCE' | 'DIRECT';
-
 export interface ICreateProgramExpenseDraftItem {
   number: string;
   description: string;
   amount: string;
-  recipient_type: IProgramExpenseRecipientType;
-  mechanics: IProgramExpenseMechanics;
+  recipient_type: Zeus.ExpenseRecipientType;
+  mechanics: Zeus.ExpenseMechanics;
   recipient_name?: string;
   requisites?: string;
   recipient_account?: string;

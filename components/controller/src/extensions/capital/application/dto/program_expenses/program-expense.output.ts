@@ -1,5 +1,8 @@
-import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { ExpenseProposalStatus } from '~/extensions/expenses/domain/enums/expense-proposal-status.enum';
+import { ExpenseMechanics } from '~/extensions/expenses/domain/enums/expense-mechanics.enum';
+import { ExpenseRecipientType } from '~/extensions/expenses/domain/enums/expense-recipient-type.enum';
+import { ExpenseItemStatus } from '~/extensions/expenses/domain/enums/expense-item-status.enum';
 
 /** Owner-callback из шасси (зеркало InterExpenseCallbackHandler). */
 @ObjectType('CapitalProgramExpenseCallback')
@@ -13,13 +16,13 @@ export class ProgramExpenseCallbackOutputDTO {
 @ObjectType('CapitalProgramExpenseItem')
 export class ProgramExpenseItemOutputDTO {
   @Field(() => String) item_hash!: string;
-  @Field(() => Int) mechanics!: number;
-  @Field(() => Int) recipient_type!: number;
+  @Field(() => ExpenseMechanics) mechanics!: ExpenseMechanics;
+  @Field(() => ExpenseRecipientType) recipient_type!: ExpenseRecipientType;
   @Field(() => String) recipient!: string;
   @Field(() => String) description!: string;
   @Field(() => String) planned_amount!: string;
   @Field(() => String) actual_amount!: string;
-  @Field(() => Int) status!: number;
+  @Field(() => ExpenseItemStatus) status!: ExpenseItemStatus;
 }
 
 /**

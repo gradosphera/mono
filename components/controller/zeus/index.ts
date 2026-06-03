@@ -20727,11 +20727,11 @@ export type ModelTypes = {
 		actual_amount: string,
 	description: string,
 	item_hash: string,
-	mechanics: number,
+	mechanics: ModelTypes["ExpenseMechanics"],
 	planned_amount: string,
 	recipient: string,
-	recipient_type: number,
-	status: number
+	recipient_type: ModelTypes["ExpenseRecipientType"],
+	status: ModelTypes["ExpenseItemStatus"]
 };
 	/** Проект в системе CAPITAL с компонентами */
 ["CapitalProject"]: {
@@ -30046,11 +30046,11 @@ export type GraphQLTypes = {
 	actual_amount: string,
 	description: string,
 	item_hash: string,
-	mechanics: number,
+	mechanics: GraphQLTypes["ExpenseMechanics"],
 	planned_amount: string,
 	recipient: string,
-	recipient_type: number,
-	status: number,
+	recipient_type: GraphQLTypes["ExpenseRecipientType"],
+	status: GraphQLTypes["ExpenseItemStatus"],
 	['...on CapitalProgramExpenseItem']: Omit<GraphQLTypes["CapitalProgramExpenseItem"], "...on CapitalProgramExpenseItem">
 };
 	/** Проект в системе CAPITAL с компонентами */

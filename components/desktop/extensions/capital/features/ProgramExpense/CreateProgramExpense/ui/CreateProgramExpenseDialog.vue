@@ -92,7 +92,7 @@ BaseDialog(
                 label='Описание',
                 placeholder='Назначение расхода'
               )
-            .col-12(v-if='item.recipient_type === "ORG"')
+            .col-12(v-if='item.recipient_type === Zeus.ExpenseRecipientType.ORG')
               BaseInput(
                 v-model='item.requisites',
                 label='Реквизиты получателя',
@@ -112,6 +112,7 @@ BaseDialog(
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
+import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
@@ -144,14 +145,14 @@ const operationCodeOptions = [
 ];
 
 const recipientTypeOptions = [
-  { label: 'Я сам', value: 'SELF' as const },
-  { label: 'Пайщик', value: 'MEMBER' as const },
-  { label: 'Организация', value: 'ORG' as const },
+  { label: 'Я сам', value: Zeus.ExpenseRecipientType.SELF },
+  { label: 'Пайщик', value: Zeus.ExpenseRecipientType.MEMBER },
+  { label: 'Организация', value: Zeus.ExpenseRecipientType.ORG },
 ];
 
 const mechanicsOptions = [
-  { label: 'Аванс под отчёт', value: 'ADVANCE' as const },
-  { label: 'Прямая оплата', value: 'DIRECT' as const },
+  { label: 'Аванс под отчёт', value: Zeus.ExpenseMechanics.ADVANCE },
+  { label: 'Прямая оплата', value: Zeus.ExpenseMechanics.DIRECT },
 ];
 
 const canSubmit = computed(
@@ -167,8 +168,8 @@ function addItem(): void {
     number: String(form.items.length + 1),
     description: '',
     amount: '',
-    recipient_type: 'SELF',
-    mechanics: 'ADVANCE',
+    recipient_type: Zeus.ExpenseRecipientType.SELF,
+    mechanics: Zeus.ExpenseMechanics.ADVANCE,
     recipient_name: '',
     requisites: '',
     recipient_account: '',

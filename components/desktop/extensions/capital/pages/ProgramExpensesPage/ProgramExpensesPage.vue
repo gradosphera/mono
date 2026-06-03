@@ -55,6 +55,7 @@ q-page.program-expenses-page
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { Zeus } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
@@ -93,40 +94,33 @@ function formatDate(iso: string): string {
   }
 }
 
-type ProgramExpenseStatus =
-  | 'CREATED'
-  | 'AUTHORIZED'
-  | 'PARTIALLY_PAID'
-  | 'REPORT_SUBMITTED'
-  | 'CLOSED'
-  | 'DECLINED'
-  | 'UNDEFINED';
-
-function statusLabel(status: ProgramExpenseStatus): string {
-  const map: Record<ProgramExpenseStatus, string> = {
-    CREATED: 'Создан',
-    AUTHORIZED: 'Авторизован',
-    PARTIALLY_PAID: 'Частично оплачен',
-    REPORT_SUBMITTED: 'Отчёт подан',
-    CLOSED: 'Закрыт',
-    DECLINED: 'Отклонён',
-    UNDEFINED: 'Неизвестно',
+function statusLabel(status: Zeus.ExpenseProposalStatus): string {
+  const map: Record<Zeus.ExpenseProposalStatus, string> = {
+    [Zeus.ExpenseProposalStatus.CREATED]: 'Создан',
+    [Zeus.ExpenseProposalStatus.AUTHORIZED]: 'Авторизован',
+    [Zeus.ExpenseProposalStatus.PARTIALLY_PAID]: 'Частично оплачен',
+    [Zeus.ExpenseProposalStatus.REPORT_SUBMITTED]: 'Отчёт подан',
+    [Zeus.ExpenseProposalStatus.CLOSED]: 'Закрыт',
+    [Zeus.ExpenseProposalStatus.DECLINED]: 'Отклонён',
+    [Zeus.ExpenseProposalStatus.UNDEFINED]: 'Неизвестно',
   };
   return map[status] ?? status;
 }
 
-function statusVariant(status: ProgramExpenseStatus): 'neutral' | 'pos' | 'warn' | 'neg' | 'info' | 'accent' {
+function statusVariant(
+  status: Zeus.ExpenseProposalStatus,
+): 'neutral' | 'pos' | 'warn' | 'neg' | 'info' | 'accent' {
   switch (status) {
-    case 'CLOSED':
+    case Zeus.ExpenseProposalStatus.CLOSED:
       return 'pos';
-    case 'AUTHORIZED':
+    case Zeus.ExpenseProposalStatus.AUTHORIZED:
       return 'accent';
-    case 'PARTIALLY_PAID':
-    case 'REPORT_SUBMITTED':
+    case Zeus.ExpenseProposalStatus.PARTIALLY_PAID:
+    case Zeus.ExpenseProposalStatus.REPORT_SUBMITTED:
       return 'warn';
-    case 'DECLINED':
+    case Zeus.ExpenseProposalStatus.DECLINED:
       return 'neg';
-    case 'CREATED':
+    case Zeus.ExpenseProposalStatus.CREATED:
       return 'info';
     default:
       return 'neutral';

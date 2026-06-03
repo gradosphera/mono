@@ -6,13 +6,15 @@ import {
   INTER_EXPENSE_CHASSIS,
   type InterExpenseChassisPort,
   type InterExpenseItem,
-  type InterExpensePagination,
-  type InterExpensePaginatedResult,
   type InterExpenseProposalRead,
   type InterExpenseProposalStatus,
 } from '@coopenomics/inter';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
+import {
+  PaginationInputDTO,
+  type PaginationResult,
+} from '~/application/common/dto/pagination.dto';
 import type { CreateProgramExpenseInputDTO } from '../dto/program_expenses/create-program-expense.input';
 import type { TopupProgramExpenseInputDTO } from '../dto/program_expenses/topup-program-expense.input';
 import type {
@@ -23,6 +25,7 @@ import type {
 import { ExpenseProposalStatus } from '~/extensions/expenses/domain/enums/expense-proposal-status.enum';
 import { ExpenseMechanics } from '~/extensions/expenses/domain/enums/expense-mechanics.enum';
 import { ExpenseRecipientType } from '~/extensions/expenses/domain/enums/expense-recipient-type.enum';
+import { ExpenseItemStatus } from '~/extensions/expenses/domain/enums/expense-item-status.enum';
 
 /**
  * Управление программными расходами Капитала.
@@ -78,12 +81,29 @@ export class ProgramExpensesManagementService {
 
   async listProgramExpenses(
     coopname: string,
-    pagination?: InterExpensePagination,
-  ): Promise<InterExpensePaginatedResult<ProgramExpenseOutputDTO>> {
-    const result = await this.expenseChassis.listProposalsByOwner(coopname, 'capital', 'onpgexpdone', pagination);
+    options?: PaginationInputDTO,
+  ): Promise<PaginationResult<ProgramExpenseOutputDTO>> {
+    const limit = options?.limit;
+    const page = options?.page != null ? Math.max(1, options.page) : 1;
+    const offset = limit != null ? (page - 1) * limit : undefined;
+    const sortBy = options?.sortBy === 'createdAt' || options?.sortBy === 'updatedAt' ? options.sortBy : undefined;
+    const sortOrder = options?.sortOrder === 'ASC' || options?.sortOrder === 'DESC' ? options.sortOrder : undefined;
+
+    const result = await this.expenseChassis.listProposalsByOwner(coopname, 'capital', 'onpgexpdone', {
+      limit,
+      offset,
+      sortBy,
+      sortOrder,
+    });
+
+    const items = result.items.map((p) => this.toOutput(p));
+    const totalPages = limit != null ? Math.max(1, Math.ceil(result.totalCount / limit)) : 1;
+
     return {
-      items: result.items.map((p) => this.toOutput(p)),
+      items,
       totalCount: result.totalCount,
+      totalPages,
+      currentPage: page,
     };
   }
 
@@ -112,13 +132,13 @@ export class ProgramExpensesManagementService {
   private toItemOutput(it: InterExpenseItem): ProgramExpenseItemOutputDTO {
     return {
       item_hash: it.itemHash,
-      mechanics: it.mechanics,
-      recipient_type: it.recipientType,
+      mechanics: this.mapMechanics(it.mechanics),
+      recipient_type: this.mapRecipientType(it.recipientType),
       recipient: it.recipient,
       description: it.description,
       planned_amount: it.plannedAmount,
       actual_amount: it.actualAmount,
-      status: it.status,
+      status: this.mapItemStatus(it.status),
     };
   }
 
@@ -142,6 +162,33 @@ export class ProgramExpensesManagementService {
         return ExpenseProposalStatus.DECLINED;
       default:
         return ExpenseProposalStatus.UNDEFINED;
+    }
+  }
+
+  private mapMechanics(raw: number): ExpenseMechanics {
+    return raw === 1 ? ExpenseMechanics.DIRECT : ExpenseMechanics.ADVANCE;
+  }
+
+  private mapRecipientType(raw: number): ExpenseRecipientType {
+    if (raw === 2) return ExpenseRecipientType.ORG;
+    if (raw === 1) return ExpenseRecipientType.MEMBER;
+    return ExpenseRecipientType.SELF;
+  }
+
+  private mapItemStatus(raw: number): ExpenseItemStatus {
+    switch (raw) {
+      case 0:
+        return ExpenseItemStatus.APPROVED;
+      case 1:
+        return ExpenseItemStatus.PAID;
+      case 2:
+        return ExpenseItemStatus.REPORTED;
+      case 3:
+        return ExpenseItemStatus.RETURNED;
+      case 4:
+        return ExpenseItemStatus.OVERSPENT;
+      default:
+        return ExpenseItemStatus.UNDEFINED;
     }
   }
 }

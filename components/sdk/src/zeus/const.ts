@@ -2743,11 +2743,11 @@ export const ReturnTypes: Record<string,any> = {
 		actual_amount:"String",
 		description:"String",
 		item_hash:"String",
-		mechanics:"Int",
+		mechanics:"ExpenseMechanics",
 		planned_amount:"String",
 		recipient:"String",
-		recipient_type:"Int",
-		status:"Int"
+		recipient_type:"ExpenseRecipientType",
+		status:"ExpenseItemStatus"
 	},
 	CapitalProject:{
 		_created_at:"DateTime",
