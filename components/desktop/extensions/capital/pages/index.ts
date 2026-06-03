@@ -24,3 +24,4 @@ export * from './ComponentVotingPage';
 export * from './ComponentResultsPage';
 export * from './InvitationsPage';
 export * from './ProcessesPage';
+export * from './ProgramExpensesPage';
