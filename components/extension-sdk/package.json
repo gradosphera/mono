@@ -2,25 +2,15 @@
   "name": "@coopenomics/extension-sdk",
   "version": "0.1.0",
   "description": "SDK для разработки backend-расширений Apollo Federation v2 subgraph'ов экосистемы кооперативов",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
   "files": [
     "dist",
     "templates",
     "README.md"
   ],
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
+    "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
