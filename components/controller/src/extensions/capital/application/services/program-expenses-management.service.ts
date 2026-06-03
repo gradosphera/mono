@@ -12,7 +12,9 @@ import {
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import {
+  buildPaginationResult,
   PaginationInputDTO,
+  paginationInputToOffset,
   type PaginationResult,
 } from '~/application/common/dto/pagination.dto';
 import type { CreateProgramExpenseInputDTO } from '../dto/program_expenses/create-program-expense.input';
@@ -83,28 +85,17 @@ export class ProgramExpensesManagementService {
     coopname: string,
     options?: PaginationInputDTO,
   ): Promise<PaginationResult<ProgramExpenseOutputDTO>> {
-    const limit = options?.limit;
-    const page = options?.page != null ? Math.max(1, options.page) : 1;
-    const offset = limit != null ? (page - 1) * limit : undefined;
-    const sortBy = options?.sortBy === 'createdAt' || options?.sortBy === 'updatedAt' ? options.sortBy : undefined;
-    const sortOrder = options?.sortOrder === 'ASC' || options?.sortOrder === 'DESC' ? options.sortOrder : undefined;
+    const { limit, offset, sortBy, sortOrder } = paginationInputToOffset(options);
+    const allowedSort = sortBy === 'createdAt' || sortBy === 'updatedAt' ? sortBy : undefined;
 
     const result = await this.expenseChassis.listProposalsByOwner(coopname, 'capital', 'onpgexpdone', {
       limit,
       offset,
-      sortBy,
+      sortBy: allowedSort,
       sortOrder,
     });
 
-    const items = result.items.map((p) => this.toOutput(p));
-    const totalPages = limit != null ? Math.max(1, Math.ceil(result.totalCount / limit)) : 1;
-
-    return {
-      items,
-      totalCount: result.totalCount,
-      totalPages,
-      currentPage: page,
-    };
+    return buildPaginationResult(result, options, (p) => this.toOutput(p));
   }
 
   async getProgramExpense(coopname: string, expenseHash: string): Promise<ProgramExpenseOutputDTO | null> {
