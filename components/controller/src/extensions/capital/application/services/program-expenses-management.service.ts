@@ -21,6 +21,8 @@ import type {
   ProgramExpenseOutputDTO,
 } from '../dto/program_expenses/program-expense.output';
 import { ExpenseProposalStatus } from '~/extensions/expenses/domain/enums/expense-proposal-status.enum';
+import { ExpenseMechanics } from '~/extensions/expenses/domain/enums/expense-mechanics.enum';
+import { ExpenseRecipientType } from '~/extensions/expenses/domain/enums/expense-recipient-type.enum';
 
 /**
  * Управление программными расходами Капитала.
@@ -48,8 +50,13 @@ export class ProgramExpensesManagementService {
       operation_code: data.operation_code,
       items: data.items.map((it) => ({
         item_hash: it.item_hash,
-        mechanics: Number(it.mechanics),
-        recipient_type: Number(it.recipient_type),
+        mechanics: it.mechanics === ExpenseMechanics.DIRECT ? 1 : 0,
+        recipient_type:
+          it.recipient_type === ExpenseRecipientType.SELF
+            ? 0
+            : it.recipient_type === ExpenseRecipientType.MEMBER
+              ? 1
+              : 2,
         recipient: it.recipient,
         description: it.description,
         planned_amount: it.planned_amount,
