@@ -66,4 +66,33 @@ export class AppsCatalogHttpService {
       return [];
     }
   }
+
+  /**
+   * Story 9.4.b: получить install.js пакета remote-расширения.
+   *
+   * Возвращает plain CJS-текст из ca-admin endpoint'а
+   * `GET /v1/public/packages/:scope/:name/install.js`. На degraded mode
+   * (без env-config'а apps-catalog'а) либо если ca-admin отвечает 404
+   * — возвращает `null`, чтобы desktop'у было ясно «нет такого пакета /
+   * каталог недоступен» вместо ошибки 500 в браузере.
+   *
+   * @param scope владелец пакета (`voskhod` из `@voskhod/demo-app`).
+   * @param name  short-name пакета (`demo-app`).
+   */
+  async fetchInstallScript(scope: string, name: string): Promise<string | null> {
+    if (!this.client) return null;
+    try {
+      const res = await this.client.get<string>(
+        `/v1/public/packages/${encodeURIComponent(scope)}/${encodeURIComponent(name)}/install.js`,
+        { responseType: 'text', transformResponse: (data) => data as string },
+      );
+      return typeof res.data === 'string' ? res.data : String(res.data);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(
+        `apps-catalog install.js fetch failed for ${scope}/${name}: ${msg}`,
+      );
+      return null;
+    }
+  }
 }
