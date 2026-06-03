@@ -1,5 +1,14 @@
 import type { IDocumentAggregate, IDocumentPackageAggregate } from 'src/entities/Document/model/types';
+import { Cooperative } from 'cooptypes';
 import { getShortNameFromCertificate } from '../utils/getNameFromCertificate';
+
+/**
+ * Восстанавливает ровно подписанный формат signed_at (SDK подписывает ISO UTC без дробных секунд и без Z).
+ * Чистая строковая операция без reparse через Date — нет риска сдвига часового пояса. Гарантирует, что
+ * .sig несёт байт-в-байт ту строку, что вошла в signed_hash, и C4-проверка проходит без нормализации.
+ */
+const canonicalSignedAt = (s: string | null | undefined): string =>
+  (s ?? '').replace(/\.\d+/, '').replace(/[zZ]$/, '');
 
 type ZipEntry = {
   name: string;
@@ -366,7 +375,9 @@ const SIG_HASH_OID_SHA256 = '2.16.840.1.101.3.4.2.1';
  * в верхнем регистре (SHA-256 байтов PDF), `meta_hash`/`hash` — из SDK в нижнем. Верификатор
  * сверяет хэш-цепочку именно по этим строкам (C3 конкатенирует их без нормализации регистра).
  *
- * canonicalization='legacy-node-stringify': SDK считает meta_hash как SHA-256(JSON.stringify(meta)).
+ * Режим канонизации выбирается по версии подписи документа:
+ *   1.0.0 → 'legacy-node-stringify' (SHA-256(JSON.stringify(meta)), недетерминированный),
+ *   1.1.0 → 'jcs-1.0' (RFC 8785, детерминированный) — meta_hash совпадает с верификатором.
  */
 const buildSigFile = (
   aggregate: IDocumentAggregate,
@@ -377,7 +388,7 @@ const buildSigFile = (
   const signatures = doc?.signatures ?? [];
   return {
     v: '2.0',
-    canonicalization: 'legacy-node-stringify',
+    canonicalization: Cooperative.Document.canonicalizationForVersion(doc?.version),
     algorithm: { name: 'ecdsa-secp256k1', oid: SIG_ALGORITHM_OID_SECP256K1 },
     hash: { name: 'sha256', oid: SIG_HASH_OID_SHA256 },
     content: { filename: pdfName, mime: 'application/pdf' },
@@ -390,7 +401,7 @@ const buildSigFile = (
     signatures: signatures.map((signature) => ({
       public_key: signature.public_key,
       signature: signature.signature,
-      signed_at: signature.signed_at,
+      signed_at: canonicalSignedAt(signature.signed_at),
       signed_hash: signature.signed_hash,
       signer_certificate: signature.signer_certificate ?? null,
       issuer_signature: null,
