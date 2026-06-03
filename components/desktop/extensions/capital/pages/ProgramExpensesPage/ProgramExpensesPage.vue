@@ -3,18 +3,16 @@ q-page.program-expenses-page
   .header
     .header__left
       h1.t-h2 Управление расходами программы
-      .t-body-sm.muted Программные расходы Капитала через шасси расходов.
+      p.t-sm.t-muted Программные расходы Капитала через шасси расходов.
     .header__actions
-      BaseButton(
-        variant='ghost',
-        icon='account_balance_wallet',
-        @click='openTopup'
-      ) Пополнить пул
-      BaseButton(
-        variant='primary',
-        icon='add',
-        @click='openCreate'
-      ) Создать расход
+      BaseButton(variant='ghost', @click='openTopup')
+        template(#icon-left)
+          q-icon(name='account_balance_wallet', size='18px')
+        | Пополнить пул
+      BaseButton(variant='primary', @click='openCreate')
+        template(#icon-left)
+          q-icon(name='add', size='18px')
+        | Создать расход
 
   .content(v-if='store.programExpenses && store.programExpenses.items.length')
     .row.q-col-gutter-md
@@ -23,7 +21,7 @@ q-page.program-expenses-page
           .row-card
             .row-card__head
               .row-card__title {{ item.description || '— без описания —' }}
-              BaseChip(:label='statusLabel(item.status)', :tone='statusTone(item.status)')
+              BaseChip(:variant='statusVariant(item.status)') {{ statusLabel(item.status) }}
             .row-card__amount {{ item.total_planned }}
             .row-card__meta
               .meta-row
@@ -117,16 +115,19 @@ function statusLabel(status: ProgramExpenseStatus): string {
   return map[status] ?? status;
 }
 
-function statusTone(status: ProgramExpenseStatus): 'neutral' | 'positive' | 'warning' | 'danger' {
+function statusVariant(status: ProgramExpenseStatus): 'neutral' | 'pos' | 'warn' | 'neg' | 'info' | 'accent' {
   switch (status) {
     case 'CLOSED':
-      return 'positive';
+      return 'pos';
     case 'AUTHORIZED':
+      return 'accent';
     case 'PARTIALLY_PAID':
     case 'REPORT_SUBMITTED':
-      return 'warning';
+      return 'warn';
     case 'DECLINED':
-      return 'danger';
+      return 'neg';
+    case 'CREATED':
+      return 'info';
     default:
       return 'neutral';
   }
@@ -164,15 +165,10 @@ function statusTone(status: ProgramExpenseStatus): 'neutral' | 'positive' | 'war
   gap: var(--p-2);
 }
 
-.muted {
-  color: var(--p-muted);
-}
-
 .row-card {
   display: flex;
   flex-direction: column;
   gap: var(--p-3);
-  padding: var(--p-4);
 }
 
 .row-card__head {
@@ -185,13 +181,13 @@ function statusTone(status: ProgramExpenseStatus): 'neutral' | 'positive' | 'war
 .row-card__title {
   font-size: var(--p-fs-body);
   font-weight: 600;
-  color: var(--p-text);
+  color: var(--p-ink);
 }
 
 .row-card__amount {
   font-size: var(--p-fs-h3);
   font-weight: 700;
-  color: var(--p-text);
+  color: var(--p-ink);
 }
 
 .row-card__meta {
@@ -208,17 +204,17 @@ function statusTone(status: ProgramExpenseStatus): 'neutral' | 'positive' | 'war
 }
 
 .meta-key {
-  color: var(--p-muted);
+  color: var(--p-ink-2);
 }
 
 .meta-val {
-  color: var(--p-text);
+  color: var(--p-ink);
 }
 
 .row-card__hash {
   font-family: var(--p-font-mono, monospace);
-  font-size: var(--p-fs-body-xs);
-  color: var(--p-muted);
+  font-size: var(--p-fs-meta);
+  color: var(--p-ink-2);
 }
 
 .empty {

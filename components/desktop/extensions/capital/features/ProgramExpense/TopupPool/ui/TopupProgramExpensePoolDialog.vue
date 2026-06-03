@@ -6,7 +6,7 @@ BaseDialog(
   @update:model-value='$emit("update:modelValue", $event)'
 )
   .form
-    .t-section.q-mb-sm Перевод средств из инвестиционного пула в пул программных расходов
+    .t-eyebrow.t-muted.q-mb-sm Перевод средств из инвестиционного пула в пул программных расходов
     BaseInput(
       v-model='amount',
       label='Сумма пополнения',
@@ -76,7 +76,7 @@ async function submit(): Promise<void> {
 }
 
 .hint {
-  color: var(--p-muted);
+  color: var(--p-ink-2);
   font-size: var(--p-fs-body-sm);
 }
 

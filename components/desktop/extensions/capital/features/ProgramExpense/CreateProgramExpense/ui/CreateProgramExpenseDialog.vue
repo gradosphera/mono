@@ -7,7 +7,7 @@ BaseDialog(
 )
   .create-form
     .field-group
-      .t-section.q-mb-sm Цель и параметры
+      .t-eyebrow.t-muted.q-mb-sm Цель и параметры
       BaseInput(
         v-model='form.description',
         label='Цель расходов',
@@ -26,13 +26,11 @@ BaseDialog(
 
     .field-group
       .field-group__head
-        .t-section Строки расходов
-        BaseButton(
-          variant='ghost',
-          size='sm',
-          icon='add',
-          @click='addItem'
-        ) Добавить позицию
+        .t-eyebrow.t-muted Строки расходов
+        BaseButton(variant='ghost', size='sm', @click='addItem')
+          template(#icon-left)
+            q-icon(name='add', size='16px')
+          | Добавить позицию
 
       .empty-items(v-if='!form.items.length')
         EmptyState(
@@ -45,13 +43,9 @@ BaseDialog(
       .items
         .item-card(v-for='(item, idx) in form.items', :key='idx')
           .item-card__head
-            .t-section-sm Позиция №{{ idx + 1 }}
-            BaseButton(
-              variant='ghost',
-              size='sm',
-              icon='delete',
-              @click='removeItem(idx)'
-            )
+            .t-sm Позиция №{{ idx + 1 }}
+            BaseButton(variant='ghost', size='sm', icon-only, aria-label='Удалить позицию', @click='removeItem(idx)')
+              q-icon(name='delete', size='16px')
           .row.q-col-gutter-sm
             .col-12.col-md-6
               q-select(
