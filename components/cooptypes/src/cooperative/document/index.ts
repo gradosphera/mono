@@ -241,10 +241,19 @@ export interface IComplexAgenda2 extends IAgenda {
 
 /**
  * Режим канонизации `meta` при вычислении meta_hash (см. SigFile v2.0).
- *   'legacy-node-stringify' — текущая логика SDK: SHA-256(JSON.stringify(meta)).
- *   'jcs-1.0'               — RFC 8785 (задел; реальные документы пока legacy).
+ *   'legacy-node-stringify' — версия подписи 1.0.0: SHA-256(JSON.stringify(meta)), недетерминированная (зависит от порядка ключей).
+ *   'jcs-1.0'               — версия подписи 1.1.0: RFC 8785, детерминированная (порядок ключей не влияет).
  */
 export type CanonicalizationMode = 'jcs-1.0' | 'legacy-node-stringify'
+
+/**
+ * Режим канонизации по версии алгоритма подписи документа.
+ * 1.1.0+ → детерминированный JCS; всё остальное (1.0.0/пусто) → legacy.
+ * Единый источник соответствия для desktop-экспорта .sig и верификатора.
+ */
+export function canonicalizationForVersion(version: string | undefined): CanonicalizationMode {
+  return version === '1.1.0' ? 'jcs-1.0' : 'legacy-node-stringify'
+}
 
 /** OID secp256k1 ECDSA. */
 export const SIG_ALGORITHM_OID_SECP256K1 = '1.3.132.0.10'
