@@ -1,15 +1,15 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ExpenseItemInputDTO } from './expense-item.input';
+import { ExpenseCallbackInputDTO } from './expense-callback.input';
+import { ExpenseProposalStatementSignedDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-statement-document.dto';
 
 /**
- * Input создания СЗ-расхода (председатель / пайщик подаёт смету).
+ * Input создания и подачи СЗ-расхода (создатель сметы — пайщик / председатель).
  *
- * На-цепи: `expense::createexp` (terminal-переход → CREATED).
- * Требует document2 `statement_doc` (type=2010) от signature-pipeline UI Эпика 2 —
- * остальные бизнес-поля (`operation_code`, `source_wallet`, `items`,
- * `callback`, `mechanics`) дойдут расширением DTO одновременно с подключением
- * document2. Сейчас регистрируется минимальная сигнатура, чтобы UI и SDK
- * видели mutation `createExpenseProposal` end-to-end.
+ * Сабмит: `expense::createexp` через `ExpensesBlockchainPort.createExp`.
+ * Подпись `statement` (registry 2010) сделана на стороне UI через `Classes.Document`.
  */
 @InputType('CreateExpenseProposalInput')
 export class CreateExpenseProposalInputDTO {
@@ -18,8 +18,50 @@ export class CreateExpenseProposalInputDTO {
   @IsString()
   coopname!: string;
 
+  @Field(() => String, { description: 'Имя пайщика-создателя СЗ.' })
+  @IsNotEmpty()
+  @IsString()
+  username!: string;
+
   @Field(() => String, { description: 'Хеш сметы расхода (детерминированный, из UI).' })
   @IsNotEmpty()
   @IsString()
   proposal_hash!: string;
+
+  @Field(() => String, {
+    description: 'Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir").',
+  })
+  @IsNotEmpty()
+  @IsString()
+  operation_code!: string;
+
+  @Field(() => String, {
+    description: 'Источник средств (eosio::name кошелька-источника, eg "w.cap.blago").',
+  })
+  @IsNotEmpty()
+  @IsString()
+  source_wallet!: string;
+
+  @Field(() => [ExpenseItemInputDTO], { description: 'Строки расхода (массив items).' })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ExpenseItemInputDTO)
+  items!: ExpenseItemInputDTO[];
+
+  @Field(() => ExpenseCallbackInputDTO, {
+    nullable: true,
+    description: 'Callback на финализацию closeexp (опционально).',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ExpenseCallbackInputDTO)
+  callback?: ExpenseCallbackInputDTO;
+
+  @Field(() => ExpenseProposalStatementSignedDocumentInputDTO, {
+    description: 'Подписанная СЗ-смета (document2, registry 2010).',
+  })
+  @ValidateNested()
+  @Type(() => ExpenseProposalStatementSignedDocumentInputDTO)
+  statement!: ExpenseProposalStatementSignedDocumentInputDTO;
 }

@@ -1,6 +1,6 @@
 # Expenses Extension — шасси расходов (C28-31)
 
-**Статус:** scaffold-stub (план файловой структуры). Реализация ждёт C28-29 (контракт `expenses`).
+**Статус:** implemented (8 actions полного lifecycle, sync-сервис, GraphQL).
 
 ## Скоуп расширения
 

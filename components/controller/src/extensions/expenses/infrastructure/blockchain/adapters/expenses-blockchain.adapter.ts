@@ -11,11 +11,9 @@ import { ExpensesBlockchainPort } from '../../../domain/interfaces/expenses-bloc
  * Адаптер блокчейн-порта `expense`. Канон взят с `CapitalBlockchainAdapter`:
  * подпись ключом кооператива (`active` permission), `account = contractName.production`.
  *
- * 6 actions без document2:
- * `payexp` / `reportexp` / `returnexp` / `overspendexp` / `closeexp` / `declexp`.
- *
- * `createexp` + `authexp` подключатся отдельным шагом после расшивки
- * signature-pipeline UI Эпика 2 (document2 type=2010/2011).
+ * 8 actions полного lifecycle: createexp / authexp / payexp / reportexp / returnexp /
+ * overspendexp / closeexp / declexp. Документы document2 (statement / decision) идут
+ * как часть `data` action'а — wharfkit сериализует поля по C++ struct document2.
  */
 @Injectable()
 export class ExpensesBlockchainAdapter implements ExpensesBlockchainPort {
@@ -30,6 +28,26 @@ export class ExpensesBlockchainAdapter implements ExpensesBlockchainPort {
       throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции')
     }
     this.blockchainService.initialize(coopname, wif)
+  }
+
+  async createExp(data: ExpenseContract.Actions.CreateExp.ICreateExp): Promise<TransactResult> {
+    await this.initWithCoopKey(data.coopname)
+    return this.blockchainService.transact({
+      account: ExpenseContract.contractName.production,
+      name: ExpenseContract.Actions.CreateExp.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    })
+  }
+
+  async authExp(data: ExpenseContract.Actions.AuthExp.IAuthExp): Promise<TransactResult> {
+    await this.initWithCoopKey(data.coopname)
+    return this.blockchainService.transact({
+      account: ExpenseContract.contractName.production,
+      name: ExpenseContract.Actions.AuthExp.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    })
   }
 
   async payExp(data: ExpenseContract.Actions.PayExp.IPayExp): Promise<TransactResult> {

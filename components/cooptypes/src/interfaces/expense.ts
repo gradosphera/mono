@@ -12,17 +12,22 @@ export type IUint64 = number | string
 
 /**
  * Документ document2 (signact1/signact2 — двухподписные акты).
- * Локальная копия — см. capital/ledger/wallet — codegen дублирует на контракт.
+ * Точная копия C++ struct document2 из components/contracts/cpp/lib/domain/document_core.hpp.
  */
 export interface IDocument2 {
+  version: string
   hash: IChecksum256
-  meta: string
   doc_hash: IChecksum256
+  meta_hash: IChecksum256
+  meta: string
   signatures: ISignature2[]
 }
 
 export interface ISignature2 {
+  id: IUint32
+  signed_hash: IChecksum256
   signer: IName
+  public_key: string
   signature: string
   signed_at: ITimePointSec
   meta: string

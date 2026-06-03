@@ -1,4 +1,3 @@
-import { NotImplementedException } from '@nestjs/common'
 import { ExpensesMutationsService } from './expenses-mutations.service'
 import type { ExpensesBlockchainPort } from '../../domain/interfaces/expenses-blockchain.port'
 import type { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
@@ -9,11 +8,13 @@ import type { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.i
 import type { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input'
 import type { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
 import type { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input'
+import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum'
+import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum'
 
 /**
- * Контракт-тест: 6 mutations пробрасывают payload в `ExpensesBlockchainPort`
- * и проверяют action-mapping; `createExpenseProposal`/`authorizeExpenseReport`
- * ждут document2 → 501.
+ * Контракт-тест: все 8 mutations пробрасывают payload в `ExpensesBlockchainPort`
+ * с корректным action-mapping. createExpenseProposal/authorizeExpenseReport
+ * раскладывают подписанный document2 через `.toDocument()`.
  */
 describe('ExpensesMutationsService', () => {
   let service: ExpensesMutationsService
@@ -23,6 +24,8 @@ describe('ExpensesMutationsService', () => {
 
   beforeEach(() => {
     chain = {
+      createExp: jest.fn().mockResolvedValue(fakeResult),
+      authExp: jest.fn().mockResolvedValue(fakeResult),
       payExp: jest.fn().mockResolvedValue(fakeResult),
       reportExp: jest.fn().mockResolvedValue(fakeResult),
       returnExp: jest.fn().mockResolvedValue(fakeResult),
@@ -31,6 +34,88 @@ describe('ExpensesMutationsService', () => {
       declineExp: jest.fn().mockResolvedValue(fakeResult),
     }
     service = new ExpensesMutationsService(chain)
+  })
+
+  const makeSignedDoc = (overrides: Partial<{ hash: string; doc_hash: string; meta_hash: string }> = {}) => ({
+    version: '1',
+    hash: overrides.hash ?? '0xhash',
+    doc_hash: overrides.doc_hash ?? '0xdoc',
+    meta_hash: overrides.meta_hash ?? '0xmeta',
+    meta: { title: 'Заявление', registry_id: 2010 },
+    signatures: [
+      {
+        id: 0,
+        signed_hash: '0xsignedhash',
+        signer: 'ivanov',
+        public_key: 'EOS6...',
+        signature: 'SIG_K1_...',
+        signed_at: '2026-06-02T10:00:00',
+        meta: '',
+      },
+    ],
+    toDocument(): any {
+      return {
+        version: '1',
+        hash: overrides.hash ?? '0xhash',
+        doc_hash: overrides.doc_hash ?? '0xdoc',
+        meta_hash: overrides.meta_hash ?? '0xmeta',
+        meta: JSON.stringify({ title: 'Заявление', registry_id: 2010 }),
+        signatures: this.signatures,
+      }
+    },
+  })
+
+  it('createExpenseProposal → chain.createExp с раскладкой items + document2', async () => {
+    const input: CreateExpenseProposalInputDTO = {
+      coopname: 'voskhod',
+      username: 'ivanov',
+      proposal_hash: '0xabc',
+      operation_code: 'o.exp.blgadv',
+      source_wallet: 'w.cap.blago',
+      items: [
+        {
+          item_hash: '0xitem1',
+          mechanics: ExpenseMechanics.ADVANCE,
+          recipient_type: ExpenseRecipientType.MEMBER,
+          recipient: 'petrov',
+          description: 'Закупка кормов',
+          planned_amount: '5000.0000 RUB',
+        },
+      ],
+      statement: makeSignedDoc() as any,
+    } as CreateExpenseProposalInputDTO
+
+    await service.createExpenseProposal(input)
+
+    expect(chain.createExp).toHaveBeenCalledTimes(1)
+    const call = chain.createExp.mock.calls[0][0]
+    expect(call.coopname).toBe('voskhod')
+    expect(call.username).toBe('ivanov')
+    expect(call.proposal_hash).toBe('0xabc')
+    expect(call.operation_code).toBe('o.exp.blgadv')
+    expect(call.source_wallet).toBe('w.cap.blago')
+    expect(call.items).toHaveLength(1)
+    expect(call.items[0].item_hash).toBe('0xitem1')
+    expect(call.items[0].mechanics).toBe(0)
+    expect(call.items[0].recipient_type).toBe(1)
+    expect(call.callback).toEqual({ contract: '', action: '', data: '' })
+    expect(call.statement.doc_hash).toBe('0xdoc')
+  })
+
+  it('authorizeExpenseReport → chain.authExp с decision document2', async () => {
+    const input: AuthorizeExpenseReportInputDTO = {
+      coopname: 'voskhod',
+      proposal_hash: '0xabc',
+      decision: makeSignedDoc({ doc_hash: '0xdecdoc' }) as any,
+    } as AuthorizeExpenseReportInputDTO
+
+    await service.authorizeExpenseReport(input)
+
+    expect(chain.authExp).toHaveBeenCalledTimes(1)
+    const call = chain.authExp.mock.calls[0][0]
+    expect(call.coopname).toBe('voskhod')
+    expect(call.proposal_hash).toBe('0xabc')
+    expect(call.decision.doc_hash).toBe('0xdecdoc')
   })
 
   it('payExpenseItem → chain.payExp({coopname, proposal_hash, item_hash, actual_amount})', async () => {
@@ -103,7 +188,7 @@ describe('ExpensesMutationsService', () => {
     })
   })
 
-  it('submitExpenseReport → chain.closeExp({coopname, proposal_hash}) без total/comment', async () => {
+  it('submitExpenseReport → chain.closeExp({coopname, proposal_hash})', async () => {
     const input = {
       coopname: 'voskhod',
       proposal_hash: '0xabc',
@@ -130,19 +215,5 @@ describe('ExpensesMutationsService', () => {
       proposal_hash: '0xabc',
       reason: 'не утверждаю',
     })
-  })
-
-  it('authorizeExpenseReport → NotImplementedException + ссылка на decision_doc/Эпик 2', async () => {
-    const input = { coopname: 'voskhod', proposal_hash: '0xabc' } as AuthorizeExpenseReportInputDTO
-
-    await expect(service.authorizeExpenseReport(input)).rejects.toBeInstanceOf(NotImplementedException)
-    await expect(service.authorizeExpenseReport(input)).rejects.toThrow(/decision_doc/)
-  })
-
-  it('createExpenseProposal → NotImplementedException + ссылка на statement_doc/Эпик 2', async () => {
-    const input = { coopname: 'voskhod', proposal_hash: '0xabc' } as CreateExpenseProposalInputDTO
-
-    await expect(service.createExpenseProposal(input)).rejects.toBeInstanceOf(NotImplementedException)
-    await expect(service.createExpenseProposal(input)).rejects.toThrow(/statement_doc/)
   })
 })

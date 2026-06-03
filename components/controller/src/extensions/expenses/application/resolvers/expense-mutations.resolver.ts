@@ -15,11 +15,12 @@ import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.
 import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input';
 
 /**
- * GraphQL Mutation-резолвер контракта `expense` (платёж / отчёт / возврат).
+ * GraphQL Mutation-резолвер контракта `expense`.
  *
- * Сервис пока бросает `NotImplementedException` (см. `ExpensesMutationsService`) —
- * подключение write-mutation pool отложено до Эпика 0 (cooptypes regen).
- * Резолвер регистрируется в схеме, чтобы UI и SDK сразу видели сигнатуру.
+ * 8 actions полного lifecycle: createExpenseProposal / authorizeExpenseReport /
+ * payExpenseItem / reportExpenseItem / returnExpenseItem / overspendExpenseItem /
+ * submitExpenseReport / declineExpenseReport. Все маршрутизируются в
+ * `ExpensesMutationsService`, который сабмитит через `ExpensesBlockchainPort`.
  */
 @Resolver()
 export class ExpenseMutationsResolver {

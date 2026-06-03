@@ -45,6 +45,38 @@ describe('ExpensesBlockchainAdapter', () => {
     )
   }
 
+  const fakeDoc2 = {
+    version: '1',
+    hash: '0xh',
+    doc_hash: '0xd',
+    meta_hash: '0xm',
+    meta: '{}',
+    signatures: [],
+  } as any
+
+  it('createExp → transact(expense, createexp, [{coopname, active}])', async () => {
+    await adapter.createExp({
+      coopname,
+      username: 'ivanov',
+      proposal_hash: '0xabc',
+      operation_code: 'o.exp.blgadv',
+      source_wallet: 'w.cap.blago',
+      items: [],
+      callback: { contract: '', action: '', data: '' },
+      statement: fakeDoc2,
+    })
+    assertTransactShape(ExpenseContract.Actions.CreateExp.actionName)
+  })
+
+  it('authExp → transact(expense, authexp, ...)', async () => {
+    await adapter.authExp({
+      coopname,
+      proposal_hash: '0xabc',
+      decision: fakeDoc2,
+    })
+    assertTransactShape(ExpenseContract.Actions.AuthExp.actionName)
+  })
+
   it('payExp → transact(expense, payexp, [{coopname, active}])', async () => {
     await adapter.payExp({
       coopname,
