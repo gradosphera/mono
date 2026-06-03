@@ -1,58 +1,80 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
-import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
-import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
-import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
-import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
-import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input';
-import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input';
-import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input';
+import { Inject, Injectable, NotImplementedException } from '@nestjs/common'
+import type { TransactResult } from '@wharfkit/session'
+import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
+import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
+import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
+import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
+import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input'
+import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input'
+import {
+  EXPENSES_BLOCKCHAIN_PORT,
+  ExpensesBlockchainPort,
+} from '../../domain/interfaces/expenses-blockchain.port'
 
 /**
- * Write-сервис расходов (`expense::payexp` / `reportexp` / `returnexp`).
+ * Write-сервис расходов (`expense::payexp` / `reportexp` / `returnexp` / `closeexp` / `declexp`).
  *
- * Скелет — chain-submit подключается через write-mutation pool после Эпика 0
- * (`cooptypes` regen P0 action-codes для `expense`). Сейчас все методы бросают
- * `NotImplementedException` — модуль компилится, резолвер регистрируется в схеме,
- * UI получает явный 501 вместо тихого падения.
+ * 5 из 6 mutations работают через `ExpensesBlockchainPort` (после Эпика 0 cooptypes).
+ * `authorizeExpenseReport` (`expense::authexp`) ждёт document2 `decision_doc` (type=2011)
+ * от signature-pipeline UI Эпика 2 — пока NotImplementedException с явным reason.
  *
- * TODO(C28-31 шаг 8): подключить `WriteMutationPoolService.submitWithPool`
- * + `waitForDelta` + discriminated return `{ status: 'applied' | 'pending' }` (ADR-009/012).
+ * Adapter подписывает ключом кооператива (`active`), `account = expense`. Для пайщик-actions
+ * (`reportexp` / `returnexp`) — тот же канон, что в capital (`createCommit` пайщика
+ * сервисно подписан кооперативом).
  */
 @Injectable()
 export class ExpensesMutationsService {
-  async payExpenseItem(_input: PayExpenseItemInputDTO): Promise<TransactionDTO> {
-    throw new NotImplementedException(
-      'payExpenseItem: chain-submit подключится после Эпика 0 (cooptypes regen для expense).'
-    );
+  constructor(
+    @Inject(EXPENSES_BLOCKCHAIN_PORT)
+    private readonly chain: ExpensesBlockchainPort
+  ) {}
+
+  async payExpenseItem(input: PayExpenseItemInputDTO): Promise<TransactResult> {
+    return this.chain.payExp({
+      coopname: input.coopname,
+      proposal_hash: input.proposal_hash,
+      item_hash: input.item_hash,
+      actual_amount: input.actual_amount,
+    })
   }
 
-  async reportExpenseItem(_input: ReportExpenseItemInputDTO): Promise<TransactionDTO> {
-    throw new NotImplementedException(
-      'reportExpenseItem: chain-submit подключится после Эпика 0 (cooptypes regen для expense).'
-    );
+  async reportExpenseItem(input: ReportExpenseItemInputDTO): Promise<TransactResult> {
+    return this.chain.reportExp({
+      coopname: input.coopname,
+      proposal_hash: input.proposal_hash,
+      item_hash: input.item_hash,
+    })
   }
 
-  async returnExpenseItem(_input: ReturnExpenseItemInputDTO): Promise<TransactionDTO> {
-    throw new NotImplementedException(
-      'returnExpenseItem: chain-submit подключится после Эпика 0 (cooptypes regen для expense).'
-    );
+  async returnExpenseItem(input: ReturnExpenseItemInputDTO): Promise<TransactResult> {
+    return this.chain.returnExp({
+      coopname: input.coopname,
+      proposal_hash: input.proposal_hash,
+      item_hash: input.item_hash,
+      return_amount: input.return_amount,
+    })
   }
 
-  async submitExpenseReport(_input: SubmitExpenseReportInputDTO): Promise<TransactionDTO> {
-    throw new NotImplementedException(
-      'submitExpenseReport: chain-submit подключится после Эпика 0 (cooptypes regen для expense::closeexp).'
-    );
+  async submitExpenseReport(input: SubmitExpenseReportInputDTO): Promise<TransactResult> {
+    // closeexp принимает только {coopname, proposal_hash}. total_actual_amount/comment —
+    // backend-метаданные Phase 2 (валидация суммы фактических item-сумм перед submit'ом).
+    return this.chain.closeExp({
+      coopname: input.coopname,
+      proposal_hash: input.proposal_hash,
+    })
   }
 
-  async authorizeExpenseReport(_input: AuthorizeExpenseReportInputDTO): Promise<TransactionDTO> {
+  async authorizeExpenseReport(_input: AuthorizeExpenseReportInputDTO): Promise<TransactResult> {
     throw new NotImplementedException(
-      'authorizeExpenseReport: chain-submit подключится после Эпика 0 (cooptypes regen для expense::authexp).'
-    );
+      'authorizeExpenseReport: ждёт document2 decision_doc (type=2011) от signature-pipeline UI Эпика 2.'
+    )
   }
 
-  async declineExpenseReport(_input: DeclineExpenseReportInputDTO): Promise<TransactionDTO> {
-    throw new NotImplementedException(
-      'declineExpenseReport: chain-submit подключится после Эпика 0 (cooptypes regen для expense::declineexp).'
-    );
+  async declineExpenseReport(input: DeclineExpenseReportInputDTO): Promise<TransactResult> {
+    return this.chain.declineExp({
+      coopname: input.coopname,
+      proposal_hash: input.proposal_hash,
+      reason: input.reason,
+    })
   }
 }

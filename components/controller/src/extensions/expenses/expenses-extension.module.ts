@@ -1,13 +1,17 @@
 import { Module } from '@nestjs/common';
 import { FileStorageInfrastructureModule } from '~/infrastructure/file-storage';
 import { DocumentDomainModule } from '~/domain/document/document.module';
+import { BlockchainModule } from '~/infrastructure/blockchain/blockchain.module';
+import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
 import { ExpensesDatabaseModule } from './infrastructure/database/expenses-database.module';
 import { ExpenseContractInfoService } from './infrastructure/services/expense-contract-info.service';
 import { ExpenseProposalDeltaMapper } from './infrastructure/blockchain/mappers/expense-proposal-delta.mapper';
+import { ExpensesBlockchainAdapter } from './infrastructure/blockchain/adapters/expenses-blockchain.adapter';
 import { ExpenseProposalTypeormRepository } from './infrastructure/repositories/expense-proposal.typeorm-repository';
 import { ExpenseFileTypeormRepository } from './infrastructure/repositories/expense-file.typeorm-repository';
 import { EXPENSE_PROPOSAL_REPOSITORY } from './domain/repositories/expense-proposal.repository';
 import { EXPENSE_FILE_REPOSITORY } from './domain/repositories/expense-file.repository';
+import { EXPENSES_BLOCKCHAIN_PORT } from './domain/interfaces/expenses-blockchain.port';
 import { ExpenseProposalSyncService } from './application/syncers/expense-proposal-sync.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ExpensesMutationsService } from './application/services/expenses-mutations.service';
@@ -36,6 +40,8 @@ import { ExpenseFilesResolver } from './application/resolvers/expense-files.reso
   imports: [
     ExpensesDatabaseModule,
     DocumentDomainModule,
+    BlockchainModule,
+    VaultDomainModule,
     FileStorageInfrastructureModule.forFeature([ExpenseFilesService]),
   ],
   providers: [
@@ -50,6 +56,10 @@ import { ExpenseFilesResolver } from './application/resolvers/expense-files.reso
     {
       provide: EXPENSE_FILE_REPOSITORY,
       useClass: ExpenseFileTypeormRepository,
+    },
+    {
+      provide: EXPENSES_BLOCKCHAIN_PORT,
+      useClass: ExpensesBlockchainAdapter,
     },
     ExpenseProposalSyncService,
     ExpensesManagementService,
