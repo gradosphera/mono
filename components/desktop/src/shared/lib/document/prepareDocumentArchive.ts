@@ -5,7 +5,7 @@ import { getShortNameFromCertificate } from '../utils/getNameFromCertificate';
 /**
  * Восстанавливает ровно подписанный формат signed_at (SDK подписывает ISO UTC без дробных секунд и без Z).
  * Чистая строковая операция без reparse через Date — нет риска сдвига часового пояса. Гарантирует, что
- * .sig несёт байт-в-байт ту строку, что вошла в signed_hash, и C4-проверка проходит без нормализации.
+ * .coopsig несёт байт-в-байт ту строку, что вошла в signed_hash, и C4-проверка проходит без нормализации.
  */
 const canonicalSignedAt = (s: string | null | undefined): string =>
   (s ?? '').replace(/\.\d+/, '').replace(/[zZ]$/, '');
@@ -364,12 +364,12 @@ const buildArchiveName = (
   return sanitizeName(`${base}${hashSuffix}${signerSuffix}`);
 };
 
-// OID криптопримитивов для самодостаточного .sig (см. cooptypes SigFile v2.0).
+// OID криптопримитивов для самодостаточного .coopsig (см. cooptypes SigFile v2.0).
 const SIG_ALGORITHM_OID_SECP256K1 = '1.3.132.0.10';
 const SIG_HASH_OID_SHA256 = '2.16.840.1.101.3.4.2.1';
 
 /**
- * Формирует detached-подпись `.sig` v2.0 из агрегата документа.
+ * Формирует detached-подпись (файл `.coopsig`, формат SigFile v2.0) из агрегата документа.
  *
  * canonical-значения берём КАК ЕСТЬ из `aggregate.document`: `doc_hash` приходит из фабрики
  * в верхнем регистре (SHA-256 байтов PDF), `meta_hash`/`hash` — из SDK в нижнем. Верификатор
@@ -409,8 +409,12 @@ const buildSigFile = (
   };
 };
 
-/** Имя `.sig` рядом с PDF: <doc>.sig (тот же базовый стем, что у PDF). */
-const sigFileNameFor = (pdfName: string) => `${pdfName.replace(/\.pdf$/i, '')}.sig`;
+/**
+ * Имя файла подписи рядом с PDF: <doc>.coopsig (тот же базовый стем, что у PDF).
+ * Расширение НЕ `.sig` намеренно — чтобы ОС не предлагала открыть его в КриптоПро (наш формат —
+ * secp256k1 JSON, а не ГОСТ-CMS; совместимости с КриптоПро нет в принципе). Внутри — JSON SigFile v2.0.
+ */
+const sigFileNameFor = (pdfName: string) => `${pdfName.replace(/\.pdf$/i, '')}.coopsig`;
 
 export const prepareDocumentArchive = async (
   aggregate: IDocumentAggregate,
