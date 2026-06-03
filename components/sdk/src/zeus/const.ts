@@ -126,7 +126,7 @@ export const AllTypesProps: Record<string,any> = {
 		document:"SignedDigitalDocumentInput"
 	},
 	AuthorizeExpenseReportInput:{
-
+		decision:"ExpenseProposalDecisionSignedDocumentInput"
 	},
 	BankAccountDetailsInput:{
 
@@ -300,7 +300,9 @@ export const AllTypesProps: Record<string,any> = {
 		statement:"SignedDigitalDocumentInput"
 	},
 	CreateExpenseProposalInput:{
-
+		callback:"ExpenseCallbackInput",
+		items:"ExpenseItemInput",
+		statement:"ExpenseProposalStatementSignedDocumentInput"
 	},
 	CreateIndividualDataInput:{
 		passport:"PassportInput"
@@ -431,12 +433,33 @@ export const AllTypesProps: Record<string,any> = {
 	EntrepreneurDetailsInput:{
 
 	},
+	ExpenseCallbackInput:{
+
+	},
 	ExpenseFileKind: "enum" as const,
 	ExpenseFilter:{
 
 	},
+	ExpenseItemInput:{
+		mechanics:"ExpenseMechanics",
+		recipient_type:"ExpenseRecipientType"
+	},
 	ExpenseItemStatus: "enum" as const,
 	ExpenseMechanics: "enum" as const,
+	ExpenseProposalDecisionSignedDocumentInput:{
+		meta:"ExpenseProposalDecisionSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ExpenseProposalDecisionSignedMetaDocumentInput:{
+
+	},
+	ExpenseProposalStatementSignedDocumentInput:{
+		meta:"ExpenseProposalStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ExpenseProposalStatementSignedMetaDocumentInput:{
+
+	},
 	ExpenseProposalStatus: "enum" as const,
 	ExpenseRecipientType: "enum" as const,
 	ExpenseStatus: "enum" as const,

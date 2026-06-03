@@ -125,6 +125,9 @@ export const AllTypesProps: Record<string,any> = {
 	AuthorizeDecisionInput:{
 		document:"SignedDigitalDocumentInput"
 	},
+	AuthorizeExpenseReportInput:{
+		decision:"ExpenseProposalDecisionSignedDocumentInput"
+	},
 	BankAccountDetailsInput:{
 
 	},
@@ -296,6 +299,11 @@ export const AllTypesProps: Record<string,any> = {
 	CreateExpenseInput:{
 		statement:"SignedDigitalDocumentInput"
 	},
+	CreateExpenseProposalInput:{
+		callback:"ExpenseCallbackInput",
+		items:"ExpenseItemInput",
+		statement:"ExpenseProposalStatementSignedDocumentInput"
+	},
 	CreateIndividualDataInput:{
 		passport:"PassportInput"
 	},
@@ -379,6 +387,9 @@ export const AllTypesProps: Record<string,any> = {
 	DeclineApproveInput:{
 
 	},
+	DeclineExpenseReportInput:{
+
+	},
 	DeclineRequestInput:{
 
 	},
@@ -422,9 +433,35 @@ export const AllTypesProps: Record<string,any> = {
 	EntrepreneurDetailsInput:{
 
 	},
+	ExpenseCallbackInput:{
+
+	},
+	ExpenseFileKind: "enum" as const,
 	ExpenseFilter:{
 
 	},
+	ExpenseItemInput:{
+		mechanics:"ExpenseMechanics",
+		recipient_type:"ExpenseRecipientType"
+	},
+	ExpenseItemStatus: "enum" as const,
+	ExpenseMechanics: "enum" as const,
+	ExpenseProposalDecisionSignedDocumentInput:{
+		meta:"ExpenseProposalDecisionSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ExpenseProposalDecisionSignedMetaDocumentInput:{
+
+	},
+	ExpenseProposalStatementSignedDocumentInput:{
+		meta:"ExpenseProposalStatementSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	ExpenseProposalStatementSignedMetaDocumentInput:{
+
+	},
+	ExpenseProposalStatus: "enum" as const,
+	ExpenseRecipientType: "enum" as const,
 	ExpenseStatus: "enum" as const,
 	ExtendedMeetStatus: "enum" as const,
 	ExtensionInput:{
@@ -649,6 +686,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		authorizeDecision:{
 			data:"AuthorizeDecisionInput"
+		},
+		authorizeExpenseReport:{
+			data:"AuthorizeExpenseReportInput"
 		},
 		cancelRequest:{
 			data:"CancelRequestInput"
@@ -960,6 +1000,9 @@ export const AllTypesProps: Record<string,any> = {
 		createDepositPayment:{
 			data:"CreateDepositPaymentInput"
 		},
+		createExpenseProposal:{
+			data:"CreateExpenseProposalInput"
+		},
 		createInitialPayment:{
 			data:"CreateInitialPaymentInput"
 		},
@@ -980,6 +1023,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		declineAgreement:{
 			data:"DeclineAgreementInput"
+		},
+		declineExpenseReport:{
+			data:"DeclineExpenseReportInput"
 		},
 		declineRequest:{
 			data:"DeclineRequestInput"
@@ -1130,6 +1176,12 @@ export const AllTypesProps: Record<string,any> = {
 		notifyOnAnnualGeneralMeet:{
 			data:"NotifyOnAnnualGeneralMeetInput"
 		},
+		overspendExpenseItem:{
+			data:"OverspendExpenseItemInput"
+		},
+		payExpenseItem:{
+			data:"PayExpenseItemInput"
+		},
 		processConvertToAxonStatement:{
 			data:"ProcessConvertToAxonStatementInput"
 		},
@@ -1154,11 +1206,17 @@ export const AllTypesProps: Record<string,any> = {
 		registerParticipant:{
 			data:"RegisterParticipantInput"
 		},
+		reportExpenseItem:{
+			data:"ReportExpenseItemInput"
+		},
 		resetKey:{
 			data:"ResetKeyInput"
 		},
 		restartAnnualGeneralMeet:{
 			data:"RestartAnnualGeneralMeetInput"
+		},
+		returnExpenseItem:{
+			data:"ReturnExpenseItemInput"
 		},
 		saveReportDraft:{
 			input:"SaveReportDraftInput"
@@ -1186,6 +1244,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		startResetKey:{
 			data:"StartResetKeyInput"
+		},
+		submitExpenseReport:{
+			data:"SubmitExpenseReportInput"
 		},
 		supplyOnRequest:{
 			data:"SupplyOnRequestInput"
@@ -1220,6 +1281,9 @@ export const AllTypesProps: Record<string,any> = {
 		updateSystem:{
 			data:"Update"
 		},
+		uploadExpenseFile:{
+			data:"UploadExpenseFileInput"
+		},
 		verifyEmail:{
 			data:"VerifyEmailInputDTO"
 		},
@@ -1244,6 +1308,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	OrganizationType: "enum" as const,
+	OverspendExpenseItemInput:{
+
+	},
 	PaginationInput:{
 
 	},
@@ -1261,6 +1328,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	PassportInput:{
+
+	},
+	PayExpenseItemInput:{
 
 	},
 	PaymentDirection: "enum" as const,
@@ -1497,6 +1567,24 @@ export const AllTypesProps: Record<string,any> = {
 		cooperativePrograms:{
 
 		},
+		expenseFile:{
+
+		},
+		expenseFilesByItem:{
+
+		},
+		expenseFilesByProposal:{
+
+		},
+		expenseProposal:{
+
+		},
+		expenseProposalsByCooperative:{
+			options:"PaginationInput"
+		},
+		expenseProposalsByMember:{
+			options:"PaginationInput"
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -1664,6 +1752,9 @@ export const AllTypesProps: Record<string,any> = {
 	RemoveSecretaryRoomInput:{
 
 	},
+	ReportExpenseItemInput:{
+
+	},
 	ReportHistoryFilterInput:{
 		reportType:"ReportType"
 	},
@@ -1731,6 +1822,9 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	ReturnByMoneySignedMetaDocumentInput:{
+
+	},
+	ReturnExpenseItemInput:{
 
 	},
 	RoomMessageKind: "enum" as const,
@@ -1830,6 +1924,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	StoryStatus: "enum" as const,
+	SubmitExpenseReportInput:{
+
+	},
 	SubmitVoteInput:{
 		votes:"VoteDistributionInput"
 	},
@@ -1899,6 +1996,9 @@ export const AllTypesProps: Record<string,any> = {
 	UpdateStoryInput:{
 		content_format:"CapitalStoryContentFormat",
 		status:"StoryStatus"
+	},
+	UploadExpenseFileInput:{
+		kind:"ExpenseFileKind"
 	},
 	UserStatus: "enum" as const,
 	VarsInput:{
@@ -3137,6 +3237,52 @@ export const ReturnTypes: Record<string,any> = {
 		inn:"String",
 		ogrn:"String"
 	},
+	ExpenseFile:{
+		checksum_sha256:"String",
+		coopname:"String",
+		id:"Int",
+		item_hash:"String",
+		kind:"ExpenseFileKind",
+		mime_type:"String",
+		proposal_hash:"String",
+		read_url:"String",
+		size_bytes:"Int",
+		storage_key:"String",
+		uploaded_at:"DateTime",
+		uploaded_by_username:"String"
+	},
+	ExpenseItem:{
+		actual_amount:"String",
+		description:"String",
+		item_hash:"String",
+		mechanics:"ExpenseMechanics",
+		planned_amount:"String",
+		recipient:"String",
+		recipient_type:"ExpenseRecipientType",
+		status:"ExpenseItemStatus"
+	},
+	ExpenseProposal:{
+		_created_at:"DateTime",
+		_id:"String",
+		_updated_at:"DateTime",
+		block_num:"Float",
+		blockchain_status:"Int",
+		coopname:"String",
+		created_at:"String",
+		decision_doc:"DocumentAggregate",
+		id:"Int",
+		items:"ExpenseItem",
+		operation_code:"String",
+		present:"Boolean",
+		proposal_hash:"String",
+		source_wallet:"String",
+		statement_doc:"DocumentAggregate",
+		status:"ExpenseProposalStatus",
+		total_actual:"String",
+		total_planned:"String",
+		updated_at:"String",
+		username:"String"
+	},
 	ExtendedBlockchainAction:{
 		account:"String",
 		account_ram_deltas:"AccountRamDelta",
@@ -3512,6 +3658,7 @@ export const ReturnTypes: Record<string,any> = {
 		addPaymentMethod:"PaymentMethod",
 		addTrustedAccount:"Branch",
 		authorizeDecision:"Transaction",
+		authorizeExpenseReport:"Transaction",
 		cancelRequest:"Transaction",
 		capitalAddAuthor:"CapitalProject",
 		capitalApproveCommit:"CapitalCommit",
@@ -3609,6 +3756,7 @@ export const ReturnTypes: Record<string,any> = {
 		createBranch:"Branch",
 		createChildOrder:"Transaction",
 		createDepositPayment:"GatewayPayment",
+		createExpenseProposal:"Transaction",
 		createInitialPayment:"GatewayPayment",
 		createParentOffer:"Transaction",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
@@ -3616,6 +3764,7 @@ export const ReturnTypes: Record<string,any> = {
 		createWithdraw:"CreateWithdrawResponse",
 		deactivateWebPushSubscriptionById:"Boolean",
 		declineAgreement:"Transaction",
+		declineExpenseReport:"Transaction",
 		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
@@ -3658,6 +3807,8 @@ export const ReturnTypes: Record<string,any> = {
 		markReportPeriod:"Boolean",
 		moderateRequest:"Transaction",
 		notifyOnAnnualGeneralMeet:"MeetAggregate",
+		overspendExpenseItem:"Transaction",
+		payExpenseItem:"Transaction",
 		processConvertToAxonStatement:"Boolean",
 		prohibitRequest:"Transaction",
 		publishProjectOfFreeDecision:"Boolean",
@@ -3666,8 +3817,10 @@ export const ReturnTypes: Record<string,any> = {
 		refresh:"RegisteredAccount",
 		registerAccount:"RegisteredAccount",
 		registerParticipant:"Account",
+		reportExpenseItem:"Transaction",
 		resetKey:"Boolean",
 		restartAnnualGeneralMeet:"MeetAggregate",
+		returnExpenseItem:"Transaction",
 		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
 		sendAgreement:"Transaction",
@@ -3677,6 +3830,7 @@ export const ReturnTypes: Record<string,any> = {
 		signBySecretaryOnAnnualGeneralMeet:"MeetAggregate",
 		startInstall:"StartInstallResult",
 		startResetKey:"Boolean",
+		submitExpenseReport:"Transaction",
 		supplyOnRequest:"Transaction",
 		triggerNotificationWorkflow:"Boolean",
 		uninstallExtension:"Boolean",
@@ -3688,6 +3842,7 @@ export const ReturnTypes: Record<string,any> = {
 		updateRequest:"Transaction",
 		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
+		uploadExpenseFile:"ExpenseFile",
 		verifyEmail:"Boolean",
 		voteOnAnnualGeneralMeet:"MeetAggregate",
 		walmoveWallets:"Ledger2AdjustmentResult"
@@ -3877,6 +4032,12 @@ export const ReturnTypes: Record<string,any> = {
 	PaginatedDeltasPaginationResult:{
 		currentPage:"Int",
 		items:"Delta",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedExpenseProposalsPaginationResult:{
+		currentPage:"Int",
+		items:"ExpenseProposal",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -4170,6 +4331,12 @@ export const ReturnTypes: Record<string,any> = {
 		checkReportReadiness:"ReportReadinessView",
 		cooperativeAgreements:"CoopAgreement",
 		cooperativePrograms:"CooperativeProgram",
+		expenseFile:"ExpenseFile",
+		expenseFilesByItem:"ExpenseFile",
+		expenseFilesByProposal:"ExpenseFile",
+		expenseProposal:"ExpenseProposal",
+		expenseProposalsByCooperative:"PaginatedExpenseProposalsPaginationResult",
+		expenseProposalsByMember:"PaginatedExpenseProposalsPaginationResult",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

@@ -37,12 +37,19 @@
               td.col-num {{ row.total_actual || '—' }}
               td.col-hash.t-mono-sm {{ truncateHash(row.proposal_hash) }}
               td.col-actions
-                BaseButton(
-                  variant='ghost',
-                  size='sm',
-                  icon='chevron_right',
-                  @click.stop='openDetail(row.proposal_hash)'
-                ) Открыть
+                .row-actions
+                  BaseButton(
+                    variant='primary',
+                    size='sm',
+                    icon='gavel',
+                    @click.stop='openAuthorize(row.proposal_hash)'
+                  ) Авторизовать
+                  BaseButton(
+                    variant='ghost',
+                    size='sm',
+                    icon='chevron_right',
+                    @click.stop='openDetail(row.proposal_hash)'
+                  ) Открыть
 
       .table-foot
         span {{ rangeLabel }}
@@ -61,6 +68,12 @@
     )
       template(#icon)
         q-icon(name='task_alt', size='48px')
+
+  ExpenseProposalAuthorizeDialog(
+    v-model='authorizeOpen',
+    :proposal-hash='authorizingHash',
+    @authorized='onAuthorized'
+  )
 </template>
 
 <script setup lang="ts">
@@ -77,6 +90,7 @@ import {
   getExpenseProposalsByCooperative,
   type IExpenseProposalsByCooperativeResult,
 } from '../api';
+import ExpenseProposalAuthorizeDialog from './ExpenseProposalAuthorizeDialog.vue';
 
 type IProposalRow = NonNullable<IExpenseProposalsByCooperativeResult['items']>[number];
 
@@ -159,6 +173,18 @@ function openDetail(hash: string): void {
   void router.push({ name: 'expenses-detail', params: { hash } });
 }
 
+const authorizeOpen = ref(false);
+const authorizingHash = ref('');
+
+function openAuthorize(hash: string): void {
+  authorizingHash.value = hash;
+  authorizeOpen.value = true;
+}
+
+function onAuthorized(): void {
+  void loadPage(1);
+}
+
 onMounted(() => {
   void loadPage(1);
 });
@@ -195,8 +221,14 @@ onMounted(() => {
 }
 
 .col-actions {
-  width: 140px;
+  width: 220px;
   text-align: right;
+}
+
+.row-actions {
+  display: flex;
+  gap: var(--p-2);
+  justify-content: flex-end;
 }
 
 .cell-name {

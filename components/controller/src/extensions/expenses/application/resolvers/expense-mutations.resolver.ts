@@ -1,9 +1,14 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
+import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
+import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
+import { ExpenseProposalStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-statement-document.dto';
+import { ExpenseProposalDecisionGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-decision-document.dto';
 import { ExpensesMutationsService } from '../services/expenses-mutations.service';
 import { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input';
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
@@ -25,6 +30,38 @@ import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.inpu
 @Resolver()
 export class ExpenseMutationsResolver {
   constructor(private readonly expensesMutations: ExpensesMutationsService) {}
+
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'generateExpenseProposalStatementDocument',
+    description: 'Сгенерировать документ СЗ-заявления (registry 2010) для последующей подписи.',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member', 'user'])
+  async generateExpenseProposalStatementDocument(
+    @Args('data', { type: () => ExpenseProposalStatementGenerateDocumentInputDTO })
+    data: ExpenseProposalStatementGenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO,
+  ): Promise<GeneratedDocumentDTO> {
+    return this.expensesMutations.generateExpenseProposalStatementDocument(data, options);
+  }
+
+  @Mutation(() => GeneratedDocumentDTO, {
+    name: 'generateExpenseProposalDecisionDocument',
+    description: 'Сгенерировать документ-решение по СЗ (registry 2011) для последующей подписи.',
+  })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async generateExpenseProposalDecisionDocument(
+    @Args('data', { type: () => ExpenseProposalDecisionGenerateDocumentInputDTO })
+    data: ExpenseProposalDecisionGenerateDocumentInputDTO,
+    @Args('options', { type: () => GenerateDocumentOptionsInputDTO, nullable: true })
+    options: GenerateDocumentOptionsInputDTO,
+  ): Promise<GeneratedDocumentDTO> {
+    return this.expensesMutations.generateExpenseProposalDecisionDocument(data, options);
+  }
 
   @Mutation(() => TransactionDTO, {
     name: 'createExpenseProposal',

@@ -1,5 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type { TransactResult } from '@wharfkit/session'
+import { Cooperative } from 'cooptypes'
+import { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service'
+import type { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity'
+import { ExpenseProposalStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-statement-document.dto'
+import { ExpenseProposalDecisionGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-decision-document.dto'
 import { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
@@ -26,8 +31,25 @@ import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.
 export class ExpensesMutationsService {
   constructor(
     @Inject(EXPENSES_BLOCKCHAIN_PORT)
-    private readonly chain: ExpensesBlockchainPort
+    private readonly chain: ExpensesBlockchainPort,
+    private readonly generator: GeneratorInfrastructureService
   ) {}
+
+  async generateExpenseProposalStatementDocument(
+    data: ExpenseProposalStatementGenerateDocumentInputDTO,
+    options: Cooperative.Document.IGenerationOptions
+  ): Promise<DocumentDomainEntity> {
+    data.registry_id = Cooperative.Registry.ExpenseProposalStatement.registry_id
+    return this.generator.generateDocument({ data: data as unknown as Cooperative.Registry.ExpenseProposalStatement.Action, options: options || {} })
+  }
+
+  async generateExpenseProposalDecisionDocument(
+    data: ExpenseProposalDecisionGenerateDocumentInputDTO,
+    options: Cooperative.Document.IGenerationOptions
+  ): Promise<DocumentDomainEntity> {
+    data.registry_id = Cooperative.Registry.ExpenseProposalDecision.registry_id
+    return this.generator.generateDocument({ data: data as unknown as Cooperative.Registry.ExpenseProposalDecision.Action, options: options || {} })
+  }
 
   async createExpenseProposal(input: CreateExpenseProposalInputDTO): Promise<TransactResult> {
     const items = input.items.map((it) => ({

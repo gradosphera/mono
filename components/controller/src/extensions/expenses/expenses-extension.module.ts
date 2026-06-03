@@ -3,6 +3,7 @@ import { FileStorageInfrastructureModule } from '~/infrastructure/file-storage';
 import { DocumentDomainModule } from '~/domain/document/document.module';
 import { BlockchainModule } from '~/infrastructure/blockchain/blockchain.module';
 import { VaultDomainModule } from '~/domain/vault/vault-domain.module';
+import { GeneratorInfrastructureModule } from '~/infrastructure/generator/generator.module';
 import { ExpensesDatabaseModule } from './infrastructure/database/expenses-database.module';
 import { ExpenseContractInfoService } from './infrastructure/services/expense-contract-info.service';
 import { ExpenseProposalDeltaMapper } from './infrastructure/blockchain/mappers/expense-proposal-delta.mapper';
@@ -42,6 +43,7 @@ import { ExpenseFilesResolver } from './application/resolvers/expense-files.reso
     DocumentDomainModule,
     BlockchainModule,
     VaultDomainModule,
+    GeneratorInfrastructureModule,
     FileStorageInfrastructureModule.forFeature([ExpenseFilesService]),
   ],
   providers: [

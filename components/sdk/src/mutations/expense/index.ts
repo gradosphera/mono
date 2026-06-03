@@ -1,3 +1,5 @@
+export * as GenerateExpenseProposalStatementDocument from './generateExpenseProposalStatementDocument'
+export * as GenerateExpenseProposalDecisionDocument from './generateExpenseProposalDecisionDocument'
 export * as CreateExpenseProposal from './createExpenseProposal'
 export * as PayExpenseItem from './payExpenseItem'
 export * as ReportExpenseItem from './reportExpenseItem'

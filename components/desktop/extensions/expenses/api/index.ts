@@ -18,5 +18,11 @@ export type {
   IGetExpenseFilesByProposalInput,
   IExpenseFilesByProposalResult,
 } from './queries/getExpenseFilesByProposal';
+export { generateExpenseProposalStatementDocument } from './mutations/generateExpenseProposalStatementDocument';
+export type { IGenerateExpenseProposalStatementDocumentInput } from './mutations/generateExpenseProposalStatementDocument';
+export { generateExpenseProposalDecisionDocument } from './mutations/generateExpenseProposalDecisionDocument';
+export type { IGenerateExpenseProposalDecisionDocumentInput } from './mutations/generateExpenseProposalDecisionDocument';
 export { createExpenseProposal } from './mutations/createExpenseProposal';
 export type { ICreateExpenseProposalInput } from './mutations/createExpenseProposal';
+export { authorizeExpenseReport } from './mutations/authorizeExpenseReport';
+export type { IAuthorizeExpenseReportInput } from './mutations/authorizeExpenseReport';

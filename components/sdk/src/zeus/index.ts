@@ -1942,6 +1942,8 @@ export type ValueTypes = {
 	["AuthorizeExpenseReportInput"]: {
 	/** Имя кооператива. */
 	coopname: string | Variable<any, string>,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: ValueTypes["ExpenseProposalDecisionSignedDocumentInput"] | Variable<any, string>,
 	/** Хеш сметы расхода. */
 	proposal_hash: string | Variable<any, string>
 };
@@ -4445,10 +4447,22 @@ export type ValueTypes = {
 	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
 };
 	["CreateExpenseProposalInput"]: {
+	/** Callback на финализацию closeexp (опционально). */
+	callback?: ValueTypes["ExpenseCallbackInput"] | undefined | null | Variable<any, string>,
 	/** Имя кооператива. */
 	coopname: string | Variable<any, string>,
+	/** Строки расхода (массив items). */
+	items: Array<ValueTypes["ExpenseItemInput"]> | Variable<any, string>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string | Variable<any, string>,
 	/** Хеш сметы расхода (детерминированный, из UI). */
-	proposal_hash: string | Variable<any, string>
+	proposal_hash: string | Variable<any, string>,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string | Variable<any, string>,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: ValueTypes["ExpenseProposalStatementSignedDocumentInput"] | Variable<any, string>,
+	/** Имя пайщика-создателя СЗ. */
+	username: string | Variable<any, string>
 };
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
@@ -5135,6 +5149,14 @@ export type ValueTypes = {
 	/** ОГРН */
 	ogrn: string | Variable<any, string>
 };
+	["ExpenseCallbackInput"]: {
+	/** Action-метод */
+	action?: string | undefined | null | Variable<any, string>,
+	/** Контракт-целевой */
+	contract?: string | undefined | null | Variable<any, string>,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null | Variable<any, string>
+};
 	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
 ["ExpenseFile"]: AliasType<{
 	/** SHA-256 содержимого, hex-lowercase. */
@@ -5197,6 +5219,20 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on ExpenseItem']?: Omit<ValueTypes["ExpenseItem"], "...on ExpenseItem">
 }>;
+	["ExpenseItemInput"]: {
+	/** Описание назначения расхода. */
+	description: string | Variable<any, string>,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string | Variable<any, string>,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: ValueTypes["ExpenseMechanics"] | Variable<any, string>,
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string | Variable<any, string>,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string | Variable<any, string>,
+	/** Тип получателя. */
+	recipient_type: ValueTypes["ExpenseRecipientType"] | Variable<any, string>
+};
 	/** Статус строки расхода. */
 ["ExpenseItemStatus"]:ExpenseItemStatus;
 	/** Способ оплаты строки расхода. */
@@ -5246,6 +5282,86 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on ExpenseProposal']?: Omit<ValueTypes["ExpenseProposal"], "...on ExpenseProposal">
 }>;
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация решения по СЗ */
+	meta: ValueTypes["ExpenseProposalDecisionSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация СЗ-заявления */
+	meta: ValueTypes["ExpenseProposalStatementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
 	/** Статус сметы расхода. */
 ["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	/** Тип получателя платежа. */
@@ -10625,6 +10741,8 @@ export type ResolverInputTypes = {
 	["AuthorizeExpenseReportInput"]: {
 	/** Имя кооператива. */
 	coopname: string,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: ResolverInputTypes["ExpenseProposalDecisionSignedDocumentInput"],
 	/** Хеш сметы расхода. */
 	proposal_hash: string
 };
@@ -13060,10 +13178,22 @@ export type ResolverInputTypes = {
 	statement: ResolverInputTypes["SignedDigitalDocumentInput"]
 };
 	["CreateExpenseProposalInput"]: {
+	/** Callback на финализацию closeexp (опционально). */
+	callback?: ResolverInputTypes["ExpenseCallbackInput"] | undefined | null,
 	/** Имя кооператива. */
 	coopname: string,
+	/** Строки расхода (массив items). */
+	items: Array<ResolverInputTypes["ExpenseItemInput"]>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string,
 	/** Хеш сметы расхода (детерминированный, из UI). */
-	proposal_hash: string
+	proposal_hash: string,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: ResolverInputTypes["ExpenseProposalStatementSignedDocumentInput"],
+	/** Имя пайщика-создателя СЗ. */
+	username: string
 };
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
@@ -13734,6 +13864,14 @@ export type ResolverInputTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseCallbackInput"]: {
+	/** Action-метод */
+	action?: string | undefined | null,
+	/** Контракт-целевой */
+	contract?: string | undefined | null,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null
+};
 	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
 ["ExpenseFile"]: AliasType<{
 	/** SHA-256 содержимого, hex-lowercase. */
@@ -13794,6 +13932,20 @@ export type ResolverInputTypes = {
 	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ExpenseItemInput"]: {
+	/** Описание назначения расхода. */
+	description: string,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: ResolverInputTypes["ExpenseMechanics"],
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string,
+	/** Тип получателя. */
+	recipient_type: ResolverInputTypes["ExpenseRecipientType"]
+};
 	/** Статус строки расхода. */
 ["ExpenseItemStatus"]:ExpenseItemStatus;
 	/** Способ оплаты строки расхода. */
@@ -13842,6 +13994,86 @@ export type ResolverInputTypes = {
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация решения по СЗ */
+	meta: ResolverInputTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация СЗ-заявления */
+	meta: ResolverInputTypes["ExpenseProposalStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
 	/** Статус сметы расхода. */
 ["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	/** Тип получателя платежа. */
@@ -19071,6 +19303,8 @@ export type ModelTypes = {
 	["AuthorizeExpenseReportInput"]: {
 	/** Имя кооператива. */
 	coopname: string,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: ModelTypes["ExpenseProposalDecisionSignedDocumentInput"],
 	/** Хеш сметы расхода. */
 	proposal_hash: string
 };
@@ -21432,10 +21666,22 @@ export type ModelTypes = {
 	statement: ModelTypes["SignedDigitalDocumentInput"]
 };
 	["CreateExpenseProposalInput"]: {
+	/** Callback на финализацию closeexp (опционально). */
+	callback?: ModelTypes["ExpenseCallbackInput"] | undefined | null,
 	/** Имя кооператива. */
 	coopname: string,
+	/** Строки расхода (массив items). */
+	items: Array<ModelTypes["ExpenseItemInput"]>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string,
 	/** Хеш сметы расхода (детерминированный, из UI). */
-	proposal_hash: string
+	proposal_hash: string,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: ModelTypes["ExpenseProposalStatementSignedDocumentInput"],
+	/** Имя пайщика-создателя СЗ. */
+	username: string
 };
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
@@ -22087,6 +22333,14 @@ export type ModelTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseCallbackInput"]: {
+	/** Action-метод */
+	action?: string | undefined | null,
+	/** Контракт-целевой */
+	contract?: string | undefined | null,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null
+};
 	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
 ["ExpenseFile"]: {
 		/** SHA-256 содержимого, hex-lowercase. */
@@ -22144,6 +22398,20 @@ export type ModelTypes = {
 	/** Статус строки. */
 	status: ModelTypes["ExpenseItemStatus"]
 };
+	["ExpenseItemInput"]: {
+	/** Описание назначения расхода. */
+	description: string,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: ModelTypes["ExpenseMechanics"],
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string,
+	/** Тип получателя. */
+	recipient_type: ModelTypes["ExpenseRecipientType"]
+};
 	["ExpenseItemStatus"]:ExpenseItemStatus;
 	["ExpenseMechanics"]:ExpenseMechanics;
 	/** Смета расхода (СЗ). */
@@ -22188,6 +22456,86 @@ export type ModelTypes = {
 	updated_at?: string | undefined | null,
 	/** Создатель сметы (username). */
 	username?: string | undefined | null
+};
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация решения по СЗ */
+	meta: ModelTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация СЗ-заявления */
+	meta: ModelTypes["ExpenseProposalStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	["ExpenseRecipientType"]:ExpenseRecipientType;
@@ -27993,6 +28341,8 @@ export type GraphQLTypes = {
 	["AuthorizeExpenseReportInput"]: {
 		/** Имя кооператива. */
 	coopname: string,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: GraphQLTypes["ExpenseProposalDecisionSignedDocumentInput"],
 	/** Хеш сметы расхода. */
 	proposal_hash: string
 };
@@ -30496,10 +30846,22 @@ export type GraphQLTypes = {
 	statement: GraphQLTypes["SignedDigitalDocumentInput"]
 };
 	["CreateExpenseProposalInput"]: {
-		/** Имя кооператива. */
+		/** Callback на финализацию closeexp (опционально). */
+	callback?: GraphQLTypes["ExpenseCallbackInput"] | undefined | null,
+	/** Имя кооператива. */
 	coopname: string,
+	/** Строки расхода (массив items). */
+	items: Array<GraphQLTypes["ExpenseItemInput"]>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string,
 	/** Хеш сметы расхода (детерминированный, из UI). */
-	proposal_hash: string
+	proposal_hash: string,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: GraphQLTypes["ExpenseProposalStatementSignedDocumentInput"],
+	/** Имя пайщика-создателя СЗ. */
+	username: string
 };
 	["CreateIndividualDataInput"]: {
 		/** Дата рождения */
@@ -31186,6 +31548,14 @@ export type GraphQLTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseCallbackInput"]: {
+		/** Action-метод */
+	action?: string | undefined | null,
+	/** Контракт-целевой */
+	contract?: string | undefined | null,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null
+};
 	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
 ["ExpenseFile"]: {
 	__typename: "ExpenseFile",
@@ -31248,6 +31618,20 @@ export type GraphQLTypes = {
 	status: GraphQLTypes["ExpenseItemStatus"],
 	['...on ExpenseItem']: Omit<GraphQLTypes["ExpenseItem"], "...on ExpenseItem">
 };
+	["ExpenseItemInput"]: {
+		/** Описание назначения расхода. */
+	description: string,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: GraphQLTypes["ExpenseMechanics"],
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string,
+	/** Тип получателя. */
+	recipient_type: GraphQLTypes["ExpenseRecipientType"]
+};
 	/** Статус строки расхода. */
 ["ExpenseItemStatus"]: ExpenseItemStatus;
 	/** Способ оплаты строки расхода. */
@@ -31296,6 +31680,86 @@ export type GraphQLTypes = {
 	/** Создатель сметы (username). */
 	username?: string | undefined | null,
 	['...on ExpenseProposal']: Omit<GraphQLTypes["ExpenseProposal"], "...on ExpenseProposal">
+};
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация решения по СЗ */
+	meta: GraphQLTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация СЗ-заявления */
+	meta: GraphQLTypes["ExpenseProposalStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
 };
 	/** Статус сметы расхода. */
 ["ExpenseProposalStatus"]: ExpenseProposalStatus;
@@ -37144,10 +37608,16 @@ type ZEUS_VARIABLES = {
 	["EditContributorInput"]: ValueTypes["EditContributorInput"];
 	["EditProjectInput"]: ValueTypes["EditProjectInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
+	["ExpenseCallbackInput"]: ValueTypes["ExpenseCallbackInput"];
 	["ExpenseFileKind"]: ValueTypes["ExpenseFileKind"];
 	["ExpenseFilter"]: ValueTypes["ExpenseFilter"];
+	["ExpenseItemInput"]: ValueTypes["ExpenseItemInput"];
 	["ExpenseItemStatus"]: ValueTypes["ExpenseItemStatus"];
 	["ExpenseMechanics"]: ValueTypes["ExpenseMechanics"];
+	["ExpenseProposalDecisionSignedDocumentInput"]: ValueTypes["ExpenseProposalDecisionSignedDocumentInput"];
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: ValueTypes["ExpenseProposalDecisionSignedMetaDocumentInput"];
+	["ExpenseProposalStatementSignedDocumentInput"]: ValueTypes["ExpenseProposalStatementSignedDocumentInput"];
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: ValueTypes["ExpenseProposalStatementSignedMetaDocumentInput"];
 	["ExpenseProposalStatus"]: ValueTypes["ExpenseProposalStatus"];
 	["ExpenseRecipientType"]: ValueTypes["ExpenseRecipientType"];
 	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];

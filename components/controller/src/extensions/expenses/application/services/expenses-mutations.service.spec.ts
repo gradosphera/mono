@@ -1,5 +1,6 @@
 import { ExpensesMutationsService } from './expenses-mutations.service'
 import type { ExpensesBlockchainPort } from '../../domain/interfaces/expenses-blockchain.port'
+import type { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service'
 import type { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
 import type { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
 import type { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
@@ -19,6 +20,7 @@ import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.
 describe('ExpensesMutationsService', () => {
   let service: ExpensesMutationsService
   let chain: jest.Mocked<ExpensesBlockchainPort>
+  let generator: jest.Mocked<Pick<GeneratorInfrastructureService, 'generateDocument'>>
 
   const fakeResult = { response: { transaction_id: 'tx_abc' } } as never
 
@@ -33,7 +35,10 @@ describe('ExpensesMutationsService', () => {
       closeExp: jest.fn().mockResolvedValue(fakeResult),
       declineExp: jest.fn().mockResolvedValue(fakeResult),
     }
-    service = new ExpensesMutationsService(chain)
+    generator = {
+      generateDocument: jest.fn().mockResolvedValue({} as never),
+    }
+    service = new ExpensesMutationsService(chain, generator as unknown as GeneratorInfrastructureService)
   })
 
   const makeSignedDoc = (overrides: Partial<{ hash: string; doc_hash: string; meta_hash: string }> = {}) => ({

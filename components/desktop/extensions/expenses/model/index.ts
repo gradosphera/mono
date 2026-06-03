@@ -12,3 +12,9 @@ export {
   getExpenseItemStatusVariant,
   getExpenseMechanicsLabel,
 } from './expenseItemStatus';
+export { useExpenseProposalActions } from './useExpenseProposalActions';
+export type {
+  ICreateProposalDraft,
+  ICreateProposalDraftItem,
+  IAuthorizeProposalDraft,
+} from './useExpenseProposalActions';

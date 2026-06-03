@@ -1939,6 +1939,14 @@ export type ValueTypes = {
 	/** Подписанный председателем документ утверждения решения */
 	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
 };
+	["AuthorizeExpenseReportInput"]: {
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: ValueTypes["ExpenseProposalDecisionSignedDocumentInput"] | Variable<any, string>,
+	/** Хеш сметы расхода. */
+	proposal_hash: string | Variable<any, string>
+};
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
 	/** Время последней успешной генерации (UTC) */
@@ -4438,6 +4446,24 @@ export type ValueTypes = {
 	/** Служебная записка о расходе */
 	statement: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
 };
+	["CreateExpenseProposalInput"]: {
+	/** Callback на финализацию closeexp (опционально). */
+	callback?: ValueTypes["ExpenseCallbackInput"] | undefined | null | Variable<any, string>,
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Строки расхода (массив items). */
+	items: Array<ValueTypes["ExpenseItemInput"]> | Variable<any, string>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string | Variable<any, string>,
+	/** Хеш сметы расхода (детерминированный, из UI). */
+	proposal_hash: string | Variable<any, string>,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string | Variable<any, string>,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: ValueTypes["ExpenseProposalStatementSignedDocumentInput"] | Variable<any, string>,
+	/** Имя пайщика-создателя СЗ. */
+	username: string | Variable<any, string>
+};
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string | Variable<any, string>,
@@ -4833,6 +4859,14 @@ export type ValueTypes = {
 	/** Причина отклонения */
 	reason: string | Variable<any, string>
 };
+	["DeclineExpenseReportInput"]: {
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Хеш сметы расхода. */
+	proposal_hash: string | Variable<any, string>,
+	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
+	reason: string | Variable<any, string>
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -5115,6 +5149,45 @@ export type ValueTypes = {
 	/** ОГРН */
 	ogrn: string | Variable<any, string>
 };
+	["ExpenseCallbackInput"]: {
+	/** Action-метод */
+	action?: string | undefined | null | Variable<any, string>,
+	/** Контракт-целевой */
+	contract?: string | undefined | null | Variable<any, string>,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null | Variable<any, string>
+};
+	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
+["ExpenseFile"]: AliasType<{
+	/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256?:boolean | `@${string}`,
+	/** Имя кооператива (scope). */
+	coopname?:boolean | `@${string}`,
+	/** Внутренний ID записи. */
+	id?:boolean | `@${string}`,
+	/** Хеш строки расхода (если файл уровня item). */
+	item_hash?:boolean | `@${string}`,
+	/** Назначение файла. */
+	kind?:boolean | `@${string}`,
+	/** MIME-тип содержимого. */
+	mime_type?:boolean | `@${string}`,
+	/** Хеш сметы расхода. */
+	proposal_hash?:boolean | `@${string}`,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?:boolean | `@${string}`,
+	/** Размер файла в байтах. */
+	size_bytes?:boolean | `@${string}`,
+	/** MinIO-ключ внутри бакета. */
+	storage_key?:boolean | `@${string}`,
+	/** Когда загружено. */
+	uploaded_at?:boolean | `@${string}`,
+	/** Кто загрузил (username). */
+	uploaded_by_username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ExpenseFile']?: Omit<ValueTypes["ExpenseFile"], "...on ExpenseFile">
+}>;
+	/** Тип первичного файла расхода. */
+["ExpenseFileKind"]:ExpenseFileKind;
 	["ExpenseFilter"]: {
 	/** Фильтр по ID фонда */
 	fundId?: string | undefined | null | Variable<any, string>,
@@ -5125,6 +5198,174 @@ export type ValueTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null | Variable<any, string>
 };
+	/** Строка сметы расхода. */
+["ExpenseItem"]: AliasType<{
+	/** Фактическая сумма (после оплаты/отчёта). */
+	actual_amount?:boolean | `@${string}`,
+	/** Назначение/описание строки. */
+	description?:boolean | `@${string}`,
+	/** Хеш строки расхода. */
+	item_hash?:boolean | `@${string}`,
+	/** Способ оплаты. */
+	mechanics?:boolean | `@${string}`,
+	/** Планируемая сумма. */
+	planned_amount?:boolean | `@${string}`,
+	/** Идентификатор получателя. */
+	recipient?:boolean | `@${string}`,
+	/** Тип получателя платежа. */
+	recipient_type?:boolean | `@${string}`,
+	/** Статус строки. */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ExpenseItem']?: Omit<ValueTypes["ExpenseItem"], "...on ExpenseItem">
+}>;
+	["ExpenseItemInput"]: {
+	/** Описание назначения расхода. */
+	description: string | Variable<any, string>,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string | Variable<any, string>,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: ValueTypes["ExpenseMechanics"] | Variable<any, string>,
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string | Variable<any, string>,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string | Variable<any, string>,
+	/** Тип получателя. */
+	recipient_type: ValueTypes["ExpenseRecipientType"] | Variable<any, string>
+};
+	/** Статус строки расхода. */
+["ExpenseItemStatus"]:ExpenseItemStatus;
+	/** Способ оплаты строки расхода. */
+["ExpenseMechanics"]:ExpenseMechanics;
+	/** Смета расхода (СЗ). */
+["ExpenseProposal"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Сырой статус из блокчейна (uint8). */
+	blockchain_status?:boolean | `@${string}`,
+	/** Имя кооператива (scope). */
+	coopname?:boolean | `@${string}`,
+	/** Время создания (chain). */
+	created_at?:boolean | `@${string}`,
+	/** Решение совета о расходе (DocumentAggregate). */
+	decision_doc?:ValueTypes["DocumentAggregate"],
+	/** ID в блокчейне. */
+	id?:boolean | `@${string}`,
+	/** Строки сметы. */
+	items?:ValueTypes["ExpenseItem"],
+	/** Код операции (operation_code). */
+	operation_code?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш сметы расхода. */
+	proposal_hash?:boolean | `@${string}`,
+	/** Кошелёк-источник средств. */
+	source_wallet?:boolean | `@${string}`,
+	/** Заявление пайщика о расходе (DocumentAggregate). */
+	statement_doc?:ValueTypes["DocumentAggregate"],
+	/** Доменный статус сметы. */
+	status?:boolean | `@${string}`,
+	/** Сумма всех строк (факт). */
+	total_actual?:boolean | `@${string}`,
+	/** Сумма всех строк (план). */
+	total_planned?:boolean | `@${string}`,
+	/** Время последнего обновления (chain). */
+	updated_at?:boolean | `@${string}`,
+	/** Создатель сметы (username). */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ExpenseProposal']?: Omit<ValueTypes["ExpenseProposal"], "...on ExpenseProposal">
+}>;
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация решения по СЗ */
+	meta: ValueTypes["ExpenseProposalDecisionSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string | Variable<any, string>,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string | Variable<any, string>,
+	/** Метаинформация СЗ-заявления */
+	meta: ValueTypes["ExpenseProposalStatementSignedMetaDocumentInput"] | Variable<any, string>,
+	/** Хэш мета-данных */
+	meta_hash: string | Variable<any, string>,
+	/** Вектор подписей */
+	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
+	/** Версия стандарта документа */
+	version: string | Variable<any, string>
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number | Variable<any, string>,
+	/** Название кооператива, связанное с документом */
+	coopname: string | Variable<any, string>,
+	/** Дата и время создания документа */
+	created_at: string | Variable<any, string>,
+	/** Имя генератора, использованного для создания документа */
+	generator: string | Variable<any, string>,
+	/** Язык документа */
+	lang: string | Variable<any, string>,
+	/** Ссылки, связанные с документом */
+	links: Array<string> | Variable<any, string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string | Variable<any, string>,
+	/** ID документа в реестре */
+	registry_id: number | Variable<any, string>,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string | Variable<any, string>,
+	/** Название документа */
+	title: string | Variable<any, string>,
+	/** Имя пользователя, создавшего документ */
+	username: string | Variable<any, string>,
+	/** Версия генератора, использованного для создания документа */
+	version: string | Variable<any, string>
+};
+	/** Статус сметы расхода. */
+["ExpenseProposalStatus"]:ExpenseProposalStatus;
+	/** Тип получателя платежа. */
+["ExpenseRecipientType"]:ExpenseRecipientType;
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
@@ -6428,6 +6669,7 @@ addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, stri
 addPaymentMethod?: [{	data: ValueTypes["AddPaymentMethodInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 authorizeDecision?: [{	data: ValueTypes["AuthorizeDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+authorizeExpenseReport?: [{	data: ValueTypes["AuthorizeExpenseReportInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
@@ -6528,6 +6770,7 @@ createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | 
 createBranch?: [{	data: ValueTypes["CreateBranchInput"] | Variable<any, string>},ValueTypes["Branch"]],
 createChildOrder?: [{	data: ValueTypes["CreateChildOrderInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createDepositPayment?: [{	data: ValueTypes["CreateDepositPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
+createExpenseProposal?: [{	data: ValueTypes["CreateExpenseProposalInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createInitialPayment?: [{	data: ValueTypes["CreateInitialPaymentInput"] | Variable<any, string>},ValueTypes["GatewayPayment"]],
 createParentOffer?: [{	data: ValueTypes["CreateParentOfferInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ValueTypes["CreateProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["CreatedProjectFreeDecision"]],
@@ -6535,6 +6778,7 @@ createWebPushSubscription?: [{	data: ValueTypes["CreateSubscriptionInput"] | Var
 createWithdraw?: [{	data: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
 declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+declineExpenseReport?: [{	data: ValueTypes["DeclineExpenseReportInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -6577,6 +6821,8 @@ logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `
 markReportPeriod?: [{	data: ValueTypes["MarkReportPeriodInput"] | Variable<any, string>},boolean | `@${string}`],
 moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ValueTypes["NotifyOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
+overspendExpenseItem?: [{	data: ValueTypes["OverspendExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+payExpenseItem?: [{	data: ValueTypes["PayExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 processConvertToAxonStatement?: [{	data: ValueTypes["ProcessConvertToAxonStatementInput"] | Variable<any, string>},boolean | `@${string}`],
 prohibitRequest?: [{	data: ValueTypes["ProhibitRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -6585,8 +6831,10 @@ receiveOnRequest?: [{	data: ValueTypes["ReceiveOnRequestInput"] | Variable<any, 
 refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
+reportExpenseItem?: [{	data: ValueTypes["ReportExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
+returnExpenseItem?: [{	data: ValueTypes["ReturnExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 saveReportDraft?: [{	input: ValueTypes["SaveReportDraftInput"] | Variable<any, string>},ValueTypes["ReportDraft"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 sendAgreement?: [{	data: ValueTypes["SendAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -6596,6 +6844,7 @@ signByPresiderOnAnnualGeneralMeet?: [{	data: ValueTypes["SignByPresiderOnAnnualG
 signBySecretaryOnAnnualGeneralMeet?: [{	data: ValueTypes["SignBySecretaryOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 startInstall?: [{	data: ValueTypes["StartInstallInput"] | Variable<any, string>},ValueTypes["StartInstallResult"]],
 startResetKey?: [{	data: ValueTypes["StartResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
+submitExpenseReport?: [{	data: ValueTypes["SubmitExpenseReportInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 supplyOnRequest?: [{	data: ValueTypes["SupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 triggerNotificationWorkflow?: [{	data: ValueTypes["TriggerNotificationWorkflowInput"] | Variable<any, string>},boolean | `@${string}`],
 uninstallExtension?: [{	data: ValueTypes["UninstallExtensionInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -6607,6 +6856,7 @@ updateReportRequisites?: [{	input: ValueTypes["UpdateReportRequisitesInput"] | V
 updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 updateSettings?: [{	data: ValueTypes["UpdateSettingsInput"] | Variable<any, string>},ValueTypes["Settings"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
+uploadExpenseFile?: [{	data: ValueTypes["UploadExpenseFileInput"] | Variable<any, string>},ValueTypes["ExpenseFile"]],
 verifyEmail?: [{	data: ValueTypes["VerifyEmailInputDTO"] | Variable<any, string>},boolean | `@${string}`],
 voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},ValueTypes["Ledger2AdjustmentResult"]],
@@ -6750,6 +7000,16 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 		__typename?: boolean | `@${string}`,
 	['...on OrganizationWithBankAccount']?: Omit<ValueTypes["OrganizationWithBankAccount"], "...on OrganizationWithBankAccount">
 }>;
+	["OverspendExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Хеш строки расхода (item). */
+	item_hash: string | Variable<any, string>,
+	/** Сумма доплаты сверх planned_amount (asset, например "200.0000 RUB"). */
+	overspend_amount: string | Variable<any, string>,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string | Variable<any, string>
+};
 	["PaginatedActionsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -7014,6 +7274,18 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 		__typename?: boolean | `@${string}`,
 	['...on PaginatedDeltasPaginationResult']?: Omit<ValueTypes["PaginatedDeltasPaginationResult"], "...on PaginatedDeltasPaginationResult">
 }>;
+	["PaginatedExpenseProposalsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["ExpenseProposal"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on PaginatedExpenseProposalsPaginationResult']?: Omit<ValueTypes["PaginatedExpenseProposalsPaginationResult"], "...on PaginatedExpenseProposalsPaginationResult">
+}>;
 	["PaginatedGatewayPaymentsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -7179,6 +7451,16 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 	issued_by: string | Variable<any, string>,
 	number: number | Variable<any, string>,
 	series: number | Variable<any, string>
+};
+	["PayExpenseItemInput"]: {
+	/** Фактическая сумма оплаты (asset, например "100.0000 RUB"). */
+	actual_amount: string | Variable<any, string>,
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Хеш строки расхода (item). */
+	item_hash: string | Variable<any, string>,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string | Variable<any, string>
 };
 	["PaymentDetails"]: AliasType<{
 	/** Сумма платежа с учетом комиссии */
@@ -7836,6 +8118,12 @@ chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ValueTypes["ListUtcDatesWithN
 checkReportReadiness?: [{	reportType: ValueTypes["ReportType"] | Variable<any, string>},ValueTypes["ReportReadinessView"]],
 cooperativeAgreements?: [{	coopname: string | Variable<any, string>},ValueTypes["CoopAgreement"]],
 cooperativePrograms?: [{	coopname: string | Variable<any, string>},ValueTypes["CooperativeProgram"]],
+expenseFile?: [{	id: number | Variable<any, string>},ValueTypes["ExpenseFile"]],
+expenseFilesByItem?: [{	coopname: string | Variable<any, string>,	item_hash: string | Variable<any, string>,	proposal_hash: string | Variable<any, string>},ValueTypes["ExpenseFile"]],
+expenseFilesByProposal?: [{	coopname: string | Variable<any, string>,	proposal_hash: string | Variable<any, string>},ValueTypes["ExpenseFile"]],
+expenseProposal?: [{	proposal_hash: string | Variable<any, string>},ValueTypes["ExpenseProposal"]],
+expenseProposalsByCooperative?: [{	coopname: string | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedExpenseProposalsPaginationResult"]],
+expenseProposalsByMember?: [{	coopname: string | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>,	username: string | Variable<any, string>},ValueTypes["PaginatedExpenseProposalsPaginationResult"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -8139,6 +8427,14 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 		__typename?: boolean | `@${string}`,
 	['...on ReportDraft']?: Omit<ValueTypes["ReportDraft"], "...on ReportDraft">
 }>;
+	["ReportExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Хеш строки расхода (item). */
+	item_hash: string | Variable<any, string>,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string | Variable<any, string>
+};
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null | Variable<any, string>,
@@ -8608,6 +8904,16 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	/** Версия генератора, использованного для создания документа */
 	version: string | Variable<any, string>
 };
+	["ReturnExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Хеш строки расхода (item). */
+	item_hash: string | Variable<any, string>,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string | Variable<any, string>,
+	/** Возвращаемая сумма (asset, например "50.0000 RUB"). */
+	return_amount: string | Variable<any, string>
+};
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]:RoomMessageKind;
 	["SaveReportDraftInput"]: {
@@ -8992,6 +9298,16 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
+	["SubmitExpenseReportInput"]: {
+	/** Комментарий пайщика к финализации отчёта (свободный текст, до 1000 символов). */
+	comment?: string | undefined | null | Variable<any, string>,
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Хеш сметы расхода. */
+	proposal_hash: string | Variable<any, string>,
+	/** Итоговая сумма фактических расходов (asset, например "1500.0000 RUB"). */
+	total_actual_amount?: string | undefined | null | Variable<any, string>
+};
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -9361,6 +9677,24 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	story_hash: string | Variable<any, string>,
 	/** Название истории */
 	title?: string | undefined | null | Variable<any, string>
+};
+	["UploadExpenseFileInput"]: {
+	/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string | Variable<any, string>,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string | Variable<any, string>,
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** Хеш строки расхода (пусто — файл уровня сметы). */
+	item_hash?: string | undefined | null | Variable<any, string>,
+	/** Назначение файла (платёжка/чек/возврат). */
+	kind: ValueTypes["ExpenseFileKind"] | Variable<any, string>,
+	/** MIME-тип содержимого. */
+	mime_type: string | Variable<any, string>,
+	/** Хеш сметы расхода. */
+	proposal_hash: string | Variable<any, string>,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number | Variable<any, string>
 };
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
@@ -10403,6 +10737,14 @@ export type ResolverInputTypes = {
 	decision_id: number,
 	/** Подписанный председателем документ утверждения решения */
 	document: ResolverInputTypes["SignedDigitalDocumentInput"]
+};
+	["AuthorizeExpenseReportInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: ResolverInputTypes["ExpenseProposalDecisionSignedDocumentInput"],
+	/** Хеш сметы расхода. */
+	proposal_hash: string
 };
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
@@ -12835,6 +13177,24 @@ export type ResolverInputTypes = {
 	/** Служебная записка о расходе */
 	statement: ResolverInputTypes["SignedDigitalDocumentInput"]
 };
+	["CreateExpenseProposalInput"]: {
+	/** Callback на финализацию closeexp (опционально). */
+	callback?: ResolverInputTypes["ExpenseCallbackInput"] | undefined | null,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Строки расхода (массив items). */
+	items: Array<ResolverInputTypes["ExpenseItemInput"]>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string,
+	/** Хеш сметы расхода (детерминированный, из UI). */
+	proposal_hash: string,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: ResolverInputTypes["ExpenseProposalStatementSignedDocumentInput"],
+	/** Имя пайщика-создателя СЗ. */
+	username: string
+};
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string,
@@ -13224,6 +13584,14 @@ export type ResolverInputTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineExpenseReportInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
+	reason: string
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -13496,6 +13864,44 @@ export type ResolverInputTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseCallbackInput"]: {
+	/** Action-метод */
+	action?: string | undefined | null,
+	/** Контракт-целевой */
+	contract?: string | undefined | null,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null
+};
+	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
+["ExpenseFile"]: AliasType<{
+	/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256?:boolean | `@${string}`,
+	/** Имя кооператива (scope). */
+	coopname?:boolean | `@${string}`,
+	/** Внутренний ID записи. */
+	id?:boolean | `@${string}`,
+	/** Хеш строки расхода (если файл уровня item). */
+	item_hash?:boolean | `@${string}`,
+	/** Назначение файла. */
+	kind?:boolean | `@${string}`,
+	/** MIME-тип содержимого. */
+	mime_type?:boolean | `@${string}`,
+	/** Хеш сметы расхода. */
+	proposal_hash?:boolean | `@${string}`,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?:boolean | `@${string}`,
+	/** Размер файла в байтах. */
+	size_bytes?:boolean | `@${string}`,
+	/** MinIO-ключ внутри бакета. */
+	storage_key?:boolean | `@${string}`,
+	/** Когда загружено. */
+	uploaded_at?:boolean | `@${string}`,
+	/** Кто загрузил (username). */
+	uploaded_by_username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Тип первичного файла расхода. */
+["ExpenseFileKind"]:ExpenseFileKind;
 	["ExpenseFilter"]: {
 	/** Фильтр по ID фонда */
 	fundId?: string | undefined | null,
@@ -13506,6 +13912,172 @@ export type ResolverInputTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
+	/** Строка сметы расхода. */
+["ExpenseItem"]: AliasType<{
+	/** Фактическая сумма (после оплаты/отчёта). */
+	actual_amount?:boolean | `@${string}`,
+	/** Назначение/описание строки. */
+	description?:boolean | `@${string}`,
+	/** Хеш строки расхода. */
+	item_hash?:boolean | `@${string}`,
+	/** Способ оплаты. */
+	mechanics?:boolean | `@${string}`,
+	/** Планируемая сумма. */
+	planned_amount?:boolean | `@${string}`,
+	/** Идентификатор получателя. */
+	recipient?:boolean | `@${string}`,
+	/** Тип получателя платежа. */
+	recipient_type?:boolean | `@${string}`,
+	/** Статус строки. */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ExpenseItemInput"]: {
+	/** Описание назначения расхода. */
+	description: string,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: ResolverInputTypes["ExpenseMechanics"],
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string,
+	/** Тип получателя. */
+	recipient_type: ResolverInputTypes["ExpenseRecipientType"]
+};
+	/** Статус строки расхода. */
+["ExpenseItemStatus"]:ExpenseItemStatus;
+	/** Способ оплаты строки расхода. */
+["ExpenseMechanics"]:ExpenseMechanics;
+	/** Смета расхода (СЗ). */
+["ExpenseProposal"]: AliasType<{
+	/** Дата создания записи */
+	_created_at?:boolean | `@${string}`,
+	/** Внутренний ID базы данных */
+	_id?:boolean | `@${string}`,
+	/** Дата последнего обновления записи */
+	_updated_at?:boolean | `@${string}`,
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?:boolean | `@${string}`,
+	/** Сырой статус из блокчейна (uint8). */
+	blockchain_status?:boolean | `@${string}`,
+	/** Имя кооператива (scope). */
+	coopname?:boolean | `@${string}`,
+	/** Время создания (chain). */
+	created_at?:boolean | `@${string}`,
+	/** Решение совета о расходе (DocumentAggregate). */
+	decision_doc?:ResolverInputTypes["DocumentAggregate"],
+	/** ID в блокчейне. */
+	id?:boolean | `@${string}`,
+	/** Строки сметы. */
+	items?:ResolverInputTypes["ExpenseItem"],
+	/** Код операции (operation_code). */
+	operation_code?:boolean | `@${string}`,
+	/** Флаг присутствия записи в блокчейне */
+	present?:boolean | `@${string}`,
+	/** Хеш сметы расхода. */
+	proposal_hash?:boolean | `@${string}`,
+	/** Кошелёк-источник средств. */
+	source_wallet?:boolean | `@${string}`,
+	/** Заявление пайщика о расходе (DocumentAggregate). */
+	statement_doc?:ResolverInputTypes["DocumentAggregate"],
+	/** Доменный статус сметы. */
+	status?:boolean | `@${string}`,
+	/** Сумма всех строк (факт). */
+	total_actual?:boolean | `@${string}`,
+	/** Сумма всех строк (план). */
+	total_planned?:boolean | `@${string}`,
+	/** Время последнего обновления (chain). */
+	updated_at?:boolean | `@${string}`,
+	/** Создатель сметы (username). */
+	username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация решения по СЗ */
+	meta: ResolverInputTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация СЗ-заявления */
+	meta: ResolverInputTypes["ExpenseProposalStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	/** Статус сметы расхода. */
+["ExpenseProposalStatus"]:ExpenseProposalStatus;
+	/** Тип получателя платежа. */
+["ExpenseRecipientType"]:ExpenseRecipientType;
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
@@ -14772,6 +15344,7 @@ addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInp
 addPaymentMethod?: [{	data: ResolverInputTypes["AddPaymentMethodInput"]},ResolverInputTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 authorizeDecision?: [{	data: ResolverInputTypes["AuthorizeDecisionInput"]},ResolverInputTypes["Transaction"]],
+authorizeExpenseReport?: [{	data: ResolverInputTypes["AuthorizeExpenseReportInput"]},ResolverInputTypes["Transaction"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
@@ -14872,6 +15445,7 @@ createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetIn
 createBranch?: [{	data: ResolverInputTypes["CreateBranchInput"]},ResolverInputTypes["Branch"]],
 createChildOrder?: [{	data: ResolverInputTypes["CreateChildOrderInput"]},ResolverInputTypes["Transaction"]],
 createDepositPayment?: [{	data: ResolverInputTypes["CreateDepositPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
+createExpenseProposal?: [{	data: ResolverInputTypes["CreateExpenseProposalInput"]},ResolverInputTypes["Transaction"]],
 createInitialPayment?: [{	data: ResolverInputTypes["CreateInitialPaymentInput"]},ResolverInputTypes["GatewayPayment"]],
 createParentOffer?: [{	data: ResolverInputTypes["CreateParentOfferInput"]},ResolverInputTypes["Transaction"]],
 createProjectOfFreeDecision?: [{	data: ResolverInputTypes["CreateProjectFreeDecisionInput"]},ResolverInputTypes["CreatedProjectFreeDecision"]],
@@ -14879,6 +15453,7 @@ createWebPushSubscription?: [{	data: ResolverInputTypes["CreateSubscriptionInput
 createWithdraw?: [{	data: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
 declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
+declineExpenseReport?: [{	data: ResolverInputTypes["DeclineExpenseReportInput"]},ResolverInputTypes["Transaction"]],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
@@ -14921,6 +15496,8 @@ logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
 markReportPeriod?: [{	data: ResolverInputTypes["MarkReportPeriodInput"]},boolean | `@${string}`],
 moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverInputTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["NotifyOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
+overspendExpenseItem?: [{	data: ResolverInputTypes["OverspendExpenseItemInput"]},ResolverInputTypes["Transaction"]],
+payExpenseItem?: [{	data: ResolverInputTypes["PayExpenseItemInput"]},ResolverInputTypes["Transaction"]],
 processConvertToAxonStatement?: [{	data: ResolverInputTypes["ProcessConvertToAxonStatementInput"]},boolean | `@${string}`],
 prohibitRequest?: [{	data: ResolverInputTypes["ProhibitRequestInput"]},ResolverInputTypes["Transaction"]],
 publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
@@ -14929,8 +15506,10 @@ receiveOnRequest?: [{	data: ResolverInputTypes["ReceiveOnRequestInput"]},Resolve
 refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
+reportExpenseItem?: [{	data: ResolverInputTypes["ReportExpenseItemInput"]},ResolverInputTypes["Transaction"]],
 resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
 restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
+returnExpenseItem?: [{	data: ResolverInputTypes["ReturnExpenseItemInput"]},ResolverInputTypes["Transaction"]],
 saveReportDraft?: [{	input: ResolverInputTypes["SaveReportDraftInput"]},ResolverInputTypes["ReportDraft"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
 sendAgreement?: [{	data: ResolverInputTypes["SendAgreementInput"]},ResolverInputTypes["Transaction"]],
@@ -14940,6 +15519,7 @@ signByPresiderOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignByPresiderO
 signBySecretaryOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["SignBySecretaryOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 startInstall?: [{	data: ResolverInputTypes["StartInstallInput"]},ResolverInputTypes["StartInstallResult"]],
 startResetKey?: [{	data: ResolverInputTypes["StartResetKeyInput"]},boolean | `@${string}`],
+submitExpenseReport?: [{	data: ResolverInputTypes["SubmitExpenseReportInput"]},ResolverInputTypes["Transaction"]],
 supplyOnRequest?: [{	data: ResolverInputTypes["SupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
 triggerNotificationWorkflow?: [{	data: ResolverInputTypes["TriggerNotificationWorkflowInput"]},boolean | `@${string}`],
 uninstallExtension?: [{	data: ResolverInputTypes["UninstallExtensionInput"]},boolean | `@${string}`],
@@ -14951,6 +15531,7 @@ updateReportRequisites?: [{	input: ResolverInputTypes["UpdateReportRequisitesInp
 updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInputTypes["Transaction"]],
 updateSettings?: [{	data: ResolverInputTypes["UpdateSettingsInput"]},ResolverInputTypes["Settings"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
+uploadExpenseFile?: [{	data: ResolverInputTypes["UploadExpenseFileInput"]},ResolverInputTypes["ExpenseFile"]],
 verifyEmail?: [{	data: ResolverInputTypes["VerifyEmailInputDTO"]},boolean | `@${string}`],
 voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputTypes["Ledger2AdjustmentResult"]],
@@ -15087,6 +15668,16 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["OverspendExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Сумма доплаты сверх planned_amount (asset, например "200.0000 RUB"). */
+	overspend_amount: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
+};
 	["PaginatedActionsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -15329,6 +15920,17 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 	totalPages?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["PaginatedExpenseProposalsPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["ExpenseProposal"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["PaginatedGatewayPaymentsPaginationResult"]: AliasType<{
 	/** Текущая страница */
 	currentPage?:boolean | `@${string}`,
@@ -15491,6 +16093,16 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 	issued_by: string,
 	number: number,
 	series: number
+};
+	["PayExpenseItemInput"]: {
+	/** Фактическая сумма оплаты (asset, например "100.0000 RUB"). */
+	actual_amount: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
 };
 	["PaymentDetails"]: AliasType<{
 	/** Сумма платежа с учетом комиссии */
@@ -16125,6 +16737,12 @@ chatcoopListUtcDatesWithNewRoomMessages?: [{	data: ResolverInputTypes["ListUtcDa
 checkReportReadiness?: [{	reportType: ResolverInputTypes["ReportType"]},ResolverInputTypes["ReportReadinessView"]],
 cooperativeAgreements?: [{	coopname: string},ResolverInputTypes["CoopAgreement"]],
 cooperativePrograms?: [{	coopname: string},ResolverInputTypes["CooperativeProgram"]],
+expenseFile?: [{	id: number},ResolverInputTypes["ExpenseFile"]],
+expenseFilesByItem?: [{	coopname: string,	item_hash: string,	proposal_hash: string},ResolverInputTypes["ExpenseFile"]],
+expenseFilesByProposal?: [{	coopname: string,	proposal_hash: string},ResolverInputTypes["ExpenseFile"]],
+expenseProposal?: [{	proposal_hash: string},ResolverInputTypes["ExpenseProposal"]],
+expenseProposalsByCooperative?: [{	coopname: string,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedExpenseProposalsPaginationResult"]],
+expenseProposalsByMember?: [{	coopname: string,	options?: ResolverInputTypes["PaginationInput"] | undefined | null,	username: string},ResolverInputTypes["PaginatedExpenseProposalsPaginationResult"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -16418,6 +17036,14 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	year?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["ReportExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
+};
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
 	limit?: number | undefined | null,
@@ -16876,6 +17502,16 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string,
+	/** Возвращаемая сумма (asset, например "50.0000 RUB"). */
+	return_amount: string
+};
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]:RoomMessageKind;
 	["SaveReportDraftInput"]: {
@@ -17252,6 +17888,16 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]:StoryStatus;
+	["SubmitExpenseReportInput"]: {
+	/** Комментарий пайщика к финализации отчёта (свободный текст, до 1000 символов). */
+	comment?: string | undefined | null,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Итоговая сумма фактических расходов (asset, например "1500.0000 RUB"). */
+	total_actual_amount?: string | undefined | null
+};
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -17613,6 +18259,24 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	story_hash: string,
 	/** Название истории */
 	title?: string | undefined | null
+};
+	["UploadExpenseFileInput"]: {
+	/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (пусто — файл уровня сметы). */
+	item_hash?: string | undefined | null,
+	/** Назначение файла (платёжка/чек/возврат). */
+	kind: ResolverInputTypes["ExpenseFileKind"],
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number
 };
 	["UserAccount"]: AliasType<{
 	/** Метаинформация */
@@ -18635,6 +19299,14 @@ export type ModelTypes = {
 	decision_id: number,
 	/** Подписанный председателем документ утверждения решения */
 	document: ModelTypes["SignedDigitalDocumentInput"]
+};
+	["AuthorizeExpenseReportInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: ModelTypes["ExpenseProposalDecisionSignedDocumentInput"],
+	/** Хеш сметы расхода. */
+	proposal_hash: string
 };
 	["AvailableReport"]: {
 		deadline: string,
@@ -20993,6 +21665,24 @@ export type ModelTypes = {
 	/** Служебная записка о расходе */
 	statement: ModelTypes["SignedDigitalDocumentInput"]
 };
+	["CreateExpenseProposalInput"]: {
+	/** Callback на финализацию closeexp (опционально). */
+	callback?: ModelTypes["ExpenseCallbackInput"] | undefined | null,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Строки расхода (массив items). */
+	items: Array<ModelTypes["ExpenseItemInput"]>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string,
+	/** Хеш сметы расхода (детерминированный, из UI). */
+	proposal_hash: string,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: ModelTypes["ExpenseProposalStatementSignedDocumentInput"],
+	/** Имя пайщика-создателя СЗ. */
+	username: string
+};
 	["CreateIndividualDataInput"]: {
 	/** Дата рождения */
 	birthdate: string,
@@ -21374,6 +22064,14 @@ export type ModelTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineExpenseReportInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
+	reason: string
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -21635,6 +22333,42 @@ export type ModelTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseCallbackInput"]: {
+	/** Action-метод */
+	action?: string | undefined | null,
+	/** Контракт-целевой */
+	contract?: string | undefined | null,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null
+};
+	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
+["ExpenseFile"]: {
+		/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256: string,
+	/** Имя кооператива (scope). */
+	coopname: string,
+	/** Внутренний ID записи. */
+	id: number,
+	/** Хеш строки расхода (если файл уровня item). */
+	item_hash?: string | undefined | null,
+	/** Назначение файла. */
+	kind: ModelTypes["ExpenseFileKind"],
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?: string | undefined | null,
+	/** Размер файла в байтах. */
+	size_bytes: number,
+	/** MinIO-ключ внутри бакета. */
+	storage_key: string,
+	/** Когда загружено. */
+	uploaded_at: ModelTypes["DateTime"],
+	/** Кто загрузил (username). */
+	uploaded_by_username: string
+};
+	["ExpenseFileKind"]:ExpenseFileKind;
 	["ExpenseFilter"]: {
 	/** Фильтр по ID фонда */
 	fundId?: string | undefined | null,
@@ -21645,6 +22379,166 @@ export type ModelTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
+	/** Строка сметы расхода. */
+["ExpenseItem"]: {
+		/** Фактическая сумма (после оплаты/отчёта). */
+	actual_amount?: string | undefined | null,
+	/** Назначение/описание строки. */
+	description: string,
+	/** Хеш строки расхода. */
+	item_hash: string,
+	/** Способ оплаты. */
+	mechanics: ModelTypes["ExpenseMechanics"],
+	/** Планируемая сумма. */
+	planned_amount: string,
+	/** Идентификатор получателя. */
+	recipient?: string | undefined | null,
+	/** Тип получателя платежа. */
+	recipient_type: ModelTypes["ExpenseRecipientType"],
+	/** Статус строки. */
+	status: ModelTypes["ExpenseItemStatus"]
+};
+	["ExpenseItemInput"]: {
+	/** Описание назначения расхода. */
+	description: string,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: ModelTypes["ExpenseMechanics"],
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string,
+	/** Тип получателя. */
+	recipient_type: ModelTypes["ExpenseRecipientType"]
+};
+	["ExpenseItemStatus"]:ExpenseItemStatus;
+	["ExpenseMechanics"]:ExpenseMechanics;
+	/** Смета расхода (СЗ). */
+["ExpenseProposal"]: {
+		/** Дата создания записи */
+	_created_at: ModelTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: ModelTypes["DateTime"],
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Сырой статус из блокчейна (uint8). */
+	blockchain_status?: number | undefined | null,
+	/** Имя кооператива (scope). */
+	coopname: string,
+	/** Время создания (chain). */
+	created_at?: string | undefined | null,
+	/** Решение совета о расходе (DocumentAggregate). */
+	decision_doc?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** ID в блокчейне. */
+	id?: number | undefined | null,
+	/** Строки сметы. */
+	items: Array<ModelTypes["ExpenseItem"]>,
+	/** Код операции (operation_code). */
+	operation_code?: string | undefined | null,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Кошелёк-источник средств. */
+	source_wallet?: string | undefined | null,
+	/** Заявление пайщика о расходе (DocumentAggregate). */
+	statement_doc?: ModelTypes["DocumentAggregate"] | undefined | null,
+	/** Доменный статус сметы. */
+	status: ModelTypes["ExpenseProposalStatus"],
+	/** Сумма всех строк (факт). */
+	total_actual?: string | undefined | null,
+	/** Сумма всех строк (план). */
+	total_planned?: string | undefined | null,
+	/** Время последнего обновления (chain). */
+	updated_at?: string | undefined | null,
+	/** Создатель сметы (username). */
+	username?: string | undefined | null
+};
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация решения по СЗ */
+	meta: ModelTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+	/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация СЗ-заявления */
+	meta: ModelTypes["ExpenseProposalStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<ModelTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+	/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ExpenseProposalStatus"]:ExpenseProposalStatus;
+	["ExpenseRecipientType"]:ExpenseRecipientType;
 	["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: {
@@ -22876,6 +23770,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	authorizeDecision: ModelTypes["Transaction"],
+	/** Утвердить СЗ-отчёт (закрытие сметы). Триггерит капитализацию РИД в Благоросте.
+
+Требуемые роли: chairman.  */
+	authorizeExpenseReport: ModelTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -23250,6 +24148,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	createDepositPayment: ModelTypes["GatewayPayment"],
+	/** Подать СЗ-расход (создать смету с подписью пайщика/председателя).
+
+Требуемые роли: chairman, member, user.  */
+	createExpenseProposal: ModelTypes["Transaction"],
 	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
 
 Требуемые роли: chairman, member.  */
@@ -23276,6 +24178,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: ModelTypes["Transaction"],
+	/** Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.
+
+Требуемые роли: chairman.  */
+	declineExpenseReport: ModelTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
 	/** Удалить кооперативный участок
@@ -23424,6 +24330,14 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	notifyOnAnnualGeneralMeet: ModelTypes["MeetAggregate"],
+	/** Доплатить сумму перерасхода по строке расхода (ADVANCE-механика).
+
+Требуемые роли: chairman.  */
+	overspendExpenseItem: ModelTypes["Transaction"],
+	/** Оплатить строку расхода (выдача аванса ADVANCE или прямая оплата DIRECT).
+
+Требуемые роли: chairman.  */
+	payExpenseItem: ModelTypes["Transaction"],
 	/** Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию
 
 Требуемые роли: member, chairman.  */
@@ -23446,12 +24360,20 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	registerParticipant: ModelTypes["Account"],
+	/** Закрыть строку расхода чеком (ADVANCE-отчёт пайщика).
+
+Требуемые роли: chairman, member, user.  */
+	reportExpenseItem: ModelTypes["Transaction"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
 	/** Перезапуск общего собрания пайщиков
 
 Требуемые роли: chairman.  */
 	restartAnnualGeneralMeet: ModelTypes["MeetAggregate"],
+	/** Вернуть неиспользованный аванс по строке расхода (ADVANCE-остаток).
+
+Требуемые роли: chairman, member, user.  */
+	returnExpenseItem: ModelTypes["Transaction"],
 	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
 
 Требуемые роли: chairman.  */
@@ -23480,6 +24402,10 @@ export type ModelTypes = {
 	startInstall: ModelTypes["StartInstallResult"],
 	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
 	startResetKey: boolean,
+	/** Финализировать СЗ-отчёт по смете расхода (все items закрыты — оплата/чек/возврат).
+
+Требуемые роли: chairman, member, user.  */
+	submitExpenseReport: ModelTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: ModelTypes["Transaction"],
 	/** Запустить воркфлоу уведомлений (только для председателя или server-secret)
@@ -23516,6 +24442,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	updateSystem: ModelTypes["SystemInfo"],
+	/** Загрузить первичный файл расхода (платёжка/чек/возврат) в бакет expenses:files.
+
+Требуемые роли: chairman, member, user.  */
+	uploadExpenseFile: ModelTypes["ExpenseFile"],
 	/** Подтвердить email адрес пользователя */
 	verifyEmail: boolean,
 	/** Голосование на общем собрании пайщиков
@@ -23649,6 +24579,16 @@ export type ModelTypes = {
 	type: string,
 	/** Имя аккаунта организации */
 	username: string
+};
+	["OverspendExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Сумма доплаты сверх planned_amount (asset, например "200.0000 RUB"). */
+	overspend_amount: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
 };
 	["PaginatedActionsPaginationResult"]: {
 		/** Текущая страница */
@@ -23870,6 +24810,16 @@ export type ModelTypes = {
 	/** Общее количество страниц */
 	totalPages: number
 };
+	["PaginatedExpenseProposalsPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["ExpenseProposal"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["PaginatedGatewayPaymentsPaginationResult"]: {
 		/** Текущая страница */
 	currentPage: number,
@@ -24029,6 +24979,16 @@ export type ModelTypes = {
 	issued_by: string,
 	number: number,
 	series: number
+};
+	["PayExpenseItemInput"]: {
+	/** Фактическая сумма оплаты (asset, например "100.0000 RUB"). */
+	actual_amount: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
 };
 	["PaymentDetails"]: {
 		/** Сумма платежа с учетом комиссии */
@@ -24714,6 +25674,30 @@ export type ModelTypes = {
 	cooperativeAgreements: Array<ModelTypes["CoopAgreement"]>,
 	/** Целевые потребительские программы кооператива (id, тип, активность, draft_id) */
 	cooperativePrograms: Array<ModelTypes["CooperativeProgram"]>,
+	/** Получить запись о файле + свежий короткоживущий read-URL.
+
+Требуемые роли: chairman, member, user.  */
+	expenseFile: ModelTypes["ExpenseFile"],
+	/** Список файлов строки расхода (без read-URL — запрос отдельно по id).
+
+Требуемые роли: chairman, member, user.  */
+	expenseFilesByItem: Array<ModelTypes["ExpenseFile"]>,
+	/** Список файлов сметы расхода (без read-URL — запрос отдельно по id).
+
+Требуемые роли: chairman, member, user.  */
+	expenseFilesByProposal: Array<ModelTypes["ExpenseFile"]>,
+	/** Получить смету расхода по хешу.
+
+Требуемые роли: chairman, member, user.  */
+	expenseProposal?: ModelTypes["ExpenseProposal"] | undefined | null,
+	/** Список смет расходов кооператива (paginated).
+
+Требуемые роли: chairman, member.  */
+	expenseProposalsByCooperative: ModelTypes["PaginatedExpenseProposalsPaginationResult"],
+	/** Список смет расходов пайщика (свои/созданные им, paginated).
+
+Требуемые роли: chairman, member, user.  */
+	expenseProposalsByMember: ModelTypes["PaginatedExpenseProposalsPaginationResult"],
 	/** Получить сводную информацию о аккаунте
 
 Требуемые роли: chairman, member.  */
@@ -25103,6 +26087,14 @@ export type ModelTypes = {
 	reportType: ModelTypes["ReportType"],
 	updatedAt: ModelTypes["DateTime"],
 	year: number
+};
+	["ReportExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
 };
 	["ReportHistoryFilterInput"]: {
 	/** Лимит (макс 100, по умолчанию 20) */
@@ -25549,6 +26541,16 @@ export type ModelTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnExpenseItemInput"]: {
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string,
+	/** Возвращаемая сумма (asset, например "50.0000 RUB"). */
+	return_amount: string
+};
 	["RoomMessageKind"]:RoomMessageKind;
 	["SaveReportDraftInput"]: {
 	editedFields: Array<string>,
@@ -25914,6 +26916,16 @@ export type ModelTypes = {
 	project_hash: string
 };
 	["StoryStatus"]:StoryStatus;
+	["SubmitExpenseReportInput"]: {
+	/** Комментарий пайщика к финализации отчёта (свободный текст, до 1000 символов). */
+	comment?: string | undefined | null,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Итоговая сумма фактических расходов (asset, например "1500.0000 RUB"). */
+	total_actual_amount?: string | undefined | null
+};
 	["SubmitVoteInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -26265,6 +27277,24 @@ export type ModelTypes = {
 	story_hash: string,
 	/** Название истории */
 	title?: string | undefined | null
+};
+	["UploadExpenseFileInput"]: {
+	/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (пусто — файл уровня сметы). */
+	item_hash?: string | undefined | null,
+	/** Назначение файла (платёжка/чек/возврат). */
+	kind: ModelTypes["ExpenseFileKind"],
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number
 };
 	["UserAccount"]: {
 		/** Метаинформация */
@@ -27307,6 +28337,14 @@ export type GraphQLTypes = {
 	decision_id: number,
 	/** Подписанный председателем документ утверждения решения */
 	document: GraphQLTypes["SignedDigitalDocumentInput"]
+};
+	["AuthorizeExpenseReportInput"]: {
+		/** Имя кооператива. */
+	coopname: string,
+	/** Подписанное решение совета (document2, registry 2011). */
+	decision: GraphQLTypes["ExpenseProposalDecisionSignedDocumentInput"],
+	/** Хеш сметы расхода. */
+	proposal_hash: string
 };
 	["AvailableReport"]: {
 	__typename: "AvailableReport",
@@ -29807,6 +30845,24 @@ export type GraphQLTypes = {
 	/** Служебная записка о расходе */
 	statement: GraphQLTypes["SignedDigitalDocumentInput"]
 };
+	["CreateExpenseProposalInput"]: {
+		/** Callback на финализацию closeexp (опционально). */
+	callback?: GraphQLTypes["ExpenseCallbackInput"] | undefined | null,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Строки расхода (массив items). */
+	items: Array<GraphQLTypes["ExpenseItemInput"]>,
+	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
+	operation_code: string,
+	/** Хеш сметы расхода (детерминированный, из UI). */
+	proposal_hash: string,
+	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
+	source_wallet: string,
+	/** Подписанная СЗ-смета (document2, registry 2010). */
+	statement: GraphQLTypes["ExpenseProposalStatementSignedDocumentInput"],
+	/** Имя пайщика-создателя СЗ. */
+	username: string
+};
 	["CreateIndividualDataInput"]: {
 		/** Дата рождения */
 	birthdate: string,
@@ -30202,6 +31258,14 @@ export type GraphQLTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineExpenseReportInput"]: {
+		/** Имя кооператива. */
+	coopname: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
+	reason: string
+};
 	["DeclineRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -30484,6 +31548,45 @@ export type GraphQLTypes = {
 	/** ОГРН */
 	ogrn: string
 };
+	["ExpenseCallbackInput"]: {
+		/** Action-метод */
+	action?: string | undefined | null,
+	/** Контракт-целевой */
+	contract?: string | undefined | null,
+	/** Payload (hex bytes) */
+	data?: string | undefined | null
+};
+	/** Запись о первичном файле расхода (платёжка/чек/возврат). */
+["ExpenseFile"]: {
+	__typename: "ExpenseFile",
+	/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256: string,
+	/** Имя кооператива (scope). */
+	coopname: string,
+	/** Внутренний ID записи. */
+	id: number,
+	/** Хеш строки расхода (если файл уровня item). */
+	item_hash?: string | undefined | null,
+	/** Назначение файла. */
+	kind: GraphQLTypes["ExpenseFileKind"],
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?: string | undefined | null,
+	/** Размер файла в байтах. */
+	size_bytes: number,
+	/** MinIO-ключ внутри бакета. */
+	storage_key: string,
+	/** Когда загружено. */
+	uploaded_at: GraphQLTypes["DateTime"],
+	/** Кто загрузил (username). */
+	uploaded_by_username: string,
+	['...on ExpenseFile']: Omit<GraphQLTypes["ExpenseFile"], "...on ExpenseFile">
+};
+	/** Тип первичного файла расхода. */
+["ExpenseFileKind"]: ExpenseFileKind;
 	["ExpenseFilter"]: {
 		/** Фильтр по ID фонда */
 	fundId?: string | undefined | null,
@@ -30494,6 +31597,174 @@ export type GraphQLTypes = {
 	/** Фильтр по имени пользователя */
 	username?: string | undefined | null
 };
+	/** Строка сметы расхода. */
+["ExpenseItem"]: {
+	__typename: "ExpenseItem",
+	/** Фактическая сумма (после оплаты/отчёта). */
+	actual_amount?: string | undefined | null,
+	/** Назначение/описание строки. */
+	description: string,
+	/** Хеш строки расхода. */
+	item_hash: string,
+	/** Способ оплаты. */
+	mechanics: GraphQLTypes["ExpenseMechanics"],
+	/** Планируемая сумма. */
+	planned_amount: string,
+	/** Идентификатор получателя. */
+	recipient?: string | undefined | null,
+	/** Тип получателя платежа. */
+	recipient_type: GraphQLTypes["ExpenseRecipientType"],
+	/** Статус строки. */
+	status: GraphQLTypes["ExpenseItemStatus"],
+	['...on ExpenseItem']: Omit<GraphQLTypes["ExpenseItem"], "...on ExpenseItem">
+};
+	["ExpenseItemInput"]: {
+		/** Описание назначения расхода. */
+	description: string,
+	/** Хеш строки расхода (детерминированный, из UI). */
+	item_hash: string,
+	/** Способ оплаты (ADVANCE / DIRECT). */
+	mechanics: GraphQLTypes["ExpenseMechanics"],
+	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
+	planned_amount: string,
+	/** Получатель (username / eosio::name организации). */
+	recipient: string,
+	/** Тип получателя. */
+	recipient_type: GraphQLTypes["ExpenseRecipientType"]
+};
+	/** Статус строки расхода. */
+["ExpenseItemStatus"]: ExpenseItemStatus;
+	/** Способ оплаты строки расхода. */
+["ExpenseMechanics"]: ExpenseMechanics;
+	/** Смета расхода (СЗ). */
+["ExpenseProposal"]: {
+	__typename: "ExpenseProposal",
+	/** Дата создания записи */
+	_created_at: GraphQLTypes["DateTime"],
+	/** Внутренний ID базы данных */
+	_id: string,
+	/** Дата последнего обновления записи */
+	_updated_at: GraphQLTypes["DateTime"],
+	/** Номер блока крайней синхронизации с блокчейном */
+	block_num?: number | undefined | null,
+	/** Сырой статус из блокчейна (uint8). */
+	blockchain_status?: number | undefined | null,
+	/** Имя кооператива (scope). */
+	coopname: string,
+	/** Время создания (chain). */
+	created_at?: string | undefined | null,
+	/** Решение совета о расходе (DocumentAggregate). */
+	decision_doc?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** ID в блокчейне. */
+	id?: number | undefined | null,
+	/** Строки сметы. */
+	items: Array<GraphQLTypes["ExpenseItem"]>,
+	/** Код операции (operation_code). */
+	operation_code?: string | undefined | null,
+	/** Флаг присутствия записи в блокчейне */
+	present: boolean,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Кошелёк-источник средств. */
+	source_wallet?: string | undefined | null,
+	/** Заявление пайщика о расходе (DocumentAggregate). */
+	statement_doc?: GraphQLTypes["DocumentAggregate"] | undefined | null,
+	/** Доменный статус сметы. */
+	status: GraphQLTypes["ExpenseProposalStatus"],
+	/** Сумма всех строк (факт). */
+	total_actual?: string | undefined | null,
+	/** Сумма всех строк (план). */
+	total_planned?: string | undefined | null,
+	/** Время последнего обновления (chain). */
+	updated_at?: string | undefined | null,
+	/** Создатель сметы (username). */
+	username?: string | undefined | null,
+	['...on ExpenseProposal']: Omit<GraphQLTypes["ExpenseProposal"], "...on ExpenseProposal">
+};
+	["ExpenseProposalDecisionSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация решения по СЗ */
+	meta: GraphQLTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedDocumentInput"]: {
+		/** Хэш содержимого документа */
+	doc_hash: string,
+	/** Общий хэш (doc_hash + meta_hash) */
+	hash: string,
+	/** Метаинформация СЗ-заявления */
+	meta: GraphQLTypes["ExpenseProposalStatementSignedMetaDocumentInput"],
+	/** Хэш мета-данных */
+	meta_hash: string,
+	/** Вектор подписей */
+	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
+	/** Версия стандарта документа */
+	version: string
+};
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: {
+		/** Номер блока, на котором был создан документ */
+	block_num: number,
+	/** Название кооператива, связанное с документом */
+	coopname: string,
+	/** Дата и время создания документа */
+	created_at: string,
+	/** Имя генератора, использованного для создания документа */
+	generator: string,
+	/** Язык документа */
+	lang: string,
+	/** Ссылки, связанные с документом */
+	links: Array<string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
+	/** ID документа в реестре */
+	registry_id: number,
+	/** Часовой пояс, в котором был создан документ */
+	timezone: string,
+	/** Название документа */
+	title: string,
+	/** Имя пользователя, создавшего документ */
+	username: string,
+	/** Версия генератора, использованного для создания документа */
+	version: string
+};
+	/** Статус сметы расхода. */
+["ExpenseProposalStatus"]: ExpenseProposalStatus;
+	/** Тип получателя платежа. */
+["ExpenseRecipientType"]: ExpenseRecipientType;
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]: ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
@@ -31809,6 +33080,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	authorizeDecision: GraphQLTypes["Transaction"],
+	/** Утвердить СЗ-отчёт (закрытие сметы). Триггерит капитализацию РИД в Благоросте.
+
+Требуемые роли: chairman.  */
+	authorizeExpenseReport: GraphQLTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -32183,6 +33458,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	createDepositPayment: GraphQLTypes["GatewayPayment"],
+	/** Подать СЗ-расход (создать смету с подписью пайщика/председателя).
+
+Требуемые роли: chairman, member, user.  */
+	createExpenseProposal: GraphQLTypes["Transaction"],
 	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
 
 Требуемые роли: chairman, member.  */
@@ -32209,6 +33488,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: GraphQLTypes["Transaction"],
+	/** Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.
+
+Требуемые роли: chairman.  */
+	declineExpenseReport: GraphQLTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
 	/** Удалить кооперативный участок
@@ -32357,6 +33640,14 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	notifyOnAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
+	/** Доплатить сумму перерасхода по строке расхода (ADVANCE-механика).
+
+Требуемые роли: chairman.  */
+	overspendExpenseItem: GraphQLTypes["Transaction"],
+	/** Оплатить строку расхода (выдача аванса ADVANCE или прямая оплата DIRECT).
+
+Требуемые роли: chairman.  */
+	payExpenseItem: GraphQLTypes["Transaction"],
 	/** Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию
 
 Требуемые роли: member, chairman.  */
@@ -32379,12 +33670,20 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	registerParticipant: GraphQLTypes["Account"],
+	/** Закрыть строку расхода чеком (ADVANCE-отчёт пайщика).
+
+Требуемые роли: chairman, member, user.  */
+	reportExpenseItem: GraphQLTypes["Transaction"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
 	/** Перезапуск общего собрания пайщиков
 
 Требуемые роли: chairman.  */
 	restartAnnualGeneralMeet: GraphQLTypes["MeetAggregate"],
+	/** Вернуть неиспользованный аванс по строке расхода (ADVANCE-остаток).
+
+Требуемые роли: chairman, member, user.  */
+	returnExpenseItem: GraphQLTypes["Transaction"],
 	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
 
 Требуемые роли: chairman.  */
@@ -32413,6 +33712,10 @@ export type GraphQLTypes = {
 	startInstall: GraphQLTypes["StartInstallResult"],
 	/** Выслать токен для замены приватного ключа аккаунта на электронную почту */
 	startResetKey: boolean,
+	/** Финализировать СЗ-отчёт по смете расхода (все items закрыты — оплата/чек/возврат).
+
+Требуемые роли: chairman, member, user.  */
+	submitExpenseReport: GraphQLTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: GraphQLTypes["Transaction"],
 	/** Запустить воркфлоу уведомлений (только для председателя или server-secret)
@@ -32449,6 +33752,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	updateSystem: GraphQLTypes["SystemInfo"],
+	/** Загрузить первичный файл расхода (платёжка/чек/возврат) в бакет expenses:files.
+
+Требуемые роли: chairman, member, user.  */
+	uploadExpenseFile: GraphQLTypes["ExpenseFile"],
 	/** Подтвердить email адрес пользователя */
 	verifyEmail: boolean,
 	/** Голосование на общем собрании пайщиков
@@ -32597,6 +33904,16 @@ export type GraphQLTypes = {
 	/** Имя аккаунта организации */
 	username: string,
 	['...on OrganizationWithBankAccount']: Omit<GraphQLTypes["OrganizationWithBankAccount"], "...on OrganizationWithBankAccount">
+};
+	["OverspendExpenseItemInput"]: {
+		/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Сумма доплаты сверх planned_amount (asset, например "200.0000 RUB"). */
+	overspend_amount: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
 };
 	["PaginatedActionsPaginationResult"]: {
 	__typename: "PaginatedActionsPaginationResult",
@@ -32862,6 +34179,18 @@ export type GraphQLTypes = {
 	totalPages: number,
 	['...on PaginatedDeltasPaginationResult']: Omit<GraphQLTypes["PaginatedDeltasPaginationResult"], "...on PaginatedDeltasPaginationResult">
 };
+	["PaginatedExpenseProposalsPaginationResult"]: {
+	__typename: "PaginatedExpenseProposalsPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["ExpenseProposal"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number,
+	['...on PaginatedExpenseProposalsPaginationResult']: Omit<GraphQLTypes["PaginatedExpenseProposalsPaginationResult"], "...on PaginatedExpenseProposalsPaginationResult">
+};
 	["PaginatedGatewayPaymentsPaginationResult"]: {
 	__typename: "PaginatedGatewayPaymentsPaginationResult",
 	/** Текущая страница */
@@ -33027,6 +34356,16 @@ export type GraphQLTypes = {
 	issued_by: string,
 	number: number,
 	series: number
+};
+	["PayExpenseItemInput"]: {
+		/** Фактическая сумма оплаты (asset, например "100.0000 RUB"). */
+	actual_amount: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
 };
 	["PaymentDetails"]: {
 	__typename: "PaymentDetails",
@@ -33778,6 +35117,30 @@ export type GraphQLTypes = {
 	cooperativeAgreements: Array<GraphQLTypes["CoopAgreement"]>,
 	/** Целевые потребительские программы кооператива (id, тип, активность, draft_id) */
 	cooperativePrograms: Array<GraphQLTypes["CooperativeProgram"]>,
+	/** Получить запись о файле + свежий короткоживущий read-URL.
+
+Требуемые роли: chairman, member, user.  */
+	expenseFile: GraphQLTypes["ExpenseFile"],
+	/** Список файлов строки расхода (без read-URL — запрос отдельно по id).
+
+Требуемые роли: chairman, member, user.  */
+	expenseFilesByItem: Array<GraphQLTypes["ExpenseFile"]>,
+	/** Список файлов сметы расхода (без read-URL — запрос отдельно по id).
+
+Требуемые роли: chairman, member, user.  */
+	expenseFilesByProposal: Array<GraphQLTypes["ExpenseFile"]>,
+	/** Получить смету расхода по хешу.
+
+Требуемые роли: chairman, member, user.  */
+	expenseProposal?: GraphQLTypes["ExpenseProposal"] | undefined | null,
+	/** Список смет расходов кооператива (paginated).
+
+Требуемые роли: chairman, member.  */
+	expenseProposalsByCooperative: GraphQLTypes["PaginatedExpenseProposalsPaginationResult"],
+	/** Список смет расходов пайщика (свои/созданные им, paginated).
+
+Требуемые роли: chairman, member, user.  */
+	expenseProposalsByMember: GraphQLTypes["PaginatedExpenseProposalsPaginationResult"],
 	/** Получить сводную информацию о аккаунте
 
 Требуемые роли: chairman, member.  */
@@ -34186,6 +35549,14 @@ export type GraphQLTypes = {
 	updatedAt: GraphQLTypes["DateTime"],
 	year: number,
 	['...on ReportDraft']: Omit<GraphQLTypes["ReportDraft"], "...on ReportDraft">
+};
+	["ReportExpenseItemInput"]: {
+		/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string
 };
 	["ReportHistoryFilterInput"]: {
 		/** Лимит (макс 100, по умолчанию 20) */
@@ -34656,6 +36027,16 @@ export type GraphQLTypes = {
 	/** Версия генератора, использованного для создания документа */
 	version: string
 };
+	["ReturnExpenseItemInput"]: {
+		/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string,
+	/** Возвращаемая сумма (asset, например "50.0000 RUB"). */
+	return_amount: string
+};
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]: RoomMessageKind;
 	["SaveReportDraftInput"]: {
@@ -35040,6 +36421,16 @@ export type GraphQLTypes = {
 };
 	/** Статус истории в системе CAPITAL */
 ["StoryStatus"]: StoryStatus;
+	["SubmitExpenseReportInput"]: {
+		/** Комментарий пайщика к финализации отчёта (свободный текст, до 1000 символов). */
+	comment?: string | undefined | null,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Итоговая сумма фактических расходов (asset, например "1500.0000 RUB"). */
+	total_actual_amount?: string | undefined | null
+};
 	["SubmitVoteInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -35410,6 +36801,24 @@ export type GraphQLTypes = {
 	/** Название истории */
 	title?: string | undefined | null
 };
+	["UploadExpenseFileInput"]: {
+		/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** Хеш строки расхода (пусто — файл уровня сметы). */
+	item_hash?: string | undefined | null,
+	/** Назначение файла (платёжка/чек/возврат). */
+	kind: GraphQLTypes["ExpenseFileKind"],
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Хеш сметы расхода. */
+	proposal_hash: string,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number
+};
 	["UserAccount"]: {
 	__typename: "UserAccount",
 	/** Метаинформация */
@@ -35736,6 +37145,42 @@ export enum DocumentAction {
 	REGCOOP = "REGCOOP",
 	WITHDRAW = "WITHDRAW"
 }
+/** Тип первичного файла расхода. */
+export enum ExpenseFileKind {
+	PAYMENT_PROOF = "PAYMENT_PROOF",
+	REPORT_FILE = "REPORT_FILE",
+	RETURN_PROOF = "RETURN_PROOF"
+}
+/** Статус строки расхода. */
+export enum ExpenseItemStatus {
+	APPROVED = "APPROVED",
+	OVERSPENT = "OVERSPENT",
+	PAID = "PAID",
+	REPORTED = "REPORTED",
+	RETURNED = "RETURNED",
+	UNDEFINED = "UNDEFINED"
+}
+/** Способ оплаты строки расхода. */
+export enum ExpenseMechanics {
+	ADVANCE = "ADVANCE",
+	DIRECT = "DIRECT"
+}
+/** Статус сметы расхода. */
+export enum ExpenseProposalStatus {
+	AUTHORIZED = "AUTHORIZED",
+	CLOSED = "CLOSED",
+	CREATED = "CREATED",
+	DECLINED = "DECLINED",
+	PARTIALLY_PAID = "PARTIALLY_PAID",
+	REPORT_SUBMITTED = "REPORT_SUBMITTED",
+	UNDEFINED = "UNDEFINED"
+}
+/** Тип получателя платежа. */
+export enum ExpenseRecipientType {
+	MEMBER = "MEMBER",
+	ORG = "ORG",
+	SELF = "SELF"
+}
 /** Статус расхода в системе CAPITAL */
 export enum ExpenseStatus {
 	APPROVED = "APPROVED",
@@ -36060,6 +37505,7 @@ type ZEUS_VARIABLES = {
 	["AssetContributionStatementSignedDocumentInput"]: ValueTypes["AssetContributionStatementSignedDocumentInput"];
 	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
 	["AuthorizeDecisionInput"]: ValueTypes["AuthorizeDecisionInput"];
+	["AuthorizeExpenseReportInput"]: ValueTypes["AuthorizeExpenseReportInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["BuhotchSignerType"]: ValueTypes["BuhotchSignerType"];
@@ -36118,6 +37564,7 @@ type ZEUS_VARIABLES = {
 	["CreateDepositPaymentInput"]: ValueTypes["CreateDepositPaymentInput"];
 	["CreateEntrepreneurDataInput"]: ValueTypes["CreateEntrepreneurDataInput"];
 	["CreateExpenseInput"]: ValueTypes["CreateExpenseInput"];
+	["CreateExpenseProposalInput"]: ValueTypes["CreateExpenseProposalInput"];
 	["CreateIndividualDataInput"]: ValueTypes["CreateIndividualDataInput"];
 	["CreateInitOrganizationDataInput"]: ValueTypes["CreateInitOrganizationDataInput"];
 	["CreateInitialPaymentInput"]: ValueTypes["CreateInitialPaymentInput"];
@@ -36145,6 +37592,7 @@ type ZEUS_VARIABLES = {
 	["DebtStatus"]: ValueTypes["DebtStatus"];
 	["DeclineAgreementInput"]: ValueTypes["DeclineAgreementInput"];
 	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
+	["DeclineExpenseReportInput"]: ValueTypes["DeclineExpenseReportInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeleteCapitalIssueByHashInput"]: ValueTypes["DeleteCapitalIssueByHashInput"];
@@ -36160,7 +37608,18 @@ type ZEUS_VARIABLES = {
 	["EditContributorInput"]: ValueTypes["EditContributorInput"];
 	["EditProjectInput"]: ValueTypes["EditProjectInput"];
 	["EntrepreneurDetailsInput"]: ValueTypes["EntrepreneurDetailsInput"];
+	["ExpenseCallbackInput"]: ValueTypes["ExpenseCallbackInput"];
+	["ExpenseFileKind"]: ValueTypes["ExpenseFileKind"];
 	["ExpenseFilter"]: ValueTypes["ExpenseFilter"];
+	["ExpenseItemInput"]: ValueTypes["ExpenseItemInput"];
+	["ExpenseItemStatus"]: ValueTypes["ExpenseItemStatus"];
+	["ExpenseMechanics"]: ValueTypes["ExpenseMechanics"];
+	["ExpenseProposalDecisionSignedDocumentInput"]: ValueTypes["ExpenseProposalDecisionSignedDocumentInput"];
+	["ExpenseProposalDecisionSignedMetaDocumentInput"]: ValueTypes["ExpenseProposalDecisionSignedMetaDocumentInput"];
+	["ExpenseProposalStatementSignedDocumentInput"]: ValueTypes["ExpenseProposalStatementSignedDocumentInput"];
+	["ExpenseProposalStatementSignedMetaDocumentInput"]: ValueTypes["ExpenseProposalStatementSignedMetaDocumentInput"];
+	["ExpenseProposalStatus"]: ValueTypes["ExpenseProposalStatus"];
+	["ExpenseRecipientType"]: ValueTypes["ExpenseRecipientType"];
 	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];
 	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];
@@ -36240,12 +37699,14 @@ type ZEUS_VARIABLES = {
 	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];
 	["OrganizationType"]: ValueTypes["OrganizationType"];
+	["OverspendExpenseItemInput"]: ValueTypes["OverspendExpenseItemInput"];
 	["PaginationInput"]: ValueTypes["PaginationInput"];
 	["ParticipantApplicationDecisionGenerateDocumentInput"]: ValueTypes["ParticipantApplicationDecisionGenerateDocumentInput"];
 	["ParticipantApplicationGenerateDocumentInput"]: ValueTypes["ParticipantApplicationGenerateDocumentInput"];
 	["ParticipantApplicationSignedDocumentInput"]: ValueTypes["ParticipantApplicationSignedDocumentInput"];
 	["ParticipantApplicationSignedMetaDocumentInput"]: ValueTypes["ParticipantApplicationSignedMetaDocumentInput"];
 	["PassportInput"]: ValueTypes["PassportInput"];
+	["PayExpenseItemInput"]: ValueTypes["PayExpenseItemInput"];
 	["PaymentDirection"]: ValueTypes["PaymentDirection"];
 	["PaymentFiltersInput"]: ValueTypes["PaymentFiltersInput"];
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
@@ -36281,6 +37742,7 @@ type ZEUS_VARIABLES = {
 	["RegisterContributorInput"]: ValueTypes["RegisterContributorInput"];
 	["RegisterParticipantInput"]: ValueTypes["RegisterParticipantInput"];
 	["RemoveSecretaryRoomInput"]: ValueTypes["RemoveSecretaryRoomInput"];
+	["ReportExpenseItemInput"]: ValueTypes["ReportExpenseItemInput"];
 	["ReportHistoryFilterInput"]: ValueTypes["ReportHistoryFilterInput"];
 	["ReportPreviewInput"]: ValueTypes["ReportPreviewInput"];
 	["ReportSubmissionMark"]: ValueTypes["ReportSubmissionMark"];
@@ -36305,6 +37767,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneyGenerateDocumentInput"]: ValueTypes["ReturnByMoneyGenerateDocumentInput"];
 	["ReturnByMoneySignedDocumentInput"]: ValueTypes["ReturnByMoneySignedDocumentInput"];
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
+	["ReturnExpenseItemInput"]: ValueTypes["ReturnExpenseItemInput"];
 	["RoomMessageKind"]: ValueTypes["RoomMessageKind"];
 	["SaveReportDraftInput"]: ValueTypes["SaveReportDraftInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
@@ -36337,6 +37800,7 @@ type ZEUS_VARIABLES = {
 	["StartVotingInput"]: ValueTypes["StartVotingInput"];
 	["StopProjectInput"]: ValueTypes["StopProjectInput"];
 	["StoryStatus"]: ValueTypes["StoryStatus"];
+	["SubmitExpenseReportInput"]: ValueTypes["SubmitExpenseReportInput"];
 	["SubmitVoteInput"]: ValueTypes["SubmitVoteInput"];
 	["SupplyOnRequestInput"]: ValueTypes["SupplyOnRequestInput"];
 	["SystemStatus"]: ValueTypes["SystemStatus"];
@@ -36358,6 +37822,7 @@ type ZEUS_VARIABLES = {
 	["UpdateRequestInput"]: ValueTypes["UpdateRequestInput"];
 	["UpdateSettingsInput"]: ValueTypes["UpdateSettingsInput"];
 	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];
+	["UploadExpenseFileInput"]: ValueTypes["UploadExpenseFileInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
 	["VerifyEmailInputDTO"]: ValueTypes["VerifyEmailInputDTO"];

@@ -6,26 +6,32 @@ BaseDialog(
   @update:model-value='$emit("update:modelValue", $event)'
 )
   .create-form
-    .banner.banner--info.q-mb-md
-      q-icon.banner__icon(name='info', size='20px')
-      .banner__body
-        | Подача служебных записок открывается после расшивки signature-pipeline (Эпик 2 · document2).
-        | Форма ниже собирает заявление и вычисляет хеш — отправка вернёт ошибку до момента готовности.
-
     .field-group
-      .t-section.q-mb-sm Параметры заявления
+      .t-section.q-mb-sm Цель и параметры
       BaseInput(
-        v-model='form.operation_code',
-        label='Действие (operation_code)',
-        placeholder='ADVANCE_PAYOUT / DIRECT_PAYMENT / …',
+        v-model='form.description',
+        label='Цель расходов',
+        placeholder='Например: «Закупка хостинга и канцелярии на июнь»',
         required
       )
-      BaseInput(
-        v-model='form.source_wallet',
-        label='Источник средств (кошелёк)',
-        placeholder='w.wal.member / w.cap.gen / …',
-        required
-      )
+      .row.q-col-gutter-sm
+        .col-12.col-md-6
+          q-select(
+            v-model='form.operation_code',
+            :options='operationCodeOptions',
+            label='Действие (operation_code)',
+            outlined,
+            dense,
+            emit-value,
+            map-options
+          )
+        .col-12.col-md-6
+          BaseInput(
+            v-model='form.source_wallet',
+            label='Источник средств (кошелёк)',
+            placeholder='w.cap.blago / w.cap.gen / …',
+            required
+          )
 
     .field-group
       .field-group__head
@@ -57,13 +63,6 @@ BaseDialog(
             )
           .row.q-col-gutter-sm
             .col-12.col-md-6
-              BaseInput(
-                v-model='item.recipient',
-                label='Получатель',
-                placeholder='username / org id',
-                required
-              )
-            .col-12.col-md-6
               q-select(
                 v-model='item.recipient_type',
                 :options='recipientTypeOptions',
@@ -85,7 +84,19 @@ BaseDialog(
               )
             .col-12.col-md-6
               BaseInput(
-                v-model='item.planned_amount',
+                v-model='item.recipient_name',
+                label='Получатель (имя/название)',
+                placeholder='ФИО или название организации'
+              )
+            .col-12.col-md-6
+              BaseInput(
+                v-model='item.recipient_account',
+                label='Аккаунт получателя в кооперативе',
+                placeholder='username / eosio::name'
+              )
+            .col-12.col-md-6
+              BaseInput(
+                v-model='item.amount',
                 label='Сумма (план)',
                 placeholder='1000.0000 RUB',
                 required
@@ -95,6 +106,12 @@ BaseDialog(
                 v-model='item.description',
                 label='Описание',
                 placeholder='Назначение расхода'
+              )
+            .col-12(v-if='item.recipient_type === "ORG"')
+              BaseInput(
+                v-model='item.requisites',
+                label='Реквизиты получателя',
+                placeholder='ИНН, р/с, БИК'
               )
 
   template(#footer)
@@ -110,22 +127,12 @@ BaseDialog(
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { Zeus } from '@coopenomics/sdk';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseInput } from 'src/shared/ui/base/BaseInput';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
-import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { createExpenseProposal } from '../api';
-
-interface IItemDraft {
-  recipient: string;
-  recipient_type: Zeus.ExpenseRecipientType;
-  mechanics: Zeus.ExpenseMechanics;
-  planned_amount: string;
-  description: string;
-}
+import { useExpenseProposalActions, type ICreateProposalDraftItem } from '../model';
 
 defineProps<{ modelValue: boolean }>();
 const emit = defineEmits<{
@@ -133,42 +140,52 @@ const emit = defineEmits<{
   (e: 'created'): void;
 }>();
 
-const route = useRoute();
+const { submitProposal } = useExpenseProposalActions();
 
 const form = reactive({
-  operation_code: '',
-  source_wallet: '',
-  items: [] as IItemDraft[],
+  description: '',
+  operation_code: 'o.exp.blgadv',
+  source_wallet: 'w.cap.blago',
+  items: [] as ICreateProposalDraftItem[],
 });
 
 const submitting = ref(false);
 
+const operationCodeOptions = [
+  { label: 'Аванс из Благороста (o.exp.blgadv)', value: 'o.exp.blgadv' },
+  { label: 'Прямая оплата из Благороста (o.exp.blgdir)', value: 'o.exp.blgdir' },
+];
+
 const recipientTypeOptions = [
-  { label: 'Пайщик', value: Zeus.ExpenseRecipientType.MEMBER },
-  { label: 'Организация', value: Zeus.ExpenseRecipientType.ORG },
-  { label: 'Я сам', value: Zeus.ExpenseRecipientType.SELF },
+  { label: 'Я сам', value: 'SELF' as const },
+  { label: 'Пайщик', value: 'MEMBER' as const },
+  { label: 'Организация', value: 'ORG' as const },
 ];
 
 const mechanicsOptions = [
-  { label: 'Аванс', value: Zeus.ExpenseMechanics.ADVANCE },
-  { label: 'Прямая оплата', value: Zeus.ExpenseMechanics.DIRECT },
+  { label: 'Аванс под отчёт', value: 'ADVANCE' as const },
+  { label: 'Прямая оплата', value: 'DIRECT' as const },
 ];
 
 const canSubmit = computed(
   () =>
+    form.description.trim().length > 0 &&
     form.operation_code.trim().length > 0 &&
     form.source_wallet.trim().length > 0 &&
     form.items.length > 0 &&
-    form.items.every((i) => i.recipient.trim() && i.planned_amount.trim()),
+    form.items.every((i) => i.amount.trim() && i.description.trim()),
 );
 
 function addItem(): void {
   form.items.push({
-    recipient: '',
-    recipient_type: Zeus.ExpenseRecipientType.MEMBER,
-    mechanics: Zeus.ExpenseMechanics.ADVANCE,
-    planned_amount: '',
+    number: String(form.items.length + 1),
     description: '',
+    amount: '',
+    recipient_type: 'SELF',
+    mechanics: 'ADVANCE',
+    recipient_name: '',
+    requisites: '',
+    recipient_account: '',
   });
 }
 
@@ -180,42 +197,16 @@ function close(): void {
   emit('update:modelValue', false);
 }
 
-async function computeProposalHash(coopname: string): Promise<string> {
-  const canonical = JSON.stringify({
-    coopname,
-    operation_code: form.operation_code,
-    source_wallet: form.source_wallet,
-    items: form.items.map((i) => ({
-      recipient: i.recipient,
-      recipient_type: i.recipient_type,
-      mechanics: i.mechanics,
-      planned_amount: i.planned_amount,
-      description: i.description,
-    })),
-  });
-  const subtle =
-    typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle
-      ? globalThis.crypto.subtle
-      : null;
-  if (!subtle) throw new Error('crypto.subtle недоступен — вычислите hash на сервере');
-  const data = new TextEncoder().encode(canonical);
-  const digest = await subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
 async function submit(): Promise<void> {
-  const coopname = route.params.coopname as string;
-  if (!coopname) {
-    FailAlert(new Error('Не указан кооператив (route.params.coopname)'));
-    return;
-  }
   try {
     submitting.value = true;
-    const proposal_hash = await computeProposalHash(coopname);
-    await createExpenseProposal({ coopname, proposal_hash });
-    SuccessAlert('Служебная записка подана', 'Заявление отправлено на подпись пайщику.');
+    await submitProposal({
+      description: form.description,
+      operation_code: form.operation_code,
+      source_wallet: form.source_wallet,
+      items: form.items,
+    });
+    SuccessAlert('Служебная записка подана', 'Заявление подписано и отправлено в блокчейн.');
     emit('created');
     close();
   } catch (e) {
