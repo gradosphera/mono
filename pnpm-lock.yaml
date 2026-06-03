@@ -1364,6 +1364,9 @@ importers:
       '@wharfkit/wallet-plugin-privatekey':
         specifier: ^1.1.0
         version: 1.1.0(@wharfkit/session@1.6.1)
+      canonicalize:
+        specifier: ^2.0.0
+        version: 2.1.0
       cooptypes:
         specifier: workspace:*
         version: link:../cooptypes
@@ -9131,6 +9134,10 @@ packages:
 
   caniuse-lite@1.0.30001781:
     resolution: {integrity: sha512-RdwNCyMsNBftLjW6w01z8bKEvT6e/5tpPVEgtn22TiLGlstHOVecsX2KHFkD5e/vRnIE4EGzpuIODb3mtswtkw==}
+
+  canonicalize@2.1.0:
+    resolution: {integrity: sha512-F705O3xrsUtgt98j7leetNhTWPe+5S72rlL5O4jA1pKqBVQ/dT1O1D6PFxmSXvc0SUOinWS57DKx0I3CHrXJHQ==}
+    hasBin: true
 
   canvg@3.0.11:
     resolution: {integrity: sha512-5ON+q7jCTgMp9cjpu4Jo6XbvfYwSB2Ow3kzHKfIyJfaCAOHLbdKPQqGKgfED/R5B+3TFFfe8pegYA+b423SRyA==}
@@ -29102,6 +29109,8 @@ snapshots:
       lodash.uniq: 4.5.0
 
   caniuse-lite@1.0.30001781: {}
+
+  canonicalize@2.1.0: {}
 
   canvg@3.0.11:
     dependencies:

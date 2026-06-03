@@ -48,6 +48,7 @@
     "@wharfkit/contract": "^1.1.5",
     "@wharfkit/session": "^1.4.0",
     "@wharfkit/wallet-plugin-privatekey": "^1.1.0",
+    "canonicalize": "^2.0.0",
     "cooptypes": "workspace:*",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.2",
