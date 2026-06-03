@@ -7,6 +7,8 @@ import { AppsCatalogHttpService } from '../../infrastructure/apps-catalog-http.s
 import { AppsCatalogRemotePackageDTO } from '../dto/apps-catalog-remote-package.dto';
 import { PublishPackageInputDTO } from '../dto/publish-package-input.dto';
 import { PublishPackageResultDTO } from '../dto/publish-package-result.dto';
+import { PublishReleaseInputDTO } from '../dto/publish-release-input.dto';
+import { PublishReleaseResultDTO } from '../dto/publish-release-result.dto';
 
 /**
  * Story 9.5.b — публичный каталог remote-пакетов на desktop'е магазина.
@@ -101,6 +103,58 @@ export class AppsCatalogProxyResolver {
     if (outcome.status === 'conflict') {
       return {
         status: 'conflict',
+        requestId: outcome.requestId,
+        error: outcome.error,
+      };
+    }
+    return {
+      status: 'failed',
+      requestId: outcome.requestId,
+      error: outcome.error,
+    };
+  }
+
+  /**
+   * Story 9.3.b-rel — стол разработчика выкладывает новый релиз пакета.
+   *
+   * Прокидывает manifest + версию на ca-admin `POST /v1/admin/releases`.
+   * ca-admin валидирует manifest Zod-схемой и подписывает on-chain
+   * `apps::setrelease` от имени chairman'а кооператива-оператора. Под
+   * архитектуру E10 manifest должен содержать ссылки на артефакты в
+   * Nexus (`coopenomics.backend.image` + `coopenomics.frontend.tarball`).
+   */
+  @Mutation(() => PublishReleaseResultDTO, {
+    name: 'publishRelease',
+    description:
+      'Создаёт новый релиз пакета (action apps::setrelease) через ca-admin. ' +
+      'Подписывает chairman кооператива-оператора каталога. Доступно ' +
+      'только chairman\'у (стол разработчика).',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman'])
+  async publishRelease(
+    @Args('data', { type: () => PublishReleaseInputDTO })
+    data: PublishReleaseInputDTO,
+  ): Promise<PublishReleaseResultDTO> {
+    const outcome = await this.client.createRelease({
+      packageId: data.packageId,
+      version: data.version,
+      manifest: data.manifest,
+      tarballSha256: data.tarballSha256,
+    });
+    if (outcome.status === 'applied') {
+      this.logger.log(
+        `publishRelease applied: ${data.packageId}@${data.version} (request ${outcome.requestId}, tx ${outcome.transactionId ?? '-'})`,
+      );
+      return {
+        status: 'applied',
+        requestId: outcome.requestId,
+        transactionId: outcome.transactionId,
+      };
+    }
+    if (outcome.status === 'invalidManifest') {
+      return {
+        status: 'invalidManifest',
         requestId: outcome.requestId,
         error: outcome.error,
       };

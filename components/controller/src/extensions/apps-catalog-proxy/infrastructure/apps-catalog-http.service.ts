@@ -30,6 +30,19 @@ export type RegisterPackageOutcome =
   | { status: 'conflict'; requestId: string; error: string }
   | { status: 'failed'; requestId: string; error: string };
 
+export interface CreateReleaseInput {
+  packageId: string;
+  version: string;
+  manifest: Record<string, unknown>;
+  tarballSha256?: string;
+  requestId?: string;
+}
+
+export type CreateReleaseOutcome =
+  | { status: 'applied'; requestId: string; transactionId?: string }
+  | { status: 'invalidManifest'; requestId: string; error: string }
+  | { status: 'failed'; requestId: string; error: string };
+
 /**
  * HTTP-клиент к ca-admin (apps-catalog) для Story 9.5.b. Защищён admin-API
  * ключом из env (APPS_CATALOG_API_KEY). Используется только сервером —
@@ -148,6 +161,69 @@ export class AppsCatalogHttpService {
       }
       this.logger.error(
         `registerPackage failed для ${input.packageId}: ${detail}`,
+      );
+      return { status: 'failed', requestId, error: detail };
+    }
+  }
+
+  /**
+   * Story 9.3.b-rel: создание нового релиза пакета (action `apps::setrelease`).
+   *
+   * Прокидывает manifest + версию на ca-admin `POST /v1/admin/releases`.
+   * ca-admin сам валидирует manifest Zod-схемой и подписывает on-chain.
+   *
+   * Discriminated outcome:
+   *  - `applied` — HTTP 200, on-chain прошёл; в payload может быть
+   *    `transaction_id` (если адаптер не stub'овый);
+   *  - `invalidManifest` — HTTP 422 INVALID_MANIFEST (manifest не прошёл
+   *    Zod-валидацию на стороне ca-admin); `error` содержит детали
+   *    валидации в стабильном формате;
+   *  - `failed` — прочие ошибки (network, 401, 503, degraded-mode).
+   */
+  async createRelease(input: CreateReleaseInput): Promise<CreateReleaseOutcome> {
+    const requestId = input.requestId ?? uuidv4();
+    if (!this.client) {
+      const error = 'APPS_CATALOG_URL/APPS_CATALOG_API_KEY не заданы';
+      this.logger.warn(
+        `createRelease refused (degraded mode): ${input.packageId}@${input.version}`,
+      );
+      return { status: 'failed', requestId, error };
+    }
+    try {
+      const res = await this.client.post<{
+        ok: boolean;
+        transaction_id?: string;
+      }>('/v1/admin/releases', {
+        request_id: requestId,
+        package_id: input.packageId,
+        version: input.version,
+        manifest: input.manifest,
+        ...(input.tarballSha256
+          ? { tarball_sha256: input.tarballSha256 }
+          : {}),
+      });
+      return {
+        status: 'applied',
+        requestId,
+        transactionId: res.data?.transaction_id,
+      };
+    } catch (err) {
+      const status = (err as AxiosError).response?.status;
+      const responseData = (err as AxiosError).response?.data;
+      const detail =
+        typeof responseData === 'object' && responseData
+          ? JSON.stringify(responseData)
+          : err instanceof Error
+            ? err.message
+            : String(err);
+      if (status === 422) {
+        this.logger.warn(
+          `createRelease invalidManifest для ${input.packageId}@${input.version}: ${detail}`,
+        );
+        return { status: 'invalidManifest', requestId, error: detail };
+      }
+      this.logger.error(
+        `createRelease failed для ${input.packageId}@${input.version}: ${detail}`,
       );
       return { status: 'failed', requestId, error: detail };
     }
