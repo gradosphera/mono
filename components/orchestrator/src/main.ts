@@ -42,13 +42,13 @@ async function bootstrap() {
   await app.listen(cfg.port);
   // eslint-disable-next-line no-console
   console.log(
-    `[gateway-orchestrator] up at :${cfg.port} ` +
+    `[orchestrator] up at :${cfg.port} ` +
       `(coopname=${cfg.coopname}, core=${cfg.coreSubgraphUrl})`,
   );
 }
 
 bootstrap().catch((err) => {
   // eslint-disable-next-line no-console
-  console.error('[gateway-orchestrator] failed to bootstrap:', err);
+  console.error('[orchestrator] failed to bootstrap:', err);
   process.exit(1);
 });
