@@ -41,14 +41,6 @@
             input-class='font-mono'
           )
 
-        .col-12.col-md-6(v-if='bankData?.details?.kpp')
-          CopyableInput.full-width(
-            :label='"КПП"',
-            :model-value='bankData.details.kpp',
-            dense,
-            input-class='font-mono'
-          )
-
         .col-12.col-md-6(v-if='bankData?.card_number')
           CopyableInput.full-width(
             :label='"Номер карты"',
