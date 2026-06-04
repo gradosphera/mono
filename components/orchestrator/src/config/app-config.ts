@@ -1,5 +1,5 @@
 /**
- * ENV-конфигурация gateway-orchestrator (per-tenant).
+ * ENV-конфигурация orchestrator (per-tenant).
  *
  * Все обязательные поля fail-fast валидируются на bootstrap. Если orchestrator
  * стартует и не находит coopback subgraph URL — он не сможет ничего
@@ -16,7 +16,7 @@ export interface AppConfig {
 
 export class AppConfigError extends Error {
   constructor(msg: string) {
-    super(`[gateway-orchestrator] ${msg}`);
+    super(`[orchestrator] ${msg}`);
     this.name = 'AppConfigError';
   }
 }

@@ -11,7 +11,9 @@
     "emitDecoratorMetadata": true,
     "declaration": false,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "types": ["node", "jest"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.spec.ts", "dist", "node_modules"]
 }

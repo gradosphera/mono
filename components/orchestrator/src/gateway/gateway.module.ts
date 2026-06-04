@@ -30,7 +30,7 @@ import { SubgraphRegistryService } from './subgraph-registry.service';
         // и автоматически re-compose'ит если у subgraph'а изменилась схема.
         //
         // Но: добавление НОВОГО subgraph'а (POST /v1/internal/extensions/install)
-        // потребует рестарта контейнера gateway-orchestrator. На MVP это
+        // потребует рестарта контейнера orchestrator. На MVP это
         // ОК — gateway маленький, warmup ~5 сек, делается orchestrator-pipeline
         // при первом install'е приложения (Story 10.4).
         //
