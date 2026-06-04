@@ -43,6 +43,93 @@ export type CreateReleaseOutcome =
   | { status: 'invalidManifest'; requestId: string; error: string }
   | { status: 'failed'; requestId: string; error: string };
 
+export type ModerationStatus =
+  | 'SUBMITTED'
+  | 'WITHDRAWN'
+  | 'APPROVED'
+  | 'APPROVED_PENDING_CHAIN'
+  | 'REJECTED';
+
+export interface ModerationRequestRow {
+  id: string;
+  packageId: string;
+  version: string;
+  scope: unknown;
+  brief: string;
+  releaseType: 'full' | 'canary';
+  status: ModerationStatus;
+  submittedBy: string;
+  submittedAt: string;
+  updatedAt: string;
+  requiresOverride: boolean;
+}
+
+interface ModerationRequestWireFormat {
+  id: string;
+  package_id: string;
+  version: string;
+  scope: unknown;
+  brief: string;
+  release_type: 'full' | 'canary';
+  status: ModerationStatus;
+  submitted_by: string;
+  submitted_at: string;
+  updated_at: string;
+  requires_override: boolean;
+}
+
+export type ReleaseScopeInput =
+  | { type: 'all' }
+  | { type: 'empty' }
+  | { type: 'subnets'; subnets: string[] }
+  | { type: 'cooperatives'; coopnames: string[] };
+
+export interface ApproveModerationInput {
+  moderationId: string;
+  scope: ReleaseScopeInput;
+  override?: boolean;
+  requestId?: string;
+}
+
+export type ApproveModerationOutcome =
+  | {
+      status: 'applied';
+      requestId: string;
+      packageId: string;
+      version: string;
+    }
+  | {
+      status: 'pendingChain';
+      requestId: string;
+      error: string;
+    }
+  | {
+      status: 'conflict';
+      requestId: string;
+      error: string;
+    }
+  | {
+      status: 'requiresOverride';
+      requestId: string;
+      error: string;
+    }
+  | {
+      status: 'failed';
+      requestId: string;
+      error: string;
+    };
+
+export interface RejectModerationInput {
+  moderationId: string;
+  reason: string;
+  requestId?: string;
+}
+
+export type RejectModerationOutcome =
+  | { status: 'applied'; requestId: string }
+  | { status: 'conflict'; requestId: string; error: string }
+  | { status: 'failed'; requestId: string; error: string };
+
 /**
  * HTTP-клиент к ca-admin (apps-catalog) для Story 9.5.b. Защищён admin-API
  * ключом из env (APPS_CATALOG_API_KEY). Используется только сервером —
@@ -224,6 +311,181 @@ export class AppsCatalogHttpService {
       }
       this.logger.error(
         `createRelease failed для ${input.packageId}@${input.version}: ${detail}`,
+      );
+      return { status: 'failed', requestId, error: detail };
+    }
+  }
+
+  /**
+   * Story 9.9: список заявок на модерацию по статусу.
+   *
+   * Дёргает ca-admin `GET /v1/admin/moderation?status=...&limit=...`.
+   * Используется столом восхода (chairman voskhod) для просмотра pending
+   * заявок и принятия решения (approve/reject).
+   *
+   * Degraded mode (нет ca-admin client'а) → пустой массив, чтобы UI
+   * нормально показал «pending пусто» вместо ошибки.
+   */
+  async listSubmittedModerations(
+    status: ModerationStatus = 'SUBMITTED',
+    limit?: number,
+  ): Promise<ModerationRequestRow[]> {
+    if (!this.client) return [];
+    try {
+      const params: Record<string, string | number> = { status };
+      if (limit !== undefined) params.limit = limit;
+      const res = await this.client.get<{
+        items: ModerationRequestWireFormat[];
+      }>('/v1/admin/moderation', { params });
+      return res.data.items.map((r) => ({
+        id: r.id,
+        packageId: r.package_id,
+        version: r.version,
+        scope: r.scope,
+        brief: r.brief,
+        releaseType: r.release_type,
+        status: r.status,
+        submittedBy: r.submitted_by,
+        submittedAt: r.submitted_at,
+        updatedAt: r.updated_at,
+        requiresOverride: r.requires_override,
+      }));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`listSubmittedModerations failed: ${msg}`);
+      return [];
+    }
+  }
+
+  /**
+   * Story 9.9: chairman восхода одобряет заявку на модерацию.
+   *
+   * Дёргает ca-admin `POST /v1/admin/moderation/:id/approve`. ca-admin
+   * атомарно переводит moderation в APPROVED, активирует release и
+   * выкладывает outbox-event `release.activated` (он же триггер для
+   * on-chain `apps::setrelease` и orchestrator'а install pipeline).
+   *
+   * Discriminated outcome:
+   *  - `applied` — HTTP 200, release ACTIVE, package_id/version в payload;
+   *  - `pendingChain` — HTTP 423 APPROVED_PENDING_CHAIN: moderation
+   *    одобрена, но on-chain провалился; recovery worker повторит;
+   *  - `conflict` — HTTP 409: заявка не в SUBMITTED (уже approved /
+   *    withdrawn);
+   *  - `requiresOverride` — HTTP 403: scan_report критичен, нужен
+   *    явный `override: true`;
+   *  - `failed` — прочие ошибки.
+   */
+  async approveModeration(
+    input: ApproveModerationInput,
+  ): Promise<ApproveModerationOutcome> {
+    const requestId = input.requestId ?? uuidv4();
+    if (!this.client) {
+      const error = 'APPS_CATALOG_URL/APPS_CATALOG_API_KEY не заданы';
+      this.logger.warn(
+        `approveModeration refused (degraded mode): ${input.moderationId}`,
+      );
+      return { status: 'failed', requestId, error };
+    }
+    try {
+      const res = await this.client.post<{
+        ok: boolean;
+        package_id: string;
+        version: string;
+        request_id: string;
+      }>(`/v1/admin/moderation/${encodeURIComponent(input.moderationId)}/approve`, {
+        request_id: requestId,
+        scope: input.scope,
+        ...(input.override !== undefined ? { override: input.override } : {}),
+      });
+      return {
+        status: 'applied',
+        requestId: res.data.request_id ?? requestId,
+        packageId: res.data.package_id,
+        version: res.data.version,
+      };
+    } catch (err) {
+      const httpStatus = (err as AxiosError).response?.status;
+      const responseData = (err as AxiosError).response?.data;
+      const detail =
+        typeof responseData === 'object' && responseData
+          ? JSON.stringify(responseData)
+          : err instanceof Error
+            ? err.message
+            : String(err);
+      if (httpStatus === 423) {
+        this.logger.warn(
+          `approveModeration pendingChain ${input.moderationId}: ${detail}`,
+        );
+        return { status: 'pendingChain', requestId, error: detail };
+      }
+      if (httpStatus === 409) {
+        this.logger.warn(
+          `approveModeration conflict ${input.moderationId}: ${detail}`,
+        );
+        return { status: 'conflict', requestId, error: detail };
+      }
+      if (httpStatus === 403) {
+        this.logger.warn(
+          `approveModeration requiresOverride ${input.moderationId}: ${detail}`,
+        );
+        return { status: 'requiresOverride', requestId, error: detail };
+      }
+      this.logger.error(
+        `approveModeration failed ${input.moderationId}: ${detail}`,
+      );
+      return { status: 'failed', requestId, error: detail };
+    }
+  }
+
+  /**
+   * Story 9.9: chairman восхода отклоняет заявку на модерацию.
+   *
+   * Дёргает ca-admin `POST /v1/admin/moderation/:id/reject` с `reason`.
+   * ca-admin переводит moderation в REJECTED (compare-and-set из
+   * SUBMITTED) и пишет аудит-запись.
+   *
+   * Discriminated outcome:
+   *  - `applied` — HTTP 200, заявка REJECTED;
+   *  - `conflict` — HTTP 409: заявка уже не в SUBMITTED;
+   *  - `failed` — прочие ошибки.
+   */
+  async rejectModeration(
+    input: RejectModerationInput,
+  ): Promise<RejectModerationOutcome> {
+    const requestId = input.requestId ?? uuidv4();
+    if (!this.client) {
+      const error = 'APPS_CATALOG_URL/APPS_CATALOG_API_KEY не заданы';
+      this.logger.warn(
+        `rejectModeration refused (degraded mode): ${input.moderationId}`,
+      );
+      return { status: 'failed', requestId, error };
+    }
+    try {
+      await this.client.post(
+        `/v1/admin/moderation/${encodeURIComponent(input.moderationId)}/reject`,
+        {
+          request_id: requestId,
+          reason: input.reason,
+        },
+      );
+      return { status: 'applied', requestId };
+    } catch (err) {
+      const httpStatus = (err as AxiosError).response?.status;
+      const responseData = (err as AxiosError).response?.data;
+      const detail =
+        typeof responseData === 'object' && responseData
+          ? JSON.stringify(responseData)
+          : err instanceof Error
+            ? err.message
+            : String(err);
+      if (httpStatus === 409) {
+        this.logger.warn(
+          `rejectModeration conflict ${input.moderationId}: ${detail}`,
+        );
+        return { status: 'conflict', requestId, error: detail };
+      }
+      this.logger.error(
+        `rejectModeration failed ${input.moderationId}: ${detail}`,
       );
       return { status: 'failed', requestId, error: detail };
     }
