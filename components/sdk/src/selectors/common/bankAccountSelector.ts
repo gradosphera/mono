@@ -5,7 +5,6 @@ const rawBankAccountSelector = {
   details: {
     bik: true,
     corr: true,
-    kpp: true,
   },
   account_number: true,
   bank_name: true,

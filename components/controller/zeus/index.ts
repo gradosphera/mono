@@ -1981,8 +1981,6 @@ export type ValueTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
-	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on BankAccountDetails']?: Omit<ValueTypes["BankAccountDetails"], "...on BankAccountDetails">
 }>;
@@ -1990,9 +1988,7 @@ export type ValueTypes = {
 	/** БИК банка */
 	bik: string | Variable<any, string>,
 	/** Корреспондентский счет */
-	corr: string | Variable<any, string>,
-	/** КПП банка */
-	kpp: string | Variable<any, string>
+	corr: string | Variable<any, string>
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -10443,17 +10439,13 @@ export type ResolverInputTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
-	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -18671,17 +18663,13 @@ export type ModelTypes = {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -27351,17 +27339,13 @@ export type GraphQLTypes = {
 	bik: string,
 	/** Корреспондентский счет */
 	corr: string,
-	/** КПП банка */
-	kpp: string,
 	['...on BankAccountDetails']: Omit<GraphQLTypes["BankAccountDetails"], "...on BankAccountDetails">
 };
 	["BankAccountDetailsInput"]: {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 		/** Номер банковского счета */

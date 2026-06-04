@@ -38,7 +38,6 @@
           mono
         )
         DataRow(label='БИК', :value='method.data.details.bik', copyable, mono)
-        DataRow(label='КПП', :value='method.data.details.kpp', copyable, mono)
 
   EmptyState(
     v-else,

@@ -12,14 +12,8 @@ export class BankAccountDetailsDTO {
   @IsString()
   corr: string;
 
-  @Field(() => String, { description: 'КПП банка' })
-  @IsNotEmpty({ message: 'КПП обязателен' })
-  @IsString()
-  kpp: string;
-
-  constructor(details: { bik: string; corr: string; kpp: string }) {
+  constructor(details: { bik: string; corr: string }) {
     this.bik = details.bik;
     this.corr = details.corr;
-    this.kpp = details.kpp;
   }
 }
