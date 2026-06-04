@@ -76,13 +76,18 @@
       }
 
       // Пересчитываем счётчик активных пайщиков из реестра soviet::participants
-      // (источник истины; order-independent — сойдётся, как только soviet::migrate
-      // удалит фантом-участников; до этого момента счётчик ещё включает фантомы
-      // и скорректируется на следующем деплое).
+      // (источник истины), ИСКЛЮЧАЯ фантомов явно — счётчик сходится к верному
+      // значению за ОДИН деплой независимо от порядка выполнения migrate
+      // (registrator::migrate vs soviet::migrate). Если бы считали всех has_vote,
+      // а soviet ещё не удалил фантомов — счётчик временно завысился бы.
       participants_index pparts(_soviet, PHANTOM_COOP.value);
       uint64_t active = 0;
       for (auto p = pparts.begin(); p != pparts.end(); ++p) {
-        if (p->has_vote) active++;
+        bool is_phantom = false;
+        for (const auto& ph : PHANTOMS) {
+          if (ph == p->username) { is_phantom = true; break; }
+        }
+        if (!is_phantom && p->has_vote) active++;
       }
       coops2.modify(pcoop, _registrator, [&](auto& coop) {
         coop.active_participants_count = active;
