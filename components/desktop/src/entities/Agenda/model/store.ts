@@ -8,7 +8,6 @@ const namespace = 'agendaStore';
 interface IAgendaStore {
   agenda: ComputedRef<IAgenda[]>
   loading: Ref<boolean>
-  pendingConfirmationIds: ComputedRef<Set<string>>
   loadAgenda: (data: IGetAgendaInput, hidden?: boolean) => Promise<IAgenda[]>;
   insertCreated: (item: IAgenda) => void;
 }
@@ -32,15 +31,6 @@ export const useAgendaStore = defineStore(namespace, (): IAgendaStore => {
     const loadedIds = new Set(loadedAgenda.value.map(idOf))
     const pending = createdBuffer.value.filter((item) => !loadedIds.has(idOf(item)))
     return [...pending, ...loadedAgenda.value]
-  })
-
-  // ID вопросов, ещё не подтверждённых getAgenda — на них фронт блокирует
-  // голосование/утверждение/правку, пока поллинг не вернёт их authoritative.
-  const pendingConfirmationIds = computed<Set<string>>(() => {
-    const loadedIds = new Set(loadedAgenda.value.map(idOf))
-    return new Set(
-      createdBuffer.value.filter((item) => !loadedIds.has(idOf(item))).map(idOf),
-    )
   })
 
   const loadAgenda = async (data: IGetAgendaInput, hidden = false): Promise<IAgenda[]> => {
@@ -73,7 +63,6 @@ export const useAgendaStore = defineStore(namespace, (): IAgendaStore => {
   return {
     agenda,
     loading,
-    pendingConfirmationIds,
     loadAgenda,
     insertCreated
   }
