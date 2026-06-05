@@ -386,7 +386,6 @@ export async function preLoading() {
       details: {
         bik: '044525225',
         corr: '30101810400000000225',
-        kpp: '773643001',
       },
     },
     deleted: false,
@@ -427,7 +426,6 @@ export async function preLoading() {
       details: {
         bik: '098765432',
         corr: '30101810400000000225',
-        kpp: '098765432',
       },
     },
     deleted: false,
@@ -475,7 +473,6 @@ export async function preLoading() {
       details: {
         bik: '044525225',
         corr: '30101810400000000225',
-        kpp: '773643001',
       },
     },
     deleted: false,
@@ -523,7 +520,6 @@ export async function preLoading() {
       details: {
         bik: '098765432',
         corr: '30101810400000000225',
-        kpp: '098765432',
       },
     },
     deleted: false,

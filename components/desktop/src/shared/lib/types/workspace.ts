@@ -1,6 +1,9 @@
 export interface IWorkspaceRouteMeta {
   title: string
-  icon: string
+  // Иконка пункта меню. Необязательна: hidden-роуты (deep-link страницы вроде
+  // карточки документа) в навигацию не попадают и иконки не имеют. В drawer
+  // рендер гардится `v-if='item.icon'`, undefined безопасен.
+  icon?: string
   roles: string[]
   agreements?: string[]
   conditions?: string

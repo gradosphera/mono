@@ -57,7 +57,6 @@ const initialUserDataState: IUserData = {
       details: {
         bik: '',
         corr: '',
-        kpp: '',
       },
     },
   },
@@ -82,7 +81,6 @@ const initialUserDataState: IUserData = {
       details: {
         bik: '',
         corr: '',
-        kpp: '',
       },
     },
   },

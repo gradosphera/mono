@@ -198,25 +198,31 @@ function onSelectWorkspace(workspaceName: string): void {
   palette.close();
   desktop.selectWorkspace(workspaceName);
   desktop.closeLeftDrawerOnMobile();
-  const ws = desktop.workspaceMenus.find((m) => m.workspaceName === workspaceName);
-  if (ws?.mainRoute?.name) {
-    void router.push({
-      name: ws.mainRoute.name as string,
-      params: { coopname: system.info.coopname },
-    });
-  }
+  // Переходим на реальную первую страницу стола И снимаем лоадер — ровно как
+  // WorkspaceSwitcher. Прямой push на mainRoute.name вёл на родительский
+  // layout-роут без компонента → серый экран, а лоадер оставался висеть.
+  desktop.goToDefaultPage(router);
 }
 
 function onSelectPage(workspaceName: string, pageName: string): void {
   palette.close();
-  if (workspaceName !== desktop.activeWorkspaceName) {
+  // Считаем смену стола ДО selectWorkspace (он меняет activeWorkspaceName).
+  const isWorkspaceSwitch = workspaceName !== desktop.activeWorkspaceName;
+  if (isWorkspaceSwitch) {
     desktop.selectWorkspace(workspaceName);
   }
   desktop.closeLeftDrawerOnMobile();
-  void router.push({
-    name: pageName,
-    params: { coopname: system.info.coopname },
-  });
+  void router
+    .push({
+      name: pageName,
+      params: { coopname: system.info.coopname },
+    })
+    .finally(() => {
+      // Лоадер ставится только при смене стола — снимаем его тоже только тогда.
+      if (isWorkspaceSwitch) {
+        desktop.setWorkspaceChanging(false);
+      }
+    });
 }
 
 // --- Глобальный hotkey ⌘K / Ctrl+K ----------------------------------------

@@ -15,7 +15,6 @@ import { NovuModule } from './infrastructure/novu/novu.module';
 import { EventsInfrastructureModule } from './infrastructure/events/events.module';
 import { FreeDecisionInfrastructureModule } from './infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from './infrastructure/decision-tracking/decision-tracking-infrastructure.module';
-import { SearchInfrastructureModule } from './infrastructure/search/search-infrastructure.module';
 import { FileStorageInfrastructureModule } from './infrastructure/file-storage';
 
 // Domain modules
@@ -58,6 +57,7 @@ import { QueueModule } from './application/queue/queue-app.module';
 import { DocumentModule } from './application/document/document.module';
 import { RedisAppModule } from './application/redis/redis-app.module';
 import { DecisionModule } from './application/free-decision/decision.module';
+import { DecisionAuthorizeModule } from './application/decision/decision.module';
 import { AgreementModule } from './application/agreement/agreement.module';
 import { ParticipantModule } from './application/participant/participant.module';
 import { AgendaModule } from './application/agenda/agenda.module';
@@ -78,6 +78,7 @@ import { SettingsApplicationModule } from './application/settings/settings.modul
 import { RegistrationModule } from './application/registration/registration.module';
 import { OnboardingApplicationModule } from './application/onboarding/onboarding-application.module';
 import { SearchModule } from './application/search/search.module';
+import { SignedDocumentsModule } from './application/signed-documents/signed-documents.module';
 import { MutationLoggingInterceptor } from './application/common/interceptors/mutation-logging.interceptor';
 
 @Module({
@@ -99,7 +100,6 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     GeneratorInfrastructureModule,
     RedisModule,
     NovuModule,
-    SearchInfrastructureModule,
     EventsInfrastructureModule,
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
@@ -142,6 +142,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     AccountModule,
     AgreementModule,
     AgendaModule,
+    DecisionAuthorizeModule,
     AppStoreModule,
     AuthModule,
     DesktopModule,
@@ -170,6 +171,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     RegistrationModule,
     OnboardingApplicationModule,
     SearchModule,
+    SignedDocumentsModule,
   ],
   providers: [
     {

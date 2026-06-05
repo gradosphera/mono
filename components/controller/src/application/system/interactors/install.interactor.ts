@@ -133,10 +133,29 @@ export class InstallInteractor {
 
     if (!coop) throw new BadRequestException('Информация о кооперативе не обнаружена');
 
+    // ВНИМАНИЕ про лок установки: статус НЕ трогаем здесь, до цикла. Раньше тут
+    // стоял setStatus(maintenance), но 'maintenance' на фронте включает
+    // полноэкранную заглушку «Техническое обслуживание» (watch-desktop-health),
+    // которая накрыла бы саму страницу установки во время нормального прогона.
+    // Поэтому статус остаётся 'initialized' на всё время установки (фронт
+    // показывает страницу install, как и прежде), а в 'maintenance' переводим
+    // ТОЛЬКО в catch при падении ПОСЛЕ записи в цепь — это блокирует повторный
+    // запуск install (guard выше требует 'initialized') и корректно сигналит,
+    // что коопа в полу-установленном состоянии и требует ручного разбора.
+    // Так на gorozhane (fgrtejiwnynn) образовались дубли: install падал после
+    // adduser, статус оставался 'initialized', повторный запуск проходил guard
+    // и заново минтил аккаунты совета (инцидент 2026-06-04).
+
     const users = [] as UserDomainEntity[];
     const members = [] as any;
     const sovietExt = [] as any;
     const soviet = data.soviet;
+
+    // Флаг необратимого следа: стал true после первой успешной on-chain
+    // регистрации (adduser). On-chain операции откатить нельзя, поэтому при
+    // ошибке ПОСЛЕ этого момента off-chain rollback НЕ делаем — иначе теряется
+    // привязка личность↔username, нужная для последующей сверки/очистки.
+    let chainWriteHappened = false;
 
     try {
       for (const member of soviet) {
@@ -157,6 +176,8 @@ export class InstallInteractor {
         };
 
         await this.blockchainPort.addUser(addUser);
+        // С этого момента на цепи есть необратимый аккаунт + оплаченный паевой.
+        chainWriteHappened = true;
 
         const createUser: CreateUserInputDomainInterface = {
           email: member.individual_data.email,
@@ -242,11 +263,32 @@ export class InstallInteractor {
         await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
       }
     } catch (e: any) {
-      // Откат изменений в случае ошибки
+      if (chainWriteHappened) {
+        // На цепи уже созданы аккаунты пайщиков (откату не подлежат). НЕ удаляем
+        // off-chain записи — сохраняем привязку личность↔username для ручной
+        // сверки/очистки. Переводим систему в 'maintenance': повторный запуск
+        // install заблокирован (guard требует 'initialized'), фронт показывает
+        // заглушку техобслуживания (коопа в полу-установленном состоянии);
+        // сначала нужно вручную доустановить или вычистить частично созданное.
+        await this.monoStatusRepository.setStatus(SystemStatus.maintenance);
+        logger.error(
+          `Установка прервана ПОСЛЕ on-chain регистрации (${users.length} аккаунтов уже на цепи): ${e.message}. ` +
+            `Система переведена в '${SystemStatus.maintenance}'. Off-chain данные сохранены для ручного разбора. ` +
+            `Повторный install заблокирован до очистки/доустановки.`,
+          e.stack
+        );
+        throw new BadRequestException(
+          `Установка прервана после создания аккаунтов на цепи: ${e.message}. Требуется ручной разбор (статус '${SystemStatus.maintenance}').`
+        );
+      }
+
+      // On-chain след отсутствует — безопасно откатываем off-chain и
+      // возвращаем 'initialized', чтобы установку можно было повторить чисто.
       for (const user of users) {
         await this.userDomainService.deleteUserByUsername(user.username);
         await this.generatorPort.del('individual', { username: user.username });
       }
+      await this.monoStatusRepository.setStatus(SystemStatus.initialized);
       throw new BadRequestException(e.message);
     }
 

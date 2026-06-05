@@ -1929,6 +1929,16 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on Authority']?: Omit<ValueTypes["Authority"], "...on Authority">
 }>;
+	["AuthorizeDecisionInput"]: {
+	/** Имя аккаунта председателя совета */
+	chairman: string | Variable<any, string>,
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>,
+	/** Подписанный председателем документ утверждения решения */
+	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
+};
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
 	/** Время последней успешной генерации (UTC) */
@@ -1971,8 +1981,6 @@ export type ValueTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
-	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on BankAccountDetails']?: Omit<ValueTypes["BankAccountDetails"], "...on BankAccountDetails">
 }>;
@@ -1980,9 +1988,7 @@ export type ValueTypes = {
 	/** БИК банка */
 	bik: string | Variable<any, string>,
 	/** Корреспондентский счет */
-	corr: string | Variable<any, string>,
-	/** КПП банка */
-	kpp: string | Variable<any, string>
+	corr: string | Variable<any, string>
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -6417,6 +6423,7 @@ acceptChildOrder?: [{	data: ValueTypes["AcceptChildOrderInput"] | Variable<any, 
 addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 addPaymentMethod?: [{	data: ValueTypes["AddPaymentMethodInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
+authorizeDecision?: [{	data: ValueTypes["AuthorizeDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
@@ -8639,6 +8646,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	highlights?:boolean | `@${string}`,
 	/** ID реестра документа */
 	registry_id?:boolean | `@${string}`,
+	/** ФИО подписанта документа */
+	signer?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
@@ -10381,6 +10390,16 @@ export type ResolverInputTypes = {
 	waits?:ResolverInputTypes["WaitWeight"],
 		__typename?: boolean | `@${string}`
 }>;
+	["AuthorizeDecisionInput"]: {
+	/** Имя аккаунта председателя совета */
+	chairman: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Подписанный председателем документ утверждения решения */
+	document: ResolverInputTypes["SignedDigitalDocumentInput"]
+};
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
 	/** Время последней успешной генерации (UTC) */
@@ -10420,17 +10439,13 @@ export type ResolverInputTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
-	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -14748,6 +14763,7 @@ acceptChildOrder?: [{	data: ResolverInputTypes["AcceptChildOrderInput"]},Resolve
 addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInputTypes["Account"]],
 addPaymentMethod?: [{	data: ResolverInputTypes["AddPaymentMethodInput"]},ResolverInputTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
+authorizeDecision?: [{	data: ResolverInputTypes["AuthorizeDecisionInput"]},ResolverInputTypes["Transaction"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
@@ -16893,6 +16909,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	highlights?:boolean | `@${string}`,
 	/** ID реестра документа */
 	registry_id?:boolean | `@${string}`,
+	/** ФИО подписанта документа */
+	signer?:boolean | `@${string}`,
 	/** Имя пользователя */
 	username?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -18600,6 +18618,16 @@ export type ModelTypes = {
 	/** Вес ожидания */
 	waits: Array<ModelTypes["WaitWeight"]>
 };
+	["AuthorizeDecisionInput"]: {
+	/** Имя аккаунта председателя совета */
+	chairman: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Подписанный председателем документ утверждения решения */
+	document: ModelTypes["SignedDigitalDocumentInput"]
+};
 	["AvailableReport"]: {
 		deadline: string,
 	/** Время последней успешной генерации (UTC) */
@@ -18635,17 +18663,13 @@ export type ModelTypes = {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -22836,6 +22860,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	addTrustedAccount: ModelTypes["Branch"],
+	/** Утвердить и исполнить решение совета
+
+Требуемые роли: chairman.  */
+	authorizeDecision: ModelTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -25548,6 +25576,8 @@ export type ModelTypes = {
 	highlights: Array<string>,
 	/** ID реестра документа */
 	registry_id: number,
+	/** ФИО подписанта документа */
+	signer: string,
 	/** Имя пользователя */
 	username: string
 };
@@ -27256,6 +27286,16 @@ export type GraphQLTypes = {
 	waits: Array<GraphQLTypes["WaitWeight"]>,
 	['...on Authority']: Omit<GraphQLTypes["Authority"], "...on Authority">
 };
+	["AuthorizeDecisionInput"]: {
+		/** Имя аккаунта председателя совета */
+	chairman: string,
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number,
+	/** Подписанный председателем документ утверждения решения */
+	document: GraphQLTypes["SignedDigitalDocumentInput"]
+};
 	["AvailableReport"]: {
 	__typename: "AvailableReport",
 	deadline: string,
@@ -27299,17 +27339,13 @@ export type GraphQLTypes = {
 	bik: string,
 	/** Корреспондентский счет */
 	corr: string,
-	/** КПП банка */
-	kpp: string,
 	['...on BankAccountDetails']: Omit<GraphQLTypes["BankAccountDetails"], "...on BankAccountDetails">
 };
 	["BankAccountDetailsInput"]: {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 		/** Номер банковского счета */
@@ -31753,6 +31789,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	addTrustedAccount: GraphQLTypes["Branch"],
+	/** Утвердить и исполнить решение совета
+
+Требуемые роли: chairman.  */
+	authorizeDecision: GraphQLTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -34643,6 +34683,8 @@ export type GraphQLTypes = {
 	highlights: Array<string>,
 	/** ID реестра документа */
 	registry_id: number,
+	/** ФИО подписанта документа */
+	signer: string,
 	/** Имя пользователя */
 	username: string,
 	['...on SearchResult']: Omit<GraphQLTypes["SearchResult"], "...on SearchResult">
@@ -36001,6 +36043,7 @@ type ZEUS_VARIABLES = {
 	["AssetContributionStatementGenerateDocumentInput"]: ValueTypes["AssetContributionStatementGenerateDocumentInput"];
 	["AssetContributionStatementSignedDocumentInput"]: ValueTypes["AssetContributionStatementSignedDocumentInput"];
 	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
+	["AuthorizeDecisionInput"]: ValueTypes["AuthorizeDecisionInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["BuhotchSignerType"]: ValueTypes["BuhotchSignerType"];

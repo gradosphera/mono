@@ -133,4 +133,32 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
       data,
     });
   }
+
+  async authorizeDecision(
+    authorizeData: SovietContract.Actions.Decisions.Authorize.IAuthorize,
+    execData: SovietContract.Actions.Decisions.Exec.IExec
+  ): Promise<TransactResult> {
+    // Утверждение + исполнение проводятся через бэкенд ключом кооператива
+    // (soviet::authorize/exec — require_auth(coopname)). Согласие председателя
+    // криптографически закреплено в подписанном им документе authorizeData.document.
+    const wif = await this.vaultDomainService.getWif(authorizeData.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(authorizeData.coopname, wif);
+
+    return await this.blockchainService.transact([
+      {
+        account: SovietContract.contractName.production,
+        name: SovietContract.Actions.Decisions.Authorize.actionName,
+        authorization: [{ actor: authorizeData.coopname, permission: 'active' }],
+        data: authorizeData,
+      },
+      {
+        account: SovietContract.contractName.production,
+        name: SovietContract.Actions.Decisions.Exec.actionName,
+        authorization: [{ actor: execData.coopname, permission: 'active' }],
+        data: execData,
+      },
+    ]);
+  }
 }

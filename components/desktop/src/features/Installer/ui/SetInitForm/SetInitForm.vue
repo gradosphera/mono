@@ -124,7 +124,6 @@ const createDefaultOrganizationData = (): ICreateOrganizationData => ({
       details: {
         corr: '',
         bik: '',
-        kpp: '',
       },
       account_number: '',
       currency: 'RUB',
@@ -160,7 +159,6 @@ const isValidData = computed(() => {
     data?.bank_account?.bank_name &&
     data?.bank_account?.details?.corr &&
     data?.bank_account?.details?.bik &&
-    data?.bank_account?.details?.kpp &&
     data?.bank_account?.account_number
   );
 });
