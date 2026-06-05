@@ -9,7 +9,6 @@
 #   • cpp/soviet/src/decision/freedecision.cpp
 #   • cpp/soviet/src/vote/votefor.cpp
 #   • cpp/soviet/src/vote/voteagainst.cpp
-#   • cpp/soviet/src/vote/cancelvote.cpp
 #   • cpp/soviet/src/decision/authorize.cpp
 #   • cpp/soviet/src/decision/exec.cpp
 #   • cpp/soviet/src/decision/cancelexprd.cpp
@@ -63,17 +62,9 @@ actions:
     actor: Член совета
     role: reject
     purpose: >
-      Член совета голосует «против». При достижении консенсуса по отказу
-      решение переходит в статус rejected; протокол не оформляется,
-      исполнения не происходит.
-
-  - name: soviet::cancelvote
-    human: Отозвать голос
-    actor: Член совета
-    role: progress
-    purpose: >
-      Член совета отзывает ранее поданный голос (за или против) до того,
-      как решение перешло в финальный статус.
+      Член совета голосует «против». Как только против высказалось больше
+      половины состава совета, решение сразу отклоняется (статус rejected):
+      протокол не оформляется, исполнения не происходит.
 
   - name: soviet::authorize
     human: Утвердить протокол
@@ -214,7 +205,7 @@ scenario:
       actor: Член совета
       action: soviet::votefor
       description: >
-        Члены совета поочерёдно голосуют (votefor / voteagainst / cancelvote).
+        Члены совета поочерёдно голосуют (votefor / voteagainst).
         При достижении большинства «за» решение помечается как approved.
       pre:
         - Решение ещё не закрыто (created).

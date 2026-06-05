@@ -9,30 +9,23 @@
 
  * @note Авторизация требуется от аккаунта: @p coopname
  */
-void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) { 
-  require_auth(coopname);
-
+// Общая ветка отказа решения: при наличии полей коллбэка отправляет инициатору
+// коллбэк отклонения, затем удаляет решение из оперативной таблицы. Вызывается
+// из cancelexprd (просрочка) и voteagainst (отрицательный консенсус).
+void decline_and_erase_decision(eosio::name coopname, uint64_t decision_id, const std::string &reason) {
   decisions_index decisions(_soviet, coopname.value);
   auto decision = decisions.find(decision_id);
   eosio::check(decision != decisions.end(), "Решение не найдено");
-  
-  // Проверка истечения срока
-  bool expired = true;
-  if ( decision -> expired_at.has_value() ) {
-    expired = (eosio::time_point_sec(eosio::current_time_point()) > decision->expired_at.value());
-  }
-  
-  eosio::check(expired, "Срок действия решения ещё не истёк");
-  
+
   // Проверка наличия всех необходимых полей для отправки коллбэка
-  if (decision->callback_contract.has_value() && 
-      decision->decline_callback.has_value() && 
-      decision->hash.has_value() && 
-      decision->callback_contract.value() != ""_n && 
-      decision->confirm_callback.value() != ""_n && 
+  if (decision->callback_contract.has_value() &&
+      decision->decline_callback.has_value() &&
+      decision->hash.has_value() &&
+      decision->callback_contract.value() != ""_n &&
+      decision->confirm_callback.value() != ""_n &&
       decision->decline_callback.value() != ""_n
     ) {
-    
+
     // Отправка коллбэка отклонения
     Action::send<decline_callback_interface>(
       decision->callback_contract.value(),
@@ -41,10 +34,28 @@ void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) {
       _soviet,
       coopname,
       decision->hash.value(),
-      std::string("Отклонение по истечению срока")
+      reason
     );
   }
-  
+
   // Удаление решения
   decisions.erase(decision);
+}
+
+void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) {
+  require_auth(coopname);
+
+  decisions_index decisions(_soviet, coopname.value);
+  auto decision = decisions.find(decision_id);
+  eosio::check(decision != decisions.end(), "Решение не найдено");
+
+  // Проверка истечения срока
+  bool expired = true;
+  if ( decision -> expired_at.has_value() ) {
+    expired = (eosio::time_point_sec(eosio::current_time_point()) > decision->expired_at.value());
+  }
+
+  eosio::check(expired, "Срок действия решения ещё не истёк");
+
+  decline_and_erase_decision(coopname, decision_id, std::string("Отклонение по истечению срока"));
 }

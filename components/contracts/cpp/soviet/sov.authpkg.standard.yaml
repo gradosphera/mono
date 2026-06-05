@@ -5,7 +5,7 @@
 # получить от совета согласие на выполнение действия. Поток:
 #
 #   контракт-инициатор → newpackage / create_agenda → soviet::decisions
-#       ↓ голосование (votefor / voteagainst / cancelvote)
+#       ↓ голосование (votefor / voteagainst)
 #   approved=true → authorize (председатель)
 #       ↓
 #   authorized=true → exec → callback в исходный контракт (confirmreg /
@@ -19,7 +19,7 @@
 #
 # Источники в коде:
 #   • cpp/soviet/src/doc/newpackage.cpp
-#   • cpp/soviet/src/vote/{votefor,voteagainst,cancelvote}.cpp
+#   • cpp/soviet/src/vote/{votefor,voteagainst}.cpp
 #   • cpp/soviet/src/decision/{authorize,cancelexprd,exec}.cpp
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -74,17 +74,10 @@ actions:
     actor: Член совета
     role: reject
     purpose: >
-      Член совета голосует «против». При достижении консенсуса по отказу
-      решение помечается как rejected и при exec в исходный контракт
-      уйдёт decline-callback.
-
-  - name: soviet::cancelvote
-    human: Отозвать голос
-    actor: Член совета
-    role: progress
-    purpose: >
-      Член совета отзывает ранее поданный голос до перехода решения
-      в финальный статус.
+      Член совета голосует «против». Как только против высказалось больше
+      половины состава совета, решение отклоняется сразу — не дожидаясь
+      истечения срока: в исходный процесс уходит уведомление об отказе,
+      решение закрывается.
 
   - name: soviet::authorize
     human: Утвердить протокол
@@ -223,8 +216,8 @@ scenario:
       actor: Член совета
       action: soviet::votefor
       description: >
-        Члены совета голосуют по решению (votefor / voteagainst /
-        cancelvote). При достижении большинства «за» — approved=true.
+        Члены совета голосуют по решению (votefor / voteagainst).
+        При достижении большинства «за» — approved=true.
       pre:
         - Решение в `pending`.
       post:
@@ -262,8 +255,10 @@ scenario:
       action: soviet::voteagainst
       actor: Член совета
       description: >
-        Большинство «против» — при exec в исходный контракт уйдёт
-        decline-callback (например, registrator::declinereg).
+        Как только против высказалось больше половины состава совета,
+        решение отклоняется сразу (не дожидаясь срока): в исходный
+        контракт уходит decline-callback (например, registrator::declinereg),
+        запись решения удаляется.
 
     - branch: Просрочка
       at_step: 2
