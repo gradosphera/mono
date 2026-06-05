@@ -62,18 +62,10 @@ void soviet::voteagainst(
   
   decision -> check_for_any_vote_exist(username);
 
+  // Голос «против» только фиксируется. Отрицательный консенсус НЕ затирает
+  // решение автоматически: отказ при достигнутом большинстве «против» проводит
+  // председатель явным действием declinedec (развязано с авто-отменой по сроку
+  // cancelexprd). Так принятое отрицательно решение не исчезает само из повестки.
   add_vote_against(coopname, username, decision->id);
-
-  // Отрицательный консенсус: если против высказалось больше заданного процента
-  // от состава совета — решение отклоняется немедленно, не дожидаясь истечения
-  // срока, той же веткой отказа, что и просрочка (коллбэк отклонения инициатору
-  // + удаление решения). Порог зеркален votefor — 50% состава, строгое «больше».
-  auto [votes_for_count, votes_against_count] = decision->get_votes_count();
-  uint64_t total_members = board.get_members_count();
-  uint64_t consensus_percent = 50;
-
-  if (votes_against_count * 100 > total_members * consensus_percent) {
-    decline_and_erase_decision(coopname, decision->id, std::string("Отклонено советом: большинство голосов против"));
-  }
 };
 

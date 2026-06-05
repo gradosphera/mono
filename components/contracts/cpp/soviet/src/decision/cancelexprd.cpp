@@ -59,3 +59,36 @@ void soviet::cancelexprd(eosio::name coopname, uint64_t decision_id) {
 
   decline_and_erase_decision(coopname, decision_id, std::string("Отклонение по истечению срока"));
 }
+
+/**
+ * @brief Явное отклонение решения советом по отрицательному консенсусу
+ * Проводится председателем (ключом кооператива), когда против решения
+ * проголосовало большинство состава совета, до истечения срока. Развязано с
+ * cancelexprd: просрочка гасится автоматически по сроку, а отрицательно принятое
+ * решение снимается с повестки только этим явным действием.
+ * @param coopname Наименование кооператива
+ * @param decision_id Идентификатор решения для отклонения
+ * @ingroup public_actions
+ * @ingroup public_soviet_actions
+
+ * @note Авторизация требуется от аккаунта: @p coopname
+ */
+void soviet::declinedec(eosio::name coopname, uint64_t decision_id) {
+  require_auth(coopname);
+
+  decisions_index decisions(_soviet, coopname.value);
+  auto decision = decisions.find(decision_id);
+  eosio::check(decision != decisions.end(), "Решение не найдено");
+
+  // Отрицательный консенсус: против должно высказаться больше половины состава
+  // совета (порог зеркален votefor — 50%, строгое «больше»).
+  auto board = get_board_by_type_or_fail(coopname, "soviet"_n);
+  auto [votes_for_count, votes_against_count] = decision->get_votes_count();
+  uint64_t total_members = board.get_members_count();
+  uint64_t consensus_percent = 50;
+
+  eosio::check(votes_against_count * 100 > total_members * consensus_percent,
+    "Решение не отклонено советом: нет большинства голосов против");
+
+  decline_and_erase_decision(coopname, decision_id, std::string("Отклонено советом: большинство голосов против"));
+}
