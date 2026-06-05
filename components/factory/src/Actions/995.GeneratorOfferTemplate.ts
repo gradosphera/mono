@@ -12,19 +12,16 @@ export class Factory extends DocFactory<GeneratorOfferTemplate.Action> {
   }
 
   async generateDocument(data: GeneratorOfferTemplate.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<GeneratorOfferTemplate.Model>
-
-    if (process.env.SOURCE === 'local') {
-      template = GeneratorOfferTemplate.Template
-    }
-    else {
-      template = await this.getTemplate(DraftContract.contractName.production, GeneratorOfferTemplate.registry_id, data.block_num)
-    }
+    const { template, vars, coop, user } = await this.resolveParallel({
+      template: () => process.env.SOURCE === 'local'
+        ? Promise.resolve(GeneratorOfferTemplate.Template as ITemplate<GeneratorOfferTemplate.Model>)
+        : this.getTemplate<GeneratorOfferTemplate.Model>(DraftContract.contractName.production, GeneratorOfferTemplate.registry_id, data.block_num),
+      vars: () => this.getVars(data.coopname),
+      coop: () => this.getCooperative(data.coopname),
+      user: () => this.getUser(data.username, data.block_num),
+    })
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
-    const vars = await this.getVars(data.coopname)
-    const coop = await this.getCooperative(data.coopname)
-    const user = await this.getUser(data.username, data.block_num)
     const common_user = this.getCommonUser(user)
 
     // Проверяем наличие данных протокола, утвердившего генерационную программу

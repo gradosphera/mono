@@ -2,7 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
-import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
+import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
 import readline from 'node:readline'
 import { PDFDocument } from 'pdf-lib'
 import moment from 'moment-timezone'
@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid'
 import type { IGeneratedDocument, IMetaDocument, ITranslations } from '../../Interfaces'
 import { TemplateEngine } from '../Templator'
 import { calculateSha256 } from '../../Utils/calculateSHA'
-import { ArialBase64 } from '../../Fonts/arial'
 
 const weasyPrintVersion = '67' // ВАЖНО: держать в синхроне с controller/Dockerfile (pip install WeasyPrint==X) и мета-данными каждого документа
 
@@ -49,7 +48,7 @@ for line in sys.stdin:
 class WeasyWorker {
   private proc: ChildProcessWithoutNullStreams | null = null
   private rl: readline.Interface | null = null
-  private pending: { resolve: () => void; reject: (e: Error) => void } | null = null
+  private pending: { resolve: () => void, reject: (e: Error) => void } | null = null
 
   private static pythonBin(): string {
     // В образе controller'а WeasyPrint живёт в /venv (см. controller/Dockerfile).
@@ -195,13 +194,13 @@ export class PDFService implements IPDFService {
     const tempHtmlPath = path.join(tempDir, `${tempId}.html`)
     const tempPdfPath = path.join(tempDir, `${tempId}.pdf`)
 
-    // CSS с указанием кодировки и шрифтом для кириллицы
+    // CSS с указанием кодировки и шрифта.
+    // Arial установлен СИСТЕМНО в образе (controller/Dockerfile → fontconfig),
+    // поэтому НЕ встраиваем шрифт через data:base64 — иначе weasyprint парсил бы
+    // ~270 КБ TTF на КАЖДЫЙ рендер (≈1.3 сек). Системный шрифт парсится один раз
+    // и кешируется fontconfig'ом. Тот же файл шрифта — глифы/вёрстка идентичны.
     const fontStyle = `
       <style>
-        @font-face {
-          font-family: 'Arial';
-          src: url(data:font/ttf;base64,${ArialBase64}) format('truetype');
-        }
         * {
           font-family: 'Arial', sans-serif;
         }
