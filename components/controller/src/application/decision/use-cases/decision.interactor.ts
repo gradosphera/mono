@@ -4,6 +4,7 @@ import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.uti
 import { SovietContract } from 'cooptypes';
 import type { TransactResult } from '@wharfkit/session';
 import { AuthorizeDecisionInputDTO } from '../dto/authorize-decision-input.dto';
+import { DeclineDecisionInputDTO } from '../dto/decline-decision-input.dto';
 
 @Injectable()
 export class DecisionInteractor {
@@ -28,5 +29,14 @@ export class DecisionInteractor {
     };
 
     return await this.sovietBlockchainPort.authorizeDecision(authorizeData, execData);
+  }
+
+  async declineDecision(data: DeclineDecisionInputDTO): Promise<TransactResult> {
+    const declineData: SovietContract.Actions.Decisions.Declinedec.IDeclineDecision = {
+      coopname: data.coopname,
+      decision_id: data.decision_id,
+    };
+
+    return await this.sovietBlockchainPort.declineDecision(declineData);
   }
 }

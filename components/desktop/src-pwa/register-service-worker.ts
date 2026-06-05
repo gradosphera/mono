@@ -180,6 +180,12 @@ if (!shouldRegisterSW) {
       updateAvailable = true;
       hasPendingUpdate = true;
 
+      // Уведомляем Vue-слой о доступном обновлении. Boot 'pwa-update' слушает это
+      // событие и показывает канон-тост с кнопкой «Обновить» (см. src/boot/pwa-update.ts).
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('sw:update-available'));
+      }
+
       // Показываем уведомление пользователю
       if ('Notification' in window) {
         if (Notification.permission === 'granted') {

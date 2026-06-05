@@ -12,18 +12,14 @@ export class Factory extends DocFactory<BlagorostProgramTemplate.Action> {
   }
 
   async generateDocument(data: BlagorostProgramTemplate.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<BlagorostProgramTemplate.Model>
-
-    if (process.env.SOURCE === 'local') {
-      template = BlagorostProgramTemplate.Template
-    }
-    else {
-      template = await this.getTemplate(DraftContract.contractName.production, BlagorostProgramTemplate.registry_id, data.block_num)
-    }
+    const { template, vars } = await this.resolveParallel({
+      template: () => process.env.SOURCE === 'local'
+        ? Promise.resolve(BlagorostProgramTemplate.Template as ITemplate<BlagorostProgramTemplate.Model>)
+        : this.getTemplate<BlagorostProgramTemplate.Model>(DraftContract.contractName.production, BlagorostProgramTemplate.registry_id, data.block_num),
+      vars: () => this.getVars(data.coopname),
+    })
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
-
-    const vars = await this.getVars(data.coopname)
 
     const combinedData: BlagorostProgramTemplate.Model = { meta, vars }
 
