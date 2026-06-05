@@ -1944,6 +1944,7 @@ export const ReturnTypes: Record<string,any> = {
 		participant_account:"ParticipantAccount",
 		private_account:"PrivateAccount",
 		provider_account:"MonoAccount",
+		registration_payment:"RegistrationPayment",
 		user_account:"UserAccount",
 		username:"String"
 	},
@@ -4261,6 +4262,13 @@ export const ReturnTypes: Record<string,any> = {
 	RegistrationConfig:{
 		programs:"RegistrationProgram",
 		requires_selection:"Boolean"
+	},
+	RegistrationPayment:{
+		hash:"String",
+		message:"String",
+		quantity:"Float",
+		status:"PaymentStatus",
+		symbol:"String"
 	},
 	RegistrationProgram:{
 		applicable_account_types:"AccountType",

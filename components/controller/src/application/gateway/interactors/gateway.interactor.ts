@@ -113,6 +113,15 @@ export class GatewayInteractor {
         throw new NotFoundException(`Не удалось найти платеж с ID ${data.id}`);
       }
 
+      // Сохраняем причину изменения статуса (например, причину отклонения платежа),
+      // чтобы пайщик увидел её на странице регистрации даже после перезагрузки/в другой вкладке.
+      if (data.message !== undefined && result.id) {
+        const updated = await this.paymentRepository.update(result.id, { message: data.message });
+        if (updated) {
+          result.message = updated.message;
+        }
+      }
+
       // Обрабатываем платеж при статусе PAID
       if (statusEnum === PaymentStatusEnum.PAID) {
         if (result.direction === PaymentDirectionEnum.INCOMING) {

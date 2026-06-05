@@ -37,6 +37,8 @@ import { EntrepreneurDomainEntity } from '~/domain/branch/entities/entrepreneur-
 import { ACCOUNT_BLOCKCHAIN_PORT, AccountBlockchainPort } from '~/domain/account/interfaces/account-blockchain.port';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { userStatus } from '~/types/user.types';
+import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
+import { PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum';
 import { CandidateStatus } from '~/domain/registration/enum';
 import { sha256 } from '~/utils/sha256';
 import { normalizeUserEmail } from '~/utils/normalize-user-email';
@@ -61,7 +63,8 @@ export class AccountInteractor {
     @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
     private readonly tokenApplicationService: TokenApplicationService,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
-    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService
+    @Inject(USER_DOMAIN_SERVICE) private readonly userDomainService: UserDomainService,
+    @Inject(PAYMENT_REPOSITORY) private readonly paymentRepository: PaymentRepository
   ) {}
 
   private readonly logger = new Logger(AccountInteractor.name);
@@ -268,7 +271,28 @@ export class AccountInteractor {
   }
 
   async getAccount(username: string): Promise<AccountDomainEntity> {
-    return await this.accountDomainService.getAccount(username);
+    const account = await this.accountDomainService.getAccount(username);
+
+    // Прокидываем сводку по вступительному платежу, чтобы фронт восстановил шаг
+    // регистрации (ожидание/отклонение платежа) после перезагрузки и в любой вкладке.
+    // Актуально только пока пайщик ещё не принят (нет participant_account).
+    if (!account.participant_account) {
+      const payment = await this.paymentRepository.findLatestByUsernameAndType(
+        username,
+        PaymentTypeEnum.REGISTRATION
+      );
+      if (payment) {
+        account.registration_payment = {
+          status: payment.status,
+          message: payment.message ?? null,
+          hash: payment.hash,
+          quantity: payment.quantity,
+          symbol: payment.symbol,
+        };
+      }
+    }
+
+    return account;
   }
 
   async getAccounts(

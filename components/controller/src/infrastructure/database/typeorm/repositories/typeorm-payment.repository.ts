@@ -264,4 +264,19 @@ export class TypeOrmPaymentRepository implements PaymentRepository {
     if (!payment) return null;
     return this.mapToDomainEntity(payment);
   }
+
+  async findLatestByUsernameAndType(
+    username: string,
+    type: PaymentTypeEnum
+  ): Promise<PaymentDomainInterface | null> {
+    const payment = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .where('payment.username = :username', { username })
+      .andWhere('payment.type = :type', { type })
+      .orderBy('payment.created_at', 'DESC')
+      .getOne();
+
+    if (!payment) return null;
+    return this.mapToDomainEntity(payment);
+  }
 }

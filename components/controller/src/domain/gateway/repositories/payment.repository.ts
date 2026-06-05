@@ -45,6 +45,14 @@ export interface PaymentRepository {
     quantity: number,
     symbol: string
   ): Promise<PaymentDomainInterface | null>;
+
+  /**
+   * Найти последний платеж заданного типа для пользователя (любой статус)
+   * @param username имя пользователя
+   * @param type тип платежа
+   * @returns последний по дате создания платеж или null
+   */
+  findLatestByUsernameAndType(username: string, type: PaymentTypeEnum): Promise<PaymentDomainInterface | null>;
 }
 
 export const PAYMENT_REPOSITORY = Symbol('PaymentRepository');
