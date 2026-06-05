@@ -49,6 +49,25 @@ export default ssrMiddleware(({ app }) => {
     // Переопределяем метод, чтобы вставить наш скрипт перед закрывающим тегом </head>
     res.send = function (html) {
       if (typeof html === 'string') {
+        // Перенаправляем <link rel="manifest"> на динамический /manifest.webmanifest
+        // (см. dynamicManifest.ts): статический /manifest.json перехватывается
+        // serveStatic до middleware, поэтому имя коопа отдаём по другому пути.
+        html = html.replace(
+          /(<link[^>]*rel=["']?manifest["']?[^>]*href=["']?)[^"'\s>]*(["']?[^>]*>)/i,
+          '$1/manifest.webmanifest$2',
+        );
+
+        // На iOS имя на домашнем экране берётся из apple-mobile-web-app-title,
+        // а не из manifest. Build-time значение generic — подставляем имя коопа
+        // из env в рантайме (idempotent: replace если тег есть, иначе insert).
+        const appleTitle =
+          (process.env.COOP_SHORT_NAME as string) || 'Цифровой Кооператив';
+        const appleMeta = `<meta name="apple-mobile-web-app-title" content="${appleTitle}">`;
+        if (/<meta name="apple-mobile-web-app-title"[^>]*>/.test(html)) {
+          html = html.replace(/<meta name="apple-mobile-web-app-title"[^>]*>/, appleMeta);
+        } else {
+          html = html.replace('</head>', `${appleMeta}</head>`);
+        }
         html = html.replace('</head>', `${script}</head>`);
       }
       return originalSend.call(this, html);
