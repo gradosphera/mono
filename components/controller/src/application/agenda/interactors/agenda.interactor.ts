@@ -91,6 +91,7 @@ export class AgendaInteractor {
   async getAgendaItemByHash(coopname: string, hash: string): Promise<AgendaWithDocumentsDomainInterface | null> {
     const target = String(hash).toUpperCase();
 
+    // decision появляется на чейне почти мгновенно после публикации.
     const decisions = (await this.blockchainPort.getAllRows(
       SovietContract.contractName.production,
       coopname,
@@ -100,6 +101,8 @@ export class AgendaInteractor {
     const decision = decisions.find((d) => String(d.hash).toUpperCase() === target);
     if (!decision) return null;
 
+    // action newsubmitted индексируется парсером с лагом (~2 c) — пока его нет,
+    // вернём null, и вызывающая сторона повторит тик.
     const actionResponse = await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
       filter: JSON.stringify({
         account: SovietContract.contractName.production,

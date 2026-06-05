@@ -11,13 +11,13 @@ import type { GeneratedDocumentDTO } from '~/application/document/dto/generated-
 import { AgendaService } from '~/application/agenda/services/agenda.service';
 import type { AgendaWithDocumentsDTO } from '~/application/agenda/dto/agenda-with-documents.dto';
 
-// Повестка собирается join'ом таблицы decisions из блокчейна с
-// проиндексированными парсером действием newsubmitted и документом-заявлением.
-// Сразу после публикации парсер ещё не успел проиндексировать, поэтому даём
-// settle-паузу и забираем готовый вопрос с повестки (с короткой страховочной
-// петлёй на случай чуть большего лага), чтобы вернуть его фронту немедленно.
-const PUBLISH_FETCH_DELAY_MS = 1000;
-const PUBLISH_FETCH_ATTEMPTS = 4;
+// Повестка собирается join'ом таблицы decisions из блокчейна (доступна сразу)
+// с проиндексированными парсером действием newsubmitted и документом-заявлением.
+// Решение появляется на чейне мгновенно, но индексация парсером action'а занимает
+// ~2 c — поэтому опрашиваем повестку короткими тиками, пока вопрос не соберётся,
+// и возвращаем его фронту немедленно (без ожидания общего поллинга страницы).
+const PUBLISH_FETCH_DELAY_MS = 400;
+const PUBLISH_FETCH_ATTEMPTS = 13; // ~5 c суммарно — запас над типичными ~2 c
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -51,14 +51,16 @@ export class FreeDecisionService {
   ): Promise<AgendaWithDocumentsDTO | null> {
     await this.freeDecisionInteractor.publishProjectOfFreeDecision(data);
 
-    // Хэш документа-заявления == hash решения в таблице decisions блокчейна.
-    const hash = data.document.doc_hash;
+    // decision.hash в блокчейне == «общий хэш» подписанного заявления (hash =
+    // doc_hash + meta_hash), НЕ doc_hash (хэш только содержимого) — их легко
+    // перепутать, и матч по doc_hash молча никогда не сработает.
+    const hash = data.document.hash;
 
     let item: AgendaWithDocumentsDTO | null = null;
     for (let attempt = 0; attempt < PUBLISH_FETCH_ATTEMPTS; attempt++) {
-      await sleep(PUBLISH_FETCH_DELAY_MS);
       item = await this.agendaService.getAgendaItemByHash(hash);
       if (item) break;
+      await sleep(PUBLISH_FETCH_DELAY_MS);
     }
 
     // null допустим: если парсер не успел проиндексировать — фронт покажет вопрос
