@@ -7,6 +7,11 @@ import { PaymentTypeEnum, PaymentDirectionEnum } from '~/domain/gateway/enums/pa
 import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
+import { RegistratorContract } from 'cooptypes';
+
+// Имя on-chain события отказа в регистрации — из констант cooptypes, не хардкод.
+const REGISTRATOR = RegistratorContract.contractName.production;
+const DECLINE_REG_EVENT = `action::${REGISTRATOR}::${RegistratorContract.Actions.DeclineRegistration.actionName}`;
 
 /**
  * Заводит исходящий платёж-возврат при отказе совета в приёме пайщика.
@@ -30,7 +35,7 @@ export class RegistrationDeclineListener {
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
   ) {}
 
-  @OnEvent('action::registrator::declinereg')
+  @OnEvent(DECLINE_REG_EVENT)
   async onDeclineRegistration(action: ActionDomainInterface): Promise<void> {
     const registration_hash = action?.data?.registration_hash as string | undefined;
     if (!registration_hash) return;
