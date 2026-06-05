@@ -32,6 +32,15 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
     );
   }
 
+  async getBoards(coopname: string): Promise<SovietContract.Tables.Boards.IBoards[]> {
+    // Per-coop советов единицы строк; full scan адекватен.
+    return await this.blockchainService.getAllRows<SovietContract.Tables.Boards.IBoards>(
+      SovietContract.contractName.production,
+      coopname,
+      SovietContract.Tables.Boards.tableName
+    );
+  }
+
   async getCoagreement(
     coopname: string,
     agreement_type: string
@@ -83,6 +92,20 @@ export class SovietBlockchainAdapter implements SovietBlockchainPort {
     return await this.blockchainService.transact({
       account: SovietContract.contractName.production,
       name: SovietContract.Actions.Decisions.Cancelexprd.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data,
+    });
+  }
+
+  async declineDecision(data: SovietContract.Actions.Decisions.Declinedec.IDeclineDecision): Promise<TransactResult> {
+    const wif = await this.vaultDomainService.getWif(data.coopname);
+    if (!wif) throw new HttpApiError(httpStatus.BAD_GATEWAY, 'Не найден приватный ключ для совершения операции');
+
+    this.blockchainService.initialize(data.coopname, wif);
+
+    return await this.blockchainService.transact({
+      account: SovietContract.contractName.production,
+      name: SovietContract.Actions.Decisions.Declinedec.actionName,
       authorization: [{ actor: data.coopname, permission: 'active' }],
       data,
     });

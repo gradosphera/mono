@@ -379,6 +379,9 @@ export const AllTypesProps: Record<string,any> = {
 	DeclineApproveInput:{
 
 	},
+	DeclineDecisionInput:{
+
+	},
 	DeclineRequestInput:{
 
 	},
@@ -980,6 +983,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		declineAgreement:{
 			data:"DeclineAgreementInput"
+		},
+		declineDecision:{
+			data:"DeclineDecisionInput"
 		},
 		declineRequest:{
 			data:"DeclineRequestInput"
@@ -2167,6 +2173,7 @@ export const ReturnTypes: Record<string,any> = {
 		callback_contract:"String",
 		confirm_callback:"String",
 		coopname:"String",
+		council_members_count:"Float",
 		created_at:"String",
 		decline_callback:"String",
 		expired_at:"String",
@@ -3616,6 +3623,7 @@ export const ReturnTypes: Record<string,any> = {
 		createWithdraw:"CreateWithdrawResponse",
 		deactivateWebPushSubscriptionById:"Boolean",
 		declineAgreement:"Transaction",
+		declineDecision:"Transaction",
 		declineRequest:"Transaction",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",

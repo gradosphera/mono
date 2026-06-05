@@ -2162,6 +2162,8 @@ export type ValueTypes = {
 	callback_contract?:boolean | `@${string}`,
 	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -4831,6 +4833,12 @@ export type ValueTypes = {
 	/** Причина отклонения */
 	reason: string | Variable<any, string>
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -6533,6 +6541,7 @@ createWebPushSubscription?: [{	data: ValueTypes["CreateSubscriptionInput"] | Var
 createWithdraw?: [{	data: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
 declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+declineDecision?: [{	data: ValueTypes["DeclineDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -10633,6 +10642,8 @@ export type ResolverInputTypes = {
 	callback_contract?:boolean | `@${string}`,
 	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -13236,6 +13247,12 @@ export type ResolverInputTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14891,6 +14908,7 @@ createWebPushSubscription?: [{	data: ResolverInputTypes["CreateSubscriptionInput
 createWithdraw?: [{	data: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
 declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
+declineDecision?: [{	data: ResolverInputTypes["DeclineDecisionInput"]},ResolverInputTypes["Transaction"]],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
@@ -18870,6 +18888,8 @@ export type ModelTypes = {
 	callback_contract?: string | undefined | null,
 	confirm_callback?: string | undefined | null,
 	coopname: string,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count: number,
 	created_at: string,
 	decline_callback?: string | undefined | null,
 	expired_at: string,
@@ -21399,6 +21419,12 @@ export type ModelTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -23301,6 +23327,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: ModelTypes["Transaction"],
+	/** Отклонить решение совета по отрицательному консенсусу (большинство голосов против)
+
+Требуемые роли: chairman.  */
+	declineDecision: ModelTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
 	/** Удалить кооперативный участок
@@ -27571,6 +27601,8 @@ export type GraphQLTypes = {
 	callback_contract?: string | undefined | null,
 	confirm_callback?: string | undefined | null,
 	coopname: string,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count: number,
 	created_at: string,
 	decline_callback?: string | undefined | null,
 	expired_at: string,
@@ -30239,6 +30271,12 @@ export type GraphQLTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -32246,6 +32284,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: GraphQLTypes["Transaction"],
+	/** Отклонить решение совета по отрицательному консенсусу (большинство голосов против)
+
+Требуемые роли: chairman.  */
+	declineDecision: GraphQLTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
 	/** Удалить кооперативный участок
@@ -36198,6 +36240,7 @@ type ZEUS_VARIABLES = {
 	["DebtStatus"]: ValueTypes["DebtStatus"];
 	["DeclineAgreementInput"]: ValueTypes["DeclineAgreementInput"];
 	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
+	["DeclineDecisionInput"]: ValueTypes["DeclineDecisionInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeleteCapitalIssueByHashInput"]: ValueTypes["DeleteCapitalIssueByHashInput"];
