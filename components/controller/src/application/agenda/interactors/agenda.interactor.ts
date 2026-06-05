@@ -80,4 +80,44 @@ export class AgendaInteractor {
     }
     return agenda;
   }
+
+  /**
+   * Собирает ОДИН пункт повестки по хэшу документа-заявления. Нужен сразу после
+   * публикации свободного решения: возвращаем только что созданный вопрос фронту
+   * немедленно, без ожидания общего поллинга. Возвращает null, пока парсер ещё не
+   * проиндексировал действие newsubmitted или документ-заявление — тогда
+   * вызывающая сторона повторит попытку через паузу.
+   */
+  async getAgendaItemByHash(coopname: string, hash: string): Promise<AgendaWithDocumentsDomainInterface | null> {
+    const target = String(hash).toUpperCase();
+
+    const decisions = (await this.blockchainPort.getAllRows(
+      SovietContract.contractName.production,
+      coopname,
+      'decisions'
+    )) as SovietContract.Tables.Decisions.IDecision[];
+
+    const decision = decisions.find((d) => String(d.hash).toUpperCase() === target);
+    if (!decision) return null;
+
+    const actionResponse = await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
+      filter: JSON.stringify({
+        account: SovietContract.contractName.production,
+        name: SovietContract.Actions.Registry.NewSubmitted.actionName,
+        receiver: process.env.COOPNAME,
+        'data.package': target,
+      }),
+      page: 1,
+      limit: 1,
+    });
+
+    const action = actionResponse?.results?.[0];
+    if (!action) return null;
+
+    const documents = await this.documentPackageAggregator.buildDocumentPackageAggregate(action);
+    // Тот же фильтр, что в getAgenda: без агрегата заявления пункт не отображается.
+    if (!documents.statement?.documentAggregate) return null;
+
+    return { table: decision, action, documents };
+  }
 }

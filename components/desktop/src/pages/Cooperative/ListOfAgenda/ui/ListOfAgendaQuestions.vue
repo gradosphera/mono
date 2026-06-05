@@ -8,7 +8,7 @@
     :is-voted-for='isVotedFor',
     :is-voted-against='isVotedAgainst',
     :is-voted-any='isVotedAny',
-    :processing-decisions='processingDecisions',
+    :processing-decisions='disabledDecisions',
     @authorize='onAuthorizeDecision',
     @decline='onDeclineDecision',
     @vote-for='onVoteFor',
@@ -62,6 +62,7 @@ const decisionProcessor = useDecisionProcessor();
 const {
   loading,
   loadDecisions,
+  pendingConfirmationIds,
   authorizeAndExecuteDecision,
   declineDecision,
   voteForDecision,
@@ -71,6 +72,21 @@ const {
   isVotedAny,
   formatDecisionTitle,
 } = decisionProcessor;
+
+// Кнопки строки блокируем не только во время операции (processingDecisions), но и
+// для оптимистично вставленных вопросов, ещё не подтверждённых getAgenda
+// (pendingConfirmationIds) — голос/утверждение упадут, пока вопрос не виден
+// бэкенду через нормальный путь повестки.
+const disabledDecisions = computed<Record<string, boolean>>(() => {
+  const map: Record<string, boolean> = {};
+  for (const [id, value] of Object.entries(processingDecisions.value)) {
+    map[id] = value;
+  }
+  for (const id of pendingConfirmationIds.value) {
+    map[id] = true;
+  }
+  return map;
+});
 
 // Пункты, которые председатель только что УТВЕРДИЛ. Повестка показывает все
 // неутверждённые вопросы, поэтому скрывать пункт нужно только после утверждения

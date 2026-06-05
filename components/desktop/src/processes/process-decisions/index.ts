@@ -29,6 +29,9 @@ export function useDecisionProcessor() {
   // Данные повестки и состояние загрузки
   const decisions = computed(() => agendaStore.agenda);
   const loading = computed(() => agendaStore.loading);
+  // ID вопросов, оптимистично вставленных после публикации и ещё не
+  // подтверждённых getAgenda — на них блокируем голос/утверждение/правку.
+  const pendingConfirmationIds = computed(() => agendaStore.pendingConfirmationIds);
 
   /**
    * Форматирует заголовок вопроса
@@ -297,6 +300,7 @@ export function useDecisionProcessor() {
   return {
     decisions,
     loading,
+    pendingConfirmationIds,
     loadDecisions,
     generateDecisionDocument,
     authorizeAndExecuteDecision,

@@ -58,4 +58,22 @@ export class AgendaService {
 
     return processedAgenda;
   }
+
+  /**
+   * Возвращает ОДИН пункт повестки по хэшу документа-заявления (или null, если он
+   * ещё не проиндексирован парсером). Используется сразу после публикации
+   * свободного решения, чтобы фронт показал созданный вопрос немедленно.
+   */
+  public async getAgendaItemByHash(hash: string): Promise<AgendaWithDocumentsDTO | null> {
+    const item = await this.agendaInteractor.getAgendaItemByHash(config.coopname, hash);
+    if (!item) return null;
+
+    const boards = await this.sovietBlockchainPort.getBoards(config.coopname);
+    const councilMembersCount = boards.find((b) => b.type === 'soviet')?.members.length ?? 0;
+
+    const usernameCertificate = await this.userCertificateDomainPort.getCertificateByUsername(item.table.username);
+
+    // Только что созданный вопрос ещё без голосов — сертификаты голосовавших пусты.
+    return new AgendaWithDocumentsDTO(item, usernameCertificate, [], [], councilMembersCount);
+  }
 }
