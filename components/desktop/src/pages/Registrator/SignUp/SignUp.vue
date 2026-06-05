@@ -82,6 +82,13 @@ onMounted(() => {
       store.step = steps.WaitingRegistration;
       return;
     }
+    // Есть незавершённый вступительный платёж (ожидание подтверждения денег или
+    // отклонение председателем) — восстанавливаем экран ожидания/отказа даже
+    // после перезагрузки и в любой вкладке. Процесс может тянуться днями.
+    if (session.registrationPayment) {
+      store.step = steps.WaitingRegistration;
+      return;
+    }
   }
 });
 

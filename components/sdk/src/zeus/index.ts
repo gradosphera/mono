@@ -1126,6 +1126,8 @@ export type ValueTypes = {
 	private_account?:ValueTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?:ValueTypes["RegistrationPayment"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
@@ -8082,6 +8084,20 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationConfig']?: Omit<ValueTypes["RegistrationConfig"], "...on RegistrationConfig">
 }>;
+	["RegistrationPayment"]: AliasType<{
+	/** Хэш платежа */
+	hash?:boolean | `@${string}`,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?:boolean | `@${string}`,
+	/** Сумма вступительного платежа */
+	quantity?:boolean | `@${string}`,
+	/** Статус вступительного платежа */
+	status?:boolean | `@${string}`,
+	/** Символ валюты платежа */
+	symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on RegistrationPayment']?: Omit<ValueTypes["RegistrationPayment"], "...on RegistrationPayment">
+}>;
 	["RegistrationProgram"]: AliasType<{
 	/** Для каких типов аккаунтов доступна программа */
 	applicable_account_types?:boolean | `@${string}`,
@@ -8764,6 +8780,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string | Variable<any, string>,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null | Variable<any, string>,
 	/** Новый статус платежа */
 	status: ValueTypes["PaymentStatus"] | Variable<any, string>
 };
@@ -9602,6 +9620,8 @@ export type ResolverInputTypes = {
 	private_account?:ResolverInputTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?:ResolverInputTypes["RegistrationPayment"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
@@ -16361,6 +16381,19 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	requires_selection?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["RegistrationPayment"]: AliasType<{
+	/** Хэш платежа */
+	hash?:boolean | `@${string}`,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?:boolean | `@${string}`,
+	/** Сумма вступительного платежа */
+	quantity?:boolean | `@${string}`,
+	/** Статус вступительного платежа */
+	status?:boolean | `@${string}`,
+	/** Символ валюты платежа */
+	symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["RegistrationProgram"]: AliasType<{
 	/** Для каких типов аккаунтов доступна программа */
 	applicable_account_types?:boolean | `@${string}`,
@@ -17026,6 +17059,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: ResolverInputTypes["PaymentStatus"]
 };
@@ -17848,6 +17883,8 @@ export type ModelTypes = {
 	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?: ModelTypes["RegistrationPayment"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -25047,6 +25084,18 @@ export type ModelTypes = {
 	/** Нужен ли выбор программы */
 	requires_selection: boolean
 };
+	["RegistrationPayment"]: {
+		/** Хэш платежа */
+	hash: string,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?: string | undefined | null,
+	/** Сумма вступительного платежа */
+	quantity: number,
+	/** Статус вступительного платежа */
+	status: ModelTypes["PaymentStatus"],
+	/** Символ валюты платежа */
+	symbol: string
+};
 	["RegistrationProgram"]: {
 		/** Для каких типов аккаунтов доступна программа */
 	applicable_account_types: Array<ModelTypes["AccountType"]>,
@@ -25691,6 +25740,8 @@ export type ModelTypes = {
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: ModelTypes["PaymentStatus"]
 };
@@ -26484,6 +26535,8 @@ export type GraphQLTypes = {
 	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?: GraphQLTypes["RegistrationPayment"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -34118,6 +34171,20 @@ export type GraphQLTypes = {
 	requires_selection: boolean,
 	['...on RegistrationConfig']: Omit<GraphQLTypes["RegistrationConfig"], "...on RegistrationConfig">
 };
+	["RegistrationPayment"]: {
+	__typename: "RegistrationPayment",
+	/** Хэш платежа */
+	hash: string,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?: string | undefined | null,
+	/** Сумма вступительного платежа */
+	quantity: number,
+	/** Статус вступительного платежа */
+	status: GraphQLTypes["PaymentStatus"],
+	/** Символ валюты платежа */
+	symbol: string,
+	['...on RegistrationPayment']: Omit<GraphQLTypes["RegistrationPayment"], "...on RegistrationPayment">
+};
 	["RegistrationProgram"]: {
 	__typename: "RegistrationProgram",
 	/** Для каких типов аккаунтов доступна программа */
@@ -34800,6 +34867,8 @@ export type GraphQLTypes = {
 	["SetPaymentStatusInput"]: {
 		/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: GraphQLTypes["PaymentStatus"]
 };
