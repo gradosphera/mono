@@ -35956,6 +35956,7 @@ export enum PaymentStatus {
 export enum PaymentType {
 	DEPOSIT = "DEPOSIT",
 	REGISTRATION = "REGISTRATION",
+	REGISTRATION_REFUND = "REGISTRATION_REFUND",
 	WITHDRAWAL = "WITHDRAWAL"
 }
 export enum ProcessInstanceStatus {

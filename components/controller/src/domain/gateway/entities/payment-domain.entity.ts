@@ -112,6 +112,7 @@ export class PaymentDomainEntity implements PaymentDomainInterface {
       [PaymentTypeEnum.REGISTRATION]: 'Регистрационный взнос',
       [PaymentTypeEnum.DEPOSIT]: 'Паевой взнос',
       [PaymentTypeEnum.WITHDRAWAL]: 'Возврат взноса',
+      [PaymentTypeEnum.REGISTRATION_REFUND]: 'Возврат вступит. и мин.паевого взноса',
     };
     return typeLabels[this.type] || this.type;
   }
