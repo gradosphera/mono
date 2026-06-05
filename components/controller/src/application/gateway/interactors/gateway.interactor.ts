@@ -275,19 +275,31 @@ export class GatewayInteractor {
     // Валидируем символ
     QuantityUtils.validateSymbol(symbol);
 
-    // Проверяем, нет ли уже активного платежа этого типа для пользователя с такой же суммой
-    const existingPayment = await this.paymentRepository.findActivePendingPayment(
+    // Регистрационный платёж одноразовый. Если у пайщика уже есть рег-платёж в
+    // «живом» статусе (ожидает оплаты / в обработке / оплачен / принят) — возвращаем
+    // его, а не создаём второй. Иначе при перезаходе/перезагрузке страницы оплаты в
+    // момент приёма платежа findActivePendingPayment (только PENDING) промахивался —
+    // первый платёж уже PAID/COMPLETED, и заводился платёж-дубль, который нельзя ни
+    // принять (аккаунт уже зарегистрирован), ни осмысленно отклонить.
+    // Новый ордер заводим только если прошлого нет либо он провалился/истёк/отменён
+    // (легитимная повторная попытка, в т.ч. после resetRegistration).
+    const lastRegistrationPayment = await this.paymentRepository.findLatestByUsernameAndType(
       data.username,
-      PaymentTypeEnum.REGISTRATION,
-      amount,
-      symbol
+      PaymentTypeEnum.REGISTRATION
     );
 
-    if (existingPayment) {
+    const reusableStatuses = [
+      PaymentStatusEnum.PENDING,
+      PaymentStatusEnum.PROCESSING,
+      PaymentStatusEnum.PAID,
+      PaymentStatusEnum.COMPLETED,
+    ];
+
+    if (lastRegistrationPayment && reusableStatuses.includes(lastRegistrationPayment.status)) {
       this.logger.log(
-        `Найден существующий активный регистрационный платеж для пользователя ${data.username} на сумму ${amount} ${symbol}`
+        `Регистрационный платёж для ${data.username} уже существует (${lastRegistrationPayment.id}, статус ${lastRegistrationPayment.status}) — повторный ордер не создаём`
       );
-      return new PaymentDomainEntity(existingPayment, { isNewlyCreated: false });
+      return new PaymentDomainEntity(lastRegistrationPayment, { isNewlyCreated: false });
     }
 
     // Получаем настройки для определения провайдера
