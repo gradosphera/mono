@@ -42,7 +42,7 @@ module.exports = configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['widget', 'init', 'axios', 'sentry', 'network', 'chatwoot', 'theme', 'ui', 'haptics'],
+    boot: ['widget', 'init', 'axios', 'sentry', 'network', 'chatwoot', 'theme', 'ui', 'haptics', 'pwa-update'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [
@@ -247,6 +247,7 @@ module.exports = configure(function (ctx) {
 
       middlewares: [
         'generateConfig', // middleware для генерации config.js с переменными окружения
+        'dynamicManifest', // динамический /manifest.json с именем коопа из env (пер-кооп установочник)
         'render', // keep this as last one
       ],
 
@@ -269,6 +270,13 @@ module.exports = configure(function (ctx) {
             cfg.maximumFileSizeToCacheInBytes = 5 * 1024 * 1024; // 5MB
             // Не включаем ревизию для определенных файлов
             cfg.dontCacheBustURLsMatching = /\.\w{8}\./;
+            // Новый SW НЕ активируется в фоне сам: ждёт в waiting, пока
+            // пользователь не нажмёт «Обновить» (тост → window.applyUpdate() →
+            // SKIP_WAITING → controllerchange → reload). Иначе была гонка
+            // «подвисание между релизами» (старая страница + новый SW).
+            // skipWaiting:false → Workbox сам инжектит listener SKIP_WAITING.
+            cfg.skipWaiting = false;
+            cfg.clientsClaim = false;
           },
           extendManifestJson(json) {
             json.name = process.env.COOP_SHORT_NAME || 'Цифровой Кооператив';
