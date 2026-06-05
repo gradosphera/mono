@@ -81,7 +81,9 @@ export function useCreateProjectOfFreeDecision() {
       }
     );
 
-    return result
+    // Поле publishProjectOfFreeDecision nullable в схеме → result может быть
+    // undefined; приводим к null, чтобы попасть в объявленный IAgenda | null.
+    return result ?? null
   }
 
   return {
