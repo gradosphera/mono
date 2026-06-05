@@ -3668,7 +3668,7 @@ export const ReturnTypes: Record<string,any> = {
 		notifyOnAnnualGeneralMeet:"MeetAggregate",
 		processConvertToAxonStatement:"Boolean",
 		prohibitRequest:"Transaction",
-		publishProjectOfFreeDecision:"Boolean",
+		publishProjectOfFreeDecision:"AgendaWithDocuments",
 		publishRequest:"Transaction",
 		receiveOnRequest:"Transaction",
 		refresh:"RegisteredAccount",
