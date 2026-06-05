@@ -41,6 +41,7 @@ import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/reposito
 import { PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum';
 import { CandidateStatus } from '~/domain/registration/enum';
 import { sha256 } from '~/utils/sha256';
+import { registrationProfileFingerprint } from '~/utils/registration-profile-fingerprint';
 import { normalizeUserEmail } from '~/utils/normalize-user-email';
 import type {
   SearchPrivateAccountsInputDomainInterface,
@@ -327,6 +328,29 @@ export class AccountInteractor {
     const candidate = await this.candidateRepository.findByUsername(username);
     if (!candidate) {
       throw new HttpApiError(HttpStatus.NOT_FOUND, `Кандидат с именем ${username} не найден`);
+    }
+
+    // Гард A (замок профиля): на цепь не должны уйти данные, отличные от
+    // подписанных в заявлении. Если в meta кандидата зафиксирован отпечаток
+    // (заявление подписано после внедрения гарда) — сверяем с текущим
+    // профилем. Кандидаты без отпечатка (регистрация шла до внедрения)
+    // пропускаются, чтобы не сломать уже идущие регистрации.
+    let candidateMeta: Record<string, any> = {};
+    try {
+      candidateMeta = candidate.meta ? JSON.parse(candidate.meta) : {};
+    } catch {
+      candidateMeta = {};
+    }
+    const lockedFingerprint = candidateMeta?.registration_profile_fingerprint;
+    if (lockedFingerprint) {
+      const account = await this.accountDomainService.getAccount(username);
+      const currentFingerprint = registrationProfileFingerprint(account?.private_account);
+      if (currentFingerprint && currentFingerprint !== lockedFingerprint) {
+        throw new HttpApiError(
+          HttpStatus.BAD_REQUEST,
+          'Данные пайщика изменены после подписания заявления. Пожалуйста, переподпишите заявление перед регистрацией.'
+        );
+      }
     }
 
     try {
