@@ -45,11 +45,19 @@ void registrator::confirmreg(eosio::name coopname, checksum256 registration_hash
     )
   ).send();
 
-  std::string memo = "Минимальный паевой взнос при вступлении пайщика с username=" + candidate -> username.to_string();
-  Ledger2::apply(_registrator, coopname, operations::registrator::PUT_MINSHARE, candidate -> minimum, candidate -> username, registration_hash, memo);
+  // Совет одобрил — признаём взнос: переносим суспенс (76) на паевой фонд (80)
+  // и целевое финансирование (86). Деньги уже на w.reg.pend (o.reg.inpay в confirmpay).
+  // Гарды amount>0: у кооператива может не быть вступительного (initial==0) —
+  // ledger2::apply падает на нулевой сумме, поэтому переносим только ненулевые части.
+  if (candidate -> minimum.amount > 0) {
+    std::string memo = "Зачисление минимального паевого взноса по решению совета, username=" + candidate -> username.to_string();
+    Ledger2::apply(_registrator, coopname, operations::registrator::SETTLE_MINSHARE, candidate -> minimum, candidate -> username, registration_hash, memo);
+  }
 
-  memo = "Вступительный взнос при вступлении пайщика с username=" + candidate -> username.to_string();
-  Ledger2::apply(_registrator, coopname, operations::registrator::PAY_ENTRANCE, candidate -> initial, candidate -> username, registration_hash, memo);
+  if (candidate -> initial.amount > 0) {
+    std::string memo = "Зачисление вступительного взноса по решению совета, username=" + candidate -> username.to_string();
+    Ledger2::apply(_registrator, coopname, operations::registrator::SETTLE_ENTRANCE, candidate -> initial, candidate -> username, registration_hash, memo);
+  }
   // Увеличиваем счетчик активных пайщиков
   cooperatives2_index cooperatives(_registrator, _registrator.value);
   auto coop_itr = cooperatives.find(coopname.value);

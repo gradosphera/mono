@@ -54,8 +54,13 @@ namespace operations {
 
   // registrator
   namespace registrator {
-    inline constexpr eosio::name PAY_ENTRANCE  = "o.reg.payent"_n;  ///< Оплата вступительного взноса (Dr 51 / Cr 86, ISSUE ENTRANCE_FEES).
-    inline constexpr eosio::name PUT_MINSHARE  = "o.reg.putmin"_n;  ///< Внесение минимального паевого при регистрации (Dr 51 / Cr 80, ISSUE MIN_SHARE_FUND).
+    inline constexpr eosio::name PAY_ENTRANCE  = "o.reg.payent"_n;  ///< Оплата вступительного взноса (Dr 51 / Cr 86, ISSUE ENTRANCE_FEES). Одношаговый путь adduser (без совета).
+    inline constexpr eosio::name PUT_MINSHARE  = "o.reg.putmin"_n;  ///< Внесение минимального паевого при регистрации (Dr 51 / Cr 80, ISSUE MIN_SHARE_FUND). Одношаговый путь adduser (без совета).
+    // Двухфазный путь через совет (reguser → confirmpay → confirmreg/declinereg):
+    inline constexpr eosio::name RECEIVE_PAYMENT = "o.reg.inpay"_n;  ///< Приём регистрационного взноса кассой в ожидание решения совета (Dr 51 / Cr 76, ISSUE REGISTRATION_PENDING).
+    inline constexpr eosio::name SETTLE_MINSHARE = "o.reg.setmin"_n; ///< Зачисление минимального паевого по решению совета (Dr 76 / Cr 80, TRANSFER REGISTRATION_PENDING → MIN_SHARE_FUND).
+    inline constexpr eosio::name SETTLE_ENTRANCE = "o.reg.setent"_n; ///< Зачисление вступительного по решению совета (Dr 76 / Cr 86, TRANSFER REGISTRATION_PENDING → ENTRANCE_FEES).
+    inline constexpr eosio::name REFUND          = "o.reg.refund"_n; ///< Возврат регистрационного взноса при отказе совета (Dr 76 / Cr 51, BURN REGISTRATION_PENDING — деньги уходят из системы банковским переводом кандидату).
   }
 
   // wallet
@@ -187,6 +192,33 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
   { operations::registrator::PUT_MINSHARE, processes::registrator::ACCEPT, WalletOp::ISSUE, eosio::name{}, ledger2_wallets::MIN_SHARE_FUND,
     ledger2_accounts::BANK_ACCOUNT, ledger2_accounts::SHARE_FUND,
     "Минимальный паевой взнос пайщика при регистрации" },
+
+  // 2a. Приём регистрационного взноса кассой (поток через совет): Dr 51 / Cr 76, ISSUE REGISTRATION_PENDING.
+  // Деньги получены, но взнос ещё не признан — висит на расчётах с пайщиком (76)
+  // до решения совета. Сумма = вступительный + минимальный паевой.
+  { operations::registrator::RECEIVE_PAYMENT, processes::registrator::ACCEPT, WalletOp::ISSUE, eosio::name{}, ledger2_wallets::REGISTRATION_PENDING,
+    ledger2_accounts::BANK_ACCOUNT, ledger2_accounts::PARTICIPANT_SETTLEMENTS,
+    "Приём регистрационного взноса в ожидание решения совета" },
+
+  // 2b. Зачисление минимального паевого по решению совета: Dr 76 / Cr 80, TRANSFER REGISTRATION_PENDING → MIN_SHARE_FUND.
+  { operations::registrator::SETTLE_MINSHARE, processes::registrator::ACCEPT, WalletOp::TRANSFER,
+    ledger2_wallets::REGISTRATION_PENDING, ledger2_wallets::MIN_SHARE_FUND,
+    ledger2_accounts::PARTICIPANT_SETTLEMENTS, ledger2_accounts::SHARE_FUND,
+    "Зачисление минимального паевого взноса по решению совета" },
+
+  // 2c. Зачисление вступительного по решению совета: Dr 76 / Cr 86, TRANSFER REGISTRATION_PENDING → ENTRANCE_FEES.
+  { operations::registrator::SETTLE_ENTRANCE, processes::registrator::ACCEPT, WalletOp::TRANSFER,
+    ledger2_wallets::REGISTRATION_PENDING, ledger2_wallets::ENTRANCE_FEES,
+    ledger2_accounts::PARTICIPANT_SETTLEMENTS, ledger2_accounts::TARGET_RECEIPTS,
+    "Зачисление вступительного взноса по решению совета" },
+
+  // 2d. Возврат регистрационного взноса при отказе совета: Dr 76 / Cr 51, BURN REGISTRATION_PENDING.
+  // Отдельный процесс p.reg.refund: приём взноса прерывается, начинается возврат.
+  // Деньги уходят из системы (банковский перевод кандидату), получателя на цепи нет.
+  { operations::registrator::REFUND, processes::registrator::REFUND, WalletOp::BURN,
+    ledger2_wallets::REGISTRATION_PENDING, eosio::name{},
+    ledger2_accounts::PARTICIPANT_SETTLEMENTS, ledger2_accounts::BANK_ACCOUNT,
+    "Возврат регистрационного взноса при отказе совета" },
 
   // 3. Внесение паевого взноса: Dr 51 / Cr 80, ISSUE SHARE_FUND_PAY
   { operations::wallet::COMPLETE_DEPOSIT, processes::wallet::DEPOSIT, WalletOp::ISSUE, eosio::name{}, ledger2_wallets::SHARE_FUND_PAY,
