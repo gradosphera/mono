@@ -203,6 +203,20 @@ export class GatewayInteractor {
   private async processOutgoingPayment(payment: PaymentDomainInterface) {
     this.logger.log(`Обрабатываем исходящий платеж ${payment.id}`);
 
+    // Возврат вступительного/мин.паевого при отказе совета — чистая off-chain
+    // запись. Взнос по фондам не разносился (confirmreg не было), on-chain
+    // движений нет — откатывать нечего. Подтверждение кассиром лишь фиксирует
+    // факт физического возврата денег: статус → COMPLETED, без completeOutcome.
+    // Будущая обратная проводка по расчётному счёту (когда введём проводки на
+    // приёме платежа) появится здесь же.
+    if (payment.type === PaymentTypeEnum.REGISTRATION_REFUND) {
+      if (payment.id) {
+        await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+      }
+      this.logger.log(`Возврат регистрации ${payment.hash} подтверждён (off-chain, без проводок)`);
+      return;
+    }
+
     try {
       const completeOutcomeData: CompleteOutcomeDomainInterface = {
         coopname: payment.coopname,

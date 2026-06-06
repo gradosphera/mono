@@ -95,6 +95,16 @@
       .text-caption.text-grey-7.q-mb-xs Данные блокчейна
       pre.text-body2.q-mb-none.font-mono {{ formatBlockchainData(payment.blockchain_data) }}
 
+  // Назначение платежа без банковских реквизитов (напр. возврат взноса кассиром):
+  // даём кассиру скопировать готовый текст назначения в платёжку.
+  div(v-else-if='payment.memo')
+    q-card.q-pa-md(flat)
+      CopyableInput.full-width(
+        :label='"Назначение платежа"',
+        :model-value='payment.memo',
+        dense
+      )
+
   // Показываем сообщение по умолчанию
   div(v-else)
     .text-grey-6.text-center.q-py-md

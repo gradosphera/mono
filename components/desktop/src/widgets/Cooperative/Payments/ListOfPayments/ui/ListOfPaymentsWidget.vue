@@ -42,7 +42,9 @@
               td.col-action(v-if='!hideActions', @click.stop)
                 .cell-actions(v-if='["EXPIRED", "PENDING", "FAILED"].includes(row.status)')
                   SetOrderPaidStatusButton(:id='row.id')
-                  SetOrderRefundedStatusButton(:id='row.id')
+                  //- Возврат вступительного взноса отклонить нельзя — совет уже
+                  //- отказал, кассир обязан вернуть деньги. Прячем «Отклонить».
+                  SetOrderRefundedStatusButton(v-if='!isRefundType(row.type)', :id='row.id')
                 span.no-actions(v-else) —
 
             tr.expand-row(v-if='expanded.get(row.id)')
@@ -126,6 +128,11 @@ const getStatusVariant = (status?: string | null): BaseBadgeVariant => {
 
 const isIncoming = (direction?: string | null): boolean =>
   direction === Zeus.PaymentDirection.INCOMING;
+
+// Возврат вступительного/мин.паевого взноса при отказе совета — отклонению не
+// подлежит (см. шаблон): у такого исходящего платежа только «Подтвердить».
+const isRefundType = (type?: string | null): boolean =>
+  type === Zeus.PaymentType.REGISTRATION_REFUND;
 
 const getDirectionIcon = (direction?: string | null) => {
   return isIncoming(direction)
