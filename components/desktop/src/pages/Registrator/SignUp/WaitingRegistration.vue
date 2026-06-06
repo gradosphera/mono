@@ -22,14 +22,17 @@ div
     template(v-else)
       p Ваш платеж принят. Ожидаем, когда совет рассмотрит Ваше заявление и примет решение о приёме Вас в пайщики. Рассмотрение может занять до 30 дней, но обычно решение принимается в течение одного-двух дней. Вы получите уведомление, когда решение будет принято.
       span Эту страницу можно закрыть, а при необходимости, войти с другого устройства с помощью ключа доступа, который был сохранён ранее.
-      Loader
+      //- Статичная иконка ожидания вместо крутящегося спиннера: процесс длится
+      //- до 30 дней, анимация загрузки сбивала с толку («страница не дозагрузилась»).
+      .waiting-pending
+        q-icon.waiting-pending__icon(name='hourglass_top', size='40px')
+        p.waiting-pending__caption Ожидаем решение совета
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue';
 import { useSessionStore } from 'src/entities/Session';
 import { useAccountStore } from 'src/entities/Account';
-import { Loader } from 'src/shared/ui/Loader';
 import { BaseBanner, BaseButton } from 'src/shared/ui/base';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { Zeus } from '@coopenomics/sdk';
@@ -82,7 +85,9 @@ const fixData = async () => {
     session.setCurrentUserAccount(account);
     store.state.is_paid = false;
     store.state.payment = null;
-    store.state.signature = '';
+    // Сбрасываем все согласия и подписанные документы — на повторном проходе
+    // пайщик должен заново проставить галочки (устав/ПД) и подписать заявление.
+    store.resetConsents();
     store.goTo('SetUserData');
   } catch (e: any) {
     FailAlert(`Не удалось вернуться к редактированию: ${e.message}`);
@@ -125,3 +130,21 @@ onBeforeUnmount(() => {
   }
 });
 </script>
+
+<style scoped>
+.waiting-pending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--p-2, 8px);
+  margin-top: var(--p-5, 24px);
+}
+.waiting-pending__icon {
+  color: var(--p-ink-3, var(--p-ink-2));
+}
+.waiting-pending__caption {
+  margin: 0;
+  font-size: var(--p-fs-body-sm, 13px);
+  color: var(--p-ink-3, var(--p-ink-2));
+}
+</style>
