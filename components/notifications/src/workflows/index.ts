@@ -7,6 +7,7 @@ import { workflow as approvalRequestWorkflow } from './approval-request';
 import { workflow as decisionApprovedWorkflow } from './decision-approved';
 import { workflow as paymentPaidWorkflow } from './payment-paid';
 import { workflow as paymentCancelledWorkflow } from './payment-cancelled';
+import { workflow as paymentRefundedWorkflow } from './payment-refunded';
 import { workflow as meetInitialWorkflow } from './meet-initial';
 import { workflow as meetReminderStartWorkflow } from './meet-reminder-start';
 import { workflow as meetStartedWorkflow } from './meet-started';
@@ -32,6 +33,7 @@ export * as ApprovalRequest from './approval-request';
 export * as DecisionApproved from './decision-approved';
 export * as PaymentPaid from './payment-paid';
 export * as PaymentCancelled from './payment-cancelled';
+export * as PaymentRefunded from './payment-refunded';
 export * as MeetInitial from './meet-initial';
 export * as MeetReminderStart from './meet-reminder-start';
 export * as MeetStarted from './meet-started';
@@ -58,6 +60,7 @@ export const allWorkflows: WorkflowDefinition[] = [
   decisionApprovedWorkflow,
   paymentPaidWorkflow,
   paymentCancelledWorkflow,
+  paymentRefundedWorkflow,
   meetInitialWorkflow,
   meetReminderStartWorkflow,
   meetStartedWorkflow,

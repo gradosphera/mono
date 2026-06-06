@@ -7,6 +7,7 @@ import config from '~/config/config';
 import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import type { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
+import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
 import { Workflows } from '@coopenomics/notifications';
 
 /**
@@ -56,9 +57,16 @@ export class PaymentNotificationService implements OnModuleInit {
       // Получаем отображаемое имя пользователя
       const userName = await this.accountPort.getDisplayName(payment.username);
 
-      // Выбираем workflow в зависимости от статуса платежа
+      // Выбираем workflow по статусу И направлению платежа: исходящий PAID — это
+      // возврат взноса пайщику, у него своё уведомление «Возврат выполнен», а не
+      // «Платёж принят» (иначе пайщик при возврате получает письмо как на приём).
+      const isOutgoing = payment.direction === PaymentDirectionEnum.OUTGOING;
       const workflowId =
-        payment.status === PaymentStatusEnum.PAID ? Workflows.PaymentPaid.id : Workflows.PaymentCancelled.id;
+        payment.status === PaymentStatusEnum.PAID
+          ? isOutgoing
+            ? Workflows.PaymentRefunded.id
+            : Workflows.PaymentPaid.id
+          : Workflows.PaymentCancelled.id;
 
       // Формируем данные для workflow (без приватных данных)
       const payload: Workflows.PaymentPaid.IPayload | Workflows.PaymentCancelled.IPayload = {
