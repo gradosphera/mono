@@ -35,4 +35,8 @@ void registrator::refundpay(name coopname, checksum256 registration_hash) {
   Registrator::candidates_index candidates(_registrator, coopname.value);
   auto it = candidates.find(candidate -> username.value);
   candidates.erase(it);
+
+  // Освобождаем аккаунт для повторной подачи на том же username: снимаем
+  // карточку участника, иначе reguser упадёт «повторное получение невозможно».
+  reset_account_card(candidate -> username);
 }

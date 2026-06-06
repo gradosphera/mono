@@ -56,7 +56,9 @@ void registrator::declinereg(name coopname, checksum256 registration_hash, std::
       )
     ).send();
   } else {
-    // Миграционный путь: возвращать на цепи нечего — закрываем кандидата.
+    // Миграционный путь: возвращать на цепи нечего — закрываем кандидата и
+    // освобождаем аккаунт для повторной подачи (снимаем карточку участника).
     if (it != candidates.end()) candidates.erase(it);
+    reset_account_card(candidate -> username);
   }
 }
