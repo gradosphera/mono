@@ -385,6 +385,9 @@ export const AllTypesProps: Record<string,any> = {
 	DeclineRequestInput:{
 
 	},
+	DeleteAccountInput:{
+
+	},
 	DeleteBranchInput:{
 
 	},
@@ -989,6 +992,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		declineRequest:{
 			data:"DeclineRequestInput"
+		},
+		deleteAccount:{
+			data:"DeleteAccountInput"
 		},
 		deleteBranch:{
 			data:"DeleteBranchInput"
@@ -3625,6 +3631,7 @@ export const ReturnTypes: Record<string,any> = {
 		declineAgreement:"Transaction",
 		declineDecision:"Transaction",
 		declineRequest:"Transaction",
+		deleteAccount:"Boolean",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
 		deleteReportDraft:"Boolean",

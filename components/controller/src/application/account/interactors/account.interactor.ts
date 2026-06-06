@@ -206,7 +206,51 @@ export class AccountInteractor {
     return result;
   }
 
+  /**
+   * Удаление аккаунта из системы учёта провайдера (off-chain).
+   *
+   * deleteUserByUsername удаляет только строку users в PG — блокчейн не трогает.
+   * Поэтому удалять допустимо ТОЛЬКО аккаунты без следа в цепи: иначе off-chain
+   * удаление осиротит блокчейн-аккаунт/членство и не освободит username on-chain.
+   * Это та же граница необратимости, что у resetRegistration.
+   *
+   * Назначение — почистить реестр от незавершённых/отклонённых регистраций
+   * (тестеры, брошенные попытки) и освободить занятый e-mail для перерегистрации.
+   *
+   * Запрещаем удаление, если:
+   *  - аккаунт зарегистрирован в цепи (есть blockchain_account) — статусы
+   *    registered/active;
+   *  - пайщик принят в кооператив (есть participant_account: accepted/blocked);
+   *  - off-chain статус не входит в регистрационный allow-list (в частности
+   *    blocked и любой будущий не-регистрационный статус — fail-closed).
+   */
   async deleteAccount(username: string): Promise<void> {
+    const account = await this.accountDomainService.getAccount(username);
+
+    if (account.blockchain_account || account.participant_account) {
+      throw new HttpApiError(
+        HttpStatus.BAD_REQUEST,
+        'Пайщик уже зарегистрирован в блокчейне — удаление невозможно.'
+      );
+    }
+
+    // Удаляем только незавершённые/отклонённые регистрации. Активный и
+    // заблокированный — не регистрационные статусы, удалять нельзя.
+    const deletableStatuses: userStatus[] = [
+      userStatus['1_Created'],
+      userStatus['2_Joined'],
+      userStatus['3_Payed'],
+      userStatus['10_Failed'],
+      userStatus['100_Refunded'],
+    ];
+    const status = account.provider_account?.status as userStatus | undefined;
+    if (!status || !deletableStatuses.includes(status)) {
+      throw new HttpApiError(
+        HttpStatus.BAD_REQUEST,
+        'Удаление доступно только для пайщиков в незавершённом регистрационном статусе.'
+      );
+    }
+
     await this.userDomainService.deleteUserByUsername(username);
   }
 

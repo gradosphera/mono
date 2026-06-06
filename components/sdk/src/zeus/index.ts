@@ -4849,6 +4849,10 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string | Variable<any, string>
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string | Variable<any, string>,
@@ -6543,6 +6547,7 @@ deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionI
 declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineDecision?: [{	data: ValueTypes["DeclineDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+deleteAccount?: [{	data: ValueTypes["DeleteAccountInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteReportDraft?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
@@ -13265,6 +13270,10 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -14912,6 +14921,7 @@ deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubsc
 declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
 declineDecision?: [{	data: ResolverInputTypes["DeclineDecisionInput"]},ResolverInputTypes["Transaction"]],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
+deleteAccount?: [{	data: ResolverInputTypes["DeleteAccountInput"]},boolean | `@${string}`],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteReportDraft?: [{	id: string},boolean | `@${string}`],
@@ -21439,6 +21449,10 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
+};
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -23337,6 +23351,10 @@ export type ModelTypes = {
 	declineDecision: ModelTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
+	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
+
+Требуемые роли: chairman.  */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок
 
 Требуемые роли: chairman.  */
@@ -30293,6 +30311,10 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["DeleteAccountInput"]: {
+		/** Имя аккаунта пользователя */
+	username_for_delete: string
+};
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
 	braname: string,
@@ -32296,6 +32318,10 @@ export type GraphQLTypes = {
 	declineDecision: GraphQLTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
+	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
+
+Требуемые роли: chairman.  */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок
 
 Требуемые роли: chairman.  */
@@ -36251,6 +36277,7 @@ type ZEUS_VARIABLES = {
 	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
 	["DeclineDecisionInput"]: ValueTypes["DeclineDecisionInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
+	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeleteCapitalIssueByHashInput"]: ValueTypes["DeleteCapitalIssueByHashInput"];
 	["DeleteCapitalStoryByHashInput"]: ValueTypes["DeleteCapitalStoryByHashInput"];
