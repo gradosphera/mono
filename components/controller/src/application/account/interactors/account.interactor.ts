@@ -299,9 +299,13 @@ export class AccountInteractor {
         (!payment || new Date(refund.created_at).getTime() >= new Date(payment.created_at).getTime());
 
       if (isCouncilDeclined && refund) {
+        // Два шага возврата для UI: пока касса не подтвердила исходящий платёж
+        // (refund != COMPLETED) — PROCESSING (кнопки повторной подачи нет, аккаунт
+        // на цепи ещё занят карточкой); после подтверждения — REFUNDED (refundpay
+        // снял карточку, повторная подача возможна).
         const done = refund.status === PaymentStatusEnum.COMPLETED;
         account.registration_payment = {
-          status: PaymentStatusEnum.REFUNDED,
+          status: done ? PaymentStatusEnum.REFUNDED : PaymentStatusEnum.PROCESSING,
           message: done
             ? 'Совет отказал в приёме. Регистрационный взнос возвращён. Вы можете подать заявку заново.'
             : 'Совет отказал в приёме. Регистрационный взнос возвращается. Дождитесь его завершения, чтобы подать заявку заново.',

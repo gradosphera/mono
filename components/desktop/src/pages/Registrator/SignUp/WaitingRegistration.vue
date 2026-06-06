@@ -5,13 +5,24 @@ div
     :title='stepTitle',
     :done='store.isStepDone("WaitingRegistration")'
   )
-    //- Совет отказал в приёме (declinereg) — взнос возвращается, можно подать
-    //- заявку заново. Сигнал — статус возврата REFUNDED из registration_payment.
-    template(v-if='isCouncilDeclined')
+    //- Совет отказал (declinereg). Возврат идёт в два шага:
+    //-  1) PROCESSING — исходящий платёж кассой ещё не проведён: кнопки нет,
+    //-     ждём завершения возврата;
+    //-  2) REFUNDED — взнос возвращён: только теперь можно подать заявку заново
+    //-     (на цепи освобождён аккаунт — refundpay снял карточку участника).
+    template(v-if='isCouncilRefundPending')
       BaseBanner.q-mb-md(variant='neg')
         .text-bold Совет отказал в приёме.
         p.q-mt-xs.q-mb-none(v-if='declineMessage') {{ declineMessage }}
-        p.q-mt-xs.q-mb-none(v-else) Совет принял отрицательное решение по вашему заявлению. Регистрационный взнос возвращается. Вы можете подать заявку заново.
+        p.q-mt-xs.q-mb-none(v-else) Совет принял отрицательное решение по вашему заявлению. Регистрационный взнос возвращается — дождитесь завершения возврата.
+      .waiting-pending
+        q-icon.waiting-pending__icon(name='hourglass_top', size='40px')
+        p.waiting-pending__caption Возврат взноса выполняется
+    template(v-else-if='isCouncilDeclined')
+      BaseBanner.q-mb-md(variant='neg')
+        .text-bold Совет отказал в приёме.
+        p.q-mt-xs.q-mb-none(v-if='declineMessage') {{ declineMessage }}
+        p.q-mt-xs.q-mb-none(v-else) Регистрационный взнос возвращён. Вы можете подать заявку заново.
       .row.q-gutter-sm
         BaseButton(variant='primary', @click='fixData', :loading='isResetting') Подать заявку заново
     //- Платёж отклонён председателем (до создания аккаунта в блокчейне) —
@@ -25,7 +36,7 @@ div
         BaseButton(variant='primary', @click='retryPayment', :disable='isResetting') Повторить оплату
         BaseButton(variant='secondary', @click='fixData', :loading='isResetting') Исправить данные
     //- Техническая ошибка обработки — направляем в поддержку.
-    template(v-else-if='isFailed && !isCouncilDeclined')
+    template(v-else-if='isFailed')
       p Произошла ошибка при регистрации. Пожалуйста, обратитесь в поддержку для устранения проблемы.
     //- Штатное ожидание: деньги приняты, ждём решение совета.
     template(v-else)
@@ -46,7 +57,7 @@ import { BaseBanner, BaseButton } from 'src/shared/ui/base';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { Zeus } from '@coopenomics/sdk';
 import { useResetRegistration } from 'src/features/Account/ResetRegistration';
-import { FailAlert } from 'src/shared/api';
+import { FailAlert, extractGraphQLErrorMessages } from 'src/shared/api';
 
 const store = useRegistratorStore();
 const session = useSessionStore();
@@ -74,9 +85,14 @@ const isDeclined = computed(() => {
 
 const declineMessage = computed(() => registrationPayment.value?.message || '');
 
-// Отказ совета (declinereg): бэкенд отдаёт по registration_payment статус REFUNDED
-// (входящий рег-платёж его не принимает) — взнос возвращается, можно подать заявку
-// заново. Отличается от отклонения самого платежа (isDeclined).
+// Отказ совета (declinereg) — два шага возврата, бэкенд отдаёт их по
+// registration_payment.status (входящий рег-платёж эти статусы не принимает):
+//  • PROCESSING — исходящий возврат кассой ещё не проведён: ждём, кнопки нет;
+//  • REFUNDED  — взнос возвращён, аккаунт на цепи освобождён: можно подать заявку
+//    заново. Раньше REFUNDED показывать кнопку нельзя — повторный reguser упадёт.
+const isCouncilRefundPending = computed(
+  () => registrationPayment.value?.status === Zeus.PaymentStatus.PROCESSING
+);
 const isCouncilDeclined = computed(
   () => registrationPayment.value?.status === Zeus.PaymentStatus.REFUNDED
 );
@@ -85,7 +101,7 @@ const isCouncilDeclined = computed(
 const isFailed = computed(() => session.userAccount?.status === 'failed' && !isDeclined.value);
 
 const stepTitle = computed(() => {
-  if (isCouncilDeclined.value) return 'Совет отказал в приёме';
+  if (isCouncilRefundPending.value || isCouncilDeclined.value) return 'Совет отказал в приёме';
   if (isDeclined.value) return 'Платёж не принят';
   return 'Получите решение совета о приёме Вас в пайщики кооператива';
 });
@@ -112,7 +128,7 @@ const fixData = async () => {
     store.resetConsents();
     store.goTo('SetUserData');
   } catch (e: any) {
-    FailAlert(`Не удалось вернуться к редактированию: ${e.message}`);
+    FailAlert(`Не удалось вернуться к редактированию: ${extractGraphQLErrorMessages(e)}`);
   } finally {
     isResetting.value = false;
   }
