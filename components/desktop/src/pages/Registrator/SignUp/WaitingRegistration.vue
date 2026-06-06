@@ -2,12 +2,21 @@
 div
   q-step(
     :name='store.steps.WaitingRegistration',
-    :title='isDeclined ? "Платёж не принят" : "Получите решение совета о приёме Вас в пайщики кооператива"',
+    :title='stepTitle',
     :done='store.isStepDone("WaitingRegistration")'
   )
+    //- Совет отказал в приёме (declinereg) — взнос возвращается, можно подать
+    //- заявку заново. Сигнал — статус возврата REFUNDED из registration_payment.
+    template(v-if='isCouncilDeclined')
+      BaseBanner.q-mb-md(variant='neg')
+        .text-bold Совет отказал в приёме.
+        p.q-mt-xs.q-mb-none(v-if='declineMessage') {{ declineMessage }}
+        p.q-mt-xs.q-mb-none(v-else) Совет принял отрицательное решение по вашему заявлению. Регистрационный взнос возвращается. Вы можете подать заявку заново.
+      .row.q-gutter-sm
+        BaseButton(variant='primary', @click='fixData', :loading='isResetting') Подать заявку заново
     //- Платёж отклонён председателем (до создания аккаунта в блокчейне) —
     //- показываем причину и даём начать заново со своим e-mail.
-    template(v-if='isDeclined')
+    template(v-else-if='isDeclined')
       BaseBanner.q-mb-md(variant='neg')
         .text-bold Ваш платёж не был принят.
         p.q-mt-xs.q-mb-none(v-if='declineMessage') Причина: {{ declineMessage }}
@@ -16,7 +25,7 @@ div
         BaseButton(variant='primary', @click='retryPayment', :disable='isResetting') Повторить оплату
         BaseButton(variant='secondary', @click='fixData', :loading='isResetting') Исправить данные
     //- Техническая ошибка обработки — направляем в поддержку.
-    template(v-else-if='isFailed')
+    template(v-else-if='isFailed && !isCouncilDeclined')
       p Произошла ошибка при регистрации. Пожалуйста, обратитесь в поддержку для устранения проблемы.
     //- Штатное ожидание: деньги приняты, ждём решение совета.
     template(v-else)
@@ -65,8 +74,21 @@ const isDeclined = computed(() => {
 
 const declineMessage = computed(() => registrationPayment.value?.message || '');
 
+// Отказ совета (declinereg): бэкенд отдаёт по registration_payment статус REFUNDED
+// (входящий рег-платёж его не принимает) — взнос возвращается, можно подать заявку
+// заново. Отличается от отклонения самого платежа (isDeclined).
+const isCouncilDeclined = computed(
+  () => registrationPayment.value?.status === Zeus.PaymentStatus.REFUNDED
+);
+
 // Унаследованная ветка технической ошибки по блокчейн-аккаунту пользователя.
 const isFailed = computed(() => session.userAccount?.status === 'failed' && !isDeclined.value);
+
+const stepTitle = computed(() => {
+  if (isCouncilDeclined.value) return 'Совет отказал в приёме';
+  if (isDeclined.value) return 'Платёж не принят';
+  return 'Получите решение совета о приёме Вас в пайщики кооператива';
+});
 
 const retryPayment = () => {
   store.state.is_paid = false;

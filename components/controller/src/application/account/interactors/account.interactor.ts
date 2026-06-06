@@ -279,18 +279,39 @@ export class AccountInteractor {
     // регистрации (ожидание/отклонение платежа) после перезагрузки и в любой вкладке.
     // Актуально только пока пайщик ещё не принят (нет participant_account).
     if (!account.participant_account) {
-      const payment = await this.paymentRepository.findLatestByUsernameAndType(
+      // Отказ совета (declinereg) заводит исходящий возврат REGISTRATION_REFUND.
+      // Сообщаем фронту отдельным статусом REFUNDED (входящий рег-платёж этот
+      // статус никогда не принимает) — иначе экран ожидания висит на «ожидаем
+      // решение совета», т.к. сам входящий платёж остаётся COMPLETED.
+      const refund = await this.paymentRepository.findLatestByUsernameAndType(
         username,
-        PaymentTypeEnum.REGISTRATION
+        PaymentTypeEnum.REGISTRATION_REFUND
       );
-      if (payment) {
+      if (refund) {
+        const done = refund.status === PaymentStatusEnum.COMPLETED;
         account.registration_payment = {
-          status: payment.status,
-          message: payment.message ?? null,
-          hash: payment.hash,
-          quantity: payment.quantity,
-          symbol: payment.symbol,
+          status: PaymentStatusEnum.REFUNDED,
+          message: done
+            ? 'Совет отказал в приёме. Регистрационный взнос возвращён. Вы можете подать заявку заново.'
+            : 'Совет отказал в приёме. Регистрационный взнос возвращается. Вы можете подать заявку заново.',
+          hash: refund.hash,
+          quantity: refund.quantity,
+          symbol: refund.symbol,
         };
+      } else {
+        const payment = await this.paymentRepository.findLatestByUsernameAndType(
+          username,
+          PaymentTypeEnum.REGISTRATION
+        );
+        if (payment) {
+          account.registration_payment = {
+            status: payment.status,
+            message: payment.message ?? null,
+            hash: payment.hash,
+            quantity: payment.quantity,
+            symbol: payment.symbol,
+          };
+        }
       }
     }
 

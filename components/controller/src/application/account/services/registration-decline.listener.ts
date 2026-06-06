@@ -21,10 +21,15 @@ const DECLINE_REG_EVENT = `action::${REGISTRATOR}::${RegistratorContract.Actions
  * PR #94), через общую decline-callback ветку.
  *
  * На момент отказа взнос по фондам НЕ разносился (confirmreg не было), но реальные
- * деньги пайщика уже у кооператива на расчётном счёте. Поэтому заводим исходящий
- * платёж в реестр, чтобы кассир вернул вступительный + мин.паевой. Возврат —
- * чистая off-chain запись: подтверждение кассиром не делает on-chain проводок
- * (см. gateway.interactor.processOutgoingPayment), отклонить такой возврат нельзя.
+ * деньги пайщика уже у кооператива на расчётном счёте (стоят на расчётах с пайщиком,
+ * счёт 76). Заводим исходящий платёж в реестр, чтобы кассир вернул вступительный +
+ * мин.паевой. Подтверждение кассиром проводит on-chain возврат: gateway::outcomplete
+ * → registrator::refundpay (обратная проводка Дт 76 / Кт 51), см.
+ * gateway.interactor.processOutgoingPayment. Отклонить такой возврат нельзя.
+ *
+ * Хэш платежа-возврата = registration_hash: on-chain исходящий объект (создан
+ * declinereg через gateway::createoutpay) идентифицируется этим же хэшем, и
+ * completeOutcome({ outcome_hash }) при подтверждении кассой должен совпасть с ним.
  */
 @Injectable()
 export class RegistrationDeclineListener {
@@ -85,7 +90,10 @@ export class RegistrationDeclineListener {
       memo: `Возврат вступительного и минимального паевого взносов №${original.hash.slice(0, 8)}. Без НДС.`,
       provider: original.provider,
       secret: generateUniqueHash(),
-      hash: generateUniqueHash(),
+      // Хэш = registration_hash: совпадает с outcome_hash on-chain исходящего
+      // объекта (gateway::createoutpay в declinereg), чтобы completeOutcome при
+      // подтверждении кассой нашёл его и вызвал registrator::refundpay.
+      hash: registration_hash,
       expired_at: undefined, // бессрочный — как и прочие исходящие платежи
       created_at: now,
       updated_at: now,

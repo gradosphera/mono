@@ -203,17 +203,46 @@ export class GatewayInteractor {
   private async processOutgoingPayment(payment: PaymentDomainInterface) {
     this.logger.log(`Обрабатываем исходящий платеж ${payment.id}`);
 
-    // Возврат вступительного/мин.паевого при отказе совета — чистая off-chain
-    // запись. Взнос по фондам не разносился (confirmreg не было), on-chain
-    // движений нет — откатывать нечего. Подтверждение кассиром лишь фиксирует
-    // факт физического возврата денег: статус → COMPLETED, без completeOutcome.
-    // Будущая обратная проводка по расчётному счёту (когда введём проводки на
-    // приёме платежа) появится здесь же.
+    // Возврат вступительного/мин.паевого при отказе совета. Деньги пайщика стоят
+    // на расчётах с пайщиком (счёт 76, w.reg.pend) с момента приёма платежа.
+    // Подтверждение кассой проводит on-chain возврат: completeOutcome →
+    // gateway::outcomplete → registrator::refundpay (обратная проводка Дт 76 / Кт 51,
+    // сжигание w.reg.pend). outcome_hash = payment.hash = registration_hash —
+    // on-chain исходящий объект создан declinereg через gateway::createoutpay.
+    //
+    // MIGRATION (снять условие после 30.07.2026): кандидаты, принятые ДО релиза
+    // двухфазного учёта, on-chain исходящего объекта не имеют (declinereg для них
+    // не звал createoutpay — не было баланса на w.reg.pend). Для них completeOutcome
+    // падает «Объект возврата не существует» — это штатный старый путь: проводок
+    // нет, возврат чисто off-chain, помечаем COMPLETED.
     if (payment.type === PaymentTypeEnum.REGISTRATION_REFUND) {
-      if (payment.id) {
-        await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+      try {
+        const completeOutcomeData: CompleteOutcomeDomainInterface = {
+          coopname: payment.coopname,
+          outcome_hash: payment.hash,
+        };
+        await this.gatewayBlockchainPort.completeOutcome(completeOutcomeData);
+        if (payment.id) {
+          await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+        }
+        this.logger.log(`Возврат регистрации ${payment.hash} подтверждён (проводка Дт 76 / Кт 51)`);
+      } catch (e: any) {
+        const message = e?.message ?? String(e);
+        // переходный период до 30.07.2026: on-chain объекта нет — старый путь
+        if (message.includes('Объект возврата не существует')) {
+          if (payment.id) {
+            await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+          }
+          this.logger.warn(
+            `Возврат регистрации ${payment.hash}: on-chain объект не найден (переходный период до 30.07.2026) — подтверждён off-chain без проводок`,
+          );
+        } else {
+          if (payment.id) {
+            await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.FAILED, message });
+          }
+          this.logger.error(`Ошибка подтверждения возврата регистрации ${payment.hash}: ${message}`, e);
+        }
       }
-      this.logger.log(`Возврат регистрации ${payment.hash} подтверждён (off-chain, без проводок)`);
       return;
     }
 
