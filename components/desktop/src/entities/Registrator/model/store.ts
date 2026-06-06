@@ -204,6 +204,20 @@ export const useRegistratorStore = defineStore(
       }
     };
 
+    // Сброс всех согласий и сгенерированных документов без затирания введённых
+    // пользователем данных (userData/email). Нужен при возврате к редактированию
+    // после отклонённого платежа: галочки «прочитал устав / согласие на ПД» и
+    // подписи должны быть проставлены заново на повторном проходе.
+    const resetConsents = () => {
+      state.agreements = structuredClone(initialAgreementsState);
+      state.signature = '';
+      state.statement = structuredClone(initialDocumentState);
+      state.walletAgreement = structuredClone(initialDocumentState);
+      state.privacyAgreement = structuredClone(initialDocumentState);
+      state.signatureAgreement = structuredClone(initialDocumentState);
+      state.userAgreement = structuredClone(initialDocumentState);
+    };
+
     const clearAddUserState = () =>
       reactive({
         spread_initial: false,
@@ -243,6 +257,7 @@ export const useRegistratorStore = defineStore(
       isStepDone,
       isStep,
       clearUserData,
+      resetConsents,
       addUserState,
       isBranched,
     };
