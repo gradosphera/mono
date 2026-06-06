@@ -1,3 +1,5 @@
+#include "registration_migration.hpp"
+
 /**
  * @brief Отклонение регистрации пользователя.
  * Отклоняет регистрацию кандидата советом
@@ -16,14 +18,20 @@ void registrator::declinereg(name coopname, checksum256 registration_hash, std::
   eosio::check(candidate.has_value(), "Кандидат не найден");
 
   // Совет отказал — процесс приёма взноса прерывается, начинается процесс
-  // возврата (p.reg.refund). Деньги уже получены кассой и стоят на расчётах
-  // с пайщиком (w.reg.pend, счёт 76). Сжигаем суспенс обратной проводкой
-  // Dr 76 / Cr 51: деньги уходят из системы банковским переводом кандидату
-  // (его инициирует бэкенд по событию отказа). Сумма = вступительный + минимальный паевой.
-  eosio::asset registration_quantity = candidate -> initial + candidate -> minimum;
-  if (registration_quantity.amount > 0) {
+  // возврата (p.reg.refund). Сжигаем суспенс обратной проводкой Dr 76 / Cr 51:
+  // деньги уходят из системы банковским переводом кандидату (его инициирует
+  // бэкенд по событию отказа).
+  //
+  // MIGRATION (снять условие после 30.07.2026, см. registration_migration.hpp):
+  // возврат через ledger2 делаем только если платёж принят по новому пути —
+  // есть баланс на w.reg.pend (счёт 76). Кандидаты, принятые ДО релиза, суспенса
+  // не имеют: для них on-chain проводки возврата нет (как было раньше), деньги
+  // возвращает бэкенд банковским переводом. Сжигаем фактический остаток на
+  // w.reg.pend — он равен полученной сумме (вступительный + минимальный паевой).
+  eosio::asset pending = Registrator::get_registration_pending_balance(coopname, candidate -> username);
+  if (pending.amount > 0) {
     std::string memo = "Возврат регистрационного взноса при отказе совета, username=" + candidate -> username.to_string();
-    Ledger2::apply(_registrator, coopname, operations::registrator::REFUND, registration_quantity, candidate -> username, registration_hash, memo);
+    Ledger2::apply(_registrator, coopname, operations::registrator::REFUND, pending, candidate -> username, registration_hash, memo);
   }
 
   // Кандидат отклонён — удаляем из картотеки кандидатов.
