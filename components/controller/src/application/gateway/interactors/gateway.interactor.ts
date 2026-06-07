@@ -9,7 +9,7 @@ import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.en
 import { GatewayBlockchainPort, GATEWAY_BLOCKCHAIN_PORT } from '~/domain/gateway/ports/gateway-blockchain.port';
 import { PaymentRepository, PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
-import { PaymentDirectionEnum, PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum';
+import { PaymentDirectionEnum, PaymentTypeEnum, VAT_EXEMPT_NOTE } from '~/domain/gateway/enums/payment-type.enum';
 import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import type { CreateInitialPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-initial-payment-input-domain.interface';
 import type { CreateDepositPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-deposit-payment-input-domain.interface';
@@ -317,6 +317,22 @@ export class GatewayInteractor {
       PaymentTypeEnum.REGISTRATION
     );
 
+    // Повторная подача после отказа совета: прошлый цикл закрыт возвратом —
+    // REGISTRATION_REFUND свежее последнего вступительного платежа. Тогда старый
+    // рег-платёж принадлежит ЗАВЕРШЁННОМУ циклу и переиспользовать его нельзя:
+    // иначе вернули бы исполненный QR (COMPLETED ∈ reusableStatuses), а новый
+    // платёж в реестре совета не появился бы. Заводим новый ордер. Детекция цикла
+    // по дате — та же, что в account.interactor (getAccount / resetRegistration).
+    const lastRegistrationRefund = await this.paymentRepository.findLatestByUsernameAndType(
+      data.username,
+      PaymentTypeEnum.REGISTRATION_REFUND
+    );
+    const supersededByRefund =
+      !!lastRegistrationRefund &&
+      !!lastRegistrationPayment &&
+      new Date(lastRegistrationRefund.created_at).getTime() >=
+        new Date(lastRegistrationPayment.created_at).getTime();
+
     const reusableStatuses = [
       PaymentStatusEnum.PENDING,
       PaymentStatusEnum.PROCESSING,
@@ -324,7 +340,11 @@ export class GatewayInteractor {
       PaymentStatusEnum.COMPLETED,
     ];
 
-    if (lastRegistrationPayment && reusableStatuses.includes(lastRegistrationPayment.status)) {
+    if (
+      !supersededByRefund &&
+      lastRegistrationPayment &&
+      reusableStatuses.includes(lastRegistrationPayment.status)
+    ) {
       this.logger.log(
         `Регистрационный платёж для ${data.username} уже существует (${lastRegistrationPayment.id}, статус ${lastRegistrationPayment.status}) — повторный ордер не создаём`
       );
@@ -351,7 +371,7 @@ export class GatewayInteractor {
       direction: PaymentDirectionEnum.INCOMING,
       provider,
       status: PaymentStatusEnum.PENDING,
-      memo: `Вступительный и минимальный паевой взносы №${hash.slice(0, 8)}`,
+      memo: `Вступительный и минимальный паевой взносы №${hash.slice(0, 8)}. ${VAT_EXEMPT_NOTE}`,
       payment_method_id: undefined,
       expired_at: expiredAt,
       created_at: now,
@@ -441,7 +461,7 @@ export class GatewayInteractor {
       direction: PaymentDirectionEnum.INCOMING,
       provider: provider,
       status: PaymentStatusEnum.PENDING,
-      memo: `Паевой взнос по соглашению о ЦПП "Цифровой Кошелёк" №${hash.slice(0, 8)}`,
+      memo: `Паевой взнос по соглашению о ЦПП "Цифровой Кошелёк" №${hash.slice(0, 8)}. ${VAT_EXEMPT_NOTE}`,
       secret,
       payment_method_id: undefined,
       expired_at: expiredAt,
@@ -550,7 +570,7 @@ export class GatewayInteractor {
       // готовый к выплате. Переход AWAITING_AUTHORIZATION → PENDING происходит
       // в WithdrawAuthorizationListener при on-chain action wallet::authwthd.
       status: PaymentStatusEnum.AWAITING_AUTHORIZATION,
-      memo: `Возврат паевого взноса №${data.payment_hash.slice(0, 8)}`,
+      memo: `Возврат паевого взноса №${data.payment_hash.slice(0, 8)}. ${VAT_EXEMPT_NOTE}`,
       secret: generateUniqueHash(),
       payment_method_id: data.method_id,
       payment_details: paymentDetails,

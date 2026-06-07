@@ -30,6 +30,14 @@ export const PAYMENT_TYPE_LABELS: Record<PaymentTypeEnum, string> = {
 };
 
 /**
+ * Налоговая оговорка для назначения платежа. Взносы пайщика (вступительный,
+ * минимальный паевой, паевой) и их возврат НДС не облагаются. Оговорка обязана
+ * присутствовать целиком в memo каждого платежа — это единый источник назначения:
+ * провайдеры QR (qrpay/sberpoll) её больше НЕ дописывают, чтобы не задвоить.
+ */
+export const VAT_EXEMPT_NOTE = 'НДС не облагается.';
+
+/**
  * Человекочитаемые названия направлений платежей
  */
 export const PAYMENT_DIRECTION_LABELS: Record<PaymentDirectionEnum, string> = {

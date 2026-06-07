@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
 import { CANDIDATE_REPOSITORY, CandidateRepository } from '~/domain/account/repository/candidate.repository';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
-import { PaymentTypeEnum, PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
+import { PaymentTypeEnum, PaymentDirectionEnum, VAT_EXEMPT_NOTE } from '~/domain/gateway/enums/payment-type.enum';
 import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import type { ActionDomainInterface } from '~/domain/parser/interfaces/action-domain.interface';
 import { generateUniqueHash } from '~/utils/generate-hash.util';
@@ -85,9 +85,9 @@ export class RegistrationDeclineListener {
       status: PaymentStatusEnum.PENDING,
       // Назначение — зеркало входящего взноса: тот же № (первые 8 символов хэша
       // исходного платежа, что показывался пайщику в QR) и та же НДС-оговорка
-      // («Без НДС.» qrpay/sberpoll добавляют к Purpose при приёме). Кассир копирует
-      // этот текст as-is в назначение возвратного платежа.
-      memo: `Возврат вступительного и минимального паевого взносов №${original.hash.slice(0, 8)}. Без НДС.`,
+      // (VAT_EXEMPT_NOTE). Назначение целиком хранится в memo — провайдеры её
+      // больше не дописывают. Кассир копирует этот текст as-is в возвратный платёж.
+      memo: `Возврат вступительного и минимального паевого взносов №${original.hash.slice(0, 8)}. ${VAT_EXEMPT_NOTE}`,
       provider: original.provider,
       secret: generateUniqueHash(),
       // Хэш = registration_hash: совпадает с outcome_hash on-chain исходящего
