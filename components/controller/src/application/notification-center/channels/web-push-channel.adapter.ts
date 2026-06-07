@@ -36,12 +36,19 @@ export class WebPushChannelAdapter implements WebPushChannelPort {
   async send(message: ChannelMessage): Promise<ChannelDeliveryResult> {
     const username = message.recipient.username;
     if (!username) {
-      return { delivered: false, error: 'recipient has no username (web-push addressing)' };
+      // Нет адресации web-push — канал неприменим, не ошибка.
+      return { delivered: false, skipped: true, error: 'у получателя нет username для web-push' };
     }
 
     const subscriptions = await this.subscriptionPort.getUserSubscriptions(username);
     if (subscriptions.length === 0) {
-      return { delivered: false, error: `no active web-push subscriptions for '${username}'` };
+      // Получатель не подписан на push (не дал разрешения / нет PWA / подписка
+      // протухла). Канал неприменим — мягкий пропуск, без ретраев и ошибки.
+      return {
+        delivered: false,
+        skipped: true,
+        error: `у получателя '${username}' нет активной push-подписки`,
+      };
     }
 
     const template = resolveTemplate(message.workflowId, NotificationChannel.PUSH);

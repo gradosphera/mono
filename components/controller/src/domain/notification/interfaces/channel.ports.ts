@@ -33,9 +33,15 @@ export interface ChannelMessage {
 export interface ChannelDeliveryResult {
   /** Канал принял сообщение (SMTP accept / push 201 / in-app persisted). */
   delivered: boolean;
+  /**
+   * Канал неприменим к получателю (нет push-подписки / нет email-адреса) —
+   * это НЕ ошибка. Worker гасит строку в `canceled` без ретраев и error-лога;
+   * `error` несёт человекочитаемую причину (для тултипа в журнале).
+   */
+  skipped?: boolean;
   /** Ответ провайдера: message-id / push-status / error-body. */
   providerResponse?: string;
-  /** Текст ошибки при провале (для ретрая/диагностики). */
+  /** Текст ошибки при провале (для ретрая/диагностики) или причина пропуска. */
   error?: string;
 }
 

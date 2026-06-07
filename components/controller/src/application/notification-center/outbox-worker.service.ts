@@ -132,6 +132,20 @@ export class OutboxWorkerService implements OnModuleInit {
       ? await this.safeSend(port, row)
       : { delivered: false, error: `нет адаптера для канала '${row.channel}'` };
 
+    // Контекст для логов — председатель/оператор должен видеть, кому что и почему.
+    const ctx = `workflow=${row.workflowId} канал=${row.channel} получатель=${row.recipientUsername || row.recipientSubscriberId} попытка ${attemptNumber}/${row.maxAttempts}`;
+
+    // Канал неприменим к получателю (нет push-подписки / нет email-адреса) — это
+    // не сбой доставки: гасим строку в canceled, без ретраев и без записи попытки
+    // в журнал. Причину кладём в lastError (тултип «Отменено» на столе председателя).
+    if (result.skipped) {
+      row.status = NotificationOutboxStatus.CANCELED;
+      row.lastError = result.error;
+      await this.outboxRepository.save(row);
+      this.logger.debug(`Канал пропущен (неприменим к получателю): ${ctx}: ${result.error}`);
+      return;
+    }
+
     // Журнал попытки (append-only) — источник стола председателя.
     await this.deliveryRepository.save(
       this.deliveryRepository.create({
@@ -146,9 +160,6 @@ export class OutboxWorkerService implements OnModuleInit {
         error: result.error,
       })
     );
-
-    // Контекст для логов — председатель/оператор должен видеть, кому что и почему.
-    const ctx = `workflow=${row.workflowId} канал=${row.channel} получатель=${row.recipientUsername || row.recipientSubscriberId} попытка ${attemptNumber}/${row.maxAttempts}`;
 
     if (result.delivered) {
       row.status = NotificationOutboxStatus.SENT;
