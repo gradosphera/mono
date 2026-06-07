@@ -7,6 +7,7 @@
       variant='accent'
     ) {{ badgeLabel }}
     q-menu(
+      ref='menuRef',
       anchor='bottom right',
       self='top right',
       :offset='[0, 8]',
@@ -15,7 +16,8 @@
       NotificationPanel(
         :notifications='store.items',
         :loading='store.loading',
-        :view-all-label='viewAllLabel',
+        :view-all-label="'Показать все'",
+        :show-view-all='isChairman',
         @open='onOpenNotification',
         @mark-all-read='onMarkAllRead',
         @view-all='onViewAll'
@@ -23,15 +25,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import type { QMenu } from 'quasar';
+import { useRouter } from 'vue-router';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import { NotificationCenter as NotificationPanel } from 'src/shared/ui/domain/NotificationCenter';
+import { useSessionStore } from 'src/entities/Session';
+import { useSystemStore } from 'src/entities/System/model';
 import { useNotificationInboxStore } from './model';
 
 const store = useNotificationInboxStore();
+const session = useSessionStore();
+const { info } = useSystemStore();
+const router = useRouter();
+const menuRef = ref<QMenu | null>(null);
 
 const badgeLabel = computed(() => (store.unreadCount > 99 ? '99+' : String(store.unreadCount)));
-const viewAllLabel = computed(() => (store.hasMore ? 'Показать ещё' : 'Все загружены'));
+// Футер «Показать все» ведёт в полный журнал — он на столе председателя
+// (роль chairman). Для остальных пайщиков полной страницы пока нет — футер скрыт.
+const isChairman = computed(() => session.isChairman);
 
 function onOpen(): void {
   void store.loadInbox(true);
@@ -46,7 +58,11 @@ function onMarkAllRead(): void {
 }
 
 function onViewAll(): void {
-  void store.loadMore();
+  menuRef.value?.hide();
+  void router.push({
+    name: 'chairman-notifications-journal',
+    params: { coopname: info.coopname },
+  });
 }
 
 onMounted(() => {
@@ -67,8 +83,8 @@ onBeforeUnmount(() => {
 
 .notification-bell__count {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: -4px;
+  right: -4px;
   pointer-events: none;
 }
 </style>
