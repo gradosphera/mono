@@ -1,6 +1,7 @@
 // app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 // Infrastructure modules
@@ -11,7 +12,6 @@ import config from '~/config/config';
 import { BlockchainModule } from './infrastructure/blockchain/blockchain.module';
 import { GeneratorInfrastructureModule } from './infrastructure/generator/generator.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
-import { NovuModule } from './infrastructure/novu/novu.module';
 import { EventsInfrastructureModule } from './infrastructure/events/events.module';
 import { FreeDecisionInfrastructureModule } from './infrastructure/free-decision/free-decision-infrastructure.module';
 import { DecisionTrackingInfrastructureModule } from './infrastructure/decision-tracking/decision-tracking-infrastructure.module';
@@ -35,7 +35,6 @@ import { DesktopDomainModule } from './domain/desktop/desktop-domain.module';
 import { MeetDomainModule } from './domain/meet/meet-domain.module';
 import { GatewayDomainModule } from './domain/gateway/gateway-domain.module';
 import { VaultDomainModule } from './domain/vault/vault-domain.module';
-import { NotificationDomainModule } from './domain/notification/notification-domain.module';
 import { LedgerDomainModule } from './domain/ledger/ledger-domain.module';
 import { ProcessRegistryDomainModule } from './domain/process-registry/process-registry-domain.module';
 import { ParserDomainModule } from './domain/parser/parser-domain.module';
@@ -67,6 +66,7 @@ import { MeetModule } from './application/meet/meet.module';
 import { GatewayModule } from './application/gateway/gateway.module';
 import { WalletModule } from './application/wallet/wallet.module';
 import { NotificationModule } from './application/notification/notification.module';
+import { NotificationCenterModule } from './application/notification-center/notification-center.module';
 import { LedgerModule } from './application/ledger/ledger.module';
 import { Ledger2Module } from './application/ledger2/ledger2.module';
 import { ProcessRegistryModule } from './application/process-registry/process-registry.module';
@@ -92,6 +92,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
         limit: 50,
       },
     ]),
+    ScheduleModule.forRoot(), // @Interval/@Cron — нужен outbox-worker'у Центра уведомлений
     // Infrastructure modules
     MongooseModule.forRoot(config.mongoose.url),
     DatabaseModule,
@@ -99,7 +100,6 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     BlockchainModule,
     GeneratorInfrastructureModule,
     RedisModule,
-    NovuModule,
     EventsInfrastructureModule,
     FreeDecisionInfrastructureModule,
     DecisionTrackingInfrastructureModule,
@@ -131,7 +131,6 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     MeetDomainModule,
     GatewayDomainModule,
     VaultDomainModule,
-    NotificationDomainModule,
     LedgerDomainModule,
     ProcessRegistryDomainModule,
     ParserDomainModule,
@@ -160,6 +159,7 @@ import { MutationLoggingInterceptor } from './application/common/interceptors/mu
     GatewayModule,
     WalletModule,
     NotificationModule,
+    NotificationCenterModule,
     LedgerModule,
     Ledger2Module,
     ProcessRegistryModule,

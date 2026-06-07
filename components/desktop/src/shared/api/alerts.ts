@@ -4,7 +4,7 @@ import { formatAssetsInText } from 'src/shared/lib/utils/formatAsset2Digits';
 
 /**
  * Canon-тосты платформы. Единый визуал и поведение для всех типов
- * уведомлений: бизнес-успех, бизнес-ошибка, входящий push (Novu).
+ * уведомлений: бизнес-успех, бизнес-ошибка, входящее in-app уведомление.
  *
  * Канон (см. shared/MONO Design System.html → .toast):
  *  - Позиция: правый НИЖНИЙ угол (bottom-right).
@@ -84,7 +84,7 @@ export function NotifyAlert(title: string, body?: string, avatar?: string): void
     message: title,
     caption: body,
     avatar,
-    // Без avatar — нейтральная иконка-колокольчик; это in-app push от Novu.
+    // Без avatar — нейтральная иконка-колокольчик; это in-app уведомление.
     icon: avatar ? undefined : 'notifications',
     position: POSITION,
     timeout: TIMEOUT_INFO + 3000,

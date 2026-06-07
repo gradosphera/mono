@@ -25,8 +25,6 @@ const SCHEMA_GEN_ENV_DEFAULTS: Record<string, string> = {
   REDIS_PASSWORD: '',
   BLOCKCHAIN_RPC: 'http://127.0.0.1:8888',
   CHAIN_ID: 'cf057bbfb72640471fd910bcb67639c22df9f238706fab5919ce743a1f9efa38',
-  NOVU_APP_ID: 'schema-gen',
-  NOVU_API_KEY: 'schema-gen',
   VAPID_PUBLIC_KEY: 'BM_schema_gen_placeholder_public_key____________________________',
   VAPID_PRIVATE_KEY: 'schema_gen_placeholder_private_key',
   MATRIX_ADMIN_USERNAME: 'schema-gen',
@@ -124,12 +122,6 @@ const envVarsSchema = z.object({
     .default('1000')
     .transform((val) => parseInt(val, 10)),
 
-  // Параметры NOVU
-  NOVU_APP_ID: z.string().min(1, { message: 'Не должно быть пустым' }),
-  NOVU_BACKEND_URL: z.string().min(1, { message: 'Не должно быть пустым' }).default('https://novu.coopenomics.world/api'),
-  NOVU_SOCKET_URL: z.string().min(1, { message: 'Не должно быть пустым' }).default('https://novu.coopenomics.world/ws'),
-  NOVU_API_KEY: z.string().min(1, { message: 'Не должно быть пустым' }),
-  NOVU_WEBHOOK_SECRET: z.string().min(1, { message: 'Не должно быть пустым' }).default('default-webhook-secret'),
 
   // Параметры VAPID для web push
   VAPID_PUBLIC_KEY: z.string().min(1, { message: 'VAPID_PUBLIC_KEY не должен быть пустым' }),
@@ -279,13 +271,6 @@ export default {
     host: envVars.data.REDIS_HOST,
     port: envVars.data.REDIS_PORT,
     password: envVars.data.REDIS_PASSWORD,
-  },
-  novu: {
-    app_id: envVars.data.NOVU_APP_ID,
-    backend_url: envVars.data.NOVU_BACKEND_URL,
-    socket_url: envVars.data.NOVU_SOCKET_URL,
-    api_key: envVars.data.NOVU_API_KEY,
-    webhook_secret: envVars.data.NOVU_WEBHOOK_SECRET,
   },
   vapid: {
     public_key: envVars.data.VAPID_PUBLIC_KEY,

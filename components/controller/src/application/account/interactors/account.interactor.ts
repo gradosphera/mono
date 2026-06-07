@@ -6,10 +6,6 @@ import { HttpApiError } from '~/utils/httpApiError';
 import { UserDomainService, USER_DOMAIN_SERVICE } from '~/domain/user/services/user-domain.service';
 import { TokenApplicationService } from '~/application/token/services/token-application.service';
 import { GENERATOR_PORT, GeneratorPort } from '~/domain/document/ports/generator.port';
-import {
-  NOTIFICATION_DOMAIN_SERVICE,
-  NotificationDomainService,
-} from '~/domain/notification/services/notification-domain.service';
 import { EventsService } from '~/infrastructure/events/events.service';
 import type { GetAccountsInputDomainInterface } from '~/domain/account/interfaces/get-accounts-input.interface';
 import type {
@@ -60,7 +56,6 @@ export class AccountInteractor {
     private readonly searchPrivateAccountsRepository: SearchPrivateAccountsRepository,
     @Inject(ACCOUNT_BLOCKCHAIN_PORT) private readonly accountBlockchainPort: AccountBlockchainPort,
     @Inject(CANDIDATE_REPOSITORY) private readonly candidateRepository: CandidateRepository,
-    @Inject(NOTIFICATION_DOMAIN_SERVICE) private readonly notificationDomainService: NotificationDomainService,
     private readonly eventsService: EventsService,
     @Inject(GENERATOR_PORT) private readonly generatorPort: GeneratorPort,
     private readonly tokenApplicationService: TokenApplicationService,
@@ -172,25 +167,6 @@ export class AccountInteractor {
       throw new Error('Не получены входные данные для обновления');
     }
 
-    // Novu: не блокируем ответ мутации — догоняем подписчика в фоне
-    try {
-      const account = await this.getAccount(user.username);
-      void this.notificationDomainService
-        .createSubscriberFromAccount(account)
-        .then(() => {
-          this.logger.log(`Подписчик NOVU обновлён для ${data.username}`);
-        })
-        .catch((error: unknown) => {
-          const message = error instanceof Error ? error.message : String(error);
-          const stack = error instanceof Error ? error.stack : undefined;
-          this.logger.error(`Ошибка обновления подписчика NOVU для ${data.username}: ${message}`, stack);
-        });
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`Ошибка подготовки синхронизации NOVU для ${data.username}: ${message}`, stack);
-    }
-
     // Получаем финальный аккаунт
     const account = await this.getAccount(user.username);
 
@@ -275,11 +251,11 @@ export class AccountInteractor {
     const user = await this.createUser({ ...data, role: 'user' });
     const tokens = await this.tokenApplicationService.generateAuthTokens(user.id);
 
-    // Настраиваем подписчика NOVU
+    // Настраиваем identity получателя
     try {
       await this.accountDomainService.setupNotificationSubscriber(user.username, 'регистрации');
     } catch (error: any) {
-      this.logger.error(`Ошибка настройки подписчика NOVU при регистрации ${data.username}: ${error.message}`, error.stack);
+      this.logger.error(`Ошибка настройки identity получателя при регистрации ${data.username}: ${error.message}`, error.stack);
     }
 
     // Создаем нового кандидата в репозитории

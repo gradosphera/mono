@@ -1,10 +1,8 @@
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
-import { NovuWorkflowAdapter } from '~/infrastructure/novu/novu-workflow.adapter';
-import { NOVU_WORKFLOW_PORT } from '~/domain/notification/interfaces/novu-workflow.port';
+import { NOTIFICATION_PORT, type NotificationPort } from '~/domain/notification/interfaces/notify.port';
 import { ACCOUNT_DATA_PORT, AccountDataPort } from '~/domain/account/ports/account-data.port';
 import config from '~/config/config';
-import type { WorkflowTriggerDomainInterface } from '~/domain/notification/interfaces/workflow-trigger-domain.interface';
 import type { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
 import { PaymentDirectionEnum } from '~/domain/gateway/enums/payment-type.enum';
@@ -16,8 +14,8 @@ import { Workflows } from '@coopenomics/notifications';
 @Injectable()
 export class PaymentNotificationService implements OnModuleInit {
   constructor(
-    @Inject(NOVU_WORKFLOW_PORT)
-    private readonly novuWorkflowAdapter: NovuWorkflowAdapter,
+    @Inject(NOTIFICATION_PORT)
+    private readonly notificationPort: NotificationPort,
     @Inject(ACCOUNT_DATA_PORT)
     private readonly accountPort: AccountDataPort,
     private readonly logger: WinstonLoggerService
@@ -46,7 +44,7 @@ export class PaymentNotificationService implements OnModuleInit {
       const userEmail = user.provider_account?.email;
       const subscriberId = user.provider_account?.subscriber_id?.trim();
       if (!subscriberId) {
-        this.logger.warn(`subscriber_id пользователя ${payment.username} не найден — пропуск Novu`);
+        this.logger.warn(`subscriber_id пользователя ${payment.username} не найден`);
         return;
       }
       if (!userEmail) {
@@ -77,17 +75,17 @@ export class PaymentNotificationService implements OnModuleInit {
         paymentUrl: `${config.frontend_url}`, //TODO: точную ссылку потом
       };
 
-      // Отправляем уведомление
-      const triggerData: WorkflowTriggerDomainInterface = {
-        name: workflowId,
+      // Отправляем уведомление через Центр уведомлений
+      await this.notificationPort.notify({
+        coopname: config.coopname,
+        workflowId,
         to: {
           subscriberId,
           email: userEmail,
+          username: payment.username,
         },
         payload,
-      };
-
-      await this.novuWorkflowAdapter.triggerWorkflow(triggerData);
+      });
       this.logger.log(
         `Уведомление отправлено пользователю ${payment.username} о статусе платежа ${payment.id} (${payment.status})`
       );
