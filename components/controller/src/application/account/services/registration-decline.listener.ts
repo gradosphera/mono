@@ -62,12 +62,24 @@ export class RegistrationDeclineListener {
     }
 
     // Идемпотентность: повторный приход события (replay/форк) не плодит возвраты.
+    // Но проверяем возврат именно ТЕКУЩЕГО цикла. На повторной подаче после прошлого
+    // отказа в БД остаётся возврат прошлого цикла, и его hash совпадает с новым
+    // (registration_hash = sha256(username) детерминирован). Возврат текущего цикла
+    // создаётся ПОЗЖЕ текущего вступительного платежа — по этому и отличаем. Иначе
+    // старый возврат блокировал бы создание нового, latest refund оставался бы старше
+    // нового платежа, и фронт завис бы на «платёж принят». Детекция цикла по дате —
+    // как в account.interactor (getAccount / resetRegistration / createRegistrationPayment).
     const existingRefund = await this.paymentRepository.findLatestByUsernameAndType(
       candidate.username,
       PaymentTypeEnum.REGISTRATION_REFUND,
     );
-    if (existingRefund) {
-      this.logger.debug(`declinereg: возврат для ${candidate.username} уже существует (${existingRefund.id}) — пропуск`);
+    if (
+      existingRefund &&
+      new Date(existingRefund.created_at).getTime() >= new Date(original.created_at).getTime()
+    ) {
+      this.logger.debug(
+        `declinereg: возврат текущего цикла для ${candidate.username} уже существует (${existingRefund.id}) — пропуск`,
+      );
       return;
     }
 
