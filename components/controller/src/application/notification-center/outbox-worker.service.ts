@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -48,7 +48,7 @@ type DeliveryChannelPort = { send(message: ChannelMessage): Promise<ChannelDeliv
  * своя строка со своим status/attempts/scheduledAt.
  */
 @Injectable()
-export class OutboxWorkerService {
+export class OutboxWorkerService implements OnModuleInit {
   private readonly logger = new Logger(OutboxWorkerService.name);
   // Гард от наложения тиков (single-instance): длинный тик не запускается повторно.
   private isRunning = false;
@@ -68,6 +68,13 @@ export class OutboxWorkerService {
       [NotificationChannel.IN_APP]: inAppChannel,
       [NotificationChannel.PUSH]: webPushChannel,
     };
+  }
+
+  onModuleInit(): void {
+    // Признак, что worker поднялся (иначе при пустой очереди в логах ничего нет).
+    this.logger.log(
+      `Outbox-worker Центра уведомлений запущен: интервал ${WORKER_INTERVAL_MS} мс, батч ${WORKER_BATCH_SIZE}`
+    );
   }
 
   @Interval('notification-outbox-worker', WORKER_INTERVAL_MS)
@@ -105,6 +112,9 @@ export class OutboxWorkerService {
 
     if (candidates.length === 0) return;
 
+    // Виден только в debug-уровне — heartbeat обработки, не шумит на проде.
+    this.logger.debug(`Тик: к обработке ${candidates.length} строк очереди`);
+
     for (const row of candidates) {
       await this.processRow(row, now);
     }
@@ -137,18 +147,24 @@ export class OutboxWorkerService {
       })
     );
 
+    // Контекст для логов — председатель/оператор должен видеть, кому что и почему.
+    const ctx = `workflow=${row.workflowId} канал=${row.channel} получатель=${row.recipientUsername || row.recipientSubscriberId} попытка ${attemptNumber}/${row.maxAttempts}`;
+
     if (result.delivered) {
       row.status = NotificationOutboxStatus.SENT;
       row.lastError = undefined;
+      this.logger.debug(`Доставлено: ${ctx}`);
     } else if (row.attempts >= row.maxAttempts) {
       // Попытки исчерпаны — терминальный failed (виден/переотправляем на столе председателя).
       row.status = NotificationOutboxStatus.FAILED;
       row.lastError = result.error;
+      this.logger.error(`Доставка провалена окончательно: ${ctx}: ${result.error}`);
     } else {
       // Временный сбой — назад в PENDING с backoff-паузой.
       row.status = NotificationOutboxStatus.PENDING;
       row.lastError = result.error;
       row.scheduledAt = new Date(now.getTime() + this.backoffMs(row.attempts));
+      this.logger.warn(`Доставка не удалась, будет ретрай: ${ctx}: ${result.error}`);
     }
     await this.outboxRepository.save(row);
   }

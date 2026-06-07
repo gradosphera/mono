@@ -29,11 +29,21 @@
         tbody
           tr(v-for='row in store.items', :key='row.id')
             td.col-date {{ formatDateToHumanDateTime(row.createdAt) }}
-            td.cell-recipient {{ row.recipientUsername || row.recipientSubscriberId }}
+            td.cell-recipient
+              template(v-if='row.recipientUsername')
+                span.cell-recipient__name(v-if='recipientName(row.recipientUsername)') {{ recipientName(row.recipientUsername) }}
+                AccountBadge(:account-name='row.recipientUsername', size='sm')
+              span.cell-recipient__sub(v-else) {{ row.recipientSubscriberId }}
             td {{ workflowLabel(row.workflowId) }}
             td {{ channelLabels[row.channel] ?? row.channel }}
-            td
+            td(:class='{ "cell-status--has-error": row.lastError }')
               BaseBadge(:variant='statusVariant(row.status)') {{ statusLabels[row.status] ?? row.status }}
+              q-tooltip(
+                v-if='row.lastError',
+                anchor='top middle',
+                self='bottom middle',
+                max-width='320px'
+              ) {{ row.lastError }}
             td.col-num {{ row.attempts }}
             td.col-action(@click.stop)
               BaseButton(
@@ -65,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { Workflows } from '@coopenomics/notifications';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
@@ -75,14 +85,55 @@ import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { TableSkeleton } from 'src/shared/ui/base/TableSkeleton';
 import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
+import { AccountBadge } from 'src/shared/ui/domain/AccountBadge';
 import { FilterBar } from 'src/shared/ui/domain/FilterBar';
 import type { FilterDefinition, FilterValues } from 'src/shared/ui/domain/FilterBar';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
+import { getName } from 'src/shared/lib/utils/account';
+import { api as accountApi } from 'src/entities/Account/api';
 import { useNotificationJournalStore } from '../model';
 import type { INotificationsFilter } from '../model';
 
 const store = useNotificationJournalStore();
 const resendingId = ref<string | null>(null);
+
+// Резолв ФИО получателя по username (на фронте — DTO журнала несёт только
+// username/subscriber_id). Кэш на компонент, чтобы не перезапрашивать.
+const recipientNames = ref<Record<string, string>>({});
+
+function recipientName(username?: string | null): string {
+  return username ? (recipientNames.value[username] ?? '') : '';
+}
+
+async function resolveRecipientNames(): Promise<void> {
+  const usernames = [
+    ...new Set(
+      store.items
+        .map((i) => i.recipientUsername)
+        .filter((u): u is string => Boolean(u)),
+    ),
+  ];
+  const missing = usernames.filter((u) => !(u in recipientNames.value));
+  if (!missing.length) return;
+  await Promise.all(
+    missing.map(async (username) => {
+      let name = '';
+      try {
+        const account = await accountApi.getAccount(username);
+        // getName может вернуть «undefined undefined …» если private_account
+        // недоступен/пустой — вычищаем, тогда покажем только username.
+        name = account
+          ? getName(account).replace(/undefined/g, '').replace(/\s+/g, ' ').trim()
+          : '';
+      } catch {
+        name = '';
+      }
+      recipientNames.value = { ...recipientNames.value, [username]: name };
+    }),
+  );
+}
+
+watch(() => store.items, () => void resolveRecipientNames(), { immediate: true });
 
 const channelLabels: Record<string, string> = {
   [Zeus.NotificationChannel.EMAIL]: 'Email',
@@ -219,5 +270,22 @@ onMounted(() => {
 
 .cell-recipient {
   overflow-wrap: anywhere;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.cell-recipient__name {
+  color: var(--p-ink);
+  font-size: var(--p-fs-body-sm, 13px);
+  line-height: 1.3;
+}
+.cell-recipient__sub {
+  font-family: var(--p-mono);
+  font-size: var(--p-fs-mono-sm, 12px);
+  color: var(--p-ink-2);
+}
+.cell-status--has-error {
+  cursor: help;
 }
 </style>
