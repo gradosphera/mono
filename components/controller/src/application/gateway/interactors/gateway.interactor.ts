@@ -9,7 +9,7 @@ import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.en
 import { GatewayBlockchainPort, GATEWAY_BLOCKCHAIN_PORT } from '~/domain/gateway/ports/gateway-blockchain.port';
 import { PaymentRepository, PAYMENT_REPOSITORY } from '~/domain/gateway/repositories/payment.repository';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
-import { PaymentDirectionEnum, PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum';
+import { PaymentDirectionEnum, PaymentTypeEnum, VAT_EXEMPT_NOTE } from '~/domain/gateway/enums/payment-type.enum';
 import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import type { CreateInitialPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-initial-payment-input-domain.interface';
 import type { CreateDepositPaymentInputDomainInterface } from '~/domain/gateway/interfaces/create-deposit-payment-input-domain.interface';
@@ -203,17 +203,46 @@ export class GatewayInteractor {
   private async processOutgoingPayment(payment: PaymentDomainInterface) {
     this.logger.log(`Обрабатываем исходящий платеж ${payment.id}`);
 
-    // Возврат вступительного/мин.паевого при отказе совета — чистая off-chain
-    // запись. Взнос по фондам не разносился (confirmreg не было), on-chain
-    // движений нет — откатывать нечего. Подтверждение кассиром лишь фиксирует
-    // факт физического возврата денег: статус → COMPLETED, без completeOutcome.
-    // Будущая обратная проводка по расчётному счёту (когда введём проводки на
-    // приёме платежа) появится здесь же.
+    // Возврат вступительного/мин.паевого при отказе совета. Деньги пайщика стоят
+    // на расчётах с пайщиком (счёт 76, w.reg.pend) с момента приёма платежа.
+    // Подтверждение кассой проводит on-chain возврат: completeOutcome →
+    // gateway::outcomplete → registrator::refundpay (обратная проводка Дт 76 / Кт 51,
+    // сжигание w.reg.pend). outcome_hash = payment.hash = registration_hash —
+    // on-chain исходящий объект создан declinereg через gateway::createoutpay.
+    //
+    // MIGRATION (снять условие после 30.07.2026): кандидаты, принятые ДО релиза
+    // двухфазного учёта, on-chain исходящего объекта не имеют (declinereg для них
+    // не звал createoutpay — не было баланса на w.reg.pend). Для них completeOutcome
+    // падает «Объект возврата не существует» — это штатный старый путь: проводок
+    // нет, возврат чисто off-chain, помечаем COMPLETED.
     if (payment.type === PaymentTypeEnum.REGISTRATION_REFUND) {
-      if (payment.id) {
-        await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+      try {
+        const completeOutcomeData: CompleteOutcomeDomainInterface = {
+          coopname: payment.coopname,
+          outcome_hash: payment.hash,
+        };
+        await this.gatewayBlockchainPort.completeOutcome(completeOutcomeData);
+        if (payment.id) {
+          await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+        }
+        this.logger.log(`Возврат регистрации ${payment.hash} подтверждён (проводка Дт 76 / Кт 51)`);
+      } catch (e: any) {
+        const message = e?.message ?? String(e);
+        // переходный период до 30.07.2026: on-chain объекта нет — старый путь
+        if (message.includes('Объект возврата не существует')) {
+          if (payment.id) {
+            await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+          }
+          this.logger.warn(
+            `Возврат регистрации ${payment.hash}: on-chain объект не найден (переходный период до 30.07.2026) — подтверждён off-chain без проводок`,
+          );
+        } else {
+          if (payment.id) {
+            await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.FAILED, message });
+          }
+          this.logger.error(`Ошибка подтверждения возврата регистрации ${payment.hash}: ${message}`, e);
+        }
       }
-      this.logger.log(`Возврат регистрации ${payment.hash} подтверждён (off-chain, без проводок)`);
       return;
     }
 
@@ -288,6 +317,22 @@ export class GatewayInteractor {
       PaymentTypeEnum.REGISTRATION
     );
 
+    // Повторная подача после отказа совета: прошлый цикл закрыт возвратом —
+    // REGISTRATION_REFUND свежее последнего вступительного платежа. Тогда старый
+    // рег-платёж принадлежит ЗАВЕРШЁННОМУ циклу и переиспользовать его нельзя:
+    // иначе вернули бы исполненный QR (COMPLETED ∈ reusableStatuses), а новый
+    // платёж в реестре совета не появился бы. Заводим новый ордер. Детекция цикла
+    // по дате — та же, что в account.interactor (getAccount / resetRegistration).
+    const lastRegistrationRefund = await this.paymentRepository.findLatestByUsernameAndType(
+      data.username,
+      PaymentTypeEnum.REGISTRATION_REFUND
+    );
+    const supersededByRefund =
+      !!lastRegistrationRefund &&
+      !!lastRegistrationPayment &&
+      new Date(lastRegistrationRefund.created_at).getTime() >=
+        new Date(lastRegistrationPayment.created_at).getTime();
+
     const reusableStatuses = [
       PaymentStatusEnum.PENDING,
       PaymentStatusEnum.PROCESSING,
@@ -295,7 +340,11 @@ export class GatewayInteractor {
       PaymentStatusEnum.COMPLETED,
     ];
 
-    if (lastRegistrationPayment && reusableStatuses.includes(lastRegistrationPayment.status)) {
+    if (
+      !supersededByRefund &&
+      lastRegistrationPayment &&
+      reusableStatuses.includes(lastRegistrationPayment.status)
+    ) {
       this.logger.log(
         `Регистрационный платёж для ${data.username} уже существует (${lastRegistrationPayment.id}, статус ${lastRegistrationPayment.status}) — повторный ордер не создаём`
       );
@@ -322,7 +371,7 @@ export class GatewayInteractor {
       direction: PaymentDirectionEnum.INCOMING,
       provider,
       status: PaymentStatusEnum.PENDING,
-      memo: `Вступительный и минимальный паевой взносы №${hash.slice(0, 8)}`,
+      memo: `Вступительный и минимальный паевой взносы №${hash.slice(0, 8)}. ${VAT_EXEMPT_NOTE}`,
       payment_method_id: undefined,
       expired_at: expiredAt,
       created_at: now,
@@ -412,7 +461,7 @@ export class GatewayInteractor {
       direction: PaymentDirectionEnum.INCOMING,
       provider: provider,
       status: PaymentStatusEnum.PENDING,
-      memo: `Паевой взнос по соглашению о ЦПП "Цифровой Кошелёк" №${hash.slice(0, 8)}`,
+      memo: `Паевой взнос по соглашению о ЦПП "Цифровой Кошелёк" №${hash.slice(0, 8)}. ${VAT_EXEMPT_NOTE}`,
       secret,
       payment_method_id: undefined,
       expired_at: expiredAt,
@@ -521,7 +570,7 @@ export class GatewayInteractor {
       // готовый к выплате. Переход AWAITING_AUTHORIZATION → PENDING происходит
       // в WithdrawAuthorizationListener при on-chain action wallet::authwthd.
       status: PaymentStatusEnum.AWAITING_AUTHORIZATION,
-      memo: `Возврат паевого взноса №${data.payment_hash.slice(0, 8)}`,
+      memo: `Возврат паевого взноса №${data.payment_hash.slice(0, 8)}. ${VAT_EXEMPT_NOTE}`,
       secret: generateUniqueHash(),
       payment_method_id: data.method_id,
       payment_details: paymentDetails,

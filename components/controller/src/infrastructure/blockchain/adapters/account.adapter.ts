@@ -56,26 +56,33 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
 
     const actions: any[] = [];
 
-    // Создаем объект registerAccountData с данными из кандидата
-    const registerAccountData: RegistratorContract.Actions.CreateAccount.ICreateAccount = {
-      coopname: config.coopname,
-      username: candidate.username,
-      referer: candidate.referer || '',
-      public_key: candidate.public_key,
-      meta: candidate.meta || '{}',
-    };
+    // Повторная подача на том же аккаунте (после отказа совета и возврата взноса):
+    // eosio-аккаунт уже существует — повторный CreateAccount упал бы. Создаём аккаунт
+    // только если его ещё нет; карточку участника на цепи снял refundpay (type=""),
+    // поэтому следующий RegisterUser проходит.
+    const existingAccount = await this.getBlockchainAccount(candidate.username);
+    if (!existingAccount) {
+      // Создаем объект registerAccountData с данными из кандидата
+      const registerAccountData: RegistratorContract.Actions.CreateAccount.ICreateAccount = {
+        coopname: config.coopname,
+        username: candidate.username,
+        referer: candidate.referer || '',
+        public_key: candidate.public_key,
+        meta: candidate.meta || '{}',
+      };
 
-    actions.push({
-      account: RegistratorContract.contractName.production,
-      name: RegistratorContract.Actions.CreateAccount.actionName,
-      authorization: [
-        {
-          actor: config.coopname,
-          permission: 'active',
-        },
-      ],
-      data: registerAccountData,
-    });
+      actions.push({
+        account: RegistratorContract.contractName.production,
+        name: RegistratorContract.Actions.CreateAccount.actionName,
+        authorization: [
+          {
+            actor: config.coopname,
+            permission: 'active',
+          },
+        ],
+        data: registerAccountData,
+      });
+    }
 
     // Создаем объект registerUserData с данными из кандидата
     const registerUserData: RegistratorContract.Actions.RegisterUser.IRegisterUser = {

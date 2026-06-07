@@ -88,6 +88,8 @@ public:
   [[eosio::action]] void confirmpay(name coopname, checksum256 registration_hash);
   [[eosio::action]] void declinepay(name coopname, checksum256 registration_hash, std::string reason);
   [[eosio::action]] void declinereg(name coopname, checksum256 registration_hash, std::string reason);
+  [[eosio::action]] void refundpay(name coopname, checksum256 registration_hash);
+  [[eosio::action]] void declinerfnd(name coopname, checksum256 registration_hash, std::string reason);
   
   
   [[eosio::action]] void createbranch(eosio::name coopname, eosio::name braname);

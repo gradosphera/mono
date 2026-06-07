@@ -35,7 +35,8 @@ namespace processes {
 
   // registrator
   namespace registrator {
-    inline constexpr eosio::name ACCEPT    = "p.reg.accept"_n;   ///< Приём пайщика в кооператив (o.reg.payent + o.reg.putmin).
+    inline constexpr eosio::name ACCEPT    = "p.reg.accept"_n;   ///< Приём пайщика в кооператив (o.reg.payent + o.reg.putmin; для потока через совет — o.reg.inpay + o.reg.setmin + o.reg.setent).
+    inline constexpr eosio::name REFUND    = "p.reg.refund"_n;   ///< Возврат регистрационного взноса при отказе совета (o.reg.refund). Отдельный процесс: приём взноса прерывается, начинается возврат.
   }
 
   // wallet

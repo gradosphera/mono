@@ -2,12 +2,32 @@
 div
   q-step(
     :name='store.steps.WaitingRegistration',
-    :title='isDeclined ? "Платёж не принят" : "Получите решение совета о приёме Вас в пайщики кооператива"',
+    :title='stepTitle',
     :done='store.isStepDone("WaitingRegistration")'
   )
+    //- Совет отказал (declinereg). Возврат идёт в два шага:
+    //-  1) PROCESSING — исходящий платёж кассой ещё не проведён: кнопки нет,
+    //-     ждём завершения возврата;
+    //-  2) REFUNDED — взнос возвращён: только теперь можно подать заявку заново
+    //-     (на цепи освобождён аккаунт — refundpay снял карточку участника).
+    template(v-if='isCouncilRefundPending')
+      BaseBanner.q-mb-md(variant='neg')
+        .text-bold Совет отказал в приёме.
+        p.q-mt-xs.q-mb-none(v-if='declineMessage') {{ declineMessage }}
+        p.q-mt-xs.q-mb-none(v-else) Совет принял отрицательное решение по вашему заявлению. Регистрационный взнос возвращается — дождитесь завершения возврата.
+      .waiting-pending
+        q-icon.waiting-pending__icon(name='hourglass_top', size='40px')
+        p.waiting-pending__caption Возврат взноса выполняется
+    template(v-else-if='isCouncilDeclined')
+      BaseBanner.q-mb-md(variant='neg')
+        .text-bold Совет отказал в приёме.
+        p.q-mt-xs.q-mb-none(v-if='declineMessage') {{ declineMessage }}
+        p.q-mt-xs.q-mb-none(v-else) Регистрационный взнос возвращён. Вы можете подать заявку заново.
+      .row.q-gutter-sm
+        BaseButton(variant='primary', @click='fixData', :loading='isResetting') Подать заявку заново
     //- Платёж отклонён председателем (до создания аккаунта в блокчейне) —
     //- показываем причину и даём начать заново со своим e-mail.
-    template(v-if='isDeclined')
+    template(v-else-if='isDeclined')
       BaseBanner.q-mb-md(variant='neg')
         .text-bold Ваш платёж не был принят.
         p.q-mt-xs.q-mb-none(v-if='declineMessage') Причина: {{ declineMessage }}
@@ -37,7 +57,7 @@ import { BaseBanner, BaseButton } from 'src/shared/ui/base';
 import { useRegistratorStore } from 'src/entities/Registrator';
 import { Zeus } from '@coopenomics/sdk';
 import { useResetRegistration } from 'src/features/Account/ResetRegistration';
-import { FailAlert } from 'src/shared/api';
+import { FailAlert, extractGraphQLErrorMessages } from 'src/shared/api';
 
 const store = useRegistratorStore();
 const session = useSessionStore();
@@ -65,8 +85,26 @@ const isDeclined = computed(() => {
 
 const declineMessage = computed(() => registrationPayment.value?.message || '');
 
+// Отказ совета (declinereg) — два шага возврата, бэкенд отдаёт их по
+// registration_payment.status (входящий рег-платёж эти статусы не принимает):
+//  • PROCESSING — исходящий возврат кассой ещё не проведён: ждём, кнопки нет;
+//  • REFUNDED  — взнос возвращён, аккаунт на цепи освобождён: можно подать заявку
+//    заново. Раньше REFUNDED показывать кнопку нельзя — повторный reguser упадёт.
+const isCouncilRefundPending = computed(
+  () => registrationPayment.value?.status === Zeus.PaymentStatus.PROCESSING
+);
+const isCouncilDeclined = computed(
+  () => registrationPayment.value?.status === Zeus.PaymentStatus.REFUNDED
+);
+
 // Унаследованная ветка технической ошибки по блокчейн-аккаунту пользователя.
 const isFailed = computed(() => session.userAccount?.status === 'failed' && !isDeclined.value);
+
+const stepTitle = computed(() => {
+  if (isCouncilRefundPending.value || isCouncilDeclined.value) return 'Совет отказал в приёме';
+  if (isDeclined.value) return 'Платёж не принят';
+  return 'Получите решение совета о приёме Вас в пайщики кооператива';
+});
 
 const retryPayment = () => {
   store.state.is_paid = false;
@@ -90,7 +128,7 @@ const fixData = async () => {
     store.resetConsents();
     store.goTo('SetUserData');
   } catch (e: any) {
-    FailAlert(`Не удалось вернуться к редактированию: ${e.message}`);
+    FailAlert(`Не удалось вернуться к редактированию: ${extractGraphQLErrorMessages(e)}`);
   } finally {
     isResetting.value = false;
   }

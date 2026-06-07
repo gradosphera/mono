@@ -283,7 +283,37 @@ export class AccountInteractor {
         username,
         PaymentTypeEnum.REGISTRATION
       );
-      if (payment) {
+      // Отказ совета (declinereg) заводит исходящий возврат REGISTRATION_REFUND.
+      // Сообщаем фронту отдельным статусом REFUNDED (входящий рег-платёж этот статус
+      // никогда не принимает) — иначе экран ожидания висит на «ожидаем решение
+      // совета», т.к. сам входящий платёж остаётся COMPLETED. Отказ относится к
+      // ТЕКУЩЕМУ циклу только если возврат свежее последнего вступительного платежа:
+      // после повторной подачи создаётся новый REGISTRATION (свежее старого возврата),
+      // и прошлый отказ больше не всплывает.
+      const refund = await this.paymentRepository.findLatestByUsernameAndType(
+        username,
+        PaymentTypeEnum.REGISTRATION_REFUND
+      );
+      const isCouncilDeclined =
+        !!refund &&
+        (!payment || new Date(refund.created_at).getTime() >= new Date(payment.created_at).getTime());
+
+      if (isCouncilDeclined && refund) {
+        // Два шага возврата для UI: пока касса не подтвердила исходящий платёж
+        // (refund != COMPLETED) — PROCESSING (кнопки повторной подачи нет, аккаунт
+        // на цепи ещё занят карточкой); после подтверждения — REFUNDED (refundpay
+        // снял карточку, повторная подача возможна).
+        const done = refund.status === PaymentStatusEnum.COMPLETED;
+        account.registration_payment = {
+          status: done ? PaymentStatusEnum.REFUNDED : PaymentStatusEnum.PROCESSING,
+          message: done
+            ? 'Совет отказал в приёме. Регистрационный взнос возвращён. Вы можете подать заявку заново.'
+            : 'Совет отказал в приёме. Регистрационный взнос возвращается. Дождитесь его завершения, чтобы подать заявку заново.',
+          hash: refund.hash,
+          quantity: refund.quantity,
+          symbol: refund.symbol,
+        };
+      } else if (payment) {
         account.registration_payment = {
           status: payment.status,
           message: payment.message ?? null,
@@ -399,34 +429,56 @@ export class AccountInteractor {
       throw new HttpApiError(HttpStatus.NOT_FOUND, `Пользователь ${username} не найден`);
     }
 
-    // Аккаунт уже в блокчейне → откат к редактированию невозможен (username
-    // занят необратимо).
-    const blockchainAccount = await this.accountDomainService.getBlockchainAccount(username);
-    if (
-      blockchainAccount ||
-      user.status === userStatus['4_Registered'] ||
-      user.status === userStatus['5_Active']
-    ) {
-      throw new HttpApiError(
-        HttpStatus.BAD_REQUEST,
-        'Регистрация уже отправлена в блокчейн — откат к редактированию невозможен, требуется перерегистрация.'
-      );
-    }
-
-    // Регистрационный платёж: принятые средства откатывать нельзя (нужен возврат).
+    // Повторная подача после отказа совета (вариант 1): в отличие от обычного
+    // отката (до приёма платежа), здесь аккаунт уже в блокчейне и взнос был принят —
+    // это нормально. Карточку участника на цепи снимает refundpay при завершении
+    // возврата, поэтому пускаем только когда возврат COMPLETED (иначе повторный
+    // reguser упадёт «повторное получение невозможно»). Отказ относится к текущему
+    // циклу, только если возврат свежее последнего вступительного платежа.
     const payment = await this.paymentRepository.findLatestByUsernameAndType(
       username,
       PaymentTypeEnum.REGISTRATION
     );
-    if (payment) {
-      if (payment.status === PaymentStatusEnum.PAID || payment.status === PaymentStatusEnum.COMPLETED) {
+    const refund = await this.paymentRepository.findLatestByUsernameAndType(
+      username,
+      PaymentTypeEnum.REGISTRATION_REFUND
+    );
+    const isCouncilDeclined =
+      !!refund &&
+      (!payment || new Date(refund.created_at).getTime() >= new Date(payment.created_at).getTime());
+
+    if (isCouncilDeclined && refund) {
+      if (refund.status !== PaymentStatusEnum.COMPLETED) {
         throw new HttpApiError(
           HttpStatus.BAD_REQUEST,
-          'Вступительный взнос уже принят — для отката требуется возврат средств.'
+          'Возврат регистрационного взноса ещё выполняется. Подайте заявку заново после его завершения.'
         );
       }
-      if (payment.id) {
-        await this.paymentRepository.delete(payment.id);
+      // Старые платежи не удаляем: getAccount различает циклы по дате — новый
+      // вступительный платёж будет свежее этого возврата, и прошлый отказ исчезнет.
+    } else {
+      // Обычный откат до приёма платежа: аккаунт ещё не в блокчейне, взнос не принят.
+      const blockchainAccount = await this.accountDomainService.getBlockchainAccount(username);
+      if (
+        blockchainAccount ||
+        user.status === userStatus['4_Registered'] ||
+        user.status === userStatus['5_Active']
+      ) {
+        throw new HttpApiError(
+          HttpStatus.BAD_REQUEST,
+          'Регистрация уже отправлена в блокчейн — откат к редактированию невозможен, требуется перерегистрация.'
+        );
+      }
+      if (payment) {
+        if (payment.status === PaymentStatusEnum.PAID || payment.status === PaymentStatusEnum.COMPLETED) {
+          throw new HttpApiError(
+            HttpStatus.BAD_REQUEST,
+            'Вступительный взнос уже принят — для отката требуется возврат средств.'
+          );
+        }
+        if (payment.id) {
+          await this.paymentRepository.delete(payment.id);
+        }
       }
     }
 
