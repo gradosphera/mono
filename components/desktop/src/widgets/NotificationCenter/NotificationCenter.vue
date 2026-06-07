@@ -7,7 +7,6 @@
       variant='accent'
     ) {{ badgeLabel }}
     q-menu(
-      ref='menuRef',
       anchor='bottom right',
       self='top right',
       :offset='[0, 8]',
@@ -16,34 +15,21 @@
       NotificationPanel(
         :notifications='store.items',
         :loading='store.loading',
-        :view-all-label="'Показать все'",
-        :show-view-all='isChairman',
+        :show-view-all='false',
         @open='onOpenNotification',
-        @mark-all-read='onMarkAllRead',
-        @view-all='onViewAll'
+        @mark-all-read='onMarkAllRead'
       )
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
-import type { QMenu } from 'quasar';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, onBeforeUnmount } from 'vue';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import { NotificationCenter as NotificationPanel } from 'src/shared/ui/domain/NotificationCenter';
-import { useSessionStore } from 'src/entities/Session';
-import { useSystemStore } from 'src/entities/System/model';
 import { useNotificationInboxStore } from './model';
 
 const store = useNotificationInboxStore();
-const session = useSessionStore();
-const { info } = useSystemStore();
-const router = useRouter();
-const menuRef = ref<QMenu | null>(null);
 
 const badgeLabel = computed(() => (store.unreadCount > 99 ? '99+' : String(store.unreadCount)));
-// Футер «Показать все» ведёт в полный журнал — он на столе председателя
-// (роль chairman). Для остальных пайщиков полной страницы пока нет — футер скрыт.
-const isChairman = computed(() => session.isChairman);
 
 function onOpen(): void {
   void store.loadInbox(true);
@@ -55,14 +41,6 @@ function onOpenNotification(id: string): void {
 
 function onMarkAllRead(): void {
   void store.markAllRead();
-}
-
-function onViewAll(): void {
-  menuRef.value?.hide();
-  void router.push({
-    name: 'chairman-notifications-journal',
-    params: { coopname: info.coopname },
-  });
 }
 
 onMounted(() => {
@@ -81,10 +59,13 @@ onBeforeUnmount(() => {
   align-items: center;
 }
 
+/* Бейдж вытолкнут за верхне-правый угол кнопки (translate), чтобы не
+   «наезжал» на глиф колокола (.icon-btn 32px, глиф 16px по центру). */
 .notification-bell__count {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 0;
+  right: 0;
+  transform: translate(45%, -45%);
   pointer-events: none;
 }
 </style>
