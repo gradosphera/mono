@@ -19,7 +19,7 @@ function toItem(n: IInboxNotification): NotificationItem {
     category: categoryFromWorkflowId(n.workflowId),
     title: n.title,
     description: n.body,
-    date: n.createdAt,
+    date: n.createdAt as string,
     read: n.isRead,
   };
 }
