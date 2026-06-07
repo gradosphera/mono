@@ -201,6 +201,7 @@ public:
   //decisions
   [[eosio::action]] void withdraw(eosio::name coopname, eosio::name username, uint64_t withdraw_id, document2 statement);
   [[eosio::action]] void cancelexprd(eosio::name coopname, uint64_t decision_id);
+  [[eosio::action]] void declinedec(eosio::name coopname, uint64_t decision_id);
 
   void withdraw_effect(eosio::name executer, eosio::name coopname, uint64_t decision_id, uint64_t batch_id);
   

@@ -1126,6 +1126,8 @@ export type ValueTypes = {
 	private_account?:ValueTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?:ValueTypes["RegistrationPayment"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
@@ -1981,8 +1983,6 @@ export type ValueTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
-	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on BankAccountDetails']?: Omit<ValueTypes["BankAccountDetails"], "...on BankAccountDetails">
 }>;
@@ -1990,9 +1990,7 @@ export type ValueTypes = {
 	/** БИК банка */
 	bik: string | Variable<any, string>,
 	/** Корреспондентский счет */
-	corr: string | Variable<any, string>,
-	/** КПП банка */
-	kpp: string | Variable<any, string>
+	corr: string | Variable<any, string>
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -2164,6 +2162,8 @@ export type ValueTypes = {
 	callback_contract?:boolean | `@${string}`,
 	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -4833,6 +4833,12 @@ export type ValueTypes = {
 	/** Причина отклонения */
 	reason: string | Variable<any, string>
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -4842,6 +4848,10 @@ export type ValueTypes = {
 	meta: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
+};
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string | Variable<any, string>
 };
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -6569,7 +6579,9 @@ createWebPushSubscription?: [{	data: ValueTypes["CreateSubscriptionInput"] | Var
 createWithdraw?: [{	data: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
 declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+declineDecision?: [{	data: ValueTypes["DeclineDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+deleteAccount?: [{	data: ValueTypes["DeleteAccountInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteReportDraft?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
@@ -6615,7 +6627,7 @@ moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, st
 notifyOnAnnualGeneralMeet?: [{	data: ValueTypes["NotifyOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 processConvertToAxonStatement?: [{	data: ValueTypes["ProcessConvertToAxonStatementInput"] | Variable<any, string>},boolean | `@${string}`],
 prohibitRequest?: [{	data: ValueTypes["ProhibitRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
+publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["AgendaWithDocuments"]],
 publishRequest?: [{	data: ValueTypes["PublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 receiveOnRequest?: [{	data: ValueTypes["ReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
@@ -6623,6 +6635,8 @@ registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, st
 registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 resendNotification?: [{	id: string | Variable<any, string>},ValueTypes["Notification"]],
 resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration?:ValueTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 saveReportDraft?: [{	input: ValueTypes["SaveReportDraftInput"] | Variable<any, string>},ValueTypes["ReportDraft"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -8227,6 +8241,20 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationConfig']?: Omit<ValueTypes["RegistrationConfig"], "...on RegistrationConfig">
 }>;
+	["RegistrationPayment"]: AliasType<{
+	/** Хэш платежа */
+	hash?:boolean | `@${string}`,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?:boolean | `@${string}`,
+	/** Сумма вступительного платежа */
+	quantity?:boolean | `@${string}`,
+	/** Статус вступительного платежа */
+	status?:boolean | `@${string}`,
+	/** Символ валюты платежа */
+	symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on RegistrationPayment']?: Omit<ValueTypes["RegistrationPayment"], "...on RegistrationPayment">
+}>;
 	["RegistrationProgram"]: AliasType<{
 	/** Для каких типов аккаунтов доступна программа */
 	applicable_account_types?:boolean | `@${string}`,
@@ -8909,6 +8937,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string | Variable<any, string>,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null | Variable<any, string>,
 	/** Новый статус платежа */
 	status: ValueTypes["PaymentStatus"] | Variable<any, string>
 };
@@ -9753,6 +9783,8 @@ export type ResolverInputTypes = {
 	private_account?:ResolverInputTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?:ResolverInputTypes["RegistrationPayment"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
@@ -10590,17 +10622,13 @@ export type ResolverInputTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
-	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -10768,6 +10796,8 @@ export type ResolverInputTypes = {
 	callback_contract?:boolean | `@${string}`,
 	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -13371,6 +13401,12 @@ export type ResolverInputTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -13380,6 +13416,10 @@ export type ResolverInputTypes = {
 	meta: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
 };
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -15058,7 +15098,9 @@ createWebPushSubscription?: [{	data: ResolverInputTypes["CreateSubscriptionInput
 createWithdraw?: [{	data: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
 declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
+declineDecision?: [{	data: ResolverInputTypes["DeclineDecisionInput"]},ResolverInputTypes["Transaction"]],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
+deleteAccount?: [{	data: ResolverInputTypes["DeleteAccountInput"]},boolean | `@${string}`],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteReportDraft?: [{	id: string},boolean | `@${string}`],
@@ -15104,7 +15146,7 @@ moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverI
 notifyOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["NotifyOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 processConvertToAxonStatement?: [{	data: ResolverInputTypes["ProcessConvertToAxonStatementInput"]},boolean | `@${string}`],
 prohibitRequest?: [{	data: ResolverInputTypes["ProhibitRequestInput"]},ResolverInputTypes["Transaction"]],
-publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
+publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},ResolverInputTypes["AgendaWithDocuments"]],
 publishRequest?: [{	data: ResolverInputTypes["PublishRequestInput"]},ResolverInputTypes["Transaction"]],
 receiveOnRequest?: [{	data: ResolverInputTypes["ReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["RegisteredAccount"]],
@@ -15112,6 +15154,8 @@ registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverI
 registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
 resendNotification?: [{	id: string},ResolverInputTypes["Notification"]],
 resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration?:ResolverInputTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 saveReportDraft?: [{	input: ResolverInputTypes["SaveReportDraftInput"]},ResolverInputTypes["ReportDraft"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
@@ -16651,6 +16695,19 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	requires_selection?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["RegistrationPayment"]: AliasType<{
+	/** Хэш платежа */
+	hash?:boolean | `@${string}`,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?:boolean | `@${string}`,
+	/** Сумма вступительного платежа */
+	quantity?:boolean | `@${string}`,
+	/** Статус вступительного платежа */
+	status?:boolean | `@${string}`,
+	/** Символ валюты платежа */
+	symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["RegistrationProgram"]: AliasType<{
 	/** Для каких типов аккаунтов доступна программа */
 	applicable_account_types?:boolean | `@${string}`,
@@ -17316,6 +17373,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: ResolverInputTypes["PaymentStatus"]
 };
@@ -18143,6 +18202,8 @@ export type ModelTypes = {
 	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?: ModelTypes["RegistrationPayment"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -18958,17 +19019,13 @@ export type ModelTypes = {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -19132,6 +19189,8 @@ export type ModelTypes = {
 	callback_contract?: string | undefined | null,
 	confirm_callback?: string | undefined | null,
 	coopname: string,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count: number,
 	created_at: string,
 	decline_callback?: string | undefined | null,
 	expired_at: string,
@@ -21661,6 +21720,12 @@ export type ModelTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -21670,6 +21735,10 @@ export type ModelTypes = {
 	meta: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
 };
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -23593,8 +23662,16 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: ModelTypes["Transaction"],
+	/** Отклонить решение совета по отрицательному консенсусу (большинство голосов против)
+
+Требуемые роли: chairman.  */
+	declineDecision: ModelTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
+	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
+
+Требуемые роли: chairman.  */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок
 
 Требуемые роли: chairman.  */
@@ -23755,10 +23832,10 @@ export type ModelTypes = {
 	processConvertToAxonStatement: boolean,
 	/** Отклонить модерацию по заявке */
 	prohibitRequest: ModelTypes["Transaction"],
-	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему
+	/** Опубликовать предложенную повестку и проект решения для голосования совета. Возвращает созданный пункт повестки (или null, если он ещё не проиндексирован) для немедленного отображения на фронте.
 
 Требуемые роли: chairman, member.  */
-	publishProjectOfFreeDecision: boolean,
+	publishProjectOfFreeDecision?: ModelTypes["AgendaWithDocuments"] | undefined | null,
 	/** Опубликовать заявку */
 	publishRequest: ModelTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
@@ -23777,6 +23854,8 @@ export type ModelTypes = {
 	resendNotification: ModelTypes["Notification"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration: ModelTypes["Account"],
 	/** Перезапуск общего собрания пайщиков
 
 Требуемые роли: chairman.  */
@@ -25493,6 +25572,18 @@ export type ModelTypes = {
 	/** Нужен ли выбор программы */
 	requires_selection: boolean
 };
+	["RegistrationPayment"]: {
+		/** Хэш платежа */
+	hash: string,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?: string | undefined | null,
+	/** Сумма вступительного платежа */
+	quantity: number,
+	/** Статус вступительного платежа */
+	status: ModelTypes["PaymentStatus"],
+	/** Символ валюты платежа */
+	symbol: string
+};
 	["RegistrationProgram"]: {
 		/** Для каких типов аккаунтов доступна программа */
 	applicable_account_types: Array<ModelTypes["AccountType"]>,
@@ -26137,6 +26228,8 @@ export type ModelTypes = {
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: ModelTypes["PaymentStatus"]
 };
@@ -26934,6 +27027,8 @@ export type GraphQLTypes = {
 	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?: GraphQLTypes["RegistrationPayment"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -27789,17 +27884,13 @@ export type GraphQLTypes = {
 	bik: string,
 	/** Корреспондентский счет */
 	corr: string,
-	/** КПП банка */
-	kpp: string,
 	['...on BankAccountDetails']: Omit<GraphQLTypes["BankAccountDetails"], "...on BankAccountDetails">
 };
 	["BankAccountDetailsInput"]: {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 		/** Номер банковского счета */
@@ -27972,6 +28063,8 @@ export type GraphQLTypes = {
 	callback_contract?: string | undefined | null,
 	confirm_callback?: string | undefined | null,
 	coopname: string,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count: number,
 	created_at: string,
 	decline_callback?: string | undefined | null,
 	expired_at: string,
@@ -30640,6 +30733,12 @@ export type GraphQLTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -30649,6 +30748,10 @@ export type GraphQLTypes = {
 	meta: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["DeleteAccountInput"]: {
+		/** Имя аккаунта пользователя */
+	username_for_delete: string
 };
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
@@ -32681,8 +32784,16 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: GraphQLTypes["Transaction"],
+	/** Отклонить решение совета по отрицательному консенсусу (большинство голосов против)
+
+Требуемые роли: chairman.  */
+	declineDecision: GraphQLTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
+	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
+
+Требуемые роли: chairman.  */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок
 
 Требуемые роли: chairman.  */
@@ -32843,10 +32954,10 @@ export type GraphQLTypes = {
 	processConvertToAxonStatement: boolean,
 	/** Отклонить модерацию по заявке */
 	prohibitRequest: GraphQLTypes["Transaction"],
-	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему
+	/** Опубликовать предложенную повестку и проект решения для голосования совета. Возвращает созданный пункт повестки (или null, если он ещё не проиндексирован) для немедленного отображения на фронте.
 
 Требуемые роли: chairman, member.  */
-	publishProjectOfFreeDecision: boolean,
+	publishProjectOfFreeDecision?: GraphQLTypes["AgendaWithDocuments"] | undefined | null,
 	/** Опубликовать заявку */
 	publishRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
@@ -32865,6 +32976,8 @@ export type GraphQLTypes = {
 	resendNotification: GraphQLTypes["Notification"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration: GraphQLTypes["Account"],
 	/** Перезапуск общего собрания пайщиков
 
 Требуемые роли: chairman.  */
@@ -34734,6 +34847,20 @@ export type GraphQLTypes = {
 	requires_selection: boolean,
 	['...on RegistrationConfig']: Omit<GraphQLTypes["RegistrationConfig"], "...on RegistrationConfig">
 };
+	["RegistrationPayment"]: {
+	__typename: "RegistrationPayment",
+	/** Хэш платежа */
+	hash: string,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?: string | undefined | null,
+	/** Сумма вступительного платежа */
+	quantity: number,
+	/** Статус вступительного платежа */
+	status: GraphQLTypes["PaymentStatus"],
+	/** Символ валюты платежа */
+	symbol: string,
+	['...on RegistrationPayment']: Omit<GraphQLTypes["RegistrationPayment"], "...on RegistrationPayment">
+};
 	["RegistrationProgram"]: {
 	__typename: "RegistrationProgram",
 	/** Для каких типов аккаунтов доступна программа */
@@ -35416,6 +35543,8 @@ export type GraphQLTypes = {
 	["SetPaymentStatusInput"]: {
 		/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: GraphQLTypes["PaymentStatus"]
 };
@@ -36520,6 +36649,7 @@ export enum PaymentStatus {
 export enum PaymentType {
 	DEPOSIT = "DEPOSIT",
 	REGISTRATION = "REGISTRATION",
+	REGISTRATION_REFUND = "REGISTRATION_REFUND",
 	WITHDRAWAL = "WITHDRAWAL"
 }
 export enum ProcessInstanceStatus {
@@ -36770,7 +36900,9 @@ type ZEUS_VARIABLES = {
 	["DebtStatus"]: ValueTypes["DebtStatus"];
 	["DeclineAgreementInput"]: ValueTypes["DeclineAgreementInput"];
 	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
+	["DeclineDecisionInput"]: ValueTypes["DeclineDecisionInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
+	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeleteCapitalIssueByHashInput"]: ValueTypes["DeleteCapitalIssueByHashInput"];
 	["DeleteCapitalStoryByHashInput"]: ValueTypes["DeleteCapitalStoryByHashInput"];

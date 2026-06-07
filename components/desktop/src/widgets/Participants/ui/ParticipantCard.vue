@@ -9,13 +9,24 @@
       .participant-card__email {{ participant.provider_account?.email || 'Email не указан' }}
     .participant-card__meta
       span.participant-card__date {{ formatDate(String(participant.participant_account?.created_at || '')) }}
-      q-checkbox(
-        :model-value='participant.participant_account?.status === "accepted"',
-        disable,
-        color='primary',
-        size='sm'
-      )
-        q-tooltip {{ participant.participant_account?.status === 'accepted' ? 'Активен' : 'Неактивен' }}
+      .participant-card__status
+        q-checkbox(
+          :model-value='participant.participant_account?.status === "accepted"',
+          disable,
+          color='primary',
+          size='sm'
+        )
+          q-tooltip {{ participant.participant_account?.status === 'accepted' ? 'Активен' : 'Неактивен' }}
+        BaseButton(
+          v-if='deletable',
+          variant='danger',
+          size='sm',
+          icon-only,
+          aria-label='Удалить пайщика',
+          @click.stop='$emit("delete", participant)'
+        )
+          template(#icon-left)
+            q-icon(name='delete_outline', size='18px')
     q-icon.participant-card__chevron(
       :name='expanded ? "expand_less" : "expand_more"',
       size='20px'
@@ -43,10 +54,12 @@ import {
 const props = defineProps<{
   participant: IAccount;
   expanded?: boolean;
+  deletable?: boolean;
 }>();
 
 const emit = defineEmits<{
   'toggle-expand': [];
+  delete: [participant: IAccount];
   update: [
     participant: IAccount,
     newData: IIndividualData | IOrganizationData | IEntrepreneurData,
@@ -132,6 +145,11 @@ const onUpdate = (
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-3);
   white-space: nowrap;
+}
+.participant-card__status {
+  display: flex;
+  align-items: center;
+  gap: var(--p-2, 8px);
 }
 
 .participant-card__chevron {

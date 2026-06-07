@@ -4,6 +4,11 @@
 export * as VerificateAccount from './verificateAccount'
 
 /**
+ * Действие отклонения регистрации кандидата советом (отказ в приёме).
+ */
+export * as DeclineRegistration from './declineRegistration'
+
+/**
  * Действие обновления публичных данных аккаунта
  */
 export * as UpdateAccount from './updateAccount'

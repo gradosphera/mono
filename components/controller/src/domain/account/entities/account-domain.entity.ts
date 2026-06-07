@@ -2,6 +2,7 @@ import { RegistratorContract, type SovietContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import type { MonoAccountDomainInterface } from '../interfaces/mono-account-domain.interface';
 import type { PrivateAccountDomainInterface } from '../interfaces/private-account-domain.interface';
+import type { RegistrationPaymentDomainInterface } from '../interfaces/registration-payment-domain.interface';
 
 export class AccountDomainEntity {
   public readonly username!: string;
@@ -10,6 +11,7 @@ export class AccountDomainEntity {
   public provider_account!: MonoAccountDomainInterface | null;
   public participant_account!: SovietContract.Tables.Participants.IParticipants | null;
   public private_account!: PrivateAccountDomainInterface | null;
+  public registration_payment?: RegistrationPaymentDomainInterface | null;
 
   constructor(data: AccountDomainEntity) {
     Object.assign(this, data);

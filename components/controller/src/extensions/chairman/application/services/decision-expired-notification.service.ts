@@ -181,9 +181,9 @@ export class DecisionExpiredNotificationService implements OnModuleInit, OnModul
         // Если поле expired_at не существует, добавляем
         if (!decision.expired_at) return true;
 
-        // Если решение уже принято и не требуется отменять принятые решения, пропускаем
-        if (decision.approved && !plugin.config.cancelApprovedDecisions) return false;
-
+        // По истечению срока гасим ВСЕ решения (и принятые, и нет). Отрицательно
+        // принятые решения отдельно снимает председатель действием declinedec —
+        // авто-отмена по сроку и явный отказ по консенсусу теперь развязаны.
         // Конвертируем дату из формата блокчейна в JavaScript Date
         const expiredDate = new Date(decision.expired_at);
 

@@ -91,3 +91,25 @@ export function NotifyAlert(title: string, body?: string, avatar?: string): void
     actions: [CLOSE_ACTION],
   });
 }
+
+// Тост обновления приложения. Правый нижний угол (там же, где все тосты),
+// timeout 0 (не исчезает сам): пользователь сам решает «Обновить»/«Позже».
+export function UpdateAlert(onApply: () => void, onDismiss?: () => void): void {
+  Notify.create({
+    message: 'Доступно обновление',
+    caption: 'Вышла новая версия рабочего стола. Без обновления часть функций может работать некорректно.',
+    type: 'info',
+    icon: 'update',
+    position: POSITION,
+    timeout: 0,
+    group: false,
+    multiLine: true,
+    classes: 'q-notification--app-update',
+    actions: [
+      { label: 'Обновить', noDismiss: true, handler: onApply },
+      { label: 'Позже', flat: true, size: 'sm', handler: (): void => { onDismiss?.(); } },
+      // Крестик закрытия — позиционируется в правый верхний угол тоста (CSS .app-update__close)
+      { icon: 'close', flat: true, round: true, size: 'sm', class: 'app-update__close', handler: (): void => { onDismiss?.(); } },
+    ],
+  });
+}

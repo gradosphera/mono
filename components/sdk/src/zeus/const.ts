@@ -379,7 +379,13 @@ export const AllTypesProps: Record<string,any> = {
 	DeclineApproveInput:{
 
 	},
+	DeclineDecisionInput:{
+
+	},
 	DeclineRequestInput:{
+
+	},
+	DeleteAccountInput:{
 
 	},
 	DeleteBranchInput:{
@@ -981,8 +987,14 @@ export const AllTypesProps: Record<string,any> = {
 		declineAgreement:{
 			data:"DeclineAgreementInput"
 		},
+		declineDecision:{
+			data:"DeclineDecisionInput"
+		},
 		declineRequest:{
 			data:"DeclineRequestInput"
+		},
+		deleteAccount:{
+			data:"DeleteAccountInput"
 		},
 		deleteBranch:{
 			data:"DeleteBranchInput"
@@ -1973,6 +1985,7 @@ export const ReturnTypes: Record<string,any> = {
 		participant_account:"ParticipantAccount",
 		private_account:"PrivateAccount",
 		provider_account:"MonoAccount",
+		registration_payment:"RegistrationPayment",
 		user_account:"UserAccount",
 		username:"String"
 	},
@@ -2103,8 +2116,7 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	BankAccountDetails:{
 		bik:"String",
-		corr:"String",
-		kpp:"String"
+		corr:"String"
 	},
 	BankPaymentMethod:{
 		created_at:"DateTime",
@@ -2196,6 +2208,7 @@ export const ReturnTypes: Record<string,any> = {
 		callback_contract:"String",
 		confirm_callback:"String",
 		coopname:"String",
+		council_members_count:"Float",
 		created_at:"String",
 		decline_callback:"String",
 		expired_at:"String",
@@ -3662,7 +3675,9 @@ export const ReturnTypes: Record<string,any> = {
 		createWithdraw:"CreateWithdrawResponse",
 		deactivateWebPushSubscriptionById:"Boolean",
 		declineAgreement:"Transaction",
+		declineDecision:"Transaction",
 		declineRequest:"Transaction",
+		deleteAccount:"Boolean",
 		deleteBranch:"Boolean",
 		deletePaymentMethod:"Boolean",
 		deleteReportDraft:"Boolean",
@@ -3708,7 +3723,7 @@ export const ReturnTypes: Record<string,any> = {
 		notifyOnAnnualGeneralMeet:"MeetAggregate",
 		processConvertToAxonStatement:"Boolean",
 		prohibitRequest:"Transaction",
-		publishProjectOfFreeDecision:"Boolean",
+		publishProjectOfFreeDecision:"AgendaWithDocuments",
 		publishRequest:"Transaction",
 		receiveOnRequest:"Transaction",
 		refresh:"RegisteredAccount",
@@ -3716,6 +3731,7 @@ export const ReturnTypes: Record<string,any> = {
 		registerParticipant:"Account",
 		resendNotification:"Notification",
 		resetKey:"Boolean",
+		resetRegistration:"Account",
 		restartAnnualGeneralMeet:"MeetAggregate",
 		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
@@ -4356,6 +4372,13 @@ export const ReturnTypes: Record<string,any> = {
 	RegistrationConfig:{
 		programs:"RegistrationProgram",
 		requires_selection:"Boolean"
+	},
+	RegistrationPayment:{
+		hash:"String",
+		message:"String",
+		quantity:"Float",
+		status:"PaymentStatus",
+		symbol:"String"
 	},
 	RegistrationProgram:{
 		applicable_account_types:"AccountType",

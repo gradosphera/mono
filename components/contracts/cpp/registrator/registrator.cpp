@@ -8,6 +8,8 @@
 #include "src/user/confirmreg.cpp"
 #include "src/user/declinereg.cpp"
 #include "src/user/declinepay.cpp"
+#include "src/user/refundpay.cpp"
+#include "src/user/declinerfnd.cpp"
 #include "src/user/reguser.cpp"
 
 #include "src/account/createbranch.cpp"

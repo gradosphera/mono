@@ -7,6 +7,7 @@ import { MonoAccountDTO } from './mono-account.dto';
 import { UserAccountDTO } from '~/application/account/dto/base-user-account.dto';
 import { ParticipantAccountDTO } from './participant-account.dto';
 import { PrivateAccountDTO } from './private-account.dto';
+import { RegistrationPaymentDTO } from './registration-payment.dto';
 
 @ObjectType('Account')
 export class AccountDTO {
@@ -58,6 +59,15 @@ export class AccountDTO {
   @Type(() => PrivateAccountDTO)
   public readonly private_account!: PrivateAccountDTO | null;
 
+  @Field(() => RegistrationPaymentDTO, {
+    description:
+      'сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке.',
+    nullable: true,
+  })
+  @ValidateNested()
+  @Type(() => RegistrationPaymentDTO)
+  public readonly registration_payment!: RegistrationPaymentDTO | null;
+
   constructor(entity: AccountDomainEntity) {
     this.username = entity.username;
     this.blockchain_account = entity.blockchain_account || null;
@@ -65,5 +75,8 @@ export class AccountDTO {
     this.user_account = entity.user_account ? new UserAccountDTO(entity.user_account) : null;
     this.participant_account = entity.participant_account ? new ParticipantAccountDTO(entity.participant_account) : null;
     this.private_account = entity.private_account ? new PrivateAccountDTO(entity.private_account) : null;
+    this.registration_payment = entity.registration_payment
+      ? new RegistrationPaymentDTO(entity.registration_payment)
+      : null;
   }
 }

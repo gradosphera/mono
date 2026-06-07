@@ -22,6 +22,7 @@ export interface ProcessMeta {
 export const LEDGER2_PROCESS_REGISTRY: readonly ProcessMeta[] = [
   // registrator
   { type: 'p.reg.accept',   contract: 'registrator',  name: 'ACCEPT',      human_name: 'Приём пайщика' },
+  { type: 'p.reg.refund',   contract: 'registrator',  name: 'REFUND',      human_name: 'Возврат регистрационного взноса при отказе совета' },
 
   // wallet
   { type: 'p.wal.depo',     contract: 'wallet',       name: 'DEPOSIT',     human_name: 'Внесение паевого взноса' },

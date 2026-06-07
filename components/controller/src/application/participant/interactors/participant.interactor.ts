@@ -15,6 +15,7 @@ import { userStatus } from '~/types/user.types';
 import { HttpApiError } from '~/utils/httpApiError';
 import { normalizeUserEmail } from '~/utils/normalize-user-email';
 import { sha256 } from '~/utils/sha256';
+import { registrationProfileFingerprint } from '~/utils/registration-profile-fingerprint';
 import http from 'http-status';
 import { PublicKey, Signature } from '@wharfkit/antelope';
 import { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
@@ -219,9 +220,27 @@ export class ParticipantInteractor {
       }
     }
 
+    // Гард A (замок профиля): фиксируем каноничный отпечаток удостоверяющих
+    // данных, под которыми подписано заявление. Перед регистрацией в блокчейне
+    // он сверяется — если профиль изменят после подписи и не переподпишут
+    // заявление, на цепь данные не уйдут. См. registerBlockchainAccount.
+    const signedAccount = await this.accountDomainService.getAccount(data.username);
+    const profileFingerprint = registrationProfileFingerprint(signedAccount?.private_account);
+
+    let candidateMeta: Record<string, any> = {};
+    try {
+      candidateMeta = candidate.meta ? JSON.parse(candidate.meta) : {};
+    } catch {
+      candidateMeta = {};
+    }
+    if (profileFingerprint) {
+      candidateMeta.registration_profile_fingerprint = profileFingerprint;
+    }
+
     await this.candidateRepository.update(data.username, {
       braname: data.braname,
       program_key: data.program_key,
+      meta: JSON.stringify(candidateMeta),
     });
 
     // Обновляем статус пользователя
