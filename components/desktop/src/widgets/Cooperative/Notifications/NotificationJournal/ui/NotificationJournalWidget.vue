@@ -123,7 +123,7 @@ async function resolveRecipientNames(): Promise<void> {
         // getName может вернуть «undefined undefined …» если private_account
         // недоступен/пустой — вычищаем, тогда покажем только username.
         name = account
-          ? getName(account).replace(/undefined/g, '').replace(/\s+/g, ' ').trim()
+          ? (getName(account) ?? '').replace(/undefined/g, '').replace(/\s+/g, ' ').trim()
           : '';
       } catch {
         name = '';
