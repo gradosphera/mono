@@ -99,6 +99,7 @@ import { getName } from 'src/shared/lib/utils';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { useAccountStore } from 'src/entities/Account/model';
 import { SuccessAlert, FailAlert } from 'src/shared/api';
+import { Zeus } from '@coopenomics/sdk';
 import {
   type IAccount,
   type IIndividualData,
@@ -106,13 +107,20 @@ import {
   type IEntrepreneurData,
 } from 'src/entities/Account/types';
 
-// Удалять можно только незавершённые/отклонённые регистрации без следа в цепи.
-// Зеркалит серверный guard в account.interactor.deleteAccount: активный
-// (registered/active, есть blockchain/participant) и заблокированный — нельзя.
-const DELETABLE_STATUSES = ['created', 'joined', 'payed', 'failed', 'refunded'];
+// Удаляем регистрационную воронку до приёма + терминальные отказы. Зеркалит
+// серверный guard в account.interactor.deleteAccount: принятый
+// (participant_account) и пост-регистрационные Registered/Active/Blocked — нельзя.
+// blockchain_account для гейта НЕ годится — он есть уже у статуса Created.
+const DELETABLE_STATUSES = [
+  Zeus.UserStatus.Created,
+  Zeus.UserStatus.Joined,
+  Zeus.UserStatus.Payed,
+  Zeus.UserStatus.Failed,
+  Zeus.UserStatus.Refunded,
+];
 
 const isDeletable = (account: IAccount): boolean => {
-  if (account.blockchain_account || account.participant_account) return false;
+  if (account.participant_account) return false;
   const status = account.provider_account?.status;
   return !!status && DELETABLE_STATUSES.includes(status);
 };
