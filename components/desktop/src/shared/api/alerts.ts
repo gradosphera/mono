@@ -1,6 +1,7 @@
 import { Notify } from 'quasar';
 import { extractGraphQLErrorMessages } from './errors';
 import { formatAssetsInText } from 'src/shared/lib/utils/formatAsset2Digits';
+import { sanitizeBlockchainError } from 'src/shared/lib/utils/sanitizeBlockchainError';
 
 /**
  * Canon-тосты платформы. Единый визуал и поведение для всех типов
@@ -64,10 +65,22 @@ export function SuccessAlert(
 export function FailAlert(error: unknown, text?: string): void {
   let message = extractGraphQLErrorMessages(error);
   message = message.replace('assertion failure with message: ', '');
+
+  // Полный технический текст ошибки — в консоль для разработчиков. Пользователю
+  // ниже показываем очищенную версию, но сырой ассерт цепи остаётся доступен
+  // здесь (и в логах контроллера).
+  // eslint-disable-next-line no-console
+  console.error('[FailAlert]', message, error);
+
   // Суммы из ошибок цепи приходят «сырыми» (precision=4: "100.0000 RUB").
   // Приводим к виду «2 знака» через единый форматтер — единая точка для
   // всех тостов ошибок (см. formatAssetsInText).
   message = formatAssetsInText(message);
+  // Снимаем технические детали ассертов контрактов (scope-префикс вида
+  // `walletop TRANSFER:` и служебные имена кошельков `w.wal.share`), чтобы
+  // пользователь видел «Недостаточно средств на кошельке», а не внутреннюю
+  // механику. Единая точка очистки для всех тостов ошибок.
+  message = sanitizeBlockchainError(message);
 
   Notify.create({
     message: text ? `${text}: ${message}` : message,
