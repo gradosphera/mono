@@ -509,9 +509,16 @@ export class GatewayInteractor {
   }
 
   /**
-   * Создать исходящий платеж (withdraw)
+   * Подготовить исходящий платеж (withdraw) к созданию: все валидации + сборка
+   * записи, но БЕЗ записи в БД.
+   *
+   * Вынесено отдельно от персиста, чтобы вызывающий мог сначала провести
+   * валидацию, затем выполнить on-chain транзакцию, и только при её успехе
+   * зафиксировать платёж (см. WalletInteractor.createWithdraw). Иначе при
+   * отклонении транзакции блокчейном (например, недостаточно L3-средств) в
+   * разделе «Платежи» оставался бы фантомный исходящий платёж со статусом FAILED.
    */
-  async createWithdraw(data: CreateWithdrawPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
+  async prepareWithdraw(data: CreateWithdrawPaymentInputDomainInterface): Promise<PaymentDomainInterface> {
     // Обновляем истекшие платежи перед созданием нового
     await this.paymentRepository.expireOutdatedPayments();
 
@@ -580,7 +587,14 @@ export class GatewayInteractor {
       hash: data.payment_hash, // Используем переданный payment_hash
     };
 
-    // Создаем платеж в базе данных
+    return paymentData;
+  }
+
+  /**
+   * Зафиксировать ранее подготовленный исходящий платеж в БД.
+   * Вызывается только после успешной on-chain транзакции.
+   */
+  async persistWithdraw(paymentData: PaymentDomainInterface): Promise<PaymentDomainEntity> {
     const createdPayment = await this.paymentRepository.create(paymentData);
 
     if (!createdPayment.id) {
@@ -588,10 +602,22 @@ export class GatewayInteractor {
     }
 
     this.logger.log(
-      `Создан исходящий платеж ${data.payment_hash} для пользователя ${data.username} на сумму ${data.quantity} ${data.symbol} с платежным методом ${data.method_id}`
+      `Создан исходящий платеж ${paymentData.hash} для пользователя ${paymentData.username} на сумму ${paymentData.quantity} ${paymentData.symbol} с платежным методом ${paymentData.payment_method_id}`
     );
 
     return new PaymentDomainEntity(createdPayment);
+  }
+
+  /**
+   * Создать исходящий платеж (withdraw): подготовка + немедленный персист.
+   *
+   * Не использует on-chain проверку — подходит только там, где запись о платеже
+   * в БД должна существовать безусловно. Для возврата паевого взноса используется
+   * связка prepareWithdraw → on-chain транзакция → persistWithdraw.
+   */
+  async createWithdraw(data: CreateWithdrawPaymentInputDomainInterface): Promise<PaymentDomainEntity> {
+    const paymentData = await this.prepareWithdraw(data);
+    return await this.persistWithdraw(paymentData);
   }
 
   /**
