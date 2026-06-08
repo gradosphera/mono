@@ -327,6 +327,9 @@ function plural(n: number, one: string, few: string, many: string): string {
   font-size: var(--p-fs-body-sm, 13px);
   line-height: var(--p-lh-body-sm, 1.5);
   color: var(--p-ink-2);
+  /* In-app тела несут перенос строки как \n (не HTML <br> — тело рендерится
+     как текст, без v-html: payload содержит ФИО/заголовки = XSS-вектор). */
+  white-space: pre-line;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
