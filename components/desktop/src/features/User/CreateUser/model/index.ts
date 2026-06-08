@@ -323,7 +323,7 @@ export function useCreateUser() {
     if (synthData.type === Zeus.AccountType.individual) {
       synthData.individual_data = userData.individual_data;
     } else if (synthData.type === Zeus.AccountType.organization) {
-      // strip устаревший «КПП банка» из persisted-localStorage перед отправкой
+      // TODO(удалить после 01.09.2026): strip устаревший «КПП банка» из persisted-localStorage
       synthData.organization_data = stripLegacyBankKpp(userData.organization_data);
     } else if (synthData.type === Zeus.AccountType.entrepreneur) {
       synthData.entrepreneur_data = stripLegacyBankKpp(userData.entrepreneur_data);

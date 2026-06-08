@@ -46,6 +46,7 @@ export function useAddUser() {
           ? (state.userData
               .individual_data as Zeus.ModelTypes['CreateIndividualDataInput'])
           : undefined,
+      // TODO(удалить после 01.09.2026): stripLegacyBankKpp — временный shim persisted-localStorage
       organization_data:
         state.userData.type === 'organization'
           ? stripLegacyBankKpp(
