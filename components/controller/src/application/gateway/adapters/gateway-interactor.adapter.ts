@@ -12,6 +12,7 @@ import type {
 } from '~/domain/common/interfaces/pagination.interface';
 import { PaymentDomainEntity } from '~/domain/gateway/entities/payment-domain.entity';
 import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum';
+import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 
 @Injectable()
 export class GatewayInteractorAdapter implements GatewayInteractorPort {
@@ -34,6 +35,14 @@ export class GatewayInteractorAdapter implements GatewayInteractorPort {
 
   async createWithdraw(data: CreateWithdrawInputDomainInterface): Promise<PaymentDomainEntity> {
     return await this.gatewayInteractor.createWithdraw(data);
+  }
+
+  async prepareWithdraw(data: CreateWithdrawInputDomainInterface): Promise<PaymentDomainInterface> {
+    return await this.gatewayInteractor.prepareWithdraw(data);
+  }
+
+  async persistWithdraw(paymentData: PaymentDomainInterface): Promise<PaymentDomainEntity> {
+    return await this.gatewayInteractor.persistWithdraw(paymentData);
   }
 
   async setPaymentStatus(data: SetPaymentStatusInputDomainInterface): Promise<PaymentDomainEntity> {
