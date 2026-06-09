@@ -322,7 +322,6 @@ jobs:
           # из отдельного coopenomics/parser repo.
           build_service cooparser     '@coopenomics/parser'         start
           build_service notificator   'coop-notificator'            start
-          build_service email-relay   '@coopenomics/email-relay'    start
           build_service notifications '@coopenomics/notifications'  sync
 
       # === Этап 3: webhook деплоя ===

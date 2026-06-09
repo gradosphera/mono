@@ -106,27 +106,6 @@ services:
     working_dir: /app
     command: pnpm --filter @coopenomics/desktop run dev
 
-  # HTTP→SMTP релей. Конфиг (RELAY_TOKEN, SMTP_*) — в components/email-relay/.env
-  # (как coopback). Сам ходит в SMTP через nodemailer. На проде ставится отдельно
-  # плейбуком на сервере с открытыми портами (см. playbooks/email-relay).
-  email-relay:
-    build:
-      context: ./
-      dockerfile: components/controller/Dockerfile
-    image: coopback
-    env_file:
-      - ./components/email-relay/.env
-    restart: unless-stopped
-    user: "1000:1000"
-    environment:
-      HOME: /tmp
-    volumes:
-      - ./:/app
-    ports:
-      - "127.0.0.1:${EMAIL_RELAY_HOST_PORT:-3025}:3025"
-    working_dir: /app
-    command: pnpm --filter @coopenomics/email-relay run dev
-
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     restart: unless-stopped
