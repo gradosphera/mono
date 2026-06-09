@@ -55,6 +55,9 @@ export class WebPushChannelAdapter implements WebPushChannelPort {
     const title = renderTemplate(template?.subject, message) || 'Уведомление';
     const body = renderTemplate(template?.body, message);
 
+    // info-уровень: видно сколько эндпоинтов адресуем (диагностика «push не пришёл»).
+    this.logger.log(`web-push → '${username}': ${subscriptions.length} активн. подписк(а), workflow=${message.workflowId}`);
+
     let anyDelivered = false;
     for (const subscription of subscriptions) {
       const dto = new WebPushSubscriptionDto(new WebPushSubscriptionDomainEntity(subscription));

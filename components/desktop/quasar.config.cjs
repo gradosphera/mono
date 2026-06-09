@@ -274,6 +274,12 @@ module.exports = configure(function (ctx) {
           useCredentialsForManifestTag: false,
           useFilenameHashes: true, // Включаем хеширование файлов
           extendGenerateSWOptions(cfg) {
+            // Push-обработчик. В режиме GenerateSW Quasar игнорирует
+            // sourceFiles.serviceWorker (custom-service-worker.ts), поэтому
+            // обработчик push/notificationclick подмешиваем в генерируемый SW
+            // через importScripts из статического public/push-sw.js. Без этого
+            // push доходит до браузера, но SW его не показывает.
+            cfg.importScripts = ['push-sw.js'];
             // Увеличиваем максимальный размер файла для кэширования
             cfg.maximumFileSizeToCacheInBytes = 5 * 1024 * 1024; // 5MB
             // Не включаем ревизию для определенных файлов

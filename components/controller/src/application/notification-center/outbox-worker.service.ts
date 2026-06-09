@@ -142,7 +142,8 @@ export class OutboxWorkerService implements OnModuleInit {
       row.status = NotificationOutboxStatus.CANCELED;
       row.lastError = result.error;
       await this.outboxRepository.save(row);
-      this.logger.debug(`Канал пропущен (неприменим к получателю): ${ctx}: ${result.error}`);
+      // info-уровень: председатель/оператор должен видеть, что и почему не ушло.
+      this.logger.log(`Канал пропущен (неприменим к получателю): ${ctx}: ${result.error}`);
       return;
     }
 
@@ -164,7 +165,8 @@ export class OutboxWorkerService implements OnModuleInit {
     if (result.delivered) {
       row.status = NotificationOutboxStatus.SENT;
       row.lastError = undefined;
-      this.logger.debug(`Доставлено: ${ctx}`);
+      // info-уровень: каждая успешная доставка видна в логах без рытья в БД.
+      this.logger.log(`Доставлено: ${ctx}${result.providerResponse ? ` (${result.providerResponse})` : ''}`);
     } else if (row.attempts >= row.maxAttempts) {
       // Попытки исчерпаны — терминальный failed (виден/переотправляем на столе председателя).
       row.status = NotificationOutboxStatus.FAILED;
