@@ -19,13 +19,20 @@ module.exports = configure(function (ctx) {
   const isSPA = ctx.mode.spa;
   // Загружаем переменные окружения всегда в режиме разработки
   // или только для клиентской части в продакшн
-  const env =
-    isDev || isSPA
+  // Версия пакета (CalVer, lockstep через lerna) запекается в бандл как
+  // process.env.APP_VERSION — это «запущенная» версия клиента: показываем в UI
+  // и сверяем с self-report SSR-ноды (/version) для оповещения об обновлении.
+  const APP_VERSION = require('./package.json').version;
+
+  const env = {
+    ...(isDev || isSPA
       ? require('dotenv').config().parsed
       : {
           CLIENT: process.env.CLIENT,
           SERVER: process.env.SERVER,
-        };
+        }),
+    APP_VERSION,
+  };
 
   return {
     htmlVariables: {
@@ -248,6 +255,7 @@ module.exports = configure(function (ctx) {
       middlewares: [
         'generateConfig', // middleware для генерации config.js с переменными окружения
         'dynamicManifest', // динамический /manifest.json с именем коопа из env (пер-кооп установочник)
+        'version', // self-report версии ноды (/version) для оповещения об обновлении
         'render', // keep this as last one
       ],
 

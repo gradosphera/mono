@@ -1,10 +1,11 @@
 import { boot } from 'quasar/wrappers';
 import { UpdateAlert } from 'src/shared/api/alerts';
 
-// Связывает событие service worker'а ('sw:update-available' из
-// src-pwa/register-service-worker.ts) с канон-тостом. SW не может звать Quasar
-// Notify напрямую — только через window-событие. По «Обновить» зовём
-// window.applyUpdate() → SKIP_WAITING → controllerchange → reload (см. register-service-worker.ts).
+// Связывает window-событие 'sw:update-available' с канон-тостом. Источник события —
+// version-watch (src/entities/AppVersion) по self-report ноды /version; lifecycle
+// service worker'а как триггер отключён (ненадёжен на iOS standalone и др.).
+// По «Обновить» зовём window.applyUpdate() (SKIP_WAITING → controllerchange → reload,
+// либо прямой reload если waiting-SW нет — см. register-service-worker.ts).
 export default boot(() => {
   if (typeof window === 'undefined') return; // SSR-safe: только клиент
 
