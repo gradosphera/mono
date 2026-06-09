@@ -325,7 +325,13 @@ onMounted(() => {
 .pay-card__name {
   font-weight: 500;
   color: var(--p-ink-1);
-  overflow-wrap: anywhere;
+  /* Имя занимает свободную ширину и обрезается «…», а не рассыпается в
+     столбик, когда рядом длинный бейдж статуса. */
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pay-card__amount {
@@ -333,6 +339,7 @@ onMounted(() => {
   align-items: center;
   font-weight: 500;
   white-space: nowrap;
+  flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
 
@@ -340,7 +347,8 @@ onMounted(() => {
   color: var(--p-ink-2);
   font-size: var(--p-fs-body-sm);
   text-align: right;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .pay-card__row--meta {
@@ -397,7 +405,7 @@ onMounted(() => {
 }
 
 .cell-name {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .dir {

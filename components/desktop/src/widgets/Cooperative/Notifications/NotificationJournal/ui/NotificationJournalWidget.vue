@@ -250,9 +250,13 @@ onMounted(() => {
   overflow-x: auto;
 }
 
+/* 7 колонок с кнопкой «Переотправить» не влезают в телефон осмысленно —
+   таблица скроллится по горизонтали (.table-scroll). Глобальный канон форсит
+   .table{min-width:0!important}+table-layout:auto, схлопывая колонки в буквы-
+   в-столбик; перебиваем !important+специфичностью scope, чтобы вернуть скролл. */
 .table {
-  table-layout: fixed;
-  min-width: 960px;
+  table-layout: fixed !important;
+  min-width: 960px !important;
 }
 
 .col-date {
@@ -269,7 +273,7 @@ onMounted(() => {
 }
 
 .cell-recipient {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   display: flex;
   flex-direction: column;
   align-items: flex-start;

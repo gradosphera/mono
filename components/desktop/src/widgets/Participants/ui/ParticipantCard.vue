@@ -2,7 +2,7 @@
 .participant-card
   .participant-card__head(@click='$emit("toggle-expand")')
     .participant-card__avatar
-      q-icon(name='fa-solid fa-user', size='18px')
+      q-icon(name='person', size='20px')
     .participant-card__id
       .participant-card__name {{ getName(participant) }}
       .participant-card__account {{ participant.username }}
@@ -116,17 +116,24 @@ const onUpdate = (
   flex: 1 1 auto;
   min-width: 0;
 }
+/* Имя/аккаунт/email обрезаются «…» в одну строку, а не рассыпаются в столбик
+   по буквам, когда бейдж «Активный пайщик» съедает ширину meta-колонки.
+   Полные значения видны в раскрытой карточке (ParticipantDetails). */
 .participant-card__name {
   font-size: var(--p-fs-h3, 15px);
   font-weight: 600;
   color: var(--p-ink);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .participant-card__account,
 .participant-card__email {
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .participant-card__meta {

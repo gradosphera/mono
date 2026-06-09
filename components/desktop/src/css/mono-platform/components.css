@@ -491,7 +491,9 @@ body {
   .table thead th,
   .table tbody td {
     white-space: normal;
-    overflow-wrap: anywhere;
+    /* break-word, не anywhere: длинные значения переносятся по границам слов,
+       а не по каждой букве (иначе «Новая заявка» рассыпается в столбик). */
+    overflow-wrap: break-word;
     padding: 12px 10px;
   }
 }
