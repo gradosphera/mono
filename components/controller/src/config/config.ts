@@ -76,6 +76,10 @@ const envVarsSchema = z.object({
   SMTP_USERNAME: z.string().default(''), // Пустая строка для необязательного значения
   SMTP_PASSWORD: z.string().default(''), // Пустая строка для необязательного значения
   EMAIL_FROM: z.string().default(''), // Пустая строка для необязательного значения
+  // HTTP→SMTP релей (@coopenomics/email-relay). Если URL задан — письма уходят
+  // POST'ом на релей вместо прямого SMTP (хостинг кооператива может резать порты).
+  EMAIL_RELAY_URL: z.string().default(''),
+  EMAIL_RELAY_TOKEN: z.string().default(''),
   COOPNAME: z.string().min(1, { message: 'Не должно быть пустым' }).default('voskhod'), // Задаём дефолтное значение, пустая строка невалидна
   TIMEZONE: z.string().min(1, { message: 'Не должно быть пустым' }).default('Europe/Moscow'), // Пустая строка невалидна
   GRAPHQL_SERVICE: z
@@ -250,6 +254,10 @@ export default {
       },
     },
     from: envVars.data.EMAIL_FROM,
+    relay: {
+      url: envVars.data.EMAIL_RELAY_URL,
+      token: envVars.data.EMAIL_RELAY_TOKEN,
+    },
   },
   coopname: envVars.data.COOPNAME,
   graphql_service: envVars.data.GRAPHQL_SERVICE,
