@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/email-relay",
-  "version": "2026.6.9-4",
+  "version": "2026.6.9-alpha-5",
   "description": "HTTP→SMTP релей: принимает письма по HTTPS (Bearer-токен) и отправляет их по SMTP. Нужен там, где у кооператива закрыт исходящий SMTP — релей ставится на сервер с открытыми портами.",
   "type": "commonjs",
   "private": true,
