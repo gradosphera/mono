@@ -105,8 +105,24 @@ if (!shouldRegisterSW) {
     }
   };
 
-  // Регистрируем Service Worker (указываем явный путь для SSR режима)
-  register(process.env.SERVICE_WORKER_FILE || '/service-worker.js', {
+  // Диагностический таймстемп первого старта (грепается по слову BOOTRACE).
+  const bootraceTs = (): string => {
+    try {
+      return `${Math.round(performance.now())}ms`;
+    } catch {
+      return '?';
+    }
+  };
+
+  // [FIX-2] Регистрацию SW откладываем до window 'load'. Раньше register()
+  // вызывался на этапе eval модуля — и фоновой precache всего build-manifest
+  // (до 5 МБ/файл) стартовал ОДНОВРЕМЕННО с первой отрисовкой и догрузкой ленивых
+  // чанков маршрутов, конкурируя за сеть. На холодном заходе в проде это и
+  // приводило к провалу import() чанка → пустой router-view. После 'load'
+  // критический путь уже отрисован, precache идёт «вторым эшелоном».
+  const doRegister = () => {
+    console.log(`[BOOTRACE] ${bootraceTs()} SW: старт регистрации (после window load)`);
+    register(process.env.SERVICE_WORKER_FILE || '/service-worker.js', {
     // The registrationOptions object will be passed as the second argument
     // to ServiceWorkerContainer.register()
     // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register#Parameter
@@ -238,6 +254,15 @@ if (!shouldRegisterSW) {
         console.log('Приложение будет работать без Service Worker');
     },
   });
+  };
+
+  // window.load уже мог пройти к моменту eval (SSR-гидратация быстрая) —
+  // тогда регистрируем сразу, иначе ждём событие load.
+  if (document.readyState === 'complete') {
+    doRegister();
+  } else {
+    window.addEventListener('load', () => doRegister(), { once: true });
+  }
 
   // Присваиваем функции глобальному объекту window
   window.applyUpdate = applyUpdate;

@@ -13,12 +13,27 @@ import { LocalStorage } from 'quasar';
 // Проверка, работаем ли мы на сервере (SSR)
 const isServer = typeof window === 'undefined';
 
+// [BOOTRACE] Диагностика порядка инициализации первого холодного старта.
+// Грепается по слову BOOTRACE. Логируем только на клиенте — гонка именно там.
+function bootrace(stage: string): void {
+  if (isServer) return;
+  let ts = '?';
+  try {
+    ts = `${Math.round(performance.now())}ms`;
+  } catch {
+    /* noop */
+  }
+  console.log(`[BOOTRACE] ${ts} initApp: ${stage}`);
+}
+
 export async function useInitAppProcess(router: Router) {
+  bootrace('start');
   applyThemeFromStorage();
   const system = useSystemStore();
 
   try {
     await system.loadSystemInfo();
+    bootrace('loadSystemInfo OK');
 
     // Сохраняем реферала из URL, если он есть
     if (!isServer) {
@@ -31,6 +46,7 @@ export async function useInitAppProcess(router: Router) {
       }
     }
   } catch (error) {
+    bootrace('loadSystemInfo FAIL');
     console.warn('Failed to load initial system info, backend might be unavailable:', error);
     // Продолжаем инициализацию даже при недоступности бэкенда
   }
@@ -49,15 +65,19 @@ export async function useInitAppProcess(router: Router) {
 
   try {
   await desktops.loadDesktop();
+  bootrace('loadDesktop OK');
   } catch (error) {
+    bootrace('loadDesktop FAIL');
     console.warn('Failed to load desktop configuration:', error);
     // Продолжаем инициализацию даже при ошибках загрузки десктопа
   }
 
   // Регистрируем маршруты рабочего стола до выбора активного рабочего стола
   desktops.registerWorkspaceMenus(router);
+  bootrace(`registerWorkspaceMenus done (routes=${router.getRoutes().length})`);
 
   await useInitWalletProcess().run();
+  bootrace('initWallet done');
 
   // Выбираем authorized-рабочий стол только если пайщик принят советом
   // (status='active'). На промежуточных статусах оставляем дефолтный
@@ -70,7 +90,9 @@ export async function useInitAppProcess(router: Router) {
   useBranchOverlayProcess();
 
   setupNavigationGuard(router);
+  bootrace('navigationGuard installed');
 
   await useInitExtensionsProcess(router);
+  bootrace(`initExtensions done (routes=${router.getRoutes().length})`);
 
 }
