@@ -294,11 +294,16 @@ async function onLogout(): Promise<void> {
 .left-drawer-menu__hidden-dialogs {
   display: none;
 }
+/* Кнопка «Выйти» из RailUserCard — урезаем нижний padding, чтобы версия
+   шла сразу под ней без лишнего вертикального зазора. */
+:deep(.rail__signout) {
+  padding-bottom: var(--p-1, 4px);
+}
 /* Версия приложения — приглушённая подпись под карточкой пользователя. */
 .left-drawer-menu__version {
   text-align: center;
-  padding: var(--p-1, 4px) var(--p-2, 8px) var(--p-2, 8px);
-  font-size: var(--p-fs-eyebrow, 11px);
+  padding: 0 var(--p-2, 8px) var(--p-1, 4px);
+  font-size: 10px;
   color: var(--p-ink-3);
   user-select: none;
 }
