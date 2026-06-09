@@ -189,16 +189,22 @@ export class AccountInteractor {
    * Назначение — почистить реестр от незавершённых/отклонённых регистраций
    * (тестеры, брошенные попытки) и освободить занятый e-mail для перерегистрации.
    *
-   * Различитель — СТАТУС, не наличие blockchain_account: on-chain аккаунт в этой
-   * среде заводится рано и присутствует уже у статуса `created`, поэтому он НЕ
-   * признак «принят/зарегистрирован» и для гейта не годится.
+   * Единственный гард — НЕ принят в кооператив. participant_account
+   * (accepted|blocked) появляется только после приёма советом, его наличие ⟺ член
+   * кооператива. Всё остальное (черновик, заявление, оплачен/на рассмотрении
+   * совета, отклонён, возврат) удаляемо — это и есть «незавершённая регистрация».
    *
-   * Запрещаем, только если:
-   *  - пайщик принят в кооператив (есть participant_account: accepted/blocked) —
-   *    активный член;
-   *  - статус пост-регистрационный (registered = после приёма вступительного
-   *    платежа, active) или blocked, либо любой будущий не-регистрационный —
-   *    allow-list fail-closed.
+   * Статус для гейта НЕ годится: воронка реально доходит лишь до `registered`
+   * (отказ совета и возврат взноса оставляют статус `registered`, а `failed`/
+   * `refunded` users.status никем не выставляются). Прежний allow-list
+   * `[created, joined, payed, failed, refunded]` исключал именно отклонённые/
+   * оплаченные брошенные регистрации — ровно те, ради которых задумана чистка.
+   *
+   * On-chain аккаунт заводится при оплате взноса (статус registered) и в EOSIO
+   * неудаляем — остаётся осиротевшим, имя в цепи занято навсегда. Для
+   * регистрационной чистки это приемлемо: off-chain учёт провайдера и цепь
+   * намеренно расходятся (см. registration-decline.listener — карточку кандидата
+   * на цепи снимает refundpay, системный аккаунт остаётся).
    */
   async deleteAccount(username: string): Promise<void> {
     const account = await this.accountDomainService.getAccount(username);
@@ -207,23 +213,6 @@ export class AccountInteractor {
       throw new HttpApiError(
         HttpStatus.BAD_REQUEST,
         'Пайщик принят в кооператив — удаление невозможно.'
-      );
-    }
-
-    // Регистрационная воронка до приёма вступительного платежа + терминальные
-    // отказы. Registered/Active/Blocked — НЕ удаляем.
-    const deletableStatuses: userStatus[] = [
-      userStatus['1_Created'],
-      userStatus['2_Joined'],
-      userStatus['3_Payed'],
-      userStatus['10_Failed'],
-      userStatus['100_Refunded'],
-    ];
-    const status = account.provider_account?.status as userStatus | undefined;
-    if (!status || !deletableStatuses.includes(status)) {
-      throw new HttpApiError(
-        HttpStatus.BAD_REQUEST,
-        'Удаление доступно только для пайщиков в незавершённом регистрационном статусе.'
       );
     }
 

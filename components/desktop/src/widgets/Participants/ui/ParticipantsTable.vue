@@ -80,6 +80,8 @@ BaseDialog(
     | Удалить аккаунт пайщика «{{ deleteTarget ? getName(deleteTarget) : '' }}» из реестра?
     br
     | Действие необратимо. E-mail освободится для повторной регистрации.
+  BaseBanner.q-mt-md(v-if='isOnChainRegistered(deleteTarget)', variant='warn')
+    | Аккаунт уже зарегистрирован в блокчейне (после оплаты взноса). Запись в цепи удалить нельзя — имя «{{ deleteTarget?.username }}» останется занятым навсегда, из реестра провайдера он лишь исчезнет. Если заявка ещё на рассмотрении совета — сначала отклоните её в повестке.
   template(#footer)
     BaseButton(variant='ghost', :disabled='deleting', @click='confirmOpen = false') Отменить
     BaseButton(variant='danger', :loading='deleting', @click='confirmDelete') Удалить
@@ -103,23 +105,19 @@ import {
   type IEntrepreneurData,
 } from 'src/entities/Account/types';
 
-// Удаляем регистрационную воронку до приёма + терминальные отказы. Зеркалит
-// серверный guard в account.interactor.deleteAccount: принятый
-// (participant_account) и пост-регистрационные Registered/Active/Blocked — нельзя.
-// blockchain_account для гейта НЕ годится — он есть уже у статуса Created.
-const DELETABLE_STATUSES = [
-  Zeus.UserStatus.Created,
-  Zeus.UserStatus.Joined,
-  Zeus.UserStatus.Payed,
-  Zeus.UserStatus.Failed,
-  Zeus.UserStatus.Refunded,
-];
+// Удаляем любой аккаунт, который ещё НЕ стал принятым пайщиком. participant_account
+// (accepted|blocked) появляется только после приёма советом — его наличие ⟺ член
+// кооператива, такого не трогаем. Всё прочее (черновик, заявление, оплачен/на
+// рассмотрении совета, отклонён, возврат) — удаляемо. Зеркалит серверный guard в
+// account.interactor.deleteAccount. Статус для гейта НЕ годится: воронка реально
+// доходит лишь до Registered (отказ совета/возврат оставляют Registered, а
+// Payed/Failed/Refunded users.status никем не выставляются).
+const isDeletable = (account: IAccount): boolean => !account.participant_account;
 
-const isDeletable = (account: IAccount): boolean => {
-  if (account.participant_account) return false;
-  const status = account.provider_account?.status;
-  return !!status && DELETABLE_STATUSES.includes(status);
-};
+// On-chain аккаунт заводится при оплате взноса (статус Registered) и в EOSIO
+// неудаляем — предупреждаем председателя, что запись в цепи останется.
+const isOnChainRegistered = (account: IAccount | null): boolean =>
+  account?.provider_account?.status === Zeus.UserStatus.Registered;
 
 // Props
 defineProps<{
