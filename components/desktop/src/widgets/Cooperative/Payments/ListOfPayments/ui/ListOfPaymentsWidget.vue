@@ -372,12 +372,16 @@ onMounted(() => {
   border-top: 1px solid var(--p-line);
 }
 
+/* Глобальный канон снимает min-width (.table{min-width:0!important}) — без
+   него колонки сжимаются уже контента и кнопки действий наезжают на статус.
+   Перебиваем !important: при нехватке ширины таблица скроллится в
+   .table-scroll, а не схлопывает колонки (как журнал уведомлений). */
 .table {
-  table-layout: fixed;
-  min-width: 860px;
+  table-layout: fixed !important;
+  min-width: 860px !important;
 }
 .table--actions {
-  min-width: 980px;
+  min-width: 980px !important;
 }
 
 .col-toggle {
