@@ -36,12 +36,7 @@ q-table(
 
       q-td
         .participants-table__status
-          q-checkbox(
-            :model-value='props.row.participant_account?.status === "accepted"',
-            disable,
-            color='primary',
-            size='sm'
-          )
+          BaseBadge(:variant='getAccountStatusBadge(props.row).variant') {{ getAccountStatusBadge(props.row).label }}
           BaseButton(
             v-if='isDeletable(props.row)',
             variant='danger',
@@ -98,6 +93,7 @@ import { ParticipantCard, ParticipantDetails } from '.';
 import { getName } from 'src/shared/lib/utils';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { useAccountStore } from 'src/entities/Account/model';
+import { getAccountStatusBadge } from 'src/entities/Account';
 import { SuccessAlert, FailAlert } from 'src/shared/api';
 import { Zeus } from '@coopenomics/sdk';
 import {
@@ -205,7 +201,7 @@ const columns: any[] = [
   {
     name: 'status',
     align: 'left',
-    label: 'Активен',
+    label: 'Статус',
     field: 'status',
     sortable: true,
   },

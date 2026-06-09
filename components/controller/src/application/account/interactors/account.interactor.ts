@@ -361,7 +361,11 @@ export class AccountInteractor {
     };
 
     for (const account of provider_accounts.items) {
-      const item = await this.accountDomainService.getAccount(account.username);
+      // this.getAccount (а не accountDomainService.getAccount) — чтобы реестр получил
+      // registration_payment: иначе отказ совета (Registered + возврат взноса) на
+      // списке неотличим от «ожидает совет». Обогащение стоит 2 доп. запроса к
+      // платежам только для непринятых аккаунтов (гард `!participant_account`).
+      const item = await this.getAccount(account.username);
       result.items.push(item);
     }
 

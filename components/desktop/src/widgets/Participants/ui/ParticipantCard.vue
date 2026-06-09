@@ -10,13 +10,7 @@
     .participant-card__meta
       span.participant-card__date {{ formatDate(String(participant.participant_account?.created_at || '')) }}
       .participant-card__status
-        q-checkbox(
-          :model-value='participant.participant_account?.status === "accepted"',
-          disable,
-          color='primary',
-          size='sm'
-        )
-          q-tooltip {{ participant.participant_account?.status === 'accepted' ? 'Активен' : 'Неактивен' }}
+        BaseBadge(:variant='getAccountStatusBadge(participant).variant') {{ getAccountStatusBadge(participant).label }}
         BaseButton(
           v-if='deletable',
           variant='danger',
@@ -44,6 +38,7 @@
 import moment from 'src/shared/lib/utils/dates/moment';
 import ParticipantDetails from './ParticipantDetails.vue';
 import { getName } from 'src/shared/lib/utils';
+import { getAccountStatusBadge } from 'src/entities/Account';
 import {
   type IAccount,
   type IIndividualData,
