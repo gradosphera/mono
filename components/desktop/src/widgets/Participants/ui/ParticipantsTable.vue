@@ -81,7 +81,7 @@ BaseDialog(
     br
     | Действие необратимо. E-mail освободится для повторной регистрации.
   BaseBanner.q-mt-md(v-if='isOnChainRegistered(deleteTarget)', variant='warn')
-    | Аккаунт уже зарегистрирован в блокчейне (после оплаты взноса). Запись в цепи удалить нельзя — имя «{{ deleteTarget?.username }}» останется занятым навсегда, из реестра провайдера он лишь исчезнет. Если заявка ещё на рассмотрении совета — сначала отклоните её в повестке.
+    | Аккаунт уже зарегистрирован в блокчейне (после оплаты взноса). Запись в цепи удалить нельзя — имя «{{ deleteTarget?.username }}» останется занятым навсегда, из реестра провайдера он лишь исчезает.
   template(#footer)
     BaseButton(variant='ghost', :disabled='deleting', @click='confirmOpen = false') Отменить
     BaseButton(variant='danger', :loading='deleting', @click='confirmDelete') Удалить
