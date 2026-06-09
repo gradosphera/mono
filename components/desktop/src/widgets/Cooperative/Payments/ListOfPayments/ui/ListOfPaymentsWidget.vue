@@ -282,16 +282,20 @@ onMounted(() => {
    (components.css) форсит .table { min-width:0 !important } + посимвольный
    перенос ячеек на узких экранах, из-за чего таблица из 7–8 колонок
    схлопывается в нечитаемые буквы-в-столбик. Поэтому на телефоне таблицу
-   скрываем и показываем карточную раскладку (как реестр документов). */
-.pmt-mobile {
+   скрываем и показываем карточную раскладку (как реестр документов).
+   ВАЖНО: .payments-cards ниже задаёт display:flex с той же специфичностью,
+   что и одиночный .pmt-mobile, и перебивал бы display:none по порядку
+   источника (карточки лезли на десктоп поверх таблицы). Поэтому скрытие/показ
+   вешаем на двойной селектор .payments-cards.pmt-mobile — он специфичнее. */
+.payments-cards.pmt-mobile {
   display: none;
 }
 @media (max-width: 599px) {
   .pmt-desktop {
     display: none;
   }
-  .pmt-mobile {
-    display: block;
+  .payments-cards.pmt-mobile {
+    display: flex;
   }
 }
 
