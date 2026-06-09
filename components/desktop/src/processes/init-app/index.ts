@@ -1,5 +1,6 @@
 import { useDesktopStore } from 'src/entities/Desktop/model';
 import { useSystemStore } from 'src/entities/System/model';
+import { useUpdateWatch } from 'src/entities/AppVersion/model';
 import { useInitWalletProcess } from 'src/processes/init-wallet';
 import type { Router } from 'vue-router';
 import { useBranchOverlayProcess } from '../watch-branch-overlay';
@@ -39,6 +40,9 @@ export async function useInitAppProcess(router: Router) {
   // делает код более понятным и предотвращает лишние вызовы
   if (!isServer) {
     system.startSystemMonitoring();
+    // Опрос self-report версии ноды (/version) → тост об обновлении.
+    // Заменяет ненадёжный триггер от lifecycle service worker'а.
+    useUpdateWatch().start();
   }
 
   const desktops = useDesktopStore();

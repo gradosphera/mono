@@ -73,27 +73,25 @@ if (!shouldRegisterSW) {
 
   // Переменная для отслеживания обновлений
   let refreshing = false;
-  let updateAvailable = false;
   let registrationInstance: any;
 
-  // Функция для ручного применения обновления (доступна глобально через window).
-  // Перезагрузка произойдёт автоматически через глобальный controllerchange-слушатель.
+  // Применение обновления (доступно глобально через window). Вызывается из тоста
+  // version-watch. НЕ зависит от того, выстрелил ли lifecycle-callback `updated`:
+  // - если есть готовый waiting-SW → активируем его (SKIP_WAITING), перезагрузка
+  //   произойдёт через глобальный controllerchange-слушатель;
+  // - если waiting нет (SW ещё не подготовил бандл или его нет вовсе) → просто
+  //   перезагружаем; свежий index/бандлы придут из SSR/сети (useFilenameHashes).
   const applyUpdate = function () {
-    if (!updateAvailable || !registrationInstance) {
-      if (isVerbose)
-        console.log('Обновление не доступно или регистрация не найдена');
-      return;
-    }
+    if (refreshing) return;
+    refreshing = true;
+    hasPendingUpdate = true; // разрешаем reload по controllerchange
 
-    if (!refreshing) {
-      refreshing = true;
-      updateAvailable = false;
+    if (isVerbose) console.log('Применяем обновление...');
 
-      if (isVerbose) console.log('Применяем обновление Service Worker...');
-
-      if (registrationInstance.waiting) {
-        registrationInstance.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
+    if (registrationInstance && registrationInstance.waiting) {
+      registrationInstance.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      window.location.reload();
     }
   };
 
@@ -177,14 +175,13 @@ if (!shouldRegisterSW) {
           registration,
         );
 
-      updateAvailable = true;
+      // Готовый waiting-SW — позволяет applyUpdate() активировать его без reload «вслепую».
       hasPendingUpdate = true;
 
-      // Уведомляем Vue-слой о доступном обновлении. Boot 'pwa-update' слушает это
-      // событие и показывает канон-тост с кнопкой «Обновить» (см. src/boot/pwa-update.ts).
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('sw:update-available'));
-      }
+      // НЕ показываем тост отсюда: lifecycle service worker'а ненадёжен (iOS
+      // standalone PWA не пробрасывает событие, первая установка шлёт `cached`,
+      // событие нет если бинарь SW не изменился). Триггер тоста перенесён в
+      // version-watch (src/entities/AppVersion) по self-report ноды /version.
 
       // Показываем уведомление пользователю
       if ('Notification' in window) {
