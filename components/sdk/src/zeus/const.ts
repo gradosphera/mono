@@ -2116,7 +2116,8 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	BankAccountDetails:{
 		bik:"String",
-		corr:"String"
+		corr:"String",
+		kpp:"String"
 	},
 	BankPaymentMethod:{
 		created_at:"DateTime",

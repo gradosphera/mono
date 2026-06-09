@@ -1983,6 +1983,8 @@ export type ValueTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
+	/** КПП (устар.) */
+	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on BankAccountDetails']?: Omit<ValueTypes["BankAccountDetails"], "...on BankAccountDetails">
 }>;
@@ -10622,6 +10624,8 @@ export type ResolverInputTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
+	/** КПП (устар.) */
+	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["BankAccountDetailsInput"]: {
@@ -19019,7 +19023,9 @@ export type ModelTypes = {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string
+	corr: string,
+	/** КПП (устар.) */
+	kpp?: string
 };
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
@@ -27884,6 +27890,8 @@ export type GraphQLTypes = {
 	bik: string,
 	/** Корреспондентский счет */
 	corr: string,
+	/** КПП (устар.) */
+	kpp?: string,
 	['...on BankAccountDetails']: Omit<GraphQLTypes["BankAccountDetails"], "...on BankAccountDetails">
 };
 	["BankAccountDetailsInput"]: {
