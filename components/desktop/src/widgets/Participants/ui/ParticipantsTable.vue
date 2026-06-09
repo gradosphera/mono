@@ -1,5 +1,5 @@
 <template lang="pug">
-q-table(
+q-table.participants-table(
   flat,
   :grid='isMobile',
   :rows='accounts',
@@ -228,6 +228,17 @@ const onUpdate = (
   display: flex;
   align-items: center;
   gap: var(--p-2, 8px);
+}
+
+/* Грид-режим (мобайл): карточки во всю ширину с вертикальным отступом —
+   убираем дефолтный 4px-padding grid-item'а, ставим понятный gap. */
+.participants-table .q-table__grid-item {
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--p-3, 12px);
+}
+.participants-table .q-table__grid-item:last-child {
+  margin-bottom: 0;
 }
 
 .no-hover.q-tr--hover,

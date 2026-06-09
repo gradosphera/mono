@@ -1,16 +1,25 @@
 <template lang="pug">
 .participant-card
   .participant-card__head(@click='$emit("toggle-expand")')
-    .participant-card__avatar
-      q-icon(name='person', size='20px')
-    .participant-card__id
-      .participant-card__name {{ getName(participant) }}
-      .participant-card__account {{ participant.username }}
-      .participant-card__email {{ participant.provider_account?.email || 'Email не указан' }}
+    .participant-card__top
+      .participant-card__avatar
+        q-icon(name='person', size='20px')
+      .participant-card__id
+        .participant-card__name {{ getName(participant) }}
+        .participant-card__account {{ participant.username }}
+        .participant-card__email {{ participant.provider_account?.email || 'Email не указан' }}
+      q-icon.participant-card__chevron(
+        :name='expanded ? "expand_less" : "expand_more"',
+        size='20px'
+      )
+    //- Статус, дата и удаление — отдельной строкой под идентификацией, чтобы
+    //- широкий бейдж («Ожидает решения совета») не сжимал имя/аккаунт/email
+    //- до пары букв на узком экране.
     .participant-card__meta
-      span.participant-card__date {{ formatDate(String(participant.participant_account?.created_at || '')) }}
       .participant-card__status
         BaseBadge(:variant='getAccountStatusBadge(participant).variant') {{ getAccountStatusBadge(participant).label }}
+      .participant-card__meta-right
+        span.participant-card__date {{ formatDate(String(participant.participant_account?.created_at || '')) }}
         BaseButton(
           v-if='deletable',
           variant='danger',
@@ -21,10 +30,6 @@
         )
           template(#icon-left)
             q-icon(name='delete_outline', size='18px')
-    q-icon.participant-card__chevron(
-      :name='expanded ? "expand_less" : "expand_more"',
-      size='20px'
-    )
 
   q-slide-transition
     .participant-card__body(v-show='expanded')
@@ -90,14 +95,20 @@ const onUpdate = (
 
 .participant-card__head {
   display: flex;
-  align-items: flex-start;
-  gap: var(--p-3, 12px);
+  flex-direction: column;
+  gap: var(--p-2, 8px);
   padding: var(--p-4, 16px);
   cursor: pointer;
   transition: background-color var(--p-dur-fast, 120ms) var(--p-ease-standard);
 }
 .participant-card__head:hover {
   background: var(--p-surface-2);
+}
+
+.participant-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--p-3, 12px);
 }
 
 .participant-card__avatar {
@@ -136,22 +147,30 @@ const onUpdate = (
   text-overflow: ellipsis;
 }
 
+/* Мета-строка под идентификацией: бейдж слева, дата+удаление справа.
+   Отступ слева выравнивает её под текст (за аватаром 36px + gap). */
 .participant-card__meta {
-  flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--p-1, 4px);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p-3, 12px);
+  padding-left: calc(36px + var(--p-3, 12px));
+}
+.participant-card__status {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.participant-card__meta-right {
+  display: flex;
+  align-items: center;
+  gap: var(--p-3, 12px);
+  flex-shrink: 0;
 }
 .participant-card__date {
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-3);
   white-space: nowrap;
-}
-.participant-card__status {
-  display: flex;
-  align-items: center;
-  gap: var(--p-2, 8px);
 }
 
 .participant-card__chevron {
