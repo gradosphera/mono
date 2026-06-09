@@ -230,12 +230,12 @@ const onUpdate = (
   gap: var(--p-2, 8px);
 }
 
-/* Грид-режим (мобайл): карточки во всю ширину с вертикальным отступом.
-   Зазор задаём ЧЕРЕЗ padding grid-item'а (он входит в измеряемую высоту
-   элемента virtual-scroll); margin-bottom virtual-scroll игнорирует. */
+/* Грид-режим (мобайл): карточки во всю ширину. Вертикальный отступ задаёт
+   сама .participant-card (margin-bottom) — его virtual-scroll учитывает,
+   тогда как margin/padding на grid-item игнорируется. */
 .participants-table .q-table__grid-item {
   width: 100%;
-  padding: var(--p-2, 8px) 0;
+  padding: 0;
 }
 
 .no-hover.q-tr--hover,
