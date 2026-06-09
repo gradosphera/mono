@@ -69,13 +69,26 @@ const DEFAULT_ICONS: Record<WalletProgram, string> = {
   generator: 'bolt',
 };
 
-const resolvedTitle = computed(() => props.title ?? DEFAULT_TITLES[props.program]);
-const resolvedIcon = computed(() => props.icon ?? DEFAULT_ICONS[props.program]);
+const resolvedTitle = computed(
+  () => props.title ?? (props.program ? DEFAULT_TITLES[props.program] : ''),
+);
+const resolvedIcon = computed(
+  () => props.icon ?? (props.program ? DEFAULT_ICONS[props.program] : 'savings'),
+);
 
-const progStyle = computed<CSSProperties>(() => ({
-  '--prog-bg': `var(--prog-${props.program}-soft)`,
-  '--prog-fg': `var(--prog-${props.program})`,
-} as CSSProperties));
+const progStyle = computed<CSSProperties>(() => {
+  // Нейтральная карточка (или без программы) — приглушённая иконка без акцента.
+  if (props.neutral || !props.program) {
+    return {
+      '--prog-bg': 'var(--p-canvas-2)',
+      '--prog-fg': 'var(--p-ink-2)',
+    } as CSSProperties;
+  }
+  return {
+    '--prog-bg': `var(--prog-${props.program}-soft)`,
+    '--prog-fg': `var(--prog-${props.program})`,
+  } as CSSProperties;
+});
 
 // Бегущая строка при переполнении. Если заголовок/подпись не влезают в свою
 // колонку — вместо обрезки «…» текст плавно прокручивается туда-обратно, чтобы
