@@ -106,6 +106,39 @@ services:
     working_dir: /app
     command: pnpm --filter @coopenomics/desktop run dev
 
+  # HTTP→SMTP релей. Локально SMTP смотрит в mailpit (перехватчик ниже), чтобы
+  # прогнать путь controller → relay → SMTP без реального почтовика. На проде
+  # ставится отдельно плейбуком на сервере с открытыми портами (см. playbooks/email-relay).
+  email-relay:
+    build:
+      context: ./
+      dockerfile: components/controller/Dockerfile
+    image: coopback
+    restart: unless-stopped
+    user: "1000:1000"
+    environment:
+      HOME: /tmp
+      PORT: 3025
+      RELAY_TOKEN: ${EMAIL_RELAY_TOKEN:-dev-relay-token}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      EMAIL_FROM_DEFAULT: ${EMAIL_FROM:-noreply@coopenomics.world}
+    volumes:
+      - ./:/app
+    ports:
+      - "127.0.0.1:${EMAIL_RELAY_HOST_PORT:-3025}:3025"
+    working_dir: /app
+    command: pnpm --filter @coopenomics/email-relay run dev
+
+  # Локальный SMTP-перехватчик: SMTP на 1025, веб-интерфейс на 8025.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     restart: unless-stopped

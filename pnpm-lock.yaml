@@ -1058,6 +1058,34 @@ importers:
         specifier: ^0.34.5
         version: 0.34.5
 
+  components/email-relay:
+    dependencies:
+      express:
+        specifier: ^4.22.1
+        version: 4.22.1
+      nodemailer:
+        specifier: ^8.0.1
+        version: 8.0.4
+    devDependencies:
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.25
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.37
+      '@types/nodemailer':
+        specifier: ^6.4.14
+        version: 6.4.23
+      nodemon:
+        specifier: ^3.1.0
+        version: 3.1.14
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.15.33(@swc/helpers@0.5.19))(@types/node@20.19.37)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
   components/factory:
     dependencies:
       ajv:
@@ -7417,6 +7445,9 @@ packages:
 
   '@types/node@8.10.66':
     resolution: {integrity: sha512-tktOkFUA4kXx2hhhrB8bIFb5TbwzS4uOhKEmwiD+NoiL0qtP2OQ9mFldbgD4dV1djrlBYP6eBuQZiWjuHUpqFw==}
+
+  '@types/nodemailer@6.4.23':
+    resolution: {integrity: sha512-aFV3/NsYFLSx9mbb5gtirBSXJnAlrusoKNuPbxsASWc7vrKLmIrTQRpdcxNcSFL3VW2A2XpeLEavwb2qMi6nlQ==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -26589,6 +26620,10 @@ snapshots:
       undici-types: 6.21.0
 
   '@types/node@8.10.66': {}
+
+  '@types/nodemailer@6.4.23':
+    dependencies:
+      '@types/node': 20.19.37
 
   '@types/normalize-package-data@2.4.4': {}
 
