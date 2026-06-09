@@ -151,6 +151,7 @@ function plural(n: number, one: string, few: string, many: string): string {
   max-width: 100vw;
   background: var(--p-surface);
   color: var(--p-ink);
+  border: 1px solid var(--p-line-1);
   border-radius: var(--p-r-md, 12px);
   box-shadow: var(--p-shadow-pop);
   overflow: hidden;
@@ -288,6 +289,24 @@ function plural(n: number, one: string, few: string, many: string): string {
 }
 .notification-center__item:focus-visible {
   box-shadow: inset 0 0 0 2px var(--p-primary);
+}
+
+/* Разделитель между уведомлениями — видимая линия в обеих темах (--p-line
+   0.06 на тёмной почти невидим, оттого «всё сливалось»; --p-line-1 заметнее). */
+.notification-center__items .notification-center__item + .notification-center__item {
+  border-top: 1px solid var(--p-line-1);
+}
+
+/* Непрочитанные выделяем подложкой + левым акцент-баром: на тёмной теме одна
+   разница в цвете текста + точка тонули в фоне панели. primary-soft/-line дают
+   видимый тон в обеих темах, не ухудшая светлую. */
+.notification-center__item.is-unread {
+  background: var(--p-primary-soft);
+  box-shadow: inset 3px 0 0 var(--p-primary);
+}
+.notification-center__item.is-unread:hover,
+.notification-center__item.is-unread:focus-visible {
+  background: var(--p-primary-line);
 }
 
 .notification-center__item-bullet {
