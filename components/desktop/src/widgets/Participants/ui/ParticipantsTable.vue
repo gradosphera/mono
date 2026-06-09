@@ -36,12 +36,7 @@ q-table(
 
       q-td
         .participants-table__status
-          q-checkbox(
-            :model-value='props.row.participant_account?.status === "accepted"',
-            disable,
-            color='primary',
-            size='sm'
-          )
+          BaseBadge(:variant='getAccountStatusBadge(props.row).variant') {{ getAccountStatusBadge(props.row).label }}
           BaseButton(
             v-if='isDeletable(props.row)',
             variant='danger',
@@ -85,6 +80,8 @@ BaseDialog(
     | Удалить аккаунт пайщика «{{ deleteTarget ? getName(deleteTarget) : '' }}» из реестра?
     br
     | Действие необратимо. E-mail освободится для повторной регистрации.
+  BaseBanner.q-mt-md(v-if='isOnChainRegistered(deleteTarget)', variant='warn')
+    | Аккаунт уже зарегистрирован в блокчейне (после оплаты взноса). Запись в цепи удалить нельзя — имя «{{ deleteTarget?.username }}» останется занятым навсегда, из реестра провайдера он лишь исчезает.
   template(#footer)
     BaseButton(variant='ghost', :disabled='deleting', @click='confirmOpen = false') Отменить
     BaseButton(variant='danger', :loading='deleting', @click='confirmDelete') Удалить
@@ -98,6 +95,7 @@ import { ParticipantCard, ParticipantDetails } from '.';
 import { getName } from 'src/shared/lib/utils';
 import { ExpandToggleButton } from 'src/shared/ui/ExpandToggleButton';
 import { useAccountStore } from 'src/entities/Account/model';
+import { getAccountStatusBadge } from 'src/entities/Account';
 import { SuccessAlert, FailAlert } from 'src/shared/api';
 import { Zeus } from '@coopenomics/sdk';
 import {
@@ -107,23 +105,19 @@ import {
   type IEntrepreneurData,
 } from 'src/entities/Account/types';
 
-// Удаляем регистрационную воронку до приёма + терминальные отказы. Зеркалит
-// серверный guard в account.interactor.deleteAccount: принятый
-// (participant_account) и пост-регистрационные Registered/Active/Blocked — нельзя.
-// blockchain_account для гейта НЕ годится — он есть уже у статуса Created.
-const DELETABLE_STATUSES = [
-  Zeus.UserStatus.Created,
-  Zeus.UserStatus.Joined,
-  Zeus.UserStatus.Payed,
-  Zeus.UserStatus.Failed,
-  Zeus.UserStatus.Refunded,
-];
+// Удаляем любой аккаунт, который ещё НЕ стал принятым пайщиком. participant_account
+// (accepted|blocked) появляется только после приёма советом — его наличие ⟺ член
+// кооператива, такого не трогаем. Всё прочее (черновик, заявление, оплачен/на
+// рассмотрении совета, отклонён, возврат) — удаляемо. Зеркалит серверный guard в
+// account.interactor.deleteAccount. Статус для гейта НЕ годится: воронка реально
+// доходит лишь до Registered (отказ совета/возврат оставляют Registered, а
+// Payed/Failed/Refunded users.status никем не выставляются).
+const isDeletable = (account: IAccount): boolean => !account.participant_account;
 
-const isDeletable = (account: IAccount): boolean => {
-  if (account.participant_account) return false;
-  const status = account.provider_account?.status;
-  return !!status && DELETABLE_STATUSES.includes(status);
-};
+// On-chain аккаунт заводится при оплате взноса (статус Registered) и в EOSIO
+// неудаляем — предупреждаем председателя, что запись в цепи останется.
+const isOnChainRegistered = (account: IAccount | null): boolean =>
+  account?.provider_account?.status === Zeus.UserStatus.Registered;
 
 // Props
 defineProps<{
@@ -205,7 +199,7 @@ const columns: any[] = [
   {
     name: 'status',
     align: 'left',
-    label: 'Активен',
+    label: 'Статус',
     field: 'status',
     sortable: true,
   },
