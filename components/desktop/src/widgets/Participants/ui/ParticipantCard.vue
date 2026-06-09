@@ -6,8 +6,20 @@
         q-icon(name='person', size='20px')
       .participant-card__id
         .participant-card__name {{ getName(participant) }}
-        .participant-card__account {{ participant.username }}
-        .participant-card__email {{ participant.provider_account?.email || 'Email не указан' }}
+        .participant-card__account
+          q-icon.participant-card__field-icon(name='badge', size='14px')
+            q-tooltip Имя аккаунта
+          span.participant-card__field-text {{ participant.username }}
+          q-icon.participant-card__copy(
+            name='content_copy',
+            size='14px',
+            @click.stop='copyText(participant.username)'
+          )
+            q-tooltip Скопировать
+        .participant-card__email
+          q-icon.participant-card__field-icon(name='mail', size='14px')
+            q-tooltip Email
+          span.participant-card__field-text {{ participant.provider_account?.email || 'Email не указан' }}
       q-icon.participant-card__chevron(
         :name='expanded ? "expand_less" : "expand_more"',
         size='20px'
@@ -40,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { copyToClipboard, Notify } from 'quasar';
 import moment from 'src/shared/lib/utils/dates/moment';
 import ParticipantDetails from './ParticipantDetails.vue';
 import { getName } from 'src/shared/lib/utils';
@@ -65,6 +78,16 @@ const emit = defineEmits<{
     newData: IIndividualData | IOrganizationData | IEntrepreneurData,
   ];
 }>();
+
+async function copyText(text: string): Promise<void> {
+  if (!text) return;
+  try {
+    await copyToClipboard(text);
+    Notify.create({ type: 'positive', message: 'Скопировано', timeout: 1200, position: 'top' });
+  } catch {
+    Notify.create({ type: 'negative', message: 'Не удалось скопировать', timeout: 2000, position: 'top' });
+  }
+}
 
 // Форматирование даты
 const formatDate = (date?: string) => {
@@ -140,32 +163,52 @@ const onUpdate = (
 }
 .participant-card__account,
 .participant-card__email {
+  display: flex;
+  align-items: center;
+  gap: var(--p-1, 4px);
   font-size: var(--p-fs-meta, 12px);
   color: var(--p-ink-2);
-  white-space: nowrap;
+}
+.participant-card__field-text {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.participant-card__field-icon {
+  flex-shrink: 0;
+  color: var(--p-ink-3);
+}
+.participant-card__copy {
+  flex-shrink: 0;
+  color: var(--p-ink-3);
+  cursor: pointer;
+  transition: color var(--p-dur-fast, 120ms) var(--p-ease-standard);
+}
+.participant-card__copy:hover {
+  color: var(--p-primary);
 }
 
 /* Мета-строка под идентификацией: бейдж слева, дата+удаление справа.
-   Отступ слева выравнивает её под текст (за аватаром 36px + gap). */
+   flex-wrap: широкий бейдж («Ожидает решения совета») не наезжает на дату —
+   когда не помещается, дата+удаление переносятся на следующую строку. */
 .participant-card__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--p-3, 12px);
-  padding-left: calc(36px + var(--p-3, 12px));
+  gap: var(--p-2, 8px) var(--p-3, 12px);
 }
 .participant-card__status {
   display: flex;
   align-items: center;
-  min-width: 0;
+  flex-shrink: 0;
 }
 .participant-card__meta-right {
   display: flex;
   align-items: center;
   gap: var(--p-3, 12px);
   flex-shrink: 0;
+  margin-left: auto;
 }
 .participant-card__date {
   font-size: var(--p-fs-meta, 12px);

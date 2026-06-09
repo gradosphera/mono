@@ -230,15 +230,12 @@ const onUpdate = (
   gap: var(--p-2, 8px);
 }
 
-/* Грид-режим (мобайл): карточки во всю ширину с вертикальным отступом —
-   убираем дефолтный 4px-padding grid-item'а, ставим понятный gap. */
+/* Грид-режим (мобайл): карточки во всю ширину с вертикальным отступом.
+   Зазор задаём ЧЕРЕЗ padding grid-item'а (он входит в измеряемую высоту
+   элемента virtual-scroll); margin-bottom virtual-scroll игнорирует. */
 .participants-table .q-table__grid-item {
   width: 100%;
-  padding: 0;
-  margin-bottom: var(--p-3, 12px);
-}
-.participants-table .q-table__grid-item:last-child {
-  margin-bottom: 0;
+  padding: var(--p-2, 8px) 0;
 }
 
 .no-hover.q-tr--hover,
