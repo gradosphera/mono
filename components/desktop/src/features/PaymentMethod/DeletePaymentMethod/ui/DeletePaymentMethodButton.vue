@@ -1,8 +1,14 @@
 <template lang="pug">
 div
-  q-btn(@click="showDialog=true" :size="size" flat dense)
-    q-icon(name="close")
-    span.q-ml-xs удалить
+  BaseButton(
+    variant='danger',
+    :size='size',
+    icon-only,
+    aria-label='Удалить метод платежа',
+    @click='showDialog = true'
+  )
+    template(#icon-left)
+      q-icon(name='delete_outline', size='18px')
 
   BaseDialog(
     v-model='showDialog',
@@ -23,6 +29,7 @@ div
 import { computed, ref } from 'vue';
 import { useDeletePaymentMethod } from '../model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
+import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { Form } from 'src/shared/ui/Form';
 
