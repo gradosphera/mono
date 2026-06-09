@@ -13,12 +13,33 @@ const PAGE_LIMIT = 20;
 /** Интервал поллинга непрочитанных. Live-подписки в репо нет — обновляем опросом. */
 const POLL_INTERVAL_MS = 30_000;
 
+/**
+ * Тело уведомления шарится с email/push-шаблонами и несёт HTML (`<br>`, теги).
+ * In-app панель рендерит описание как ТЕКСТ (без v-html — payload содержит
+ * ФИО/заголовки = XSS-вектор), а перенос строки ждёт как `\n`
+ * (CSS `white-space: pre-line`). Поэтому приводим HTML к плоскому тексту.
+ */
+function plainText(s: string | null | undefined): string {
+  if (!s) return '';
+  return s
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div)>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/[ \t]+\n/g, '\n')
+    .trim();
+}
+
 function toItem(n: IInboxNotification): NotificationItem {
   return {
     id: n.id,
     category: categoryFromWorkflowId(n.workflowId),
-    title: n.title,
-    description: n.body,
+    title: plainText(n.title),
+    description: plainText(n.body),
     date: n.createdAt as string,
     read: n.isRead,
   };
