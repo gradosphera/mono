@@ -148,13 +148,21 @@ function plural(n: number, one: string, few: string, many: string): string {
   display: flex;
   flex-direction: column;
   width: 360px;
-  max-width: 100vw;
+  max-width: 100%;
   background: var(--p-surface);
   color: var(--p-ink);
   border: 1px solid var(--p-line-1);
   border-radius: var(--p-r-md, 12px);
   box-shadow: var(--p-shadow-pop);
   overflow: hidden;
+}
+
+/* На мобиле панель занимает всю ширину раскрытого меню (см. .notification-center-menu
+   в виджете) — не узкий обрубок 360px. */
+@media (max-width: 600px) {
+  .notification-center {
+    width: 100%;
+  }
 }
 
 .notification-center__header {

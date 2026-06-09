@@ -7,6 +7,7 @@
       variant='accent'
     ) {{ badgeLabel }}
     q-menu(
+      class='notification-center-menu',
       anchor='bottom right',
       self='top right',
       :offset='[0, 8]',
@@ -186,5 +187,19 @@ onBeforeUnmount(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+</style>
+
+<!-- q-menu рендерится порталом в body → стиль не может быть scoped. На мобиле
+     панель раскрываем во всю ширину вьюпорта (минус мелкий зазор), а не прижатым
+     справа обрубком 360px, у которого резало правый край. -->
+<style>
+@media (max-width: 600px) {
+  .notification-center-menu.q-menu {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
 }
 </style>
