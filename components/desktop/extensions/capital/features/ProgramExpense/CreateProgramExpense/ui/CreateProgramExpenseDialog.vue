@@ -185,10 +185,7 @@ async function submit(): Promise<void> {
       operation_code: form.operation_code,
       items: form.items,
     });
-    SuccessAlert(
-      'Программный расход подан',
-      'Заявление подписано, capital зарезервировал пул и передал в шасси расходов.',
-    );
+    SuccessAlert('Программный расход подан — заявление подписано и передано в шасси расходов');
     emit('created');
     close();
   } catch (e) {

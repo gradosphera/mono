@@ -62,7 +62,7 @@ async function submit(): Promise<void> {
   try {
     submitting.value = true;
     await submitTopup(amount.value);
-    SuccessAlert('Пул пополнен', 'Средства переведены в пул программных расходов.');
+    SuccessAlert('Пул пополнен — средства переведены в пул программных расходов');
     emit('topped-up');
     amount.value = '';
     close();
