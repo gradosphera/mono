@@ -152,6 +152,10 @@ export const AllTypesProps: Record<string,any> = {
 	CapitalContributorFilter:{
 		status:"ContributorStatus"
 	},
+	CapitalCreateProgramExpenseInput:{
+		items:"ExpenseItemInput",
+		statement:"ExpenseProposalStatementSignedDocumentInput"
+	},
 	CapitalCycleFilter:{
 		status:"CycleStatus"
 	},
@@ -187,6 +191,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	CapitalTimeStatsInput:{
+
+	},
+	CapitalTopupProgramExpenseInput:{
 
 	},
 	ChairmanOnboardingAgendaInput:{
@@ -446,19 +453,46 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ExpenseItemStatus: "enum" as const,
 	ExpenseMechanics: "enum" as const,
+	ExpenseProposalDecisionBodyInput:{
+
+	},
+	ExpenseProposalDecisionGenerateDocumentInput:{
+		decision:"ExpenseProposalDecisionBodyInput",
+		items:"ExpenseProposalDecisionItemInput",
+		proposal:"ExpenseProposalDecisionHeaderInput"
+	},
+	ExpenseProposalDecisionHeaderInput:{
+
+	},
+	ExpenseProposalDecisionItemInput:{
+
+	},
 	ExpenseProposalDecisionSignedDocumentInput:{
 		meta:"ExpenseProposalDecisionSignedMetaDocumentInput",
 		signatures:"SignatureInfoInput"
 	},
 	ExpenseProposalDecisionSignedMetaDocumentInput:{
+		decision:"ExpenseProposalDecisionBodyInput",
+		items:"ExpenseProposalDecisionItemInput",
+		proposal:"ExpenseProposalDecisionHeaderInput"
+	},
+	ExpenseProposalHeaderInput:{
 
+	},
+	ExpenseProposalItemInput:{
+
+	},
+	ExpenseProposalStatementGenerateDocumentInput:{
+		items:"ExpenseProposalItemInput",
+		proposal:"ExpenseProposalHeaderInput"
 	},
 	ExpenseProposalStatementSignedDocumentInput:{
 		meta:"ExpenseProposalStatementSignedMetaDocumentInput",
 		signatures:"SignatureInfoInput"
 	},
 	ExpenseProposalStatementSignedMetaDocumentInput:{
-
+		items:"ExpenseProposalItemInput",
+		proposal:"ExpenseProposalHeaderInput"
 	},
 	ExpenseProposalStatus: "enum" as const,
 	ExpenseRecipientType: "enum" as const,
@@ -735,6 +769,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalCreateProcessTemplate:{
 			data:"CreateProcessTemplateInput"
 		},
+		capitalCreateProgramExpense:{
+			data:"CapitalCreateProgramExpenseInput"
+		},
 		capitalCreateProgramInvest:{
 			data:"CreateProgramInvestInput"
 		},
@@ -928,6 +965,9 @@ export const AllTypesProps: Record<string,any> = {
 		capitalSubmitVote:{
 			data:"SubmitVoteInput"
 		},
+		capitalTopupProgramExpensePool:{
+			data:"CapitalTopupProgramExpenseInput"
+		},
 		capitalUpdateIssue:{
 			data:"UpdateIssueInput"
 		},
@@ -1085,6 +1125,14 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		generateDocument:{
 			input:"GenerateAnyDocumentInput"
+		},
+		generateExpenseProposalDecisionDocument:{
+			data:"ExpenseProposalDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateExpenseProposalStatementDocument:{
+			data:"ExpenseProposalStatementGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
 		},
 		generateFreeDecision:{
 			data:"FreeDecisionGenerateDocumentInput",
@@ -1475,6 +1523,12 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		capitalIssues:{
 			filter:"CapitalIssueFilter",
+			options:"PaginationInput"
+		},
+		capitalProgramExpense:{
+
+		},
+		capitalProgramExpenses:{
 			options:"PaginationInput"
 		},
 		capitalProject:{
@@ -2666,6 +2720,35 @@ export const ReturnTypes: Record<string,any> = {
 		onboarding_generator_program_template_hash:"String",
 		onboarding_init_at:"String"
 	},
+	CapitalProgramExpense:{
+		callback:"CapitalProgramExpenseCallback",
+		coopname:"String",
+		created_at:"String",
+		creator:"String",
+		expense_hash:"String",
+		items:"CapitalProgramExpenseItem",
+		operation_code:"String",
+		source_wallet:"String",
+		status:"ExpenseProposalStatus",
+		total_actual:"String",
+		total_planned:"String",
+		updated_at:"String"
+	},
+	CapitalProgramExpenseCallback:{
+		action:"String",
+		contract:"String",
+		data:"String"
+	},
+	CapitalProgramExpenseItem:{
+		actual_amount:"String",
+		description:"String",
+		item_hash:"String",
+		mechanics:"ExpenseMechanics",
+		planned_amount:"String",
+		recipient:"String",
+		recipient_type:"ExpenseRecipientType",
+		status:"ExpenseItemStatus"
+	},
 	CapitalProject:{
 		_created_at:"DateTime",
 		_id:"String",
@@ -3674,6 +3757,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalCreateExpense:"Transaction",
 		capitalCreateIssue:"CapitalIssue",
 		capitalCreateProcessTemplate:"ProcessTemplate",
+		capitalCreateProgramExpense:"Transaction",
 		capitalCreateProgramInvest:"Transaction",
 		capitalCreateProgramProperty:"Transaction",
 		capitalCreateProject:"Transaction",
@@ -3731,6 +3815,7 @@ export const ReturnTypes: Record<string,any> = {
 		capitalStartVoting:"Transaction",
 		capitalStopProject:"CapitalProject",
 		capitalSubmitVote:"Transaction",
+		capitalTopupProgramExpensePool:"Transaction",
 		capitalUpdateIssue:"CapitalIssue",
 		capitalUpdateProcessTemplate:"ProcessTemplate",
 		capitalUpdateStory:"CapitalStory",
@@ -3782,6 +3867,8 @@ export const ReturnTypes: Record<string,any> = {
 		generateBallotForAnnualGeneralMeetDocument:"GeneratedDocument",
 		generateConvertToAxonStatement:"GeneratedDocument",
 		generateDocument:"GeneratedDocument",
+		generateExpenseProposalDecisionDocument:"GeneratedDocument",
+		generateExpenseProposalStatementDocument:"GeneratedDocument",
 		generateFreeDecision:"GeneratedDocument",
 		generateParticipantApplication:"GeneratedDocument",
 		generateParticipantApplicationDecision:"GeneratedDocument",
@@ -3972,6 +4059,12 @@ export const ReturnTypes: Record<string,any> = {
 	PaginatedCapitalLogsPaginationResult:{
 		currentPage:"Int",
 		items:"CapitalLog",
+		totalCount:"Int",
+		totalPages:"Int"
+	},
+	PaginatedCapitalProgramExpensesPaginationResult:{
+		currentPage:"Int",
+		items:"CapitalProgramExpense",
 		totalCount:"Int",
 		totalPages:"Int"
 	},
@@ -4299,6 +4392,8 @@ export const ReturnTypes: Record<string,any> = {
 		capitalInvests:"PaginatedCapitalInvestsPaginationResult",
 		capitalIssue:"CapitalIssue",
 		capitalIssues:"PaginatedCapitalIssuesPaginationResult",
+		capitalProgramExpense:"CapitalProgramExpense",
+		capitalProgramExpenses:"PaginatedCapitalProgramExpensesPaginationResult",
 		capitalProject:"CapitalProject",
 		capitalProjectWithRelations:"CapitalProject",
 		capitalProjects:"PaginatedCapitalProjectsPaginationResult",
