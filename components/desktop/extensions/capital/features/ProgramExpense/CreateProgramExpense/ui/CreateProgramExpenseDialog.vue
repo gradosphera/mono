@@ -14,14 +14,11 @@ BaseDialog(
         placeholder='Например: «Закупка хостинга и канцелярии на июнь»',
         required
       )
-      q-select(
+      BaseSelect(
         v-model='form.operation_code',
         :options='operationCodeOptions',
-        label='Действие (operation_code)',
-        outlined,
-        dense,
-        emit-value,
-        map-options
+        label='Способ оплаты',
+        hint='Применяется ко всем позициям заявления'
       )
 
     .field-group
@@ -48,36 +45,24 @@ BaseDialog(
               q-icon(name='delete', size='16px')
           .row.q-col-gutter-sm
             .col-12.col-md-6
-              q-select(
+              BaseSelect(
                 v-model='item.recipient_type',
                 :options='recipientTypeOptions',
-                label='Тип получателя',
-                outlined,
-                dense,
-                emit-value,
-                map-options
+                label='Тип получателя'
               )
-            .col-12.col-md-6
-              q-select(
-                v-model='item.mechanics',
-                :options='mechanicsOptions',
-                label='Способ',
-                outlined,
-                dense,
-                emit-value,
-                map-options
-              )
-            .col-12.col-md-6
-              BaseInput(
-                v-model='item.recipient_name',
-                label='Получатель (имя/название)',
-                placeholder='ФИО или название организации'
-              )
-            .col-12.col-md-6
+            .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.MEMBER')
               BaseInput(
                 v-model='item.recipient_account',
-                label='Аккаунт получателя в кооперативе',
-                placeholder='username / eosio::name'
+                label='Аккаунт пайщика-получателя',
+                placeholder='username',
+                required
+              )
+            .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.ORG')
+              BaseInput(
+                v-model='item.recipient_name',
+                label='Название организации',
+                placeholder='Например: ООО «Хостинг-центр»',
+                required
               )
             .col-12.col-md-6
               BaseInput(
@@ -118,6 +103,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseInput } from 'src/shared/ui/base/BaseInput';
+import { BaseSelect } from 'src/shared/ui/base/BaseSelect';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import {
   useCreateProgramExpense,
@@ -157,17 +143,18 @@ const recipientTypeOptions = [
   { label: 'Организация', value: Zeus.ExpenseRecipientType.ORG },
 ];
 
-const mechanicsOptions = [
-  { label: 'Аванс под отчёт', value: Zeus.ExpenseMechanics.ADVANCE },
-  { label: 'Прямая оплата', value: Zeus.ExpenseMechanics.DIRECT },
-];
-
 const canSubmit = computed(
   () =>
     form.description.trim().length > 0 &&
     form.operation_code.trim().length > 0 &&
     form.items.length > 0 &&
-    form.items.every((i) => i.amount.trim() && i.description.trim()),
+    form.items.every(
+      (i) =>
+        i.amount.trim() &&
+        i.description.trim() &&
+        (i.recipient_type !== Zeus.ExpenseRecipientType.MEMBER || i.recipient_account?.trim()) &&
+        (i.recipient_type !== Zeus.ExpenseRecipientType.ORG || i.recipient_name?.trim()),
+    ),
 );
 
 function addItem(): void {
@@ -176,7 +163,6 @@ function addItem(): void {
     description: '',
     amount: '',
     recipient_type: Zeus.ExpenseRecipientType.SELF,
-    mechanics: Zeus.ExpenseMechanics.ADVANCE,
     recipient_name: '',
     requisites: '',
     recipient_account: '',

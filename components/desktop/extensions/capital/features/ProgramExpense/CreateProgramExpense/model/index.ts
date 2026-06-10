@@ -16,7 +16,6 @@ export interface ICreateProgramExpenseDraftItem {
   description: string;
   amount: string;
   recipient_type: Zeus.ExpenseRecipientType;
-  mechanics: Zeus.ExpenseMechanics;
   recipient_name?: string;
   requisites?: string;
   recipient_account?: string;
@@ -47,6 +46,31 @@ function resolveSourceWallet(operationCode: string): string {
   return code;
 }
 
+/**
+ * Механика одна на всё СЗ и однозначно следует из operation_code —
+ * контракт expense отклоняет items со способом, не совпадающим с кодом.
+ */
+function resolveMechanics(operationCode: string): Zeus.ExpenseMechanics {
+  return operationCode === 'o.exp.blgdir'
+    ? Zeus.ExpenseMechanics.DIRECT
+    : Zeus.ExpenseMechanics.ADVANCE;
+}
+
+/**
+ * On-chain получатель (eosio::name): SELF — сам создатель, MEMBER — аккаунт
+ * пайщика, ORG — пустое имя (организация не имеет аккаунта в кооперативе,
+ * её название и реквизиты фиксируются в документе-заявлении).
+ */
+function resolveRecipient(item: ICreateProgramExpenseDraftItem, creator: string): string {
+  if (item.recipient_type === Zeus.ExpenseRecipientType.MEMBER) {
+    const account = item.recipient_account?.trim();
+    if (!account) throw new Error('Для получателя-пайщика укажите его аккаунт');
+    return account;
+  }
+  if (item.recipient_type === Zeus.ExpenseRecipientType.ORG) return '';
+  return creator;
+}
+
 export function useCreateProgramExpense() {
   const { info } = useSystemStore();
   const session = useSessionStore();
@@ -59,13 +83,14 @@ export function useCreateProgramExpense() {
     const precision = info.symbols.root_govern_precision;
     const totalAmount = draft.items.reduce((sum, it) => sum + parseFloat(it.amount || '0'), 0);
     const total_amount = formatToAsset(totalAmount, symbol, precision);
+    const mechanics = resolveMechanics(draft.operation_code);
 
     const itemsForDoc = draft.items.map((it, idx) => ({
       number: String(idx + 1),
       description: it.description,
       amount: it.amount,
       recipient_type: it.recipient_type,
-      mechanics: it.mechanics,
+      mechanics,
       recipient_name: it.recipient_name ?? '',
       requisites: it.requisites ?? '',
     }));
@@ -93,9 +118,9 @@ export function useCreateProgramExpense() {
 
     const itemsForChain = draft.items.map((it, idx) => ({
       item_hash: it.item_hash ?? generateItemHash(expense_hash, idx),
-      mechanics: it.mechanics,
+      mechanics,
       recipient_type: it.recipient_type,
-      recipient: it.recipient_account ?? it.recipient_name ?? session.username,
+      recipient: resolveRecipient(it, session.username),
       description: it.description,
       planned_amount: formatToAsset(it.amount, symbol, precision),
     }));
