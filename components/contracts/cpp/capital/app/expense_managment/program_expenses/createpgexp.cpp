@@ -26,7 +26,7 @@ void capital::createpgexp(name coopname, checksum256 expense_hash, name creator,
                           std::string description, document2 statement) {
   require_auth(coopname);
 
-  verify_document_or_fail(statement);
+  verify_document_or_fail(statement, {creator});
   eosio::check(!items.empty(), "Программный расход должен содержать хотя бы один item");
 
   // Сумма расхода — сумма planned_amount всех items.
@@ -51,12 +51,14 @@ void capital::createpgexp(name coopname, checksum256 expense_hash, name creator,
   // data пустой — capital резолвит запись по expense_hash, дополнительный payload не нужен.
   ExpenseDomain::callback_handler callback{
     .contract = _capital,
-    .action   = Names::Capital::Callbacks::ON_PROGRAM_EXPENSE_DONE,
+    .action   = Names::Capital::ON_PROGRAM_EXPENSE_DONE,
     .data     = std::vector<char>{}
   };
 
+  // Authority — _capital: у capital@eosio.code нет coopname@active, а
+  // expense::createexp принимает контракты-инициаторы по contracts_whitelist.
   eosio::action(
-    eosio::permission_level{coopname, "active"_n},
+    eosio::permission_level{_capital, "active"_n},
     _expense,
     Names::External::CREATE_EXPENSE_PROPOSAL,
     std::make_tuple(coopname, creator, expense_hash, operation_code,

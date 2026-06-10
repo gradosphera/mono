@@ -51,9 +51,8 @@ namespace Names {
     constexpr eosio::name AUTHORIZE_EXPENSE = "capauthexpns"_n;
     constexpr eosio::name DECLINE_EXPENSE = "capdeclexpns"_n;
 
-    // Программные расходы обслуживаются шасси expense; capital видит только инициирование
-    // и callback завершения flow.
-    constexpr eosio::name CREATE_PROGRAM_EXPENSE = "createpgexp"_n;
+    // Программные расходы обслуживаются шасси expense; capital видит только
+    // инициирование (createpgexp) и этот callback завершения flow.
     constexpr eosio::name ON_PROGRAM_EXPENSE_DONE = "onpgexpdone"_n;
     
     // Коллбэки для долгов

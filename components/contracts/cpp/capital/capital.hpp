@@ -346,13 +346,13 @@ public:
 
     /**
      * @brief Callback от шасси expense на финализацию program-расхода.
-     * Вызывается inline от самого capital (require_auth(_capital)) после того
-     * как шасси expense закончило flow (CLOSED либо DECLINED).
+     * Шасси шлёт его inline (authority — _expense@active, require_auth(_expense))
+     * после терминального перехода flow (CLOSED либо DECLINED).
      *
-     *   status == CLOSED   → consume_program_expense(total_actual) +
-     *                         release_program_expense(reserved - total_actual) +
-     *                         delete progexpense.
-     *   status == DECLINED → release_program_expense(reserved) + delete progexpense.
+     *   status == CLOSED   → consume(total_actual) + release(остаток резерва);
+     *                         при total_actual > reserved (перерасход) превышение
+     *                         списывается напрямую из program_expense_pool.
+     *   status == DECLINED → release(reserved); decline возможен только до оплат.
      */
     [[eosio::action]]
     void onpgexpdone(name coopname, checksum256 expense_hash, uint8_t status,

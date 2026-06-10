@@ -263,26 +263,6 @@ namespace Capital::Expenses {
     });
   }
 
-  inline void set_program_approved(eosio::name coopname, uint64_t id, const document2 &approved_statement) {
-    Capital::program_expense_index t(_capital, coopname.value);
-    auto itr = t.find(id);
-    eosio::check(itr != t.end(), "Программный расход не найден");
-    t.modify(itr, coopname, [&](auto &e) {
-      e.status = Status::APPROVED;
-      e.approved_statement = approved_statement;
-    });
-  }
-
-  inline void set_program_authorized(eosio::name coopname, uint64_t id, const document2 &authorization) {
-    Capital::program_expense_index t(_capital, coopname.value);
-    auto itr = t.find(id);
-    eosio::check(itr != t.end(), "Программный расход не найден");
-    t.modify(itr, coopname, [&](auto &e) {
-      e.status = Status::AUTHORIZED;
-      e.authorization = authorization;
-    });
-  }
-
   inline void delete_program_expense(eosio::name coopname, uint64_t id) {
     Capital::program_expense_index t(_capital, coopname.value);
     auto itr = t.find(id);

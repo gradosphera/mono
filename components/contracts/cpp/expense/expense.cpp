@@ -68,7 +68,11 @@ void expense::createexp(name coopname, name username,
                         std::vector<D::item> items,
                         D::callback_handler callback,
                         document2 statement) {
-  require_auth(coopname);
+  // Прямой вызов backend'а — авторизация кооператива; inline от контракта-инициатора
+  // (capital::createpgexp и т.п.) — авторизация по whitelist, как в ledger2::apply.
+  if (!has_auth(coopname)) {
+    check_auth_and_get_payer_or_fail(contracts_whitelist);
+  }
 
   verify_document_or_fail(statement, {username});
   check_operation_code(operation_code);
@@ -80,12 +84,26 @@ void expense::createexp(name coopname, name username,
   eosio::check(find_proposal(tbl, proposal_hash) == tbl.get_index<"byhash"_n>().end(),
                "СЗ с таким proposal_hash уже существует");
 
-  const auto total = sum_planned(items);
+  // Механика каждого item обязана соответствовать operation_code proposal'а:
+  // ledger2-проводка payexp идёт по одному коду на весь СЗ, и смешение
+  // ADVANCE/DIRECT привело бы к зависанию средств в ADVANCE_HOLD (DIRECT-item
+  // под blgadv) либо к burn по пустому кошельку (ADVANCE-item под blgdir).
+  const auto required_mechanics = operation_code == operations::expense::BLAGO_ADVANCE
+    ? D::Mechanics::ADVANCE
+    : D::Mechanics::DIRECT;
 
   for (auto& it : items) {
+    eosio::check(it.planned_amount.is_valid() && it.planned_amount.amount > 0,
+                 "planned_amount каждого item должен быть положительным");
+    eosio::check(it.mechanics == static_cast<uint8_t>(required_mechanics),
+                 "Механика item не соответствует operation_code СЗ (blgadv = ADVANCE, blgdir = DIRECT)");
+    eosio::check(it.recipient_type <= static_cast<uint8_t>(D::RecipientType::ORG),
+                 "Неизвестный recipient_type item");
     it.status        = static_cast<uint8_t>(D::ItemStatus::APPROVED);
     it.actual_amount = zero_like(it.planned_amount);
   }
+
+  const auto total = sum_planned(items);
 
   tbl.emplace(get_self(), [&](auto& row) {
     row.id              = tbl.available_primary_key();
@@ -131,15 +149,21 @@ void expense::declexp(name coopname, checksum256 proposal_hash, std::string reas
   auto idx = tbl.get_index<"byhash"_n>();
   auto it  = idx.find(proposal_hash);
   eosio::check(it != idx.end(), "СЗ не найден");
-  eosio::check(it->status != static_cast<uint8_t>(D::ProposalStatus::CLOSED),
-               "Нельзя отклонить закрытый СЗ");
+  // Отклонение возможно только пока ни один item не оплачен: после payexp деньги
+  // уже ушли через ledger2, и decline разъехался бы с учётом инициатора
+  // (callback DECLINED возвращает инициатору весь резерв). Частично исполненный
+  // СЗ завершается обычным путём: reportexp / returnexp → closeexp.
+  eosio::check(it->status == static_cast<uint8_t>(D::ProposalStatus::CREATED) ||
+               it->status == static_cast<uint8_t>(D::ProposalStatus::AUTHORIZED),
+               "Отклонить можно только СЗ без оплат (статусы CREATED / AUTHORIZED)");
 
   idx.modify(it, get_self(), [&](auto& row) {
     row.status     = static_cast<uint8_t>(D::ProposalStatus::DECLINED);
     row.updated_at = eosio::current_time_point();
   });
 
-  // Callback инициатору (capital::onpgexpdone и т.п.) — total_actual на момент decline.
+  // Callback инициатору (capital::onpgexpdone и т.п.); total_actual здесь всегда 0 —
+  // оплат до decline не было (см. проверку статусов выше).
   send_callback_if_any(it->callback, coopname, proposal_hash,
                        static_cast<uint8_t>(D::ProposalStatus::DECLINED),
                        it->total_actual, get_self());
@@ -156,48 +180,45 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
   eosio::check(it->status == static_cast<uint8_t>(D::ProposalStatus::AUTHORIZED) ||
                it->status == static_cast<uint8_t>(D::ProposalStatus::PARTIALLY_PAID),
                "Оплата возможна только из статусов AUTHORIZED / PARTIALLY_PAID");
+  eosio::check(actual_amount.is_valid() && actual_amount.amount > 0,
+               "actual_amount должен быть положительным");
 
   bool item_found = false;
-  D::Mechanics mech = D::Mechanics::ADVANCE;
-  asset total_after = it->total_actual;
 
   idx.modify(it, get_self(), [&](auto& row) {
+    bool all_reported = true;
     for (auto& i : row.items) {
       if (i.item_hash == item_hash) {
         eosio::check(i.status == static_cast<uint8_t>(D::ItemStatus::APPROVED),
                      "Item уже оплачен или закрыт");
+        eosio::check(actual_amount.symbol == i.planned_amount.symbol,
+                     "Символ actual_amount не совпадает с планом item");
+        eosio::check(actual_amount.amount <= i.planned_amount.amount,
+                     "Сумма оплаты не может превышать план item; доплата сверх плана — через overspendexp");
         i.actual_amount = actual_amount;
-        i.status        = static_cast<uint8_t>(D::ItemStatus::PAID);
-        mech            = static_cast<D::Mechanics>(i.mechanics);
-        item_found      = true;
-        break;
+        // DIRECT не имеет фазы подотчёта (нет ADVANCE_HOLD): закрывающие документы
+        // прикладывает сам кассир, item считается отчитанным сразу после оплаты.
+        i.status = static_cast<D::Mechanics>(i.mechanics) == D::Mechanics::DIRECT
+          ? static_cast<uint8_t>(D::ItemStatus::REPORTED)
+          : static_cast<uint8_t>(D::ItemStatus::PAID);
+        item_found = true;
+      }
+      if (i.status != static_cast<uint8_t>(D::ItemStatus::REPORTED)) {
+        all_reported = false;
       }
     }
     eosio::check(item_found, "item с заданным hash не найден в СЗ");
     row.total_actual += actual_amount;
-    row.status       = static_cast<uint8_t>(D::ProposalStatus::PARTIALLY_PAID);
-    row.updated_at   = eosio::current_time_point();
-    total_after      = row.total_actual;
+    // DIRECT-only СЗ становится готов к закрытию сразу после последней оплаты.
+    row.status = all_reported
+      ? static_cast<uint8_t>(D::ProposalStatus::REPORT_SUBMITTED)
+      : static_cast<uint8_t>(D::ProposalStatus::PARTIALLY_PAID);
+    row.updated_at = eosio::current_time_point();
   });
 
   // ledger2 проводка по operation_code из proposal — выдача аванса или прямая оплата.
   Ledger2::apply(get_self(), coopname, it->operation_code, actual_amount,
                  it->username, proposal_hash, "expense:payexp");
-
-  // DIRECT — фоновый reportexp (закрываем подотчёт нулевым BURN, без чека от пайщика).
-  if (mech == D::Mechanics::DIRECT) {
-    // Для DIRECT нет ADVANCE_HOLD-кошелька, поэтому advrpt-BURN не применим.
-    // DIRECT считается «закрытым» сразу после payexp: помечаем item REPORTED.
-    idx.modify(it, get_self(), [&](auto& row) {
-      for (auto& i : row.items) {
-        if (i.item_hash == item_hash) {
-          i.status = static_cast<uint8_t>(D::ItemStatus::REPORTED);
-          break;
-        }
-      }
-      row.updated_at = eosio::current_time_point();
-    });
-  }
 }
 
 void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 item_hash) {
@@ -207,12 +228,14 @@ void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 it
   auto idx = tbl.get_index<"byhash"_n>();
   auto it  = idx.find(proposal_hash);
   eosio::check(it != idx.end(), "СЗ не найден");
+  eosio::check(it->status == static_cast<uint8_t>(D::ProposalStatus::PARTIALLY_PAID),
+               "Отчёт возможен только по СЗ в статусе PARTIALLY_PAID");
 
   asset item_amount = asset{0, it->total_actual.symbol};
   bool item_found = false;
-  bool all_reported = true;
 
   idx.modify(it, get_self(), [&](auto& row) {
+    bool all_reported = true;
     for (auto& i : row.items) {
       if (i.item_hash == item_hash) {
         eosio::check(i.status == static_cast<uint8_t>(D::ItemStatus::PAID),
@@ -223,8 +246,7 @@ void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 it
         item_amount = i.actual_amount;
         item_found  = true;
       }
-      if (i.status != static_cast<uint8_t>(D::ItemStatus::REPORTED) &&
-          i.status != static_cast<uint8_t>(D::ItemStatus::RETURNED)) {
+      if (i.status != static_cast<uint8_t>(D::ItemStatus::REPORTED)) {
         all_reported = false;
       }
     }
@@ -235,9 +257,13 @@ void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 it
     row.updated_at = eosio::current_time_point();
   });
 
-  // ledger2: BURN ADVANCE_HOLD, без бухпроводки — canal 08/51 уже сделан на blgadv.
-  Ledger2::apply(get_self(), coopname, operations::expense::ADVANCE_REPORT, item_amount,
-                 it->username, proposal_hash, "expense:reportexp");
+  // ledger2: BURN ADVANCE_HOLD на остаточный actual item'а (выдано − возвращено
+  // + доплачено), без бухпроводки — canal 08/51 уже сделан на blgadv/over.
+  // Полный возврат аванса (actual == 0) — burn не нужен, ADVANCE_HOLD уже пуст.
+  if (item_amount.amount > 0) {
+    Ledger2::apply(get_self(), coopname, operations::expense::ADVANCE_REPORT, item_amount,
+                   it->username, proposal_hash, "expense:reportexp");
+  }
 }
 
 void expense::closeexp(name coopname, checksum256 proposal_hash) {
@@ -269,6 +295,8 @@ void expense::returnexp(name coopname, checksum256 proposal_hash, checksum256 it
   auto idx = tbl.get_index<"byhash"_n>();
   auto it  = idx.find(proposal_hash);
   eosio::check(it != idx.end(), "СЗ не найден");
+  eosio::check(it->status == static_cast<uint8_t>(D::ProposalStatus::PARTIALLY_PAID),
+               "Возврат возможен только по СЗ в статусе PARTIALLY_PAID");
 
   bool item_found = false;
 
@@ -277,10 +305,17 @@ void expense::returnexp(name coopname, checksum256 proposal_hash, checksum256 it
       if (i.item_hash == item_hash) {
         eosio::check(i.status == static_cast<uint8_t>(D::ItemStatus::PAID),
                      "Возврат возможен только из статуса PAID");
+        eosio::check(static_cast<D::Mechanics>(i.mechanics) == D::Mechanics::ADVANCE,
+                     "returnexp применим только к ADVANCE-механике");
+        eosio::check(return_amount.is_valid() &&
+                     return_amount.symbol == i.actual_amount.symbol,
+                     "Символ return_amount не совпадает с item");
         eosio::check(return_amount.amount > 0 && return_amount.amount <= i.actual_amount.amount,
                      "return_amount должен быть положительным и не превышать actual_amount");
+        // Settlement-запись: статус item НЕ меняется (остаётся PAID) — после
+        // возврата остатка получатель штатно отчитывается reportexp по
+        // фактически потраченной части (при полном возврате — actual == 0).
         i.actual_amount -= return_amount;
-        i.status   = static_cast<uint8_t>(D::ItemStatus::RETURNED);
         item_found = true;
         break;
       }
@@ -304,6 +339,8 @@ void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256
   auto idx = tbl.get_index<"byhash"_n>();
   auto it  = idx.find(proposal_hash);
   eosio::check(it != idx.end(), "СЗ не найден");
+  eosio::check(it->status == static_cast<uint8_t>(D::ProposalStatus::PARTIALLY_PAID),
+               "Перерасход возможен только по СЗ в статусе PARTIALLY_PAID");
 
   bool item_found = false;
 
@@ -314,8 +351,13 @@ void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256
                      "Перерасход регистрируется только из статуса PAID");
         eosio::check(static_cast<D::Mechanics>(i.mechanics) == D::Mechanics::ADVANCE,
                      "overspendexp применим только к ADVANCE-механике");
+        eosio::check(overspend_amount.is_valid() &&
+                     overspend_amount.symbol == i.actual_amount.symbol,
+                     "Символ overspend_amount не совпадает с item");
+        // Settlement-запись: статус item НЕ меняется (остаётся PAID) — подотчёт
+        // (теперь на полную сумму выдано + доплата) закрывается штатным reportexp,
+        // который сделает burn ADVANCE_HOLD на итоговый actual.
         i.actual_amount += overspend_amount;
-        i.status   = static_cast<uint8_t>(D::ItemStatus::OVERSPENT);
         item_found = true;
         break;
       }
@@ -325,10 +367,8 @@ void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256
     row.updated_at   = eosio::current_time_point();
   });
 
-  // ledger2: 1) OVERSPEND (выдача доплаты) → 2) ADVANCE_REPORT (закрытие подотчёта).
+  // ledger2: OVERSPEND — выдача доплаты (TRANSFER BLAGOROST_FUND → ADVANCE_HOLD,
+  // Dr 08 / Cr 51). Закрытие подотчёта на полную сумму — в reportexp.
   Ledger2::apply(get_self(), coopname, operations::expense::OVERSPEND, overspend_amount,
                  it->username, proposal_hash, "expense:overspend");
-
-  Ledger2::apply(get_self(), coopname, operations::expense::ADVANCE_REPORT, overspend_amount,
-                 it->username, proposal_hash, "expense:overspend-report");
 }
