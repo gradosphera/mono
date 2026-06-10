@@ -1,4 +1,8 @@
-import { ExpensesCapitalTriggerService } from './expenses-capital-trigger.service';
+import type { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  ExpensesCapitalTriggerService,
+  EXPENSE_CAPITALIZATION_REQUIRED,
+} from './expenses-capital-trigger.service';
 import { ExpenseProposalDomainEntity } from '../../domain/entities/expense-proposal.entity';
 import { ExpenseProposalStatus } from '../../domain/enums/expense-proposal-status.enum';
 import type { ExpenseProposalRepository } from '../../domain/repositories/expense-proposal.repository';
@@ -11,6 +15,7 @@ function makeProposal(
   return {
     proposal_hash: '0xabc',
     coopname: 'voskhod',
+    username: 'creator',
     status,
     total_actual: total_actual ?? '1500.0000 RUB',
   } as unknown as ExpenseProposalDomainEntity;
@@ -44,11 +49,13 @@ describe('ExpensesCapitalTriggerService', () => {
   let service: ExpensesCapitalTriggerService;
   let logger: ReturnType<typeof makeLogger>;
   let proposals: ExpenseProposalRepository;
+  let eventEmitter: EventEmitter2 & { emit: jest.Mock };
 
   beforeEach(() => {
     logger = makeLogger();
     proposals = {} as ExpenseProposalRepository;
-    service = new ExpensesCapitalTriggerService(proposals, logger);
+    eventEmitter = { emit: jest.fn() } as unknown as EventEmitter2 & { emit: jest.Mock };
+    service = new ExpensesCapitalTriggerService(proposals, eventEmitter, logger);
   });
 
   it('ничего не делает для не-CLOSED статуса', async () => {
@@ -77,7 +84,7 @@ describe('ExpensesCapitalTriggerService', () => {
     expect(logger.log).not.toHaveBeenCalled();
   });
 
-  it('logs capitalization-TODO для CLOSED + total_actual', async () => {
+  it('эмитит EXPENSE_CAPITALIZATION_REQUIRED для CLOSED + total_actual', async () => {
     await service.handleProposalSynced({
       entity: makeProposal(ExpenseProposalStatus.CLOSED, '1500.0000 RUB'),
       blockNum: 100,
@@ -86,9 +93,17 @@ describe('ExpensesCapitalTriggerService', () => {
     const message = logger.log.mock.calls[0][0] as string;
     expect(message).toContain('0xabc');
     expect(message).toContain('1500.0000 RUB');
-    expect(message).toContain('voskhod');
     expect(message).toContain('100');
-    expect(message).toContain('TODO');
+    expect(eventEmitter.emit).toHaveBeenCalledWith(
+      EXPENSE_CAPITALIZATION_REQUIRED,
+      expect.objectContaining({
+        coopname: 'voskhod',
+        proposal_hash: '0xabc',
+        username: 'creator',
+        total_actual: '1500.0000 RUB',
+        block_num: 100,
+      })
+    );
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
