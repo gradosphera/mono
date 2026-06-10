@@ -206,7 +206,7 @@ async function submit(): Promise<void> {
       source_wallet: form.source_wallet,
       items: form.items,
     });
-    SuccessAlert('Служебная записка подана', 'Заявление подписано и отправлено в блокчейн.');
+    SuccessAlert('Служебная записка подана — заявление подписано и отправлено в блокчейн');
     emit('created');
     close();
   } catch (e) {

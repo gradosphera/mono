@@ -96,7 +96,7 @@
                 .file-row__meta.t-muted
                   span(v-if='file.uploaded_by_username') {{ file.uploaded_by_username }}
                   span(v-if='file.uploaded_at') {{ ' · ' + formatDate(file.uploaded_at) }}
-                  span(v-if='file.size_bytes') {{ ' · ' + formatBytes(file.size_bytes) }}
+                  span(v-if='file.size_bytes') {{ ' · ' + formatBytes(Number(file.size_bytes)) }}
           EmptyState(
             v-else,
             title='Файлов пока нет',
