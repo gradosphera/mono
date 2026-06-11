@@ -160,6 +160,7 @@ export interface IOverspendexp {
  */
 export interface IProposal {
   id: IUint64
+  coopname: IName
   proposal_hash: IChecksum256
   username: IName
   source_wallet: IName

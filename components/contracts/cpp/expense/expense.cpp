@@ -99,6 +99,7 @@ void expense::createexp(name coopname, name username,
 
   tbl.emplace(get_self(), [&](auto& row) {
     row.id              = tbl.available_primary_key();
+    row.coopname        = coopname;
     row.proposal_hash   = proposal_hash;
     row.username        = username;
     row.source_wallet   = source_wallet;

@@ -99,6 +99,7 @@ namespace ExpenseDomain {
    */
   struct [[eosio::table, eosio::contract("expense")]] proposal {
     uint64_t              id;
+    eosio::name           coopname;       ///< кооператив (= scope таблицы; дублируем полем по канону)
     eosio::checksum256    proposal_hash;
     eosio::name           username;       ///< создатель
     eosio::name           source_wallet;  ///< семантически — из какого ЦПП/фонда (w.cap.blago, w.sov.expns, …)
@@ -118,7 +119,7 @@ namespace ExpenseDomain {
     uint64_t by_status()        const { return static_cast<uint64_t>(status); }
 
     EOSLIB_SERIALIZE(proposal,
-      (id)(proposal_hash)(username)(source_wallet)(status)
+      (id)(coopname)(proposal_hash)(username)(source_wallet)(status)
       (items)(total_planned)(total_actual)(callback)(statement_doc)(decision_doc)
       (created_at)(updated_at))
   };
