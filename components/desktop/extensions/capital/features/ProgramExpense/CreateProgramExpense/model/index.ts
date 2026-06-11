@@ -21,6 +21,8 @@ export interface ICreateProgramExpenseDraftItem {
   requisites?: string;
   recipient_account?: string;
   item_hash?: string;
+  /** Идентификатор платёжного метода получателя-пайщика (SELF/MEMBER). */
+  payment_method_id?: string | null;
 }
 
 export interface ICreateProgramExpenseDraft {
@@ -63,6 +65,8 @@ export function useCreateProgramExpense() {
     const totalAmount = draft.items.reduce((sum, it) => sum + parseFloat(it.amount || '0'), 0);
     const total_amount = formatToAsset(totalAmount, symbol, precision);
 
+    // Полные реквизиты в документ подставляет сервер по payment_method_id;
+    // фронт знает только сокращённое представление.
     const itemsForDoc = draft.items.map((it, idx) => ({
       number: String(idx + 1),
       description: it.description,
@@ -71,6 +75,11 @@ export function useCreateProgramExpense() {
       mechanics: it.mechanics,
       recipient_name: it.recipient_name ?? '',
       requisites: it.requisites ?? '',
+      payment_method_id: it.payment_method_id ?? undefined,
+      recipient_username:
+        it.recipient_type === Zeus.ExpenseRecipientType.MEMBER
+          ? it.recipient_account?.trim()
+          : undefined,
     }));
 
     const generateInput: GenerateStatementInput = {
@@ -102,6 +111,8 @@ export function useCreateProgramExpense() {
       recipient: resolveRecipient(it, session.username),
       description: it.description,
       planned_amount: formatToAsset(it.amount, symbol, precision),
+      payment_method_id: it.payment_method_id ?? undefined,
+      requisites: it.requisites || undefined,
     }));
 
     const result = await createProgramExpense({

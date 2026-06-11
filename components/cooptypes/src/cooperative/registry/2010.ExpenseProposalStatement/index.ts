@@ -44,26 +44,25 @@ export interface Model {
 export const title = 'Служебная записка-смета о расходах'
 export const description = 'Заявка-смета председателю кооператива на финансирование расходов по программе. Содержит описание цели и массив позиций расхода.'
 
-export const context = `<style>h1{margin:0;text-align:center;}h3{margin:0;padding-top:15px;text-align:center;}.digital-document{padding:20px;white-space:pre-wrap;}.subheader{padding-bottom:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:8px;text-align:left;word-wrap:break-word;overflow-wrap:break-word;}th{background-color:#f4f4f4;}.summary{margin-top:20px;text-align:right;font-weight:bold;}.signature{padding-top:30px;}</style><div class="digital-document"><div style="padding-bottom:30px;"><h1 style="text-align:center">{% trans 'PROPOSAL_TITLE' %}</h1><p style="text-align:center">{{vars.full_abbr_genitive}} «{{vars.name}}»</p><p style="text-align:right;padding-top:20px">{{ coop.city }}, {{ meta.created_at }}</p></div><h3>{% trans 'PURPOSE' %}</h3><p>{{ proposal.description }}</p><h3 style="padding-top:20px;">{% trans 'ITEMS' %}</h3><table><thead><tr><th>№</th><th>{% trans 'ITEM_DESCRIPTION' %}</th><th>{% trans 'ITEM_AMOUNT' %}</th><th>{% trans 'ITEM_RECIPIENT' %}</th><th>{% trans 'ITEM_MECHANICS' %}</th><th>{% trans 'ITEM_REQUISITES' %}</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.number }}</td><td>{{ item.description }}</td><td>{{ item.amount }}</td><td>{% if item.recipient_type == 'SELF' %}{% trans 'RECIPIENT_SELF' %}{% elif item.recipient_type == 'MEMBER' %}{% trans 'RECIPIENT_MEMBER' %}: {{ item.recipient_name }}{% else %}{% trans 'RECIPIENT_ORG' %}: {{ item.recipient_name }}{% endif %}</td><td>{% if item.mechanics == 'ADVANCE' %}{% trans 'MECH_ADVANCE' %}{% else %}{% trans 'MECH_DIRECT' %}{% endif %}</td><td>{{ item.requisites }}</td></tr>{% endfor %}</tbody></table><p class="summary">{% trans 'TOTAL' %}: {{ proposal.total_amount }} ({{ proposal.items_count }} {% trans 'ITEMS_COUNT_SUFFIX' %})</p><p style="padding-top:15px;">{% trans 'SOURCE_WALLET' %}: {{ proposal.source_wallet }}</p><div class="signature"><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div></div>`
+// Вёрстка по бумажному образцу служебной записки: шапка-адресат справа,
+// дата слева, центрированный заголовок с идентификатором (= proposal_hash,
+// по нему записку можно найти), позиции — нумерованным списком с полными
+// реквизитами получателей. Кошелёк-источник в документе не указывается.
+export const context = `<style>h1{margin:0;text-align:center;}.digital-document{padding:20px;}.doc-header{text-align:right;padding-bottom:25px;}.doc-header p{margin:2px 0;}.doc-id{text-align:center;font-size:12px;word-break:break-all;padding-top:6px;padding-bottom:25px;}ol.items{padding-left:25px;margin:10px 0;}ol.items li{padding-bottom:10px;}.signature{padding-top:40px;}</style><div class="digital-document"><div class="doc-header"><p>{% trans 'TO_COUNCIL' %} {{vars.full_abbr_genitive}} «{{vars.name}}»</p><p>{% trans 'FROM_MEMBER' %} {{ user.full_name_or_short_name }}</p></div><p>{% trans 'DATE' %}: {{ meta.created_at }}</p><h1 style="padding-top:25px;">{% trans 'PROPOSAL_TITLE' %}</h1><p class="doc-id">№ {{ proposal_hash }}</p><p>{% trans 'BODY_INTRO' %} {{ proposal.total_amount }}, {% trans 'BODY_NAMELY' %}:</p><ol class="items">{% for item in items %}<li>{{ item.description }} — {{ item.amount }} ({% if item.mechanics == 'ADVANCE' %}{% trans 'MECH_ADVANCE' %}{% else %}{% trans 'MECH_DIRECT' %}{% endif %}). {% trans 'ITEM_RECIPIENT' %}: {% if item.recipient_type == 'SELF' %}{{ user.full_name_or_short_name }}{% else %}{{ item.recipient_name }}{% endif %}{% if item.requisites %}. {% trans 'ITEM_REQUISITES' %}: {{ item.requisites }}{% endif %}</li>{% endfor %}</ol><p>{% trans 'PURPOSE' %}: {{ proposal.description }}</p><div class="signature"><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div></div>`
 
 export const translations = {
   ru: {
-    PROPOSAL_TITLE: 'СЛУЖЕБНАЯ ЗАПИСКА-СМЕТА О РАСХОДАХ',
-    PURPOSE: 'ЦЕЛЬ РАСХОДОВ',
-    ITEMS: 'ПОЗИЦИИ РАСХОДА',
-    ITEM_DESCRIPTION: 'Описание',
-    ITEM_AMOUNT: 'Сумма',
+    TO_COUNCIL: 'В Совет',
+    FROM_MEMBER: 'от пайщика',
+    DATE: 'Дата',
+    PROPOSAL_TITLE: 'СЛУЖЕБНАЯ ЗАПИСКА',
+    BODY_INTRO: 'Прошу согласовать списание затрат в общей сумме',
+    BODY_NAMELY: 'а именно',
+    MECH_ADVANCE: 'аванс под отчёт',
+    MECH_DIRECT: 'прямая оплата',
     ITEM_RECIPIENT: 'Получатель',
-    ITEM_MECHANICS: 'Механика',
     ITEM_REQUISITES: 'Реквизиты',
-    RECIPIENT_SELF: 'Я (creator)',
-    RECIPIENT_MEMBER: 'Пайщик',
-    RECIPIENT_ORG: 'Организация',
-    MECH_ADVANCE: 'Аванс под отчёт',
-    MECH_DIRECT: 'Прямая оплата',
-    TOTAL: 'Итого',
-    ITEMS_COUNT_SUFFIX: 'поз.',
-    SOURCE_WALLET: 'Источник средств',
+    PURPOSE: 'Цель расходов',
     SIGNED_DIGITALLY: 'подписано электронной подписью',
   },
 }
@@ -73,6 +72,7 @@ export const exampleData = {
   meta: { created_at: '02.06.2026 14:00' },
   vars: { full_abbr_genitive: 'ПК', name: 'Восход' },
   user: { full_name_or_short_name: 'Иванов И.И.' },
+  proposal_hash: '55c470039a8c53ce1b4b6e842fe8063ab3d5b85ba2ba8ab0ae6e30be3ad328b7',
   proposal: {
     description: 'Закупка хостинга и бухгалтерских услуг на июнь 2026',
     total_amount: '15000.00 RUB',
@@ -96,7 +96,7 @@ export const exampleData = {
       recipient_type: 'SELF',
       mechanics: 'ADVANCE',
       recipient_name: '',
-      requisites: '',
+      requisites: 'Банковский перевод: счёт 40817810000000000000, Банк ВТБ (ПАО), БИК 044525187',
     },
   ],
 }

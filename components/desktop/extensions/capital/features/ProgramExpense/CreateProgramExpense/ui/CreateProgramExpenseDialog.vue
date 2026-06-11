@@ -43,7 +43,8 @@ BaseDialog(
               BaseSelect(
                 v-model='item.recipient_type',
                 :options='recipientTypeOptions',
-                label='Тип получателя'
+                label='Тип получателя',
+                @update:model-value='item.payment_method_id = null'
               )
             .col-12.col-md-6
               BaseSelect(
@@ -57,7 +58,8 @@ BaseDialog(
                 v-model='item.recipient_account',
                 label='Аккаунт пайщика-получателя',
                 placeholder='username',
-                required
+                required,
+                @update:model-value='item.payment_method_id = null'
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.ORG')
               BaseInput(
@@ -79,11 +81,26 @@ BaseDialog(
                 label='Описание',
                 placeholder='Назначение расхода'
               )
+            .col-12(v-if='item.recipient_type === Zeus.ExpenseRecipientType.SELF')
+              PaymentMethodSelect(
+                v-model='item.payment_method_id',
+                :username='session.username',
+                hint='Реквизиты фиксируются на момент подачи — на них придёт выплата',
+                required
+              )
+            .col-12(v-if='item.recipient_type === Zeus.ExpenseRecipientType.MEMBER')
+              PaymentMethodSelect(
+                v-model='item.payment_method_id',
+                :username='item.recipient_account?.trim() || ""',
+                :hint='item.recipient_account?.trim() ? "Реквизиты фиксируются на момент подачи" : "Сначала укажите аккаунт пайщика-получателя"',
+                required
+              )
             .col-12(v-if='item.recipient_type === Zeus.ExpenseRecipientType.ORG')
               BaseInput(
                 v-model='item.requisites',
                 label='Реквизиты получателя',
-                placeholder='ИНН, р/с, БИК'
+                placeholder='ИНН, р/с, БИК',
+                required
               )
 
   template(#footer)
@@ -102,11 +119,13 @@ import { computed, reactive, ref } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseInput } from 'src/shared/ui/base/BaseInput';
 import { BaseSelect } from 'src/shared/ui/base/BaseSelect';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
+import { PaymentMethodSelect } from 'src/shared/ui/domain/PaymentMethodSelect';
 import {
   useCreateProgramExpense,
   type ICreateProgramExpenseDraftItem,
@@ -119,6 +138,7 @@ const emit = defineEmits<{
 }>();
 
 const system = useSystemStore();
+const session = useSessionStore();
 const { submitProgramExpense } = useCreateProgramExpense();
 
 const amountPlaceholder = computed(() => {
@@ -153,7 +173,9 @@ const canSubmit = computed(
         i.amount.trim() &&
         i.description.trim() &&
         (i.recipient_type !== Zeus.ExpenseRecipientType.MEMBER || i.recipient_account?.trim()) &&
-        (i.recipient_type !== Zeus.ExpenseRecipientType.ORG || i.recipient_name?.trim()),
+        (i.recipient_type === Zeus.ExpenseRecipientType.ORG
+          ? Boolean(i.recipient_name?.trim() && i.requisites?.trim())
+          : Boolean(i.payment_method_id)),
     ),
 );
 
@@ -167,6 +189,7 @@ function addItem(): void {
     recipient_name: '',
     requisites: '',
     recipient_account: '',
+    payment_method_id: null,
   });
 }
 

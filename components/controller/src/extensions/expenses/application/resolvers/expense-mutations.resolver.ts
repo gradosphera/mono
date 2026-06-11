@@ -16,16 +16,14 @@ import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
 import { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input';
 import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input';
-import { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input';
-import { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input';
 
 /**
  * GraphQL Mutation-резолвер контракта `expense`.
  *
- * 8 actions полного lifecycle: createExpenseProposal / authorizeExpenseReport /
- * payExpenseItem / reportExpenseItem / returnExpenseItem / overspendExpenseItem /
- * submitExpenseReport / declineExpenseReport. Все маршрутизируются в
+ * createExpenseProposal / payExpenseItem / reportExpenseItem / returnExpenseItem /
+ * overspendExpenseItem / submitExpenseReport. Все маршрутизируются в
  * `ExpensesMutationsService`, который сабмитит через `ExpensesBlockchainPort`.
+ * Авторизация и отклонение СЗ — решение совета (повестка), не мутации backend'а.
  */
 @Resolver()
 export class ExpenseMutationsResolver {
@@ -135,27 +133,4 @@ export class ExpenseMutationsResolver {
     return this.expensesMutations.submitExpenseReport(data);
   }
 
-  @Mutation(() => TransactionDTO, {
-    name: 'authorizeExpenseReport',
-    description: 'Утвердить СЗ-отчёт (закрытие сметы). Триггерит капитализацию РИД в Благоросте.',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async authorizeExpenseReport(
-    @Args('data', { type: () => AuthorizeExpenseReportInputDTO }) data: AuthorizeExpenseReportInputDTO
-  ): Promise<TransactionDTO> {
-    return this.expensesMutations.authorizeExpenseReport(data);
-  }
-
-  @Mutation(() => TransactionDTO, {
-    name: 'declineExpenseReport',
-    description: 'Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.',
-  })
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
-  async declineExpenseReport(
-    @Args('data', { type: () => DeclineExpenseReportInputDTO }) data: DeclineExpenseReportInputDTO
-  ): Promise<TransactionDTO> {
-    return this.expensesMutations.declineExpenseReport(data);
-  }
 }

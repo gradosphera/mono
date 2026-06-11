@@ -81,6 +81,21 @@ export interface InterExpensePaginatedResult<T> {
   totalCount: number;
 }
 
+
+/** Строка СЗ для снимка реквизитов получателя (фиксация «куда платить» на момент создания). */
+export interface InterExpenseRequisiteItemInput {
+  proposalHash: string;
+  itemHash: string;
+  /** Получатель: username пайщика (владелец платёжного метода) либо пусто для организации. */
+  recipient: string;
+  /** true — получатель-организация: реквизиты приходят строкой `requisites`. */
+  isOrganization: boolean;
+  /** Идентификатор платёжного метода получателя-пайщика. */
+  paymentMethodId?: string;
+  /** Реквизиты строкой (организации — ручной ввод из формы). */
+  requisites?: string;
+}
+
 export interface InterExpenseChassisPort {
   /**
    * Чтение proposal'а по хэшу. Возвращает null, если шасси не видит
@@ -105,4 +120,17 @@ export interface InterExpenseChassisPort {
     ownerAction?: string,
     pagination?: InterExpensePagination,
   ): Promise<InterExpensePaginatedResult<InterExpenseProposalRead>>;
+
+  /**
+   * Валидация реквизитов строк СЗ ДО постановки on-chain заявки: у каждой
+   * строки с получателем-пайщиком должен существовать указанный платёжный метод.
+   */
+  validateRequisites(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void>;
+
+  /**
+   * Снимок реквизитов ПОСЛЕ успешной on-chain заявки: данные платёжного метода
+   * копируются в хранилище шасси на момент создания СЗ — последующее изменение
+   * метода пайщиком не меняет то, куда платить по уже поданной смете.
+   */
+  snapshotRequisites(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void>;
 }

@@ -69,4 +69,5 @@ export type {
   InterExpensePaginatedResult,
   InterExpenseProposalRead,
   InterExpenseProposalStatus,
+  InterExpenseRequisiteItemInput,
 } from './expense-chassis.port';

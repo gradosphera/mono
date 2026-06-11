@@ -1,0 +1,92 @@
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import type { InterExpenseRequisiteItemInput } from '@coopenomics/inter'
+import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository'
+import { ExpenseRequisiteSnapshotTypeormEntity } from '../../infrastructure/entities/expense-requisite-snapshot.typeorm-entity'
+import { formatPaymentMethodRequisites } from '../../domain/utils/format-requisites.util'
+
+/**
+ * Снимки реквизитов получателей по строкам СЗ. Канон gateway prepareWithdraw →
+ * persistWithdraw: `validate` зовётся ДО on-chain заявки (метод существует),
+ * `snapshot` — ПОСЛЕ (данные метода копируются на момент создания СЗ).
+ * Реквизиты в чейн не пишутся — только в БД шасси и в документ 2010.
+ */
+@Injectable()
+export class ExpenseRequisiteSnapshotsService {
+  private readonly logger = new Logger(ExpenseRequisiteSnapshotsService.name)
+
+  constructor(
+    @Inject(PAYMENT_METHOD_REPOSITORY)
+    private readonly paymentMethods: PaymentMethodRepository,
+    @InjectRepository(ExpenseRequisiteSnapshotTypeormEntity)
+    private readonly repository: Repository<ExpenseRequisiteSnapshotTypeormEntity>
+  ) {}
+
+  async validate(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void> {
+    await this.resolve(coopname, items)
+  }
+
+  async snapshot(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void> {
+    const snapshots = await this.resolve(coopname, items)
+    if (snapshots.length === 0) return
+    try {
+      await this.repository.save(snapshots)
+    } catch (error: any) {
+      // On-chain заявка уже создана — без снимка бухгалтер не получит реквизиты
+      // для оплаты. Требуется ручная сверка.
+      this.logger.error(
+        `КРИТИЧНО: СЗ ${items[0]?.proposalHash} создана on-chain, но снимок реквизитов не сохранён: ${error.message}`,
+        error
+      )
+      throw error
+    }
+  }
+
+  /** Полные реквизиты платёжного метода пайщика строкой — для документов. */
+  async formatForOwner(username: string, methodId: string): Promise<string> {
+    const method = await this.paymentMethods.get({ username, method_id: methodId })
+    return formatPaymentMethodRequisites(method)
+  }
+
+  private async resolve(
+    coopname: string,
+    items: InterExpenseRequisiteItemInput[]
+  ): Promise<ExpenseRequisiteSnapshotTypeormEntity[]> {
+    return Promise.all(
+      items.map(async (it) => {
+        const snapshot = this.repository.create({
+          coopname,
+          proposal_hash: it.proposalHash.toLowerCase(),
+          item_hash: it.itemHash.toLowerCase(),
+          recipient: it.recipient,
+          method_id: null,
+          method_type: null,
+          data: null,
+          requisites: it.requisites ?? '',
+        })
+
+        if (it.isOrganization) {
+          return snapshot
+        }
+
+        if (!it.paymentMethodId) {
+          throw new BadRequestException(
+            `Не указаны реквизиты получателя ${it.recipient} (платёжный метод) по строке расхода`
+          )
+        }
+
+        const method = await this.paymentMethods.get({
+          username: it.recipient,
+          method_id: it.paymentMethodId,
+        })
+
+        snapshot.method_id = method.method_id
+        snapshot.method_type = method.method_type
+        snapshot.data = method.data as unknown as Record<string, unknown>
+        snapshot.requisites = formatPaymentMethodRequisites(method)
+        return snapshot
+      })
+    )
+  }
+}

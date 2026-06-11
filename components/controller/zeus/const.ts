@@ -125,9 +125,6 @@ export const AllTypesProps: Record<string,any> = {
 	AuthorizeDecisionInput:{
 		document:"SignedDigitalDocumentInput"
 	},
-	AuthorizeExpenseReportInput:{
-		decision:"ExpenseProposalDecisionSignedDocumentInput"
-	},
 	BankAccountDetailsInput:{
 
 	},
@@ -397,9 +394,6 @@ export const AllTypesProps: Record<string,any> = {
 	DeclineDecisionInput:{
 
 	},
-	DeclineExpenseReportInput:{
-
-	},
 	DeclineRequestInput:{
 
 	},
@@ -472,15 +466,6 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ExpenseProposalDecisionItemInput:{
 
-	},
-	ExpenseProposalDecisionSignedDocumentInput:{
-		meta:"ExpenseProposalDecisionSignedMetaDocumentInput",
-		signatures:"SignatureInfoInput"
-	},
-	ExpenseProposalDecisionSignedMetaDocumentInput:{
-		decision:"ExpenseProposalDecisionBodyInput",
-		items:"ExpenseProposalDecisionItemInput",
-		proposal:"ExpenseProposalDecisionHeaderInput"
 	},
 	ExpenseProposalHeaderInput:{
 
@@ -726,9 +711,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		authorizeDecision:{
 			data:"AuthorizeDecisionInput"
-		},
-		authorizeExpenseReport:{
-			data:"AuthorizeExpenseReportInput"
 		},
 		cancelRequest:{
 			data:"CancelRequestInput"
@@ -1072,9 +1054,6 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		declineDecision:{
 			data:"DeclineDecisionInput"
-		},
-		declineExpenseReport:{
-			data:"DeclineExpenseReportInput"
 		},
 		declineRequest:{
 			data:"DeclineRequestInput"
@@ -3802,7 +3781,6 @@ export const ReturnTypes: Record<string,any> = {
 		addPaymentMethod:"PaymentMethod",
 		addTrustedAccount:"Branch",
 		authorizeDecision:"Transaction",
-		authorizeExpenseReport:"Transaction",
 		cancelRequest:"Transaction",
 		capitalAddAuthor:"CapitalProject",
 		capitalApproveCommit:"CapitalCommit",
@@ -3911,7 +3889,6 @@ export const ReturnTypes: Record<string,any> = {
 		deactivateWebPushSubscriptionById:"Boolean",
 		declineAgreement:"Transaction",
 		declineDecision:"Transaction",
-		declineExpenseReport:"Transaction",
 		declineRequest:"Transaction",
 		deleteAccount:"Boolean",
 		deleteBranch:"Boolean",

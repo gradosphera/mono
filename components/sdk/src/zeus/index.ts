@@ -1941,14 +1941,6 @@ export type ValueTypes = {
 	/** Подписанный председателем документ утверждения решения */
 	document: ValueTypes["SignedDigitalDocumentInput"] | Variable<any, string>
 };
-	["AuthorizeExpenseReportInput"]: {
-	/** Имя кооператива. */
-	coopname: string | Variable<any, string>,
-	/** Подписанное решение совета (document2, registry 2011). */
-	decision: ValueTypes["ExpenseProposalDecisionSignedDocumentInput"] | Variable<any, string>,
-	/** Хеш сметы расхода. */
-	proposal_hash: string | Variable<any, string>
-};
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
 	/** Время последней успешной генерации (UTC) */
@@ -4925,14 +4917,6 @@ export type ValueTypes = {
 	/** Идентификатор решения */
 	decision_id: number | Variable<any, string>
 };
-	["DeclineExpenseReportInput"]: {
-	/** Имя кооператива. */
-	coopname: string | Variable<any, string>,
-	/** Хеш сметы расхода. */
-	proposal_hash: string | Variable<any, string>,
-	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
-	reason: string | Variable<any, string>
-};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string | Variable<any, string>,
@@ -5296,12 +5280,16 @@ export type ValueTypes = {
 	item_hash: string | Variable<any, string>,
 	/** Способ оплаты (ADVANCE / DIRECT). */
 	mechanics: ValueTypes["ExpenseMechanics"] | Variable<any, string>,
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
+	payment_method_id?: string | undefined | null | Variable<any, string>,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string | Variable<any, string>,
 	/** Получатель (username / eosio::name организации). */
 	recipient: string | Variable<any, string>,
 	/** Тип получателя. */
-	recipient_type: ValueTypes["ExpenseRecipientType"] | Variable<any, string>
+	recipient_type: ValueTypes["ExpenseRecipientType"] | Variable<any, string>,
+	/** Реквизиты получателя-организации (вводятся вручную). */
+	requisites?: string | undefined | null | Variable<any, string>
 };
 	/** Статус строки расхода. */
 ["ExpenseItemStatus"]:ExpenseItemStatus;
@@ -5405,52 +5393,6 @@ export type ValueTypes = {
 	recipient_type: string | Variable<any, string>,
 	requisites?: string | undefined | null | Variable<any, string>
 };
-	["ExpenseProposalDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string | Variable<any, string>,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string | Variable<any, string>,
-	/** Метаинформация решения по СЗ */
-	meta: ValueTypes["ExpenseProposalDecisionSignedMetaDocumentInput"] | Variable<any, string>,
-	/** Хэш мета-данных */
-	meta_hash: string | Variable<any, string>,
-	/** Вектор подписей */
-	signatures: Array<ValueTypes["SignatureInfoInput"]> | Variable<any, string>,
-	/** Версия стандарта документа */
-	version: string | Variable<any, string>
-};
-	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number | Variable<any, string>,
-	/** Название кооператива, связанное с документом */
-	coopname: string | Variable<any, string>,
-	/** Дата и время создания документа */
-	created_at: string | Variable<any, string>,
-	/** Тело решения */
-	decision: ValueTypes["ExpenseProposalDecisionBodyInput"] | Variable<any, string>,
-	/** Имя генератора, использованного для создания документа */
-	generator: string | Variable<any, string>,
-	/** Позиции расхода */
-	items: Array<ValueTypes["ExpenseProposalDecisionItemInput"]> | Variable<any, string>,
-	/** Язык документа */
-	lang: string | Variable<any, string>,
-	/** Ссылки, связанные с документом */
-	links: Array<string> | Variable<any, string>,
-	/** Шапка СЗ */
-	proposal: ValueTypes["ExpenseProposalDecisionHeaderInput"] | Variable<any, string>,
-	/** Хеш сметы расхода */
-	proposal_hash: string | Variable<any, string>,
-	/** ID документа в реестре */
-	registry_id: number | Variable<any, string>,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string | Variable<any, string>,
-	/** Название документа */
-	title: string | Variable<any, string>,
-	/** Имя пользователя, создавшего документ */
-	username: string | Variable<any, string>,
-	/** Версия генератора, использованного для создания документа */
-	version: string | Variable<any, string>
-};
 	["ExpenseProposalHeaderInput"]: {
 	/** Описание цели расходов */
 	description: string | Variable<any, string>,
@@ -5470,10 +5412,14 @@ export type ValueTypes = {
 	mechanics: string | Variable<any, string>,
 	/** Порядковый номер строки */
 	number: string | Variable<any, string>,
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
+	payment_method_id?: string | undefined | null | Variable<any, string>,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null | Variable<any, string>,
 	/** Тип получателя (SELF / MEMBER / ORG) */
 	recipient_type: string | Variable<any, string>,
+	/** Имя аккаунта получателя-пайщика (владелец реквизитов). */
+	recipient_username?: string | undefined | null | Variable<any, string>,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null | Variable<any, string>
 };
@@ -6890,7 +6836,6 @@ addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, stri
 addPaymentMethod?: [{	data: ValueTypes["AddPaymentMethodInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 authorizeDecision?: [{	data: ValueTypes["AuthorizeDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-authorizeExpenseReport?: [{	data: ValueTypes["AuthorizeExpenseReportInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
@@ -7002,7 +6947,6 @@ createWithdraw?: [{	data: ValueTypes["CreateWithdrawInput"] | Variable<any, stri
 deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
 declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineDecision?: [{	data: ValueTypes["DeclineDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-declineExpenseReport?: [{	data: ValueTypes["DeclineExpenseReportInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 deleteAccount?: [{	data: ValueTypes["DeleteAccountInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
@@ -11112,14 +11056,6 @@ export type ResolverInputTypes = {
 	/** Подписанный председателем документ утверждения решения */
 	document: ResolverInputTypes["SignedDigitalDocumentInput"]
 };
-	["AuthorizeExpenseReportInput"]: {
-	/** Имя кооператива. */
-	coopname: string,
-	/** Подписанное решение совета (document2, registry 2011). */
-	decision: ResolverInputTypes["ExpenseProposalDecisionSignedDocumentInput"],
-	/** Хеш сметы расхода. */
-	proposal_hash: string
-};
 	["AvailableReport"]: AliasType<{
 	deadline?:boolean | `@${string}`,
 	/** Время последней успешной генерации (UTC) */
@@ -14019,14 +13955,6 @@ export type ResolverInputTypes = {
 	/** Идентификатор решения */
 	decision_id: number
 };
-	["DeclineExpenseReportInput"]: {
-	/** Имя кооператива. */
-	coopname: string,
-	/** Хеш сметы расхода. */
-	proposal_hash: string,
-	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
-	reason: string
-};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -14378,12 +14306,16 @@ export type ResolverInputTypes = {
 	item_hash: string,
 	/** Способ оплаты (ADVANCE / DIRECT). */
 	mechanics: ResolverInputTypes["ExpenseMechanics"],
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
+	payment_method_id?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
 	/** Получатель (username / eosio::name организации). */
 	recipient: string,
 	/** Тип получателя. */
-	recipient_type: ResolverInputTypes["ExpenseRecipientType"]
+	recipient_type: ResolverInputTypes["ExpenseRecipientType"],
+	/** Реквизиты получателя-организации (вводятся вручную). */
+	requisites?: string | undefined | null
 };
 	/** Статус строки расхода. */
 ["ExpenseItemStatus"]:ExpenseItemStatus;
@@ -14486,52 +14418,6 @@ export type ResolverInputTypes = {
 	recipient_type: string,
 	requisites?: string | undefined | null
 };
-	["ExpenseProposalDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация решения по СЗ */
-	meta: ResolverInputTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ResolverInputTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Тело решения */
-	decision: ResolverInputTypes["ExpenseProposalDecisionBodyInput"],
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Позиции расхода */
-	items: Array<ResolverInputTypes["ExpenseProposalDecisionItemInput"]>,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Шапка СЗ */
-	proposal: ResolverInputTypes["ExpenseProposalDecisionHeaderInput"],
-	/** Хеш сметы расхода */
-	proposal_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["ExpenseProposalHeaderInput"]: {
 	/** Описание цели расходов */
 	description: string,
@@ -14551,10 +14437,14 @@ export type ResolverInputTypes = {
 	mechanics: string,
 	/** Порядковый номер строки */
 	number: string,
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
+	payment_method_id?: string | undefined | null,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null,
 	/** Тип получателя (SELF / MEMBER / ORG) */
 	recipient_type: string,
+	/** Имя аккаунта получателя-пайщика (владелец реквизитов). */
+	recipient_username?: string | undefined | null,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null
 };
@@ -15932,7 +15822,6 @@ addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInp
 addPaymentMethod?: [{	data: ResolverInputTypes["AddPaymentMethodInput"]},ResolverInputTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 authorizeDecision?: [{	data: ResolverInputTypes["AuthorizeDecisionInput"]},ResolverInputTypes["Transaction"]],
-authorizeExpenseReport?: [{	data: ResolverInputTypes["AuthorizeExpenseReportInput"]},ResolverInputTypes["Transaction"]],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
@@ -16044,7 +15933,6 @@ createWithdraw?: [{	data: ResolverInputTypes["CreateWithdrawInput"]},ResolverInp
 deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
 declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
 declineDecision?: [{	data: ResolverInputTypes["DeclineDecisionInput"]},ResolverInputTypes["Transaction"]],
-declineExpenseReport?: [{	data: ResolverInputTypes["DeclineExpenseReportInput"]},ResolverInputTypes["Transaction"]],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
 deleteAccount?: [{	data: ResolverInputTypes["DeleteAccountInput"]},boolean | `@${string}`],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
@@ -20034,14 +19922,6 @@ export type ModelTypes = {
 	/** Подписанный председателем документ утверждения решения */
 	document: ModelTypes["SignedDigitalDocumentInput"]
 };
-	["AuthorizeExpenseReportInput"]: {
-	/** Имя кооператива. */
-	coopname: string,
-	/** Подписанное решение совета (document2, registry 2011). */
-	decision: ModelTypes["ExpenseProposalDecisionSignedDocumentInput"],
-	/** Хеш сметы расхода. */
-	proposal_hash: string
-};
 	["AvailableReport"]: {
 		deadline: string,
 	/** Время последней успешной генерации (UTC) */
@@ -22856,14 +22736,6 @@ export type ModelTypes = {
 	/** Идентификатор решения */
 	decision_id: number
 };
-	["DeclineExpenseReportInput"]: {
-	/** Имя кооператива. */
-	coopname: string,
-	/** Хеш сметы расхода. */
-	proposal_hash: string,
-	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
-	reason: string
-};
 	["DeclineRequestInput"]: {
 	/** Имя аккаунта кооператива */
 	coopname: string,
@@ -23201,12 +23073,16 @@ export type ModelTypes = {
 	item_hash: string,
 	/** Способ оплаты (ADVANCE / DIRECT). */
 	mechanics: ModelTypes["ExpenseMechanics"],
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
+	payment_method_id?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
 	/** Получатель (username / eosio::name организации). */
 	recipient: string,
 	/** Тип получателя. */
-	recipient_type: ModelTypes["ExpenseRecipientType"]
+	recipient_type: ModelTypes["ExpenseRecipientType"],
+	/** Реквизиты получателя-организации (вводятся вручную). */
+	requisites?: string | undefined | null
 };
 	["ExpenseItemStatus"]:ExpenseItemStatus;
 	["ExpenseMechanics"]:ExpenseMechanics;
@@ -23306,52 +23182,6 @@ export type ModelTypes = {
 	recipient_type: string,
 	requisites?: string | undefined | null
 };
-	["ExpenseProposalDecisionSignedDocumentInput"]: {
-	/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация решения по СЗ */
-	meta: ModelTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<ModelTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
-	/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Тело решения */
-	decision: ModelTypes["ExpenseProposalDecisionBodyInput"],
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Позиции расхода */
-	items: Array<ModelTypes["ExpenseProposalDecisionItemInput"]>,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Шапка СЗ */
-	proposal: ModelTypes["ExpenseProposalDecisionHeaderInput"],
-	/** Хеш сметы расхода */
-	proposal_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["ExpenseProposalHeaderInput"]: {
 	/** Описание цели расходов */
 	description: string,
@@ -23371,10 +23201,14 @@ export type ModelTypes = {
 	mechanics: string,
 	/** Порядковый номер строки */
 	number: string,
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
+	payment_method_id?: string | undefined | null,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null,
 	/** Тип получателя (SELF / MEMBER / ORG) */
 	recipient_type: string,
+	/** Имя аккаунта получателя-пайщика (владелец реквизитов). */
+	recipient_username?: string | undefined | null,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null
 };
@@ -24713,10 +24547,6 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	authorizeDecision: ModelTypes["Transaction"],
-	/** Утвердить СЗ-отчёт (закрытие сметы). Триггерит капитализацию РИД в Благоросте.
-
-Требуемые роли: chairman.  */
-	authorizeExpenseReport: ModelTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -25133,10 +24963,6 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	declineDecision: ModelTypes["Transaction"],
-	/** Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.
-
-Требуемые роли: chairman.  */
-	declineExpenseReport: ModelTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
 	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
@@ -29462,14 +29288,6 @@ export type GraphQLTypes = {
 	/** Подписанный председателем документ утверждения решения */
 	document: GraphQLTypes["SignedDigitalDocumentInput"]
 };
-	["AuthorizeExpenseReportInput"]: {
-		/** Имя кооператива. */
-	coopname: string,
-	/** Подписанное решение совета (document2, registry 2011). */
-	decision: GraphQLTypes["ExpenseProposalDecisionSignedDocumentInput"],
-	/** Хеш сметы расхода. */
-	proposal_hash: string
-};
 	["AvailableReport"]: {
 	__typename: "AvailableReport",
 	deadline: string,
@@ -32446,14 +32264,6 @@ export type GraphQLTypes = {
 	/** Идентификатор решения */
 	decision_id: number
 };
-	["DeclineExpenseReportInput"]: {
-		/** Имя кооператива. */
-	coopname: string,
-	/** Хеш сметы расхода. */
-	proposal_hash: string,
-	/** Причина отклонения СЗ-отчёта (до 1000 символов). */
-	reason: string
-};
 	["DeclineRequestInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
@@ -32817,12 +32627,16 @@ export type GraphQLTypes = {
 	item_hash: string,
 	/** Способ оплаты (ADVANCE / DIRECT). */
 	mechanics: GraphQLTypes["ExpenseMechanics"],
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
+	payment_method_id?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
 	/** Получатель (username / eosio::name организации). */
 	recipient: string,
 	/** Тип получателя. */
-	recipient_type: GraphQLTypes["ExpenseRecipientType"]
+	recipient_type: GraphQLTypes["ExpenseRecipientType"],
+	/** Реквизиты получателя-организации (вводятся вручную). */
+	requisites?: string | undefined | null
 };
 	/** Статус строки расхода. */
 ["ExpenseItemStatus"]: ExpenseItemStatus;
@@ -32926,52 +32740,6 @@ export type GraphQLTypes = {
 	recipient_type: string,
 	requisites?: string | undefined | null
 };
-	["ExpenseProposalDecisionSignedDocumentInput"]: {
-		/** Хэш содержимого документа */
-	doc_hash: string,
-	/** Общий хэш (doc_hash + meta_hash) */
-	hash: string,
-	/** Метаинформация решения по СЗ */
-	meta: GraphQLTypes["ExpenseProposalDecisionSignedMetaDocumentInput"],
-	/** Хэш мета-данных */
-	meta_hash: string,
-	/** Вектор подписей */
-	signatures: Array<GraphQLTypes["SignatureInfoInput"]>,
-	/** Версия стандарта документа */
-	version: string
-};
-	["ExpenseProposalDecisionSignedMetaDocumentInput"]: {
-		/** Номер блока, на котором был создан документ */
-	block_num: number,
-	/** Название кооператива, связанное с документом */
-	coopname: string,
-	/** Дата и время создания документа */
-	created_at: string,
-	/** Тело решения */
-	decision: GraphQLTypes["ExpenseProposalDecisionBodyInput"],
-	/** Имя генератора, использованного для создания документа */
-	generator: string,
-	/** Позиции расхода */
-	items: Array<GraphQLTypes["ExpenseProposalDecisionItemInput"]>,
-	/** Язык документа */
-	lang: string,
-	/** Ссылки, связанные с документом */
-	links: Array<string>,
-	/** Шапка СЗ */
-	proposal: GraphQLTypes["ExpenseProposalDecisionHeaderInput"],
-	/** Хеш сметы расхода */
-	proposal_hash: string,
-	/** ID документа в реестре */
-	registry_id: number,
-	/** Часовой пояс, в котором был создан документ */
-	timezone: string,
-	/** Название документа */
-	title: string,
-	/** Имя пользователя, создавшего документ */
-	username: string,
-	/** Версия генератора, использованного для создания документа */
-	version: string
-};
 	["ExpenseProposalHeaderInput"]: {
 		/** Описание цели расходов */
 	description: string,
@@ -32991,10 +32759,14 @@ export type GraphQLTypes = {
 	mechanics: string,
 	/** Порядковый номер строки */
 	number: string,
+	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
+	payment_method_id?: string | undefined | null,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null,
 	/** Тип получателя (SELF / MEMBER / ORG) */
 	recipient_type: string,
+	/** Имя аккаунта получателя-пайщика (владелец реквизитов). */
+	recipient_username?: string | undefined | null,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null
 };
@@ -34423,10 +34195,6 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	authorizeDecision: GraphQLTypes["Transaction"],
-	/** Утвердить СЗ-отчёт (закрытие сметы). Триггерит капитализацию РИД в Благоросте.
-
-Требуемые роли: chairman.  */
-	authorizeExpenseReport: GraphQLTypes["Transaction"],
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -34843,10 +34611,6 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	declineDecision: GraphQLTypes["Transaction"],
-	/** Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.
-
-Требуемые роли: chairman.  */
-	declineExpenseReport: GraphQLTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
 	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
@@ -39065,7 +38829,6 @@ type ZEUS_VARIABLES = {
 	["AssetContributionStatementSignedDocumentInput"]: ValueTypes["AssetContributionStatementSignedDocumentInput"];
 	["AssetContributionStatementSignedMetaDocumentInput"]: ValueTypes["AssetContributionStatementSignedMetaDocumentInput"];
 	["AuthorizeDecisionInput"]: ValueTypes["AuthorizeDecisionInput"];
-	["AuthorizeExpenseReportInput"]: ValueTypes["AuthorizeExpenseReportInput"];
 	["BankAccountDetailsInput"]: ValueTypes["BankAccountDetailsInput"];
 	["BankAccountInput"]: ValueTypes["BankAccountInput"];
 	["BuhotchSignerType"]: ValueTypes["BuhotchSignerType"];
@@ -39155,7 +38918,6 @@ type ZEUS_VARIABLES = {
 	["DeclineAgreementInput"]: ValueTypes["DeclineAgreementInput"];
 	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
 	["DeclineDecisionInput"]: ValueTypes["DeclineDecisionInput"];
-	["DeclineExpenseReportInput"]: ValueTypes["DeclineExpenseReportInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
 	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
@@ -39182,8 +38944,6 @@ type ZEUS_VARIABLES = {
 	["ExpenseProposalDecisionGenerateDocumentInput"]: ValueTypes["ExpenseProposalDecisionGenerateDocumentInput"];
 	["ExpenseProposalDecisionHeaderInput"]: ValueTypes["ExpenseProposalDecisionHeaderInput"];
 	["ExpenseProposalDecisionItemInput"]: ValueTypes["ExpenseProposalDecisionItemInput"];
-	["ExpenseProposalDecisionSignedDocumentInput"]: ValueTypes["ExpenseProposalDecisionSignedDocumentInput"];
-	["ExpenseProposalDecisionSignedMetaDocumentInput"]: ValueTypes["ExpenseProposalDecisionSignedMetaDocumentInput"];
 	["ExpenseProposalHeaderInput"]: ValueTypes["ExpenseProposalHeaderInput"];
 	["ExpenseProposalItemInput"]: ValueTypes["ExpenseProposalItemInput"];
 	["ExpenseProposalStatementGenerateDocumentInput"]: ValueTypes["ExpenseProposalStatementGenerateDocumentInput"];

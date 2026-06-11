@@ -5,10 +5,7 @@ import type { Cooperative } from 'cooptypes';
 import { generateUniqueHash } from 'src/shared/lib/utils/generateUniqueHash';
 import {
   generateExpenseProposalStatementDocument,
-  generateExpenseProposalDecisionDocument,
   createExpenseProposal,
-  authorizeExpenseReport,
-  declineExpenseReport,
 } from '../api';
 
 export interface ICreateProposalDraftItem {
@@ -27,17 +24,6 @@ export interface ICreateProposalDraft {
   source_wallet: string;
   description: string;
   items: ICreateProposalDraftItem[];
-}
-
-export interface IAuthorizeProposalDraft {
-  proposal_hash: string;
-  description: string;
-  source_wallet: string;
-  items: ICreateProposalDraftItem[];
-  decision_kind: 'approve' | 'decline';
-  decision_reason?: string;
-  protocol_number?: string;
-  protocol_date?: string;
 }
 
 export function useExpenseProposalActions() {
@@ -103,66 +89,7 @@ export function useExpenseProposalActions() {
     } as any);
   }
 
-  async function authorizeProposal(draft: IAuthorizeProposalDraft) {
-    // Отклонение — без протокола решения: контрактный declexp принимает
-    // только причину. Документ 2011 генерируется лишь при утверждении.
-    if (draft.decision_kind === 'decline') {
-      return declineExpenseReport({
-        coopname: info.coopname,
-        proposal_hash: draft.proposal_hash,
-        reason: draft.decision_reason || 'Отклонено председателем',
-      } as any);
-    }
-
-    const itemsForDoc = draft.items.map((it, idx) => ({
-      number: String(idx + 1),
-      description: it.description,
-      amount: it.amount,
-      recipient_type: it.recipient_type,
-      mechanics: it.mechanics,
-      recipient_name: it.recipient_name ?? '',
-      requisites: it.requisites ?? '',
-    }));
-
-    const totalAmount = draft.items.reduce((sum, it) => sum + parseFloat(it.amount || '0'), 0);
-    const total_amount = `${totalAmount.toFixed(4)} RUB`;
-
-    const generated = await generateExpenseProposalDecisionDocument({
-      coopname: info.coopname,
-      username: session.username,
-      proposal_hash: draft.proposal_hash,
-      proposal: {
-        description: draft.description,
-        total_amount,
-        items_count: draft.items.length,
-        source_wallet: draft.source_wallet,
-      },
-      items: itemsForDoc,
-      decision: {
-        kind: draft.decision_kind,
-        reason: draft.decision_reason,
-        protocol_number: draft.protocol_number,
-        protocol_date: draft.protocol_date,
-      },
-    } as any);
-
-    const docKey = 'generateExpenseProposalDecisionDocument' as const;
-    const generatedDoc = (generated as any)[docKey];
-
-    const digital = new DigitalDocument(generatedDoc);
-    const signed = await digital.sign<Cooperative.Registry.ExpenseProposalDecision.Meta>(
-      session.username,
-      1,
-    );
-
-    return authorizeExpenseReport({
-      coopname: info.coopname,
-      proposal_hash: draft.proposal_hash,
-      decision: signed as any,
-    } as any);
-  }
-
-  return { submitProposal, authorizeProposal };
+  return { submitProposal };
 }
 
 function generateItemHash(proposal_hash: string, idx: number): string {

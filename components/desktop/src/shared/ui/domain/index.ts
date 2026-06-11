@@ -14,6 +14,7 @@ export * from './FilterBar';
 export * from './IdentityPanel';
 export * from './NotificationCenter';
 export * from './OtpInput';
+export * from './PaymentMethodSelect';
 export * from './PersonCard';
 export * from './RailUserCard';
 export * from './SignatureCard';

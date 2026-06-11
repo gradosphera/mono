@@ -6,39 +6,46 @@ import type { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input
 import type { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
 import type { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input'
 import type { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
-import type { AuthorizeExpenseReportInputDTO } from '../dto/authorize-expense-report.input'
 import type { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
-import type { DeclineExpenseReportInputDTO } from '../dto/decline-expense-report.input'
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum'
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum'
 
 /**
- * Контракт-тест: все 8 mutations пробрасывают payload в `ExpensesBlockchainPort`
- * с корректным action-mapping. createExpenseProposal/authorizeExpenseReport
- * раскладывают подписанный document2 через `.toDocument()`.
+ * Контракт-тест: backend-mutations пробрасывают payload в `ExpensesBlockchainPort`
+ * с корректным action-mapping. createExpenseProposal раскладывает подписанный
+ * document2 через `.toDocument()` и снимает реквизиты получателей-пайщиков.
+ * authexp/declexp — callbacks решения совета, у backend'а их нет.
  */
 describe('ExpensesMutationsService', () => {
   let service: ExpensesMutationsService
   let chain: jest.Mocked<ExpensesBlockchainPort>
   let generator: jest.Mocked<Pick<GeneratorInfrastructureService, 'generateDocument'>>
+  let requisiteSnapshots: { validate: jest.Mock; snapshot: jest.Mock; formatForOwner: jest.Mock }
 
   const fakeResult = { response: { transaction_id: 'tx_abc' } } as never
 
   beforeEach(() => {
     chain = {
       createExp: jest.fn().mockResolvedValue(fakeResult),
-      authExp: jest.fn().mockResolvedValue(fakeResult),
       payExp: jest.fn().mockResolvedValue(fakeResult),
       reportExp: jest.fn().mockResolvedValue(fakeResult),
       returnExp: jest.fn().mockResolvedValue(fakeResult),
       overspendExp: jest.fn().mockResolvedValue(fakeResult),
       closeExp: jest.fn().mockResolvedValue(fakeResult),
-      declineExp: jest.fn().mockResolvedValue(fakeResult),
-    }
+    } as unknown as jest.Mocked<ExpensesBlockchainPort>
     generator = {
       generateDocument: jest.fn().mockResolvedValue({} as never),
     }
-    service = new ExpensesMutationsService(chain, generator as unknown as GeneratorInfrastructureService)
+    requisiteSnapshots = {
+      validate: jest.fn().mockResolvedValue(undefined),
+      snapshot: jest.fn().mockResolvedValue(undefined),
+      formatForOwner: jest.fn().mockResolvedValue('Банковский перевод: счёт 40817810000000000000, Банк ВТБ (ПАО)'),
+    }
+    service = new ExpensesMutationsService(
+      chain,
+      generator as unknown as GeneratorInfrastructureService,
+      requisiteSnapshots as never
+    )
   })
 
   const makeSignedDoc = (overrides: Partial<{ hash: string; doc_hash: string; meta_hash: string }> = {}) => ({
@@ -84,6 +91,7 @@ describe('ExpensesMutationsService', () => {
           recipient: 'petrov',
           description: 'Закупка кормов',
           planned_amount: '5000.0000 RUB',
+          payment_method_id: 'pm-1',
         },
       ],
       statement: makeSignedDoc() as any,
@@ -103,22 +111,42 @@ describe('ExpensesMutationsService', () => {
     expect(call.items[0].recipient_type).toBe(1)
     expect(call.callback).toEqual({ contract: '', action: '', data: '' })
     expect(call.statement.doc_hash).toBe('0xdoc')
+
+    // Реквизиты: валидация до блокчейна, снимок — после.
+    expect(requisiteSnapshots.validate).toHaveBeenCalledTimes(1)
+    expect(requisiteSnapshots.snapshot).toHaveBeenCalledTimes(1)
+    const snapItems = requisiteSnapshots.snapshot.mock.calls[0][1]
+    expect(snapItems[0]).toMatchObject({
+      proposalHash: '0xabc',
+      itemHash: '0xitem1',
+      recipient: 'petrov',
+      isOrganization: false,
+      paymentMethodId: 'pm-1',
+    })
   })
 
-  it('authorizeExpenseReport → chain.authExp с decision document2', async () => {
-    const input: AuthorizeExpenseReportInputDTO = {
+  it('createExpenseProposal: ошибка валидации реквизитов не доходит до блокчейна', async () => {
+    requisiteSnapshots.validate.mockRejectedValue(new Error('Не указаны реквизиты получателя'))
+    const input: CreateExpenseProposalInputDTO = {
       coopname: 'voskhod',
+      username: 'ivanov',
       proposal_hash: '0xabc',
-      decision: makeSignedDoc({ doc_hash: '0xdecdoc' }) as any,
-    } as AuthorizeExpenseReportInputDTO
+      source_wallet: 'w.cap.blago',
+      items: [
+        {
+          item_hash: '0xitem1',
+          mechanics: ExpenseMechanics.ADVANCE,
+          recipient_type: ExpenseRecipientType.SELF,
+          recipient: 'ivanov',
+          description: 'Канцелярия',
+          planned_amount: '1000.0000 RUB',
+        },
+      ],
+      statement: makeSignedDoc() as any,
+    } as CreateExpenseProposalInputDTO
 
-    await service.authorizeExpenseReport(input)
-
-    expect(chain.authExp).toHaveBeenCalledTimes(1)
-    const call = chain.authExp.mock.calls[0][0]
-    expect(call.coopname).toBe('voskhod')
-    expect(call.proposal_hash).toBe('0xabc')
-    expect(call.decision.doc_hash).toBe('0xdecdoc')
+    await expect(service.createExpenseProposal(input)).rejects.toThrow('Не указаны реквизиты')
+    expect(chain.createExp).not.toHaveBeenCalled()
   })
 
   it('payExpenseItem → chain.payExp({coopname, proposal_hash, item_hash, actual_amount})', async () => {
@@ -202,21 +230,5 @@ describe('ExpensesMutationsService', () => {
     await service.submitExpenseReport(input)
 
     expect(chain.closeExp).toHaveBeenCalledWith({ coopname: 'voskhod', proposal_hash: '0xabc' })
-  })
-
-  it('declineExpenseReport → chain.declineExp({coopname, proposal_hash, reason})', async () => {
-    const input = {
-      coopname: 'voskhod',
-      proposal_hash: '0xabc',
-      reason: 'не утверждаю',
-    } as DeclineExpenseReportInputDTO
-
-    await service.declineExpenseReport(input)
-
-    expect(chain.declineExp).toHaveBeenCalledWith({
-      coopname: 'voskhod',
-      proposal_hash: '0xabc',
-      reason: 'не утверждаю',
-    })
   })
 })

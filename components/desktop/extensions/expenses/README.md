@@ -93,8 +93,7 @@ Queries.Expenses.ExpenseFiles.query
 // Кассир + админ
 Mutations.Expenses.PayExpenseItem.mutation
 Mutations.Expenses.SubmitExpenseReport.mutation
-Mutations.Expenses.AuthorizeExpenseReport.mutation
-Mutations.Expenses.DeclineExpenseReport.mutation
+// Авторизация/отклонение СЗ — решение совета (повестка), мутаций нет
 Mutations.Expenses.ReturnExpenseItem.mutation
 Mutations.Expenses.UploadExpenseFile.mutation
 

@@ -41,6 +41,23 @@ class ExpenseProposalItemInputDTO implements ItemAction {
   @IsOptional()
   @IsString()
   requisites?: string;
+
+  @Field({
+    description:
+      'Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ.',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  payment_method_id?: string;
+
+  @Field({
+    description: 'Имя аккаунта получателя-пайщика (владелец реквизитов).',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  recipient_username?: string;
 }
 
 @InputType('ExpenseProposalHeaderInput')

@@ -16,6 +16,7 @@ import { EXPENSES_BLOCKCHAIN_PORT } from './domain/interfaces/expenses-blockchai
 import { ExpenseProposalSyncService } from './application/syncers/expense-proposal-sync.service';
 import { ExpensesManagementService } from './application/services/expenses-management.service';
 import { ExpensesMutationsService } from './application/services/expenses-mutations.service';
+import { ExpenseRequisiteSnapshotsService } from './application/services/expense-requisite-snapshots.service';
 import { ExpensesCapitalTriggerService } from './application/services/expenses-capital-trigger.service';
 import { ExpenseFilesService } from './application/services/expense-files.service';
 import { ExpenseProposalResolver } from './application/resolvers/expense-proposal.resolver';
@@ -66,6 +67,7 @@ import { ExpensesInterExpenseChassisAdapter } from './infrastructure/inter/expen
     },
     ExpenseProposalSyncService,
     ExpensesManagementService,
+    ExpenseRequisiteSnapshotsService,
     ExpensesMutationsService,
     ExpensesCapitalTriggerService,
     ExpenseFilesService,

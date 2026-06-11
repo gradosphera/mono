@@ -8,9 +8,11 @@ import type {
   InterExpensePaginatedResult,
   InterExpenseProposalRead,
   InterExpenseProposalStatus,
+  InterExpenseRequisiteItemInput,
 } from '@coopenomics/inter';
 import { ExpenseProposalTypeormEntity } from '../entities/expense-proposal.typeorm-entity';
 import { ExpenseProposalStatus } from '../../domain/enums/expense-proposal-status.enum';
+import { ExpenseRequisiteSnapshotsService } from '../../application/services/expense-requisite-snapshots.service';
 
 /**
  * Реализация `InterExpenseChassisPort` для consumer-расширений (capital, marketplace, EMP).
@@ -24,7 +26,16 @@ export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPo
   constructor(
     @InjectRepository(ExpenseProposalTypeormEntity)
     private readonly repository: Repository<ExpenseProposalTypeormEntity>,
+    private readonly requisiteSnapshots: ExpenseRequisiteSnapshotsService,
   ) {}
+
+  async validateRequisites(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void> {
+    await this.requisiteSnapshots.validate(coopname, items);
+  }
+
+  async snapshotRequisites(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void> {
+    await this.requisiteSnapshots.snapshot(coopname, items);
+  }
 
   async readProposalByHash(coopname: string, proposalHash: string): Promise<InterExpenseProposalRead | null> {
     const entity = await this.repository.findOne({

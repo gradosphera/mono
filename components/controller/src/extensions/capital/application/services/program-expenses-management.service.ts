@@ -8,6 +8,7 @@ import {
   type InterExpenseItem,
   type InterExpenseProposalRead,
   type InterExpenseProposalStatus,
+  type InterExpenseRequisiteItemInput,
 } from '@coopenomics/inter';
 import { AccountDataPort, ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
@@ -50,6 +51,18 @@ export class ProgramExpensesManagementService {
   ) {}
 
   async createProgramExpense(data: CreateProgramExpenseInputDTO): Promise<TransactResult> {
+    // Реквизиты получателей: валидация ДО on-chain заявки, снимок в шасси —
+    // ПОСЛЕ (фиксация «куда платить» на момент создания СЗ).
+    const requisiteItems: InterExpenseRequisiteItemInput[] = data.items.map((it) => ({
+      proposalHash: data.expense_hash,
+      itemHash: it.item_hash,
+      recipient: it.recipient,
+      isOrganization: it.recipient_type === ExpenseRecipientType.ORG,
+      paymentMethodId: it.payment_method_id,
+      requisites: it.requisites,
+    }));
+    await this.expenseChassis.validateRequisites(data.coopname, requisiteItems);
+
     const zeroAmount = `0.0000 ${config.blockchain.root_govern_symbol}`;
     const blockchainData: CapitalContract.Actions.CreateProgramExpense.ICreateProgramExpense = {
       coopname: data.coopname,
@@ -73,7 +86,11 @@ export class ProgramExpensesManagementService {
       description: data.description,
       statement: this.domainToBlockchainUtils.convertSignedDocumentToBlockchainFormat(data.statement),
     };
-    return this.capitalBlockchainPort.createProgramExpense(blockchainData);
+    const result = await this.capitalBlockchainPort.createProgramExpense(blockchainData);
+
+    await this.expenseChassis.snapshotRequisites(data.coopname, requisiteItems);
+
+    return result;
   }
 
   async topupProgramExpense(data: TopupProgramExpenseInputDTO): Promise<TransactResult> {

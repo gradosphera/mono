@@ -24,7 +24,3 @@ export { generateExpenseProposalDecisionDocument } from './mutations/generateExp
 export type { IGenerateExpenseProposalDecisionDocumentInput } from './mutations/generateExpenseProposalDecisionDocument';
 export { createExpenseProposal } from './mutations/createExpenseProposal';
 export type { ICreateExpenseProposalInput } from './mutations/createExpenseProposal';
-export { authorizeExpenseReport } from './mutations/authorizeExpenseReport';
-export type { IAuthorizeExpenseReportInput } from './mutations/authorizeExpenseReport';
-export { declineExpenseReport } from './mutations/declineExpenseReport';
-export type { IDeclineExpenseReportInput } from './mutations/declineExpenseReport';

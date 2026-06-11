@@ -5,7 +5,6 @@ import {
   ExpensesRegistryPage,
   ExpenseDetailPage,
   ExpensesAdminApprovePage,
-  ExpensesAdminAuthorizePage,
   CashierPage,
   MyAdvancesPage,
 } from './pages';
@@ -50,19 +49,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             meta: {
               title: 'На одобрение председателя',
               icon: 'gavel',
-              roles: ['chairman'],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
-          {
-            path: 'admin/authorize',
-            name: 'expenses-admin-authorize',
-            component: markRaw(ExpensesAdminAuthorizePage),
-            meta: {
-              title: 'На авторизацию совета',
-              icon: 'how_to_vote',
               roles: ['chairman'],
               agreements: agreementsBase,
               requiresAuth: true,
