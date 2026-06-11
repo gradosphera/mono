@@ -2,7 +2,6 @@
   <div
     :class="['wallet', { 'wallet--row': compact, 'wallet--empty': empty }]"
     :style="progStyle"
-    :tabindex="titleOverflow || subOverflow ? 0 : undefined"
   >
     <span class="wallet__icon">
       <q-icon :name="resolvedIcon" />
@@ -13,6 +12,7 @@
         ref="titleEl"
         class="wallet__title"
         :class="{ 'is-marquee': titleOverflow }"
+        :tabindex="titleOverflow ? 0 : undefined"
         :title="resolvedTitle"
       >
         <span class="wallet__scroll">{{ resolvedTitle }}</span>
@@ -22,6 +22,7 @@
         ref="subEl"
         class="wallet__sub"
         :class="{ 'is-marquee': subOverflow }"
+        :tabindex="subOverflow ? 0 : undefined"
         :title="subtitle"
       >
         <span class="wallet__scroll">{{ subtitle }}</span>
@@ -100,15 +101,23 @@ const subEl = ref<HTMLElement | null>(null);
 const titleOverflow = ref(false);
 const subOverflow = ref(false);
 
+// Скорость прокрутки одинакова у всех строк (px/с), поэтому длительность
+// цикла считается из величины переполнения; движение занимает 64% цикла
+// (паузы на краях — по 18%), это учтено в делителе.
+const MARQUEE_SPEED_PX_PER_S = 30;
+
 function measureEl(el: HTMLElement | null, flag: typeof titleOverflow): void {
   if (!el) return;
   // scrollWidth — полная ширина текста, clientWidth — видимая колонка.
   const overflow = el.scrollWidth - el.clientWidth;
   if (overflow > 1) {
     el.style.setProperty('--marquee-shift', `-${overflow}px`);
+    const duration = Math.max(3, overflow / MARQUEE_SPEED_PX_PER_S / 0.64);
+    el.style.setProperty('--marquee-duration', `${duration.toFixed(2)}s`);
     flag.value = true;
   } else {
     el.style.removeProperty('--marquee-shift');
+    el.style.removeProperty('--marquee-duration');
     flag.value = false;
   }
 }
@@ -148,22 +157,24 @@ watch([resolvedTitle, () => props.subtitle], () => void nextTick(measure));
   will-change: transform;
 }
 /* В покое — обычная обрезка с «…», без постоянного бега (иначе дёргается).
-   Прокрутка целиком включается только при наведении/фокусе карточки и сразу
-   для обеих строк (заголовок + подпись). На тач карточка фокусируется тапом
-   (tabindex навешивается только при реальном переполнении). */
-.wallet:hover .wallet__title.is-marquee,
-.wallet:hover .wallet__sub.is-marquee,
-.wallet:focus-within .wallet__title.is-marquee,
-.wallet:focus-within .wallet__sub.is-marquee {
+   Бежит ТОЛЬКО строка под курсором (или сфокусированная тапом на тач) —
+   не вся карточка разом. Длительность цикла per-строка из --marquee-duration:
+   скорость движения одинаковая у всех строк независимо от длины текста.
+   tabindex навешивается на строку только при реальном переполнении. */
+.wallet__title.is-marquee:hover,
+.wallet__sub.is-marquee:hover,
+.wallet__title.is-marquee:focus,
+.wallet__sub.is-marquee:focus {
   text-overflow: clip;
 }
-.wallet:hover .wallet__title.is-marquee .wallet__scroll,
-.wallet:hover .wallet__sub.is-marquee .wallet__scroll,
-.wallet:focus-within .wallet__title.is-marquee .wallet__scroll,
-.wallet:focus-within .wallet__sub.is-marquee .wallet__scroll {
-  animation: wallet-marquee 6s ease-in-out infinite alternate;
+.wallet__title.is-marquee:hover .wallet__scroll,
+.wallet__sub.is-marquee:hover .wallet__scroll,
+.wallet__title.is-marquee:focus .wallet__scroll,
+.wallet__sub.is-marquee:focus .wallet__scroll {
+  animation: wallet-marquee var(--marquee-duration, 6s) linear infinite alternate;
 }
-.wallet:focus-visible {
+.wallet__title.is-marquee:focus-visible,
+.wallet__sub.is-marquee:focus-visible {
   outline: 2px solid var(--p-primary);
   outline-offset: 2px;
 }
