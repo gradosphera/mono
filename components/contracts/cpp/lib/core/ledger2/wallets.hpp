@@ -49,9 +49,10 @@ struct ledger2_wallets {
   static constexpr eosio::name WITHDRAWALS_SINK     = "w.wal.wthdrw"_n;  ///< DEPRECATED 2026-05-21: исторический sink возвратов. Оставлен в реестре для исторических L2-балансов (накопленные возвраты до перехода). Не использовать в новых операциях.
   static constexpr eosio::name WITHDRAW_PENDING     = "w.wal.wpend"_n;   ///< Резерв паевого под заявку на возврат (COOPERATIVE-пул). o.wal.wthreq переводит сюда с w.wal.share, o.wal.wthdec возвращает обратно, o.wal.wthcpl сжигает отсюда. Заменил механику blocked/BLOCK/UNBLOCK 2026-05-24.
 
-  // registrator — минимальный паевой + вступительные
+  // registrator — минимальный паевой + вступительные + суспенс
   static constexpr eosio::name MIN_SHARE_FUND       = "w.reg.minshr"_n;  ///< Минимальный паевой взнос пайщика (USER_SHARED, без сверки соглашений)
   static constexpr eosio::name ENTRANCE_FEES        = "w.reg.entry"_n;   ///< Вступительные взносы (Cr 86, COOPERATIVE)
+  static constexpr eosio::name REGISTRATION_PENDING = "w.reg.pend"_n;    ///< Регистрационный взнос в ожидании решения совета (суспенс счёта 76, USER_SHARED, без сверки соглашений — кандидат ещё не член). o.reg.inpay → сюда (Dr 51/Cr 76); o.reg.setmin/setent уносят на 80/86; o.reg.refund сжигает (Dr 76/Cr 51).
 
   // soviet — членские (инфраструктура) + делегатские + хоз.расходы + использованные паевые
   static constexpr eosio::name INFRA_FEES           = "w.sov.infra"_n;   ///< Членские взносы за инфраструктуру кооп. платформы (COOPERATIVE)
@@ -101,14 +102,15 @@ struct Ledger2WalletMeta {
   WalletKind       kind;
 };
 
-inline constexpr std::array<Ledger2WalletMeta, 16> LEDGER2_WALLET_REGISTRY = {{
-  // USER_SHARED (6) — L3-разрез по пайщику
+inline constexpr std::array<Ledger2WalletMeta, 17> LEDGER2_WALLET_REGISTRY = {{
+  // USER_SHARED (7) — L3-разрез по пайщику
   { ledger2_wallets::MIN_SHARE_FUND,    "Минимальный паевой взнос",                                 WalletKind::USER_SHARED },
   { ledger2_wallets::SHARE_FUND_PAY,    "Паевой взнос пайщика",                                     WalletKind::USER_SHARED },
   { ledger2_wallets::CK_MEMBER,         "ЦК — членская часть пайщика",                              WalletKind::USER_SHARED },
   { ledger2_wallets::BLAGOROST_FUND,    "ЦПП «Благорост» — единый кошелёк программы у пайщика",     WalletKind::USER_SHARED },
   { ledger2_wallets::PREIMP_FUND,       "Первичный учёт РИД-взносов до перехода на электронный учёт", WalletKind::USER_SHARED },
   { ledger2_wallets::ADVANCE_HOLD,      "Подотчётные средства пайщика",                             WalletKind::USER_SHARED },
+  { ledger2_wallets::REGISTRATION_PENDING, "Регистрационный взнос в ожидании решения совета",       WalletKind::USER_SHARED },
 
   // COOPERATIVE (10) — единый кооперативный баланс, без L3 (Generator + 9 «единых пулов»)
   // GENERATOR_FUND переведён сюда из USER_SHARED (см. wallets.hpp:64) —
@@ -237,7 +239,7 @@ struct Ledger2WalletProgramMapping {
   uint64_t    required_program_id; // 0 = исключение (без проверки)
 };
 
-inline constexpr std::array<Ledger2WalletProgramMapping, 7> LEDGER2_USER_SHARED_PROGRAM_MAPPING = {{
+inline constexpr std::array<Ledger2WalletProgramMapping, 8> LEDGER2_USER_SHARED_PROGRAM_MAPPING = {{
   { ledger2_wallets::MIN_SHARE_FUND,    0 /* w.reg.minshr — без проверки */    },
   { ledger2_wallets::SHARE_FUND_PAY,    1 /* ЦК */                              },
   { ledger2_wallets::CK_MEMBER,         1 /* ЦК */                              },
@@ -245,6 +247,7 @@ inline constexpr std::array<Ledger2WalletProgramMapping, 7> LEDGER2_USER_SHARED_
   { ledger2_wallets::GENERATOR_FUND,    3 /* Генератор */                       },
   { ledger2_wallets::PREIMP_FUND,       0 /* w.cap.preimp — РИД-учёт до перехода на электронный учёт, без проверки */ },
   { ledger2_wallets::ADVANCE_HOLD,      0 /* w.exp.adv — подотчёт пайщика по СЗ; программа-источник проверена контрактом expense, повторная gate не нужна */ },
+  { ledger2_wallets::REGISTRATION_PENDING, 0 /* w.reg.pend — кандидат ещё не член, соглашения нет, без проверки */ },
 }};
 
 /**

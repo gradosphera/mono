@@ -2,6 +2,7 @@ import { Cooperative, SovietContract } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { api as authorizeDecisionApi } from 'src/features/Decision/AuthorizeAndExecDecision/api';
+import { api as declineDecisionApi } from 'src/features/Decision/DeclineDecision';
 import { useVoteForDecision } from 'src/features/Decision/VoteForDecision';
 import { useVoteAgainstDecision } from 'src/features/Decision/VoteAgainstDecision';
 import { computed } from 'vue';
@@ -193,6 +194,33 @@ export function useDecisionProcessor() {
   }
 
   /**
+   * Отклоняет решение, против которого проголосовало большинство совета
+   * (отрицательный консенсус). Проводит контроллер ключом кооператива; контракт
+   * проверяет порог «против». Развязано с авто-отменой по сроку (cancelexprd).
+   */
+  async function declineDecision(row: IAgenda) {
+    if (!row.table) {
+      throw new Error('Отсутствует таблица решения');
+    }
+
+    if (!row.table.id) {
+      throw new Error('Отсутствует ID решения');
+    }
+
+    const decision_id = Number(row.table.id);
+    if (isNaN(decision_id)) {
+      throw new Error('Некорректный ID решения');
+    }
+
+    await declineDecisionApi.declineDecision({
+      coopname: info.coopname,
+      decision_id,
+    });
+
+    return true;
+  }
+
+  /**
    * Голосовать "за" решение
    */
   async function voteForDecision(row: IAgenda) {
@@ -272,6 +300,7 @@ export function useDecisionProcessor() {
     loadDecisions,
     generateDecisionDocument,
     authorizeAndExecuteDecision,
+    declineDecision,
     voteForDecision,
     voteAgainstDecision,
     isVotedFor,

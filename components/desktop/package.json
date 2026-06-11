@@ -1,6 +1,6 @@
 {
   "name": "@coopenomics/desktop",
-  "version": "2026.5.30-alpha-2",
+  "version": "2026.6.9-18",
   "description": "Рабочий стол кооператива — Vue 3 + Quasar Framework",
   "productName": "Desktop App",
   "author": "Alex Ant <dacom.dark.sun@gmail.com>",
@@ -38,7 +38,6 @@
     "@fortawesome/vue-fontawesome": "^3.1.2",
     "@headlessui/vue": "^1.7.22",
     "@milkdown/crepe": "^7.18.0",
-    "@novu/js": "^3.14.0",
     "@openreplay/tracker": "^17.1.0",
     "@openreplay/tracker-assist": "^9.0.1",
     "@productdevbook/chatwoot": "^1.7.0",

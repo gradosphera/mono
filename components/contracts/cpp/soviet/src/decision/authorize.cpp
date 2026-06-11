@@ -31,7 +31,9 @@ void soviet::authorize(eosio::name coopname, eosio::name chairman, uint64_t deci
 
   verify_document_or_fail(document);
 
-  decisions.modify(decision, chairman, [&](auto &d){
+  // RAM-плательщик — кооператив: транзакцию авторизует coopname (require_auth выше),
+  // поэтому увеличивать RAM аккаунта председателя нельзя (он tx не подписывал).
+  decisions.modify(decision, coopname, [&](auto &d){
     d.authorized_by = chairman;
     d.authorized = !decision -> authorized;
     d.authorization = document;

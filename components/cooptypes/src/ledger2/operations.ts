@@ -67,6 +67,27 @@ export const LEDGER2_OPERATION_REGISTRY: readonly OperationMeta[] = [
     debit: 51, credit: 80,
     human_name: 'Минимальный паевой взнос пайщика при регистрации' },
 
+  // Двухфазный путь через совет (reguser → confirmpay → confirmreg/declinereg)
+  { code: 'o.reg.inpay',   process_type: 'p.reg.accept',  contract: 'registrator',
+    name: 'RECEIVE_PAYMENT', wallet_op: 'ISSUE',   wallet_from: null, wallet_to: 'w.reg.pend',
+    debit: 51, credit: 76,
+    human_name: 'Приём регистрационного взноса в ожидание решения совета' },
+
+  { code: 'o.reg.setmin',  process_type: 'p.reg.accept',  contract: 'registrator',
+    name: 'SETTLE_MINSHARE', wallet_op: 'TRANSFER', wallet_from: 'w.reg.pend', wallet_to: 'w.reg.minshr',
+    debit: 76, credit: 80,
+    human_name: 'Зачисление минимального паевого взноса по решению совета' },
+
+  { code: 'o.reg.setent',  process_type: 'p.reg.accept',  contract: 'registrator',
+    name: 'SETTLE_ENTRANCE', wallet_op: 'TRANSFER', wallet_from: 'w.reg.pend', wallet_to: 'w.reg.entry',
+    debit: 76, credit: 86,
+    human_name: 'Зачисление вступительного взноса по решению совета' },
+
+  { code: 'o.reg.refund',  process_type: 'p.reg.refund',  contract: 'registrator',
+    name: 'REFUND',         wallet_op: 'BURN',     wallet_from: 'w.reg.pend', wallet_to: null,
+    debit: 76, credit: 51,
+    human_name: 'Возврат регистрационного взноса при отказе совета' },
+
   // wallet
   { code: 'o.wal.depcpl',  process_type: 'p.wal.depo',    contract: 'wallet',
     name: 'COMPLETE_DEPOSIT',  wallet_op: 'ISSUE',    wallet_from: null, wallet_to: 'w.wal.share',

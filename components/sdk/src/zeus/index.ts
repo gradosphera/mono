@@ -1126,6 +1126,8 @@ export type ValueTypes = {
 	private_account?:ValueTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ValueTypes["MonoAccount"],
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?:ValueTypes["RegistrationPayment"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ValueTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
@@ -1989,7 +1991,7 @@ export type ValueTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
+	/** КПП (устар.) */
 	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on BankAccountDetails']?: Omit<ValueTypes["BankAccountDetails"], "...on BankAccountDetails">
@@ -1998,9 +2000,7 @@ export type ValueTypes = {
 	/** БИК банка */
 	bik: string | Variable<any, string>,
 	/** Корреспондентский счет */
-	corr: string | Variable<any, string>,
-	/** КПП банка */
-	kpp: string | Variable<any, string>
+	corr: string | Variable<any, string>
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -2172,6 +2172,8 @@ export type ValueTypes = {
 	callback_contract?:boolean | `@${string}`,
 	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -4916,6 +4918,12 @@ export type ValueTypes = {
 	/** Причина отклонения */
 	reason: string | Variable<any, string>
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор решения */
+	decision_id: number | Variable<any, string>
+};
 	["DeclineExpenseReportInput"]: {
 	/** Имя кооператива. */
 	coopname: string | Variable<any, string>,
@@ -4933,6 +4941,10 @@ export type ValueTypes = {
 	meta: string | Variable<any, string>,
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
+};
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string | Variable<any, string>
 };
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -6341,6 +6353,40 @@ export type ValueTypes = {
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["InboxNotification"]: AliasType<{
+	/** Инициатор уведомления (от кого) */
+	actorSubscriberId?:boolean | `@${string}`,
+	/** Тело уведомления */
+	body?:boolean | `@${string}`,
+	/** Когда получено */
+	createdAt?:boolean | `@${string}`,
+	/** Идентификатор уведомления инбокса */
+	id?:boolean | `@${string}`,
+	/** Прочитано получателем */
+	isRead?:boolean | `@${string}`,
+	/** Исходные данные (deep-link / доп-рендер) */
+	payload?:boolean | `@${string}`,
+	/** Когда отмечено прочитанным */
+	readAt?:boolean | `@${string}`,
+	/** Заголовок */
+	title?:boolean | `@${string}`,
+	/** Тип уведомления (Workflows.<Type>.id) */
+	workflowId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on InboxNotification']?: Omit<ValueTypes["InboxNotification"], "...on InboxNotification">
+}>;
+	["InboxNotificationPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["InboxNotification"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on InboxNotificationPaginationResult']?: Omit<ValueTypes["InboxNotificationPaginationResult"], "...on InboxNotificationPaginationResult">
+}>;
 	["Individual"]: AliasType<{
 	/** Дата рождения */
 	birthdate?:boolean | `@${string}`,
@@ -6954,8 +7000,10 @@ createWebPushSubscription?: [{	data: ValueTypes["CreateSubscriptionInput"] | Var
 createWithdraw?: [{	data: ValueTypes["CreateWithdrawInput"] | Variable<any, string>},ValueTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ValueTypes["DeactivateSubscriptionInput"] | Variable<any, string>},boolean | `@${string}`],
 declineAgreement?: [{	data: ValueTypes["DeclineAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+declineDecision?: [{	data: ValueTypes["DeclineDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineExpenseReport?: [{	data: ValueTypes["DeclineExpenseReportInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 declineRequest?: [{	data: ValueTypes["DeclineRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+deleteAccount?: [{	data: ValueTypes["DeleteAccountInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteBranch?: [{	data: ValueTypes["DeleteBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ValueTypes["DeletePaymentMethodInput"] | Variable<any, string>},boolean | `@${string}`],
 deleteReportDraft?: [{	id: string | Variable<any, string>},boolean | `@${string}`],
@@ -6996,6 +7044,8 @@ installExtension?: [{	data: ValueTypes["ExtensionInput"] | Variable<any, string>
 installSystem?: [{	data: ValueTypes["Install"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 login?: [{	data: ValueTypes["LoginInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 logout?: [{	data: ValueTypes["LogoutInput"] | Variable<any, string>},boolean | `@${string}`],
+markAllNotificationsRead?: [{	coopname: string | Variable<any, string>},ValueTypes["UnreadNotificationsCount"]],
+markNotificationRead?: [{	id: string | Variable<any, string>},ValueTypes["InboxNotification"]],
 markReportPeriod?: [{	data: ValueTypes["MarkReportPeriodInput"] | Variable<any, string>},boolean | `@${string}`],
 moderateRequest?: [{	data: ValueTypes["ModerateRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ValueTypes["NotifyOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -7003,14 +7053,17 @@ overspendExpenseItem?: [{	data: ValueTypes["OverspendExpenseItemInput"] | Variab
 payExpenseItem?: [{	data: ValueTypes["PayExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 processConvertToAxonStatement?: [{	data: ValueTypes["ProcessConvertToAxonStatementInput"] | Variable<any, string>},boolean | `@${string}`],
 prohibitRequest?: [{	data: ValueTypes["ProhibitRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
-publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},boolean | `@${string}`],
+publishProjectOfFreeDecision?: [{	data: ValueTypes["PublishProjectFreeDecisionInput"] | Variable<any, string>},ValueTypes["AgendaWithDocuments"]],
 publishRequest?: [{	data: ValueTypes["PublishRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 receiveOnRequest?: [{	data: ValueTypes["ReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
 reportExpenseItem?: [{	data: ValueTypes["ReportExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+resendNotification?: [{	id: string | Variable<any, string>},ValueTypes["Notification"]],
 resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration?:ValueTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 returnExpenseItem?: [{	data: ValueTypes["ReturnExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 saveReportDraft?: [{	input: ValueTypes["SaveReportDraftInput"] | Variable<any, string>},ValueTypes["ReportDraft"]],
@@ -7043,9 +7096,109 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 }>;
 	/** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
 ["NonProjectRoomKind"]:NonProjectRoomKind;
+	["Notification"]: AliasType<{
+	/** Сделано попыток */
+	attempts?:boolean | `@${string}`,
+	/** Канал доставки */
+	channel?:boolean | `@${string}`,
+	/** Кооператив-владелец */
+	coopname?:boolean | `@${string}`,
+	/** Когда поставлено в очередь */
+	createdAt?:boolean | `@${string}`,
+	/** Идентификатор уведомления */
+	id?:boolean | `@${string}`,
+	/** Текст последней ошибки */
+	lastError?:boolean | `@${string}`,
+	/** Идентификатор получателя */
+	recipientSubscriberId?:boolean | `@${string}`,
+	/** Имя аккаунта получателя */
+	recipientUsername?:boolean | `@${string}`,
+	/** Статус доставки */
+	status?:boolean | `@${string}`,
+	/** Когда обновлено */
+	updatedAt?:boolean | `@${string}`,
+	/** Тип уведомления */
+	workflowId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on Notification']?: Omit<ValueTypes["Notification"], "...on Notification">
+}>;
+	["NotificationAttempt"]: AliasType<{
+	/** Номер попытки (1-based) */
+	attemptNumber?:boolean | `@${string}`,
+	/** Когда выполнена попытка */
+	createdAt?:boolean | `@${string}`,
+	/** Текст ошибки при провале */
+	error?:boolean | `@${string}`,
+	/** Идентификатор попытки */
+	id?:boolean | `@${string}`,
+	/** Ответ провайдера (message-id / push-status) */
+	providerResponse?:boolean | `@${string}`,
+	/** Исход попытки */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on NotificationAttempt']?: Omit<ValueTypes["NotificationAttempt"], "...on NotificationAttempt">
+}>;
+	/** Канал доставки уведомления */
+["NotificationChannel"]:NotificationChannel;
+	/** Исход одной попытки доставки */
+["NotificationDeliveryStatus"]:NotificationDeliveryStatus;
+	["NotificationDetail"]: AliasType<{
+	/** Сделано попыток */
+	attempts?:boolean | `@${string}`,
+	/** Канал доставки */
+	channel?:boolean | `@${string}`,
+	/** Кооператив-владелец */
+	coopname?:boolean | `@${string}`,
+	/** Когда поставлено в очередь */
+	createdAt?:boolean | `@${string}`,
+	/** История попыток доставки */
+	deliveries?:ValueTypes["NotificationAttempt"],
+	/** Идентификатор уведомления */
+	id?:boolean | `@${string}`,
+	/** Текст последней ошибки */
+	lastError?:boolean | `@${string}`,
+	/** Идентификатор получателя */
+	recipientSubscriberId?:boolean | `@${string}`,
+	/** Имя аккаунта получателя */
+	recipientUsername?:boolean | `@${string}`,
+	/** Статус доставки */
+	status?:boolean | `@${string}`,
+	/** Когда обновлено */
+	updatedAt?:boolean | `@${string}`,
+	/** Тип уведомления */
+	workflowId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on NotificationDetail']?: Omit<ValueTypes["NotificationDetail"], "...on NotificationDetail">
+}>;
+	/** Статус строки очереди доставки уведомления */
+["NotificationOutboxStatus"]:NotificationOutboxStatus;
+	["NotificationPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ValueTypes["Notification"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on NotificationPaginationResult']?: Omit<ValueTypes["NotificationPaginationResult"], "...on NotificationPaginationResult">
+}>;
 	["NotificationWorkflowRecipientInput"]: {
 	/** Username получателя */
 	username: string | Variable<any, string>
+};
+	["NotificationsFilterInput"]: {
+	/** Канал доставки */
+	channel?: ValueTypes["NotificationChannel"] | undefined | null | Variable<any, string>,
+	/** Кооператив-владелец */
+	coopname: string | Variable<any, string>,
+	/** Идентификатор получателя */
+	recipientSubscriberId?: string | undefined | null | Variable<any, string>,
+	/** Статус доставки */
+	status?: ValueTypes["NotificationOutboxStatus"] | undefined | null | Variable<any, string>,
+	/** Тип уведомления */
+	workflowId?: string | undefined | null | Variable<any, string>
 };
 	["NotifyOnAnnualGeneralMeetInput"]: {
 	coopname: string | Variable<any, string>,
@@ -8350,6 +8503,7 @@ getDocuments?: [{	data: ValueTypes["GetDocumentsInput"] | Variable<any, string>}
 getExtensionLogs?: [{	data?: ValueTypes["GetExtensionLogsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["ExtensionLogsPaginationResult"]],
 getExtensionOnboardingState?: [{	extension_name: string | Variable<any, string>},ValueTypes["ExtensionOnboardingState"]],
 getExtensions?: [{	data?: ValueTypes["GetExtensionsInput"] | undefined | null | Variable<any, string>},ValueTypes["Extension"]],
+getInboxNotifications?: [{	coopname: string | Variable<any, string>,	pagination: ValueTypes["PaginationInput"] | Variable<any, string>},ValueTypes["InboxNotificationPaginationResult"]],
 getInstallationStatus?: [{	data: ValueTypes["GetInstallationStatusInput"] | Variable<any, string>},ValueTypes["InstallationStatus"]],
 getLedger?: [{	data: ValueTypes["GetLedgerInput"] | Variable<any, string>},ValueTypes["LedgerState"]],
 getLedger2Accounts?: [{	coopname: string | Variable<any, string>},ValueTypes["Ledger2Account"]],
@@ -8359,6 +8513,8 @@ getLedger2Wallets?: [{	coopname: string | Variable<any, string>},ValueTypes["Led
 getLedgerHistory?: [{	data: ValueTypes["GetLedgerHistoryInput"] | Variable<any, string>},ValueTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ValueTypes["GetMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 getMeets?: [{	data: ValueTypes["GetMeetsInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
+getNotification?: [{	id: string | Variable<any, string>},ValueTypes["NotificationDetail"]],
+getNotifications?: [{	filter: ValueTypes["NotificationsFilterInput"] | Variable<any, string>,	pagination: ValueTypes["PaginationInput"] | Variable<any, string>},ValueTypes["NotificationPaginationResult"]],
 getPaymentMethods?: [{	data?: ValueTypes["GetPaymentMethodsInput"] | undefined | null | Variable<any, string>},ValueTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ValueTypes["PaymentFiltersInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedGatewayPaymentsPaginationResult"]],
 getProgramWallet?: [{	filter: ValueTypes["ProgramWalletFilterInput"] | Variable<any, string>},ValueTypes["ProgramWallet"]],
@@ -8381,6 +8537,7 @@ getReportPreview?: [{	input: ValueTypes["ReportPreviewInput"] | Variable<any, st
 	getReportRequisites?:ValueTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ValueTypes["SystemInfo"],
+getUnreadNotificationsCount?: [{	coopname: string | Variable<any, string>},ValueTypes["UnreadNotificationsCount"]],
 getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] | Variable<any, string>},ValueTypes["WebPushSubscriptionDto"]],
 	/** Получить статистику веб-пуш подписок (только для председателя)
 
@@ -8565,6 +8722,20 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	requires_selection?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on RegistrationConfig']?: Omit<ValueTypes["RegistrationConfig"], "...on RegistrationConfig">
+}>;
+	["RegistrationPayment"]: AliasType<{
+	/** Хэш платежа */
+	hash?:boolean | `@${string}`,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?:boolean | `@${string}`,
+	/** Сумма вступительного платежа */
+	quantity?:boolean | `@${string}`,
+	/** Статус вступительного платежа */
+	status?:boolean | `@${string}`,
+	/** Символ валюты платежа */
+	symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on RegistrationPayment']?: Omit<ValueTypes["RegistrationPayment"], "...on RegistrationPayment">
 }>;
 	["RegistrationProgram"]: AliasType<{
 	/** Для каких типов аккаунтов доступна программа */
@@ -9266,6 +9437,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string | Variable<any, string>,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null | Variable<any, string>,
 	/** Новый статус платежа */
 	status: ValueTypes["PaymentStatus"] | Variable<any, string>
 };
@@ -9655,6 +9828,12 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	/** Имя аккаунта пользователя */
 	username: string | Variable<any, string>
 };
+	["UnreadNotificationsCount"]: AliasType<{
+	/** Число непрочитанных уведомлений */
+	count?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on UnreadNotificationsCount']?: Omit<ValueTypes["UnreadNotificationsCount"], "...on UnreadNotificationsCount">
+}>;
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
 	organization_data?: ValueTypes["UpdateOrganizationDataInput"] | undefined | null | Variable<any, string>,
@@ -10132,6 +10311,8 @@ export type ResolverInputTypes = {
 	private_account?:ResolverInputTypes["PrivateAccount"],
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?:ResolverInputTypes["MonoAccount"],
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?:ResolverInputTypes["RegistrationPayment"],
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?:ResolverInputTypes["UserAccount"],
 	/** Имя аккаунта кооператива */
@@ -10977,7 +11158,7 @@ export type ResolverInputTypes = {
 	bik?:boolean | `@${string}`,
 	/** Корреспондентский счет */
 	corr?:boolean | `@${string}`,
-	/** КПП банка */
+	/** КПП (устар.) */
 	kpp?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
@@ -10985,9 +11166,7 @@ export type ResolverInputTypes = {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -11155,6 +11334,8 @@ export type ResolverInputTypes = {
 	callback_contract?:boolean | `@${string}`,
 	confirm_callback?:boolean | `@${string}`,
 	coopname?:boolean | `@${string}`,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	decline_callback?:boolean | `@${string}`,
 	expired_at?:boolean | `@${string}`,
@@ -13830,6 +14011,12 @@ export type ResolverInputTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineExpenseReportInput"]: {
 	/** Имя кооператива. */
 	coopname: string,
@@ -13847,6 +14034,10 @@ export type ResolverInputTypes = {
 	meta: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
 };
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -15228,6 +15419,38 @@ export type ResolverInputTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["InboxNotification"]: AliasType<{
+	/** Инициатор уведомления (от кого) */
+	actorSubscriberId?:boolean | `@${string}`,
+	/** Тело уведомления */
+	body?:boolean | `@${string}`,
+	/** Когда получено */
+	createdAt?:boolean | `@${string}`,
+	/** Идентификатор уведомления инбокса */
+	id?:boolean | `@${string}`,
+	/** Прочитано получателем */
+	isRead?:boolean | `@${string}`,
+	/** Исходные данные (deep-link / доп-рендер) */
+	payload?:boolean | `@${string}`,
+	/** Когда отмечено прочитанным */
+	readAt?:boolean | `@${string}`,
+	/** Заголовок */
+	title?:boolean | `@${string}`,
+	/** Тип уведомления (Workflows.<Type>.id) */
+	workflowId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["InboxNotificationPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["InboxNotification"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Individual"]: AliasType<{
 	/** Дата рождения */
 	birthdate?:boolean | `@${string}`,
@@ -15818,8 +16041,10 @@ createWebPushSubscription?: [{	data: ResolverInputTypes["CreateSubscriptionInput
 createWithdraw?: [{	data: ResolverInputTypes["CreateWithdrawInput"]},ResolverInputTypes["CreateWithdrawResponse"]],
 deactivateWebPushSubscriptionById?: [{	data: ResolverInputTypes["DeactivateSubscriptionInput"]},boolean | `@${string}`],
 declineAgreement?: [{	data: ResolverInputTypes["DeclineAgreementInput"]},ResolverInputTypes["Transaction"]],
+declineDecision?: [{	data: ResolverInputTypes["DeclineDecisionInput"]},ResolverInputTypes["Transaction"]],
 declineExpenseReport?: [{	data: ResolverInputTypes["DeclineExpenseReportInput"]},ResolverInputTypes["Transaction"]],
 declineRequest?: [{	data: ResolverInputTypes["DeclineRequestInput"]},ResolverInputTypes["Transaction"]],
+deleteAccount?: [{	data: ResolverInputTypes["DeleteAccountInput"]},boolean | `@${string}`],
 deleteBranch?: [{	data: ResolverInputTypes["DeleteBranchInput"]},boolean | `@${string}`],
 deletePaymentMethod?: [{	data: ResolverInputTypes["DeletePaymentMethodInput"]},boolean | `@${string}`],
 deleteReportDraft?: [{	id: string},boolean | `@${string}`],
@@ -15860,6 +16085,8 @@ installExtension?: [{	data: ResolverInputTypes["ExtensionInput"]},ResolverInputT
 installSystem?: [{	data: ResolverInputTypes["Install"]},ResolverInputTypes["SystemInfo"]],
 login?: [{	data: ResolverInputTypes["LoginInput"]},ResolverInputTypes["RegisteredAccount"]],
 logout?: [{	data: ResolverInputTypes["LogoutInput"]},boolean | `@${string}`],
+markAllNotificationsRead?: [{	coopname: string},ResolverInputTypes["UnreadNotificationsCount"]],
+markNotificationRead?: [{	id: string},ResolverInputTypes["InboxNotification"]],
 markReportPeriod?: [{	data: ResolverInputTypes["MarkReportPeriodInput"]},boolean | `@${string}`],
 moderateRequest?: [{	data: ResolverInputTypes["ModerateRequestInput"]},ResolverInputTypes["Transaction"]],
 notifyOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["NotifyOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -15867,14 +16094,17 @@ overspendExpenseItem?: [{	data: ResolverInputTypes["OverspendExpenseItemInput"]}
 payExpenseItem?: [{	data: ResolverInputTypes["PayExpenseItemInput"]},ResolverInputTypes["Transaction"]],
 processConvertToAxonStatement?: [{	data: ResolverInputTypes["ProcessConvertToAxonStatementInput"]},boolean | `@${string}`],
 prohibitRequest?: [{	data: ResolverInputTypes["ProhibitRequestInput"]},ResolverInputTypes["Transaction"]],
-publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},boolean | `@${string}`],
+publishProjectOfFreeDecision?: [{	data: ResolverInputTypes["PublishProjectFreeDecisionInput"]},ResolverInputTypes["AgendaWithDocuments"]],
 publishRequest?: [{	data: ResolverInputTypes["PublishRequestInput"]},ResolverInputTypes["Transaction"]],
 receiveOnRequest?: [{	data: ResolverInputTypes["ReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
 reportExpenseItem?: [{	data: ResolverInputTypes["ReportExpenseItemInput"]},ResolverInputTypes["Transaction"]],
+resendNotification?: [{	id: string},ResolverInputTypes["Notification"]],
 resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration?:ResolverInputTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 returnExpenseItem?: [{	data: ResolverInputTypes["ReturnExpenseItemInput"]},ResolverInputTypes["Transaction"]],
 saveReportDraft?: [{	input: ResolverInputTypes["SaveReportDraftInput"]},ResolverInputTypes["ReportDraft"]],
@@ -15906,9 +16136,105 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 }>;
 	/** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
 ["NonProjectRoomKind"]:NonProjectRoomKind;
+	["Notification"]: AliasType<{
+	/** Сделано попыток */
+	attempts?:boolean | `@${string}`,
+	/** Канал доставки */
+	channel?:boolean | `@${string}`,
+	/** Кооператив-владелец */
+	coopname?:boolean | `@${string}`,
+	/** Когда поставлено в очередь */
+	createdAt?:boolean | `@${string}`,
+	/** Идентификатор уведомления */
+	id?:boolean | `@${string}`,
+	/** Текст последней ошибки */
+	lastError?:boolean | `@${string}`,
+	/** Идентификатор получателя */
+	recipientSubscriberId?:boolean | `@${string}`,
+	/** Имя аккаунта получателя */
+	recipientUsername?:boolean | `@${string}`,
+	/** Статус доставки */
+	status?:boolean | `@${string}`,
+	/** Когда обновлено */
+	updatedAt?:boolean | `@${string}`,
+	/** Тип уведомления */
+	workflowId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["NotificationAttempt"]: AliasType<{
+	/** Номер попытки (1-based) */
+	attemptNumber?:boolean | `@${string}`,
+	/** Когда выполнена попытка */
+	createdAt?:boolean | `@${string}`,
+	/** Текст ошибки при провале */
+	error?:boolean | `@${string}`,
+	/** Идентификатор попытки */
+	id?:boolean | `@${string}`,
+	/** Ответ провайдера (message-id / push-status) */
+	providerResponse?:boolean | `@${string}`,
+	/** Исход попытки */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Канал доставки уведомления */
+["NotificationChannel"]:NotificationChannel;
+	/** Исход одной попытки доставки */
+["NotificationDeliveryStatus"]:NotificationDeliveryStatus;
+	["NotificationDetail"]: AliasType<{
+	/** Сделано попыток */
+	attempts?:boolean | `@${string}`,
+	/** Канал доставки */
+	channel?:boolean | `@${string}`,
+	/** Кооператив-владелец */
+	coopname?:boolean | `@${string}`,
+	/** Когда поставлено в очередь */
+	createdAt?:boolean | `@${string}`,
+	/** История попыток доставки */
+	deliveries?:ResolverInputTypes["NotificationAttempt"],
+	/** Идентификатор уведомления */
+	id?:boolean | `@${string}`,
+	/** Текст последней ошибки */
+	lastError?:boolean | `@${string}`,
+	/** Идентификатор получателя */
+	recipientSubscriberId?:boolean | `@${string}`,
+	/** Имя аккаунта получателя */
+	recipientUsername?:boolean | `@${string}`,
+	/** Статус доставки */
+	status?:boolean | `@${string}`,
+	/** Когда обновлено */
+	updatedAt?:boolean | `@${string}`,
+	/** Тип уведомления */
+	workflowId?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Статус строки очереди доставки уведомления */
+["NotificationOutboxStatus"]:NotificationOutboxStatus;
+	["NotificationPaginationResult"]: AliasType<{
+	/** Текущая страница */
+	currentPage?:boolean | `@${string}`,
+	/** Элементы текущей страницы */
+	items?:ResolverInputTypes["Notification"],
+	/** Общее количество элементов */
+	totalCount?:boolean | `@${string}`,
+	/** Общее количество страниц */
+	totalPages?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["NotificationWorkflowRecipientInput"]: {
 	/** Username получателя */
 	username: string
+};
+	["NotificationsFilterInput"]: {
+	/** Канал доставки */
+	channel?: ResolverInputTypes["NotificationChannel"] | undefined | null,
+	/** Кооператив-владелец */
+	coopname: string,
+	/** Идентификатор получателя */
+	recipientSubscriberId?: string | undefined | null,
+	/** Статус доставки */
+	status?: ResolverInputTypes["NotificationOutboxStatus"] | undefined | null,
+	/** Тип уведомления */
+	workflowId?: string | undefined | null
 };
 	["NotifyOnAnnualGeneralMeetInput"]: {
 	coopname: string,
@@ -17157,6 +17483,7 @@ getDocuments?: [{	data: ResolverInputTypes["GetDocumentsInput"]},ResolverInputTy
 getExtensionLogs?: [{	data?: ResolverInputTypes["GetExtensionLogsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["ExtensionLogsPaginationResult"]],
 getExtensionOnboardingState?: [{	extension_name: string},ResolverInputTypes["ExtensionOnboardingState"]],
 getExtensions?: [{	data?: ResolverInputTypes["GetExtensionsInput"] | undefined | null},ResolverInputTypes["Extension"]],
+getInboxNotifications?: [{	coopname: string,	pagination: ResolverInputTypes["PaginationInput"]},ResolverInputTypes["InboxNotificationPaginationResult"]],
 getInstallationStatus?: [{	data: ResolverInputTypes["GetInstallationStatusInput"]},ResolverInputTypes["InstallationStatus"]],
 getLedger?: [{	data: ResolverInputTypes["GetLedgerInput"]},ResolverInputTypes["LedgerState"]],
 getLedger2Accounts?: [{	coopname: string},ResolverInputTypes["Ledger2Account"]],
@@ -17166,6 +17493,8 @@ getLedger2Wallets?: [{	coopname: string},ResolverInputTypes["Ledger2Wallet"]],
 getLedgerHistory?: [{	data: ResolverInputTypes["GetLedgerHistoryInput"]},ResolverInputTypes["LedgerHistoryResponse"]],
 getMeet?: [{	data: ResolverInputTypes["GetMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 getMeets?: [{	data: ResolverInputTypes["GetMeetsInput"]},ResolverInputTypes["MeetAggregate"]],
+getNotification?: [{	id: string},ResolverInputTypes["NotificationDetail"]],
+getNotifications?: [{	filter: ResolverInputTypes["NotificationsFilterInput"],	pagination: ResolverInputTypes["PaginationInput"]},ResolverInputTypes["NotificationPaginationResult"]],
 getPaymentMethods?: [{	data?: ResolverInputTypes["GetPaymentMethodsInput"] | undefined | null},ResolverInputTypes["PaymentMethodPaginationResult"]],
 getPayments?: [{	data?: ResolverInputTypes["PaymentFiltersInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedGatewayPaymentsPaginationResult"]],
 getProgramWallet?: [{	filter: ResolverInputTypes["ProgramWalletFilterInput"]},ResolverInputTypes["ProgramWallet"]],
@@ -17188,6 +17517,7 @@ getReportPreview?: [{	input: ResolverInputTypes["ReportPreviewInput"]},ResolverI
 	getReportRequisites?:ResolverInputTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo?:ResolverInputTypes["SystemInfo"],
+getUnreadNotificationsCount?: [{	coopname: string},ResolverInputTypes["UnreadNotificationsCount"]],
 getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsInput"]},ResolverInputTypes["WebPushSubscriptionDto"]],
 	/** Получить статистику веб-пуш подписок (только для председателя)
 
@@ -17365,6 +17695,19 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	programs?:ResolverInputTypes["RegistrationProgram"],
 	/** Нужен ли выбор программы */
 	requires_selection?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["RegistrationPayment"]: AliasType<{
+	/** Хэш платежа */
+	hash?:boolean | `@${string}`,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?:boolean | `@${string}`,
+	/** Сумма вступительного платежа */
+	quantity?:boolean | `@${string}`,
+	/** Статус вступительного платежа */
+	status?:boolean | `@${string}`,
+	/** Символ валюты платежа */
+	symbol?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["RegistrationProgram"]: AliasType<{
@@ -18050,6 +18393,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: ResolverInputTypes["PaymentStatus"]
 };
@@ -18425,6 +18770,11 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["UnreadNotificationsCount"]: AliasType<{
+	/** Число непрочитанных уведомлений */
+	count?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
 	organization_data?: ResolverInputTypes["UpdateOrganizationDataInput"] | undefined | null,
@@ -18900,6 +19250,8 @@ export type ModelTypes = {
 	private_account?: ModelTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: ModelTypes["MonoAccount"] | undefined | null,
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?: ModelTypes["RegistrationPayment"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: ModelTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -19724,16 +20076,14 @@ export type ModelTypes = {
 	bik: string,
 	/** Корреспондентский счет */
 	corr: string,
-	/** КПП банка */
-	kpp: string
+	/** КПП (устар.) */
+	kpp?: string | undefined | null
 };
 	["BankAccountDetailsInput"]: {
 	/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 	/** Номер банковского счета */
@@ -19897,6 +20247,8 @@ export type ModelTypes = {
 	callback_contract?: string | undefined | null,
 	confirm_callback?: string | undefined | null,
 	coopname: string,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count: number,
 	created_at: string,
 	decline_callback?: string | undefined | null,
 	expired_at: string,
@@ -22495,6 +22847,12 @@ export type ModelTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+	/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineExpenseReportInput"]: {
 	/** Имя кооператива. */
 	coopname: string,
@@ -22512,6 +22870,10 @@ export type ModelTypes = {
 	meta: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["DeleteAccountInput"]: {
+	/** Имя аккаунта пользователя */
+	username_for_delete: string
 };
 	["DeleteBranchInput"]: {
 	/** Имя аккаунта кооперативного участка */
@@ -23858,6 +24220,36 @@ export type ModelTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["InboxNotification"]: {
+		/** Инициатор уведомления (от кого) */
+	actorSubscriberId?: string | undefined | null,
+	/** Тело уведомления */
+	body: string,
+	/** Когда получено */
+	createdAt: ModelTypes["DateTime"],
+	/** Идентификатор уведомления инбокса */
+	id: string,
+	/** Прочитано получателем */
+	isRead: boolean,
+	/** Исходные данные (deep-link / доп-рендер) */
+	payload?: ModelTypes["JSON"] | undefined | null,
+	/** Когда отмечено прочитанным */
+	readAt?: ModelTypes["DateTime"] | undefined | null,
+	/** Заголовок */
+	title: string,
+	/** Тип уведомления (Workflows.<Type>.id) */
+	workflowId: string
+};
+	["InboxNotificationPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["InboxNotification"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["Individual"]: {
 		/** Дата рождения */
 	birthdate: string,
@@ -24734,12 +25126,20 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: ModelTypes["Transaction"],
+	/** Отклонить решение совета по отрицательному консенсусу (большинство голосов против)
+
+Требуемые роли: chairman.  */
+	declineDecision: ModelTypes["Transaction"],
 	/** Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.
 
 Требуемые роли: chairman.  */
 	declineExpenseReport: ModelTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: ModelTypes["Transaction"],
+	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
+
+Требуемые роли: chairman.  */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок
 
 Требуемые роли: chairman.  */
@@ -24884,6 +25284,14 @@ export type ModelTypes = {
 	login: ModelTypes["RegisteredAccount"],
 	/** Выйти из системы и заблокировать JWT-токены */
 	logout: boolean,
+	/** Отметить все уведомления инбокса прочитанными
+
+Требуемые роли: chairman, member, user.  */
+	markAllNotificationsRead: ModelTypes["UnreadNotificationsCount"],
+	/** Отметить уведомление инбокса прочитанным
+
+Требуемые роли: chairman, member, user.  */
+	markNotificationRead: ModelTypes["InboxNotification"],
 	/** Поставить или снять отметку на ячейку календаря. mark=null — снять. Сейчас поддерживается только NOT_REQUIRED («не надо сдавать»).
 
 Требуемые роли: chairman.  */
@@ -24908,10 +25316,10 @@ export type ModelTypes = {
 	processConvertToAxonStatement: boolean,
 	/** Отклонить модерацию по заявке */
 	prohibitRequest: ModelTypes["Transaction"],
-	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему
+	/** Опубликовать предложенную повестку и проект решения для голосования совета. Возвращает созданный пункт повестки (или null, если он ещё не проиндексирован) для немедленного отображения на фронте.
 
 Требуемые роли: chairman, member.  */
-	publishProjectOfFreeDecision: boolean,
+	publishProjectOfFreeDecision?: ModelTypes["AgendaWithDocuments"] | undefined | null,
 	/** Опубликовать заявку */
 	publishRequest: ModelTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
@@ -24928,8 +25336,14 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	reportExpenseItem: ModelTypes["Transaction"],
+	/** Переотправить уведомление (force-постановка новой строки в очередь доставки)
+
+Требуемые роли: chairman.  */
+	resendNotification: ModelTypes["Notification"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration: ModelTypes["Account"],
 	/** Перезапуск общего собрания пайщиков
 
 Требуемые роли: chairman.  */
@@ -25022,9 +25436,98 @@ export type ModelTypes = {
 	walmoveWallets: ModelTypes["Ledger2AdjustmentResult"]
 };
 	["NonProjectRoomKind"]:NonProjectRoomKind;
+	["Notification"]: {
+		/** Сделано попыток */
+	attempts: number,
+	/** Канал доставки */
+	channel: ModelTypes["NotificationChannel"],
+	/** Кооператив-владелец */
+	coopname: string,
+	/** Когда поставлено в очередь */
+	createdAt: ModelTypes["DateTime"],
+	/** Идентификатор уведомления */
+	id: string,
+	/** Текст последней ошибки */
+	lastError?: string | undefined | null,
+	/** Идентификатор получателя */
+	recipientSubscriberId: string,
+	/** Имя аккаунта получателя */
+	recipientUsername?: string | undefined | null,
+	/** Статус доставки */
+	status: ModelTypes["NotificationOutboxStatus"],
+	/** Когда обновлено */
+	updatedAt: ModelTypes["DateTime"],
+	/** Тип уведомления */
+	workflowId: string
+};
+	["NotificationAttempt"]: {
+		/** Номер попытки (1-based) */
+	attemptNumber: number,
+	/** Когда выполнена попытка */
+	createdAt: ModelTypes["DateTime"],
+	/** Текст ошибки при провале */
+	error?: string | undefined | null,
+	/** Идентификатор попытки */
+	id: string,
+	/** Ответ провайдера (message-id / push-status) */
+	providerResponse?: string | undefined | null,
+	/** Исход попытки */
+	status: ModelTypes["NotificationDeliveryStatus"]
+};
+	["NotificationChannel"]:NotificationChannel;
+	["NotificationDeliveryStatus"]:NotificationDeliveryStatus;
+	["NotificationDetail"]: {
+		/** Сделано попыток */
+	attempts: number,
+	/** Канал доставки */
+	channel: ModelTypes["NotificationChannel"],
+	/** Кооператив-владелец */
+	coopname: string,
+	/** Когда поставлено в очередь */
+	createdAt: ModelTypes["DateTime"],
+	/** История попыток доставки */
+	deliveries: Array<ModelTypes["NotificationAttempt"]>,
+	/** Идентификатор уведомления */
+	id: string,
+	/** Текст последней ошибки */
+	lastError?: string | undefined | null,
+	/** Идентификатор получателя */
+	recipientSubscriberId: string,
+	/** Имя аккаунта получателя */
+	recipientUsername?: string | undefined | null,
+	/** Статус доставки */
+	status: ModelTypes["NotificationOutboxStatus"],
+	/** Когда обновлено */
+	updatedAt: ModelTypes["DateTime"],
+	/** Тип уведомления */
+	workflowId: string
+};
+	["NotificationOutboxStatus"]:NotificationOutboxStatus;
+	["NotificationPaginationResult"]: {
+		/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<ModelTypes["Notification"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number
+};
 	["NotificationWorkflowRecipientInput"]: {
 	/** Username получателя */
 	username: string
+};
+	["NotificationsFilterInput"]: {
+	/** Канал доставки */
+	channel?: ModelTypes["NotificationChannel"] | undefined | null,
+	/** Кооператив-владелец */
+	coopname: string,
+	/** Идентификатор получателя */
+	recipientSubscriberId?: string | undefined | null,
+	/** Статус доставки */
+	status?: ModelTypes["NotificationOutboxStatus"] | undefined | null,
+	/** Тип уведомления */
+	workflowId?: string | undefined | null
 };
 	["NotifyOnAnnualGeneralMeetInput"]: {
 	coopname: string,
@@ -26344,6 +26847,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	getExtensions: Array<ModelTypes["Extension"]>,
+	/** Лента личного инбокса текущего пользователя
+
+Требуемые роли: chairman, member, user.  */
+	getInboxNotifications: ModelTypes["InboxNotificationPaginationResult"],
 	/** Получить статус установки кооператива с приватными данными */
 	getInstallationStatus: ModelTypes["InstallationStatus"],
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения.
@@ -26378,6 +26885,14 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	getMeets: Array<ModelTypes["MeetAggregate"]>,
+	/** Детализация одного уведомления с историей попыток доставки
+
+Требуемые роли: chairman, member.  */
+	getNotification: ModelTypes["NotificationDetail"],
+	/** Журнал уведомлений кооператива с фильтрами и пагинацией
+
+Требуемые роли: chairman, member.  */
+	getNotifications: ModelTypes["NotificationPaginationResult"],
 	/** Получить список методов оплаты
 
 Требуемые роли: chairman. Исключение: доступ разрешен, если `data.username` совпадает с `username` текущего пользователя. */
@@ -26432,6 +26947,10 @@ export type ModelTypes = {
 	getReportRequisites: ModelTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: ModelTypes["SystemInfo"],
+	/** Число непрочитанных уведомлений в инбоксе (бейдж на колоколе)
+
+Требуемые роли: chairman, member, user.  */
+	getUnreadNotificationsCount: ModelTypes["UnreadNotificationsCount"],
 	/** Получить веб-пуш подписки пользователя
 
 Требуемые роли: chairman, member.  */
@@ -26624,6 +27143,18 @@ export type ModelTypes = {
 	programs: Array<ModelTypes["RegistrationProgram"]>,
 	/** Нужен ли выбор программы */
 	requires_selection: boolean
+};
+	["RegistrationPayment"]: {
+		/** Хэш платежа */
+	hash: string,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?: string | undefined | null,
+	/** Сумма вступительного платежа */
+	quantity: number,
+	/** Статус вступительного платежа */
+	status: ModelTypes["PaymentStatus"],
+	/** Символ валюты платежа */
+	symbol: string
 };
 	["RegistrationProgram"]: {
 		/** Для каких типов аккаунтов доступна программа */
@@ -27287,6 +27818,8 @@ export type ModelTypes = {
 	["SetPaymentStatusInput"]: {
 	/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: ModelTypes["PaymentStatus"]
 };
@@ -27644,6 +28177,10 @@ export type ModelTypes = {
 	exchange_id: number,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UnreadNotificationsCount"]: {
+		/** Число непрочитанных уведомлений */
+	count: number
 };
 	["Update"]: {
 	/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -28108,6 +28645,8 @@ export type GraphQLTypes = {
 	private_account?: GraphQLTypes["PrivateAccount"] | undefined | null,
 	/** объект аккаунта в системе учёта провайдера, т.е. MONO. Здесь хранится приватная информация о пайщике кооператива, которая содержит его приватные данные. Эти данные не публикуются в блокчейне и не выходят за пределы базы данных провайдера. Они используются для заполнения шаблонов документов при нажатии соответствующих кнопок на платформе.  */
 	provider_account?: GraphQLTypes["MonoAccount"] | undefined | null,
+	/** сводка по вступительному (регистрационному) платежу пайщика. Позволяет восстановить шаг регистрации (ожидание решения совета или отклонение платежа) после перезагрузки страницы и в любой вкладке. */
+	registration_payment?: GraphQLTypes["RegistrationPayment"] | undefined | null,
 	/** объект пользователя кооперативной экономики содержит в блокчейне информацию о типе аккаунта пайщика, а также, обезличенные публичные данные (хэши) для верификации пайщиков между кооперативами. Этот уровень предназначен для хранения информации пайщика, которая необходима всем кооперативам, но не относится к какому-либо из них конкретно. */
 	user_account?: GraphQLTypes["UserAccount"] | undefined | null,
 	/** Имя аккаунта кооператива */
@@ -28971,17 +29510,15 @@ export type GraphQLTypes = {
 	bik: string,
 	/** Корреспондентский счет */
 	corr: string,
-	/** КПП банка */
-	kpp: string,
+	/** КПП (устар.) */
+	kpp?: string | undefined | null,
 	['...on BankAccountDetails']: Omit<GraphQLTypes["BankAccountDetails"], "...on BankAccountDetails">
 };
 	["BankAccountDetailsInput"]: {
 		/** БИК банка */
 	bik: string,
 	/** Корреспондентский счет */
-	corr: string,
-	/** КПП банка */
-	kpp: string
+	corr: string
 };
 	["BankAccountInput"]: {
 		/** Номер банковского счета */
@@ -29154,6 +29691,8 @@ export type GraphQLTypes = {
 	callback_contract?: string | undefined | null,
 	confirm_callback?: string | undefined | null,
 	coopname: string,
+	/** Текущее число членов совета (всего, как считает контракт). Нужно фронту для вычисления порога принятия/отклонения: за/против * 100 > council_members_count * 50 */
+	council_members_count: number,
 	created_at: string,
 	decline_callback?: string | undefined | null,
 	expired_at: string,
@@ -31897,6 +32436,12 @@ export type GraphQLTypes = {
 	/** Причина отклонения */
 	reason: string
 };
+	["DeclineDecisionInput"]: {
+		/** Имя аккаунта кооператива */
+	coopname: string,
+	/** Идентификатор решения */
+	decision_id: number
+};
 	["DeclineExpenseReportInput"]: {
 		/** Имя кооператива. */
 	coopname: string,
@@ -31914,6 +32459,10 @@ export type GraphQLTypes = {
 	meta: string,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["DeleteAccountInput"]: {
+		/** Имя аккаунта пользователя */
+	username_for_delete: string
 };
 	["DeleteBranchInput"]: {
 		/** Имя аккаунта кооперативного участка */
@@ -33322,6 +33871,40 @@ export type GraphQLTypes = {
 	/** Имя аккаунта пользователя */
 	username: string
 };
+	["InboxNotification"]: {
+	__typename: "InboxNotification",
+	/** Инициатор уведомления (от кого) */
+	actorSubscriberId?: string | undefined | null,
+	/** Тело уведомления */
+	body: string,
+	/** Когда получено */
+	createdAt: GraphQLTypes["DateTime"],
+	/** Идентификатор уведомления инбокса */
+	id: string,
+	/** Прочитано получателем */
+	isRead: boolean,
+	/** Исходные данные (deep-link / доп-рендер) */
+	payload?: GraphQLTypes["JSON"] | undefined | null,
+	/** Когда отмечено прочитанным */
+	readAt?: GraphQLTypes["DateTime"] | undefined | null,
+	/** Заголовок */
+	title: string,
+	/** Тип уведомления (Workflows.<Type>.id) */
+	workflowId: string,
+	['...on InboxNotification']: Omit<GraphQLTypes["InboxNotification"], "...on InboxNotification">
+};
+	["InboxNotificationPaginationResult"]: {
+	__typename: "InboxNotificationPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["InboxNotification"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number,
+	['...on InboxNotificationPaginationResult']: Omit<GraphQLTypes["InboxNotificationPaginationResult"], "...on InboxNotificationPaginationResult">
+};
 	["Individual"]: {
 	__typename: "Individual",
 	/** Дата рождения */
@@ -34252,12 +34835,20 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	declineAgreement: GraphQLTypes["Transaction"],
+	/** Отклонить решение совета по отрицательному консенсусу (большинство голосов против)
+
+Требуемые роли: chairman.  */
+	declineDecision: GraphQLTypes["Transaction"],
 	/** Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.
 
 Требуемые роли: chairman.  */
 	declineExpenseReport: GraphQLTypes["Transaction"],
 	/** Отклонить заявку */
 	declineRequest: GraphQLTypes["Transaction"],
+	/** Удалить аккаунт пайщика из системы учёта провайдера. Доступно только для незавершённых регистрационных статусов (черновик, неоплачен/отклонён). Активный, заблокированный и любой зарегистрированный в блокчейне аккаунт удалить нельзя. Используется для очистки реестра и освобождения e-mail под перерегистрацию.
+
+Требуемые роли: chairman.  */
+	deleteAccount: boolean,
 	/** Удалить кооперативный участок
 
 Требуемые роли: chairman.  */
@@ -34402,6 +34993,14 @@ export type GraphQLTypes = {
 	login: GraphQLTypes["RegisteredAccount"],
 	/** Выйти из системы и заблокировать JWT-токены */
 	logout: boolean,
+	/** Отметить все уведомления инбокса прочитанными
+
+Требуемые роли: chairman, member, user.  */
+	markAllNotificationsRead: GraphQLTypes["UnreadNotificationsCount"],
+	/** Отметить уведомление инбокса прочитанным
+
+Требуемые роли: chairman, member, user.  */
+	markNotificationRead: GraphQLTypes["InboxNotification"],
 	/** Поставить или снять отметку на ячейку календаря. mark=null — снять. Сейчас поддерживается только NOT_REQUIRED («не надо сдавать»).
 
 Требуемые роли: chairman.  */
@@ -34426,10 +35025,10 @@ export type GraphQLTypes = {
 	processConvertToAxonStatement: boolean,
 	/** Отклонить модерацию по заявке */
 	prohibitRequest: GraphQLTypes["Transaction"],
-	/** Опубликовать предложенную повестку и проект решения для дальнейшего голосования совета по нему
+	/** Опубликовать предложенную повестку и проект решения для голосования совета. Возвращает созданный пункт повестки (или null, если он ещё не проиндексирован) для немедленного отображения на фронте.
 
 Требуемые роли: chairman, member.  */
-	publishProjectOfFreeDecision: boolean,
+	publishProjectOfFreeDecision?: GraphQLTypes["AgendaWithDocuments"] | undefined | null,
 	/** Опубликовать заявку */
 	publishRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по акту приёмки-передачи */
@@ -34446,8 +35045,14 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	reportExpenseItem: GraphQLTypes["Transaction"],
+	/** Переотправить уведомление (force-постановка новой строки в очередь доставки)
+
+Требуемые роли: chairman.  */
+	resendNotification: GraphQLTypes["Notification"],
 	/** Заменить приватный ключ аккаунта */
 	resetKey: boolean,
+	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
+	resetRegistration: GraphQLTypes["Account"],
 	/** Перезапуск общего собрания пайщиков
 
 Требуемые роли: chairman.  */
@@ -34542,9 +35147,109 @@ export type GraphQLTypes = {
 };
 	/** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
 ["NonProjectRoomKind"]: NonProjectRoomKind;
+	["Notification"]: {
+	__typename: "Notification",
+	/** Сделано попыток */
+	attempts: number,
+	/** Канал доставки */
+	channel: GraphQLTypes["NotificationChannel"],
+	/** Кооператив-владелец */
+	coopname: string,
+	/** Когда поставлено в очередь */
+	createdAt: GraphQLTypes["DateTime"],
+	/** Идентификатор уведомления */
+	id: string,
+	/** Текст последней ошибки */
+	lastError?: string | undefined | null,
+	/** Идентификатор получателя */
+	recipientSubscriberId: string,
+	/** Имя аккаунта получателя */
+	recipientUsername?: string | undefined | null,
+	/** Статус доставки */
+	status: GraphQLTypes["NotificationOutboxStatus"],
+	/** Когда обновлено */
+	updatedAt: GraphQLTypes["DateTime"],
+	/** Тип уведомления */
+	workflowId: string,
+	['...on Notification']: Omit<GraphQLTypes["Notification"], "...on Notification">
+};
+	["NotificationAttempt"]: {
+	__typename: "NotificationAttempt",
+	/** Номер попытки (1-based) */
+	attemptNumber: number,
+	/** Когда выполнена попытка */
+	createdAt: GraphQLTypes["DateTime"],
+	/** Текст ошибки при провале */
+	error?: string | undefined | null,
+	/** Идентификатор попытки */
+	id: string,
+	/** Ответ провайдера (message-id / push-status) */
+	providerResponse?: string | undefined | null,
+	/** Исход попытки */
+	status: GraphQLTypes["NotificationDeliveryStatus"],
+	['...on NotificationAttempt']: Omit<GraphQLTypes["NotificationAttempt"], "...on NotificationAttempt">
+};
+	/** Канал доставки уведомления */
+["NotificationChannel"]: NotificationChannel;
+	/** Исход одной попытки доставки */
+["NotificationDeliveryStatus"]: NotificationDeliveryStatus;
+	["NotificationDetail"]: {
+	__typename: "NotificationDetail",
+	/** Сделано попыток */
+	attempts: number,
+	/** Канал доставки */
+	channel: GraphQLTypes["NotificationChannel"],
+	/** Кооператив-владелец */
+	coopname: string,
+	/** Когда поставлено в очередь */
+	createdAt: GraphQLTypes["DateTime"],
+	/** История попыток доставки */
+	deliveries: Array<GraphQLTypes["NotificationAttempt"]>,
+	/** Идентификатор уведомления */
+	id: string,
+	/** Текст последней ошибки */
+	lastError?: string | undefined | null,
+	/** Идентификатор получателя */
+	recipientSubscriberId: string,
+	/** Имя аккаунта получателя */
+	recipientUsername?: string | undefined | null,
+	/** Статус доставки */
+	status: GraphQLTypes["NotificationOutboxStatus"],
+	/** Когда обновлено */
+	updatedAt: GraphQLTypes["DateTime"],
+	/** Тип уведомления */
+	workflowId: string,
+	['...on NotificationDetail']: Omit<GraphQLTypes["NotificationDetail"], "...on NotificationDetail">
+};
+	/** Статус строки очереди доставки уведомления */
+["NotificationOutboxStatus"]: NotificationOutboxStatus;
+	["NotificationPaginationResult"]: {
+	__typename: "NotificationPaginationResult",
+	/** Текущая страница */
+	currentPage: number,
+	/** Элементы текущей страницы */
+	items: Array<GraphQLTypes["Notification"]>,
+	/** Общее количество элементов */
+	totalCount: number,
+	/** Общее количество страниц */
+	totalPages: number,
+	['...on NotificationPaginationResult']: Omit<GraphQLTypes["NotificationPaginationResult"], "...on NotificationPaginationResult">
+};
 	["NotificationWorkflowRecipientInput"]: {
 		/** Username получателя */
 	username: string
+};
+	["NotificationsFilterInput"]: {
+		/** Канал доставки */
+	channel?: GraphQLTypes["NotificationChannel"] | undefined | null,
+	/** Кооператив-владелец */
+	coopname: string,
+	/** Идентификатор получателя */
+	recipientSubscriberId?: string | undefined | null,
+	/** Статус доставки */
+	status?: GraphQLTypes["NotificationOutboxStatus"] | undefined | null,
+	/** Тип уведомления */
+	workflowId?: string | undefined | null
 };
 	["NotifyOnAnnualGeneralMeetInput"]: {
 		coopname: string,
@@ -35997,6 +36702,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	getExtensions: Array<GraphQLTypes["Extension"]>,
+	/** Лента личного инбокса текущего пользователя
+
+Требуемые роли: chairman, member, user.  */
+	getInboxNotifications: GraphQLTypes["InboxNotificationPaginationResult"],
 	/** Получить статус установки кооператива с приватными данными */
 	getInstallationStatus: GraphQLTypes["InstallationStatus"],
 	/** Получить полное состояние плана счетов кооператива. Возвращает все счета из стандартного плана счетов с актуальными данными из блокчейна. Если счет не активен в блокчейне, возвращает нулевые значения.
@@ -36031,6 +36740,14 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	getMeets: Array<GraphQLTypes["MeetAggregate"]>,
+	/** Детализация одного уведомления с историей попыток доставки
+
+Требуемые роли: chairman, member.  */
+	getNotification: GraphQLTypes["NotificationDetail"],
+	/** Журнал уведомлений кооператива с фильтрами и пагинацией
+
+Требуемые роли: chairman, member.  */
+	getNotifications: GraphQLTypes["NotificationPaginationResult"],
 	/** Получить список методов оплаты
 
 Требуемые роли: chairman. Исключение: доступ разрешен, если `data.username` совпадает с `username` текущего пользователя. */
@@ -36085,6 +36802,10 @@ export type GraphQLTypes = {
 	getReportRequisites: GraphQLTypes["ReportRequisitesView"],
 	/** Получить сводную публичную информацию о системе */
 	getSystemInfo: GraphQLTypes["SystemInfo"],
+	/** Число непрочитанных уведомлений в инбоксе (бейдж на колоколе)
+
+Требуемые роли: chairman, member, user.  */
+	getUnreadNotificationsCount: GraphQLTypes["UnreadNotificationsCount"],
 	/** Получить веб-пуш подписки пользователя
 
 Требуемые роли: chairman, member.  */
@@ -36288,6 +37009,20 @@ export type GraphQLTypes = {
 	/** Нужен ли выбор программы */
 	requires_selection: boolean,
 	['...on RegistrationConfig']: Omit<GraphQLTypes["RegistrationConfig"], "...on RegistrationConfig">
+};
+	["RegistrationPayment"]: {
+	__typename: "RegistrationPayment",
+	/** Хэш платежа */
+	hash: string,
+	/** Причина изменения статуса. При отклонении платежа — причина отказа, которую видит пайщик. */
+	message?: string | undefined | null,
+	/** Сумма вступительного платежа */
+	quantity: number,
+	/** Статус вступительного платежа */
+	status: GraphQLTypes["PaymentStatus"],
+	/** Символ валюты платежа */
+	symbol: string,
+	['...on RegistrationPayment']: Omit<GraphQLTypes["RegistrationPayment"], "...on RegistrationPayment">
 };
 	["RegistrationProgram"]: {
 	__typename: "RegistrationProgram",
@@ -36989,6 +37724,8 @@ export type GraphQLTypes = {
 	["SetPaymentStatusInput"]: {
 		/** Идентификатор платежа, для которого устанавливается статус */
 	id: string,
+	/** Причина изменения статуса. При отклонении платежа показывается пайщику как причина отказа. */
+	message?: string | undefined | null,
 	/** Новый статус платежа */
 	status: GraphQLTypes["PaymentStatus"]
 };
@@ -37377,6 +38114,12 @@ export type GraphQLTypes = {
 	exchange_id: number,
 	/** Имя аккаунта пользователя */
 	username: string
+};
+	["UnreadNotificationsCount"]: {
+	__typename: "UnreadNotificationsCount",
+	/** Число непрочитанных уведомлений */
+	count: number,
+	['...on UnreadNotificationsCount']: Omit<GraphQLTypes["UnreadNotificationsCount"], "...on UnreadNotificationsCount">
 };
 	["Update"]: {
 		/** Собственные данные кооператива, обслуживающего экземпляр платформы */
@@ -38101,6 +38844,25 @@ export enum NonProjectRoomKind {
 	MEMBERS = "MEMBERS",
 	SECRETARY = "SECRETARY"
 }
+/** Канал доставки уведомления */
+export enum NotificationChannel {
+	EMAIL = "EMAIL",
+	IN_APP = "IN_APP",
+	PUSH = "PUSH"
+}
+/** Исход одной попытки доставки */
+export enum NotificationDeliveryStatus {
+	FAILED = "FAILED",
+	SENT = "SENT"
+}
+/** Статус строки очереди доставки уведомления */
+export enum NotificationOutboxStatus {
+	CANCELED = "CANCELED",
+	FAILED = "FAILED",
+	PENDING = "PENDING",
+	SENDING = "SENDING",
+	SENT = "SENT"
+}
 /** Тип юридического лица */
 export enum OrganizationType {
 	AO = "AO",
@@ -38132,6 +38894,7 @@ export enum PaymentStatus {
 export enum PaymentType {
 	DEPOSIT = "DEPOSIT",
 	REGISTRATION = "REGISTRATION",
+	REGISTRATION_REFUND = "REGISTRATION_REFUND",
 	WITHDRAWAL = "WITHDRAWAL"
 }
 export enum ProcessInstanceStatus {
@@ -38250,6 +39013,7 @@ export enum UserStatus {
 	Joined = "Joined",
 	Payed = "Payed",
 	Refunded = "Refunded",
+	Refunding = "Refunding",
 	Registered = "Registered"
 }
 /** Тип подписанта для нулевых форм: руководитель или представитель */
@@ -38386,8 +39150,10 @@ type ZEUS_VARIABLES = {
 	["DebtStatus"]: ValueTypes["DebtStatus"];
 	["DeclineAgreementInput"]: ValueTypes["DeclineAgreementInput"];
 	["DeclineApproveInput"]: ValueTypes["DeclineApproveInput"];
+	["DeclineDecisionInput"]: ValueTypes["DeclineDecisionInput"];
 	["DeclineExpenseReportInput"]: ValueTypes["DeclineExpenseReportInput"];
 	["DeclineRequestInput"]: ValueTypes["DeclineRequestInput"];
+	["DeleteAccountInput"]: ValueTypes["DeleteAccountInput"];
 	["DeleteBranchInput"]: ValueTypes["DeleteBranchInput"];
 	["DeleteCapitalIssueByHashInput"]: ValueTypes["DeleteCapitalIssueByHashInput"];
 	["DeleteCapitalStoryByHashInput"]: ValueTypes["DeleteCapitalStoryByHashInput"];
@@ -38495,7 +39261,11 @@ type ZEUS_VARIABLES = {
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
 	["MoveCapitalIssueToComponentInput"]: ValueTypes["MoveCapitalIssueToComponentInput"];
 	["NonProjectRoomKind"]: ValueTypes["NonProjectRoomKind"];
+	["NotificationChannel"]: ValueTypes["NotificationChannel"];
+	["NotificationDeliveryStatus"]: ValueTypes["NotificationDeliveryStatus"];
+	["NotificationOutboxStatus"]: ValueTypes["NotificationOutboxStatus"];
 	["NotificationWorkflowRecipientInput"]: ValueTypes["NotificationWorkflowRecipientInput"];
+	["NotificationsFilterInput"]: ValueTypes["NotificationsFilterInput"];
 	["NotifyOnAnnualGeneralMeetInput"]: ValueTypes["NotifyOnAnnualGeneralMeetInput"];
 	["OpenProjectInput"]: ValueTypes["OpenProjectInput"];
 	["OrganizationDetailsInput"]: ValueTypes["OrganizationDetailsInput"];

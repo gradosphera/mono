@@ -6,6 +6,9 @@ export enum PaymentTypeEnum {
   REGISTRATION = 'registration', // Регистрационный взнос
   DEPOSIT = 'deposit', // Паевой взнос
   WITHDRAWAL = 'withdrawal', // Возврат паевого взноса
+  // Исходящий возврат вступительного и мин. паевого взносов при отказе совета
+  // в приёме. Отдельный тип, не WITHDRAWAL — чтобы не путать с возвратом паевого.
+  REGISTRATION_REFUND = 'registration_refund',
 }
 
 /**
@@ -23,7 +26,16 @@ export const PAYMENT_TYPE_LABELS: Record<PaymentTypeEnum, string> = {
   [PaymentTypeEnum.REGISTRATION]: 'Вступительный и мин. паевой взносы',
   [PaymentTypeEnum.DEPOSIT]: 'Паевой взнос',
   [PaymentTypeEnum.WITHDRAWAL]: 'Возврат паевого взноса',
+  [PaymentTypeEnum.REGISTRATION_REFUND]: 'Возврат вступит. и мин.паевого взноса',
 };
+
+/**
+ * Налоговая оговорка для назначения платежа. Взносы пайщика (вступительный,
+ * минимальный паевой, паевой) и их возврат НДС не облагаются. Оговорка обязана
+ * присутствовать целиком в memo каждого платежа — это единый источник назначения:
+ * провайдеры QR (qrpay/sberpoll) её больше НЕ дописывают, чтобы не задвоить.
+ */
+export const VAT_EXEMPT_NOTE = 'НДС не облагается.';
 
 /**
  * Человекочитаемые названия направлений платежей
@@ -50,4 +62,4 @@ export const INCOMING_PAYMENT_TYPES = [PaymentTypeEnum.REGISTRATION, PaymentType
 /**
  * Исходящие типы платежей
  */
-export const OUTGOING_PAYMENT_TYPES = [PaymentTypeEnum.WITHDRAWAL];
+export const OUTGOING_PAYMENT_TYPES = [PaymentTypeEnum.WITHDRAWAL, PaymentTypeEnum.REGISTRATION_REFUND];

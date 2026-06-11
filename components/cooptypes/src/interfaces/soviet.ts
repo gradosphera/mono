@@ -177,6 +177,11 @@ export interface ICancelexprd {
   decision_id: IUint64
 }
 
+export interface IDeclinedec {
+  coopname: IName
+  decision_id: IUint64
+}
+
 export interface ICancelreg {
   coopname: IName
   username: IName

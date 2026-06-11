@@ -6,58 +6,101 @@
     :rows='6',
     :min-width='hideActions ? "880px" : "1000px"'
   )
-  .table-wrap(v-else-if='items.length')
-    .table-scroll
-      table.table(:class='{ "table--actions": !hideActions }')
-        thead
-          tr
-            th.col-toggle
-            th.col-sort(@click='onSort("username")') Пайщик {{ sortMark('username') }}
-            th.col-sort.col-date(@click='onSort("created_at")') Дата создания {{ sortMark('created_at') }}
-            th.col-sort.col-num(@click='onSort("quantity")') Сумма {{ sortMark('quantity') }}
-            th Тип платежа
-            th Направление
-            th.col-sort(@click='onSort("status")') Статус {{ sortMark('status') }}
-            th.col-action(v-if='!hideActions') Действия
-        tbody
-          template(v-for='row in items', :key='row.id')
-            tr.data-row(@click='toggleExpand(row.id)')
-              td.col-toggle
-                button.icon-btn(
-                  type='button',
-                  :aria-label='expanded.get(row.id) ? "Свернуть" : "Развернуть"',
-                  @click.stop='toggleExpand(row.id)'
-                )
-                  q-icon(:name='expanded.get(row.id) ? "expand_more" : "chevron_right"')
-              td.cell-name {{ getShortNameFromCertificate(row.username_certificate) || row.username }}
-              td {{ formatDateToHumanDateTime(row.created_at) }}
-              td.col-num {{ row.quantity }} {{ row.symbol }}
-              td {{ row.type_label }}
-              td
-                span.dir(:class='isIncoming(row.direction) ? "dir--in" : "dir--out"')
-                  q-icon.q-mr-xs(:name='getDirectionIcon(row.direction)', size='16px')
-                  span {{ row.direction_label }}
-              td
-                BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
-              td.col-action(v-if='!hideActions', @click.stop)
-                .cell-actions(v-if='["EXPIRED", "PENDING", "FAILED"].includes(row.status)')
-                  SetOrderPaidStatusButton(:id='row.id')
-                  SetOrderRefundedStatusButton(:id='row.id')
-                span.no-actions(v-else) —
+  template(v-else-if='items.length')
+    //- Десктоп: канон-таблица. На мобиле скрыта — таблица из 7–8 колонок
+    //- нечитаема на телефоне (глобальный канон ломает её посимвольным
+    //- переносом), поэтому ниже идёт карточная раскладка.
+    .table-wrap.pmt-desktop
+      .table-scroll
+        table.table(:class='{ "table--actions": !hideActions }')
+          thead
+            tr
+              th.col-toggle
+              th.col-sort(@click='onSort("username")') Пайщик {{ sortMark('username') }}
+              th.col-sort.col-date(@click='onSort("created_at")') Дата создания {{ sortMark('created_at') }}
+              th.col-sort.col-num(@click='onSort("quantity")') Сумма {{ sortMark('quantity') }}
+              th Тип платежа
+              th Направление
+              th.col-sort(@click='onSort("status")') Статус {{ sortMark('status') }}
+              th.col-action(v-if='!hideActions') Действия
+          tbody
+            template(v-for='row in items', :key='row.id')
+              tr.data-row(@click='toggleExpand(row.id)')
+                td.col-toggle
+                  button.icon-btn(
+                    type='button',
+                    :aria-label='expanded.get(row.id) ? "Свернуть" : "Развернуть"',
+                    @click.stop='toggleExpand(row.id)'
+                  )
+                    q-icon(:name='expanded.get(row.id) ? "expand_more" : "chevron_right"')
+                td.cell-name {{ getShortNameFromCertificate(row.username_certificate) || row.username }}
+                td {{ formatDateToHumanDateTime(row.created_at) }}
+                td.col-num {{ row.quantity }} {{ row.symbol }}
+                td {{ row.type_label }}
+                td
+                  span.dir(:class='isIncoming(row.direction) ? "dir--in" : "dir--out"')
+                    q-icon.q-mr-xs(:name='getDirectionIcon(row.direction)', size='16px')
+                    span {{ row.direction_label }}
+                td
+                  BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
+                td.col-action(v-if='!hideActions', @click.stop)
+                  .cell-actions(v-if='["EXPIRED", "PENDING", "FAILED"].includes(row.status)')
+                    SetOrderPaidStatusButton(:id='row.id')
+                    //- Возврат вступительного взноса отклонить нельзя — совет уже
+                    //- отказал, кассир обязан вернуть деньги. Прячем «Отклонить».
+                    SetOrderRefundedStatusButton(v-if='!isRefundType(row.type)', :id='row.id')
+                  span.no-actions(v-else) —
 
-            tr.expand-row(v-if='expanded.get(row.id)')
-              td(:colspan='hideActions ? 7 : 8')
-                PaymentDetails(:payment='row')
+              tr.expand-row(v-if='expanded.get(row.id)')
+                td(:colspan='hideActions ? 7 : 8')
+                  PaymentDetails(:payment='row')
 
-    .table-foot
-      span {{ rangeLabel }}
-      BaseButton(
-        v-if='hasMore',
-        variant='ghost',
-        size='sm',
-        :loading='onLoading',
-        @click='loadMore'
-      ) Загрузить ещё
+      .table-foot
+        span {{ rangeLabel }}
+        BaseButton(
+          v-if='hasMore',
+          variant='ghost',
+          size='sm',
+          :loading='onLoading',
+          @click='loadMore'
+        ) Загрузить ещё
+
+    //- Мобайл: карточки вместо таблицы. Видны только на узких экранах.
+    .payments-cards.pmt-mobile
+      .pay-card(v-for='row in items', :key='row.id')
+        .pay-card__main(@click='toggleExpand(row.id)')
+          .pay-card__row
+            span.pay-card__name {{ getShortNameFromCertificate(row.username_certificate) || row.username }}
+            BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
+          .pay-card__row
+            span.pay-card__amount
+              q-icon.q-mr-xs(
+                :name='getDirectionIcon(row.direction)',
+                :class='isIncoming(row.direction) ? "dir--in" : "dir--out"',
+                size='16px'
+              )
+              | {{ row.quantity }} {{ row.symbol }}
+            span.pay-card__type {{ row.type_label }}
+          .pay-card__row.pay-card__row--meta
+            span {{ row.direction_label }}
+            span {{ formatDateToHumanDateTime(row.created_at) }}
+        .pay-card__actions(
+          v-if='!hideActions && ["EXPIRED", "PENDING", "FAILED"].includes(row.status)',
+          @click.stop
+        )
+          SetOrderPaidStatusButton(:id='row.id')
+          SetOrderRefundedStatusButton(v-if='!isRefundType(row.type)', :id='row.id')
+        PaymentDetails.pay-card__details(v-if='expanded.get(row.id)', :payment='row')
+
+      .table-foot
+        span {{ rangeLabel }}
+        BaseButton(
+          v-if='hasMore',
+          variant='ghost',
+          size='sm',
+          :loading='onLoading',
+          @click='loadMore'
+        ) Загрузить ещё
 
   EmptyState(
     v-else,
@@ -127,10 +170,14 @@ const getStatusVariant = (status?: string | null): BaseBadgeVariant => {
 const isIncoming = (direction?: string | null): boolean =>
   direction === Zeus.PaymentDirection.INCOMING;
 
+// Возврат вступительного/мин.паевого взноса при отказе совета — отклонению не
+// подлежит (см. шаблон): у такого исходящего платежа только «Подтвердить».
+const isRefundType = (type?: string | null): boolean =>
+  type === Zeus.PaymentType.REGISTRATION_REFUND;
+
+// Material-иконки (канон запрещает FontAwesome fa-*).
 const getDirectionIcon = (direction?: string | null) => {
-  return isIncoming(direction)
-    ? 'fa-solid fa-arrow-down'
-    : 'fa-solid fa-arrow-up';
+  return isIncoming(direction) ? 'arrow_downward' : 'arrow_upward';
 };
 
 // Колонки скелетона повторяют шапку реальной таблицы платежей; колонка
@@ -227,18 +274,114 @@ onMounted(() => {
   width: 100%;
 }
 
-/* Горизонтальный скролл на узких экранах — вместо отдельной мобильной
-   карточной верстки: таблица остаётся таблицей, просто прокручивается. */
 .table-scroll {
   overflow-x: auto;
 }
 
+/* Десктоп — таблица, мобайл (≤599px) — карточки. Глобальный канон
+   (components.css) форсит .table { min-width:0 !important } + посимвольный
+   перенос ячеек на узких экранах, из-за чего таблица из 7–8 колонок
+   схлопывается в нечитаемые буквы-в-столбик. Поэтому на телефоне таблицу
+   скрываем и показываем карточную раскладку (как реестр документов).
+   ВАЖНО: .payments-cards ниже задаёт display:flex с той же специфичностью,
+   что и одиночный .pmt-mobile, и перебивал бы display:none по порядку
+   источника (карточки лезли на десктоп поверх таблицы). Поэтому скрытие/показ
+   вешаем на двойной селектор .payments-cards.pmt-mobile — он специфичнее. */
+.payments-cards.pmt-mobile {
+  display: none;
+}
+@media (max-width: 599px) {
+  .pmt-desktop {
+    display: none;
+  }
+  .payments-cards.pmt-mobile {
+    display: flex;
+  }
+}
+
+.payments-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
+}
+
+.pay-card {
+  background: var(--p-surface);
+  border: 1px solid var(--p-line);
+  border-radius: var(--p-r-md, 12px);
+  padding: var(--p-3, 12px) var(--p-4, 16px);
+}
+
+.pay-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2, 8px);
+  cursor: pointer;
+}
+
+.pay-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p-3, 12px);
+}
+
+.pay-card__name {
+  font-weight: 500;
+  color: var(--p-ink-1);
+  /* Имя занимает свободную ширину и обрезается «…», а не рассыпается в
+     столбик, когда рядом длинный бейдж статуса. */
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pay-card__amount {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pay-card__type {
+  color: var(--p-ink-2);
+  font-size: var(--p-fs-body-sm);
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.pay-card__row--meta {
+  font-size: var(--p-fs-meta);
+  color: var(--p-ink-3);
+}
+
+.pay-card__actions {
+  display: flex;
+  gap: var(--p-2, 8px);
+  margin-top: var(--p-3, 12px);
+}
+
+.pay-card__details {
+  margin-top: var(--p-3, 12px);
+  padding-top: var(--p-3, 12px);
+  border-top: 1px solid var(--p-line);
+}
+
+/* Глобальный канон снимает min-width (.table{min-width:0!important}) — без
+   него колонки сжимаются уже контента и кнопки действий наезжают на статус.
+   Перебиваем !important: при нехватке ширины таблица скроллится в
+   .table-scroll, а не схлопывает колонки (как журнал уведомлений). */
 .table {
-  table-layout: fixed;
-  min-width: 860px;
+  table-layout: fixed !important;
+  min-width: 860px !important;
 }
 .table--actions {
-  min-width: 980px;
+  min-width: 980px !important;
 }
 
 .col-toggle {
@@ -270,7 +413,7 @@ onMounted(() => {
 }
 
 .cell-name {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .dir {
