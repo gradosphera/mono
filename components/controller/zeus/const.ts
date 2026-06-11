@@ -3047,6 +3047,8 @@ export const ReturnTypes: Record<string,any> = {
 		coopname:"String",
 		global_available_invest_pool:"String",
 		present:"Boolean",
+		program_expense_pool:"String",
+		program_expense_reserved:"String",
 		program_membership_available:"String",
 		program_membership_cumulative_reward_per_share:"Float",
 		program_membership_distributed:"String",

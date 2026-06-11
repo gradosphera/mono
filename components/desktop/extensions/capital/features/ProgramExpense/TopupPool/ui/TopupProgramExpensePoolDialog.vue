@@ -6,14 +6,14 @@ BaseDialog(
   @update:model-value='$emit("update:modelValue", $event)'
 )
   .form
-    .t-eyebrow.t-muted.q-mb-sm Перевод средств из инвестиционного пула в пул программных расходов
+    .t-eyebrow.t-muted.q-mb-sm Перевод средств из глобального инвест-пула в пул программных расходов
     BaseInput(
       v-model='amount',
       label='Сумма пополнения',
       :placeholder='amountPlaceholder',
       required
     )
-    .hint Средства списываются с `global_available_invest_pool` и зачисляются в `program_expense_pool`.
+    .hint Деньги переводятся из свободных инвестиций программы в пул, из которого оплачиваются программные расходы.
 
   template(#footer)
     .footer-bar

@@ -3652,6 +3652,10 @@ export type ValueTypes = {
 	global_available_invest_pool?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
+	/** Пул программных расходов — средства, переведённые под целевые расходы программы */
+	program_expense_pool?:boolean | `@${string}`,
+	/** Зарезервировано в пуле программных расходов под активные расходы (служебные записки в работе) */
+	program_expense_reserved?:boolean | `@${string}`,
 	/** Доступная сумма членских взносов по программе */
 	program_membership_available?:boolean | `@${string}`,
 	/** Накопительное вознаграждение на долю в членских взносах */
@@ -12771,6 +12775,10 @@ export type ResolverInputTypes = {
 	global_available_invest_pool?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
+	/** Пул программных расходов — средства, переведённые под целевые расходы программы */
+	program_expense_pool?:boolean | `@${string}`,
+	/** Зарезервировано в пуле программных расходов под активные расходы (служебные записки в работе) */
+	program_expense_reserved?:boolean | `@${string}`,
 	/** Доступная сумма членских взносов по программе */
 	program_membership_available?:boolean | `@${string}`,
 	/** Накопительное вознаграждение на долю в членских взносах */
@@ -21639,6 +21647,10 @@ export type ModelTypes = {
 	global_available_invest_pool: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
+	/** Пул программных расходов — средства, переведённые под целевые расходы программы */
+	program_expense_pool?: string | undefined | null,
+	/** Зарезервировано в пуле программных расходов под активные расходы (служебные записки в работе) */
+	program_expense_reserved?: string | undefined | null,
 	/** Доступная сумма членских взносов по программе */
 	program_membership_available: string,
 	/** Накопительное вознаграждение на долю в членских взносах */
@@ -31171,6 +31183,10 @@ export type GraphQLTypes = {
 	global_available_invest_pool: string,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
+	/** Пул программных расходов — средства, переведённые под целевые расходы программы */
+	program_expense_pool?: string | undefined | null,
+	/** Зарезервировано в пуле программных расходов под активные расходы (служебные записки в работе) */
+	program_expense_reserved?: string | undefined | null,
 	/** Доступная сумма членских взносов по программе */
 	program_membership_available: string,
 	/** Накопительное вознаграждение на долю в членских взносах */

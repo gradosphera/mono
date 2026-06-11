@@ -14,6 +14,32 @@ q-page.program-expenses-page
           q-icon(name='add', size='18px')
         | Создать расход
 
+  .pools.row.q-col-gutter-md
+    .col-12.col-md-6
+      WalletCard(
+        neutral,
+        title='Глобальный инвест-пул',
+        subtitle='Свободные инвестиции программы — источник пополнения',
+        balance-label='Доступно к распределению',
+        :balance='globalPool.amount',
+        :symbol='globalPool.symbol',
+        icon='savings',
+        :loading='!configStore.state'
+      )
+    .col-12.col-md-6
+      WalletCard(
+        program='blagorost',
+        title='Пул программных расходов',
+        subtitle='Из него оплачиваются программные расходы',
+        balance-label='Доступно',
+        :balance='expensePool.amount',
+        :symbol='expensePool.symbol',
+        :locked-balance='expenseReserved.has ? expenseReserved.amount : undefined',
+        locked-label='Зарезервировано под активные расходы',
+        icon='receipt_long',
+        :loading='!configStore.state'
+      )
+
   .content(v-if='store.programExpenses && store.programExpenses.items.length')
     .row.q-col-gutter-md
       .col-12.col-md-6.col-lg-4(v-for='item in store.programExpenses.items', :key='item.expense_hash')
@@ -61,12 +87,16 @@ import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
+import { WalletCard } from 'src/shared/ui/domain/WalletCard';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { useProgramExpenseStore } from 'app/extensions/capital/entities/ProgramExpense/model';
+import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
 import { CreateProgramExpenseDialog } from 'app/extensions/capital/features/ProgramExpense/CreateProgramExpense/ui';
 import { TopupProgramExpensePoolDialog } from 'app/extensions/capital/features/ProgramExpense/TopupPool/ui';
 
 const system = useSystemStore();
 const store = useProgramExpenseStore();
+const configStore = useConfigStore();
 
 const coopname = computed(() => system.info.coopname);
 const createOpen = ref(false);
@@ -75,8 +105,29 @@ const topupOpen = ref(false);
 function openCreate(): void { createOpen.value = true; }
 function openTopup(): void { topupOpen.value = true; }
 
+function splitAsset(asset?: string | null): { amount: string; symbol: string } {
+  const fallbackSymbol = system.info?.symbols?.root_govern_symbol ?? 'RUB';
+  if (!asset) return { amount: '0,00', symbol: fallbackSymbol };
+  const parts = formatAsset2Digits(asset).split(' ');
+  return { amount: parts[0] || '0,00', symbol: parts[1] || fallbackSymbol };
+}
+
+const globalPool = computed(() =>
+  splitAsset(configStore.state?.global_available_invest_pool),
+);
+const expensePool = computed(() =>
+  splitAsset(configStore.state?.program_expense_pool),
+);
+const expenseReserved = computed(() => {
+  const reserved = configStore.state?.program_expense_reserved;
+  return { ...splitAsset(reserved), has: parseFloat(reserved ?? '0') > 0 };
+});
+
 async function refresh(): Promise<void> {
-  await store.loadProgramExpenses({ coopname: coopname.value });
+  await Promise.all([
+    store.loadProgramExpenses({ coopname: coopname.value }),
+    configStore.loadState({ coopname: coopname.value }),
+  ]);
 }
 
 onMounted(refresh);
@@ -157,6 +208,10 @@ function statusVariant(
 .header__actions {
   display: flex;
   gap: var(--p-2);
+}
+
+.pools {
+  margin-bottom: var(--p-5);
 }
 
 .row-card {
