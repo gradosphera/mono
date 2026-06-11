@@ -5492,6 +5492,8 @@ export type ValueTypes = {
 	links?: Array<string> | undefined | null | Variable<any, string>,
 	/** Шапка СЗ */
 	proposal: ValueTypes["ExpenseProposalHeaderInput"] | Variable<any, string>,
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -14569,6 +14571,8 @@ export type ResolverInputTypes = {
 	links?: Array<string> | undefined | null,
 	/** Шапка СЗ */
 	proposal: ResolverInputTypes["ExpenseProposalHeaderInput"],
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -23385,6 +23389,8 @@ export type ModelTypes = {
 	links?: Array<string> | undefined | null,
 	/** Шапка СЗ */
 	proposal: ModelTypes["ExpenseProposalHeaderInput"],
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -33001,6 +33007,8 @@ export type GraphQLTypes = {
 	links?: Array<string> | undefined | null,
 	/** Шапка СЗ */
 	proposal: GraphQLTypes["ExpenseProposalHeaderInput"],
+	/** Хеш сметы расхода (детерминированный) */
+	proposal_hash: string,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */

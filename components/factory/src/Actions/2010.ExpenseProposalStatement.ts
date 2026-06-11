@@ -30,6 +30,7 @@ export class Factory extends DocFactory<ExpenseProposalStatement.Action> {
       coop,
       user: super.getCommonUser(userData),
       vars,
+      proposal_hash: data.proposal_hash,
       proposal: data.proposal,
       items: data.items,
     }

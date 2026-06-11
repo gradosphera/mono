@@ -64,6 +64,11 @@ class ExpenseProposalHeaderInputDTO implements HeaderAction {
 
 @InputType('BaseExpenseProposalStatementMetaDocumentInput')
 class BaseExpenseProposalStatementMetaDocumentInputDTO implements Omit<Action, 'coopname' | 'username' | 'registry_id' | 'block_num' | 'lang' | 'title' | 'generator' | 'version' | 'created_at' | 'timezone' | 'links'> {
+  @Field({ description: 'Хеш сметы расхода (детерминированный)' })
+  @IsString()
+  @IsNotEmpty()
+  proposal_hash!: string;
+
   @Field(() => ExpenseProposalHeaderInputDTO, { description: 'Шапка СЗ' })
   @ValidateNested()
   @Type(() => ExpenseProposalHeaderInputDTO)
@@ -93,12 +98,7 @@ export class ExpenseProposalStatementGenerateDocumentInputDTO extends Intersecti
 export class ExpenseProposalStatementSignedMetaDocumentInputDTO extends IntersectionType(
   BaseExpenseProposalStatementMetaDocumentInputDTO,
   MetaDocumentInputDTO
-) {
-  @Field({ description: 'Хеш сметы расхода (детерминированный)' })
-  @IsString()
-  @IsNotEmpty()
-  proposal_hash!: string;
-}
+) {}
 
 /**
  * Подписанный документ СЗ-заявления (registry 2010).

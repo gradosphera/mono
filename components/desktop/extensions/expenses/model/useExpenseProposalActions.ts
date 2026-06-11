@@ -69,6 +69,7 @@ export function useExpenseProposalActions() {
     const generated = await generateExpenseProposalStatementDocument({
       coopname: info.coopname,
       username: session.username,
+      proposal_hash,
       proposal: proposalHeader,
       items: itemsForDoc,
     } as any);

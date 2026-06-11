@@ -76,6 +76,7 @@ export function useCreateProgramExpense() {
     const generateInput: GenerateStatementInput = {
       coopname: info.coopname,
       username: session.username,
+      proposal_hash: expense_hash,
       proposal: {
         description: draft.description,
         total_amount,

@@ -24,6 +24,7 @@ export interface IExpenseProposalHeader {
 }
 
 export interface Action extends IGenerate {
+  proposal_hash: string
   proposal: IExpenseProposalHeader
   items: IExpenseItem[]
 }
@@ -35,6 +36,7 @@ export interface Model {
   coop: ICooperativeData
   user: ICommonUser
   vars: IVars
+  proposal_hash: string
   proposal: IExpenseProposalHeader
   items: IExpenseItem[]
 }
