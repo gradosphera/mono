@@ -12,22 +12,24 @@ export class Factory extends DocFactory<ExpenseProposalStatement.Action> {
   }
 
   async generateDocument(data: ExpenseProposalStatement.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    let template: ITemplate<ExpenseProposalStatement.Model>
+    // Независимые источники тянем параллельно (см. resolveParallel в DocFactory)
+    const { template, coop, vars, userData } = await this.resolveParallel({
+      template: () => process.env.SOURCE === 'local'
+        ? Promise.resolve(ExpenseProposalStatement.Template as ITemplate<ExpenseProposalStatement.Model>)
+        : this.getTemplate<ExpenseProposalStatement.Model>(DraftContract.contractName.production, ExpenseProposalStatement.registry_id, data.block_num),
+      coop: () => super.getCooperative(data.coopname, data.block_num),
+      vars: () => super.getVars(data.coopname, data.block_num),
+      userData: () => super.getUser(data.username, data.block_num),
+    })
 
-    if (process.env.SOURCE === 'local') {
-      template = ExpenseProposalStatement.Template
-    }
-    else {
-      template = await this.getTemplate(DraftContract.contractName.production, ExpenseProposalStatement.registry_id, data.block_num)
-    }
-
+    // meta зависит от template.title — считаем после батча
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
 
     const combinedData: ExpenseProposalStatement.Model = {
       meta,
-      coop: (data as any).coop,
-      user: (data as any).user,
-      vars: (data as any).vars,
+      coop,
+      user: super.getCommonUser(userData),
+      vars,
       proposal: data.proposal,
       items: data.items,
     }
