@@ -35,7 +35,7 @@ q-page.program-expenses-page
         :balance='expensePool.amount',
         :symbol='expensePool.symbol',
         :locked-balance='expenseReserved.has ? expenseReserved.amount : undefined',
-        locked-label='Зарезервировано под активные расходы',
+        locked-label='Зарезервировано',
         icon='receipt_long',
         :loading='!configStore.state'
       )
