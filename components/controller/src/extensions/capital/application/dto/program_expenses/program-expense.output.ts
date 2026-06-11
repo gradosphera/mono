@@ -35,6 +35,8 @@ export class ProgramExpenseOutputDTO {
   @Field(() => String) coopname!: string;
   @Field(() => String) expense_hash!: string;
   @Field(() => String) creator!: string;
+  @Field(() => String, { description: 'Имя инициатора (ФИО пайщика или название организации)' })
+  creator_name!: string;
   @Field(() => String) source_wallet!: string;
   @Field(() => ExpenseProposalStatus) status!: ExpenseProposalStatus;
   @Field(() => ProgramExpenseCallbackOutputDTO, { nullable: true })

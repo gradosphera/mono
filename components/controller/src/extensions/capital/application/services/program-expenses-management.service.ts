@@ -9,6 +9,7 @@ import {
   type InterExpenseProposalRead,
   type InterExpenseProposalStatus,
 } from '@coopenomics/inter';
+import { AccountDataPort, ACCOUNT_DATA_PORT } from '~/domain/account/ports/account-data.port';
 import { CapitalBlockchainPort, CAPITAL_BLOCKCHAIN_PORT } from '../../domain/interfaces/capital-blockchain.port';
 import { DomainToBlockchainUtils } from '~/shared/utils/domain-to-blockchain.utils';
 import {
@@ -43,6 +44,8 @@ export class ProgramExpensesManagementService {
     private readonly capitalBlockchainPort: CapitalBlockchainPort,
     @Inject(INTER_EXPENSE_CHASSIS)
     private readonly expenseChassis: InterExpenseChassisPort,
+    @Inject(ACCOUNT_DATA_PORT)
+    private readonly accountDataPort: AccountDataPort,
     private readonly domainToBlockchainUtils: DomainToBlockchainUtils,
   ) {}
 
@@ -94,19 +97,39 @@ export class ProgramExpensesManagementService {
       sortOrder,
     });
 
-    return buildPaginationResult(result, options, (p) => this.toOutput(p));
+    const names = await this.resolveCreatorNames(result.items.map((p) => p.creator));
+    return buildPaginationResult(result, options, (p) => this.toOutput(p, names.get(p.creator) ?? p.creator));
   }
 
   async getProgramExpense(coopname: string, expenseHash: string): Promise<ProgramExpenseOutputDTO | null> {
     const proposal = await this.expenseChassis.readProposalByHash(coopname, expenseHash);
-    return proposal ? this.toOutput(proposal) : null;
+    if (!proposal) return null;
+    const names = await this.resolveCreatorNames([proposal.creator]);
+    return this.toOutput(proposal, names.get(proposal.creator) ?? proposal.creator);
   }
 
-  private toOutput(p: InterExpenseProposalRead): ProgramExpenseOutputDTO {
+  /** ФИО/название организации по username; при ошибке резолва остаётся username. */
+  private async resolveCreatorNames(creators: string[]): Promise<Map<string, string>> {
+    const unique = [...new Set(creators.filter(Boolean))];
+    const entries = await Promise.all(
+      unique.map(async (username): Promise<[string, string]> => {
+        try {
+          const displayName = await this.accountDataPort.getDisplayName(username);
+          return [username, displayName || username];
+        } catch {
+          return [username, username];
+        }
+      }),
+    );
+    return new Map(entries);
+  }
+
+  private toOutput(p: InterExpenseProposalRead, creatorName: string): ProgramExpenseOutputDTO {
     return {
       coopname: p.coopname,
       expense_hash: p.proposalHash,
       creator: p.creator,
+      creator_name: creatorName,
       source_wallet: p.sourceWalletCode,
       status: this.mapStatus(p.status),
       callback: p.callback ? this.toCallbackOutput(p.callback) : undefined,

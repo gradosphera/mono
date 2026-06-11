@@ -30,6 +30,7 @@ const rawProgramExpenseSelector = {
   coopname: true,
   expense_hash: true,
   creator: true,
+  creator_name: true,
   source_wallet: true,
   status: true,
   callback: rawProgramExpenseCallbackSelector,

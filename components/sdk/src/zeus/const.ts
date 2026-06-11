@@ -2768,6 +2768,7 @@ export const ReturnTypes: Record<string,any> = {
 		coopname:"String",
 		created_at:"String",
 		creator:"String",
+		creator_name:"String",
 		expense_hash:"String",
 		items:"CapitalProgramExpenseItem",
 		source_wallet:"String",

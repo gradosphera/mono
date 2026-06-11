@@ -3042,6 +3042,8 @@ export type ValueTypes = {
 	coopname?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	creator?:boolean | `@${string}`,
+	/** Имя инициатора (ФИО пайщика или название организации) */
+	creator_name?:boolean | `@${string}`,
 	expense_hash?:boolean | `@${string}`,
 	items?:ValueTypes["CapitalProgramExpenseItem"],
 	source_wallet?:boolean | `@${string}`,
@@ -12175,6 +12177,8 @@ export type ResolverInputTypes = {
 	coopname?:boolean | `@${string}`,
 	created_at?:boolean | `@${string}`,
 	creator?:boolean | `@${string}`,
+	/** Имя инициатора (ФИО пайщика или название организации) */
+	creator_name?:boolean | `@${string}`,
 	expense_hash?:boolean | `@${string}`,
 	items?:ResolverInputTypes["CapitalProgramExpenseItem"],
 	source_wallet?:boolean | `@${string}`,
@@ -21057,6 +21061,8 @@ export type ModelTypes = {
 	coopname: string,
 	created_at: string,
 	creator: string,
+	/** Имя инициатора (ФИО пайщика или название организации) */
+	creator_name: string,
 	expense_hash: string,
 	items: Array<ModelTypes["CapitalProgramExpenseItem"]>,
 	source_wallet: string,
@@ -30558,6 +30564,8 @@ export type GraphQLTypes = {
 	coopname: string,
 	created_at: string,
 	creator: string,
+	/** Имя инициатора (ФИО пайщика или название организации) */
+	creator_name: string,
 	expense_hash: string,
 	items: Array<GraphQLTypes["CapitalProgramExpenseItem"]>,
 	source_wallet: string,
