@@ -8,6 +8,7 @@ import {
   generateExpenseProposalDecisionDocument,
   createExpenseProposal,
   authorizeExpenseReport,
+  declineExpenseReport,
 } from '../api';
 
 export interface ICreateProposalDraftItem {
@@ -103,6 +104,16 @@ export function useExpenseProposalActions() {
   }
 
   async function authorizeProposal(draft: IAuthorizeProposalDraft) {
+    // Отклонение — без протокола решения: контрактный declexp принимает
+    // только причину. Документ 2011 генерируется лишь при утверждении.
+    if (draft.decision_kind === 'decline') {
+      return declineExpenseReport({
+        coopname: info.coopname,
+        proposal_hash: draft.proposal_hash,
+        reason: draft.decision_reason || 'Отклонено председателем',
+      } as any);
+    }
+
     const itemsForDoc = draft.items.map((it, idx) => ({
       number: String(idx + 1),
       description: it.description,

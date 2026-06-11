@@ -15,7 +15,7 @@ BaseDialog(
     .field-group
       .t-section.q-mb-sm Сводка
       DataRow(label='Пайщик', :value='proposal.username || "—"')
-      DataRow(label='Цель', :value='proposal.operation_code || "—"')
+      DataRow(label='Назначение', :value='proposalPurpose || "—"')
       DataRow(label='Сумма (план)', :value='proposal.total_planned || "—"')
       DataRow(label='Сумма (факт)', :value='proposal.total_actual || "—"')
 
@@ -107,6 +107,12 @@ const canSubmit = computed(() => {
   return true;
 });
 
+// Назначение СЗ = перечень позиций (в зеркале шасси нет отдельного описания —
+// оно живёт в документе-заявлении 2010).
+const proposalPurpose = computed(() =>
+  (proposal.value?.items ?? []).map((it: any) => it.description).filter(Boolean).join('; '),
+);
+
 watch(
   () => [props.modelValue, props.proposalHash],
   async ([open]) => {
@@ -149,7 +155,7 @@ async function submit(): Promise<void> {
 
     await authorizeProposal({
       proposal_hash: proposal.value.proposal_hash,
-      description: proposal.value.operation_code ?? 'Расход',
+      description: proposalPurpose.value || 'Расход',
       source_wallet: proposal.value.source_wallet ?? '',
       items,
       decision_kind: form.kind,

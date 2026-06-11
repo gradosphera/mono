@@ -18,8 +18,8 @@ q-page.program-expenses-page
     .col-12.col-md-6
       WalletCard(
         neutral,
-        title='Глобальный инвест-пул',
-        subtitle='Свободные инвестиции программы — источник пополнения',
+        title='Инвест-пул',
+        subtitle='Источник пополнения',
         balance-label='Доступно к распределению',
         :balance='globalPool.amount',
         :symbol='globalPool.symbol',
@@ -29,8 +29,8 @@ q-page.program-expenses-page
     .col-12.col-md-6
       WalletCard(
         program='blagorost',
-        title='Пул программных расходов',
-        subtitle='Из него оплачиваются программные расходы',
+        title='Пул расходов',
+        subtitle='Оплата программных расходов',
         balance-label='Доступно',
         :balance='expensePool.amount',
         :symbol='expensePool.symbol',
@@ -52,7 +52,7 @@ q-page.program-expenses-page
             .row-card__meta
               .meta-row
                 .meta-key Инициатор
-                .meta-val {{ item.creator }}
+                .meta-val {{ item.creator_name || item.creator }}
               .meta-row
                 .meta-key Способ оплаты
                 .meta-val {{ mechanicsSummary(item.items) }}
@@ -60,6 +60,11 @@ q-page.program-expenses-page
                 .meta-key Создан
                 .meta-val {{ formatDate(item.created_at) }}
             .row-card__hash {{ shortHash(item.expense_hash) }}
+            .row-card__actions(v-if='session.isChairman && item.status === Zeus.ExpenseProposalStatus.CREATED')
+              BaseButton(variant='primary', size='sm', @click='openAuthorize(item.expense_hash)')
+                template(#icon-left)
+                  q-icon(name='gavel', size='16px')
+                | Рассмотреть
 
   .empty(v-else)
     EmptyState(
@@ -77,12 +82,18 @@ q-page.program-expenses-page
     v-model='topupOpen',
     @topped-up='refresh'
   )
+  ExpenseProposalAuthorizeDialog(
+    v-model='authorizeOpen',
+    :proposal-hash='authorizeHash',
+    @authorized='refresh'
+  )
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { BaseChip } from 'src/shared/ui/base/BaseChip';
@@ -93,17 +104,25 @@ import { useProgramExpenseStore } from 'app/extensions/capital/entities/ProgramE
 import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
 import { CreateProgramExpenseDialog } from 'app/extensions/capital/features/ProgramExpense/CreateProgramExpense/ui';
 import { TopupProgramExpensePoolDialog } from 'app/extensions/capital/features/ProgramExpense/TopupPool/ui';
+import ExpenseProposalAuthorizeDialog from 'app/extensions/expenses/pages/ExpenseProposalAuthorizeDialog.vue';
 
 const system = useSystemStore();
+const session = useSessionStore();
 const store = useProgramExpenseStore();
 const configStore = useConfigStore();
 
 const coopname = computed(() => system.info.coopname);
 const createOpen = ref(false);
 const topupOpen = ref(false);
+const authorizeOpen = ref(false);
+const authorizeHash = ref('');
 
 function openCreate(): void { createOpen.value = true; }
 function openTopup(): void { topupOpen.value = true; }
+function openAuthorize(hash: string): void {
+  authorizeHash.value = hash;
+  authorizeOpen.value = true;
+}
 
 function splitAsset(asset?: string | null): { amount: string; symbol: string } {
   const fallbackSymbol = system.info?.symbols?.root_govern_symbol ?? 'RUB';
@@ -273,6 +292,12 @@ function statusVariant(
   font-family: var(--p-font-mono, monospace);
   font-size: var(--p-fs-meta);
   color: var(--p-ink-2);
+}
+
+.row-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--p-3);
 }
 
 .empty {
