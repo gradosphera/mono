@@ -20,7 +20,7 @@ q-page.program-expenses-page
         BaseCard
           .row-card
             .row-card__head
-              .row-card__title {{ item.description || '— без описания —' }}
+              .row-card__title {{ item.items[0]?.description || '— без описания —' }}
               BaseChip(:variant='statusVariant(item.status)') {{ statusLabel(item.status) }}
             .row-card__amount {{ item.total_planned }}
             .row-card__meta
