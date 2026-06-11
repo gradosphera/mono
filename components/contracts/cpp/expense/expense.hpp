@@ -151,6 +151,9 @@ public:
      * contracts_whitelist (inline, например capital::createpgexp).
      * Механика оплаты — per-item (item.mechanics: ADVANCE | DIRECT); ledger2-код
      * операции выводится из механики позиции в момент оплаты payexp.
+     *
+     * Ставит вопрос в повестку совета (soviet::createagenda, тип createexp):
+     * утверждение совета → callback authexp, отклонение → declexp.
      */
     [[eosio::action]]
     void createexp(name coopname, name username,
@@ -162,13 +165,16 @@ public:
 
     /**
      * @brief Авторизовать СЗ советом (signact2 decision_doc, type=2011).
-     * После этого расход доступен для оплаты.
+     * Callback решения совета — вызывается только контрактом soviet после
+     * голосования и утверждения председателем. После этого расход доступен для оплаты.
      */
     [[eosio::action]]
     void authexp(name coopname, checksum256 proposal_hash, document2 decision);
 
     /**
-     * @brief Отклонить СЗ. Возможно только до первой оплаты (CREATED / AUTHORIZED):
+     * @brief Отклонить СЗ. Callback решения совета (отрицательный консенсус
+     * голосов «против» либо просрочка повестки) — вызывается только контрактом
+     * soviet. Возможно только до первой оплаты (CREATED / AUTHORIZED):
      * после payexp средства уже ушли через ledger2, и СЗ завершается обычным
      * путём reportexp / returnexp → closeexp.
      */

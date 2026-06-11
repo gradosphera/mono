@@ -113,10 +113,26 @@ void expense::createexp(name coopname, name username,
     row.created_at      = eosio::current_time_point();
     row.updated_at      = row.created_at;
   });
+
+  // СЗ утверждает совет (как возвраты паевых взносов): ставим вопрос в повестку.
+  // Утверждение председателем после голосования → callback authexp от _soviet;
+  // отклонение (отрицательный консенсус / просрочка) → declexp с причиной.
+  ::Soviet::create_agenda(
+    _expense,
+    coopname,
+    username,
+    get_valid_soviet_action("createexp"_n),
+    proposal_hash,
+    _expense,
+    "authexp"_n,
+    "declexp"_n,
+    statement,
+    std::string("")
+  );
 }
 
 void expense::authexp(name coopname, checksum256 proposal_hash, document2 decision) {
-  require_auth(coopname);
+  require_auth(_soviet);
 
   auto tbl = get_proposals(get_self(), coopname);
   auto idx = tbl.get_index<"byhash"_n>();
@@ -135,7 +151,7 @@ void expense::authexp(name coopname, checksum256 proposal_hash, document2 decisi
 }
 
 void expense::declexp(name coopname, checksum256 proposal_hash, std::string reason) {
-  require_auth(coopname);
+  require_auth(_soviet);
 
   auto tbl = get_proposals(get_self(), coopname);
   auto idx = tbl.get_index<"byhash"_n>();
