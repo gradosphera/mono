@@ -19,6 +19,7 @@ import {
 } from '../../domain/interfaces/expenses-blockchain.port'
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum'
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum'
+import { EXPENSES_CHASSIS_CONFIG } from '../../domain/expenses-chassis.config'
 import { ExpenseRequisiteSnapshotsService } from './expense-requisite-snapshots.service'
 
 /**
@@ -43,6 +44,9 @@ export class ExpensesMutationsService {
     options: Cooperative.Document.IGenerationOptions
   ): Promise<DocumentDomainEntity> {
     data.registry_id = Cooperative.Registry.ExpenseProposalStatement.registry_id
+
+    // Фонд списания — параметр шасси, фронт его не передаёт
+    data.proposal = { ...data.proposal, fund_name: EXPENSES_CHASSIS_CONFIG.fundNameDative }
 
     // Полные реквизиты получателей подставляет сервер: фронт оперирует только
     // идентификатором платёжного метода (и видит лишь сокращённое представление).
@@ -177,6 +181,7 @@ function toRequisiteItems(proposalHash: string, items: ExpenseItemInputDTO[]): I
     itemHash: it.item_hash,
     recipient: it.recipient,
     isOrganization: it.recipient_type === ExpenseRecipientType.ORG,
+    mechanics: it.mechanics === ExpenseMechanics.DIRECT ? 'DIRECT' : 'ADVANCE',
     paymentMethodId: it.payment_method_id,
     requisites: it.requisites,
   }))

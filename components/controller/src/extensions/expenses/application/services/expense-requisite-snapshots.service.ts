@@ -55,6 +55,20 @@ export class ExpenseRequisiteSnapshotsService {
   ): Promise<ExpenseRequisiteSnapshotTypeormEntity[]> {
     return Promise.all(
       items.map(async (it) => {
+        // Инвариант шасси: пайщику — только аванс под отчёт (средства на личные
+        // реквизиты, расходом станут после отчёта чеком); организации — только
+        // прямая оплата по выставленным реквизитам.
+        if (it.isOrganization && it.mechanics !== 'DIRECT') {
+          throw new BadRequestException(
+            'Организации доступна только прямая оплата по реквизитам (DIRECT) — аванс под отчёт ей не выдаётся'
+          )
+        }
+        if (!it.isOrganization && it.mechanics !== 'ADVANCE') {
+          throw new BadRequestException(
+            `Пайщику ${it.recipient} средства передаются только авансом под отчёт (ADVANCE) — прямая оплата доступна только организации`
+          )
+        }
+
         const snapshot = this.repository.create({
           coopname,
           proposal_hash: it.proposalHash.toLowerCase(),

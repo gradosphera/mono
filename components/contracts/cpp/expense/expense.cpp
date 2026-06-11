@@ -91,6 +91,22 @@ void expense::createexp(name coopname, name username,
                  "Неизвестная mechanics item (0 = ADVANCE, 1 = DIRECT)");
     eosio::check(it.recipient_type <= static_cast<uint8_t>(D::RecipientType::ORG),
                  "Неизвестный recipient_type item");
+
+    // Инвариант: пайщик (SELF/MEMBER) получает только аванс под отчёт на личные
+    // реквизиты (расходом станет после его отчёта чеком); организация — только
+    // прямую оплату по выставленным реквизитам, аванс ей не выдаётся.
+    if (it.recipient_type == static_cast<uint8_t>(D::RecipientType::ORG)) {
+      eosio::check(it.mechanics == static_cast<uint8_t>(D::Mechanics::DIRECT),
+                   "Организации доступна только прямая оплата (DIRECT)");
+    } else {
+      eosio::check(it.mechanics == static_cast<uint8_t>(D::Mechanics::ADVANCE),
+                   "Пайщику средства выдаются только авансом под отчёт (ADVANCE)");
+      eosio::check(it.recipient != name(),
+                   "recipient обязателен для получателя-пайщика");
+      eosio::check(is_account(it.recipient),
+                   "Аккаунт получателя-пайщика не существует");
+    }
+
     it.status        = static_cast<uint8_t>(D::ItemStatus::APPROVED);
     it.actual_amount = zero_like(it.planned_amount);
   }

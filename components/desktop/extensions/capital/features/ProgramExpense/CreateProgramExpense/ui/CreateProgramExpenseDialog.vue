@@ -14,6 +14,12 @@ BaseDialog(
         placeholder='Например: «Закупка хостинга и канцелярии на июнь»',
         required
       )
+      BaseInput(
+        v-model='form.deadline',
+        type='date',
+        label='Срок исполнения (в срок до)',
+        required
+      )
 
     .field-group
       .field-group__head
@@ -44,14 +50,15 @@ BaseDialog(
                 v-model='item.recipient_type',
                 :options='recipientTypeOptions',
                 label='Тип получателя',
-                @update:model-value='item.payment_method_id = null'
+                @update:model-value='onRecipientTypeChange(item)'
               )
             .col-12.col-md-6
               BaseSelect(
                 v-model='item.mechanics',
                 :options='mechanicsOptions',
                 label='Способ оплаты',
-                hint='Аванс — под отчёт получателю; прямая — оплата по реквизитам'
+                disabled,
+                hint='Пайщику — только аванс под отчёт; организации — только прямая оплата'
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.MEMBER')
               BaseInput(
@@ -148,6 +155,7 @@ const amountPlaceholder = computed(() => {
 
 const form = reactive({
   description: '',
+  deadline: '',
   items: [] as ICreateProgramExpenseDraftItem[],
 });
 
@@ -164,9 +172,23 @@ const recipientTypeOptions = [
   { label: 'Организация', value: Zeus.ExpenseRecipientType.ORG },
 ];
 
+// Пайщик получает только аванс под отчёт (личные реквизиты, отчитается чеком);
+// организация — только прямую оплату по выставленным реквизитам.
+function mechanicsFor(recipientType: Zeus.ExpenseRecipientType): Zeus.ExpenseMechanics {
+  return recipientType === Zeus.ExpenseRecipientType.ORG
+    ? Zeus.ExpenseMechanics.DIRECT
+    : Zeus.ExpenseMechanics.ADVANCE;
+}
+
+function onRecipientTypeChange(item: ICreateProgramExpenseDraftItem): void {
+  item.payment_method_id = null;
+  item.mechanics = mechanicsFor(item.recipient_type);
+}
+
 const canSubmit = computed(
   () =>
     form.description.trim().length > 0 &&
+    form.deadline.trim().length > 0 &&
     form.items.length > 0 &&
     form.items.every(
       (i) =>
@@ -206,6 +228,7 @@ async function submit(): Promise<void> {
     submitting.value = true;
     await submitProgramExpense({
       description: form.description,
+      deadline: form.deadline,
       items: form.items,
     });
     SuccessAlert('Программный расход подан — заявление подписано и передано в шасси расходов');

@@ -23,6 +23,8 @@ export interface ICreateProposalDraftItem {
 export interface ICreateProposalDraft {
   source_wallet: string;
   description: string;
+  /** Срок исполнения («в срок до»), значение date-input `YYYY-MM-DD`. */
+  deadline: string;
   items: ICreateProposalDraftItem[];
 }
 
@@ -51,6 +53,7 @@ export function useExpenseProposalActions() {
       total_amount,
       items_count: draft.items.length,
       source_wallet: draft.source_wallet,
+      deadline: formatDeadline(draft.deadline),
     };
 
     const generated = await generateExpenseProposalStatementDocument({
@@ -94,4 +97,10 @@ export function useExpenseProposalActions() {
 
 function generateItemHash(proposal_hash: string, idx: number): string {
   return `${proposal_hash.slice(0, 56)}${idx.toString(16).padStart(8, '0')}`;
+}
+
+/** `YYYY-MM-DD` (date-input) → `DD.MM.YYYY` (документ). */
+function formatDeadline(value: string): string {
+  const [year, month, day] = value.split('-');
+  return `${day}.${month}.${year}`;
 }

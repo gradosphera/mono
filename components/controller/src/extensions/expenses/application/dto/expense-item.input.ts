@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum';
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum';
 
@@ -18,7 +18,10 @@ export class ExpenseItemInputDTO {
   @IsEnum(ExpenseRecipientType)
   recipient_type!: ExpenseRecipientType;
 
-  @Field(() => String, { description: 'Получатель (username / eosio::name организации).' })
+  @Field(() => String, {
+    description: 'Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет).',
+  })
+  @ValidateIf((o) => o.recipient_type !== ExpenseRecipientType.ORG)
   @IsNotEmpty()
   @IsString()
   recipient!: string;

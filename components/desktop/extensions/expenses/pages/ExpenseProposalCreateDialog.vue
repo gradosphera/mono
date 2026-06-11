@@ -20,6 +20,12 @@ BaseDialog(
         placeholder='w.cap.blago / w.cap.gen / …',
         required
       )
+      BaseInput(
+        v-model='form.deadline',
+        type='date',
+        label='Срок исполнения (в срок до)',
+        required
+      )
 
     .field-group
       .field-group__head
@@ -58,7 +64,8 @@ BaseDialog(
                 outlined,
                 dense,
                 emit-value,
-                map-options
+                map-options,
+                @update:model-value='onRecipientTypeChange(item)'
               )
             .col-12.col-md-6
               q-select(
@@ -68,7 +75,9 @@ BaseDialog(
                 outlined,
                 dense,
                 emit-value,
-                map-options
+                map-options,
+                disable,
+                hint='Пайщику — только аванс под отчёт; организации — только прямая оплата'
               )
             .col-12.col-md-6
               BaseInput(
@@ -133,6 +142,7 @@ const { submitProposal } = useExpenseProposalActions();
 const form = reactive({
   description: '',
   source_wallet: 'w.cap.blago',
+  deadline: '',
   items: [] as ICreateProposalDraftItem[],
 });
 
@@ -149,10 +159,16 @@ const mechanicsOptions = [
   { label: 'Прямая оплата', value: 'DIRECT' as const },
 ];
 
+// Пайщик получает только аванс под отчёт; организация — только прямую оплату.
+function onRecipientTypeChange(item: ICreateProposalDraftItem): void {
+  item.mechanics = item.recipient_type === 'ORG' ? 'DIRECT' : 'ADVANCE';
+}
+
 const canSubmit = computed(
   () =>
     form.description.trim().length > 0 &&
     form.source_wallet.trim().length > 0 &&
+    form.deadline.trim().length > 0 &&
     form.items.length > 0 &&
     form.items.every((i) => i.amount.trim() && i.description.trim()),
 );
@@ -184,6 +200,7 @@ async function submit(): Promise<void> {
     await submitProposal({
       description: form.description,
       source_wallet: form.source_wallet,
+      deadline: form.deadline,
       items: form.items,
     });
     SuccessAlert('Служебная записка подана — заявление подписано и отправлено в блокчейн');

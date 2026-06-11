@@ -58,6 +58,7 @@ export class ProgramExpensesManagementService {
       itemHash: it.item_hash,
       recipient: it.recipient,
       isOrganization: it.recipient_type === ExpenseRecipientType.ORG,
+      mechanics: it.mechanics === ExpenseMechanics.DIRECT ? 'DIRECT' : 'ADVANCE',
       paymentMethodId: it.payment_method_id,
       requisites: it.requisites,
     }));

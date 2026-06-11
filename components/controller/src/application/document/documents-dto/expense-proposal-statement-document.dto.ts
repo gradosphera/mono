@@ -77,6 +77,19 @@ class ExpenseProposalHeaderInputDTO implements HeaderAction {
   @Field({ description: 'Кошелёк-источник' })
   @IsString()
   source_wallet!: string;
+
+  @Field({ description: 'Срок исполнения («в срок до»), формат DD.MM.YYYY', nullable: true })
+  @IsOptional()
+  @IsString()
+  deadline?: string;
+
+  @Field({
+    description: 'Фонд списания — подставляется сервером из параметров шасси расходов, передавать не нужно',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  fund_name?: string;
 }
 
 @InputType('BaseExpenseProposalStatementMetaDocumentInput')

@@ -27,6 +27,8 @@ export interface ICreateProgramExpenseDraftItem {
 
 export interface ICreateProgramExpenseDraft {
   description: string;
+  /** Срок исполнения («в срок до»), значение date-input `YYYY-MM-DD`. */
+  deadline: string;
   items: ICreateProgramExpenseDraftItem[];
 }
 
@@ -91,6 +93,7 @@ export function useCreateProgramExpense() {
         total_amount,
         items_count: draft.items.length,
         source_wallet: PROGRAM_EXPENSE_SOURCE_WALLET,
+        deadline: formatDeadline(draft.deadline),
       },
       items: itemsForDoc,
     };
@@ -133,4 +136,10 @@ export function useCreateProgramExpense() {
 
 function generateItemHash(expense_hash: string, idx: number): string {
   return `${expense_hash.slice(0, 56)}${idx.toString(16).padStart(8, '0')}`;
+}
+
+/** `YYYY-MM-DD` (date-input) → `DD.MM.YYYY` (документ). */
+function formatDeadline(value: string): string {
+  const [year, month, day] = value.split('-');
+  return `${day}.${month}.${year}`;
 }

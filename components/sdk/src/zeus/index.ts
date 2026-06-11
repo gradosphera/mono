@@ -5284,7 +5284,7 @@ export type ValueTypes = {
 	payment_method_id?: string | undefined | null | Variable<any, string>,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string | Variable<any, string>,
-	/** Получатель (username / eosio::name организации). */
+	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
 	recipient: string | Variable<any, string>,
 	/** Тип получателя. */
 	recipient_type: ValueTypes["ExpenseRecipientType"] | Variable<any, string>,
@@ -5394,8 +5394,12 @@ export type ValueTypes = {
 	requisites?: string | undefined | null | Variable<any, string>
 };
 	["ExpenseProposalHeaderInput"]: {
+	/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
+	deadline?: string | undefined | null | Variable<any, string>,
 	/** Описание цели расходов */
 	description: string | Variable<any, string>,
+	/** Фонд списания — подставляется сервером из параметров шасси расходов, передавать не нужно */
+	fund_name?: string | undefined | null | Variable<any, string>,
 	/** Количество позиций */
 	items_count: number | Variable<any, string>,
 	/** Кошелёк-источник */
@@ -14310,7 +14314,7 @@ export type ResolverInputTypes = {
 	payment_method_id?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
-	/** Получатель (username / eosio::name организации). */
+	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
 	recipient: string,
 	/** Тип получателя. */
 	recipient_type: ResolverInputTypes["ExpenseRecipientType"],
@@ -14419,8 +14423,12 @@ export type ResolverInputTypes = {
 	requisites?: string | undefined | null
 };
 	["ExpenseProposalHeaderInput"]: {
+	/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
+	deadline?: string | undefined | null,
 	/** Описание цели расходов */
 	description: string,
+	/** Фонд списания — подставляется сервером из параметров шасси расходов, передавать не нужно */
+	fund_name?: string | undefined | null,
 	/** Количество позиций */
 	items_count: number,
 	/** Кошелёк-источник */
@@ -23077,7 +23085,7 @@ export type ModelTypes = {
 	payment_method_id?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
-	/** Получатель (username / eosio::name организации). */
+	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
 	recipient: string,
 	/** Тип получателя. */
 	recipient_type: ModelTypes["ExpenseRecipientType"],
@@ -23183,8 +23191,12 @@ export type ModelTypes = {
 	requisites?: string | undefined | null
 };
 	["ExpenseProposalHeaderInput"]: {
+	/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
+	deadline?: string | undefined | null,
 	/** Описание цели расходов */
 	description: string,
+	/** Фонд списания — подставляется сервером из параметров шасси расходов, передавать не нужно */
+	fund_name?: string | undefined | null,
 	/** Количество позиций */
 	items_count: number,
 	/** Кошелёк-источник */
@@ -32631,7 +32643,7 @@ export type GraphQLTypes = {
 	payment_method_id?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
-	/** Получатель (username / eosio::name организации). */
+	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
 	recipient: string,
 	/** Тип получателя. */
 	recipient_type: GraphQLTypes["ExpenseRecipientType"],
@@ -32741,8 +32753,12 @@ export type GraphQLTypes = {
 	requisites?: string | undefined | null
 };
 	["ExpenseProposalHeaderInput"]: {
-		/** Описание цели расходов */
+		/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
+	deadline?: string | undefined | null,
+	/** Описание цели расходов */
 	description: string,
+	/** Фонд списания — подставляется сервером из параметров шасси расходов, передавать не нужно */
+	fund_name?: string | undefined | null,
 	/** Количество позиций */
 	items_count: number,
 	/** Кошелёк-источник */
