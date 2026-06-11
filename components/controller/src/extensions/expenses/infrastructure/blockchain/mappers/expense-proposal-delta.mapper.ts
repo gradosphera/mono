@@ -42,9 +42,17 @@ export class ExpenseProposalDeltaMapper extends AbstractBlockchainDeltaMapper<
         ? DomainToBlockchainUtils.convertChainDocumentToDomainFormat(value.decision_doc as never)
         : undefined;
 
+      // callback.data on-chain — vector<char>; парсер десериализует его в
+      // Uint8Array, который в JSON становится {} / {"0":..}. GraphQL-поле —
+      // String, поэтому нормализуем в hex-строку ещё на записи в зеркало.
+      const callback = value.callback
+        ? { ...value.callback, data: bytesToHex(value.callback.data) }
+        : undefined;
+
       return {
         ...value,
         proposal_hash: String(value.proposal_hash).toLowerCase(),
+        callback,
         statement_doc,
         decision_doc,
       };
@@ -72,4 +80,11 @@ export class ExpenseProposalDeltaMapper extends AbstractBlockchainDeltaMapper<
   getSupportedTableNames(): string[] {
     return this.contractInfo.getTablePatterns('proposals');
   }
+}
+
+function bytesToHex(data: unknown): string {
+  if (typeof data === 'string') return data;
+  if (data == null) return '';
+  const bytes = Array.isArray(data) ? data : Object.values(data as Record<string, number>);
+  return bytes.map((b) => Number(b).toString(16).padStart(2, '0')).join('');
 }
