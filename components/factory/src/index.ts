@@ -126,6 +126,10 @@ export class Generator implements IGenerator {
       [Actions.ExpenseStatement.Template.registry_id]: new Actions.ExpenseStatement.Factory(this.storage), // 1010
       [Actions.ExpenseDecision.Template.registry_id]: new Actions.ExpenseDecision.Factory(this.storage), // 1011
 
+      // Шасси расходов — программные расходы (служебные записки)
+      [Actions.ExpenseProposalStatement.Template.registry_id]: new Actions.ExpenseProposalStatement.Factory(this.storage), // 2010
+      [Actions.ExpenseProposalDecision.Template.registry_id]: new Actions.ExpenseProposalDecision.Factory(this.storage), // 2011
+
       [Actions.GenerationMoneyInvestStatement.Template.registry_id]: new Actions.GenerationMoneyInvestStatement.Factory(this.storage), // 1020
       [Actions.GenerationMoneyReturnUnusedStatement.Template.registry_id]: new Actions.GenerationMoneyReturnUnusedStatement.Factory(this.storage), // 1025
 
