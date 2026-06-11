@@ -2,6 +2,7 @@
   <div
     :class="['wallet', { 'wallet--row': compact, 'wallet--empty': empty }]"
     :style="progStyle"
+    :tabindex="titleOverflow || subOverflow ? 0 : undefined"
   >
     <span class="wallet__icon">
       <q-icon :name="resolvedIcon" />
@@ -146,14 +147,25 @@ watch([resolvedTitle, () => props.subtitle], () => void nextTick(measure));
   white-space: nowrap;
   will-change: transform;
 }
-.wallet__title.is-marquee,
-.wallet__sub.is-marquee {
-  /* «…» не нужно — текст виден целиком за счёт прокрутки. */
+/* В покое — обычная обрезка с «…», без постоянного бега (иначе дёргается).
+   Прокрутка целиком включается только при наведении/фокусе карточки и сразу
+   для обеих строк (заголовок + подпись). На тач карточка фокусируется тапом
+   (tabindex навешивается только при реальном переполнении). */
+.wallet:hover .wallet__title.is-marquee,
+.wallet:hover .wallet__sub.is-marquee,
+.wallet:focus-within .wallet__title.is-marquee,
+.wallet:focus-within .wallet__sub.is-marquee {
   text-overflow: clip;
 }
-.wallet__title.is-marquee .wallet__scroll,
-.wallet__sub.is-marquee .wallet__scroll {
+.wallet:hover .wallet__title.is-marquee .wallet__scroll,
+.wallet:hover .wallet__sub.is-marquee .wallet__scroll,
+.wallet:focus-within .wallet__title.is-marquee .wallet__scroll,
+.wallet:focus-within .wallet__sub.is-marquee .wallet__scroll {
   animation: wallet-marquee 6s ease-in-out infinite alternate;
+}
+.wallet:focus-visible {
+  outline: 2px solid var(--p-primary);
+  outline-offset: 2px;
 }
 @keyframes wallet-marquee {
   0%,

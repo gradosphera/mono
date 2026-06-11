@@ -42,7 +42,8 @@ BaseDialog(
           .item-card__head
             .t-sm Позиция №{{ idx + 1 }}
             BaseButton(variant='ghost', size='sm', icon-only, aria-label='Удалить позицию', @click='removeItem(idx)')
-              q-icon(name='delete', size='16px')
+              template(#icon-left)
+                q-icon(name='delete_outline', size='18px')
           .row.q-col-gutter-sm
             .col-12.col-md-6
               BaseSelect(
