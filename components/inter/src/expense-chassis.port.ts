@@ -52,8 +52,6 @@ export interface InterExpenseProposalRead {
   sourceWalletCode: string;
   /** Инициатор (creator) — username председателя, оформившего расход. */
   creator: string;
-  /** Код операции ledger2 (например `BLAGO_ADVANCE` / `BLAGO_DIRECT`). */
-  operationCode: string;
   status: InterExpenseProposalStatus;
   /** Callback consumer-контракта: пустой `contract` ⇒ standalone-расход без owner'а. */
   callback?: InterExpenseCallbackHandler;

@@ -29,13 +29,6 @@ export class CreateExpenseProposalInputDTO {
   proposal_hash!: string;
 
   @Field(() => String, {
-    description: 'Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir").',
-  })
-  @IsNotEmpty()
-  @IsString()
-  operation_code!: string;
-
-  @Field(() => String, {
     description: 'Источник средств (eosio::name кошелька-источника, eg "w.cap.blago").',
   })
   @IsNotEmpty()

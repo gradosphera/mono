@@ -33,7 +33,6 @@ export class ExpenseProposalMapper {
         proposal_hash: entity.proposal_hash,
         coopname: entity.coopname,
         username: entity.username,
-        operation_code: entity.operation_code,
         source_wallet: entity.source_wallet,
         status: entity.blockchain_status,
         items: entity.items ?? [],
@@ -66,7 +65,6 @@ export class ExpenseProposalMapper {
       const bcPart: Partial<ExpenseProposalTypeormEntity> = {
         id: domain.id,
         username: domain.username,
-        operation_code: domain.operation_code,
         source_wallet: domain.source_wallet,
         blockchain_status: domain.blockchain_status,
         items: domain.items ?? [],

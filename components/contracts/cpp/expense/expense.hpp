@@ -13,7 +13,8 @@ using std::string;
  *  @brief Шасси расходов цифрового кооператива (MVP — Благорост).
  *
  *  Универсальный контракт: principal storage = СЗ-расход с массивом items;
- *  operation_code из ledger2 OPERATION_REGISTRY передаётся в payload payexp;
+ *  механика оплаты per-item (ADVANCE | DIRECT) — ledger2-код операции
+ *  выводится из item.mechanics в момент payexp;
  *  callback на финализацию (контракт+action+data) сохраняется при createexp
  *  как переменная — `expense` агностичен к программе-получателю.
  *
@@ -100,7 +101,6 @@ namespace ExpenseDomain {
     uint64_t              id;
     eosio::checksum256    proposal_hash;
     eosio::name           username;       ///< создатель
-    eosio::name           operation_code; ///< из ledger2 OPERATION_REGISTRY (например, o.exp.blgadv)
     eosio::name           source_wallet;  ///< семантически — из какого ЦПП/фонда (w.cap.blago, w.sov.expns, …)
     uint8_t               status;         ///< ProposalStatus
     std::vector<item>     items;
@@ -118,7 +118,7 @@ namespace ExpenseDomain {
     uint64_t by_status()        const { return static_cast<uint64_t>(status); }
 
     EOSLIB_SERIALIZE(proposal,
-      (id)(proposal_hash)(username)(operation_code)(source_wallet)(status)
+      (id)(proposal_hash)(username)(source_wallet)(status)
       (items)(total_planned)(total_actual)(callback)(statement_doc)(decision_doc)
       (created_at)(updated_at))
   };
@@ -143,18 +143,17 @@ public:
      * @brief Создать и подать СЗ-расход.
      *
      * Создание и подача — одна транзакция (slug createexp). На входе: items + источник
-     * (source_wallet + operation_code из OPERATION_REGISTRY) + опц. callback на финализацию.
+     * (source_wallet) + опц. callback на финализацию.
      * Подписывает создатель (signact1 statement_doc, type=2010).
      *
      * Авторизация: coopname (прямой вызов backend'а) либо контракт-инициатор из
      * contracts_whitelist (inline, например capital::createpgexp).
-     * Механика всех items обязана соответствовать operation_code
-     * (o.exp.blgadv → ADVANCE, o.exp.blgdir → DIRECT).
+     * Механика оплаты — per-item (item.mechanics: ADVANCE | DIRECT); ledger2-код
+     * операции выводится из механики позиции в момент оплаты payexp.
      */
     [[eosio::action]]
     void createexp(name coopname, name username,
                    checksum256 proposal_hash,
-                   name operation_code,
                    name source_wallet,
                    std::vector<ExpenseDomain::item> items,
                    ExpenseDomain::callback_handler callback,
@@ -177,7 +176,8 @@ public:
 
     /**
      * @brief Оплатить item — выдача аванса (ADVANCE) или прямая оплата организации (DIRECT).
-     * Контракт зовёт Ledger2::apply(operation_code, actual_amount, ...).
+     * Контракт зовёт Ledger2::apply с кодом по механике item'а
+     * (ADVANCE → o.exp.blgadv, DIRECT → o.exp.blgdir).
      * actual_amount не может превышать план item (доплата — через overspendexp).
      * DIRECT-item не имеет фазы подотчёта и помечается REPORTED сразу; когда все
      * items REPORTED — proposal переходит в REPORT_SUBMITTED прямо из payexp.

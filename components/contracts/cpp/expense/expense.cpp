@@ -1,7 +1,8 @@
 // expense.cpp — шасси расходов (MVP: Благорост).
 //
 // Принцип: контракт-владелец расходных операций, агностичен к программе-источнику.
-// operation_code передаётся в createexp; callback-handler сохраняется как переменная;
+// Механика оплаты per-item (ADVANCE | DIRECT): ledger2-код операции выводится из
+// item.mechanics в payexp; callback-handler сохраняется как переменная;
 // все ledger2-проводки идут через Ledger2::apply на коды из OPERATION_REGISTRY.
 
 #include "expense.hpp"
@@ -21,13 +22,11 @@ asset sum_planned(const std::vector<D::item>& items) {
   return total;
 }
 
-void check_operation_code(eosio::name code) {
-  // На MVP принимаем только зарегистрированные коды expense из ledger2 OPERATION_REGISTRY.
-  eosio::check(
-    code == operations::expense::BLAGO_ADVANCE ||
-    code == operations::expense::BLAGO_DIRECT,
-    "operation_code должен быть o.exp.blgadv или o.exp.blgdir на этапе payexp/createexp"
-  );
+// ledger2-код операции оплаты по механике item'а.
+eosio::name operation_code_for(uint8_t mechanics) {
+  return static_cast<D::Mechanics>(mechanics) == D::Mechanics::ADVANCE
+    ? operations::expense::BLAGO_ADVANCE
+    : operations::expense::BLAGO_DIRECT;
 }
 
 D::proposals_index get_proposals(eosio::name self, eosio::name coopname) {
@@ -63,7 +62,6 @@ void send_callback_if_any(const D::callback_handler& cb,
 
 void expense::createexp(name coopname, name username,
                         checksum256 proposal_hash,
-                        name operation_code,
                         name source_wallet,
                         std::vector<D::item> items,
                         D::callback_handler callback,
@@ -75,7 +73,6 @@ void expense::createexp(name coopname, name username,
   }
 
   verify_document_or_fail(statement, {username});
-  check_operation_code(operation_code);
   eosio::check(!items.empty(), "СЗ должен содержать хотя бы один item");
   eosio::check(ledger2_is_known_wallet(source_wallet),
                "source_wallet не найден в LEDGER2_WALLET_REGISTRY");
@@ -84,19 +81,14 @@ void expense::createexp(name coopname, name username,
   eosio::check(find_proposal(tbl, proposal_hash) == tbl.get_index<"byhash"_n>().end(),
                "СЗ с таким proposal_hash уже существует");
 
-  // Механика каждого item обязана соответствовать operation_code proposal'а:
-  // ledger2-проводка payexp идёт по одному коду на весь СЗ, и смешение
-  // ADVANCE/DIRECT привело бы к зависанию средств в ADVANCE_HOLD (DIRECT-item
-  // под blgadv) либо к burn по пустому кошельку (ADVANCE-item под blgdir).
-  const auto required_mechanics = operation_code == operations::expense::BLAGO_ADVANCE
-    ? D::Mechanics::ADVANCE
-    : D::Mechanics::DIRECT;
-
+  // Механика оплаты задаётся на каждом item отдельно (ADVANCE | DIRECT) —
+  // в одном СЗ допустимо смешение: ledger2-проводка payexp идёт по-позиционно
+  // с кодом, выведенным из механики конкретного item'а.
   for (auto& it : items) {
     eosio::check(it.planned_amount.is_valid() && it.planned_amount.amount > 0,
                  "planned_amount каждого item должен быть положительным");
-    eosio::check(it.mechanics == static_cast<uint8_t>(required_mechanics),
-                 "Механика item не соответствует operation_code СЗ (blgadv = ADVANCE, blgdir = DIRECT)");
+    eosio::check(it.mechanics <= static_cast<uint8_t>(D::Mechanics::DIRECT),
+                 "Неизвестная mechanics item (0 = ADVANCE, 1 = DIRECT)");
     eosio::check(it.recipient_type <= static_cast<uint8_t>(D::RecipientType::ORG),
                  "Неизвестный recipient_type item");
     it.status        = static_cast<uint8_t>(D::ItemStatus::APPROVED);
@@ -109,7 +101,6 @@ void expense::createexp(name coopname, name username,
     row.id              = tbl.available_primary_key();
     row.proposal_hash   = proposal_hash;
     row.username        = username;
-    row.operation_code  = operation_code;
     row.source_wallet   = source_wallet;
     row.status          = static_cast<uint8_t>(D::ProposalStatus::CREATED);
     row.items           = items;
@@ -184,6 +175,7 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
                "actual_amount должен быть положительным");
 
   bool item_found = false;
+  uint8_t paid_mechanics = 0;
 
   idx.modify(it, get_self(), [&](auto& row) {
     bool all_reported = true;
@@ -201,6 +193,7 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
         i.status = static_cast<D::Mechanics>(i.mechanics) == D::Mechanics::DIRECT
           ? static_cast<uint8_t>(D::ItemStatus::REPORTED)
           : static_cast<uint8_t>(D::ItemStatus::PAID);
+        paid_mechanics = i.mechanics;
         item_found = true;
       }
       if (i.status != static_cast<uint8_t>(D::ItemStatus::REPORTED)) {
@@ -216,8 +209,9 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
     row.updated_at = eosio::current_time_point();
   });
 
-  // ledger2 проводка по operation_code из proposal — выдача аванса или прямая оплата.
-  Ledger2::apply(get_self(), coopname, it->operation_code, actual_amount,
+  // ledger2-проводка по механике оплаченного item'а — выдача аванса (blgadv)
+  // или прямая оплата (blgdir). СЗ может смешивать обе механики.
+  Ledger2::apply(get_self(), coopname, operation_code_for(paid_mechanics), actual_amount,
                  it->username, proposal_hash, "expense:payexp");
 }
 

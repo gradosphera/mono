@@ -10,7 +10,6 @@ export const rawExpenseProposalSelector = {
   proposal_hash: true,
   coopname: true,
   username: true,
-  operation_code: true,
   source_wallet: true,
   status: true,
   blockchain_status: true,

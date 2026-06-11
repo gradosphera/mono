@@ -15,6 +15,7 @@ export interface ICreateProgramExpenseDraftItem {
   number: string;
   description: string;
   amount: string;
+  mechanics: Zeus.ExpenseMechanics;
   recipient_type: Zeus.ExpenseRecipientType;
   recipient_name?: string;
   requisites?: string;
@@ -23,38 +24,16 @@ export interface ICreateProgramExpenseDraftItem {
 }
 
 export interface ICreateProgramExpenseDraft {
-  operation_code: string;
   description: string;
   items: ICreateProgramExpenseDraftItem[];
 }
 
 /**
- * Карта `operation_code → source_wallet_code` для UI-рендера документа.
- *
- * Временно на фронте — должен выводить backend по operation_code (issue R3:
- * `refactor(expense): backend derives source_wallet from operation_code`).
- * Пока вся capital-логика на `w.cap.blago` — расширяется добавлением кодов.
+ * Кошелёк-источник программных расходов capital. Способ оплаты задаётся на
+ * каждой позиции (item.mechanics: аванс под отчёт / прямая оплата) — ledger2-код
+ * операции контракт выводит из механики позиции в момент оплаты.
  */
-const SOURCE_WALLET_BY_OPERATION: Record<string, string> = {
-  'o.exp.blgadv': 'w.cap.blago',
-  'o.exp.blgdir': 'w.cap.blago',
-};
-
-function resolveSourceWallet(operationCode: string): string {
-  const code = SOURCE_WALLET_BY_OPERATION[operationCode];
-  if (!code) throw new Error(`Не задан source_wallet для operation_code "${operationCode}"`);
-  return code;
-}
-
-/**
- * Механика одна на всё СЗ и однозначно следует из operation_code —
- * контракт expense отклоняет items со способом, не совпадающим с кодом.
- */
-function resolveMechanics(operationCode: string): Zeus.ExpenseMechanics {
-  return operationCode === 'o.exp.blgdir'
-    ? Zeus.ExpenseMechanics.DIRECT
-    : Zeus.ExpenseMechanics.ADVANCE;
-}
+const PROGRAM_EXPENSE_SOURCE_WALLET = 'w.cap.blago';
 
 /**
  * On-chain получатель (eosio::name): SELF — сам создатель, MEMBER — аккаунт
@@ -83,14 +62,13 @@ export function useCreateProgramExpense() {
     const precision = info.symbols.root_govern_precision;
     const totalAmount = draft.items.reduce((sum, it) => sum + parseFloat(it.amount || '0'), 0);
     const total_amount = formatToAsset(totalAmount, symbol, precision);
-    const mechanics = resolveMechanics(draft.operation_code);
 
     const itemsForDoc = draft.items.map((it, idx) => ({
       number: String(idx + 1),
       description: it.description,
       amount: it.amount,
       recipient_type: it.recipient_type,
-      mechanics,
+      mechanics: it.mechanics,
       recipient_name: it.recipient_name ?? '',
       requisites: it.requisites ?? '',
     }));
@@ -102,7 +80,7 @@ export function useCreateProgramExpense() {
         description: draft.description,
         total_amount,
         items_count: draft.items.length,
-        source_wallet: resolveSourceWallet(draft.operation_code),
+        source_wallet: PROGRAM_EXPENSE_SOURCE_WALLET,
       },
       items: itemsForDoc,
     };
@@ -118,7 +96,7 @@ export function useCreateProgramExpense() {
 
     const itemsForChain = draft.items.map((it, idx) => ({
       item_hash: it.item_hash ?? generateItemHash(expense_hash, idx),
-      mechanics,
+      mechanics: it.mechanics,
       recipient_type: it.recipient_type,
       recipient: resolveRecipient(it, session.username),
       description: it.description,
@@ -129,7 +107,6 @@ export function useCreateProgramExpense() {
       coopname: info.coopname,
       expense_hash,
       creator: session.username,
-      operation_code: draft.operation_code,
       items: itemsForChain,
       description: draft.description,
       statement: signed as any,

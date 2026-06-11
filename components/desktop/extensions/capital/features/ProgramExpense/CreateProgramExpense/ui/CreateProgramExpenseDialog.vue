@@ -14,12 +14,6 @@ BaseDialog(
         placeholder='Например: «Закупка хостинга и канцелярии на июнь»',
         required
       )
-      BaseSelect(
-        v-model='form.operation_code',
-        :options='operationCodeOptions',
-        label='Способ оплаты',
-        hint='Применяется ко всем позициям заявления'
-      )
 
     .field-group
       .field-group__head
@@ -50,6 +44,13 @@ BaseDialog(
                 v-model='item.recipient_type',
                 :options='recipientTypeOptions',
                 label='Тип получателя'
+              )
+            .col-12.col-md-6
+              BaseSelect(
+                v-model='item.mechanics',
+                :options='mechanicsOptions',
+                label='Способ оплаты',
+                hint='Аванс — под отчёт получателю; прямая — оплата по реквизитам'
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.MEMBER')
               BaseInput(
@@ -127,15 +128,14 @@ const amountPlaceholder = computed(() => {
 
 const form = reactive({
   description: '',
-  operation_code: 'o.exp.blgadv',
   items: [] as ICreateProgramExpenseDraftItem[],
 });
 
 const submitting = ref(false);
 
-const operationCodeOptions = [
-  { label: 'Аванс из Благороста (o.exp.blgadv)', value: 'o.exp.blgadv' },
-  { label: 'Прямая оплата из Благороста (o.exp.blgdir)', value: 'o.exp.blgdir' },
+const mechanicsOptions = [
+  { label: 'Аванс под отчёт', value: Zeus.ExpenseMechanics.ADVANCE },
+  { label: 'Прямая оплата', value: Zeus.ExpenseMechanics.DIRECT },
 ];
 
 const recipientTypeOptions = [
@@ -147,7 +147,6 @@ const recipientTypeOptions = [
 const canSubmit = computed(
   () =>
     form.description.trim().length > 0 &&
-    form.operation_code.trim().length > 0 &&
     form.items.length > 0 &&
     form.items.every(
       (i) =>
@@ -163,6 +162,7 @@ function addItem(): void {
     number: String(form.items.length + 1),
     description: '',
     amount: '',
+    mechanics: Zeus.ExpenseMechanics.ADVANCE,
     recipient_type: Zeus.ExpenseRecipientType.SELF,
     recipient_name: '',
     requisites: '',
@@ -183,7 +183,6 @@ async function submit(): Promise<void> {
     submitting.value = true;
     await submitProgramExpense({
       description: form.description,
-      operation_code: form.operation_code,
       items: form.items,
     });
     SuccessAlert('Программный расход подан — заявление подписано и передано в шасси расходов');

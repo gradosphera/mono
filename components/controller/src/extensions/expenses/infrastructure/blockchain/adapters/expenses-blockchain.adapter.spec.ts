@@ -59,7 +59,6 @@ describe('ExpensesBlockchainAdapter', () => {
       coopname,
       username: 'ivanov',
       proposal_hash: '0xabc',
-      operation_code: 'o.exp.blgadv',
       source_wallet: 'w.cap.blago',
       items: [],
       callback: { contract: '', action: '', data: '' },

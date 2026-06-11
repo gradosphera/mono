@@ -75,7 +75,6 @@ describe('ExpensesMutationsService', () => {
       coopname: 'voskhod',
       username: 'ivanov',
       proposal_hash: '0xabc',
-      operation_code: 'o.exp.blgadv',
       source_wallet: 'w.cap.blago',
       items: [
         {
@@ -97,7 +96,6 @@ describe('ExpensesMutationsService', () => {
     expect(call.coopname).toBe('voskhod')
     expect(call.username).toBe('ivanov')
     expect(call.proposal_hash).toBe('0xabc')
-    expect(call.operation_code).toBe('o.exp.blgadv')
     expect(call.source_wallet).toBe('w.cap.blago')
     expect(call.items).toHaveLength(1)
     expect(call.items[0].item_hash).toBe('0xitem1')

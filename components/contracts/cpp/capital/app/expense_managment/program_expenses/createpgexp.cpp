@@ -10,8 +10,7 @@
  * @param coopname        Кооператив
  * @param expense_hash    Хеш расхода (= proposal_hash в шасси)
  * @param creator         Инициатор расхода
- * @param operation_code  o.exp.blgadv (аванс) либо o.exp.blgdir (прямая оплата)
- * @param items           Позиции СЗ (см. ExpenseDomain::item)
+ * @param items           Позиции СЗ (см. ExpenseDomain::item); механика оплаты per-item
  * @param description     Описание для отчётности
  * @param statement       Документ-заявление (ProgramExpenseStatement)
  *
@@ -21,7 +20,6 @@
  * @note Авторизация требуется от @p coopname.
  */
 void capital::createpgexp(name coopname, checksum256 expense_hash, name creator,
-                          name operation_code,
                           std::vector<ExpenseDomain::item> items,
                           std::string description, document2 statement) {
   require_auth(coopname);
@@ -61,7 +59,7 @@ void capital::createpgexp(name coopname, checksum256 expense_hash, name creator,
     eosio::permission_level{_capital, "active"_n},
     _expense,
     Names::External::CREATE_EXPENSE_PROPOSAL,
-    std::make_tuple(coopname, creator, expense_hash, operation_code,
+    std::make_tuple(coopname, creator, expense_hash,
                     ledger2_wallets::BLAGOROST_FUND, items, callback, statement)
   ).send();
 }

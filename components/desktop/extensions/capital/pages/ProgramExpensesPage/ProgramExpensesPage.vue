@@ -54,8 +54,8 @@ q-page.program-expenses-page
                 .meta-key Инициатор
                 .meta-val {{ item.creator }}
               .meta-row
-                .meta-key Операция
-                .meta-val {{ item.operation_code }}
+                .meta-key Способ оплаты
+                .meta-val {{ mechanicsSummary(item.items) }}
               .meta-row
                 .meta-key Создан
                 .meta-val {{ formatDate(item.created_at) }}
@@ -131,6 +131,15 @@ async function refresh(): Promise<void> {
 }
 
 onMounted(refresh);
+
+// Способ оплаты задаётся на каждой позиции; в карточке — сводка по всем строкам.
+function mechanicsSummary(items: Array<{ mechanics: Zeus.ExpenseMechanics }>): string {
+  const hasAdvance = items.some((i) => i.mechanics === Zeus.ExpenseMechanics.ADVANCE);
+  const hasDirect = items.some((i) => i.mechanics === Zeus.ExpenseMechanics.DIRECT);
+  if (hasAdvance && hasDirect) return 'Аванс + прямая оплата';
+  if (hasDirect) return 'Прямая оплата';
+  return 'Аванс под отчёт';
+}
 
 function shortHash(h: string): string {
   return h.length > 12 ? `${h.slice(0, 8)}…${h.slice(-4)}` : h;

@@ -37,9 +37,6 @@ export class ExpenseProposalOutputDTO extends BaseOutputDTO {
   @Field(() => String, { nullable: true, description: 'Создатель сметы (username).' })
   username?: string;
 
-  @Field(() => String, { nullable: true, description: 'Код операции (operation_code).' })
-  operation_code?: string;
-
   @Field(() => String, { nullable: true, description: 'Кошелёк-источник средств.' })
   source_wallet?: string;
 
@@ -88,7 +85,6 @@ export class ExpenseProposalOutputDTO extends BaseOutputDTO {
     dto.coopname = entity.coopname;
     dto.status = entity.status;
     dto.username = entity.username;
-    dto.operation_code = entity.operation_code;
     dto.source_wallet = entity.source_wallet;
     dto.blockchain_status = entity.blockchain_status;
     dto.items = (entity.items ?? []).map((i) => ExpenseProposalOutputDTO.itemFromBlockchain(i));

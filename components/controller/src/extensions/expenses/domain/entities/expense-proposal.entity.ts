@@ -30,7 +30,6 @@ export class ExpenseProposalDomainEntity
   public status: ExpenseProposalStatus;
 
   public username?: string;
-  public operation_code?: string;
   public source_wallet?: string;
   public blockchain_status?: number;
   public items?: IExpenseItemBlockchainData[];
@@ -59,7 +58,6 @@ export class ExpenseProposalDomainEntity
       this.id = Number(blockchainData.id);
       this.coopname = blockchainData.coopname;
       this.username = blockchainData.username;
-      this.operation_code = blockchainData.operation_code;
       this.source_wallet = blockchainData.source_wallet;
       this.blockchain_status = blockchainData.status;
       this.items = blockchainData.items;
@@ -101,7 +99,6 @@ export class ExpenseProposalDomainEntity
     }
     this.id = Number(blockchainData.id);
     this.username = blockchainData.username;
-    this.operation_code = blockchainData.operation_code;
     this.source_wallet = blockchainData.source_wallet;
     this.blockchain_status = blockchainData.status;
     this.items = blockchainData.items;

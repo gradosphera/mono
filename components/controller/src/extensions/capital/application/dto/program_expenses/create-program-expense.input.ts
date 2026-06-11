@@ -27,14 +27,7 @@ export class CreateProgramExpenseInputDTO {
   @IsString()
   creator!: string;
 
-  @Field(() => String, {
-    description: 'Operation-code ledger2 (например, BLAGO_ADVANCE / BLAGO_DIRECT).',
-  })
-  @IsNotEmpty()
-  @IsString()
-  operation_code!: string;
-
-  @Field(() => [ExpenseItemInputDTO], { description: 'Строки расхода.' })
+  @Field(() => [ExpenseItemInputDTO], { description: 'Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно.' })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

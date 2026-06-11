@@ -33,9 +33,6 @@ export class ExpenseProposalTypeormEntity extends BaseTypeormEntity {
   username!: string;
 
   @Column({ type: 'varchar' })
-  operation_code!: string;
-
-  @Column({ type: 'varchar' })
   source_wallet!: string;
 
   @Column({ type: 'integer', nullable: true })

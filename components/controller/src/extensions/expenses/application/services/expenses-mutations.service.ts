@@ -74,7 +74,6 @@ export class ExpensesMutationsService {
       coopname: input.coopname,
       username: input.username,
       proposal_hash: input.proposal_hash,
-      operation_code: input.operation_code,
       source_wallet: input.source_wallet,
       items,
       callback: {

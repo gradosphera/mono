@@ -2652,10 +2652,8 @@ export type ValueTypes = {
 	description: string | Variable<any, string>,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string | Variable<any, string>,
-	/** Строки расхода. */
+	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
 	items: Array<ValueTypes["ExpenseItemInput"]> | Variable<any, string>,
-	/** Operation-code ledger2 (например, BLAGO_ADVANCE / BLAGO_DIRECT). */
-	operation_code: string | Variable<any, string>,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: ValueTypes["ExpenseProposalStatementSignedDocumentInput"] | Variable<any, string>
 };
@@ -3046,7 +3044,6 @@ export type ValueTypes = {
 	creator?:boolean | `@${string}`,
 	expense_hash?:boolean | `@${string}`,
 	items?:ValueTypes["CapitalProgramExpenseItem"],
-	operation_code?:boolean | `@${string}`,
 	source_wallet?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 	total_actual?:boolean | `@${string}`,
@@ -4516,8 +4513,6 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Строки расхода (массив items). */
 	items: Array<ValueTypes["ExpenseItemInput"]> | Variable<any, string>,
-	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
-	operation_code: string | Variable<any, string>,
 	/** Хеш сметы расхода (детерминированный, из UI). */
 	proposal_hash: string | Variable<any, string>,
 	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
@@ -5332,8 +5327,6 @@ export type ValueTypes = {
 	id?:boolean | `@${string}`,
 	/** Строки сметы. */
 	items?:ValueTypes["ExpenseItem"],
-	/** Код операции (operation_code). */
-	operation_code?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш сметы расхода. */
@@ -11800,10 +11793,8 @@ export type ResolverInputTypes = {
 	description: string,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string,
-	/** Строки расхода. */
+	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
 	items: Array<ResolverInputTypes["ExpenseItemInput"]>,
-	/** Operation-code ledger2 (например, BLAGO_ADVANCE / BLAGO_DIRECT). */
-	operation_code: string,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: ResolverInputTypes["ExpenseProposalStatementSignedDocumentInput"]
 };
@@ -12184,7 +12175,6 @@ export type ResolverInputTypes = {
 	creator?:boolean | `@${string}`,
 	expense_hash?:boolean | `@${string}`,
 	items?:ResolverInputTypes["CapitalProgramExpenseItem"],
-	operation_code?:boolean | `@${string}`,
 	source_wallet?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 	total_actual?:boolean | `@${string}`,
@@ -13619,8 +13609,6 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Строки расхода (массив items). */
 	items: Array<ResolverInputTypes["ExpenseItemInput"]>,
-	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
-	operation_code: string,
 	/** Хеш сметы расхода (детерминированный, из UI). */
 	proposal_hash: string,
 	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
@@ -14417,8 +14405,6 @@ export type ResolverInputTypes = {
 	id?:boolean | `@${string}`,
 	/** Строки сметы. */
 	items?:ResolverInputTypes["ExpenseItem"],
-	/** Код операции (operation_code). */
-	operation_code?:boolean | `@${string}`,
 	/** Флаг присутствия записи в блокчейне */
 	present?:boolean | `@${string}`,
 	/** Хеш сметы расхода. */
@@ -20697,10 +20683,8 @@ export type ModelTypes = {
 	description: string,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string,
-	/** Строки расхода. */
+	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
 	items: Array<ModelTypes["ExpenseItemInput"]>,
-	/** Operation-code ledger2 (например, BLAGO_ADVANCE / BLAGO_DIRECT). */
-	operation_code: string,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: ModelTypes["ExpenseProposalStatementSignedDocumentInput"]
 };
@@ -21071,7 +21055,6 @@ export type ModelTypes = {
 	creator: string,
 	expense_hash: string,
 	items: Array<ModelTypes["CapitalProgramExpenseItem"]>,
-	operation_code: string,
 	source_wallet: string,
 	status: ModelTypes["ExpenseProposalStatus"],
 	total_actual: string,
@@ -22467,8 +22450,6 @@ export type ModelTypes = {
 	coopname: string,
 	/** Строки расхода (массив items). */
 	items: Array<ModelTypes["ExpenseItemInput"]>,
-	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
-	operation_code: string,
 	/** Хеш сметы расхода (детерминированный, из UI). */
 	proposal_hash: string,
 	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
@@ -23241,8 +23222,6 @@ export type ModelTypes = {
 	id?: number | undefined | null,
 	/** Строки сметы. */
 	items: Array<ModelTypes["ExpenseItem"]>,
-	/** Код операции (operation_code). */
-	operation_code?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш сметы расхода. */
@@ -30182,10 +30161,8 @@ export type GraphQLTypes = {
 	description: string,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string,
-	/** Строки расхода. */
+	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
 	items: Array<GraphQLTypes["ExpenseItemInput"]>,
-	/** Operation-code ledger2 (например, BLAGO_ADVANCE / BLAGO_DIRECT). */
-	operation_code: string,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: GraphQLTypes["ExpenseProposalStatementSignedDocumentInput"]
 };
@@ -30577,7 +30554,6 @@ export type GraphQLTypes = {
 	creator: string,
 	expense_hash: string,
 	items: Array<GraphQLTypes["CapitalProgramExpenseItem"]>,
-	operation_code: string,
 	source_wallet: string,
 	status: GraphQLTypes["ExpenseProposalStatus"],
 	total_actual: string,
@@ -32046,8 +32022,6 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Строки расхода (массив items). */
 	items: Array<GraphQLTypes["ExpenseItemInput"]>,
-	/** Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir"). */
-	operation_code: string,
 	/** Хеш сметы расхода (детерминированный, из UI). */
 	proposal_hash: string,
 	/** Источник средств (eosio::name кошелька-источника, eg "w.cap.blago"). */
@@ -32863,8 +32837,6 @@ export type GraphQLTypes = {
 	id?: number | undefined | null,
 	/** Строки сметы. */
 	items: Array<GraphQLTypes["ExpenseItem"]>,
-	/** Код операции (operation_code). */
-	operation_code?: string | undefined | null,
 	/** Флаг присутствия записи в блокчейне */
 	present: boolean,
 	/** Хеш сметы расхода. */

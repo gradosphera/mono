@@ -14,24 +14,12 @@ BaseDialog(
         placeholder='Например: «Закупка хостинга и канцелярии на июнь»',
         required
       )
-      .row.q-col-gutter-sm
-        .col-12.col-md-6
-          q-select(
-            v-model='form.operation_code',
-            :options='operationCodeOptions',
-            label='Действие (operation_code)',
-            outlined,
-            dense,
-            emit-value,
-            map-options
-          )
-        .col-12.col-md-6
-          BaseInput(
-            v-model='form.source_wallet',
-            label='Источник средств (кошелёк)',
-            placeholder='w.cap.blago / w.cap.gen / …',
-            required
-          )
+      BaseInput(
+        v-model='form.source_wallet',
+        label='Источник средств (кошелёк)',
+        placeholder='w.cap.blago / w.cap.gen / …',
+        required
+      )
 
     .field-group
       .field-group__head
@@ -144,17 +132,11 @@ const { submitProposal } = useExpenseProposalActions();
 
 const form = reactive({
   description: '',
-  operation_code: 'o.exp.blgadv',
   source_wallet: 'w.cap.blago',
   items: [] as ICreateProposalDraftItem[],
 });
 
 const submitting = ref(false);
-
-const operationCodeOptions = [
-  { label: 'Аванс из Благороста (o.exp.blgadv)', value: 'o.exp.blgadv' },
-  { label: 'Прямая оплата из Благороста (o.exp.blgdir)', value: 'o.exp.blgdir' },
-];
 
 const recipientTypeOptions = [
   { label: 'Я сам', value: 'SELF' as const },
@@ -170,7 +152,6 @@ const mechanicsOptions = [
 const canSubmit = computed(
   () =>
     form.description.trim().length > 0 &&
-    form.operation_code.trim().length > 0 &&
     form.source_wallet.trim().length > 0 &&
     form.items.length > 0 &&
     form.items.every((i) => i.amount.trim() && i.description.trim()),
@@ -202,7 +183,6 @@ async function submit(): Promise<void> {
     submitting.value = true;
     await submitProposal({
       description: form.description,
-      operation_code: form.operation_code,
       source_wallet: form.source_wallet,
       items: form.items,
     });

@@ -72,7 +72,6 @@ export interface ICreateexp {
   coopname: IName
   username: IName
   proposal_hash: IChecksum256
-  operation_code: IName
   source_wallet: IName
   items: IItem[]
   callback: ICallbackHandler
@@ -163,7 +162,6 @@ export interface IProposal {
   id: IUint64
   proposal_hash: IChecksum256
   username: IName
-  operation_code: IName
   source_wallet: IName
   /** ProposalStatus (CREATED=0, AUTHORIZED=1, PARTIALLY_PAID=2, REPORT_SUBMITTED=3, CLOSED=4, DECLINED=5). */
   status: IUint8

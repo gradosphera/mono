@@ -935,9 +935,7 @@ export interface ICreatepgexp {
   coopname: IName
   expense_hash: IChecksum256
   creator: IName
-  /** Ledger2-код операции расхода: `o.exp.blgadv` (аванс) либо `o.exp.blgdir` (прямая оплата). */
-  operation_code: IName
-  /** Позиции СЗ-расхода (Expense.IItem из шасси). */
+  /** Позиции СЗ-расхода (Expense.IItem из шасси); механика оплаты — per-item (mechanics: ADVANCE | DIRECT). */
   items: IExpenseProposalItem[]
   description: string
   statement: IDocument2

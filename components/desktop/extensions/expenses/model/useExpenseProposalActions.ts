@@ -23,7 +23,6 @@ export interface ICreateProposalDraftItem {
 }
 
 export interface ICreateProposalDraft {
-  operation_code: string;
   source_wallet: string;
   description: string;
   items: ICreateProposalDraftItem[];
@@ -96,7 +95,6 @@ export function useExpenseProposalActions() {
       coopname: info.coopname,
       username: session.username,
       proposal_hash,
-      operation_code: draft.operation_code,
       source_wallet: draft.source_wallet,
       items: itemsForChain,
       statement: signed as any,

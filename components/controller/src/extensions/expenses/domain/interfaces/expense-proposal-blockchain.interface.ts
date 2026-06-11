@@ -34,7 +34,6 @@ export interface IExpenseProposalBlockchainData {
   proposal_hash: string;
   coopname: string;
   username: string;
-  operation_code: string;
   source_wallet: string;
   status: number;
   items: IExpenseItemBlockchainData[];

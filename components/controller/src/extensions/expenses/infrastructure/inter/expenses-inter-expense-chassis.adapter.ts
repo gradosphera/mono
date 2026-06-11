@@ -73,7 +73,6 @@ export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPo
       proposalHash: e.proposal_hash,
       sourceWalletCode: e.source_wallet ?? '',
       creator: e.username ?? '',
-      operationCode: e.operation_code ?? '',
       status: this.mapStatus(e.status),
       callback: e.callback
         ? { contract: e.callback.contract, action: e.callback.action, data: e.callback.data }

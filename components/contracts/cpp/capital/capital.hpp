@@ -335,12 +335,11 @@ public:
      * шлёт inline action expense::createexp с callback={capital, onpgexpdone}.
      * Шасси обслуживает весь flow (auth/pay/report/close|decline) и шлёт callback.
      *
-     * operation_code — o.exp.blgadv (аванс) или o.exp.blgdir (прямая оплата).
-     * items[] — позиции СЗ (см. ExpenseDomain::item).
+     * items[] — позиции СЗ (см. ExpenseDomain::item); механика оплаты per-item
+     * (item.mechanics: ADVANCE — аванс, DIRECT — прямая оплата).
      */
     [[eosio::action]]
     void createpgexp(name coopname, checksum256 expense_hash, name creator,
-                     name operation_code,
                      std::vector<ExpenseDomain::item> items,
                      std::string description, document2 statement);
 

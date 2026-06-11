@@ -52,7 +52,6 @@ export class ProgramExpensesManagementService {
       coopname: data.coopname,
       expense_hash: data.expense_hash,
       creator: data.creator,
-      operation_code: data.operation_code,
       items: data.items.map((it) => ({
         item_hash: it.item_hash,
         mechanics: it.mechanics === ExpenseMechanics.DIRECT ? 1 : 0,
@@ -108,7 +107,6 @@ export class ProgramExpensesManagementService {
       coopname: p.coopname,
       expense_hash: p.proposalHash,
       creator: p.creator,
-      operation_code: p.operationCode,
       source_wallet: p.sourceWalletCode,
       status: this.mapStatus(p.status),
       callback: p.callback ? this.toCallbackOutput(p.callback) : undefined,
