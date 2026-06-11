@@ -56,9 +56,9 @@ namespace ExpenseDomain {
   enum class ItemStatus : uint8_t {
     APPROVED  = 0,  ///< Запланирован, ждёт оплаты.
     PAID      = 1,  ///< Оплачен (ADVANCE — выдан пайщику; DIRECT — оплачен организации).
-    REPORTED  = 2,  ///< Закрыт отчётом (чек приложен).
-    RETURNED  = 3,  ///< Неиспользованный остаток вернули в пул.
-    OVERSPENT = 4,  ///< Был перерасход — задокументирован отдельной OVERSPEND op.
+    REPORTED  = 2,  ///< Закрыт отчётом (чек приложен). DIRECT-item получает его сразу при payexp.
+    RETURNED  = 3,  ///< Зарезервировано, не используется: returnexp уменьшает actual_amount, статус остаётся PAID до отчёта.
+    OVERSPENT = 4,  ///< Зарезервировано, не используется: overspendexp увеличивает actual_amount, статус остаётся PAID до отчёта.
   };
 
   /**
@@ -145,6 +145,11 @@ public:
      * Создание и подача — одна транзакция (slug createexp). На входе: items + источник
      * (source_wallet + operation_code из OPERATION_REGISTRY) + опц. callback на финализацию.
      * Подписывает создатель (signact1 statement_doc, type=2010).
+     *
+     * Авторизация: coopname (прямой вызов backend'а) либо контракт-инициатор из
+     * contracts_whitelist (inline, например capital::createpgexp).
+     * Механика всех items обязана соответствовать operation_code
+     * (o.exp.blgadv → ADVANCE, o.exp.blgdir → DIRECT).
      */
     [[eosio::action]]
     void createexp(name coopname, name username,
@@ -163,7 +168,9 @@ public:
     void authexp(name coopname, checksum256 proposal_hash, document2 decision);
 
     /**
-     * @brief Отклонить СЗ (до или после авторизации).
+     * @brief Отклонить СЗ. Возможно только до первой оплаты (CREATED / AUTHORIZED):
+     * после payexp средства уже ушли через ledger2, и СЗ завершается обычным
+     * путём reportexp / returnexp → closeexp.
      */
     [[eosio::action]]
     void declexp(name coopname, checksum256 proposal_hash, std::string reason);
@@ -171,7 +178,9 @@ public:
     /**
      * @brief Оплатить item — выдача аванса (ADVANCE) или прямая оплата организации (DIRECT).
      * Контракт зовёт Ledger2::apply(operation_code, actual_amount, ...).
-     * Для DIRECT-механики сразу за payexp вызывает reportexp (фоном).
+     * actual_amount не может превышать план item (доплата — через overspendexp).
+     * DIRECT-item не имеет фазы подотчёта и помечается REPORTED сразу; когда все
+     * items REPORTED — proposal переходит в REPORT_SUBMITTED прямо из payexp.
      */
     [[eosio::action]]
     void payexp(name coopname, checksum256 proposal_hash, checksum256 item_hash,
@@ -179,8 +188,9 @@ public:
 
     /**
      * @brief Отчёт о расходе (ADVANCE) — пайщик закрывает item чеком.
-     * Зовёт Ledger2::apply(o.exp.advrpt). Когда все items reported — статус proposal
-     * становится REPORT_SUBMITTED.
+     * Зовёт Ledger2::apply(o.exp.advrpt) на остаточный actual item'а (при полном
+     * возврате аванса burn пропускается). Когда все items reported — статус
+     * proposal становится REPORT_SUBMITTED.
      */
     [[eosio::action]]
     void reportexp(name coopname, checksum256 proposal_hash, checksum256 item_hash);
@@ -194,6 +204,8 @@ public:
 
     /**
      * @brief Возврат неиспользованного аванса (ADVANCE-остаток).
+     * Settlement-запись: уменьшает actual_amount item'а, статус остаётся PAID —
+     * фактически потраченная часть закрывается затем штатным reportexp.
      * Зовёт Ledger2::apply(o.exp.advret).
      */
     [[eosio::action]]
@@ -202,9 +214,9 @@ public:
 
     /**
      * @brief Доплата при перерасходе (ADVANCE).
-     * Сначала Ledger2::apply(o.exp.over) — выдача доплаты;
-     * сразу за ней Ledger2::apply(o.exp.advrpt) — закрытие подотчёта.
-     * Две последовательные записи в одной транзакции.
+     * Settlement-запись: увеличивает actual_amount item'а, статус остаётся PAID.
+     * Зовёт Ledger2::apply(o.exp.over) — выдача доплаты; закрытие подотчёта на
+     * полную сумму (выдано + доплата) делает последующий reportexp.
      */
     [[eosio::action]]
     void overspendexp(name coopname, checksum256 proposal_hash, checksum256 item_hash,

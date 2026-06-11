@@ -1174,6 +1174,17 @@ input AuthorizeDecisionInput {
   document: SignedDigitalDocumentInput!
 }
 
+input AuthorizeExpenseReportInput {
+  """Имя кооператива."""
+  coopname: String!
+
+  """Подписанное решение совета (document2, registry 2011)."""
+  decision: ExpenseProposalDecisionSignedDocumentInput!
+
+  """Хеш сметы расхода."""
+  proposal_hash: String!
+}
+
 type AvailableReport {
   deadline: String!
 
@@ -2086,6 +2097,31 @@ input CapitalContributorFilter {
   username: String
 }
 
+input CapitalCreateProgramExpenseInput {
+  """Имя кооператива."""
+  coopname: String!
+
+  """Имя пайщика-создателя СЗ (председатель)."""
+  creator: String!
+
+  """Описание программного расхода."""
+  description: String!
+
+  """
+  Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси.
+  """
+  expense_hash: String!
+
+  """Строки расхода."""
+  items: [ExpenseItemInput!]!
+
+  """Operation-code ledger2 (например, BLAGO_ADVANCE / BLAGO_DIRECT)."""
+  operation_code: String!
+
+  """Подписанная СЗ-смета (document2, registry 2010)."""
+  statement: ExpenseProposalStatementSignedDocumentInput!
+}
+
 """Цикл разработки в системе CAPITAL"""
 type CapitalCycle {
   """Дата создания записи"""
@@ -2615,6 +2651,38 @@ input CapitalOnboardingStepInput {
   question: String!
   step: CapitalOnboardingStep!
   title: String
+}
+
+type CapitalProgramExpense {
+  callback: CapitalProgramExpenseCallback
+  coopname: String!
+  created_at: String!
+  creator: String!
+  expense_hash: String!
+  items: [CapitalProgramExpenseItem!]!
+  operation_code: String!
+  source_wallet: String!
+  status: ExpenseProposalStatus!
+  total_actual: String!
+  total_planned: String!
+  updated_at: String!
+}
+
+type CapitalProgramExpenseCallback {
+  action: String!
+  contract: String!
+  data: String!
+}
+
+type CapitalProgramExpenseItem {
+  actual_amount: String!
+  description: String!
+  item_hash: String!
+  mechanics: ExpenseMechanics!
+  planned_amount: String!
+  recipient: String!
+  recipient_type: ExpenseRecipientType!
+  status: ExpenseItemStatus!
 }
 
 """Проект в системе CAPITAL с компонентами"""
@@ -3684,6 +3752,14 @@ input CapitalTimeStatsInput {
   username: String
 }
 
+input CapitalTopupProgramExpenseInput {
+  """Сумма пополнения (asset, eg "10000.0000 RUB")."""
+  amount: String!
+
+  """Имя кооператива."""
+  coopname: String!
+}
+
 """Голос в системе CAPITAL"""
 type CapitalVote {
   """Дата создания записи"""
@@ -4642,6 +4718,32 @@ input CreateExpenseInput {
   statement: SignedDigitalDocumentInput!
 }
 
+input CreateExpenseProposalInput {
+  """Callback на финализацию closeexp (опционально)."""
+  callback: ExpenseCallbackInput
+
+  """Имя кооператива."""
+  coopname: String!
+
+  """Строки расхода (массив items)."""
+  items: [ExpenseItemInput!]!
+
+  """Operation-code ledger2 (например, "o.exp.blgadv" / "o.exp.blgdir")."""
+  operation_code: String!
+
+  """Хеш сметы расхода (детерминированный, из UI)."""
+  proposal_hash: String!
+
+  """Источник средств (eosio::name кошелька-источника, eg "w.cap.blago")."""
+  source_wallet: String!
+
+  """Подписанная СЗ-смета (document2, registry 2010)."""
+  statement: ExpenseProposalStatementSignedDocumentInput!
+
+  """Имя пайщика-создателя СЗ."""
+  username: String!
+}
+
 input CreateIndividualDataInput {
   """Дата рождения"""
   birthdate: String!
@@ -5205,6 +5307,17 @@ input DeclineApproveInput {
   reason: String!
 }
 
+input DeclineExpenseReportInput {
+  """Имя кооператива."""
+  coopname: String!
+
+  """Хеш сметы расхода."""
+  proposal_hash: String!
+
+  """Причина отклонения СЗ-отчёта (до 1000 символов)."""
+  reason: String!
+}
+
 input DeclineRequestInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -5583,6 +5696,63 @@ input EntrepreneurDetailsInput {
   ogrn: String!
 }
 
+input ExpenseCallbackInput {
+  """Action-метод"""
+  action: String
+
+  """Контракт-целевой"""
+  contract: String
+
+  """Payload (hex bytes)"""
+  data: String
+}
+
+"""Запись о первичном файле расхода (платёжка/чек/возврат)."""
+type ExpenseFile {
+  """SHA-256 содержимого, hex-lowercase."""
+  checksum_sha256: String!
+
+  """Имя кооператива (scope)."""
+  coopname: String!
+
+  """Внутренний ID записи."""
+  id: Int!
+
+  """Хеш строки расхода (если файл уровня item)."""
+  item_hash: String
+
+  """Назначение файла."""
+  kind: ExpenseFileKind!
+
+  """MIME-тип содержимого."""
+  mime_type: String!
+
+  """Хеш сметы расхода."""
+  proposal_hash: String!
+
+  """Короткоживущий URL на скачивание (HMAC-signed)."""
+  read_url: String
+
+  """Размер файла в байтах."""
+  size_bytes: Int!
+
+  """MinIO-ключ внутри бакета."""
+  storage_key: String!
+
+  """Когда загружено."""
+  uploaded_at: DateTime!
+
+  """Кто загрузил (username)."""
+  uploaded_by_username: String!
+}
+
+"""Тип первичного файла расхода."""
+enum ExpenseFileKind {
+  PAYMENT_PROOF
+  REPORT_FILE
+  RETURN_PROOF
+}
+
 input ExpenseFilter {
   """Фильтр по ID фонда"""
   fundId: String
@@ -5595,6 +5765,431 @@ input ExpenseFilter {
 
   """Фильтр по имени пользователя"""
   username: String
+}
+
+"""Строка сметы расхода."""
+type ExpenseItem {
+  """Фактическая сумма (после оплаты/отчёта)."""
+  actual_amount: String
+
+  """Назначение/описание строки."""
+  description: String!
+
+  """Хеш строки расхода."""
+  item_hash: String!
+
+  """Способ оплаты."""
+  mechanics: ExpenseMechanics!
+
+  """Планируемая сумма."""
+  planned_amount: String!
+
+  """Идентификатор получателя."""
+  recipient: String
+
+  """Тип получателя платежа."""
+  recipient_type: ExpenseRecipientType!
+
+  """Статус строки."""
+  status: ExpenseItemStatus!
+}
+
+input ExpenseItemInput {
+  """Описание назначения расхода."""
+  description: String!
+
+  """Хеш строки расхода (детерминированный, из UI)."""
+  item_hash: String!
+
+  """Способ оплаты (ADVANCE / DIRECT)."""
+  mechanics: ExpenseMechanics!
+
+  """Планируемая сумма (asset, eg "1000.0000 RUB")."""
+  planned_amount: String!
+
+  """Получатель (username / eosio::name организации)."""
+  recipient: String!
+
+  """Тип получателя."""
+  recipient_type: ExpenseRecipientType!
+}
+
+"""Статус строки расхода."""
+enum ExpenseItemStatus {
+  APPROVED
+  OVERSPENT
+  PAID
+  REPORTED
+  RETURNED
+  UNDEFINED
+}
+
+"""Способ оплаты строки расхода."""
+enum ExpenseMechanics {
+  ADVANCE
+  DIRECT
+}
+
+"""Смета расхода (СЗ)."""
+type ExpenseProposal {
+  """Дата создания записи"""
+  _created_at: DateTime!
+
+  """Внутренний ID базы данных"""
+  _id: String!
+
+  """Дата последнего обновления записи"""
+  _updated_at: DateTime!
+
+  """Номер блока крайней синхронизации с блокчейном"""
+  block_num: Float
+
+  """Сырой статус из блокчейна (uint8)."""
+  blockchain_status: Int
+
+  """Имя кооператива (scope)."""
+  coopname: String!
+
+  """Время создания (chain)."""
+  created_at: String
+
+  """Решение совета о расходе (DocumentAggregate)."""
+  decision_doc: DocumentAggregate
+
+  """ID в блокчейне."""
+  id: Int
+
+  """Строки сметы."""
+  items: [ExpenseItem!]!
+
+  """Код операции (operation_code)."""
+  operation_code: String
+
+  """Флаг присутствия записи в блокчейне"""
+  present: Boolean!
+
+  """Хеш сметы расхода."""
+  proposal_hash: String!
+
+  """Кошелёк-источник средств."""
+  source_wallet: String
+
+  """Заявление пайщика о расходе (DocumentAggregate)."""
+  statement_doc: DocumentAggregate
+
+  """Доменный статус сметы."""
+  status: ExpenseProposalStatus!
+
+  """Сумма всех строк (факт)."""
+  total_actual: String
+
+  """Сумма всех строк (план)."""
+  total_planned: String
+
+  """Время последнего обновления (chain)."""
+  updated_at: String
+
+  """Создатель сметы (username)."""
+  username: String
+}
+
+input ExpenseProposalDecisionBodyInput {
+  """Род решения (approve / decline)"""
+  kind: String!
+
+  """Дата протокола"""
+  protocol_date: String
+
+  """Номер протокола"""
+  protocol_number: String
+
+  """Причина отказа (для decline)"""
+  reason: String
+}
+
+input ExpenseProposalDecisionGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Тело решения"""
+  decision: ExpenseProposalDecisionBodyInput!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Позиции расхода"""
+  items: [ExpenseProposalDecisionItemInput!]!
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Шапка СЗ"""
+  proposal: ExpenseProposalDecisionHeaderInput!
+
+  """Хеш сметы расхода"""
+  proposal_hash: String!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input ExpenseProposalDecisionHeaderInput {
+  description: String!
+  items_count: Int!
+  source_wallet: String!
+  total_amount: String!
+}
+
+input ExpenseProposalDecisionItemInput {
+  amount: String!
+  description: String!
+  mechanics: String!
+  number: String!
+  recipient_name: String
+  recipient_type: String!
+  requisites: String
+}
+
+input ExpenseProposalDecisionSignedDocumentInput {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """Метаинформация решения по СЗ"""
+  meta: ExpenseProposalDecisionSignedMetaDocumentInput!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+input ExpenseProposalDecisionSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Тело решения"""
+  decision: ExpenseProposalDecisionBodyInput!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Позиции расхода"""
+  items: [ExpenseProposalDecisionItemInput!]!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """Шапка СЗ"""
+  proposal: ExpenseProposalDecisionHeaderInput!
+
+  """Хеш сметы расхода"""
+  proposal_hash: String!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+input ExpenseProposalHeaderInput {
+  """Описание цели расходов"""
+  description: String!
+
+  """Количество позиций"""
+  items_count: Int!
+
+  """Кошелёк-источник"""
+  source_wallet: String!
+
+  """Итоговая сумма расходов"""
+  total_amount: String!
+}
+
+input ExpenseProposalItemInput {
+  """Сумма строки"""
+  amount: String!
+
+  """Описание расхода"""
+  description: String!
+
+  """Способ оплаты (ADVANCE / DIRECT)"""
+  mechanics: String!
+
+  """Порядковый номер строки"""
+  number: String!
+
+  """Имя получателя"""
+  recipient_name: String
+
+  """Тип получателя (SELF / MEMBER / ORG)"""
+  recipient_type: String!
+
+  """Реквизиты получателя"""
+  requisites: String
+}
+
+input ExpenseProposalStatementGenerateDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String
+
+  """Позиции расхода"""
+  items: [ExpenseProposalItemInput!]!
+
+  """Язык документа"""
+  lang: String
+
+  """Ссылки, связанные с документом"""
+  links: [String!]
+
+  """Шапка СЗ"""
+  proposal: ExpenseProposalHeaderInput!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String
+
+  """Название документа"""
+  title: String
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String
+}
+
+input ExpenseProposalStatementSignedDocumentInput {
+  """Хэш содержимого документа"""
+  doc_hash: String!
+
+  """Общий хэш (doc_hash + meta_hash)"""
+  hash: String!
+
+  """Метаинформация СЗ-заявления"""
+  meta: ExpenseProposalStatementSignedMetaDocumentInput!
+
+  """Хэш мета-данных"""
+  meta_hash: String!
+
+  """Вектор подписей"""
+  signatures: [SignatureInfoInput!]!
+
+  """Версия стандарта документа"""
+  version: String!
+}
+
+input ExpenseProposalStatementSignedMetaDocumentInput {
+  """Номер блока, на котором был создан документ"""
+  block_num: Int!
+
+  """Название кооператива, связанное с документом"""
+  coopname: String!
+
+  """Дата и время создания документа"""
+  created_at: String!
+
+  """Имя генератора, использованного для создания документа"""
+  generator: String!
+
+  """Позиции расхода"""
+  items: [ExpenseProposalItemInput!]!
+
+  """Язык документа"""
+  lang: String!
+
+  """Ссылки, связанные с документом"""
+  links: [String!]!
+
+  """Шапка СЗ"""
+  proposal: ExpenseProposalHeaderInput!
+
+  """Хеш сметы расхода (детерминированный)"""
+  proposal_hash: String!
+
+  """ID документа в реестре"""
+  registry_id: Int!
+
+  """Часовой пояс, в котором был создан документ"""
+  timezone: String!
+
+  """Название документа"""
+  title: String!
+
+  """Имя пользователя, создавшего документ"""
+  username: String!
+
+  """Версия генератора, использованного для создания документа"""
+  version: String!
+}
+
+"""Статус сметы расхода."""
+enum ExpenseProposalStatus {
+  AUTHORIZED
+  CLOSED
+  CREATED
+  DECLINED
+  PARTIALLY_PAID
+  REPORT_SUBMITTED
+  UNDEFINED
+}
+
+"""Тип получателя платежа."""
+enum ExpenseRecipientType {
+  MEMBER
+  ORG
+  SELF
 }
 
 """Статус расхода в системе CAPITAL"""
@@ -7487,6 +8082,13 @@ type Mutation {
   """
   authorizeDecision(data: AuthorizeDecisionInput!): Transaction!
 
+  """
+  Утвердить СЗ-отчёт (закрытие сметы). Триггерит капитализацию РИД в Благоросте.
+  
+  Требуемые роли: chairman. 
+  """
+  authorizeExpenseReport(data: AuthorizeExpenseReportInput!): Transaction!
+
   """Отменить заявку"""
   cancelRequest(data: CancelRequestInput!): Transaction!
 
@@ -7587,6 +8189,13 @@ type Mutation {
   Требуемые роли: chairman, member. 
   """
   capitalCreateProcessTemplate(data: CreateProcessTemplateInput!): ProcessTemplate!
+
+  """
+  Создание программного расхода капитала через шасси expense.
+  
+  Требуемые роли: chairman. 
+  """
+  capitalCreateProgramExpense(data: CapitalCreateProgramExpenseInput!): Transaction!
 
   """
   Инвестирование в программу благорост (денежная программная инвестиция)
@@ -7980,6 +8589,13 @@ type Mutation {
   capitalSubmitVote(data: SubmitVoteInput!): Transaction!
 
   """
+  Пополнение пула программных расходов капитала из инвестиционного пула.
+  
+  Требуемые роли: chairman. 
+  """
+  capitalTopupProgramExpensePool(data: CapitalTopupProgramExpenseInput!): Transaction!
+
+  """
   Обновление задачи в CAPITAL контракте
   
   Требуемые роли: chairman, member, user. 
@@ -8143,6 +8759,13 @@ type Mutation {
   createDepositPayment(data: CreateDepositPaymentInput!): GatewayPayment!
 
   """
+  Подать СЗ-расход (создать смету с подписью пайщика/председателя).
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  createExpenseProposal(data: CreateExpenseProposalInput!): Transaction!
+
+  """
   Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
   
   Требуемые роли: chairman, member. 
@@ -8186,6 +8809,13 @@ type Mutation {
   Требуемые роли: chairman, member. 
   """
   declineAgreement(data: DeclineAgreementInput!): Transaction!
+
+  """
+  Отклонить СЗ-отчёт с указанием причины. Смета переходит в DECLINED.
+  
+  Требуемые роли: chairman. 
+  """
+  declineExpenseReport(data: DeclineExpenseReportInput!): Transaction!
 
   """Отклонить заявку"""
   declineRequest(data: DeclineRequestInput!): Transaction!
@@ -8287,6 +8917,20 @@ type Mutation {
   Универсальная генерация документа с произвольными данными (только для председателя)
   """
   generateDocument(input: GenerateAnyDocumentInput!): GeneratedDocument!
+
+  """
+  Сгенерировать документ-решение по СЗ (registry 2011) для последующей подписи.
+  
+  Требуемые роли: chairman. 
+  """
+  generateExpenseProposalDecisionDocument(data: ExpenseProposalDecisionGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
+
+  """
+  Сгенерировать документ СЗ-заявления (registry 2010) для последующей подписи.
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  generateExpenseProposalStatementDocument(data: ExpenseProposalStatementGenerateDocumentInput!, options: GenerateDocumentOptionsInput): GeneratedDocument!
 
   """
   Сгенерировать протокол решения по предложенной повестке
@@ -8448,6 +9092,20 @@ type Mutation {
   notifyOnAnnualGeneralMeet(data: NotifyOnAnnualGeneralMeetInput!): MeetAggregate!
 
   """
+  Доплатить сумму перерасхода по строке расхода (ADVANCE-механика).
+  
+  Требуемые роли: chairman. 
+  """
+  overspendExpenseItem(data: OverspendExpenseItemInput!): Transaction!
+
+  """
+  Оплатить строку расхода (выдача аванса ADVANCE или прямая оплата DIRECT).
+  
+  Требуемые роли: chairman. 
+  """
+  payExpenseItem(data: PayExpenseItemInput!): Transaction!
+
+  """
   Обрабатывает подписанное заявление на конвертацию и выполняет блокчейн-транзакцию
   
   Требуемые роли: member, chairman. 
@@ -8485,6 +9143,13 @@ type Mutation {
   """
   registerParticipant(data: RegisterParticipantInput!): Account!
 
+  """
+  Закрыть строку расхода чеком (ADVANCE-отчёт пайщика).
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  reportExpenseItem(data: ReportExpenseItemInput!): Transaction!
+
   """Заменить приватный ключ аккаунта"""
   resetKey(data: ResetKeyInput!): Boolean!
 
@@ -8494,6 +9159,13 @@ type Mutation {
   Требуемые роли: chairman. 
   """
   restartAnnualGeneralMeet(data: RestartAnnualGeneralMeetInput!): MeetAggregate!
+
+  """
+  Вернуть неиспользованный аванс по строке расхода (ADVANCE-остаток).
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  returnExpenseItem(data: ReturnExpenseItemInput!): Transaction!
 
   """
   Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
@@ -8545,6 +9217,13 @@ type Mutation {
   Выслать токен для замены приватного ключа аккаунта на электронную почту
   """
   startResetKey(data: StartResetKeyInput!): Boolean!
+
+  """
+  Финализировать СЗ-отчёт по смете расхода (все items закрыты — оплата/чек/возврат).
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  submitExpenseReport(data: SubmitExpenseReportInput!): Transaction!
 
   """
   Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи
@@ -8608,6 +9287,13 @@ type Mutation {
   Требуемые роли: chairman. 
   """
   updateSystem(data: Update!): SystemInfo!
+
+  """
+  Загрузить первичный файл расхода (платёжка/чек/возврат) в бакет expenses:files.
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  uploadExpenseFile(data: UploadExpenseFileInput!): ExpenseFile!
 
   """Подтвердить email адрес пользователя"""
   verifyEmail(data: VerifyEmailInputDTO!): Boolean!
@@ -8815,6 +9501,20 @@ type OrganizationWithBankAccount {
   username: String!
 }
 
+input OverspendExpenseItemInput {
+  """Имя кооператива."""
+  coopname: String!
+
+  """Хеш строки расхода (item)."""
+  item_hash: String!
+
+  """Сумма доплаты сверх planned_amount (asset, например "200.0000 RUB")."""
+  overspend_amount: String!
+
+  """Хеш сметы расхода (proposal)."""
+  proposal_hash: String!
+}
+
 type PaginatedActionsPaginationResult {
   """Текущая страница"""
   currentPage: Int!
@@ -8983,6 +9683,20 @@ type PaginatedCapitalLogsPaginationResult {
   totalPages: Int!
 }
 
+type PaginatedCapitalProgramExpensesPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [CapitalProgramExpense!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
 type PaginatedCapitalProjectsPaginationResult {
   """Текущая страница"""
   currentPage: Int!
@@ -9115,6 +9829,20 @@ type PaginatedDeltasPaginationResult {
 
   """Элементы текущей страницы"""
   items: [Delta!]!
+
+  """Общее количество элементов"""
+  totalCount: Int!
+
+  """Общее количество страниц"""
+  totalPages: Int!
+}
+
+type PaginatedExpenseProposalsPaginationResult {
+  """Текущая страница"""
+  currentPage: Int!
+
+  """Элементы текущей страницы"""
+  items: [ExpenseProposal!]!
 
   """Общее количество элементов"""
   totalCount: Int!
@@ -9354,6 +10082,20 @@ input PassportInput {
   issued_by: String!
   number: Float!
   series: Float!
+}
+
+input PayExpenseItemInput {
+  """Фактическая сумма оплаты (asset, например "100.0000 RUB")."""
+  actual_amount: String!
+
+  """Имя кооператива."""
+  coopname: String!
+
+  """Хеш строки расхода (item)."""
+  item_hash: String!
+
+  """Хеш сметы расхода (proposal)."""
+  proposal_hash: String!
 }
 
 type PaymentDetails {
@@ -10222,6 +10964,20 @@ type Query {
   """
   capitalIssues(filter: CapitalIssueFilter, options: PaginationInput): PaginatedCapitalIssuesPaginationResult!
 
+  """
+  Программный расход по expense_hash.
+  
+  Требуемые роли: chairman, member. 
+  """
+  capitalProgramExpense(coopname: String!, expense_hash: String!): CapitalProgramExpense
+
+  """
+  Список программных расходов капитала (через шасси expense).
+  
+  Требуемые роли: chairman, member. 
+  """
+  capitalProgramExpenses(coopname: String!, options: PaginationInput): PaginatedCapitalProgramExpensesPaginationResult!
+
   """Получение проекта по хешу с компонентами"""
   capitalProject(data: GetProjectInput!): CapitalProject
 
@@ -10401,6 +11157,48 @@ type Query {
   Целевые потребительские программы кооператива (id, тип, активность, draft_id)
   """
   cooperativePrograms(coopname: String!): [CooperativeProgram!]!
+
+  """
+  Получить запись о файле + свежий короткоживущий read-URL.
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  expenseFile(id: Int!): ExpenseFile!
+
+  """
+  Список файлов строки расхода (без read-URL — запрос отдельно по id).
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  expenseFilesByItem(coopname: String!, item_hash: String!, proposal_hash: String!): [ExpenseFile!]!
+
+  """
+  Список файлов сметы расхода (без read-URL — запрос отдельно по id).
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  expenseFilesByProposal(coopname: String!, proposal_hash: String!): [ExpenseFile!]!
+
+  """
+  Получить смету расхода по хешу.
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  expenseProposal(proposal_hash: String!): ExpenseProposal
+
+  """
+  Список смет расходов кооператива (paginated).
+  
+  Требуемые роли: chairman, member. 
+  """
+  expenseProposalsByCooperative(coopname: String!, options: PaginationInput): PaginatedExpenseProposalsPaginationResult!
+
+  """
+  Список смет расходов пайщика (свои/созданные им, paginated).
+  
+  Требуемые роли: chairman, member, user. 
+  """
+  expenseProposalsByMember(coopname: String!, options: PaginationInput, username: String!): PaginatedExpenseProposalsPaginationResult!
 
   """
   Получить сводную информацию о аккаунте
@@ -11021,6 +11819,17 @@ type ReportDraft {
   reportType: ReportType!
   updatedAt: DateTime!
   year: Int!
+}
+
+input ReportExpenseItemInput {
+  """Имя кооператива."""
+  coopname: String!
+
+  """Хеш строки расхода (item)."""
+  item_hash: String!
+
+  """Хеш сметы расхода (proposal)."""
+  proposal_hash: String!
 }
 
 input ReportHistoryFilterInput {
@@ -11679,6 +12488,20 @@ input ReturnByMoneySignedMetaDocumentInput {
   version: String!
 }
 
+input ReturnExpenseItemInput {
+  """Имя кооператива."""
+  coopname: String!
+
+  """Хеш строки расхода (item)."""
+  item_hash: String!
+
+  """Хеш сметы расхода (proposal)."""
+  proposal_hash: String!
+
+  """Возвращаемая сумма (asset, например "50.0000 RUB")."""
+  return_amount: String!
+}
+
 """
 Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио)
 """
@@ -12202,6 +13025,22 @@ enum StoryStatus {
   PENDING
 }
 
+input SubmitExpenseReportInput {
+  """
+  Комментарий пайщика к финализации отчёта (свободный текст, до 1000 символов).
+  """
+  comment: String
+
+  """Имя кооператива."""
+  coopname: String!
+
+  """Хеш сметы расхода."""
+  proposal_hash: String!
+
+  """Итоговая сумма фактических расходов (asset, например "1500.0000 RUB")."""
+  total_actual_amount: String
+}
+
 input SubmitVoteInput {
   """Имя аккаунта кооператива"""
   coopname: String!
@@ -12713,6 +13552,32 @@ input UpdateStoryInput {
 
   """Название истории"""
   title: String
+}
+
+input UploadExpenseFileInput {
+  """SHA-256 содержимого, hex-lowercase (64 hex-символа)."""
+  checksum_sha256: String!
+
+  """Содержимое файла, base64 без префикса data:."""
+  content_base64: String!
+
+  """Имя кооператива."""
+  coopname: String!
+
+  """Хеш строки расхода (пусто — файл уровня сметы)."""
+  item_hash: String
+
+  """Назначение файла (платёжка/чек/возврат)."""
+  kind: ExpenseFileKind!
+
+  """MIME-тип содержимого."""
+  mime_type: String!
+
+  """Хеш сметы расхода."""
+  proposal_hash: String!
+
+  """Размер файла в байтах (для серверной валидации)."""
+  size_bytes: Float!
 }
 
 type UserAccount {
