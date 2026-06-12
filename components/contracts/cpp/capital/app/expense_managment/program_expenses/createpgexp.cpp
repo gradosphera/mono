@@ -60,6 +60,6 @@ void capital::createpgexp(name coopname, checksum256 expense_hash, name creator,
     _expense,
     Names::External::CREATE_EXPENSE_PROPOSAL,
     std::make_tuple(coopname, creator, expense_hash,
-                    ledger2_wallets::BLAGOROST_FUND, items, callback, statement)
+                    ledger2_wallets::PROGRAM_EXPENSE_POOL, items, callback, statement)
   ).send();
 }

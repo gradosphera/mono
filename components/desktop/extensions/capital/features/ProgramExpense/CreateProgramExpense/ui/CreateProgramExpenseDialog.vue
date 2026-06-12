@@ -60,10 +60,15 @@ BaseDialog(
                 disabled
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.MEMBER')
-              UserSearchSelector(
+              //- Аванс под отчёт выдаётся только физическим лицам — организации и ИП
+              //- получают оплату по счёту (тип «Организация/ИП»).
+              UserSearchSelector.base-select(
                 v-model='item.recipient_account',
                 label='Пайщик-получатель (по ФИО)',
                 outlined,
+                dense,
+                reserve-hint-space,
+                :types='["individual"]',
                 @update:model-value='item.payment_method_id = null'
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.ORG')

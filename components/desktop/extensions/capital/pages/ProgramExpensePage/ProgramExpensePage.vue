@@ -1,82 +1,90 @@
 <template lang="pug">
 q-page.program-expense-page
-  template(v-if='loading && !expense')
-    .skel
-      q-skeleton(type='rect', height='96px')
-      q-skeleton(type='rect', height='180px')
-      q-skeleton(type='rect', height='180px')
+  //- Липкий бар с кнопкой «Назад» — канон detail-страниц (реестр документов).
+  .program-expense-page__bar
+    button.expense-back(type='button', @click='goBack')
+      q-icon(name='arrow_back', size='18px')
+      span К расходам
 
-  template(v-else-if='expense')
-    //- Статус + сумма — верхняя строка страницы (канон: статус сущности вверху).
-    .head-row
-      BaseChip(:variant='proposalStatusVariant(expense.status)') {{ proposalStatusLabel(expense.status) }}
-      .head-row__amount.t-mono {{ expense.total_planned }}
+  .program-expense-page__content
+    template(v-if='loading && !expense')
+      .skel
+        q-skeleton(type='rect', height='96px')
+        q-skeleton(type='rect', height='180px')
+        q-skeleton(type='rect', height='180px')
 
-    BaseCard
-      .summary
-        DataRow(label='№ служебной записки', :value='shortExpenseId(expense.expense_hash)', mono, copyable)
-        DataRow(label='Инициатор', :value='expense.creator_name')
-        DataRow(label='Создан', :value='formatDate(expense.created_at)')
-        DataRow(label='Сумма по смете', :value='expense.total_planned')
-        DataRow(
-          v-if='hasActual',
-          label='Фактически израсходовано',
-          :value='expense.total_actual'
-        )
+    template(v-else-if='expense')
+      //- Статус сущности — вверху страницы (сумма — в сводке, не дублируем).
+      .head-row
+        BaseChip(:variant='proposalStatusVariant(expense.status)') {{ proposalStatusLabel(expense.status) }}
 
-    .section
-      .t-eyebrow.t-muted Позиции расхода
-      .items
-        BaseCard(v-for='(item, idx) in itemRows', :key='item.item_hash')
-          .item
-            .item__head
-              .item__title Позиция №{{ idx + 1 }} — {{ item.description }}
-              BaseChip(:variant='itemStatusVariant(item.status)') {{ itemStatusLabel(item.status, item.mechanics) }}
-            .item__rows
-              DataRow(label='Получатель', :value='item.recipient_name')
-              DataRow(label='Способ оплаты', :value='mechanicsLabel(item.mechanics)')
-              DataRow(label='Сумма (план)', :value='item.planned_amount')
-              DataRow(v-if='itemHasActual(item)', label='Фактически', :value='item.actual_amount')
-              DataRow(
-                v-if='item.requisite',
-                label='Реквизиты получателя',
-                :value='item.requisite.requisites'
-              )
-              DataRow(
-                v-if='item.requisite?.payment_purpose',
-                label='Назначение платежа',
-                :value='item.requisite.payment_purpose'
-              )
-            .item__files(v-if='item.files.length')
-              .t-sm.t-muted Первичные документы
-              button.file-link(
-                v-for='file in item.files',
-                :key='file.id',
-                type='button',
-                :disabled='openingId === file.id',
-                @click='openFile(file)'
-              )
-                q-icon(name='attach_file', size='16px')
-                span {{ fileKindLabel(file.kind) }}: {{ fileLabel(file) }}
-                q-spinner(v-if='openingId === file.id', size='14px')
-
-    .section
-      .t-eyebrow.t-muted История состояний
       BaseCard
-        ActivityTimeline(:events='timeline', group-by-date)
+        .summary
+          DataRow(label='№ служебной записки', :value='shortExpenseId(expense.expense_hash)', mono, copyable)
+          DataRow(label='Инициатор', :value='expense.creator_name')
+          DataRow(label='Создан', :value='formatDate(expense.created_at)')
+          DataRow(label='Сумма по смете', :value='expense.total_planned')
+          DataRow(
+            v-if='hasActual',
+            label='Фактически израсходовано',
+            :value='expense.total_actual'
+          )
 
-  .empty(v-else)
-    EmptyState(
-      title='Расход не найден',
-      body='Служебная записка с таким номером отсутствует или ещё не синхронизирована.'
-    )
-      template(#icon)
-        q-icon(name='receipt_long', size='48px')
+      .section
+        .t-eyebrow.t-muted Позиции расхода
+        .items
+          BaseCard(v-for='(item, idx) in itemRows', :key='item.item_hash')
+            .item
+              .item__head
+                .item__title Позиция №{{ idx + 1 }} — {{ item.description }}
+                //- У отклонённой СЗ позиции ничего не «ожидают» — оплат не будет.
+                BaseChip(v-if='isDeclined', variant='neutral') Не будет оплачена
+                BaseChip(v-else, :variant='itemStatusVariant(item.status)') {{ itemStatusLabel(item.status, item.mechanics) }}
+              .item__rows
+                DataRow(label='Получатель', :value='item.recipient_name')
+                DataRow(label='Способ оплаты', :value='mechanicsLabel(item.mechanics)')
+                DataRow(label='Сумма (план)', :value='item.planned_amount')
+                DataRow(v-if='itemHasActual(item)', label='Фактически', :value='item.actual_amount')
+                DataRow(
+                  v-if='item.requisite',
+                  label='Реквизиты получателя',
+                  :value='item.requisite.requisites'
+                )
+                DataRow(
+                  v-if='item.requisite?.payment_purpose',
+                  label='Назначение платежа',
+                  :value='item.requisite.payment_purpose'
+                )
+              .item__files(v-if='item.files.length')
+                .t-sm.t-muted Первичные документы
+                button.file-link(
+                  v-for='file in item.files',
+                  :key='file.id',
+                  type='button',
+                  :disabled='openingId === file.id',
+                  @click='openFile(file)'
+                )
+                  q-icon(name='attach_file', size='16px')
+                  span {{ fileKindLabel(file.kind) }}: {{ fileLabel(file) }}
+                  q-spinner(v-if='openingId === file.id', size='14px')
+
+      .section
+        .t-eyebrow.t-muted История состояний
+        BaseCard
+          ActivityTimeline(:events='timeline', group-by-date)
+
+    .empty(v-else)
+      EmptyState(
+        title='Расход не найден',
+        body='Служебная записка с таким номером отсутствует или ещё не синхронизирована.'
+      )
+        template(#icon)
+          q-icon(name='receipt_long', size='48px')
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
 import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
@@ -104,7 +112,12 @@ import {
 } from 'app/extensions/capital/entities/ProgramExpense/model';
 
 const route = useRoute();
+const router = useRouter();
 const system = useSystemStore();
+
+function goBack(): void {
+  void router.push({ name: 'capital-program-expenses' });
+}
 const desktopStore = useDesktopStore();
 const store = useProgramExpenseStore();
 
@@ -152,6 +165,10 @@ onUnmounted(() => desktopStore.clearPageTitleOverride());
 
 const hasActual = computed(
   () => parseFloat(expense.value?.total_actual ?? '0') > 0,
+);
+
+const isDeclined = computed(
+  () => expense.value?.status === Zeus.ExpenseProposalStatus.DECLINED,
 );
 
 type ItemRow = IProgramExpenseItem & {
@@ -289,7 +306,18 @@ const timeline = computed<ActivityEvent[]>(() => {
 </script>
 
 <style lang="scss" scoped>
-.program-expense-page {
+/* Липкий бар во всю ширину — отступы несут бар и контент раздельно.
+   top = высота фиксированного топбара (--p-topbar-h), иначе бар уезжает под него. */
+.program-expense-page__bar {
+  position: sticky;
+  top: var(--p-topbar-h, 56px);
+  z-index: 2;
+  background: var(--p-canvas);
+  border-bottom: 1px solid var(--p-line);
+  padding: var(--p-3, 12px) var(--p-6, 24px);
+}
+
+.program-expense-page__content {
   padding: var(--p-6, 24px);
   display: flex;
   flex-direction: column;
@@ -297,9 +325,28 @@ const timeline = computed<ActivityEvent[]>(() => {
 }
 
 @media (max-width: 768px) {
-  .program-expense-page {
+  .program-expense-page__bar {
+    padding: var(--p-3, 12px) var(--p-4, 16px);
+  }
+  .program-expense-page__content {
     padding: var(--p-4, 16px);
   }
+}
+
+.expense-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1, 4px);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--p-ink-2);
+  font-size: var(--p-fs-body-sm, 13px);
+  cursor: pointer;
+  transition: color var(--p-dur-fast, 120ms) var(--p-ease-standard);
+}
+.expense-back:hover {
+  color: var(--p-ink);
 }
 
 .skel {
@@ -313,12 +360,6 @@ const timeline = computed<ActivityEvent[]>(() => {
   align-items: center;
   justify-content: space-between;
   gap: var(--p-3);
-}
-
-.head-row__amount {
-  font-size: var(--p-fs-h3);
-  font-weight: 700;
-  color: var(--p-ink);
 }
 
 .summary {

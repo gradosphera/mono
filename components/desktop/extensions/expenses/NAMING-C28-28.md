@@ -50,11 +50,13 @@
 
 | # | C++ константа | eosio::name | WalletOp | wallet_from → wallet_to | Dr / Cr | human_name |
 |---|---|---|---|---|---|---|
-| 3.1 | `operations::expense::BLAGO_ADVANCE` | `o.exp.blgadv` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | **08 / 51** | «Выдача подотчётных из ЦПП «Благорост»» |
-| 3.2 | `operations::expense::BLAGO_DIRECT` | `o.exp.blgdir` | BURN | `BLAGOROST_FUND` → ∅ | **08 / 51** | «Прямая оплата из ЦПП «Благорост» (DIRECT)» |
+| 3.1 | `operations::expense::BLAGO_ADVANCE` | `o.exp.blgadv` | TRANSFER | `PROGRAM_EXPENSE_POOL` → `w.exp.adv` | **08 / 51** | «Выдача подотчётных из пула расходов ЦПП «Благорост»» |
+| 3.2 | `operations::expense::BLAGO_DIRECT` | `o.exp.blgdir` | BURN | `PROGRAM_EXPENSE_POOL` → ∅ | **08 / 51** | «Прямая оплата из пула расходов ЦПП «Благорост»» |
 | 3.3 | `operations::expense::ADVANCE_REPORT` | `o.exp.advrpt` | BURN | `w.exp.adv` → ∅ | 0 / 0 | «Закрытие подотчёта пайщика по отчёту (canal 08/51 уже сделан на blgadv)» |
-| 3.4 | `operations::expense::ADVANCE_RETURN` | `o.exp.advret` | TRANSFER | `w.exp.adv` → `BLAGOROST_FUND` | **51 / 08** | «Возврат неиспользованного подотчёта в ЦПП «Благорост» (зеркало blgadv)» |
-| 3.5 | `operations::expense::OVERSPEND` | `o.exp.over` | TRANSFER | `BLAGOROST_FUND` → `w.exp.adv` | **08 / 51** | «Доплата сверх подотчёта (перерасход)» |
+| 3.4 | `operations::expense::ADVANCE_RETURN` | `o.exp.advret` | TRANSFER | `w.exp.adv` → `PROGRAM_EXPENSE_POOL` | **51 / 08** | «Возврат неиспользованного подотчёта в пул расходов (зеркало blgadv)» |
+| 3.5 | `operations::expense::OVERSPEND` | `o.exp.over` | TRANSFER | `PROGRAM_EXPENSE_POOL` → `w.exp.adv` | **08 / 51** | «Доплата сверх подотчёта (перерасход)» |
+
+**Изменение v4 (2026-06-12, голосовое):** источник оплат — НЕ `w.cap.blago` (он USER_SHARED: списание уменьшало личный паевой кошелёк пайщика-инициатора — категорически неверно). Введён КООПЕРАТИВНЫЙ кошелёк `w.cap.pgexp` (`PROGRAM_EXPENSE_POOL`, «Пул программных расходов ЦПП «Благорост»»): пополняется `capital::topupprogexp` операцией `o.cap.pgtop` (ISSUE, без Dr/Cr — деньги физически на 51 со взносов, выделяется назначение), из него `expense::payexp` платит обе механики. `username` в ledger2-проводках шасси — получатель позиции (подотчёт `w.exp.adv` числится на получателе аванса), не автор СЗ.
 
 **Process_type:** один — `processes::expense::PROPOSAL = "p.exp.proposal"_n`. Все 5 кодов привязаны к нему.
 

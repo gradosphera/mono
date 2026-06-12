@@ -85,6 +85,7 @@ namespace operations {
     inline constexpr eosio::name WITHDRAW_FROM_CAPITAL = "o.cap.wthcap"_n; ///< Возврат паевого из ЦПП «Благорост» в кошелёк пайщика (TRANSFER BLAGOROST_FUND → SHARE_FUND_PAY, без Dr/Cr).
     inline constexpr eosio::name CONVERT_TO_SHARE    = "o.cap.cnvshr"_n;   ///< Конвертация сегмента: РИД → главный кошелёк (TRANSFER GENERATOR_FUND → SHARE_FUND_PAY, без Dr/Cr — бухпроводка уже была сделана в ACCEPT_RID).
     inline constexpr eosio::name CONVERT_TO_BLAGO    = "o.cap.cnvbl"_n;    ///< Конвертация сегмента: РИД → ЦПП «Благорост» (TRANSFER GENERATOR_FUND → BLAGOROST_FUND, без Dr/Cr — бухпроводка уже была сделана в ACCEPT_RID).
+    inline constexpr eosio::name PROGRAM_EXPENSE_TOPUP = "o.cap.pgtop"_n; ///< Пополнение пула программных расходов из инвестиций программы (ISSUE PROGRAM_EXPENSE_POOL, без Dr/Cr — деньги уже на 51, выделяется кооперативный резерв под расходы; паевые L3-кошельки пайщиков не трогаются).
   }
 
   // marketplace
@@ -102,6 +103,9 @@ namespace operations {
   //
   // Принципы (см. components/desktop/extensions/expenses/NAMING-C28-28.md):
   //   - Контракт `expense` универсальный: operation_code передаётся в payload.
+  //   - Источник оплат — КООПЕРАТИВНЫЙ пул расходов (PROGRAM_EXPENSE_POOL),
+  //     пополняемый o.cap.pgtop; личные L3-кошельки пайщиков (w.cap.blago)
+  //     при оплатах СЗ не изменяются.
   //   - При расходе из Благороста паевой фонд (80) НЕ трогается: меняется только форма
   //     актива 51 → 08 (Дт 08 / Кт 51 для обеих механик).
   //   - ADVANCE-отчёт (`o.exp.advrpt`) НЕ создаёт новой бухпроводки: проводка уже
@@ -109,11 +113,11 @@ namespace operations {
   //   - Callback на финализацию — переменная (`callback{contract, action, data}`),
   //     заполняется при `expense::createexp`; expense ничего не знает про capital.
   namespace expense {
-    inline constexpr eosio::name BLAGO_ADVANCE    = "o.exp.blgadv"_n;   ///< Выдача подотчётных из ЦПП «Благорост» (TRANSFER BLAGOROST_FUND → ADVANCE_HOLD, Dr 08 / Cr 51).
-    inline constexpr eosio::name BLAGO_DIRECT     = "o.exp.blgdir"_n;   ///< Прямая оплата из ЦПП «Благорост» (BURN BLAGOROST_FUND, Dr 08 / Cr 51).
+    inline constexpr eosio::name BLAGO_ADVANCE    = "o.exp.blgadv"_n;   ///< Выдача подотчётных из пула расходов (TRANSFER PROGRAM_EXPENSE_POOL → ADVANCE_HOLD, Dr 08 / Cr 51).
+    inline constexpr eosio::name BLAGO_DIRECT     = "o.exp.blgdir"_n;   ///< Прямая оплата из пула расходов (BURN PROGRAM_EXPENSE_POOL, Dr 08 / Cr 51).
     inline constexpr eosio::name ADVANCE_REPORT   = "o.exp.advrpt"_n;   ///< Закрытие подотчёта пайщика (BURN ADVANCE_HOLD, без бухпроводки — canal 08/51 уже сделан на blgadv).
-    inline constexpr eosio::name ADVANCE_RETURN   = "o.exp.advret"_n;   ///< Возврат неиспользованного подотчёта (TRANSFER ADVANCE_HOLD → BLAGOROST_FUND, Dr 51 / Cr 08).
-    inline constexpr eosio::name OVERSPEND        = "o.exp.over"_n;     ///< Доплата сверх подотчёта (TRANSFER BLAGOROST_FUND → ADVANCE_HOLD, Dr 08 / Cr 51); сразу за ней expense вызывает ADVANCE_REPORT.
+    inline constexpr eosio::name ADVANCE_RETURN   = "o.exp.advret"_n;   ///< Возврат неиспользованного подотчёта (TRANSFER ADVANCE_HOLD → PROGRAM_EXPENSE_POOL, Dr 51 / Cr 08).
+    inline constexpr eosio::name OVERSPEND        = "o.exp.over"_n;     ///< Доплата сверх подотчёта (TRANSFER PROGRAM_EXPENSE_POOL → ADVANCE_HOLD, Dr 08 / Cr 51); сразу за ней expense вызывает ADVANCE_REPORT.
   }
 
   // migration (только из migrate.cpp)
@@ -370,6 +374,16 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
     0, 0,
     "Конвертация сегмента: РИД → ЦПП «Благорост»" },
 
+  // 19a. Пополнение пула программных расходов: ISSUE PROGRAM_EXPENSE_POOL, без Dr/Cr.
+  // Совет выделяет часть свободных инвестиций программы под целевые расходы:
+  // деньги физически на 51 с момента взносов, здесь появляется кооперативный
+  // резерв-кошелёк, из которого шасси expense оплачивает СЗ. Паевые L3-кошельки
+  // пайщиков (w.cap.blago, счёт 80) не изменяются — права требования сохраняются.
+  { operations::capital::PROGRAM_EXPENSE_TOPUP, processes::capital::PGEXP, WalletOp::ISSUE,
+    eosio::name{}, ledger2_wallets::PROGRAM_EXPENSE_POOL,
+    0, 0,
+    "Пополнение пула программных расходов ЦПП «Благорост»" },
+
   // ----- Шасси расходов (o.exp.*) — вызываются из контракта expense -----
   //
   // Базовое состояние Благороста ДО расхода:
@@ -380,21 +394,25 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
   // Принцип: расход не уменьшает паевой фонд (80). Меняется только форма актива
   // 51 → 08 (банк уходит, появляется WIP-проект).
 
-  // 20. Выдача подотчётных из Благороста: Dr 08 / Cr 51, TRANSFER BLAGOROST_FUND → ADVANCE_HOLD.
-  // Деньги физически уходят пайщику (Cr 51), стоимость капитализируется в WIP проекта (Dr 08).
-  // ADVANCE_HOLD фиксирует ответственность пайщика (USER_SHARED) до отчёта.
+  // 20. Выдача подотчётных из пула программных расходов: Dr 08 / Cr 51,
+  // TRANSFER PROGRAM_EXPENSE_POOL → ADVANCE_HOLD.
+  // Источник — КООПЕРАТИВНЫЙ пул расходов (пополняется o.cap.pgtop); личные
+  // L3-кошельки пайщиков (w.cap.blago) при оплате СЗ не трогаются — их паевые
+  // взносы в программе не уменьшаются. Деньги физически уходят пайщику (Cr 51),
+  // стоимость капитализируется в WIP (Dr 08). ADVANCE_HOLD фиксирует
+  // ответственность получателя аванса (USER_SHARED) до отчёта.
   { operations::expense::BLAGO_ADVANCE, processes::expense::PROPOSAL, WalletOp::TRANSFER,
-    ledger2_wallets::BLAGOROST_FUND, ledger2_wallets::ADVANCE_HOLD,
+    ledger2_wallets::PROGRAM_EXPENSE_POOL, ledger2_wallets::ADVANCE_HOLD,
     ledger2_accounts::NON_CURRENT_INVESTMENTS, ledger2_accounts::BANK_ACCOUNT,
-    "Выдача подотчётных из ЦПП «Благорост»" },
+    "Выдача подотчётных из пула расходов ЦПП «Благорост»" },
 
-  // 21. Прямая оплата из Благороста (DIRECT): Dr 08 / Cr 51, BURN BLAGOROST_FUND.
-  // Прямая оплата организации; деньги уходят с 51, стоимость капитализируется в 08.
-  // Кошелёк-резерв не задействован — оплата фиксируется сразу.
+  // 21. Прямая оплата из пула программных расходов (DIRECT): Dr 08 / Cr 51,
+  // BURN PROGRAM_EXPENSE_POOL. Оплата организации по счёту; деньги уходят с 51,
+  // стоимость капитализируется в 08. Кошелёк-резерв не задействован.
   { operations::expense::BLAGO_DIRECT, processes::expense::PROPOSAL, WalletOp::BURN,
-    ledger2_wallets::BLAGOROST_FUND, eosio::name{},
+    ledger2_wallets::PROGRAM_EXPENSE_POOL, eosio::name{},
     ledger2_accounts::NON_CURRENT_INVESTMENTS, ledger2_accounts::BANK_ACCOUNT,
-    "Прямая оплата из ЦПП «Благорост»" },
+    "Прямая оплата из пула расходов ЦПП «Благорост»" },
 
   // 22. Закрытие подотчёта пайщика по отчёту: BURN ADVANCE_HOLD, БЕЗ бухпроводки.
   // Проводка Dr 08 / Cr 51 уже сделана на BLAGO_ADVANCE при выдаче. При отчёте только
@@ -404,18 +422,21 @@ static constexpr OperationRegistryEntry OPERATION_REGISTRY[] = {
     0, 0,
     "Закрытие подотчёта пайщика по отчёту" },
 
-  // 23. Возврат неиспользованного подотчёта: Dr 51 / Cr 08, TRANSFER ADVANCE_HOLD → BLAGOROST_FUND.
-  // Зеркало BLAGO_ADVANCE: деньги возвращаются на 51, WIP-стоимость уменьшается.
+  // 23. Возврат неиспользованного подотчёта: Dr 51 / Cr 08,
+  // TRANSFER ADVANCE_HOLD → PROGRAM_EXPENSE_POOL.
+  // Зеркало BLAGO_ADVANCE: деньги возвращаются на 51, WIP-стоимость уменьшается,
+  // остаток снова доступен пулу расходов.
   { operations::expense::ADVANCE_RETURN, processes::expense::PROPOSAL, WalletOp::TRANSFER,
-    ledger2_wallets::ADVANCE_HOLD, ledger2_wallets::BLAGOROST_FUND,
+    ledger2_wallets::ADVANCE_HOLD, ledger2_wallets::PROGRAM_EXPENSE_POOL,
     ledger2_accounts::BANK_ACCOUNT, ledger2_accounts::NON_CURRENT_INVESTMENTS,
-    "Возврат неиспользованного подотчёта в ЦПП «Благорост»" },
+    "Возврат неиспользованного подотчёта в пул расходов" },
 
-  // 24. Доплата сверх подотчёта (перерасход): Dr 08 / Cr 51, TRANSFER BLAGOROST_FUND → ADVANCE_HOLD.
+  // 24. Доплата сверх подотчёта (перерасход): Dr 08 / Cr 51,
+  // TRANSFER PROGRAM_EXPENSE_POOL → ADVANCE_HOLD.
   // Зеркало BLAGO_ADVANCE на сумму перерасхода. Контракт expense сразу за OVERSPEND
   // вызывает ADVANCE_REPORT — две последовательные записи в одной транзакции `expense::overspendexp`.
   { operations::expense::OVERSPEND, processes::expense::PROPOSAL, WalletOp::TRANSFER,
-    ledger2_wallets::BLAGOROST_FUND, ledger2_wallets::ADVANCE_HOLD,
+    ledger2_wallets::PROGRAM_EXPENSE_POOL, ledger2_wallets::ADVANCE_HOLD,
     ledger2_accounts::NON_CURRENT_INVESTMENTS, ledger2_accounts::BANK_ACCOUNT,
     "Доплата сверх подотчёта (перерасход)" },
 

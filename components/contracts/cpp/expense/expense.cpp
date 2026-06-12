@@ -209,6 +209,7 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
 
   bool item_found = false;
   uint8_t paid_mechanics = 0;
+  name paid_recipient{};
 
   idx.modify(it, get_self(), [&](auto& row) {
     bool all_reported = true;
@@ -227,6 +228,7 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
           ? static_cast<uint8_t>(D::ItemStatus::REPORTED)
           : static_cast<uint8_t>(D::ItemStatus::PAID);
         paid_mechanics = i.mechanics;
+        paid_recipient = i.recipient;
         item_found = true;
       }
       if (i.status != static_cast<uint8_t>(D::ItemStatus::REPORTED)) {
@@ -244,8 +246,10 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
 
   // ledger2-проводка по механике оплаченного item'а — выдача аванса (blgadv)
   // или прямая оплата (blgdir). СЗ может смешивать обе механики.
+  // Источник — кооперативный пул расходов; username нужен ledger2 только для
+  // USER_SHARED-стороны (w.exp.adv) — это ПОЛУЧАТЕЛЬ аванса, не автор СЗ.
   Ledger2::apply(get_self(), coopname, operation_code_for(paid_mechanics), actual_amount,
-                 it->username, proposal_hash, "expense:payexp");
+                 paid_recipient, proposal_hash, "expense:payexp");
 }
 
 void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 item_hash) {
@@ -260,6 +264,7 @@ void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 it
 
   asset item_amount = asset{0, it->total_actual.symbol};
   bool item_found = false;
+  name item_recipient{};
 
   idx.modify(it, get_self(), [&](auto& row) {
     bool all_reported = true;
@@ -271,6 +276,7 @@ void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 it
                      "reportexp применим только к ADVANCE-механике");
         i.status   = static_cast<uint8_t>(D::ItemStatus::REPORTED);
         item_amount = i.actual_amount;
+        item_recipient = i.recipient;
         item_found  = true;
       }
       if (i.status != static_cast<uint8_t>(D::ItemStatus::REPORTED)) {
@@ -286,10 +292,11 @@ void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 it
 
   // ledger2: BURN ADVANCE_HOLD на остаточный actual item'а (выдано − возвращено
   // + доплачено), без бухпроводки — canal 08/51 уже сделан на blgadv/over.
+  // Подотчёт числится на получателе аванса — его username и закрывает burn.
   // Полный возврат аванса (actual == 0) — burn не нужен, ADVANCE_HOLD уже пуст.
   if (item_amount.amount > 0) {
     Ledger2::apply(get_self(), coopname, operations::expense::ADVANCE_REPORT, item_amount,
-                   it->username, proposal_hash, "expense:reportexp");
+                   item_recipient, proposal_hash, "expense:reportexp");
   }
 }
 
@@ -326,6 +333,7 @@ void expense::returnexp(name coopname, checksum256 proposal_hash, checksum256 it
                "Возврат возможен только по СЗ в статусе PARTIALLY_PAID");
 
   bool item_found = false;
+  name item_recipient{};
 
   idx.modify(it, get_self(), [&](auto& row) {
     for (auto& i : row.items) {
@@ -343,6 +351,7 @@ void expense::returnexp(name coopname, checksum256 proposal_hash, checksum256 it
         // возврата остатка получатель штатно отчитывается reportexp по
         // фактически потраченной части (при полном возврате — actual == 0).
         i.actual_amount -= return_amount;
+        item_recipient = i.recipient;
         item_found = true;
         break;
       }
@@ -352,9 +361,10 @@ void expense::returnexp(name coopname, checksum256 proposal_hash, checksum256 it
     row.updated_at   = eosio::current_time_point();
   });
 
-  // ledger2: TRANSFER ADVANCE_HOLD → BLAGOROST_FUND, Dr 51 / Cr 08.
+  // ledger2: TRANSFER ADVANCE_HOLD → PROGRAM_EXPENSE_POOL, Dr 51 / Cr 08.
+  // Подотчёт снимается с получателя аванса.
   Ledger2::apply(get_self(), coopname, operations::expense::ADVANCE_RETURN, return_amount,
-                 it->username, proposal_hash, "expense:returnexp");
+                 item_recipient, proposal_hash, "expense:returnexp");
 }
 
 void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256 item_hash,
@@ -370,6 +380,7 @@ void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256
                "Перерасход возможен только по СЗ в статусе PARTIALLY_PAID");
 
   bool item_found = false;
+  name item_recipient{};
 
   idx.modify(it, get_self(), [&](auto& row) {
     for (auto& i : row.items) {
@@ -385,6 +396,7 @@ void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256
         // (теперь на полную сумму выдано + доплата) закрывается штатным reportexp,
         // который сделает burn ADVANCE_HOLD на итоговый actual.
         i.actual_amount += overspend_amount;
+        item_recipient = i.recipient;
         item_found = true;
         break;
       }
@@ -394,8 +406,8 @@ void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256
     row.updated_at   = eosio::current_time_point();
   });
 
-  // ledger2: OVERSPEND — выдача доплаты (TRANSFER BLAGOROST_FUND → ADVANCE_HOLD,
-  // Dr 08 / Cr 51). Закрытие подотчёта на полную сумму — в reportexp.
+  // ledger2: OVERSPEND — выдача доплаты (TRANSFER PROGRAM_EXPENSE_POOL → ADVANCE_HOLD,
+  // Dr 08 / Cr 51) на подотчёт получателя. Закрытие на полную сумму — в reportexp.
   Ledger2::apply(get_self(), coopname, operations::expense::OVERSPEND, overspend_amount,
-                 it->username, proposal_hash, "expense:overspend");
+                 item_recipient, proposal_hash, "expense:overspend");
 }
