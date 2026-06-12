@@ -88,16 +88,6 @@ class ExpenseProposalDecisionBodyInputDTO implements DecisionBody {
   @IsOptional()
   @IsString()
   reason?: string;
-
-  @Field({ description: 'Номер протокола', nullable: true })
-  @IsOptional()
-  @IsString()
-  protocol_number?: string;
-
-  @Field({ description: 'Дата протокола', nullable: true })
-  @IsOptional()
-  @IsString()
-  protocol_date?: string;
 }
 
 @InputType('BaseExpenseProposalDecisionMetaDocumentInput')
@@ -106,6 +96,10 @@ class BaseExpenseProposalDecisionMetaDocumentInputDTO implements Omit<Action, 'c
   @IsString()
   @IsNotEmpty()
   proposal_hash!: string;
+
+  @Field(() => Int, { description: 'Идентификатор решения совета (повестка) — источник данных голосования' })
+  @IsInt()
+  decision_id!: number;
 
   @Field(() => ExpenseProposalDecisionHeaderInputDTO, { description: 'Шапка СЗ' })
   @ValidateNested()
@@ -119,10 +113,10 @@ class BaseExpenseProposalDecisionMetaDocumentInputDTO implements Omit<Action, 'c
   @Type(() => ExpenseProposalDecisionItemInputDTO)
   items!: ExpenseProposalDecisionItemInputDTO[];
 
-  @Field(() => ExpenseProposalDecisionBodyInputDTO, { description: 'Тело решения' })
+  @Field(() => ExpenseProposalDecisionBodyInputDTO, { description: 'Резолюция совета (утвердить / отказать)' })
   @ValidateNested()
   @Type(() => ExpenseProposalDecisionBodyInputDTO)
-  decision!: ExpenseProposalDecisionBodyInputDTO;
+  resolution!: ExpenseProposalDecisionBodyInputDTO;
 }
 
 /**

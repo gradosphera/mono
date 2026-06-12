@@ -62,18 +62,17 @@ export function registerCapitalDecisionHandlers() {
       const { info } = useSystemStore();
       const session = useSessionStore();
 
-      // Протокол решения подписывает председатель — документ генерируется на его имя.
+      // Протокол решения подписывает председатель — документ генерируется на его
+      // имя. Данные собрания (кворум, голоса, № протокола) фабрика берёт сама
+      // по decision_id — канон протоколов решений совета.
       const generated = await generateExpenseProposalDecisionDocument({
         coopname: info.coopname,
         username: session.username,
         proposal_hash: parsedDocumentMeta.proposal_hash,
+        decision_id,
         proposal: parsedDocumentMeta.proposal,
         items: parsedDocumentMeta.items,
-        decision: {
-          kind: 'approve',
-          protocol_number: String(decision_id),
-          protocol_date: new Date().toLocaleDateString('ru-RU'),
-        },
+        resolution: { kind: 'approve' },
       } as any);
 
       return (generated as any).generateExpenseProposalDecisionDocument;

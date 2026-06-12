@@ -5343,10 +5343,6 @@ export type ValueTypes = {
 	["ExpenseProposalDecisionBodyInput"]: {
 	/** Род решения (approve / decline) */
 	kind: string | Variable<any, string>,
-	/** Дата протокола */
-	protocol_date?: string | undefined | null | Variable<any, string>,
-	/** Номер протокола */
-	protocol_number?: string | undefined | null | Variable<any, string>,
 	/** Причина отказа (для decline) */
 	reason?: string | undefined | null | Variable<any, string>
 };
@@ -5357,8 +5353,8 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null | Variable<any, string>,
-	/** Тело решения */
-	decision: ValueTypes["ExpenseProposalDecisionBodyInput"] | Variable<any, string>,
+	/** Идентификатор решения совета (повестка) — источник данных голосования */
+	decision_id: number | Variable<any, string>,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null | Variable<any, string>,
 	/** Позиции расхода */
@@ -5371,6 +5367,8 @@ export type ValueTypes = {
 	proposal: ValueTypes["ExpenseProposalDecisionHeaderInput"] | Variable<any, string>,
 	/** Хеш сметы расхода */
 	proposal_hash: string | Variable<any, string>,
+	/** Резолюция совета (утвердить / отказать) */
+	resolution: ValueTypes["ExpenseProposalDecisionBodyInput"] | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null | Variable<any, string>,
 	/** Название документа */
@@ -14379,10 +14377,6 @@ export type ResolverInputTypes = {
 	["ExpenseProposalDecisionBodyInput"]: {
 	/** Род решения (approve / decline) */
 	kind: string,
-	/** Дата протокола */
-	protocol_date?: string | undefined | null,
-	/** Номер протокола */
-	protocol_number?: string | undefined | null,
 	/** Причина отказа (для decline) */
 	reason?: string | undefined | null
 };
@@ -14393,8 +14387,8 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
-	/** Тело решения */
-	decision: ResolverInputTypes["ExpenseProposalDecisionBodyInput"],
+	/** Идентификатор решения совета (повестка) — источник данных голосования */
+	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Позиции расхода */
@@ -14407,6 +14401,8 @@ export type ResolverInputTypes = {
 	proposal: ResolverInputTypes["ExpenseProposalDecisionHeaderInput"],
 	/** Хеш сметы расхода */
 	proposal_hash: string,
+	/** Резолюция совета (утвердить / отказать) */
+	resolution: ResolverInputTypes["ExpenseProposalDecisionBodyInput"],
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -23154,10 +23150,6 @@ export type ModelTypes = {
 	["ExpenseProposalDecisionBodyInput"]: {
 	/** Род решения (approve / decline) */
 	kind: string,
-	/** Дата протокола */
-	protocol_date?: string | undefined | null,
-	/** Номер протокола */
-	protocol_number?: string | undefined | null,
 	/** Причина отказа (для decline) */
 	reason?: string | undefined | null
 };
@@ -23168,8 +23160,8 @@ export type ModelTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
-	/** Тело решения */
-	decision: ModelTypes["ExpenseProposalDecisionBodyInput"],
+	/** Идентификатор решения совета (повестка) — источник данных голосования */
+	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Позиции расхода */
@@ -23182,6 +23174,8 @@ export type ModelTypes = {
 	proposal: ModelTypes["ExpenseProposalDecisionHeaderInput"],
 	/** Хеш сметы расхода */
 	proposal_hash: string,
+	/** Резолюция совета (утвердить / отказать) */
+	resolution: ModelTypes["ExpenseProposalDecisionBodyInput"],
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -32723,10 +32717,6 @@ export type GraphQLTypes = {
 	["ExpenseProposalDecisionBodyInput"]: {
 		/** Род решения (approve / decline) */
 	kind: string,
-	/** Дата протокола */
-	protocol_date?: string | undefined | null,
-	/** Номер протокола */
-	protocol_number?: string | undefined | null,
 	/** Причина отказа (для decline) */
 	reason?: string | undefined | null
 };
@@ -32737,8 +32727,8 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at?: string | undefined | null,
-	/** Тело решения */
-	decision: GraphQLTypes["ExpenseProposalDecisionBodyInput"],
+	/** Идентификатор решения совета (повестка) — источник данных голосования */
+	decision_id: number,
 	/** Имя генератора, использованного для создания документа */
 	generator?: string | undefined | null,
 	/** Позиции расхода */
@@ -32751,6 +32741,8 @@ export type GraphQLTypes = {
 	proposal: GraphQLTypes["ExpenseProposalDecisionHeaderInput"],
 	/** Хеш сметы расхода */
 	proposal_hash: string,
+	/** Резолюция совета (утвердить / отказать) */
+	resolution: GraphQLTypes["ExpenseProposalDecisionBodyInput"],
 	/** Часовой пояс, в котором был создан документ */
 	timezone?: string | undefined | null,
 	/** Название документа */
@@ -38705,6 +38697,7 @@ export enum PaymentStatus {
 /** Тип платежа по назначению */
 export enum PaymentType {
 	DEPOSIT = "DEPOSIT",
+	EXPENSE = "EXPENSE",
 	REGISTRATION = "REGISTRATION",
 	REGISTRATION_REFUND = "REGISTRATION_REFUND",
 	WITHDRAWAL = "WITHDRAWAL"

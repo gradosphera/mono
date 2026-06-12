@@ -141,4 +141,12 @@ export interface InterExpenseChassisPort {
    * метода пайщиком не меняет то, куда платить по уже поданной смете.
    */
   snapshotRequisites(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void>;
+
+  /**
+   * On-chain оплата позиции СЗ (`expense::payexp`) под подписью кооператива.
+   * Вызывается реестром платежей (gateway) при подтверждении кассиром
+   * исходящего платежа типа EXPENSE. `actualAmount` — raw asset
+   * (например "1000.0000 RUB").
+   */
+  payItem(coopname: string, proposalHash: string, itemHash: string, actualAmount: string): Promise<void>;
 }

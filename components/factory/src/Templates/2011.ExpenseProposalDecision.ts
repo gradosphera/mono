@@ -2,8 +2,8 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
+import { decisionSchema } from '../Schema/DecisionSchema'
 import {
-  CommonUserSchema,
   CooperativeSchema,
   ExpenseItemSchema,
   ExpenseProposalDecisionBodySchema,
@@ -21,8 +21,15 @@ export const Schema: JSONSchemaType<Model> = {
   properties: {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
-    user: CommonUserSchema,
     vars: VarsSchema,
+    decision: {
+      type: 'object',
+      properties: {
+        ...decisionSchema.properties,
+      },
+      required: [...decisionSchema.required],
+      additionalProperties: true,
+    },
     proposal_hash: { type: 'string' },
     proposal_short_hash: { type: 'string' },
     proposal: ExpenseProposalHeaderSchema,
@@ -30,9 +37,9 @@ export const Schema: JSONSchemaType<Model> = {
       type: 'array',
       items: ExpenseItemSchema,
     },
-    decision: ExpenseProposalDecisionBodySchema,
+    resolution: ExpenseProposalDecisionBodySchema,
   },
-  required: ['meta', 'coop', 'user', 'vars', 'proposal_hash', 'proposal_short_hash', 'proposal', 'items', 'decision'],
+  required: ['meta', 'coop', 'vars', 'decision', 'proposal_hash', 'proposal_short_hash', 'proposal', 'items', 'resolution'],
   additionalProperties: true,
 }
 

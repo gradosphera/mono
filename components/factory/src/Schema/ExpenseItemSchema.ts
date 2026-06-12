@@ -23,8 +23,6 @@ export interface IExpenseProposalHeader {
 export interface IExpenseProposalDecisionBody {
   kind: 'approve' | 'decline'
   reason?: string
-  protocol_number?: string
-  protocol_date?: string
 }
 
 export const ExpenseItemSchema: JSONSchemaType<IExpenseItem> = {
@@ -62,8 +60,6 @@ export const ExpenseProposalDecisionBodySchema: JSONSchemaType<IExpenseProposalD
   properties: {
     kind: { type: 'string', enum: ['approve', 'decline'] },
     reason: { type: 'string', nullable: true },
-    protocol_number: { type: 'string', nullable: true },
-    protocol_date: { type: 'string', nullable: true },
   },
   required: ['kind'],
   additionalProperties: true,

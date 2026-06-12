@@ -63,15 +63,14 @@ q-page.program-expenses-page
             .row-card__amount {{ item.total_planned }}
             .row-card__meta
               .meta-row
+                .meta-key № служебной записки
+                .meta-val.t-mono {{ shortId(item.expense_hash) }}
+              .meta-row
                 .meta-key Инициатор
                 .meta-val {{ item.creator_name || item.creator }}
               .meta-row
-                .meta-key Способ оплаты
-                .meta-val {{ mechanicsSummary(item.items) }}
-              .meta-row
                 .meta-key Создан
                 .meta-val {{ formatDate(item.created_at) }}
-            .row-card__hash {{ shortHash(item.expense_hash) }}
 
   .empty(v-else)
     EmptyState(
@@ -145,17 +144,9 @@ async function refresh(): Promise<void> {
 
 onMounted(refresh);
 
-// Способ оплаты задаётся на каждой позиции; в карточке — сводка по всем строкам.
-function mechanicsSummary(items: Array<{ mechanics: Zeus.ExpenseMechanics }>): string {
-  const hasAdvance = items.some((i) => i.mechanics === Zeus.ExpenseMechanics.ADVANCE);
-  const hasDirect = items.some((i) => i.mechanics === Zeus.ExpenseMechanics.DIRECT);
-  if (hasAdvance && hasDirect) return 'Аванс + прямая оплата';
-  if (hasDirect) return 'Прямая оплата';
-  return 'Аванс под отчёт';
-}
-
-function shortHash(h: string): string {
-  return h.length > 12 ? `${h.slice(0, 8)}…${h.slice(-4)}` : h;
+// Короткий идентификатор СЗ — как № в документе (первые 16 символов хэша).
+function shortId(h: string): string {
+  return h.slice(0, 16).toUpperCase();
 }
 
 function formatDate(iso: string): string {
@@ -260,12 +251,6 @@ function statusVariant(
 
 .meta-val {
   color: var(--p-ink);
-}
-
-.row-card__hash {
-  font-family: var(--p-font-mono, monospace);
-  font-size: var(--p-fs-meta);
-  color: var(--p-ink-2);
 }
 
 .empty {

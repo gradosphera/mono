@@ -63,6 +63,30 @@
             dense
           )
 
+        //- Оплата расхода: получатель-организация и её реквизиты приходят
+        //- свободной строкой из снимка СЗ (не платёжным методом пайщика).
+        .col-12.col-md-6(v-if='freeData?.recipient_name')
+          CopyableInput.full-width(
+            :label='"Получатель"',
+            :model-value='freeData.recipient_name',
+            dense
+          )
+
+        .col-12(v-if='freeData?.requisites')
+          CopyableInput.full-width(
+            :label='"Реквизиты получателя"',
+            :model-value='freeData.requisites',
+            dense,
+            input-class='font-mono'
+          )
+
+        .col-12(v-if='expenseDescription')
+          CopyableInput.full-width(
+            :label='"Что оплачиваем"',
+            :model-value='expenseDescription',
+            dense
+          )
+
         .col-12.col-md-6(v-if='payment.memo')
           CopyableInput.full-width(
             :label='"Назначение платежа"',
@@ -139,6 +163,24 @@ const sbpData = computed(() => {
   // Проверяем, является ли это СБП аккаунтом (есть поле phone)
   if (data && typeof data === 'object' && 'phone' in data) {
     return data as ISbpAccount;
+  }
+  return null;
+});
+
+// Свободные реквизиты (оплата расхода организации/ИП по снимку СЗ)
+const freeData = computed(() => {
+  const data = payment.payment_details?.data;
+  if (data && typeof data === 'object' && ('requisites' in data || 'recipient_name' in data)) {
+    return data as { recipient_name?: string; requisites?: string };
+  }
+  return null;
+});
+
+// Описание позиции расхода — кассиру важно видеть, что именно оплачивается
+const expenseDescription = computed(() => {
+  const data = payment.blockchain_data;
+  if (data && typeof data === 'object' && 'description' in data) {
+    return (data as { description?: string }).description || null;
   }
   return null;
 });

@@ -457,9 +457,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	ExpenseProposalDecisionGenerateDocumentInput:{
-		decision:"ExpenseProposalDecisionBodyInput",
 		items:"ExpenseProposalDecisionItemInput",
-		proposal:"ExpenseProposalDecisionHeaderInput"
+		proposal:"ExpenseProposalDecisionHeaderInput",
+		resolution:"ExpenseProposalDecisionBodyInput"
 	},
 	ExpenseProposalDecisionHeaderInput:{
 

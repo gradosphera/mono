@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import type {
@@ -13,13 +13,18 @@ import type {
 import { ExpenseProposalTypeormEntity } from '../entities/expense-proposal.typeorm-entity';
 import { ExpenseProposalStatus } from '../../domain/enums/expense-proposal-status.enum';
 import { ExpenseRequisiteSnapshotsService } from '../../application/services/expense-requisite-snapshots.service';
+import {
+  EXPENSES_BLOCKCHAIN_PORT,
+  ExpensesBlockchainPort,
+} from '../../domain/interfaces/expenses-blockchain.port';
 
 /**
- * Реализация `InterExpenseChassisPort` для consumer-расширений (capital, marketplace, EMP).
+ * Реализация `InterExpenseChassisPort` для consumer-расширений (capital, marketplace, EMP)
+ * и реестра платежей (gateway).
  *
  * Adapter — тонкий: читает из локального TypeORM-зеркала proposals + items, проектирует
- * во внешний нейтральный DTO `@coopenomics/inter`. Не зовёт blockchain напрямую (для этого
- * есть `ExpenseProposalSyncService`), не открывает write API.
+ * во внешний нейтральный DTO `@coopenomics/inter`. Единственный write — `payItem`
+ * (on-chain `expense::payexp` при подтверждении исходящего платежа кассиром).
  */
 @Injectable()
 export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPort {
@@ -27,7 +32,18 @@ export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPo
     @InjectRepository(ExpenseProposalTypeormEntity)
     private readonly repository: Repository<ExpenseProposalTypeormEntity>,
     private readonly requisiteSnapshots: ExpenseRequisiteSnapshotsService,
+    @Inject(EXPENSES_BLOCKCHAIN_PORT)
+    private readonly chain: ExpensesBlockchainPort,
   ) {}
+
+  async payItem(coopname: string, proposalHash: string, itemHash: string, actualAmount: string): Promise<void> {
+    await this.chain.payExp({
+      coopname,
+      proposal_hash: proposalHash.toLowerCase(),
+      item_hash: itemHash.toLowerCase(),
+      actual_amount: actualAmount,
+    });
+  }
 
   async validateRequisites(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void> {
     await this.requisiteSnapshots.validate(coopname, items);

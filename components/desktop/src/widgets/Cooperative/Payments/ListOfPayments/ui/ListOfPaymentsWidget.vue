@@ -54,6 +54,13 @@
               tr.expand-row(v-if='expanded.get(row.id)')
                 td(:colspan='hideActions ? 7 : 8')
                   PaymentDetails(:payment='row')
+                  //- Оплата расхода по счёту: кассир прикладывает платёжку/квитанцию
+                  //- прямо в реестре после подтверждения оплаты.
+                  AttachExpenseProofPanel.q-mt-sm(
+                    v-if='expenseProofRef(row)',
+                    :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
+                    :item-hash='expenseProofRef(row)?.item_hash ?? ""'
+                  )
 
       .table-foot
         span {{ rangeLabel }}
@@ -90,7 +97,13 @@
         )
           SetOrderPaidStatusButton(:id='row.id')
           SetOrderRefundedStatusButton(v-if='!isRefundType(row.type)', :id='row.id')
-        PaymentDetails.pay-card__details(v-if='expanded.get(row.id)', :payment='row')
+        template(v-if='expanded.get(row.id)')
+          PaymentDetails.pay-card__details(:payment='row')
+          AttachExpenseProofPanel.q-mt-sm(
+            v-if='expenseProofRef(row)',
+            :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
+            :item-hash='expenseProofRef(row)?.item_hash ?? ""'
+          )
 
       .table-foot
         span {{ rangeLabel }}
@@ -117,6 +130,7 @@ import { FailAlert } from 'src/shared/api';
 import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
+import { AttachExpenseProofPanel } from 'src/features/Payment/AttachExpenseProof';
 import { PaymentDetails } from 'src/shared/ui';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import type { BaseBadgeVariant } from 'src/shared/ui/base/BaseBadge';
@@ -170,14 +184,27 @@ const getStatusVariant = (status?: string | null): BaseBadgeVariant => {
 const isIncoming = (direction?: string | null): boolean =>
   direction === Zeus.PaymentDirection.INCOMING;
 
-// Возврат вступительного/мин.паевого взноса при отказе совета — отклонению не
-// подлежит (см. шаблон): у такого исходящего платежа только «Подтвердить».
+// Платежи, которые кассир не может отклонить — только «Подтвердить»:
+// возврат вступительного/мин.паевого (совет уже отказал в приёме) и оплата
+// расхода по СЗ (совет уже утвердил расход; отказ — только решением совета).
 const isRefundType = (type?: string | null): boolean =>
-  type === Zeus.PaymentType.REGISTRATION_REFUND;
+  type === Zeus.PaymentType.REGISTRATION_REFUND || type === Zeus.PaymentType.EXPENSE;
 
 // Material-иконки (канон запрещает FontAwesome fa-*).
 const getDirectionIcon = (direction?: string | null) => {
   return isIncoming(direction) ? 'arrow_downward' : 'arrow_upward';
+};
+
+// Ссылка на позицию СЗ для блока «Подтверждение оплаты»: только у платежей
+// расхода и только после подтверждения кассиром (платёжка появляется по факту).
+const expenseProofRef = (
+  row: IPaymentRow,
+): { proposal_hash: string; item_hash: string } | null => {
+  if (row.type !== Zeus.PaymentType.EXPENSE) return null;
+  if (![Zeus.PaymentStatus.PAID, Zeus.PaymentStatus.COMPLETED].includes(row.status)) return null;
+  const data = row.blockchain_data as { proposal_hash?: string; item_hash?: string } | null;
+  if (!data?.proposal_hash || !data?.item_hash) return null;
+  return { proposal_hash: data.proposal_hash, item_hash: data.item_hash };
 };
 
 // Колонки скелетона повторяют шапку реальной таблицы платежей; колонка

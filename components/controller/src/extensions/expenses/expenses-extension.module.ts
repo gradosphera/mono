@@ -18,6 +18,7 @@ import { ExpensesManagementService } from './application/services/expenses-manag
 import { ExpensesMutationsService } from './application/services/expenses-mutations.service';
 import { ExpenseRequisiteSnapshotsService } from './application/services/expense-requisite-snapshots.service';
 import { ExpensesCapitalTriggerService } from './application/services/expenses-capital-trigger.service';
+import { ExpensePaymentsListener } from './application/services/expense-payments.listener';
 import { ExpenseFilesService } from './application/services/expense-files.service';
 import { ExpenseProposalResolver } from './application/resolvers/expense-proposal.resolver';
 import { ExpenseMutationsResolver } from './application/resolvers/expense-mutations.resolver';
@@ -70,6 +71,7 @@ import { ExpensesInterExpenseChassisAdapter } from './infrastructure/inter/expen
     ExpenseRequisiteSnapshotsService,
     ExpensesMutationsService,
     ExpensesCapitalTriggerService,
+    ExpensePaymentsListener,
     ExpenseFilesService,
     ExpenseProposalResolver,
     ExpenseMutationsResolver,

@@ -9,6 +9,10 @@ export enum PaymentTypeEnum {
   // Исходящий возврат вступительного и мин. паевого взносов при отказе совета
   // в приёме. Отдельный тип, не WITHDRAWAL — чтобы не путать с возвратом паевого.
   REGISTRATION_REFUND = 'registration_refund',
+  // Исходящая оплата позиции служебной записки-сметы (шасси expense). Создаётся
+  // автоматически после авторизации СЗ советом; подтверждение кассиром проводит
+  // on-chain оплату expense::payexp по позиции.
+  EXPENSE = 'expense',
 }
 
 /**
@@ -27,6 +31,7 @@ export const PAYMENT_TYPE_LABELS: Record<PaymentTypeEnum, string> = {
   [PaymentTypeEnum.DEPOSIT]: 'Паевой взнос',
   [PaymentTypeEnum.WITHDRAWAL]: 'Возврат паевого взноса',
   [PaymentTypeEnum.REGISTRATION_REFUND]: 'Возврат вступит. и мин.паевого взноса',
+  [PaymentTypeEnum.EXPENSE]: 'Оплата расхода по служебной записке',
 };
 
 /**
@@ -62,4 +67,8 @@ export const INCOMING_PAYMENT_TYPES = [PaymentTypeEnum.REGISTRATION, PaymentType
 /**
  * Исходящие типы платежей
  */
-export const OUTGOING_PAYMENT_TYPES = [PaymentTypeEnum.WITHDRAWAL, PaymentTypeEnum.REGISTRATION_REFUND];
+export const OUTGOING_PAYMENT_TYPES = [
+  PaymentTypeEnum.WITHDRAWAL,
+  PaymentTypeEnum.REGISTRATION_REFUND,
+  PaymentTypeEnum.EXPENSE,
+];

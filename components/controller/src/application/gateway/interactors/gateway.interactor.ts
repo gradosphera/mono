@@ -26,6 +26,7 @@ import { AccountType } from '~/application/account/enum/account-type.enum';
 import { PaymentMethodRepository, PAYMENT_METHOD_REPOSITORY } from '~/domain/common/repositories/payment-method.repository';
 import type { PaymentDetailsDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface';
 import { AccountDomainPort, ACCOUNT_DOMAIN_PORT } from '~/domain/account/ports/account-domain.port';
+import { INTER_EXPENSE_CHASSIS, type InterExpenseChassisPort } from '@coopenomics/inter';
 
 /**
  * Интерактор домена gateway для управления платежами (просмотр, изменение статуса и создание)
@@ -54,7 +55,9 @@ export class GatewayInteractor {
     @Inject(ACCOUNT_DOMAIN_SERVICE)
     private readonly accountDomainService: AccountDomainService,
     @Inject(PAYMENT_METHOD_REPOSITORY)
-    private readonly paymentMethodRepository: PaymentMethodRepository
+    private readonly paymentMethodRepository: PaymentMethodRepository,
+    @Inject(INTER_EXPENSE_CHASSIS)
+    private readonly expenseChassis: InterExpenseChassisPort
   ) {}
 
   /**
@@ -242,6 +245,33 @@ export class GatewayInteractor {
           }
           this.logger.error(`Ошибка подтверждения возврата регистрации ${payment.hash}: ${message}`, e);
         }
+      }
+      return;
+    }
+
+    // Оплата позиции СЗ-расхода: подтверждение кассой проводит on-chain
+    // expense::payexp (ledger2-проводка по механике позиции — аванс/оплата по
+    // счёту). Реквизиты и назначение платежа в чейн не уходят — они живут
+    // только в этом платеже и снимке шасси. proposal_hash — в blockchain_data
+    // (hash платежа = item_hash, его одного payexp недостаточно).
+    if (payment.type === PaymentTypeEnum.EXPENSE) {
+      const proposalHash = (payment.blockchain_data as { proposal_hash?: string } | undefined)?.proposal_hash;
+      try {
+        if (!proposalHash) {
+          throw new Error(`У платежа расхода ${payment.hash} отсутствует proposal_hash в blockchain_data`);
+        }
+        const actualAmount = QuantityUtils.formatQuantityForBlockchain(payment.quantity, payment.symbol);
+        await this.expenseChassis.payItem(payment.coopname, proposalHash, payment.hash, actualAmount);
+        if (payment.id) {
+          await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.COMPLETED });
+        }
+        this.logger.log(`Оплата позиции расхода ${payment.hash} (СЗ ${proposalHash}) проведена on-chain (payexp)`);
+      } catch (e: any) {
+        const message = e?.message ?? String(e);
+        if (payment.id) {
+          await this.paymentRepository.update(payment.id, { status: PaymentStatusEnum.FAILED, message });
+        }
+        this.logger.error(`Ошибка оплаты позиции расхода ${payment.hash}: ${message}`, e);
       }
       return;
     }
