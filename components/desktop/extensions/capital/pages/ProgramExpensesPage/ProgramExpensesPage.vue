@@ -52,33 +52,13 @@ q-page.program-expenses-page
         :loading='!configStore.state'
       )
 
-  .content(v-if='store.programExpenses && store.programExpenses.items.length')
-    .row.q-col-gutter-md
-      .col-12.col-md-6.col-lg-4(v-for='item in store.programExpenses.items', :key='item.expense_hash')
-        BaseCard.row-card-link(@click='openExpense(item.expense_hash)')
-          .row-card
-            .row-card__head
-              .row-card__title {{ item.items[0]?.description || '— без описания —' }}
-              BaseChip(:variant='statusVariant(item.status)') {{ statusLabel(item.status) }}
-            .row-card__amount {{ item.total_planned }}
-            .row-card__meta
-              .meta-row
-                .meta-key № служебной записки
-                .meta-val.t-mono {{ shortId(item.expense_hash) }}
-              .meta-row
-                .meta-key Инициатор
-                .meta-val {{ item.creator_name || item.creator }}
-              .meta-row
-                .meta-key Создан
-                .meta-val {{ formatDate(item.created_at) }}
-
-  .empty(v-else)
-    EmptyState(
-      title='Программных расходов пока нет',
-      body='Создайте первый расход через кнопку «Создать расход» в шапке.'
-    )
-      template(#icon)
-        q-icon(name='receipt_long', size='48px')
+  //- Общий виджет шасси: страница только готовит строки из своего запроса.
+  ExpenseProposalList(
+    :rows='listRows',
+    :loading='loading',
+    empty-title='Программных расходов пока нет',
+    @open='openExpense'
+  )
 
   CreateProgramExpenseDialog(
     v-model='createOpen',
@@ -95,17 +75,11 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSystemStore } from 'src/entities/System/model';
 import { useWindowSize } from 'src/shared/hooks';
-import { BaseCard } from 'src/shared/ui/base/BaseCard';
-import { BaseChip } from 'src/shared/ui/base/BaseChip';
-import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { WalletCard } from 'src/shared/ui/domain/WalletCard';
+import { ExpenseProposalList } from 'src/shared/ui/domain/ExpenseProposalList';
+import type { ExpenseProposalListRow } from 'src/shared/ui/domain/ExpenseProposalList';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
-import {
-  useProgramExpenseStore,
-  proposalStatusLabel as statusLabel,
-  proposalStatusVariant as statusVariant,
-  shortExpenseId as shortId,
-} from 'app/extensions/capital/entities/ProgramExpense/model';
+import { useProgramExpenseStore } from 'app/extensions/capital/entities/ProgramExpense/model';
 import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
 import { CreateProgramExpenseDialog } from 'app/extensions/capital/features/ProgramExpense/CreateProgramExpense/ui';
 import { TopupProgramExpensePoolDialog } from 'app/extensions/capital/features/ProgramExpense/TopupPool/ui';
@@ -140,27 +114,36 @@ const expenseReserved = computed(() => {
   return { ...splitAsset(reserved), has: parseFloat(reserved ?? '0') > 0 };
 });
 
+const loading = ref(false);
 async function refresh(): Promise<void> {
-  await Promise.all([
-    store.loadProgramExpenses({ coopname: coopname.value }),
-    configStore.loadState({ coopname: coopname.value }),
-  ]);
+  try {
+    loading.value = true;
+    await Promise.all([
+      store.loadProgramExpenses({ coopname: coopname.value }),
+      configStore.loadState({ coopname: coopname.value }),
+    ]);
+  } finally {
+    loading.value = false;
+  }
 }
 
 onMounted(refresh);
 
+// Строки для общего виджета списка СЗ — из capital-запроса программных расходов.
+const listRows = computed<ExpenseProposalListRow[]>(() =>
+  (store.programExpenses?.items ?? []).map((item) => ({
+    expense_hash: item.expense_hash,
+    title: item.items[0]?.description ?? '',
+    status: item.status,
+    total_planned: item.total_planned,
+    creator_name: item.creator_name || item.creator,
+    created_at: item.created_at,
+  })),
+);
+
 const router = useRouter();
 function openExpense(expenseHash: string): void {
   router.push({ name: 'capital-program-expense', params: { expense_hash: expenseHash } });
-}
-
-function formatDate(iso: string): string {
-  if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleString('ru-RU');
-  } catch {
-    return iso;
-  }
 }
 </script>
 
@@ -177,59 +160,5 @@ function formatDate(iso: string): string {
 
 .pools {
   margin-bottom: var(--p-5);
-}
-
-.row-card-link {
-  cursor: pointer;
-}
-
-.row-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-3);
-}
-
-.row-card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--p-2);
-}
-
-.row-card__title {
-  font-size: var(--p-fs-body);
-  font-weight: 600;
-  color: var(--p-ink);
-}
-
-.row-card__amount {
-  font-size: var(--p-fs-h3);
-  font-weight: 700;
-  color: var(--p-ink);
-}
-
-.row-card__meta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-1);
-}
-
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--p-3);
-  font-size: var(--p-fs-body-sm);
-}
-
-.meta-key {
-  color: var(--p-ink-2);
-}
-
-.meta-val {
-  color: var(--p-ink);
-}
-
-.empty {
-  margin-top: var(--p-6);
 }
 </style>
