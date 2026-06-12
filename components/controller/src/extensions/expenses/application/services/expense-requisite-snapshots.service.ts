@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import type { InterExpenseRequisiteItemInput } from '@coopenomics/inter'
 import { PAYMENT_METHOD_REPOSITORY, PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository'
+import { EXPENSES_CHASSIS_CONFIG } from '../../domain/expenses-chassis.config'
 import { ExpenseRequisiteSnapshotTypeormEntity } from '../../infrastructure/entities/expense-requisite-snapshot.typeorm-entity'
 import { formatPaymentMethodRequisites } from '../../domain/utils/format-requisites.util'
 
@@ -84,6 +85,10 @@ export class ExpenseRequisiteSnapshotsService {
         if (it.isOrganization) {
           return snapshot
         }
+
+        // Пайщику назначение платежа фиксированное — кассир в платёжке всегда
+        // указывает «Аванс под отчёт» (суть расхода — в описании позиции)
+        snapshot.payment_purpose = EXPENSES_CHASSIS_CONFIG.advancePaymentPurpose
 
         if (!it.paymentMethodId) {
           throw new BadRequestException(

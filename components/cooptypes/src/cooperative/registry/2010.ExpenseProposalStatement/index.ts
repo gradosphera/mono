@@ -43,6 +43,8 @@ export interface Model {
   user: ICommonUser
   vars: IVars
   proposal_hash: string
+  /** Короткий идентификатор СЗ (первые 16 символов хэша, uppercase) — для шапки документа */
+  proposal_short_hash: string
   proposal: IExpenseProposalHeader
   items: IExpenseItem[]
 }
@@ -56,7 +58,7 @@ export const description = 'Заявка-смета председателю к�
 // записку можно найти), позиции — нумерованным списком: описание и сумма,
 // затем построчно получатель, реквизиты и назначение платежа (для кассира).
 // Кошелёк-источник в документе не указывается.
-export const context = `<div class="digital-document"><div style="text-align: right"><p>{% trans 'TO_COUNCIL' %} {{vars.full_abbr_genitive}} «{{vars.name}}»</p><p>{% trans 'FROM_MEMBER' %} {{ user.full_name_or_short_name }}</p></div><p>{% trans 'DATE' %}: {{ meta.created_at }}</p><div style="text-align: center"><h2>{% trans 'PROPOSAL_TITLE' %}</h2><p style="word-break: break-all">№ {{ proposal_hash }}</p></div><p>{% trans 'BODY_INTRO' %}{% if proposal.fund_name %} {% trans 'BY_FUND' %} {{ proposal.fund_name }}{% endif %} {% trans 'IN_TOTAL' %} {{ proposal.total_amount }}{% if proposal.deadline %} {% trans 'DUE_BY' %} {{ proposal.deadline }}{% endif %}, {% trans 'BODY_NAMELY' %}:</p><ol>{% for item in items %}<li><p>{{ item.description }} — {{ item.amount }} ({% if item.mechanics == 'ADVANCE' %}{% trans 'MECH_ADVANCE' %}{% else %}{% trans 'MECH_DIRECT' %}{% endif %})</p><p>{% trans 'ITEM_RECIPIENT' %}: {% if item.recipient_type == 'SELF' %}{{ user.full_name_or_short_name }}{% else %}{{ item.recipient_name }}{% endif %}</p>{% if item.requisites %}<p>{% trans 'ITEM_REQUISITES' %}: {{ item.requisites }}</p>{% endif %}{% if item.payment_purpose %}<p>{% trans 'ITEM_PAYMENT_PURPOSE' %}: {{ item.payment_purpose }}</p>{% endif %}</li>{% endfor %}</ol><p>{% trans 'PURPOSE' %}: {{ proposal.description }}</p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div>`
+export const context = `<div class="digital-document"><div style="text-align: right"><p>{% trans 'TO_COUNCIL' %} {{vars.full_abbr_genitive}} «{{vars.name}}»</p><p>{% trans 'FROM_MEMBER' %} {{ user.full_name_or_short_name }}</p></div><p>{% trans 'DATE' %}: {{ meta.created_at }}</p><div style="text-align: center"><h2>{% trans 'PROPOSAL_TITLE' %} № {{ proposal_short_hash }}</h2></div><p>{% trans 'BODY_INTRO' %}{% if proposal.fund_name %} {% trans 'BY_FUND' %} {{ proposal.fund_name }}{% endif %} {% trans 'IN_TOTAL' %} {{ proposal.total_amount }}{% if proposal.deadline %} {% trans 'DUE_BY' %} {{ proposal.deadline }}{% endif %}, {% trans 'BODY_NAMELY' %}:</p>{% for item in items %}<div style="padding-top: 10px"><p><strong>{{ item.number }}. {{ item.description }} — {{ item.amount }} ({% if item.mechanics == 'ADVANCE' %}{% trans 'MECH_ADVANCE' %}{% else %}{% trans 'MECH_DIRECT' %}{% endif %})</strong></p><p>{% trans 'ITEM_RECIPIENT' %}: {% if item.recipient_type == 'SELF' %}{{ user.full_name_or_short_name }}{% else %}{{ item.recipient_name }}{% endif %}</p>{% if item.requisites %}<p>{% trans 'ITEM_REQUISITES' %}: {{ item.requisites }}</p>{% endif %}{% if item.payment_purpose %}<p>{% trans 'ITEM_PAYMENT_PURPOSE' %}: {{ item.payment_purpose }}</p>{% endif %}</div>{% endfor %}<p>{% trans 'PURPOSE' %}: {{ proposal.description }}</p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div>`
 
 export const translations = {
   ru: {
@@ -85,6 +87,7 @@ export const exampleData = {
   vars: { full_abbr_genitive: 'ПК', name: 'Восход' },
   user: { full_name_or_short_name: 'Иванов И.И.' },
   proposal_hash: '55c470039a8c53ce1b4b6e842fe8063ab3d5b85ba2ba8ab0ae6e30be3ad328b7',
+  proposal_short_hash: '55C470039A8C53CE',
   proposal: {
     description: 'Закупка хостинга и бухгалтерских услуг на июнь 2026',
     total_amount: '15000.00 RUB',

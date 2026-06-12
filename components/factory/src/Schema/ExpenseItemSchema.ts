@@ -8,6 +8,7 @@ export interface IExpenseItem {
   mechanics: 'ADVANCE' | 'DIRECT'
   recipient_name?: string
   requisites?: string
+  payment_purpose?: string
 }
 
 export interface IExpenseProposalHeader {
@@ -15,6 +16,8 @@ export interface IExpenseProposalHeader {
   total_amount: string
   items_count: number
   source_wallet: string
+  deadline?: string
+  fund_name?: string
 }
 
 export interface IExpenseProposalDecisionBody {
@@ -34,6 +37,7 @@ export const ExpenseItemSchema: JSONSchemaType<IExpenseItem> = {
     mechanics: { type: 'string', enum: ['ADVANCE', 'DIRECT'] },
     recipient_name: { type: 'string', nullable: true },
     requisites: { type: 'string', nullable: true },
+    payment_purpose: { type: 'string', nullable: true },
   },
   required: ['number', 'description', 'amount', 'recipient_type', 'mechanics'],
   additionalProperties: true,
@@ -46,6 +50,8 @@ export const ExpenseProposalHeaderSchema: JSONSchemaType<IExpenseProposalHeader>
     total_amount: { type: 'string' },
     items_count: { type: 'number' },
     source_wallet: { type: 'string' },
+    deadline: { type: 'string', nullable: true },
+    fund_name: { type: 'string', nullable: true },
   },
   required: ['description', 'total_amount', 'items_count', 'source_wallet'],
   additionalProperties: true,

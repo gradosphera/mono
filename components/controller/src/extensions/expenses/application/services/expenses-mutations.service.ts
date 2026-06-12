@@ -67,7 +67,9 @@ export class ExpensesMutationsService {
           mechanics: item.mechanics,
           recipient_name: item.recipient_name,
           requisites,
-          payment_purpose: item.payment_purpose,
+          // Пайщику назначение платежа не вводится — всегда «Аванс под отчёт»
+          payment_purpose:
+            item.recipient_type === 'ORG' ? item.payment_purpose : EXPENSES_CHASSIS_CONFIG.advancePaymentPurpose,
         }
       })
     )

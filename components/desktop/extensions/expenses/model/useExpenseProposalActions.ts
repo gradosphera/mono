@@ -43,7 +43,7 @@ export function useExpenseProposalActions() {
     const itemsForDoc = draft.items.map((it, idx) => ({
       number: String(idx + 1),
       description: it.description,
-      amount: it.amount,
+      amount: `${parseFloat(it.amount || '0').toFixed(4)} RUB`,
       recipient_type: it.recipient_type,
       mechanics: it.mechanics,
       recipient_name: it.recipient_name ?? '',

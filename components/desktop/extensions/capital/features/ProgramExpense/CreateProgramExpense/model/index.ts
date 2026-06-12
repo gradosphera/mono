@@ -74,7 +74,7 @@ export function useCreateProgramExpense() {
     const itemsForDoc = draft.items.map((it, idx) => ({
       number: String(idx + 1),
       description: it.description,
-      amount: it.amount,
+      amount: formatToAsset(it.amount, symbol, precision),
       recipient_type: it.recipient_type,
       mechanics: it.mechanics,
       recipient_name: it.recipient_name ?? '',

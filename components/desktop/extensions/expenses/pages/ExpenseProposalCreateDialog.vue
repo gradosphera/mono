@@ -100,8 +100,8 @@ BaseDialog(
             .col-12
               BaseInput(
                 v-model='item.description',
-                label='Описание',
-                placeholder='Назначение расхода'
+                label='Что оплачиваем',
+                placeholder='Своими словами: что это за расход и зачем'
               )
             .col-12(v-if='item.recipient_type === "ORG"')
               BaseInput(

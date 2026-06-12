@@ -31,8 +31,9 @@ export class Factory extends DocFactory<ExpenseProposalDecision.Action> {
       user: super.getCommonUser(userData),
       vars,
       proposal_hash: data.proposal_hash,
-      proposal: data.proposal,
-      items: data.items,
+      proposal_short_hash: this.getShortHash(data.proposal_hash),
+      proposal: { ...data.proposal, total_amount: this.formatAsset(data.proposal.total_amount) },
+      items: data.items.map(item => ({ ...item, amount: this.formatAsset(item.amount) })),
       decision: data.decision,
     }
 

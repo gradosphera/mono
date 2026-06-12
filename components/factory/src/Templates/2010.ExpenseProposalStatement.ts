@@ -23,13 +23,14 @@ export const Schema: JSONSchemaType<Model> = {
     user: CommonUserSchema,
     vars: VarsSchema,
     proposal_hash: { type: 'string' },
+    proposal_short_hash: { type: 'string' },
     proposal: ExpenseProposalHeaderSchema,
     items: {
       type: 'array',
       items: ExpenseItemSchema,
     },
   },
-  required: ['meta', 'coop', 'user', 'vars', 'proposal_hash', 'proposal', 'items'],
+  required: ['meta', 'coop', 'user', 'vars', 'proposal_hash', 'proposal_short_hash', 'proposal', 'items'],
   additionalProperties: true,
 }
 

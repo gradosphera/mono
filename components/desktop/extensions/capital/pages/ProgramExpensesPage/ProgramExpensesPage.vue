@@ -1,18 +1,18 @@
 <template lang="pug">
 q-page.program-expenses-page
-  .header
-    .header__left
-      h1.t-h2 Управление расходами программы
-      p.t-sm.t-muted Программные расходы Капитала через шасси расходов.
-    .header__actions
-      BaseButton(variant='ghost', @click='openTopup')
-        template(#icon-left)
-          q-icon(name='account_balance_wallet', size='18px')
-        | Пополнить пул
+  PageHead(
+    title='Управление расходами программы',
+    subtitle='Программные расходы Капитала через шасси расходов.'
+  )
+    template(#actions)
       BaseButton(variant='primary', @click='openCreate')
         template(#icon-left)
           q-icon(name='add', size='18px')
         | Создать расход
+      BaseButton(variant='ghost', @click='openTopup')
+        template(#icon-left)
+          q-icon(name='account_balance_wallet', size='18px')
+        | Пополнить пул
 
   .pools.row.q-col-gutter-md
     .col-12.col-md-6
@@ -84,6 +84,7 @@ import { ref, computed, onMounted } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
+import { PageHead } from 'src/shared/ui/layout/PageHead';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
@@ -197,26 +198,6 @@ function statusVariant(
   .program-expenses-page {
     padding: var(--p-4, 16px);
   }
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--p-4);
-  margin-bottom: var(--p-5);
-  flex-wrap: wrap;
-}
-
-.header__left {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-1);
-}
-
-.header__actions {
-  display: flex;
-  gap: var(--p-2);
 }
 
 .pools {
