@@ -1,6 +1,16 @@
 # Expenses Extension — UI шасси расходов (C28-32)
 
-**Статус:** scaffold-stub (route map + page placeholders). Реализация ждёт C28-31 (backend GraphQL + SDK Zeus types).
+**Статус:** живое — зарегистрировано в `extensions-registry`, backend C28-31 и контракт работают; первый прикладной потребитель — Благорост (`extensions/capital`, пул `w.cap.pgexp`).
+
+## Как подключить пул расходов на новый стол (рецепт, 2026-06-12)
+
+Шасси фабричное: контракт `expense`, backend и UI-виджеты переиспользуются без правок — настраивается только пул.
+
+1. **Контракт/ledger2** (`cpp/lib/core/ledger2/`): кошелёк-пул (COOPERATIVE) в `wallets.hpp`; 5 операций жизненного цикла (аванс/прямая/отчёт/возврат/перерасход) в `OPERATION_REGISTRY` + одна строка в `EXPENSE_OPERATION_SETS` (`operations.hpp`) — коды операций контракт `expense` выводит из `source_wallet` сам. Зеркала имён — `cooptypes/src/ledger2/{operations,processes}.ts` + локатор `controller/.../process-hash-locator.ts`.
+2. **Создание СЗ**: либо generic-мутация `Mutations.Expense.CreateExpenseProposal`, либо своя обвязка по образцу `capital::createpgexp` (счётчики/резерв пула + inline `expense::createexp` с callback на финализацию).
+3. **Страница стола**: собирается из общих доменных виджетов `ExpenseCreateDialog` (пропы `source-wallet` / `draft-key` / `submit`) + `ExpenseProposalList` — см. `src/shared/ui/domain/ExpenseCreateDialog/README.md`; эталон — `extensions/capital/pages/ProgramExpensesPage` (+ детальная `ProgramExpensePage`).
+4. **Стол совета**: `registerExpenseWallet({ wallet, title, route, ... })` в `install.ts` расширения (`src/shared/lib/expense-wallets`) — пул появится на странице «Расходы» с балансом и проваливанием.
+5. **Оплата/отчёты** работают сразу: реестр платежей, панели платёжки кассира (`features/Payment/AttachExpenseProof`) и отчёта пайщика (`features/Payment/ReportExpenseAdvance`), закрытие расхода советом — всё привязано к `proposal_hash`/`item_hash`, не к пулу.
 
 ## Скоуп расширения
 
@@ -30,21 +40,7 @@ Desktop UI для **шасси системы расходов** (MVP-SINGLE) Ц
 
 ## Регистрация в `extensions-registry`
 
-**ПОКА НЕ ЗАРЕГИСТРИРОВАН** в `src/processes/init-installed-extensions/extensions-registry.ts`. Регистрация = следующий шаг после того, как:
-- C28-31 закроет backend и SDK Zeus получит типы `Queries.Expenses.*` / `Mutations.Expenses.*`;
-- страницы-stub получат реальный контент (вместо `<EmptyState>`).
-
-До тех пор расширение **лежит в столе** — не ломает живой desktop, не появляется в drawer.
-
-После C28-31 в `extensions-registry.ts` добавить:
-```ts
-import expensesInstall from '../../../extensions/expenses/install';
-// ...
-export const extensionsRegistry = {
-  // ...
-  expenses: expensesInstall,
-};
-```
+Зарегистрировано в `src/processes/init-installed-extensions/extensions-registry.ts` (ключ `expenses`). Помимо собственного воркспейса, расширение отдаёт страницу `ExpenseWalletsPage` («Расходы» по кошелькам-пулам) — её монтирует стол совета (`extensions/soviet/install.ts`, маршрут `soviet-expense-wallets`).
 
 ## Канон вёрстки (`/home/admin/.claude/skills/mono-desktop-canon/`)
 
