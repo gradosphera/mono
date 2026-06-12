@@ -5225,6 +5225,8 @@ export type ValueTypes = {
 	kind?:boolean | `@${string}`,
 	/** MIME-тип содержимого. */
 	mime_type?:boolean | `@${string}`,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?:boolean | `@${string}`,
 	/** Хеш сметы расхода. */
 	proposal_hash?:boolean | `@${string}`,
 	/** Короткоживущий URL на скачивание (HMAC-signed). */
@@ -10016,6 +10018,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	kind: ValueTypes["ExpenseFileKind"] | Variable<any, string>,
 	/** MIME-тип содержимого. */
 	mime_type: string | Variable<any, string>,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null | Variable<any, string>,
 	/** Хеш сметы расхода. */
 	proposal_hash: string | Variable<any, string>,
 	/** Размер файла в байтах (для серверной валидации). */
@@ -14262,6 +14266,8 @@ export type ResolverInputTypes = {
 	kind?:boolean | `@${string}`,
 	/** MIME-тип содержимого. */
 	mime_type?:boolean | `@${string}`,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?:boolean | `@${string}`,
 	/** Хеш сметы расхода. */
 	proposal_hash?:boolean | `@${string}`,
 	/** Короткоживущий URL на скачивание (HMAC-signed). */
@@ -18911,6 +18917,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	kind: ResolverInputTypes["ExpenseFileKind"],
 	/** MIME-тип содержимого. */
 	mime_type: string,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null,
 	/** Хеш сметы расхода. */
 	proposal_hash: string,
 	/** Размер файла в байтах (для серверной валидации). */
@@ -23041,6 +23049,8 @@ export type ModelTypes = {
 	kind: ModelTypes["ExpenseFileKind"],
 	/** MIME-тип содержимого. */
 	mime_type: string,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?: string | undefined | null,
 	/** Хеш сметы расхода. */
 	proposal_hash: string,
 	/** Короткоживущий URL на скачивание (HMAC-signed). */
@@ -28266,6 +28276,8 @@ export type ModelTypes = {
 	kind: ModelTypes["ExpenseFileKind"],
 	/** MIME-тип содержимого. */
 	mime_type: string,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null,
 	/** Хеш сметы расхода. */
 	proposal_hash: string,
 	/** Размер файла в байтах (для серверной валидации). */
@@ -32600,6 +32612,8 @@ export type GraphQLTypes = {
 	kind: GraphQLTypes["ExpenseFileKind"],
 	/** MIME-тип содержимого. */
 	mime_type: string,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?: string | undefined | null,
 	/** Хеш сметы расхода. */
 	proposal_hash: string,
 	/** Короткоживущий URL на скачивание (HMAC-signed). */
@@ -38153,6 +38167,8 @@ export type GraphQLTypes = {
 	kind: GraphQLTypes["ExpenseFileKind"],
 	/** MIME-тип содержимого. */
 	mime_type: string,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null,
 	/** Хеш сметы расхода. */
 	proposal_hash: string,
 	/** Размер файла в байтах (для серверной валидации). */

@@ -37,6 +37,9 @@ export class ExpenseFileOutputDTO {
   @Field(() => String, { description: 'MinIO-ключ внутри бакета.' })
   storage_key!: string;
 
+  @Field(() => String, { nullable: true, description: 'Оригинальное имя загруженного файла.' })
+  original_filename?: string;
+
   @Field(() => String, { description: 'Кто загрузил (username).' })
   uploaded_by_username!: string;
 
@@ -57,6 +60,7 @@ export class ExpenseFileOutputDTO {
     dto.mime_type = data.mime_type;
     dto.size_bytes = data.size_bytes;
     dto.storage_key = data.storage_key;
+    dto.original_filename = data.original_filename ?? undefined;
     dto.uploaded_by_username = data.uploaded_by_username;
     dto.uploaded_at = data.uploaded_at;
     dto.read_url = readUrl;

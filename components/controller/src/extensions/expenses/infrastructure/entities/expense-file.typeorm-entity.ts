@@ -39,6 +39,9 @@ export class ExpenseFileTypeormEntity {
   @Column({ type: 'varchar', length: 512 })
   storage_key!: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, comment: 'Оригинальное имя загруженного файла — для отображения и поиска' })
+  original_filename!: string | null;
+
   @Column({ type: 'varchar' })
   uploaded_by_username!: string;
 

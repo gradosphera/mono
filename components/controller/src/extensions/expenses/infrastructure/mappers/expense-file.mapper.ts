@@ -17,6 +17,7 @@ export class ExpenseFileMapper {
       mime_type: entity.mime_type,
       size_bytes: entity.size_bytes,
       storage_key: entity.storage_key,
+      original_filename: entity.original_filename,
       uploaded_by_username: entity.uploaded_by_username,
       uploaded_at: entity.uploaded_at,
     };
@@ -32,6 +33,7 @@ export class ExpenseFileMapper {
       mime_type: data.mime_type,
       size_bytes: data.size_bytes,
       storage_key: data.storage_key,
+      original_filename: data.original_filename ?? null,
       uploaded_by_username: data.uploaded_by_username,
       uploaded_at: data.uploaded_at,
     };

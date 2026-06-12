@@ -8,6 +8,7 @@ import {
 import { createHash } from 'crypto';
 import type { InterFileStorageBucket } from '@coopenomics/inter';
 import { InjectBucket, UseBucket } from '~/infrastructure/file-storage';
+import { PAYMENT_REPOSITORY, type PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
 import { ExpenseFileKind } from '../../domain/enums/expense-file-kind.enum';
 import {
   EXPENSE_FILE_REPOSITORY,
@@ -37,7 +38,8 @@ const EXTENSION_BY_MIME: Record<string, string> = {
 export class ExpenseFilesService {
   constructor(
     @InjectBucket() private readonly bucket: InterFileStorageBucket,
-    @Inject(EXPENSE_FILE_REPOSITORY) private readonly files: ExpenseFileRepository
+    @Inject(EXPENSE_FILE_REPOSITORY) private readonly files: ExpenseFileRepository,
+    @Inject(PAYMENT_REPOSITORY) private readonly payments: PaymentRepository
   ) {}
 
   async uploadFile(
@@ -86,12 +88,33 @@ export class ExpenseFilesService {
       mime_type: input.mime_type,
       size_bytes: body.byteLength,
       storage_key: storageKey,
+      original_filename: input.original_filename ?? null,
       uploaded_by_username: uploadedByUsername,
       uploaded_at: new Date(),
     });
 
+    await this.syncPaymentProofMark(saved);
+
     const readUrl = await this.bucket.getReadUrl(storageKey);
     return { data: saved, readUrl };
+  }
+
+  /**
+   * Зеркалит число приложенных платёжек в исходящий платёж реестра
+   * (`blockchain_data.proof_count`) — реестр платежей показывает по нему отметку
+   * «платёжка приложена», не дёргая хранилище файлов на каждую строку.
+   * Статус платежа не трогаем — им управляет gateway.
+   */
+  private async syncPaymentProofMark(file: Pick<IExpenseFileDatabaseData, 'coopname' | 'proposal_hash' | 'item_hash' | 'kind'>): Promise<void> {
+    if (file.kind !== ExpenseFileKind.PAYMENT_PROOF || !file.item_hash) return;
+    const payment = await this.payments.findByHash(file.item_hash);
+    if (!payment?.id) return;
+    const proofs = (await this.files.findByItem(file.coopname, file.proposal_hash, file.item_hash)).filter(
+      (f) => f.kind === ExpenseFileKind.PAYMENT_PROOF
+    );
+    await this.payments.update(payment.id, {
+      blockchain_data: { ...(payment.blockchain_data ?? {}), proof_count: proofs.length },
+    });
   }
 
   async getReadUrl(fileId: number): Promise<{ data: IExpenseFileDatabaseData; readUrl: string }> {
@@ -118,6 +141,7 @@ export class ExpenseFilesService {
     if (!file) throw new NotFoundException(`Файл расхода #${fileId} не найден.`);
     await this.bucket.delete(file.storage_key);
     await this.files.delete(fileId);
+    await this.syncPaymentProofMark(file);
   }
 
   private buildKey(params: {

@@ -3351,6 +3351,7 @@ export const ReturnTypes: Record<string,any> = {
 		item_hash:"String",
 		kind:"ExpenseFileKind",
 		mime_type:"String",
+		original_filename:"String",
 		proposal_hash:"String",
 		read_url:"String",
 		size_bytes:"Int",

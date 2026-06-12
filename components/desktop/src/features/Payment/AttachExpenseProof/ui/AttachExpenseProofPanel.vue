@@ -2,15 +2,16 @@
 .attach-proof
   .t-sm.t-muted Подтверждение оплаты
   .files(v-if='files.length')
-    a.file-link(
+    button.file-link(
       v-for='file in files',
       :key='file.id',
-      :href='file.read_url',
-      target='_blank',
-      rel='noopener'
+      type='button',
+      :disabled='openingId === file.id',
+      @click='openFile(file)'
     )
       q-icon(name='attach_file', size='16px')
       span {{ fileLabel(file) }}
+      q-spinner(v-if='openingId === file.id', size='14px')
   FileUploader(
     v-model='pending',
     accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
@@ -42,6 +43,10 @@ const props = defineProps<{
   itemHash: string;
 }>();
 
+const emit = defineEmits<{
+  (e: 'uploaded'): void;
+}>();
+
 const system = useSystemStore();
 const files = ref<IExpenseFile[]>([]);
 const pending = ref<File | null>(null);
@@ -62,8 +67,25 @@ async function refresh(): Promise<void> {
 }
 
 function fileLabel(file: IExpenseFile): string {
+  if (file.original_filename) return file.original_filename;
   const date = file.uploaded_at ? new Date(file.uploaded_at).toLocaleString('ru-RU') : '';
   return `Платёжка от ${date}`;
+}
+
+// Списочные запросы файлов отдают записи без read_url (он короткоживущий) —
+// свежая ссылка запрашивается по id в момент клика и сразу открывается.
+const openingId = ref<number | null>(null);
+async function openFile(file: IExpenseFile): Promise<void> {
+  try {
+    openingId.value = file.id;
+    const url = await api.getExpenseFileReadUrl(file.id);
+    if (!url) throw new Error('Не удалось получить ссылку на файл');
+    window.open(url, '_blank', 'noopener');
+  } catch (e) {
+    FailAlert(e);
+  } finally {
+    openingId.value = null;
+  }
 }
 
 async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
@@ -95,10 +117,12 @@ async function upload(): Promise<void> {
       size_bytes: file.size,
       checksum_sha256: await sha256Hex(buffer),
       content_base64: toBase64(buffer),
+      original_filename: file.name,
     });
     pending.value = null;
     SuccessAlert('Подтверждение оплаты приложено');
     await refresh();
+    emit('uploaded');
   } catch (e) {
     FailAlert(e);
   } finally {
@@ -126,12 +150,22 @@ onMounted(refresh);
   display: inline-flex;
   align-items: center;
   gap: var(--p-1);
+  padding: 0;
+  border: none;
+  background: transparent;
   color: var(--p-primary);
   text-decoration: none;
   font-size: var(--p-fs-body-sm);
+  cursor: pointer;
+  text-align: left;
 
   &:hover {
     text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 }
 

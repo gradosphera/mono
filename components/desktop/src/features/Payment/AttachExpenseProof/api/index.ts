@@ -25,4 +25,14 @@ async function loadExpenseFilesByItem(
   return result;
 }
 
-export const api = { uploadExpenseFile, loadExpenseFilesByItem };
+// Списочные запросы файлы отдают без read_url — свежий короткоживущий URL
+// запрашивается по id в момент клика.
+async function getExpenseFileReadUrl(id: number): Promise<string | undefined> {
+  const { [Queries.Expense.ExpenseFile.name]: result } = await client.Query(
+    Queries.Expense.ExpenseFile.query,
+    { variables: { id } },
+  );
+  return result.read_url ?? undefined;
+}
+
+export const api = { uploadExpenseFile, loadExpenseFilesByItem, getExpenseFileReadUrl };

@@ -42,7 +42,14 @@
                     q-icon.q-mr-xs(:name='getDirectionIcon(row.direction)', size='16px')
                     span {{ row.direction_label }}
                 td
-                  BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
+                  .cell-status
+                    BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
+                    //- Оплата расхода: отметка о приложенной платёжке (статус не трогаем —
+                    //- им управляет реестр; отчитанность видна отдельным значком).
+                    q-icon.proof-icon.proof-icon--ok(v-if='proofState(row) === "attached"', name='receipt_long', size='16px')
+                      q-tooltip Платёжка приложена
+                    q-icon.proof-icon.proof-icon--missing(v-else-if='proofState(row) === "missing"', name='receipt_long', size='16px')
+                      q-tooltip Платёжка не приложена
                 td.col-action(v-if='!hideActions', @click.stop)
                   .cell-actions(v-if='["EXPIRED", "PENDING", "FAILED"].includes(row.status)')
                     SetOrderPaidStatusButton(:id='row.id')
@@ -59,7 +66,8 @@
                   AttachExpenseProofPanel.q-mt-sm(
                     v-if='expenseProofRef(row)',
                     :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
-                    :item-hash='expenseProofRef(row)?.item_hash ?? ""'
+                    :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+                    @uploaded='onProofUploaded(row)'
                   )
 
       .table-foot
@@ -78,7 +86,12 @@
         .pay-card__main(@click='toggleExpand(row.id)')
           .pay-card__row
             span.pay-card__name {{ getShortNameFromCertificate(row.username_certificate) || row.username }}
-            BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
+            .cell-status
+              BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
+              q-icon.proof-icon.proof-icon--ok(v-if='proofState(row) === "attached"', name='receipt_long', size='16px')
+                q-tooltip Платёжка приложена
+              q-icon.proof-icon.proof-icon--missing(v-else-if='proofState(row) === "missing"', name='receipt_long', size='16px')
+                q-tooltip Платёжка не приложена
           .pay-card__row
             span.pay-card__amount
               q-icon.q-mr-xs(
@@ -102,7 +115,8 @@
           AttachExpenseProofPanel.q-mt-sm(
             v-if='expenseProofRef(row)',
             :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
-            :item-hash='expenseProofRef(row)?.item_hash ?? ""'
+            :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+            @uploaded='onProofUploaded(row)'
           )
 
       .table-foot
@@ -205,6 +219,20 @@ const expenseProofRef = (
   const data = row.blockchain_data as { proposal_hash?: string; item_hash?: string } | null;
   if (!data?.proposal_hash || !data?.item_hash) return null;
   return { proposal_hash: data.proposal_hash, item_hash: data.item_hash };
+};
+
+// Отметка отчитанности оплаченного расхода: бэкенд зеркалит число платёжек
+// в blockchain_data.proof_count при каждой загрузке/удалении файла.
+const proofState = (row: IPaymentRow): 'attached' | 'missing' | 'none' => {
+  if (!expenseProofRef(row)) return 'none';
+  const count = (row.blockchain_data as { proof_count?: number } | null)?.proof_count ?? 0;
+  return count > 0 ? 'attached' : 'missing';
+};
+
+// Локально отражаем загруженную платёжку, не перезагружая реестр.
+const onProofUploaded = (row: IPaymentRow): void => {
+  const data = (row.blockchain_data ?? {}) as { proof_count?: number };
+  row.blockchain_data = { ...data, proof_count: (data.proof_count ?? 0) + 1 };
 };
 
 // Колонки скелетона повторяют шапку реальной таблицы платежей; колонка
@@ -446,6 +474,19 @@ onMounted(() => {
 .dir {
   display: inline-flex;
   align-items: center;
+}
+
+.cell-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-2, 8px);
+}
+
+.proof-icon--ok {
+  color: var(--p-pos);
+}
+.proof-icon--missing {
+  color: var(--p-warn);
 }
 .dir--in {
   color: var(--p-pos);

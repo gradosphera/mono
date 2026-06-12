@@ -35,6 +35,11 @@ export class UploadExpenseFileInputDTO {
   @IsIn([...ALLOWED_MIME], { message: 'mime_type должен быть одним из allowed.' })
   mime_type!: string;
 
+  @Field(() => String, { nullable: true, description: 'Оригинальное имя файла — для отображения и поиска.' })
+  @IsOptional()
+  @IsString()
+  original_filename?: string;
+
   @Field(() => Number, { description: 'Размер файла в байтах (для серверной валидации).' })
   @IsInt()
   @Min(1)

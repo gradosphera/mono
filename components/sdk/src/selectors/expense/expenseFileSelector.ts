@@ -11,6 +11,7 @@ export const rawExpenseFileSelector = {
   mime_type: true,
   size_bytes: true,
   checksum_sha256: true,
+  original_filename: true,
   read_url: true,
   uploaded_at: true,
   uploaded_by_username: true,

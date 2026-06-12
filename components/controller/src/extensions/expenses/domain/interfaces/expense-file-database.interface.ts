@@ -17,6 +17,8 @@ export interface IExpenseFileDatabaseData {
   mime_type: string;
   size_bytes: number;
   storage_key: string;
+  /** Оригинальное имя загруженного файла — для отображения и поиска */
+  original_filename?: string | null;
   uploaded_by_username: string;
   uploaded_at: Date;
 }
