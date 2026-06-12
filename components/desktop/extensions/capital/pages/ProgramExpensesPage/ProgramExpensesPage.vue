@@ -55,7 +55,7 @@ q-page.program-expenses-page
   .content(v-if='store.programExpenses && store.programExpenses.items.length')
     .row.q-col-gutter-md
       .col-12.col-md-6.col-lg-4(v-for='item in store.programExpenses.items', :key='item.expense_hash')
-        BaseCard
+        BaseCard.row-card-link(@click='openExpense(item.expense_hash)')
           .row-card
             .row-card__head
               .row-card__title {{ item.items[0]?.description || '— без описания —' }}
@@ -92,7 +92,7 @@ q-page.program-expenses-page
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { Zeus } from '@coopenomics/sdk';
+import { useRouter } from 'vue-router';
 import { useSystemStore } from 'src/entities/System/model';
 import { useWindowSize } from 'src/shared/hooks';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
@@ -100,7 +100,12 @@ import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { WalletCard } from 'src/shared/ui/domain/WalletCard';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
-import { useProgramExpenseStore } from 'app/extensions/capital/entities/ProgramExpense/model';
+import {
+  useProgramExpenseStore,
+  proposalStatusLabel as statusLabel,
+  proposalStatusVariant as statusVariant,
+  shortExpenseId as shortId,
+} from 'app/extensions/capital/entities/ProgramExpense/model';
 import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
 import { CreateProgramExpenseDialog } from 'app/extensions/capital/features/ProgramExpense/CreateProgramExpense/ui';
 import { TopupProgramExpensePoolDialog } from 'app/extensions/capital/features/ProgramExpense/TopupPool/ui';
@@ -144,9 +149,9 @@ async function refresh(): Promise<void> {
 
 onMounted(refresh);
 
-// Короткий идентификатор СЗ — как № в документе (первые 16 символов хэша).
-function shortId(h: string): string {
-  return h.slice(0, 16).toUpperCase();
+const router = useRouter();
+function openExpense(expenseHash: string): void {
+  router.push({ name: 'capital-program-expense', params: { expense_hash: expenseHash } });
 }
 
 function formatDate(iso: string): string {
@@ -155,39 +160,6 @@ function formatDate(iso: string): string {
     return new Date(iso).toLocaleString('ru-RU');
   } catch {
     return iso;
-  }
-}
-
-function statusLabel(status: Zeus.ExpenseProposalStatus): string {
-  const map: Record<Zeus.ExpenseProposalStatus, string> = {
-    [Zeus.ExpenseProposalStatus.CREATED]: 'Создан',
-    [Zeus.ExpenseProposalStatus.AUTHORIZED]: 'Авторизован',
-    [Zeus.ExpenseProposalStatus.PARTIALLY_PAID]: 'Частично оплачен',
-    [Zeus.ExpenseProposalStatus.REPORT_SUBMITTED]: 'Отчёт подан',
-    [Zeus.ExpenseProposalStatus.CLOSED]: 'Закрыт',
-    [Zeus.ExpenseProposalStatus.DECLINED]: 'Отклонён',
-    [Zeus.ExpenseProposalStatus.UNDEFINED]: 'Неизвестно',
-  };
-  return map[status] ?? status;
-}
-
-function statusVariant(
-  status: Zeus.ExpenseProposalStatus,
-): 'neutral' | 'pos' | 'warn' | 'neg' | 'info' | 'accent' {
-  switch (status) {
-    case Zeus.ExpenseProposalStatus.CLOSED:
-      return 'pos';
-    case Zeus.ExpenseProposalStatus.AUTHORIZED:
-      return 'accent';
-    case Zeus.ExpenseProposalStatus.PARTIALLY_PAID:
-    case Zeus.ExpenseProposalStatus.REPORT_SUBMITTED:
-      return 'warn';
-    case Zeus.ExpenseProposalStatus.DECLINED:
-      return 'neg';
-    case Zeus.ExpenseProposalStatus.CREATED:
-      return 'info';
-    default:
-      return 'neutral';
   }
 }
 </script>
@@ -205,6 +177,10 @@ function statusVariant(
 
 .pools {
   margin-bottom: var(--p-5);
+}
+
+.row-card-link {
+  cursor: pointer;
 }
 
 .row-card {

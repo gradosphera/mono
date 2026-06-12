@@ -1,15 +1,18 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { GqlJwtAuthGuard } from '~/application/auth/guards/graphql-jwt-auth.guard';
 import { RolesGuard } from '~/application/auth/guards/roles.guard';
 import { AuthRoles } from '~/application/auth/decorators/auth.decorator';
+import { CurrentUser } from '~/application/auth/decorators/current-user.decorator';
+import type { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { TransactionDTO } from '~/application/common/dto/transaction-result-response.dto';
 import { GeneratedDocumentDTO } from '~/application/document/dto/generated-document.dto';
 import { GenerateDocumentOptionsInputDTO } from '~/application/document/dto/generate-document-options-input.dto';
 import { ExpenseProposalStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-statement-document.dto';
 import { ExpenseProposalDecisionGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-decision-document.dto';
 import { ExpensesMutationsService } from '../services/expenses-mutations.service';
+import { ExpensesManagementService } from '../services/expenses-management.service';
 import { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input';
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
@@ -27,7 +30,30 @@ import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
  */
 @Resolver()
 export class ExpenseMutationsResolver {
-  constructor(private readonly expensesMutations: ExpensesMutationsService) {}
+  constructor(
+    private readonly expensesMutations: ExpensesMutationsService,
+    private readonly expensesManagement: ExpensesManagementService
+  ) {}
+
+  /**
+   * Контракт проверяет только статус/механику строки, но не личность
+   * отчитывающегося — поэтому отчёт по чужому авансу отсекается здесь:
+   * пайщик может отчитаться только по своей строке, совет — по любой.
+   */
+  private async assertCanReportItem(
+    user: MonoAccountDomainInterface,
+    proposalHash: string,
+    itemHash: string
+  ): Promise<void> {
+    if (user.role === 'chairman' || user.role === 'member') return;
+    const proposal = await this.expensesManagement.getProposalByHash(proposalHash);
+    const item = proposal?.items?.find(
+      (i) => i.item_hash?.toLowerCase() === itemHash.toLowerCase()
+    );
+    if (!item || item.recipient !== user.username) {
+      throw new ForbiddenException('Отчитаться по авансу может только его получатель');
+    }
+  }
 
   @Mutation(() => GeneratedDocumentDTO, {
     name: 'generateExpenseProposalStatementDocument',
@@ -35,7 +61,7 @@ export class ExpenseMutationsResolver {
   })
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member', 'user'])
+  @AuthRoles(['chairman', 'member'])
   async generateExpenseProposalStatementDocument(
     @Args('data', { type: () => ExpenseProposalStatementGenerateDocumentInputDTO })
     data: ExpenseProposalStatementGenerateDocumentInputDTO,
@@ -66,10 +92,17 @@ export class ExpenseMutationsResolver {
     description: 'Подать СЗ-расход (создать смету с подписью пайщика/председателя).',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member', 'user'])
+  @AuthRoles(['chairman', 'member'])
   async createExpenseProposal(
-    @Args('data', { type: () => CreateExpenseProposalInputDTO }) data: CreateExpenseProposalInputDTO
+    @Args('data', { type: () => CreateExpenseProposalInputDTO }) data: CreateExpenseProposalInputDTO,
+    @CurrentUser() user: MonoAccountDomainInterface
   ): Promise<TransactionDTO> {
+    // RolesGuard пропускает запрос при data.username === user.username независимо
+    // от роли — здесь это сломало бы ограничение «СЗ подаёт совет», поэтому роль
+    // проверяется явно.
+    if (user.role !== 'chairman' && user.role !== 'member') {
+      throw new ForbiddenException('Создавать служебные записки на расход могут только председатель и члены совета');
+    }
     return this.expensesMutations.createExpenseProposal(data);
   }
 
@@ -92,8 +125,10 @@ export class ExpenseMutationsResolver {
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])
   async reportExpenseItem(
-    @Args('data', { type: () => ReportExpenseItemInputDTO }) data: ReportExpenseItemInputDTO
+    @Args('data', { type: () => ReportExpenseItemInputDTO }) data: ReportExpenseItemInputDTO,
+    @CurrentUser() user: MonoAccountDomainInterface
   ): Promise<TransactionDTO> {
+    await this.assertCanReportItem(user, data.proposal_hash, data.item_hash);
     return this.expensesMutations.reportExpenseItem(data);
   }
 

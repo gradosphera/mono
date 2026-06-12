@@ -1,7 +1,7 @@
 import { markRaw } from 'vue';
 import { agreementsBase } from 'src/shared/lib/consts/workspaces';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
-import { ContributorsPage, ProgramExpensesPage } from './pages';
+import { ContributorsPage, ProgramExpensesPage, ProgramExpensePage } from './pages';
 import { CapitalBase } from './pages/CapitalBase';
 import { ProjectsListPage } from './pages/ProjectsListPage';
 import { ProjectPage } from './pages/ProjectPage';
@@ -199,6 +199,20 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               roles: ['chairman', 'member'],
               agreements: agreementsBase,
               requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'program-expenses/:expense_hash',
+            name: 'capital-program-expense',
+            component: markRaw(ProgramExpensePage),
+            meta: {
+              title: 'Расход',
+              icon: 'fa-solid fa-receipt',
+              roles: ['chairman', 'member'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+              hidden: true,
             },
             children: [],
           },

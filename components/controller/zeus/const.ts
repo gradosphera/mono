@@ -1646,6 +1646,9 @@ export const AllTypesProps: Record<string,any> = {
 		expenseProposalsByMember:{
 			options:"PaginationInput"
 		},
+		expenseRequisitesByProposal:{
+
+		},
 		getAccount:{
 			data:"GetAccountInput"
 		},
@@ -2768,6 +2771,7 @@ export const ReturnTypes: Record<string,any> = {
 		mechanics:"ExpenseMechanics",
 		planned_amount:"String",
 		recipient:"String",
+		recipient_name:"String",
 		recipient_type:"ExpenseRecipientType",
 		status:"ExpenseItemStatus"
 	},
@@ -3389,6 +3393,16 @@ export const ReturnTypes: Record<string,any> = {
 		total_planned:"String",
 		updated_at:"String",
 		username:"String"
+	},
+	ExpenseRequisite:{
+		coopname:"String",
+		data:"JSON",
+		item_hash:"String",
+		method_type:"String",
+		payment_purpose:"String",
+		proposal_hash:"String",
+		recipient:"String",
+		requisites:"String"
 	},
 	ExtendedBlockchainAction:{
 		account:"String",
@@ -4518,6 +4532,7 @@ export const ReturnTypes: Record<string,any> = {
 		expenseProposal:"ExpenseProposal",
 		expenseProposalsByCooperative:"PaginatedExpenseProposalsPaginationResult",
 		expenseProposalsByMember:"PaginatedExpenseProposalsPaginationResult",
+		expenseRequisitesByProposal:"ExpenseRequisite",
 		getAccount:"Account",
 		getAccounts:"AccountsPaginationResult",
 		getActions:"PaginatedActionsPaginationResult",

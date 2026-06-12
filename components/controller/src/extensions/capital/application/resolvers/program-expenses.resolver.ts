@@ -32,7 +32,7 @@ export class ProgramExpensesResolver {
     description: 'Создание программного расхода капитала через шасси expense.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman'])
+  @AuthRoles(['chairman', 'member'])
   async createProgramExpense(
     @Args('data', { type: () => CreateProgramExpenseInputDTO }) data: CreateProgramExpenseInputDTO,
   ): Promise<TransactionDTO> {

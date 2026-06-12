@@ -116,20 +116,29 @@ export class ProgramExpensesManagementService {
       sortOrder,
     });
 
-    const names = await this.resolveCreatorNames(result.items.map((p) => p.creator));
-    return buildPaginationResult(result, options, (p) => this.toOutput(p, names.get(p.creator) ?? p.creator));
+    const names = await this.resolveDisplayNames(
+      result.items.flatMap((p) => [p.creator, ...this.memberRecipients(p)]),
+    );
+    return buildPaginationResult(result, options, (p) => this.toOutput(p, names));
   }
 
   async getProgramExpense(coopname: string, expenseHash: string): Promise<ProgramExpenseOutputDTO | null> {
     const proposal = await this.expenseChassis.readProposalByHash(coopname, expenseHash);
     if (!proposal) return null;
-    const names = await this.resolveCreatorNames([proposal.creator]);
-    return this.toOutput(proposal, names.get(proposal.creator) ?? proposal.creator);
+    const names = await this.resolveDisplayNames([proposal.creator, ...this.memberRecipients(proposal)]);
+    return this.toOutput(proposal, names);
+  }
+
+  /** Получатели-пайщики СЗ (у ORG-строк recipient — уже название организации). */
+  private memberRecipients(p: InterExpenseProposalRead): string[] {
+    return p.items
+      .filter((it) => this.mapRecipientType(it.recipientType) !== ExpenseRecipientType.ORG)
+      .map((it) => it.recipient);
   }
 
   /** ФИО/название организации по username; при ошибке резолва остаётся username. */
-  private async resolveCreatorNames(creators: string[]): Promise<Map<string, string>> {
-    const unique = [...new Set(creators.filter(Boolean))];
+  private async resolveDisplayNames(usernames: string[]): Promise<Map<string, string>> {
+    const unique = [...new Set(usernames.filter(Boolean))];
     const entries = await Promise.all(
       unique.map(async (username): Promise<[string, string]> => {
         try {
@@ -143,16 +152,16 @@ export class ProgramExpensesManagementService {
     return new Map(entries);
   }
 
-  private toOutput(p: InterExpenseProposalRead, creatorName: string): ProgramExpenseOutputDTO {
+  private toOutput(p: InterExpenseProposalRead, names: Map<string, string>): ProgramExpenseOutputDTO {
     return {
       coopname: p.coopname,
       expense_hash: p.proposalHash,
       creator: p.creator,
-      creator_name: creatorName,
+      creator_name: names.get(p.creator) ?? p.creator,
       source_wallet: p.sourceWalletCode,
       status: this.mapStatus(p.status),
       callback: p.callback ? this.toCallbackOutput(p.callback) : undefined,
-      items: p.items.map((it) => this.toItemOutput(it)),
+      items: p.items.map((it) => this.toItemOutput(it, names)),
       total_planned: p.totalPlanned,
       total_actual: p.totalActual,
       created_at: p.createdAt,
@@ -160,12 +169,17 @@ export class ProgramExpensesManagementService {
     };
   }
 
-  private toItemOutput(it: InterExpenseItem): ProgramExpenseItemOutputDTO {
+  private toItemOutput(it: InterExpenseItem, names: Map<string, string>): ProgramExpenseItemOutputDTO {
+    const recipientType = this.mapRecipientType(it.recipientType);
     return {
       item_hash: it.itemHash,
       mechanics: this.mapMechanics(it.mechanics),
-      recipient_type: this.mapRecipientType(it.recipientType),
+      recipient_type: recipientType,
       recipient: it.recipient,
+      recipient_name:
+        recipientType === ExpenseRecipientType.ORG
+          ? it.recipient
+          : (names.get(it.recipient) ?? it.recipient),
       description: it.description,
       planned_amount: it.plannedAmount,
       actual_amount: it.actualAmount,

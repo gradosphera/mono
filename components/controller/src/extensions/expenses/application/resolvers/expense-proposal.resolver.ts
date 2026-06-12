@@ -9,7 +9,9 @@ import {
   PaginationResult,
 } from '~/application/common/dto/pagination.dto';
 import { ExpensesManagementService } from '../services/expenses-management.service';
+import { ExpenseRequisiteSnapshotsService } from '../services/expense-requisite-snapshots.service';
 import { ExpenseProposalOutputDTO } from '../dto/expense-proposal.output';
+import { ExpenseRequisiteOutputDTO } from '../dto/expense-requisite.output';
 import type { ExpenseProposalDomainEntity } from '../../domain/entities/expense-proposal.entity';
 
 const paginatedExpenseProposalsResult = createPaginationResult(
@@ -31,7 +33,25 @@ const paginatedExpenseProposalsResult = createPaginationResult(
  */
 @Resolver(() => ExpenseProposalOutputDTO)
 export class ExpenseProposalResolver {
-  constructor(private readonly expenses: ExpensesManagementService) {}
+  constructor(
+    private readonly expenses: ExpensesManagementService,
+    private readonly requisiteSnapshots: ExpenseRequisiteSnapshotsService
+  ) {}
+
+  @Query(() => [ExpenseRequisiteOutputDTO], {
+    name: 'expenseRequisitesByProposal',
+    description:
+      'Снимки реквизитов получателей по строкам СЗ (персональные данные — только совету; в блокчейн не пишутся).',
+  })
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  @AuthRoles(['chairman', 'member'])
+  async getExpenseRequisitesByProposal(
+    @Args('coopname', { type: () => String }) coopname: string,
+    @Args('proposal_hash', { type: () => String }) proposalHash: string
+  ): Promise<ExpenseRequisiteOutputDTO[]> {
+    const items = await this.requisiteSnapshots.listByProposal(coopname, proposalHash);
+    return items.map((e) => ExpenseRequisiteOutputDTO.fromEntity(e));
+  }
 
   @Query(() => ExpenseProposalOutputDTO, {
     name: 'expenseProposal',

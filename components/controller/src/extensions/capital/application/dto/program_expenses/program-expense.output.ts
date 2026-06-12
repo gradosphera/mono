@@ -19,6 +19,8 @@ export class ProgramExpenseItemOutputDTO {
   @Field(() => ExpenseMechanics) mechanics!: ExpenseMechanics;
   @Field(() => ExpenseRecipientType) recipient_type!: ExpenseRecipientType;
   @Field(() => String) recipient!: string;
+  @Field(() => String, { description: 'Имя получателя (ФИО пайщика или название организации)' })
+  recipient_name!: string;
   @Field(() => String) description!: string;
   @Field(() => String) planned_amount!: string;
   @Field(() => String) actual_amount!: string;

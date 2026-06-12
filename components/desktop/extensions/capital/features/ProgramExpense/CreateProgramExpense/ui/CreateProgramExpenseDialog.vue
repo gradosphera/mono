@@ -60,11 +60,10 @@ BaseDialog(
                 disabled
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.MEMBER')
-              BaseInput(
+              UserSearchSelector(
                 v-model='item.recipient_account',
-                label='Аккаунт пайщика-получателя',
-                placeholder='username',
-                required,
+                label='Пайщик-получатель (по ФИО)',
+                outlined,
                 @update:model-value='item.payment_method_id = null'
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.ORG')
@@ -129,7 +128,7 @@ BaseDialog(
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
@@ -140,6 +139,7 @@ import { BaseInput } from 'src/shared/ui/base/BaseInput';
 import { BaseSelect } from 'src/shared/ui/base/BaseSelect';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { PaymentMethodSelect } from 'src/shared/ui/domain/PaymentMethodSelect';
+import { UserSearchSelector } from 'src/shared/ui/UserSearchSelector';
 import {
   useCreateProgramExpense,
   type ICreateProgramExpenseDraftItem,
@@ -167,6 +167,39 @@ const form = reactive({
 });
 
 const submitting = ref(false);
+
+// Черновик формы переживает перезаход: каждое изменение зеркалится в
+// localStorage, восстановление — на маунте (SSR-safe), очистка — только
+// после успешной подачи.
+const DRAFT_KEY = 'mp:capital:create-program-expense:draft';
+
+function restoreDraft(): void {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return;
+    const draft = JSON.parse(raw) as Partial<typeof form>;
+    form.description = draft.description ?? '';
+    form.deadline = draft.deadline ?? '';
+    form.items = Array.isArray(draft.items) ? draft.items : [];
+  } catch {
+    localStorage.removeItem(DRAFT_KEY);
+  }
+}
+
+function clearDraft(): void {
+  localStorage.removeItem(DRAFT_KEY);
+}
+
+onMounted(() => {
+  restoreDraft();
+  watch(
+    form,
+    () => {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+    },
+    { deep: true },
+  );
+});
 
 const mechanicsOptions = [
   { label: 'Аванс под отчёт', value: Zeus.ExpenseMechanics.ADVANCE },
@@ -240,6 +273,10 @@ async function submit(): Promise<void> {
       items: form.items,
     });
     SuccessAlert('Программный расход подан — заявление подписано и передано в совет');
+    clearDraft();
+    form.description = '';
+    form.deadline = '';
+    form.items = [];
     emit('created');
     close();
   } catch (e) {

@@ -64,10 +64,17 @@
                   //- Оплата расхода по счёту: кассир прикладывает платёжку/квитанцию
                   //- прямо в реестре после подтверждения оплаты.
                   AttachExpenseProofPanel.q-mt-sm(
-                    v-if='expenseProofRef(row)',
+                    v-if='!hideActions && expenseProofRef(row)',
                     :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
                     :item-hash='expenseProofRef(row)?.item_hash ?? ""',
                     @uploaded='onProofUploaded(row)'
+                  )
+                  //- Аванс под отчёт: пайщик-получатель отчитывается чеком прямо
+                  //- из своего реестра платежей (панель сама скрывается для DIRECT).
+                  ReportExpenseAdvancePanel.q-mt-sm(
+                    v-else-if='advanceReportRef(row)',
+                    :proposal-hash='advanceReportRef(row)?.proposal_hash ?? ""',
+                    :item-hash='advanceReportRef(row)?.item_hash ?? ""'
                   )
 
       .table-foot
@@ -113,10 +120,15 @@
         template(v-if='expanded.get(row.id)')
           PaymentDetails.pay-card__details(:payment='row')
           AttachExpenseProofPanel.q-mt-sm(
-            v-if='expenseProofRef(row)',
+            v-if='!hideActions && expenseProofRef(row)',
             :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
             :item-hash='expenseProofRef(row)?.item_hash ?? ""',
             @uploaded='onProofUploaded(row)'
+          )
+          ReportExpenseAdvancePanel.q-mt-sm(
+            v-else-if='advanceReportRef(row)',
+            :proposal-hash='advanceReportRef(row)?.proposal_hash ?? ""',
+            :item-hash='advanceReportRef(row)?.item_hash ?? ""'
           )
 
       .table-foot
@@ -145,6 +157,8 @@ import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
 import { AttachExpenseProofPanel } from 'src/features/Payment/AttachExpenseProof';
+import { ReportExpenseAdvancePanel } from 'src/features/Payment/ReportExpenseAdvance';
+import { useSessionStore } from 'src/entities/Session';
 import { PaymentDetails } from 'src/shared/ui';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import type { BaseBadgeVariant } from 'src/shared/ui/base/BaseBadge';
@@ -219,6 +233,18 @@ const expenseProofRef = (
   const data = row.blockchain_data as { proposal_hash?: string; item_hash?: string } | null;
   if (!data?.proposal_hash || !data?.item_hash) return null;
   return { proposal_hash: data.proposal_hash, item_hash: data.item_hash };
+};
+
+// Личный реестр пайщика (hideActions): получатель аванса под отчёт прикладывает
+// чек и подаёт отчёт по своей позиции. Механику (ADVANCE/DIRECT) панель
+// проверяет сама по данным СЗ и для DIRECT не отображается.
+const session = useSessionStore();
+const advanceReportRef = (
+  row: IPaymentRow,
+): { proposal_hash: string; item_hash: string } | null => {
+  if (!props.hideActions) return null;
+  if (row.username !== session.username) return null;
+  return expenseProofRef(row);
 };
 
 // Отметка отчитанности оплаченного расхода: бэкенд зеркалит число платёжек

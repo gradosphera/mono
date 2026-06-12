@@ -6,6 +6,7 @@ const rawProgramExpenseItemSelector = {
   mechanics: true,
   recipient_type: true,
   recipient: true,
+  recipient_name: true,
   description: true,
   planned_amount: true,
   actual_amount: true,

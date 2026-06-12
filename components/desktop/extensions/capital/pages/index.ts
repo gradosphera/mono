@@ -25,3 +25,4 @@ export * from './ComponentResultsPage';
 export * from './InvitationsPage';
 export * from './ProcessesPage';
 export * from './ProgramExpensesPage';
+export * from './ProgramExpensePage';

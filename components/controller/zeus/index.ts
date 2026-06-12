@@ -3060,6 +3060,8 @@ export type ValueTypes = {
 	mechanics?:boolean | `@${string}`,
 	planned_amount?:boolean | `@${string}`,
 	recipient?:boolean | `@${string}`,
+	/** Имя получателя (ФИО пайщика или название организации) */
+	recipient_name?:boolean | `@${string}`,
 	recipient_type?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
@@ -5510,6 +5512,26 @@ export type ValueTypes = {
 ["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	/** Тип получателя платежа. */
 ["ExpenseRecipientType"]:ExpenseRecipientType;
+	["ExpenseRequisite"]: AliasType<{
+	/** Имя кооператива. */
+	coopname?:boolean | `@${string}`,
+	/** Снимок данных платёжного метода на момент подачи СЗ. */
+	data?:boolean | `@${string}`,
+	/** Хеш строки расхода (item). */
+	item_hash?:boolean | `@${string}`,
+	/** Тип платёжного метода пайщика (СБП / банковский перевод). */
+	method_type?:boolean | `@${string}`,
+	/** Назначение платежа для поручения кассиру. */
+	payment_purpose?:boolean | `@${string}`,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash?:boolean | `@${string}`,
+	/** Получатель платежа (аккаунт пайщика или название организации). */
+	recipient?:boolean | `@${string}`,
+	/** Реквизиты строкой — как в документе служебной записки. */
+	requisites?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on ExpenseRequisite']?: Omit<ValueTypes["ExpenseRequisite"], "...on ExpenseRequisite">
+}>;
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
@@ -8425,6 +8447,7 @@ expenseFilesByProposal?: [{	coopname: string | Variable<any, string>,	proposal_h
 expenseProposal?: [{	proposal_hash: string | Variable<any, string>},ValueTypes["ExpenseProposal"]],
 expenseProposalsByCooperative?: [{	coopname: string | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedExpenseProposalsPaginationResult"]],
 expenseProposalsByMember?: [{	coopname: string | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>,	username: string | Variable<any, string>},ValueTypes["PaginatedExpenseProposalsPaginationResult"]],
+expenseRequisitesByProposal?: [{	coopname: string | Variable<any, string>,	proposal_hash: string | Variable<any, string>},ValueTypes["ExpenseRequisite"]],
 getAccount?: [{	data: ValueTypes["GetAccountInput"] | Variable<any, string>},ValueTypes["Account"]],
 getAccounts?: [{	data?: ValueTypes["GetAccountsInput"] | undefined | null | Variable<any, string>,	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ValueTypes["ActionFiltersInput"] | undefined | null | Variable<any, string>,	pagination?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["PaginatedActionsPaginationResult"]],
@@ -12150,6 +12173,8 @@ export type ResolverInputTypes = {
 	mechanics?:boolean | `@${string}`,
 	planned_amount?:boolean | `@${string}`,
 	recipient?:boolean | `@${string}`,
+	/** Имя получателя (ФИО пайщика или название организации) */
+	recipient_name?:boolean | `@${string}`,
 	recipient_type?:boolean | `@${string}`,
 	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
@@ -14548,6 +14573,25 @@ export type ResolverInputTypes = {
 ["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	/** Тип получателя платежа. */
 ["ExpenseRecipientType"]:ExpenseRecipientType;
+	["ExpenseRequisite"]: AliasType<{
+	/** Имя кооператива. */
+	coopname?:boolean | `@${string}`,
+	/** Снимок данных платёжного метода на момент подачи СЗ. */
+	data?:boolean | `@${string}`,
+	/** Хеш строки расхода (item). */
+	item_hash?:boolean | `@${string}`,
+	/** Тип платёжного метода пайщика (СБП / банковский перевод). */
+	method_type?:boolean | `@${string}`,
+	/** Назначение платежа для поручения кассиру. */
+	payment_purpose?:boolean | `@${string}`,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash?:boolean | `@${string}`,
+	/** Получатель платежа (аккаунт пайщика или название организации). */
+	recipient?:boolean | `@${string}`,
+	/** Реквизиты строкой — как в документе служебной записки. */
+	requisites?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
@@ -17363,6 +17407,7 @@ expenseFilesByProposal?: [{	coopname: string,	proposal_hash: string},ResolverInp
 expenseProposal?: [{	proposal_hash: string},ResolverInputTypes["ExpenseProposal"]],
 expenseProposalsByCooperative?: [{	coopname: string,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedExpenseProposalsPaginationResult"]],
 expenseProposalsByMember?: [{	coopname: string,	options?: ResolverInputTypes["PaginationInput"] | undefined | null,	username: string},ResolverInputTypes["PaginatedExpenseProposalsPaginationResult"]],
+expenseRequisitesByProposal?: [{	coopname: string,	proposal_hash: string},ResolverInputTypes["ExpenseRequisite"]],
 getAccount?: [{	data: ResolverInputTypes["GetAccountInput"]},ResolverInputTypes["Account"]],
 getAccounts?: [{	data?: ResolverInputTypes["GetAccountsInput"] | undefined | null,	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["AccountsPaginationResult"]],
 getActions?: [{	filters?: ResolverInputTypes["ActionFiltersInput"] | undefined | null,	pagination?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["PaginatedActionsPaginationResult"]],
@@ -20989,6 +21034,8 @@ export type ModelTypes = {
 	mechanics: ModelTypes["ExpenseMechanics"],
 	planned_amount: string,
 	recipient: string,
+	/** Имя получателя (ФИО пайщика или название организации) */
+	recipient_name: string,
 	recipient_type: ModelTypes["ExpenseRecipientType"],
 	status: ModelTypes["ExpenseItemStatus"]
 };
@@ -23323,6 +23370,24 @@ export type ModelTypes = {
 };
 	["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	["ExpenseRecipientType"]:ExpenseRecipientType;
+	["ExpenseRequisite"]: {
+		/** Имя кооператива. */
+	coopname: string,
+	/** Снимок данных платёжного метода на момент подачи СЗ. */
+	data?: ModelTypes["JSON"] | undefined | null,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Тип платёжного метода пайщика (СБП / банковский перевод). */
+	method_type?: string | undefined | null,
+	/** Назначение платежа для поручения кассиру. */
+	payment_purpose?: string | undefined | null,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string,
+	/** Получатель платежа (аккаунт пайщика или название организации). */
+	recipient: string,
+	/** Реквизиты строкой — как в документе служебной записки. */
+	requisites: string
+};
 	["ExpenseStatus"]:ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
 ["ExtendedBlockchainAction"]: {
@@ -24644,7 +24709,7 @@ export type ModelTypes = {
 	capitalCreateProcessTemplate: ModelTypes["ProcessTemplate"],
 	/** Создание программного расхода капитала через шасси expense.
 
-Требуемые роли: chairman.  */
+Требуемые роли: chairman, member.  */
 	capitalCreateProgramExpense: ModelTypes["Transaction"],
 	/** Инвестирование в программу благорост (денежная программная инвестиция)
 
@@ -24968,7 +25033,7 @@ export type ModelTypes = {
 	createDepositPayment: ModelTypes["GatewayPayment"],
 	/** Подать СЗ-расход (создать смету с подписью пайщика/председателя).
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	createExpenseProposal: ModelTypes["Transaction"],
 	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
 
@@ -25068,7 +25133,7 @@ export type ModelTypes = {
 	generateExpenseProposalDecisionDocument: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать документ СЗ-заявления (registry 2010) для последующей подписи.
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: ModelTypes["GeneratedDocument"],
 	/** Сгенерировать протокол решения по предложенной повестке
 
@@ -26649,6 +26714,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	expenseProposalsByMember: ModelTypes["PaginatedExpenseProposalsPaginationResult"],
+	/** Снимки реквизитов получателей по строкам СЗ (персональные данные — только совету; в блокчейн не пишутся).
+
+Требуемые роли: chairman, member.  */
+	expenseRequisitesByProposal: Array<ModelTypes["ExpenseRequisite"]>,
 	/** Получить сводную информацию о аккаунте
 
 Требуемые роли: chairman, member.  */
@@ -30447,6 +30516,8 @@ export type GraphQLTypes = {
 	mechanics: GraphQLTypes["ExpenseMechanics"],
 	planned_amount: string,
 	recipient: string,
+	/** Имя получателя (ФИО пайщика или название организации) */
+	recipient_name: string,
 	recipient_type: GraphQLTypes["ExpenseRecipientType"],
 	status: GraphQLTypes["ExpenseItemStatus"],
 	['...on CapitalProgramExpenseItem']: Omit<GraphQLTypes["CapitalProgramExpenseItem"], "...on CapitalProgramExpenseItem">
@@ -32896,6 +32967,26 @@ export type GraphQLTypes = {
 ["ExpenseProposalStatus"]: ExpenseProposalStatus;
 	/** Тип получателя платежа. */
 ["ExpenseRecipientType"]: ExpenseRecipientType;
+	["ExpenseRequisite"]: {
+	__typename: "ExpenseRequisite",
+	/** Имя кооператива. */
+	coopname: string,
+	/** Снимок данных платёжного метода на момент подачи СЗ. */
+	data?: GraphQLTypes["JSON"] | undefined | null,
+	/** Хеш строки расхода (item). */
+	item_hash: string,
+	/** Тип платёжного метода пайщика (СБП / банковский перевод). */
+	method_type?: string | undefined | null,
+	/** Назначение платежа для поручения кассиру. */
+	payment_purpose?: string | undefined | null,
+	/** Хеш сметы расхода (proposal). */
+	proposal_hash: string,
+	/** Получатель платежа (аккаунт пайщика или название организации). */
+	recipient: string,
+	/** Реквизиты строкой — как в документе служебной записки. */
+	requisites: string,
+	['...on ExpenseRequisite']: Omit<GraphQLTypes["ExpenseRequisite"], "...on ExpenseRequisite">
+};
 	/** Статус расхода в системе CAPITAL */
 ["ExpenseStatus"]: ExpenseStatus;
 	/** Расширенное действие блокчейна с сертификатом пользователя, совершившего его. */
@@ -34305,7 +34396,7 @@ export type GraphQLTypes = {
 	capitalCreateProcessTemplate: GraphQLTypes["ProcessTemplate"],
 	/** Создание программного расхода капитала через шасси expense.
 
-Требуемые роли: chairman.  */
+Требуемые роли: chairman, member.  */
 	capitalCreateProgramExpense: GraphQLTypes["Transaction"],
 	/** Инвестирование в программу благорост (денежная программная инвестиция)
 
@@ -34629,7 +34720,7 @@ export type GraphQLTypes = {
 	createDepositPayment: GraphQLTypes["GatewayPayment"],
 	/** Подать СЗ-расход (создать смету с подписью пайщика/председателя).
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	createExpenseProposal: GraphQLTypes["Transaction"],
 	/** Создание объекта регистрационного платежа производится мутацией createInitialPayment. Выполнение мутации возвращает идентификатор платежа и данные для его совершения в зависимости от выбранного платежного провайдера.
 
@@ -34729,7 +34820,7 @@ export type GraphQLTypes = {
 	generateExpenseProposalDecisionDocument: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать документ СЗ-заявления (registry 2010) для последующей подписи.
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: GraphQLTypes["GeneratedDocument"],
 	/** Сгенерировать протокол решения по предложенной повестке
 
@@ -36456,6 +36547,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	expenseProposalsByMember: GraphQLTypes["PaginatedExpenseProposalsPaginationResult"],
+	/** Снимки реквизитов получателей по строкам СЗ (персональные данные — только совету; в блокчейн не пишутся).
+
+Требуемые роли: chairman, member.  */
+	expenseRequisitesByProposal: Array<GraphQLTypes["ExpenseRequisite"]>,
 	/** Получить сводную информацию о аккаунте
 
 Требуемые роли: chairman, member.  */

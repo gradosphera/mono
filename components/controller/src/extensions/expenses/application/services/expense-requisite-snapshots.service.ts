@@ -44,6 +44,14 @@ export class ExpenseRequisiteSnapshotsService {
     }
   }
 
+  /** Снимки реквизитов всех строк СЗ — для сверки советом на странице расхода. */
+  async listByProposal(coopname: string, proposalHash: string): Promise<ExpenseRequisiteSnapshotTypeormEntity[]> {
+    return this.repository.find({
+      where: { coopname, proposal_hash: proposalHash.toLowerCase() },
+      order: { id: 'ASC' },
+    })
+  }
+
   /** Полные реквизиты платёжного метода пайщика строкой — для документов. */
   async formatForOwner(username: string, methodId: string): Promise<string> {
     const method = await this.paymentMethods.get({ username, method_id: methodId })

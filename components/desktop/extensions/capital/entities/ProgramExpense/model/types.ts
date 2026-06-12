@@ -8,6 +8,15 @@ export type IProgramExpensesPagination =
 export type IGetProgramExpenseInput = Queries.Capital.GetProgramExpense.IInput;
 export type IGetProgramExpensesInput = Queries.Capital.GetProgramExpenses.IInput;
 
+export type IProgramExpenseItem = NonNullable<IProgramExpense>['items'][number];
+
+export type IExpenseProposalAggregate =
+  Queries.Expense.ExpenseProposal.IOutput[typeof Queries.Expense.ExpenseProposal.name];
+export type IExpenseProposalFile =
+  Queries.Expense.ExpenseFilesByProposal.IOutput[typeof Queries.Expense.ExpenseFilesByProposal.name][number];
+export type IExpenseRequisite =
+  Queries.Expense.ExpenseRequisitesByProposal.IOutput[typeof Queries.Expense.ExpenseRequisitesByProposal.name][number];
+
 export type ICreateProgramExpenseInput =
   Mutations.Capital.CreateProgramExpense.IInput['data'];
 export type ICreateProgramExpenseOutput =
