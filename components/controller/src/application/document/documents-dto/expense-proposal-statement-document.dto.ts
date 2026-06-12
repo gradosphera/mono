@@ -42,6 +42,11 @@ class ExpenseProposalItemInputDTO implements ItemAction {
   @IsString()
   requisites?: string;
 
+  @Field({ description: 'Назначение платежа — отдельной строкой после реквизитов', nullable: true })
+  @IsOptional()
+  @IsString()
+  payment_purpose?: string;
+
   @Field({
     description:
       'Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ.',

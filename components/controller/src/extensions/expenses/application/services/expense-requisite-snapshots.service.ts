@@ -60,12 +60,12 @@ export class ExpenseRequisiteSnapshotsService {
         // прямая оплата по выставленным реквизитам.
         if (it.isOrganization && it.mechanics !== 'DIRECT') {
           throw new BadRequestException(
-            'Организации доступна только прямая оплата по реквизитам (DIRECT) — аванс под отчёт ей не выдаётся'
+            'Организации/ИП доступна только оплата по счёту (DIRECT) — аванс под отчёт ей не выдаётся'
           )
         }
         if (!it.isOrganization && it.mechanics !== 'ADVANCE') {
           throw new BadRequestException(
-            `Пайщику ${it.recipient} средства передаются только авансом под отчёт (ADVANCE) — прямая оплата доступна только организации`
+            `Пайщику ${it.recipient} средства передаются только авансом под отчёт (ADVANCE) — оплата по счёту доступна только организации/ИП`
           )
         }
 
@@ -78,6 +78,7 @@ export class ExpenseRequisiteSnapshotsService {
           method_type: null,
           data: null,
           requisites: it.requisites ?? '',
+          payment_purpose: it.paymentPurpose ?? null,
         })
 
         if (it.isOrganization) {

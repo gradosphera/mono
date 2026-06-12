@@ -61,6 +61,7 @@ export class ProgramExpensesManagementService {
       mechanics: it.mechanics === ExpenseMechanics.DIRECT ? 'DIRECT' : 'ADVANCE',
       paymentMethodId: it.payment_method_id,
       requisites: it.requisites,
+      paymentPurpose: it.payment_purpose,
     }));
     await this.expenseChassis.validateRequisites(data.coopname, requisiteItems);
 

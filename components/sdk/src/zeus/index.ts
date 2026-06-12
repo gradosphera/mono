@@ -2644,7 +2644,7 @@ export type ValueTypes = {
 	description: string | Variable<any, string>,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string | Variable<any, string>,
-	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
+	/** Строки расхода. Способ оплаты (аванс под отчёт / оплата по счёту) задаётся на каждой строке отдельно. */
 	items: Array<ValueTypes["ExpenseItemInput"]> | Variable<any, string>,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: ValueTypes["ExpenseProposalStatementSignedDocumentInput"] | Variable<any, string>
@@ -5282,6 +5282,8 @@ export type ValueTypes = {
 	mechanics: ValueTypes["ExpenseMechanics"] | Variable<any, string>,
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
 	payment_method_id?: string | undefined | null | Variable<any, string>,
+	/** Назначение платежа (для оплаты по счёту) — фиксируется в снимке для кассира. */
+	payment_purpose?: string | undefined | null | Variable<any, string>,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string | Variable<any, string>,
 	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
@@ -5418,6 +5420,8 @@ export type ValueTypes = {
 	number: string | Variable<any, string>,
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
 	payment_method_id?: string | undefined | null | Variable<any, string>,
+	/** Назначение платежа — отдельной строкой после реквизитов */
+	payment_purpose?: string | undefined | null | Variable<any, string>,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null | Variable<any, string>,
 	/** Тип получателя (SELF / MEMBER / ORG) */
@@ -11737,7 +11741,7 @@ export type ResolverInputTypes = {
 	description: string,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string,
-	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
+	/** Строки расхода. Способ оплаты (аванс под отчёт / оплата по счёту) задаётся на каждой строке отдельно. */
 	items: Array<ResolverInputTypes["ExpenseItemInput"]>,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: ResolverInputTypes["ExpenseProposalStatementSignedDocumentInput"]
@@ -14312,6 +14316,8 @@ export type ResolverInputTypes = {
 	mechanics: ResolverInputTypes["ExpenseMechanics"],
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
 	payment_method_id?: string | undefined | null,
+	/** Назначение платежа (для оплаты по счёту) — фиксируется в снимке для кассира. */
+	payment_purpose?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
 	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
@@ -14447,6 +14453,8 @@ export type ResolverInputTypes = {
 	number: string,
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
 	payment_method_id?: string | undefined | null,
+	/** Назначение платежа — отдельной строкой после реквизитов */
+	payment_purpose?: string | undefined | null,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null,
 	/** Тип получателя (SELF / MEMBER / ORG) */
@@ -20579,7 +20587,7 @@ export type ModelTypes = {
 	description: string,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string,
-	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
+	/** Строки расхода. Способ оплаты (аванс под отчёт / оплата по счёту) задаётся на каждой строке отдельно. */
 	items: Array<ModelTypes["ExpenseItemInput"]>,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: ModelTypes["ExpenseProposalStatementSignedDocumentInput"]
@@ -23083,6 +23091,8 @@ export type ModelTypes = {
 	mechanics: ModelTypes["ExpenseMechanics"],
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
 	payment_method_id?: string | undefined | null,
+	/** Назначение платежа (для оплаты по счёту) — фиксируется в снимке для кассира. */
+	payment_purpose?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
 	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
@@ -23215,6 +23225,8 @@ export type ModelTypes = {
 	number: string,
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
 	payment_method_id?: string | undefined | null,
+	/** Назначение платежа — отдельной строкой после реквизитов */
+	payment_purpose?: string | undefined | null,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null,
 	/** Тип получателя (SELF / MEMBER / ORG) */
@@ -30003,7 +30015,7 @@ export type GraphQLTypes = {
 	description: string,
 	/** Хэш СЗ-расхода (детерминированный, из UI). Он же станет proposal_hash в шасси. */
 	expense_hash: string,
-	/** Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно. */
+	/** Строки расхода. Способ оплаты (аванс под отчёт / оплата по счёту) задаётся на каждой строке отдельно. */
 	items: Array<GraphQLTypes["ExpenseItemInput"]>,
 	/** Подписанная СЗ-смета (document2, registry 2010). */
 	statement: GraphQLTypes["ExpenseProposalStatementSignedDocumentInput"]
@@ -32641,6 +32653,8 @@ export type GraphQLTypes = {
 	mechanics: GraphQLTypes["ExpenseMechanics"],
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — реквизиты снимаются в момент создания и прикладываются к платежу. */
 	payment_method_id?: string | undefined | null,
+	/** Назначение платежа (для оплаты по счёту) — фиксируется в снимке для кассира. */
+	payment_purpose?: string | undefined | null,
 	/** Планируемая сумма (asset, eg "1000.0000 RUB"). */
 	planned_amount: string,
 	/** Получатель: username пайщика; для организации — пустая строка (аккаунта в кооперативе нет). */
@@ -32777,6 +32791,8 @@ export type GraphQLTypes = {
 	number: string,
 	/** Идентификатор сохранённых реквизитов получателя-пайщика — сервер подставит полные реквизиты в документ. */
 	payment_method_id?: string | undefined | null,
+	/** Назначение платежа — отдельной строкой после реквизитов */
+	payment_purpose?: string | undefined | null,
 	/** Имя получателя */
 	recipient_name?: string | undefined | null,
 	/** Тип получателя (SELF / MEMBER / ORG) */

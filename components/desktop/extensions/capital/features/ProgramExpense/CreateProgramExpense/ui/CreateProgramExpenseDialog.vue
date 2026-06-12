@@ -57,8 +57,7 @@ BaseDialog(
                 v-model='item.mechanics',
                 :options='mechanicsOptions',
                 label='Способ оплаты',
-                disabled,
-                hint='Пайщику — только аванс под отчёт; организации — только прямая оплата'
+                disabled
               )
             .col-12.col-md-6(v-if='item.recipient_type === Zeus.ExpenseRecipientType.MEMBER')
               BaseInput(
@@ -107,6 +106,13 @@ BaseDialog(
                 v-model='item.requisites',
                 label='Реквизиты получателя',
                 placeholder='ИНН, р/с, БИК',
+                required
+              )
+            .col-12(v-if='item.recipient_type === Zeus.ExpenseRecipientType.ORG')
+              BaseInput(
+                v-model='item.payment_purpose',
+                label='Назначение платежа',
+                placeholder='Например: «Оплата по счёту № 814 от 01.06.2026 за аренду серверов»',
                 required
               )
 
@@ -163,13 +169,13 @@ const submitting = ref(false);
 
 const mechanicsOptions = [
   { label: 'Аванс под отчёт', value: Zeus.ExpenseMechanics.ADVANCE },
-  { label: 'Прямая оплата', value: Zeus.ExpenseMechanics.DIRECT },
+  { label: 'Оплата по счету', value: Zeus.ExpenseMechanics.DIRECT },
 ];
 
 const recipientTypeOptions = [
   { label: 'Я сам', value: Zeus.ExpenseRecipientType.SELF },
   { label: 'Пайщик', value: Zeus.ExpenseRecipientType.MEMBER },
-  { label: 'Организация', value: Zeus.ExpenseRecipientType.ORG },
+  { label: 'Организация/ИП', value: Zeus.ExpenseRecipientType.ORG },
 ];
 
 // Пайщик получает только аванс под отчёт (личные реквизиты, отчитается чеком);
@@ -196,7 +202,7 @@ const canSubmit = computed(
         i.description.trim() &&
         (i.recipient_type !== Zeus.ExpenseRecipientType.MEMBER || i.recipient_account?.trim()) &&
         (i.recipient_type === Zeus.ExpenseRecipientType.ORG
-          ? Boolean(i.recipient_name?.trim() && i.requisites?.trim())
+          ? Boolean(i.recipient_name?.trim() && i.requisites?.trim() && i.payment_purpose?.trim())
           : Boolean(i.payment_method_id)),
     ),
 );
@@ -210,6 +216,7 @@ function addItem(): void {
     recipient_type: Zeus.ExpenseRecipientType.SELF,
     recipient_name: '',
     requisites: '',
+    payment_purpose: '',
     recipient_account: '',
     payment_method_id: null,
   });
@@ -231,7 +238,7 @@ async function submit(): Promise<void> {
       deadline: form.deadline,
       items: form.items,
     });
-    SuccessAlert('Программный расход подан — заявление подписано и передано в шасси расходов');
+    SuccessAlert('Программный расход подан — заявление подписано и передано в совет');
     emit('created');
     close();
   } catch (e) {

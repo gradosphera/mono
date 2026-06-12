@@ -19,6 +19,8 @@ export interface ICreateProgramExpenseDraftItem {
   recipient_type: Zeus.ExpenseRecipientType;
   recipient_name?: string;
   requisites?: string;
+  /** Назначение платежа (оплата по счёту организации/ИП). */
+  payment_purpose?: string;
   recipient_account?: string;
   item_hash?: string;
   /** Идентификатор платёжного метода получателя-пайщика (SELF/MEMBER). */
@@ -77,6 +79,7 @@ export function useCreateProgramExpense() {
       mechanics: it.mechanics,
       recipient_name: it.recipient_name ?? '',
       requisites: it.requisites ?? '',
+      payment_purpose: it.payment_purpose || undefined,
       payment_method_id: it.payment_method_id ?? undefined,
       recipient_username:
         it.recipient_type === Zeus.ExpenseRecipientType.MEMBER
@@ -116,6 +119,7 @@ export function useCreateProgramExpense() {
       planned_amount: formatToAsset(it.amount, symbol, precision),
       payment_method_id: it.payment_method_id ?? undefined,
       requisites: it.requisites || undefined,
+      payment_purpose: it.payment_purpose || undefined,
     }));
 
     const result = await createProgramExpense({

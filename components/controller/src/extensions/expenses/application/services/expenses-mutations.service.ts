@@ -67,6 +67,7 @@ export class ExpensesMutationsService {
           mechanics: item.mechanics,
           recipient_name: item.recipient_name,
           requisites,
+          payment_purpose: item.payment_purpose,
         }
       })
     )
@@ -184,5 +185,6 @@ function toRequisiteItems(proposalHash: string, items: ExpenseItemInputDTO[]): I
     mechanics: it.mechanics === ExpenseMechanics.DIRECT ? 'DIRECT' : 'ADVANCE',
     paymentMethodId: it.payment_method_id,
     requisites: it.requisites,
+    paymentPurpose: it.payment_purpose,
   }))
 }

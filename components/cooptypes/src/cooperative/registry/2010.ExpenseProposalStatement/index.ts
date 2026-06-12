@@ -14,6 +14,8 @@ export interface IExpenseItem {
   mechanics: ExpenseItemPaymentMechanics
   recipient_name?: string
   requisites?: string
+  /** Назначение платежа — отдельной строкой после реквизитов (для оплаты по счёту) */
+  payment_purpose?: string
 }
 
 export interface IExpenseProposalHeader {
@@ -48,11 +50,13 @@ export interface Model {
 export const title = 'Служебная записка-смета о расходах'
 export const description = 'Заявка-смета председателю кооператива на финансирование расходов по программе. Содержит описание цели и массив позиций расхода.'
 
-// Вёрстка по бумажному образцу служебной записки: шапка-адресат справа,
-// дата слева, центрированный заголовок с идентификатором (= proposal_hash,
-// по нему записку можно найти), позиции — нумерованным списком с полными
-// реквизитами получателей. Кошелёк-источник в документе не указывается.
-export const context = `<style>h1{margin:0;text-align:center;}.digital-document{padding:20px;}.doc-header{text-align:right;padding-bottom:25px;}.doc-header p{margin:2px 0;}.doc-id{text-align:center;font-size:12px;word-break:break-all;padding-top:6px;padding-bottom:25px;}ol.items{padding-left:25px;margin:10px 0;}ol.items li{padding-bottom:10px;}.signature{padding-top:40px;}</style><div class="digital-document"><div class="doc-header"><p>{% trans 'TO_COUNCIL' %} {{vars.full_abbr_genitive}} «{{vars.name}}»</p><p>{% trans 'FROM_MEMBER' %} {{ user.full_name_or_short_name }}</p></div><p>{% trans 'DATE' %}: {{ meta.created_at }}</p><h1 style="padding-top:25px;">{% trans 'PROPOSAL_TITLE' %}</h1><p class="doc-id">№ {{ proposal_hash }}</p><p>{% trans 'BODY_INTRO' %}{% if proposal.fund_name %} {% trans 'BY_FUND' %} {{ proposal.fund_name }}{% endif %} {% trans 'IN_TOTAL' %} {{ proposal.total_amount }}{% if proposal.deadline %} {% trans 'DUE_BY' %} {{ proposal.deadline }}{% endif %}, {% trans 'BODY_NAMELY' %}:</p><ol class="items">{% for item in items %}<li>{{ item.description }} — {{ item.amount }} ({% if item.mechanics == 'ADVANCE' %}{% trans 'MECH_ADVANCE' %}{% else %}{% trans 'MECH_DIRECT' %}{% endif %}). {% trans 'ITEM_RECIPIENT' %}: {% if item.recipient_type == 'SELF' %}{{ user.full_name_or_short_name }}{% else %}{{ item.recipient_name }}{% endif %}{% if item.requisites %}. {% trans 'ITEM_REQUISITES' %}: {{ item.requisites }}{% endif %}</li>{% endfor %}</ol><p>{% trans 'PURPOSE' %}: {{ proposal.description }}</p><div class="signature"><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div></div>`
+// Вёрстка по канону документов реестра (см. 1040): без <style>-блока — превью
+// его не применяет; только inline text-align на div-обёртках. Шапка-адресат
+// справа, центрированный заголовок с идентификатором (= proposal_hash, по нему
+// записку можно найти), позиции — нумерованным списком: описание и сумма,
+// затем построчно получатель, реквизиты и назначение платежа (для кассира).
+// Кошелёк-источник в документе не указывается.
+export const context = `<div class="digital-document"><div style="text-align: right"><p>{% trans 'TO_COUNCIL' %} {{vars.full_abbr_genitive}} «{{vars.name}}»</p><p>{% trans 'FROM_MEMBER' %} {{ user.full_name_or_short_name }}</p></div><p>{% trans 'DATE' %}: {{ meta.created_at }}</p><div style="text-align: center"><h2>{% trans 'PROPOSAL_TITLE' %}</h2><p style="word-break: break-all">№ {{ proposal_hash }}</p></div><p>{% trans 'BODY_INTRO' %}{% if proposal.fund_name %} {% trans 'BY_FUND' %} {{ proposal.fund_name }}{% endif %} {% trans 'IN_TOTAL' %} {{ proposal.total_amount }}{% if proposal.deadline %} {% trans 'DUE_BY' %} {{ proposal.deadline }}{% endif %}, {% trans 'BODY_NAMELY' %}:</p><ol>{% for item in items %}<li><p>{{ item.description }} — {{ item.amount }} ({% if item.mechanics == 'ADVANCE' %}{% trans 'MECH_ADVANCE' %}{% else %}{% trans 'MECH_DIRECT' %}{% endif %})</p><p>{% trans 'ITEM_RECIPIENT' %}: {% if item.recipient_type == 'SELF' %}{{ user.full_name_or_short_name }}{% else %}{{ item.recipient_name }}{% endif %}</p>{% if item.requisites %}<p>{% trans 'ITEM_REQUISITES' %}: {{ item.requisites }}</p>{% endif %}{% if item.payment_purpose %}<p>{% trans 'ITEM_PAYMENT_PURPOSE' %}: {{ item.payment_purpose }}</p>{% endif %}</li>{% endfor %}</ol><p>{% trans 'PURPOSE' %}: {{ proposal.description }}</p><p>{{ user.full_name_or_short_name }}</p><p>{% trans 'SIGNED_DIGITALLY' %}</p></div>`
 
 export const translations = {
   ru: {
@@ -66,9 +70,10 @@ export const translations = {
     DUE_BY: 'в срок до',
     BODY_NAMELY: 'а именно',
     MECH_ADVANCE: 'аванс под отчёт',
-    MECH_DIRECT: 'прямая оплата',
+    MECH_DIRECT: 'оплата по счёту',
     ITEM_RECIPIENT: 'Получатель',
     ITEM_REQUISITES: 'Реквизиты',
+    ITEM_PAYMENT_PURPOSE: 'Назначение платежа',
     PURPOSE: 'Цель расходов',
     SIGNED_DIGITALLY: 'подписано электронной подписью',
   },
@@ -97,6 +102,7 @@ export const exampleData = {
       mechanics: 'DIRECT',
       recipient_name: 'ООО «Яндекс.Облако»',
       requisites: 'ИНН 7704414297, р/с 40702810000000000000, БИК 044525000',
+      payment_purpose: 'Оплата по счёту № 814 от 01.06.2026 за аренду серверов',
     },
     {
       number: '2',

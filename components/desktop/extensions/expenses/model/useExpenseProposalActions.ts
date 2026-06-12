@@ -16,6 +16,8 @@ export interface ICreateProposalDraftItem {
   mechanics: 'ADVANCE' | 'DIRECT';
   recipient_name?: string;
   requisites?: string;
+  /** Назначение платежа (оплата по счёту организации/ИП). */
+  payment_purpose?: string;
   item_hash?: string;
   recipient_account?: string;
 }
@@ -46,6 +48,7 @@ export function useExpenseProposalActions() {
       mechanics: it.mechanics,
       recipient_name: it.recipient_name ?? '',
       requisites: it.requisites ?? '',
+      payment_purpose: it.payment_purpose || undefined,
     }));
 
     const proposalHeader = {
@@ -80,6 +83,7 @@ export function useExpenseProposalActions() {
       recipient: it.recipient_account ?? it.recipient_name ?? session.username,
       description: it.description,
       planned_amount: it.amount,
+      payment_purpose: it.payment_purpose || undefined,
     }));
 
     return createExpenseProposal({

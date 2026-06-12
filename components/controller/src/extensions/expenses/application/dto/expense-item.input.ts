@@ -51,4 +51,12 @@ export class ExpenseItemInputDTO {
   @IsOptional()
   @IsString()
   requisites?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Назначение платежа (для оплаты по счёту) — фиксируется в снимке для кассира.',
+  })
+  @IsOptional()
+  @IsString()
+  payment_purpose?: string;
 }

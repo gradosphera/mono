@@ -27,7 +27,7 @@ export class CreateProgramExpenseInputDTO {
   @IsString()
   creator!: string;
 
-  @Field(() => [ExpenseItemInputDTO], { description: 'Строки расхода. Способ оплаты (аванс / прямая оплата) задаётся на каждой строке отдельно.' })
+  @Field(() => [ExpenseItemInputDTO], { description: 'Строки расхода. Способ оплаты (аванс под отчёт / оплата по счёту) задаётся на каждой строке отдельно.' })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

@@ -100,6 +100,8 @@ export interface InterExpenseRequisiteItemInput {
   paymentMethodId?: string;
   /** Реквизиты строкой (организации — ручной ввод из формы). */
   requisites?: string;
+  /** Назначение платежа (оплата по счёту) — фиксируется в снимке для кассира. */
+  paymentPurpose?: string;
 }
 
 export interface InterExpenseChassisPort {

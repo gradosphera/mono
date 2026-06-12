@@ -43,6 +43,9 @@ export class ExpenseRequisiteSnapshotTypeormEntity {
   @Column({ type: 'text', comment: 'Реквизиты строкой — как в документе СЗ' })
   requisites!: string;
 
+  @Column({ type: 'text', nullable: true, comment: 'Назначение платежа (оплата по счёту) — для поручения кассиру' })
+  payment_purpose!: string | null;
+
   @CreateDateColumn()
   created_at!: Date;
 }

@@ -97,7 +97,7 @@ void expense::createexp(name coopname, name username,
     // прямую оплату по выставленным реквизитам, аванс ей не выдаётся.
     if (it.recipient_type == static_cast<uint8_t>(D::RecipientType::ORG)) {
       eosio::check(it.mechanics == static_cast<uint8_t>(D::Mechanics::DIRECT),
-                   "Организации доступна только прямая оплата (DIRECT)");
+                   "Организации/ИП доступна только оплата по счёту (DIRECT)");
     } else {
       eosio::check(it.mechanics == static_cast<uint8_t>(D::Mechanics::ADVANCE),
                    "Пайщику средства выдаются только авансом под отчёт (ADVANCE)");

@@ -76,8 +76,7 @@ BaseDialog(
                 dense,
                 emit-value,
                 map-options,
-                disable,
-                hint='Пайщику — только аванс под отчёт; организации — только прямая оплата'
+                disable
               )
             .col-12.col-md-6
               BaseInput(
@@ -109,6 +108,12 @@ BaseDialog(
                 v-model='item.requisites',
                 label='Реквизиты получателя',
                 placeholder='ИНН, р/с, БИК'
+              )
+            .col-12(v-if='item.recipient_type === "ORG"')
+              BaseInput(
+                v-model='item.payment_purpose',
+                label='Назначение платежа',
+                placeholder='Например: «Оплата по счёту № 814 от 01.06.2026 за аренду серверов»'
               )
 
   template(#footer)
@@ -151,12 +156,12 @@ const submitting = ref(false);
 const recipientTypeOptions = [
   { label: 'Я сам', value: 'SELF' as const },
   { label: 'Пайщик', value: 'MEMBER' as const },
-  { label: 'Организация', value: 'ORG' as const },
+  { label: 'Организация/ИП', value: 'ORG' as const },
 ];
 
 const mechanicsOptions = [
   { label: 'Аванс под отчёт', value: 'ADVANCE' as const },
-  { label: 'Прямая оплата', value: 'DIRECT' as const },
+  { label: 'Оплата по счету', value: 'DIRECT' as const },
 ];
 
 // Пайщик получает только аванс под отчёт; организация — только прямую оплату.
@@ -182,6 +187,7 @@ function addItem(): void {
     mechanics: 'ADVANCE',
     recipient_name: '',
     requisites: '',
+    payment_purpose: '',
     recipient_account: '',
   });
 }
@@ -203,7 +209,7 @@ async function submit(): Promise<void> {
       deadline: form.deadline,
       items: form.items,
     });
-    SuccessAlert('Служебная записка подана — заявление подписано и отправлено в блокчейн');
+    SuccessAlert('Служебная записка подана — заявление подписано и передано в совет');
     emit('created');
     close();
   } catch (e) {
