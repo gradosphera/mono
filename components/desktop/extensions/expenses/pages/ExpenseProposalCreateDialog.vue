@@ -269,6 +269,5 @@ async function submit(): Promise<void> {
   gap: var(--p-2);
   padding: var(--p-3) var(--p-4);
   border-top: 1px solid var(--p-line);
-  background: var(--p-canvas);
 }
 </style>

@@ -1,18 +1,30 @@
 <template lang="pug">
 q-page.program-expenses-page
-  PageHead(
-    title='Управление расходами программы',
-    subtitle='Программные расходы Капитала через шасси расходов.'
-  )
-    template(#actions)
-      BaseButton(variant='primary', @click='openCreate')
-        template(#icon-left)
-          q-icon(name='add', size='18px')
-        | Создать расход
-      BaseButton(variant='ghost', @click='openTopup')
-        template(#icon-left)
-          q-icon(name='account_balance_wallet', size='18px')
-        | Пополнить пул
+  //- Действия страницы — в топбар через canon Teleport в слот-host шапки.
+  //- На мобильном — micro-вариант (иконка + tooltip).
+  Teleport(to='#header-actions-host', defer)
+    q-btn(
+      @click='openCreate',
+      :color='isMobile ? "accent" : "primary"',
+      :flat='isMobile',
+      :dense='isMobile',
+      :size='isMobile ? "sm" : undefined',
+      no-wrap
+    )
+      q-icon(name='add')
+      span.q-ml-sm(v-if='!isMobile') Создать расход
+      q-tooltip(v-if='isMobile') Создать расход
+    q-btn(
+      @click='openTopup',
+      color='primary',
+      flat,
+      :dense='isMobile',
+      :size='isMobile ? "sm" : undefined',
+      no-wrap
+    )
+      q-icon(name='account_balance_wallet')
+      span.q-ml-sm(v-if='!isMobile') Пополнить пул
+      q-tooltip(v-if='isMobile') Пополнить пул
 
   .pools.row.q-col-gutter-md
     .col-12.col-md-6
@@ -83,8 +95,7 @@ q-page.program-expenses-page
 import { ref, computed, onMounted } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';
-import { BaseButton } from 'src/shared/ui/base/BaseButton';
-import { PageHead } from 'src/shared/ui/layout/PageHead';
+import { useWindowSize } from 'src/shared/hooks';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
@@ -98,6 +109,7 @@ import { TopupProgramExpensePoolDialog } from 'app/extensions/capital/features/P
 const system = useSystemStore();
 const store = useProgramExpenseStore();
 const configStore = useConfigStore();
+const { isMobile } = useWindowSize();
 
 const coopname = computed(() => system.info.coopname);
 const createOpen = ref(false);

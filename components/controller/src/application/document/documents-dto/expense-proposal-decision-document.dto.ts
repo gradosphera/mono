@@ -42,6 +42,11 @@ class ExpenseProposalDecisionItemInputDTO implements ItemAction {
   @IsOptional()
   @IsString()
   requisites?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  payment_purpose?: string;
 }
 
 @InputType('ExpenseProposalDecisionHeaderInput')
@@ -61,6 +66,16 @@ class ExpenseProposalDecisionHeaderInputDTO implements HeaderAction {
   @Field()
   @IsString()
   source_wallet!: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  deadline?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  fund_name?: string;
 }
 
 @InputType('ExpenseProposalDecisionBodyInput')

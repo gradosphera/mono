@@ -5381,7 +5381,9 @@ export type ValueTypes = {
 	version?: string | undefined | null | Variable<any, string>
 };
 	["ExpenseProposalDecisionHeaderInput"]: {
+	deadline?: string | undefined | null | Variable<any, string>,
 	description: string | Variable<any, string>,
+	fund_name?: string | undefined | null | Variable<any, string>,
 	items_count: number | Variable<any, string>,
 	source_wallet: string | Variable<any, string>,
 	total_amount: string | Variable<any, string>
@@ -5391,6 +5393,7 @@ export type ValueTypes = {
 	description: string | Variable<any, string>,
 	mechanics: string | Variable<any, string>,
 	number: string | Variable<any, string>,
+	payment_purpose?: string | undefined | null | Variable<any, string>,
 	recipient_name?: string | undefined | null | Variable<any, string>,
 	recipient_type: string | Variable<any, string>,
 	requisites?: string | undefined | null | Variable<any, string>
@@ -14414,7 +14417,9 @@ export type ResolverInputTypes = {
 	version?: string | undefined | null
 };
 	["ExpenseProposalDecisionHeaderInput"]: {
+	deadline?: string | undefined | null,
 	description: string,
+	fund_name?: string | undefined | null,
 	items_count: number,
 	source_wallet: string,
 	total_amount: string
@@ -14424,6 +14429,7 @@ export type ResolverInputTypes = {
 	description: string,
 	mechanics: string,
 	number: string,
+	payment_purpose?: string | undefined | null,
 	recipient_name?: string | undefined | null,
 	recipient_type: string,
 	requisites?: string | undefined | null
@@ -23186,7 +23192,9 @@ export type ModelTypes = {
 	version?: string | undefined | null
 };
 	["ExpenseProposalDecisionHeaderInput"]: {
+	deadline?: string | undefined | null,
 	description: string,
+	fund_name?: string | undefined | null,
 	items_count: number,
 	source_wallet: string,
 	total_amount: string
@@ -23196,6 +23204,7 @@ export type ModelTypes = {
 	description: string,
 	mechanics: string,
 	number: string,
+	payment_purpose?: string | undefined | null,
 	recipient_name?: string | undefined | null,
 	recipient_type: string,
 	requisites?: string | undefined | null
@@ -32752,7 +32761,9 @@ export type GraphQLTypes = {
 	version?: string | undefined | null
 };
 	["ExpenseProposalDecisionHeaderInput"]: {
-		description: string,
+		deadline?: string | undefined | null,
+	description: string,
+	fund_name?: string | undefined | null,
 	items_count: number,
 	source_wallet: string,
 	total_amount: string
@@ -32762,6 +32773,7 @@ export type GraphQLTypes = {
 	description: string,
 	mechanics: string,
 	number: string,
+	payment_purpose?: string | undefined | null,
 	recipient_name?: string | undefined | null,
 	recipient_type: string,
 	requisites?: string | undefined | null
