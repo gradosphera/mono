@@ -622,3 +622,105 @@ inline constexpr const OperationAdjustmentEntry* find_adjustment(eosio::name ope
   }
   return nullptr;
 }
+
+// =====================================================================
+// Наборы операций шасси расходов — фабричная настройка контракта expense.
+// =====================================================================
+//
+// Контракт `expense` агностичен к программе-источнику: кошелёк-пул приходит в
+// `createexp` параметром `source_wallet`, а ledger2-коды всех пяти операций
+// жизненного цикла (аванс / прямая оплата / отчёт / возврат / перерасход)
+// выводятся из этого кошелька через таблицу ниже — в коде expense нет ни
+// одного захардкоженного operation_code.
+//
+// Подключение шасси к новому пулу (например, кошельку членских взносов
+// кооперативного участка) = добавить 5 операций в OPERATION_REGISTRY и одну
+// строку здесь. Контракт expense при этом не меняется.
+struct ExpenseOperationSet {
+  eosio::name source_wallet;  ///< пул-источник средств (COOPERATIVE-кошелёк)
+  eosio::name advance;        ///< выдача аванса под отчёт (TRANSFER pool → подотчёт)
+  eosio::name direct;         ///< прямая оплата организации по счёту (BURN pool)
+  eosio::name report;         ///< закрытие подотчёта по отчёту (BURN подотчёта)
+  eosio::name refund;         ///< возврат неиспользованного аванса (TRANSFER подотчёт → pool)
+  eosio::name overspend;      ///< доплата при перерасходе (TRANSFER pool → подотчёт)
+};
+
+static constexpr ExpenseOperationSet EXPENSE_OPERATION_SETS[] = {
+  // Пул программных расходов ЦПП «Благорост» — source_wallet заполняет
+  // capital::createpgexp при создании СЗ через inline expense::createexp.
+  { ledger2_wallets::PROGRAM_EXPENSE_POOL,
+    operations::expense::BLAGO_ADVANCE,
+    operations::expense::BLAGO_DIRECT,
+    operations::expense::ADVANCE_REPORT,
+    operations::expense::ADVANCE_RETURN,
+    operations::expense::OVERSPEND },
+};
+
+static constexpr size_t EXPENSE_OPERATION_SETS_SIZE =
+  sizeof(EXPENSE_OPERATION_SETS) / sizeof(EXPENSE_OPERATION_SETS[0]);
+
+// Compile-time валидация наборов: каждый код существует в OPERATION_REGISTRY,
+// тип wallet-операции и привязка кошельков соответствуют роли кода в наборе.
+namespace ledger2_expense_sets_detail {
+  constexpr const OperationRegistryEntry* find_op(eosio::name code) {
+    for (size_t i = 0; i < OPERATION_REGISTRY_SIZE; ++i) {
+      if (OPERATION_REGISTRY[i].code == code) return &OPERATION_REGISTRY[i];
+    }
+    return nullptr;
+  }
+
+  constexpr bool source_wallets_unique() {
+    for (size_t i = 0; i < EXPENSE_OPERATION_SETS_SIZE; ++i) {
+      for (size_t j = i + 1; j < EXPENSE_OPERATION_SETS_SIZE; ++j) {
+        if (EXPENSE_OPERATION_SETS[i].source_wallet == EXPENSE_OPERATION_SETS[j].source_wallet) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  constexpr bool sets_consistent() {
+    for (size_t i = 0; i < EXPENSE_OPERATION_SETS_SIZE; ++i) {
+      const auto& s = EXPENSE_OPERATION_SETS[i];
+      const auto* adv = find_op(s.advance);
+      const auto* dir = find_op(s.direct);
+      const auto* rep = find_op(s.report);
+      const auto* ref = find_op(s.refund);
+      const auto* ovr = find_op(s.overspend);
+      if (!adv || !dir || !rep || !ref || !ovr) return false;
+      // Аванс: пул → кошелёк-подотчёт.
+      if (adv->wallet_op != WalletOp::TRANSFER || adv->wallet_from != s.source_wallet) return false;
+      const eosio::name hold = adv->wallet_to;
+      // Прямая оплата: сжигание с пула (подотчёт не задействован).
+      if (dir->wallet_op != WalletOp::BURN || dir->wallet_from != s.source_wallet) return false;
+      // Отчёт: сжигание подотчёта.
+      if (rep->wallet_op != WalletOp::BURN || rep->wallet_from != hold) return false;
+      // Возврат: подотчёт → пул.
+      if (ref->wallet_op != WalletOp::TRANSFER ||
+          ref->wallet_from != hold || ref->wallet_to != s.source_wallet) return false;
+      // Перерасход: пул → подотчёт (зеркало аванса на сумму доплаты).
+      if (ovr->wallet_op != WalletOp::TRANSFER ||
+          ovr->wallet_from != s.source_wallet || ovr->wallet_to != hold) return false;
+    }
+    return true;
+  }
+} // namespace ledger2_expense_sets_detail
+
+static_assert(ledger2_expense_sets_detail::source_wallets_unique(),
+              "EXPENSE_OPERATION_SETS: source_wallet должен быть уникален");
+static_assert(ledger2_expense_sets_detail::sets_consistent(),
+              "EXPENSE_OPERATION_SETS: набор операций не согласован с OPERATION_REGISTRY "
+              "(коды/типы wallet-операций/привязка кошельков)");
+
+/**
+ * @brief Поиск набора операций шасси расходов по кошельку-источнику.
+ */
+inline const ExpenseOperationSet* find_expense_operation_set(eosio::name source_wallet) {
+  for (size_t i = 0; i < EXPENSE_OPERATION_SETS_SIZE; ++i) {
+    if (EXPENSE_OPERATION_SETS[i].source_wallet == source_wallet) {
+      return &EXPENSE_OPERATION_SETS[i];
+    }
+  }
+  return nullptr;
+}

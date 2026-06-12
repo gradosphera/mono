@@ -35,11 +35,13 @@ export interface ICreateProgramExpenseDraft {
 }
 
 /**
- * Кошелёк-источник программных расходов capital. Способ оплаты задаётся на
- * каждой позиции (item.mechanics: аванс под отчёт / прямая оплата) — ledger2-код
- * операции контракт выводит из механики позиции в момент оплаты.
+ * Кошелёк-источник программных расходов capital — кооперативный пул расходов
+ * (его же на чейн ставит capital::createpgexp; здесь — для текста СЗ-документа).
+ * Способ оплаты задаётся на каждой позиции (item.mechanics: аванс под отчёт /
+ * прямая оплата) — ledger2-код операции контракт выводит из пары
+ * (source_wallet, механика позиции) в момент оплаты.
  */
-const PROGRAM_EXPENSE_SOURCE_WALLET = 'w.cap.blago';
+const PROGRAM_EXPENSE_SOURCE_WALLET = 'w.cap.pgexp';
 
 /**
  * On-chain получатель (eosio::name): SELF — сам создатель, MEMBER — аккаунт

@@ -1,9 +1,11 @@
-// expense.cpp — шасси расходов (MVP: Благорост).
+// expense.cpp — шасси расходов (первый потребитель: Благорост).
 //
 // Принцип: контракт-владелец расходных операций, агностичен к программе-источнику.
-// Механика оплаты per-item (ADVANCE | DIRECT): ledger2-код операции выводится из
-// item.mechanics в payexp; callback-handler сохраняется как переменная;
-// все ledger2-проводки идут через Ledger2::apply на коды из OPERATION_REGISTRY.
+// Кошелёк-пул приходит в createexp параметром source_wallet; ledger2-коды всех
+// операций жизненного цикла выводятся из него через EXPENSE_OPERATION_SETS
+// (фабричная настройка — подключение нового пула не меняет этот контракт).
+// Механика оплаты per-item (ADVANCE | DIRECT) выбирает код внутри набора;
+// callback-handler сохраняется как переменная.
 
 #include "expense.hpp"
 
@@ -22,11 +24,14 @@ asset sum_planned(const std::vector<D::item>& items) {
   return total;
 }
 
-// ledger2-код операции оплаты по механике item'а.
-eosio::name operation_code_for(uint8_t mechanics) {
-  return static_cast<D::Mechanics>(mechanics) == D::Mechanics::ADVANCE
-    ? operations::expense::BLAGO_ADVANCE
-    : operations::expense::BLAGO_DIRECT;
+// Набор ledger2-кодов операций шасси по кошельку-источнику СЗ. Один источник =
+// один набор (EXPENSE_OPERATION_SETS в ledger2) — в коде expense нет
+// захардкоженных operation_code, контракт настраивается на любой пул.
+const ExpenseOperationSet& expense_ops_for(eosio::name source_wallet) {
+  const auto* set = find_expense_operation_set(source_wallet);
+  eosio::check(set != nullptr,
+               "Для кошелька-источника не настроен набор операций шасси расходов (EXPENSE_OPERATION_SETS)");
+  return *set;
 }
 
 D::proposals_index get_proposals(eosio::name self, eosio::name coopname) {
@@ -76,6 +81,9 @@ void expense::createexp(name coopname, name username,
   eosio::check(!items.empty(), "СЗ должен содержать хотя бы один item");
   eosio::check(ledger2_is_known_wallet(source_wallet),
                "source_wallet не найден в LEDGER2_WALLET_REGISTRY");
+  // Источник определяет ledger2-коды всех операций жизненного цикла —
+  // отказываем сразу при создании, а не в момент оплаты.
+  expense_ops_for(source_wallet);
 
   auto tbl = get_proposals(get_self(), coopname);
   eosio::check(find_proposal(tbl, proposal_hash) == tbl.get_index<"byhash"_n>().end(),
@@ -244,11 +252,15 @@ void expense::payexp(name coopname, checksum256 proposal_hash, checksum256 item_
     row.updated_at = eosio::current_time_point();
   });
 
-  // ledger2-проводка по механике оплаченного item'а — выдача аванса (blgadv)
-  // или прямая оплата (blgdir). СЗ может смешивать обе механики.
-  // Источник — кооперативный пул расходов; username нужен ledger2 только для
-  // USER_SHARED-стороны (w.exp.adv) — это ПОЛУЧАТЕЛЬ аванса, не автор СЗ.
-  Ledger2::apply(get_self(), coopname, operation_code_for(paid_mechanics), actual_amount,
+  // ledger2-проводка по механике оплаченного item'а — выдача аванса или прямая
+  // оплата; коды выводятся из кошелька-источника СЗ. СЗ может смешивать механики.
+  // username нужен ledger2 только для USER_SHARED-стороны (кошелёк-подотчёт) —
+  // это ПОЛУЧАТЕЛЬ аванса, не автор СЗ.
+  const auto& ops = expense_ops_for(it->source_wallet);
+  const auto code = static_cast<D::Mechanics>(paid_mechanics) == D::Mechanics::ADVANCE
+    ? ops.advance
+    : ops.direct;
+  Ledger2::apply(get_self(), coopname, code, actual_amount,
                  paid_recipient, proposal_hash, "expense:payexp");
 }
 
@@ -290,12 +302,12 @@ void expense::reportexp(name coopname, checksum256 proposal_hash, checksum256 it
     row.updated_at = eosio::current_time_point();
   });
 
-  // ledger2: BURN ADVANCE_HOLD на остаточный actual item'а (выдано − возвращено
-  // + доплачено), без бухпроводки — canal 08/51 уже сделан на blgadv/over.
+  // ledger2: BURN кошелька-подотчёта на остаточный actual item'а (выдано −
+  // возвращено + доплачено), без бухпроводки — проводка уже сделана при выдаче.
   // Подотчёт числится на получателе аванса — его username и закрывает burn.
-  // Полный возврат аванса (actual == 0) — burn не нужен, ADVANCE_HOLD уже пуст.
+  // Полный возврат аванса (actual == 0) — burn не нужен, подотчёт уже пуст.
   if (item_amount.amount > 0) {
-    Ledger2::apply(get_self(), coopname, operations::expense::ADVANCE_REPORT, item_amount,
+    Ledger2::apply(get_self(), coopname, expense_ops_for(it->source_wallet).report, item_amount,
                    item_recipient, proposal_hash, "expense:reportexp");
   }
 }
@@ -361,9 +373,9 @@ void expense::returnexp(name coopname, checksum256 proposal_hash, checksum256 it
     row.updated_at   = eosio::current_time_point();
   });
 
-  // ledger2: TRANSFER ADVANCE_HOLD → PROGRAM_EXPENSE_POOL, Dr 51 / Cr 08.
+  // ledger2: TRANSFER подотчёт → пул-источник (зеркало выдачи аванса).
   // Подотчёт снимается с получателя аванса.
-  Ledger2::apply(get_self(), coopname, operations::expense::ADVANCE_RETURN, return_amount,
+  Ledger2::apply(get_self(), coopname, expense_ops_for(it->source_wallet).refund, return_amount,
                  item_recipient, proposal_hash, "expense:returnexp");
 }
 
@@ -406,8 +418,8 @@ void expense::overspendexp(name coopname, checksum256 proposal_hash, checksum256
     row.updated_at   = eosio::current_time_point();
   });
 
-  // ledger2: OVERSPEND — выдача доплаты (TRANSFER PROGRAM_EXPENSE_POOL → ADVANCE_HOLD,
-  // Dr 08 / Cr 51) на подотчёт получателя. Закрытие на полную сумму — в reportexp.
-  Ledger2::apply(get_self(), coopname, operations::expense::OVERSPEND, overspend_amount,
+  // ledger2: доплата перерасхода — TRANSFER пул-источник → подотчёт получателя
+  // (зеркало выдачи аванса на сумму доплаты). Закрытие на полную сумму — в reportexp.
+  Ledger2::apply(get_self(), coopname, expense_ops_for(it->source_wallet).overspend, overspend_amount,
                  item_recipient, proposal_hash, "expense:overspend");
 }

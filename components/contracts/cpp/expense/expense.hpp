@@ -13,8 +13,10 @@ using std::string;
  *  @brief Шасси расходов цифрового кооператива (MVP — Благорост).
  *
  *  Универсальный контракт: principal storage = СЗ-расход с массивом items;
- *  механика оплаты per-item (ADVANCE | DIRECT) — ledger2-код операции
- *  выводится из item.mechanics в момент payexp;
+ *  кошелёк-источник (пул) приходит параметром source_wallet, ledger2-коды всех
+ *  операций жизненного цикла выводятся из него через EXPENSE_OPERATION_SETS
+ *  (ledger2/operations.hpp) — подключение нового пула не меняет контракт;
+ *  механика оплаты per-item (ADVANCE | DIRECT) выбирает код внутри набора;
  *  callback на финализацию (контракт+action+data) сохраняется при createexp
  *  как переменная — `expense` агностичен к программе-получателю.
  *
@@ -183,8 +185,8 @@ public:
 
     /**
      * @brief Оплатить item — выдача аванса (ADVANCE) или прямая оплата организации (DIRECT).
-     * Контракт зовёт Ledger2::apply с кодом по механике item'а
-     * (ADVANCE → o.exp.blgadv, DIRECT → o.exp.blgdir).
+     * Контракт зовёт Ledger2::apply с кодом из набора операций кошелька-источника
+     * (EXPENSE_OPERATION_SETS: source_wallet + механика item'а → operation_code).
      * actual_amount не может превышать план item (доплата — через overspendexp).
      * DIRECT-item не имеет фазы подотчёта и помечается REPORTED сразу; когда все
      * items REPORTED — proposal переходит в REPORT_SUBMITTED прямо из payexp.

@@ -161,7 +161,8 @@ export class ExpenseMutationsResolver {
     description: 'Финализировать СЗ-отчёт по смете расхода (все items закрыты — оплата/чек/возврат).',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @AuthRoles(['chairman', 'member', 'user'])
+  // Закрытие расхода — финализация СЗ-отчёта советом: председатель / член совета.
+  @AuthRoles(['chairman', 'member'])
   async submitExpenseReport(
     @Args('data', { type: () => SubmitExpenseReportInputDTO }) data: SubmitExpenseReportInputDTO
   ): Promise<TransactionDTO> {

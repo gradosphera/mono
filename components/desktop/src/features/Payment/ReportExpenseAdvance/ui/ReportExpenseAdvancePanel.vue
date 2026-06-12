@@ -1,21 +1,10 @@
 <template lang="pug">
 .report-advance(v-if='item')
-  template(v-if='isReported')
-    .t-sm.t-muted Отчёт по авансу принят
-    .files(v-if='files.length')
-      button.file-link(
-        v-for='file in files',
-        :key='file.id',
-        type='button',
-        :disabled='openingId === file.id',
-        @click='openFile(file)'
-      )
-        q-icon(name='attach_file', size='16px')
-        span {{ fileLabel(file) }}
-        q-spinner(v-if='openingId === file.id', size='14px')
-
-  template(v-else-if='isAwaitingReport')
-    .t-sm.t-muted Аванс получен — отчитайтесь чеком о фактическом расходе
+  //- Без отдельных кнопок: выбранный файл сразу загружается, по первому чеку
+  //- отчёт уходит автоматически; дополнительные файлы дополняют отчёт.
+  template(v-if='isReported || isAwaitingReport')
+    .t-sm.t-muted(v-if='isReported') Отчёт по авансу подан — дополнительные документы дополнят его автоматически
+    .t-sm.t-muted(v-else) Аванс получен — приложите чек: отчёт уйдёт сразу после загрузки
     .files(v-if='files.length')
       button.file-link(
         v-for='file in files',
@@ -32,32 +21,16 @@
       accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
       :max-size='20 * 1024 * 1024',
       title='Приложите чек',
-      hint='Изображение или PDF до 20 МБ',
-      :disabled='uploading'
+      hint='Изображение или PDF до 20 МБ — отправится сразу',
+      :disabled='uploading || reporting'
     )
-    .actions
-      BaseButton(
-        v-if='pending',
-        variant='secondary',
-        size='sm',
-        :loading='uploading',
-        @click='upload'
-      ) Приложить чек
-      BaseButton(
-        variant='primary',
-        size='sm',
-        :loading='reporting',
-        :disabled='!files.length',
-        @click='submitReport'
-      ) Подать отчёт
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
-import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { FileUploader } from 'src/shared/ui/domain/FileUploader';
 import {
   attachExpenseProofApi,
@@ -151,9 +124,9 @@ function toBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-async function upload(): Promise<void> {
+async function upload(): Promise<boolean> {
   const file = pending.value;
-  if (!file) return;
+  if (!file) return false;
   try {
     uploading.value = true;
     const buffer = await file.arrayBuffer();
@@ -169,10 +142,10 @@ async function upload(): Promise<void> {
       original_filename: file.name,
     });
     pending.value = null;
-    SuccessAlert('Чек приложен');
-    await refresh();
+    return true;
   } catch (e) {
     FailAlert(e);
+    return false;
   } finally {
     uploading.value = false;
   }
@@ -195,6 +168,21 @@ async function submitReport(): Promise<void> {
     reporting.value = false;
   }
 }
+
+// Выбор файла = отправка: загружаем сразу; первый чек по неотчитанному авансу
+// автоматически подаёт отчёт, последующие файлы дополняют его без лишних кнопок.
+watch(pending, async (file) => {
+  if (!file || uploading.value) return;
+  const wasAwaitingReport = isAwaitingReport.value;
+  const uploaded = await upload();
+  if (!uploaded) return;
+  if (wasAwaitingReport) {
+    await submitReport();
+  } else {
+    SuccessAlert('Документ приложен к отчёту');
+    await refresh();
+  }
+});
 
 onMounted(refresh);
 </script>
@@ -233,11 +221,5 @@ onMounted(refresh);
     opacity: 0.6;
     cursor: default;
   }
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--p-2);
 }
 </style>

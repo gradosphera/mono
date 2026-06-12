@@ -32,10 +32,21 @@ import { ProjectHistoryPage } from './pages/ProjectHistoryPage';
 import { ComponentHistoryPage } from './pages/ComponentHistoryPage';
 import { ActivityFeedPage } from './pages/ActivityFeedPage';
 import { registerCapitalDecisionHandlers } from './app/extensions';
+import { registerExpenseWallet } from 'src/shared/lib/expense-wallets';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
   // Регистрируем обработчики решений для расширения capital
   registerCapitalDecisionHandlers();
+  // Пул расходов программы — в общесистемный реестр кошельков расходов
+  // (страница «Расходы» стола совета собирает пулы всех расширений).
+  registerExpenseWallet({
+    wallet: 'w.cap.pgexp',
+    title: 'Пул расходов программы «Благорост»',
+    subtitle: 'Программные расходы ЦПП «Благорост»',
+    icon: 'receipt_long',
+    program: 'blagorost',
+    route: { name: 'capital-program-expenses' },
+  });
   return [{
     workspace: 'capital',
     extension_name: 'capital',

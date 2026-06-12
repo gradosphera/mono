@@ -30,7 +30,7 @@
 - `[[eosio::action]]`: `expense::createexp`, `submitexp`, `authexp`, `payexp`, `reportexp`, `closeexp`, `declexp`, `returnexp`, `overspendexp`.
 - Operation codes: `o.exp.*` (§3).
 - Wallets: `w.exp.adv` (один — §4).
-- Processes: `p.exp.proposal`.
+- Processes: `p.exp.expns`.
 
 ## 2. План счетов — без новых записей
 
@@ -58,7 +58,9 @@
 
 **Изменение v4 (2026-06-12, голосовое):** источник оплат — НЕ `w.cap.blago` (он USER_SHARED: списание уменьшало личный паевой кошелёк пайщика-инициатора — категорически неверно). Введён КООПЕРАТИВНЫЙ кошелёк `w.cap.pgexp` (`PROGRAM_EXPENSE_POOL`, «Пул программных расходов ЦПП «Благорост»»): пополняется `capital::topupprogexp` операцией `o.cap.pgtop` (ISSUE, без Dr/Cr — деньги физически на 51 со взносов, выделяется назначение), из него `expense::payexp` платит обе механики. `username` в ledger2-проводках шасси — получатель позиции (подотчёт `w.exp.adv` числится на получателе аванса), не автор СЗ.
 
-**Process_type:** один — `processes::expense::PROPOSAL = "p.exp.proposal"_n`. Все 5 кодов привязаны к нему.
+**Изменение v5 (2026-06-12):** фабричная настройка пулов — в `ledger2/operations.hpp` введена таблица `EXPENSE_OPERATION_SETS` (`source_wallet → {advance, direct, report, refund, overspend}` с compile-time валидацией согласованности с `OPERATION_REGISTRY`). Контракт `expense` больше не содержит захардкоженных operation_code: коды всех пяти операций жизненного цикла выводятся из `proposal.source_wallet`. Подключение шасси к новому пулу (например, кошельку членских взносов КУ) = 5 операций в `OPERATION_REGISTRY` + 1 строка в `EXPENSE_OPERATION_SETS`, без правок expense. На фронте пулы регистрируются фабрично: `registerExpenseWallet(...)` из `install.ts` расширения → страница «Расходы» стола совета (`src/shared/lib/expense-wallets`).
+
+**Process_type:** один — `processes::expense::PROPOSAL = "p.exp.expns"_n`. Все 5 кодов привязаны к нему.
 
 ### Объяснение проводок
 
@@ -154,7 +156,7 @@ if (proposal.callback.contract != name{}) {
 3. expense::createexp(proposal_hash, items[], ?callback{contract, action, data})
      — для расходов в РИД-проект Благороста UI/backend заполняет callback = {"capital", "onexpreport", packed(wip_project_hash)}.
 4. expense::payexp(proposal_hash, item_hash, operation_code, amount)
-5. Контракт валидирует: operation_code ∈ OPERATION_REGISTRY, process_type == p.exp.proposal.
+5. Контракт валидирует: operation_code ∈ OPERATION_REGISTRY, process_type == p.exp.expns.
 6. Контракт зовёт ledger2::apply(operation_code, sum, from?, to?). Реестр сам подставляет правильные wallets и Dr/Cr.
 7. Для ADVANCE — фронт пайщика прикладывает чек → expense::reportexp → o.exp.advrpt.
 8. Для DIRECT — backend сразу после payexp вызывает reportexp (внутренне, без UI).
@@ -183,7 +185,7 @@ if (proposal.callback.contract != name{}) {
 1. C28-28 → C++:
    - `accounts.hpp` — без изменений
    - `wallets.hpp` — `+w.exp.adv`
-   - `processes.hpp` — `+p.exp.proposal`
+   - `processes.hpp` — `+p.exp.expns`
    - `operations.hpp` — `+5 entries` в `OPERATION_REGISTRY[]` под namespace `operations::expense`
 2. CI-тест `ledger2_actions_registry_test` — ожидать 5 новых кодов.
 3. `pnpm -w build` cooptypes — auto-regen enum `OperationCode`.

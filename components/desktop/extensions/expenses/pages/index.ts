@@ -1,3 +1,4 @@
+export { default as ExpenseWalletsPage } from './ExpenseWalletsPage.vue';
 export { default as ExpensesRegistryPage } from './ExpensesRegistryPage.vue';
 export { default as ExpenseDetailPage } from './ExpenseDetailPage.vue';
 export { default as ExpensesAdminApprovePage } from './ExpensesAdminApprovePage.vue';

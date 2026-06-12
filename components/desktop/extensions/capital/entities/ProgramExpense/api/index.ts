@@ -1,5 +1,5 @@
 import { client } from 'src/shared/api/client';
-import { Queries } from '@coopenomics/sdk';
+import { Mutations, Queries } from '@coopenomics/sdk';
 import type {
   IProgramExpense,
   IProgramExpensesPagination,
@@ -64,6 +64,17 @@ async function loadExpenseRequisites(
   return output;
 }
 
+// Закрытие расхода (финализация СЗ-отчёта советом) — все позиции оплачены и
+// отчитаны, председатель/член совета закрывает расход целиком.
+async function closeExpenseProposal(
+  coopname: string,
+  proposalHash: string,
+): Promise<void> {
+  await client.Mutation(Mutations.Expense.SubmitExpenseReport.mutation, {
+    variables: { data: { coopname, proposal_hash: proposalHash } },
+  });
+}
+
 // Списочные запросы файлов отдают записи без read_url (он короткоживущий) —
 // свежая ссылка запрашивается по id в момент клика.
 async function getExpenseFileReadUrl(id: number): Promise<string | undefined> {
@@ -80,5 +91,6 @@ export const api = {
   loadExpenseProposal,
   loadExpenseFiles,
   loadExpenseRequisites,
+  closeExpenseProposal,
   getExpenseFileReadUrl,
 };

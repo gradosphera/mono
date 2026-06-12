@@ -7,6 +7,7 @@ import { PaymentsPage } from 'src/pages/Cooperative/Payments';
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails';
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
+import { ExpenseWalletsPage } from 'app/extensions/expenses/pages';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
@@ -74,6 +75,18 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             meta: {
               title: 'Реестр платежей',
               icon: 'fa-solid fa-file-invoice',
+              roles: ['chairman', 'member'],
+            },
+          },
+          {
+            // Кошельки-пулы расходов: пулы регистрируют расширения через
+            // registerExpenseWallet в своих install.ts (фабричная сборка).
+            path: 'expense-wallets',
+            name: 'soviet-expense-wallets',
+            component: markRaw(ExpenseWalletsPage),
+            meta: {
+              title: 'Расходы',
+              icon: 'receipt_long',
               roles: ['chairman', 'member'],
             },
           },

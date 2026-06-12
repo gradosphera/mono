@@ -15,8 +15,16 @@ q-page.program-expense-page
 
     template(v-else-if='expense')
       //- Статус сущности — вверху страницы (сумма — в сводке, не дублируем).
+      //- Справа — действие совета: закрыть расход, когда отчёт по смете подан.
       .head-row
         BaseChip(:variant='proposalStatusVariant(expense.status)') {{ proposalStatusLabel(expense.status) }}
+        BaseButton(
+          v-if='canClose',
+          variant='primary',
+          size='sm',
+          :loading='closing',
+          @click='closeExpense'
+        ) Закрыть расход
 
       BaseCard
         .summary
@@ -68,6 +76,23 @@ q-page.program-expense-page
                   span {{ fileKindLabel(file.kind) }}: {{ fileLabel(file) }}
                   q-spinner(v-if='openingId === file.id', size='14px')
 
+      //- Документы, не привязанные к конкретной позиции (или с потерянной
+      //- привязкой) — чтобы любой приложенный файл можно было открыть со страницы.
+      .section(v-if='unmatchedFiles.length')
+        .t-eyebrow.t-muted Прочие документы
+        BaseCard
+          .item__files.item__files--flat
+            button.file-link(
+              v-for='file in unmatchedFiles',
+              :key='file.id',
+              type='button',
+              :disabled='openingId === file.id',
+              @click='openFile(file)'
+            )
+              q-icon(name='attach_file', size='16px')
+              span {{ fileKindLabel(file.kind) }}: {{ fileLabel(file) }}
+              q-spinner(v-if='openingId === file.id', size='14px')
+
       .section
         .t-eyebrow.t-muted История состояний
         BaseCard
@@ -86,9 +111,11 @@ q-page.program-expense-page
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
-import { FailAlert } from 'src/shared/api';
+import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
+import { useSessionStore } from 'src/entities/Session';
 import { useDesktopStore } from 'src/entities/Desktop';
+import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
@@ -114,6 +141,7 @@ import {
 const route = useRoute();
 const router = useRouter();
 const system = useSystemStore();
+const session = useSessionStore();
 
 function goBack(): void {
   void router.push({ name: 'capital-program-expenses' });
@@ -171,19 +199,58 @@ const isDeclined = computed(
   () => expense.value?.status === Zeus.ExpenseProposalStatus.DECLINED,
 );
 
+// Закрытие расхода — финальное действие совета по поданному СЗ-отчёту.
+const canClose = computed(
+  () =>
+    expense.value?.status === Zeus.ExpenseProposalStatus.REPORT_SUBMITTED &&
+    (session.isChairman || session.isMember),
+);
+
+const closing = ref(false);
+async function closeExpense(): Promise<void> {
+  try {
+    closing.value = true;
+    await api.closeExpenseProposal(system.info.coopname, expenseHash.value);
+    SuccessAlert('Расход закрыт — отчёт по смете утверждён');
+    await refresh();
+  } catch (e) {
+    FailAlert(e);
+  } finally {
+    closing.value = false;
+  }
+}
+
 type ItemRow = IProgramExpenseItem & {
   requisite: IExpenseRequisite | null;
   files: IExpenseProposalFile[];
 };
+
+// Чейн отдаёт хэши в верхнем регистре, файловое хранилище — в нижнем;
+// сравниваем без учёта регистра, иначе документы «исчезают» с позиций.
+const normalizeHash = (value?: string | null): string =>
+  (value ?? '').toLowerCase();
 
 const itemRows = computed<ItemRow[]>(() => {
   const items = expense.value?.items ?? [];
   return items.map((item) => ({
     ...item,
     requisite:
-      requisites.value.find((r) => r.item_hash === item.item_hash) ?? null,
-    files: files.value.filter((f) => f.item_hash === item.item_hash),
+      requisites.value.find(
+        (r) => normalizeHash(r.item_hash) === normalizeHash(item.item_hash),
+      ) ?? null,
+    files: files.value.filter(
+      (f) => normalizeHash(f.item_hash) === normalizeHash(item.item_hash),
+    ),
   }));
+});
+
+// Файлы, не сопоставленные ни одной позиции (нет item_hash или позиция не
+// найдена) — выводятся отдельной секцией, чтобы их тоже можно было открыть.
+const unmatchedFiles = computed<IExpenseProposalFile[]>(() => {
+  const itemHashes = new Set(
+    (expense.value?.items ?? []).map((i) => normalizeHash(i.item_hash)),
+  );
+  return files.value.filter((f) => !itemHashes.has(normalizeHash(f.item_hash)));
 });
 
 function itemHasActual(item: IProgramExpenseItem): boolean {
@@ -411,6 +478,12 @@ const timeline = computed<ActivityEvent[]>(() => {
   gap: var(--p-1);
   padding-top: var(--p-2);
   border-top: 1px solid var(--p-line);
+}
+
+/* Вариант секции вне карточки позиции — без разделителя сверху. */
+.item__files--flat {
+  padding-top: 0;
+  border-top: none;
 }
 
 .file-link {

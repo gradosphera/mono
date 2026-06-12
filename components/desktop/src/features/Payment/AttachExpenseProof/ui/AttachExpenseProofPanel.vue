@@ -12,29 +12,22 @@
       q-icon(name='attach_file', size='16px')
       span {{ fileLabel(file) }}
       q-spinner(v-if='openingId === file.id', size='14px')
+  //- Без отдельной кнопки: выбранный файл загружается сразу.
   FileUploader(
     v-model='pending',
     accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
     :max-size='20 * 1024 * 1024',
     title='Приложите платёжку или квитанцию',
-    hint='Изображение или PDF до 20 МБ',
+    hint='Изображение или PDF до 20 МБ — отправится сразу',
     :disabled='uploading'
   )
-  .actions(v-if='pending')
-    BaseButton(
-      variant='primary',
-      size='sm',
-      :loading='uploading',
-      @click='upload'
-    ) Загрузить
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
-import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { FileUploader } from 'src/shared/ui/domain/FileUploader';
 import { api, type IExpenseFile } from '../api';
 
@@ -130,6 +123,12 @@ async function upload(): Promise<void> {
   }
 }
 
+// Выбор файла = загрузка: отдельная кнопка «Загрузить» не нужна.
+watch(pending, (file) => {
+  if (!file || uploading.value) return;
+  void upload();
+});
+
 onMounted(refresh);
 </script>
 
@@ -167,10 +166,5 @@ onMounted(refresh);
     opacity: 0.6;
     cursor: default;
   }
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
 }
 </style>
