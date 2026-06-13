@@ -8,40 +8,39 @@
   )
 
   //- Просмотр документа во всплывающем окне — канон крупных документов
-  //- (как оферта/соглашение): maximized BaseDialog + DocumentPreview (html).
+  //- (как оферта/соглашение): maximized BaseDialog + BaseDocument (стили
+  //- документа через ShadowHtml + раскрывающийся блок подписей).
   BaseDialog(
     v-model='dialogOpen',
     :title='activeTitle',
     maximized
   )
-    DocumentPreview(
-      :document='{ type: "html", html: activeHtml }',
-      height='72vh'
+    BaseDocument(
+      v-if='activeAggregate',
+      :documentAggregate='activeAggregate'
     )
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
+import { BaseDocument } from 'src/shared/ui/BaseDocument';
 import { DocumentRow } from '../DocumentRow';
 import type { DocumentRowDoc } from '../DocumentRow';
-import { DocumentPreview } from '../DocumentPreview';
-import type {
-  ExpenseProposalDocumentsProps,
-  ExpenseDocumentAggregate,
-} from './ExpenseProposalDocuments.types';
+import type { IDocumentAggregate } from 'src/entities/Document/model';
+import type { ExpenseProposalDocumentsProps } from './ExpenseProposalDocuments.types';
 
 const props = defineProps<ExpenseProposalDocumentsProps>();
 
 interface DocEntry {
   key: string;
   title: string;
-  html: string;
+  aggregate: IDocumentAggregate;
   row: DocumentRowDoc;
 }
 
-function firstSignedAt(agg?: ExpenseDocumentAggregate | null): string | undefined {
-  const signatures = agg?.document?.signatures;
+function firstSignedAt(agg: IDocumentAggregate): string | undefined {
+  const signatures = agg.document?.signatures;
   if (!signatures?.length) return undefined;
   return signatures[0]?.signed_at ?? undefined;
 }
@@ -55,18 +54,16 @@ function formatDate(iso?: string): string | undefined {
   }
 }
 
-// Документ показываем только если есть его html (rawDocument). Без html
-// открывать нечего — строка не появляется.
+// Документ показываем, только если пришёл его html (rawDocument) — иначе
+// открывать нечего и строка не появляется.
 const docs = computed<DocEntry[]>(() => {
   const out: DocEntry[] = [];
-  const add = (agg: ExpenseDocumentAggregate | null | undefined, fallbackTitle: string, key: string): void => {
-    const html = agg?.rawDocument?.html;
-    if (!agg || !html) return;
-    const title = agg.rawDocument?.full_title || fallbackTitle;
+  const add = (agg: IDocumentAggregate | null | undefined, fallbackTitle: string, key: string): void => {
+    if (!agg?.rawDocument?.html) return;
     out.push({
       key,
-      title,
-      html,
+      title: agg.rawDocument.full_title || fallbackTitle,
+      aggregate: agg,
       row: {
         type: 'html',
         title: fallbackTitle,
@@ -82,11 +79,11 @@ const docs = computed<DocEntry[]>(() => {
 
 const dialogOpen = ref(false);
 const activeTitle = ref('');
-const activeHtml = ref('');
+const activeAggregate = ref<IDocumentAggregate | null>(null);
 
 function open(doc: DocEntry): void {
   activeTitle.value = doc.title;
-  activeHtml.value = doc.html;
+  activeAggregate.value = doc.aggregate;
   dialogOpen.value = true;
 }
 </script>
