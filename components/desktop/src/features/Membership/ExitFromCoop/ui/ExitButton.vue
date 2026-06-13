@@ -29,8 +29,8 @@ div
         template(#icon)
           q-icon(name='warning')
         div
-          p.q-mb-sm После одобрения Советом весь Ваш паевой взнос будет возвращён, а аккаунт — заблокирован.
-          p.q-mb-none Возврат к участию после выхода невозможен — только через новую регистрацию.
+          p.q-mb-sm Подтвердите, что хотите добровольно выйти из кооператива. Действие необратимо.
+          p.q-mb-none После подтверждения кабинет блокируется и запускается процесс выхода: получение решения Совета и возврат паевого взноса в срок, установленный Уставом кооператива.
 
       div.q-mt-md(v-if='loadingPreview')
         q-spinner(size='24px', color='primary')
@@ -52,6 +52,7 @@ import { FailAlert, SuccessAlert } from 'src/shared/api';
 import {
   useMembershipExit,
   useExitDialog,
+  useExitGate,
   type IMembershipExitReturnPreview,
 } from '../model';
 
@@ -66,6 +67,7 @@ withDefaults(defineProps<Props>(), {
 const walletStore = useWalletStore();
 const { showDialog, open } = useExitDialog();
 const { processMembershipExit, getReturnPreview } = useMembershipExit();
+const { loadExitStatus } = useExitGate();
 
 const isSubmitting = ref(false);
 const loadingPreview = ref(false);
@@ -94,6 +96,8 @@ const handlerSubmit = async (): Promise<void> => {
   isSubmitting.value = true;
   try {
     await processMembershipExit();
+    // Сразу подтягиваем статус — overlay заблокирует кабинет и покажет процесс выхода.
+    await loadExitStatus();
     SuccessAlert('Заявление на выход из кооператива подано. Ожидайте решения Совета.');
     clear();
   } catch (e: any) {

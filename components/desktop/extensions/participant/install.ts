@@ -1,5 +1,6 @@
 import { ProfilePage } from 'src/pages/User/ProfilePage';
 import { WalletPage } from 'src/pages/User/WalletPage';
+import { MembershipExitPage } from 'src/pages/User/MembershipExitPage';
 import { ConnectionAgreementPage, InstallationCompletedPage } from 'src/pages/Union/ConnectionAgreement';
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 import { ContactsPage } from 'src/pages/Contacts';
@@ -41,6 +42,18 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             path: 'wallet',
             name: 'wallet',
             component: markRaw(WalletPage),
+            children: [],
+          },
+          {
+            meta: {
+              title: 'Выход из кооператива',
+              icon: 'logout',
+              roles: [],
+              requiresAuth: true,
+            },
+            path: 'membership-exit',
+            name: 'membership-exit',
+            component: markRaw(MembershipExitPage),
             children: [],
           },
           {

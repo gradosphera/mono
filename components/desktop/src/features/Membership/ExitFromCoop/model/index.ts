@@ -1,4 +1,5 @@
 export * from './useExitDialog';
+export * from './useExitGate';
 import { client } from 'src/shared/api/client';
 import { Mutations, Queries } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';

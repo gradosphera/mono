@@ -11,14 +11,12 @@
 Teleport(to='#header-actions-host', defer)
   DepositButton(:micro='isMobile')
   WithdrawButton(:micro='isMobile')
-  ExitButton(:micro='isMobile')
 </template>
 
 <script lang="ts" setup>
 import { WalletProgramWidget } from 'src/widgets/Wallet';
 import { DepositButton } from 'src/features/Wallet/DepositToWallet';
 import { WithdrawButton } from 'src/features/Wallet/WithdrawFromWallet';
-import { ExitButton } from 'src/features/Membership/ExitFromCoop';
 import { useWindowSize } from 'src/shared/hooks';
 
 const { isMobile } = useWindowSize();
