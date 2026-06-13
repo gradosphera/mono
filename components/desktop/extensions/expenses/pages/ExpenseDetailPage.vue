@@ -320,9 +320,11 @@ onMounted(() => {
   overflow-x: auto;
 }
 
+/* Глобальный канон форсит .table{min-width:0!important} → колонки схлопываются
+   и текст рвётся посимвольно; перебиваем !important (эталон — реестр платежей). */
 .table {
-  table-layout: fixed;
-  min-width: 560px;
+  table-layout: fixed !important;
+  min-width: 560px !important;
 }
 
 .col-num {
@@ -332,7 +334,7 @@ onMounted(() => {
 }
 
 .cell-name {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .files {

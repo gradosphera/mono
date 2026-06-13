@@ -218,9 +218,13 @@ onMounted(() => {
   overflow-x: auto;
 }
 
+/* Глобальный канон форсит .table{min-width:0!important} — без !important
+   колонки схлопываются уже контента и текст рвётся посимвольно в столбик.
+   Перебиваем !important: при нехватке ширины таблица скроллится в
+   .table-scroll, а не ломает слова (эталон — реестр платежей). */
 .table {
-  table-layout: fixed;
-  min-width: 1080px;
+  table-layout: fixed !important;
+  min-width: 1080px !important;
 }
 
 .col-date {
@@ -237,17 +241,17 @@ onMounted(() => {
 .col-wallet {
   width: 200px;
   color: var(--p-ink-2);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .cell-name {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Пайщик: ФИО первой строкой, имя аккаунта ниже — кликом копируется. */
 .cell-payer__fio {
   color: var(--p-ink);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .cell-payer__acc {
