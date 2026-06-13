@@ -315,6 +315,9 @@ export const AllTypesProps: Record<string,any> = {
 	CreateMatrixAccountInputDTO:{
 
 	},
+	CreateMembershipExitInput:{
+		statement:"MembershipExitApplicationSignedDocumentInput"
+	},
 	CreateOrganizationDataInput:{
 		bank_account:"BankAccountInput",
 		details:"OrganizationDetailsInput",
@@ -633,6 +636,19 @@ export const AllTypesProps: Record<string,any> = {
 	MarkReportPeriodInput:{
 		mark:"ReportSubmissionMark",
 		reportType:"ReportType"
+	},
+	MembershipExitApplicationGenerateDocumentInput:{
+
+	},
+	MembershipExitApplicationSignedDocumentInput:{
+		meta:"MembershipExitApplicationSignedMetaDocumentInput",
+		signatures:"SignatureInfoInput"
+	},
+	MembershipExitApplicationSignedMetaDocumentInput:{
+
+	},
+	MembershipExitDecisionGenerateDocumentInput:{
+
 	},
 	ModerateRequestInput:{
 
@@ -969,6 +985,9 @@ export const AllTypesProps: Record<string,any> = {
 		createInitialPayment:{
 			data:"CreateInitialPaymentInput"
 		},
+		createMembershipExit:{
+			data:"CreateMembershipExitInput"
+		},
 		createParentOffer:{
 			data:"CreateParentOfferInput"
 		},
@@ -1054,6 +1073,14 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		generateFreeDecision:{
 			data:"FreeDecisionGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateMembershipExitApplication:{
+			data:"MembershipExitApplicationGenerateDocumentInput",
+			options:"GenerateDocumentOptionsInput"
+		},
+		generateMembershipExitDecision:{
+			data:"MembershipExitDecisionGenerateDocumentInput",
 			options:"GenerateDocumentOptionsInput"
 		},
 		generateParticipantApplication:{
@@ -1650,6 +1677,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		listReportDrafts:{
 			filter:"ListReportDraftsFilterInput"
+		},
+		membershipExitReturnPreview:{
+
 		},
 		onecoopGetDocuments:{
 			data:"GetOneCoopDocumentsInput"
@@ -3544,6 +3574,14 @@ export const ReturnTypes: Record<string,any> = {
 		votes_against:"Int",
 		votes_for:"Int"
 	},
+	MembershipExitResult:{
+		exit_hash:"String"
+	},
+	MembershipExitReturnPreview:{
+		minimum_contribution:"String",
+		share_contribution:"String",
+		total:"String"
+	},
 	MissingRequisiteField:{
 		key:"String",
 		label:"String",
@@ -3670,6 +3708,7 @@ export const ReturnTypes: Record<string,any> = {
 		createChildOrder:"Transaction",
 		createDepositPayment:"GatewayPayment",
 		createInitialPayment:"GatewayPayment",
+		createMembershipExit:"MembershipExitResult",
 		createParentOffer:"Transaction",
 		createProjectOfFreeDecision:"CreatedProjectFreeDecision",
 		createWebPushSubscription:"CreateSubscriptionResponse",
@@ -3696,6 +3735,8 @@ export const ReturnTypes: Record<string,any> = {
 		generateConvertToAxonStatement:"GeneratedDocument",
 		generateDocument:"GeneratedDocument",
 		generateFreeDecision:"GeneratedDocument",
+		generateMembershipExitApplication:"GeneratedDocument",
+		generateMembershipExitDecision:"GeneratedDocument",
 		generateParticipantApplication:"GeneratedDocument",
 		generateParticipantApplicationDecision:"GeneratedDocument",
 		generatePrivacyAgreement:"GeneratedDocument",
@@ -4326,6 +4367,7 @@ export const ReturnTypes: Record<string,any> = {
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
 		listReportDrafts:"ReportDraft",
+		membershipExitReturnPreview:"MembershipExitReturnPreview",
 		onecoopGetDocuments:"OneCoopDocumentsResponse",
 		process:"ProcessView",
 		processes:"ProcessSummaryPaginationResult",
