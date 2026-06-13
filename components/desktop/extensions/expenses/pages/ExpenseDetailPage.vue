@@ -1,110 +1,97 @@
 <template lang="pug">
 .q-pa-md
-  PageHead(
-    eyebrow='Шасси расходов',
-    :title='headerTitle',
-    :subtitle='headerSubtitle'
-  )
-    template(#actions)
-      BaseBadge(
-        v-if='proposal?.status',
-        :variant='proposalStatusVariant(proposal.status)'
-      ) {{ proposalStatusLabel(proposal.status) }}
-
   q-inner-loading(:showing='loading && !proposal', color='primary')
 
   .expense-detail(v-if='proposal')
-    .row.q-col-gutter-md
-      .col-12.col-md-8
-        BaseCard
-          template(#head)
-            .card-header
-              .t-section Сводка
-          .summary-grid
-            DataRow(label='Пайщик', :value='proposal.username || "—"')
-            DataRow(label='Кооператив', :value='proposal.coopname || "—"')
-            DataRow(label='Кошелёк (пул)', :value='walletLabel(proposal.source_wallet)')
-            DataRow(label='Сумма (план)', :value='formatAmount(proposal.total_planned)')
-            DataRow(label='Сумма (факт)', :value='formatAmount(proposal.total_actual)')
-            DataRow(label='Создана', :value='formatDate(proposal.created_at)')
-            DataRow(label='Обновлена', :value='formatDate(proposal.updated_at)')
-            DataRow(label='Hash')
-              template(#value-override)
-                span.t-mono-sm {{ proposal.proposal_hash }}
+    //- Статус расхода — вверху страницы, справа (канон detail-страниц).
+    .head-row
+      BaseChip(
+        v-if='proposal.status',
+        :variant='proposalStatusVariant(proposal.status)'
+      ) {{ proposalStatusLabel(proposal.status) }}
 
-        BaseCard.q-mt-md
-          template(#head)
-            .card-header
-              .t-section Строки расходов
-              span.t-muted {{ proposal.items?.length || 0 }} строк
-          .table-wrap(v-if='proposal.items?.length')
-            .table-scroll
-              table.table
-                thead
-                  tr
-                    th Получатель
-                    th Способ
-                    th.col-num План
-                    th.col-num Факт
-                    th Статус
-                tbody
-                  tr(v-for='item in proposal.items', :key='item.item_hash')
-                    td.cell-name {{ item.recipient || '—' }}
-                    td {{ mechanicsLabel(item.mechanics) }}
-                    td.col-num {{ formatAmount(item.planned_amount) }}
-                    td.col-num {{ formatAmount(item.actual_amount) }}
-                    td
-                      BaseBadge(:variant='itemStatusVariant(item.status)') {{ itemStatusLabel(item.status) }}
-          EmptyState(
-            v-else,
-            title='Нет строк',
-            body='У этой служебной записки нет позиций.'
-          )
-            template(#icon)
-              q-icon(name='list', size='40px')
+    .section
+      .t-eyebrow.t-muted Сводка
+      BaseCard
+        .summary
+          DataRow(label='Пайщик', :value='creatorName')
+          DataRow(label='Аккаунт', :value='proposal.username || "—"', mono, copyable)
+          DataRow(label='Кооператив', :value='proposal.coopname || "—"')
+          DataRow(label='Кошелёк (пул)', :value='walletLabel(proposal.source_wallet)')
+          DataRow(label='Сумма (план)', :value='formatAmount(proposal.total_planned)')
+          DataRow(label='Сумма (факт)', :value='formatAmount(proposal.total_actual)')
+          DataRow(label='Создана', :value='formatDate(proposal.created_at)')
+          DataRow(label='Обновлена', :value='formatDate(proposal.updated_at)')
+          DataRow(label='Хеш', :value='proposal.proposal_hash', mono, copyable, align='vertical')
 
-      .col-12.col-md-4
-        BaseCard
-          template(#head)
-            .card-header
-              .t-section Документы
-          //- Канон шасси: служебная записка + протокол решения совета. Клик по
-          //- строке раскрывает сам документ (BaseDocument: стили + подписи), а не
-          //- голый хеш. Тот же компонент — на странице расхода программы.
-          ExpenseProposalDocuments(
-            v-if='hasDocuments',
-            :statement='proposal.statement_doc',
-            :decision='proposal.decision_doc'
-          )
-          EmptyState(
-            v-else,
-            title='Документы не сформированы',
-            body='Здесь появятся служебная записка и протокол решения совета.'
-          )
-            template(#icon)
-              q-icon(name='description', size='40px')
+    //- Документы расхода — заявление (СЗ) и протокол решения совета. Клик по
+    //- строке раскрывает сам документ во всплывашке (доменный канон шасси).
+    .section
+      .t-eyebrow.t-muted Документы
+      BaseCard
+        ExpenseProposalDocuments(
+          v-if='hasDocuments',
+          :statement='proposal.statement_doc',
+          :decision='proposal.decision_doc'
+        )
+        EmptyState(
+          v-else,
+          title='Документы не сформированы',
+          body='Здесь появятся служебная записка и протокол решения совета.'
+        )
+          template(#icon)
+            q-icon(name='description', size='40px')
 
-        BaseCard.q-mt-md
-          template(#head)
-            .card-header
-              .t-section Чеки и подтверждения
-              span.t-muted {{ files.length }}
-          .files(v-if='files.length')
-            .file-row(v-for='file in files', :key='file.id')
-              q-icon(name='attachment', size='20px')
-              .file-row__body
-                .file-row__name {{ file.storage_key || '—' }}
-                .file-row__meta.t-muted
-                  span(v-if='file.uploaded_by_username') {{ file.uploaded_by_username }}
-                  span(v-if='file.uploaded_at') {{ ' · ' + formatDate(String(file.uploaded_at)) }}
-                  span(v-if='file.size_bytes') {{ ' · ' + formatBytes(Number(file.size_bytes)) }}
-          EmptyState(
-            v-else,
-            title='Файлов пока нет',
-            body='Прикреплённые чеки появятся после подачи отчёта.'
-          )
-            template(#icon)
-              q-icon(name='upload_file', size='40px')
+    .section
+      .t-eyebrow.t-muted Строки расходов
+      BaseCard
+        .items-head(v-if='itemsCount')
+          span.t-muted {{ itemsCountLabel }}
+        .table-wrap(v-if='itemsCount')
+          .table-scroll
+            table.table
+              thead
+                tr
+                  th Получатель
+                  th Способ
+                  th.col-num План
+                  th.col-num Факт
+                  th Статус
+              tbody
+                tr(v-for='item in proposal.items', :key='item.item_hash')
+                  td.cell-name {{ item.recipient || '—' }}
+                  td {{ mechanicsLabel(item.mechanics) }}
+                  td.col-num {{ formatAmount(item.planned_amount) }}
+                  td.col-num {{ formatAmount(item.actual_amount) }}
+                  td
+                    BaseBadge(:variant='itemStatusVariant(item.status)') {{ itemStatusLabel(item.status) }}
+        EmptyState(
+          v-else,
+          title='Нет строк',
+          body='У этой служебной записки нет позиций.'
+        )
+          template(#icon)
+            q-icon(name='list', size='40px')
+
+    //- Чеки/подтверждения — кликабельное имя файла открывает документ в новой
+    //- вкладке (как на странице расхода программы: read_url короткоживущий,
+    //- запрашиваем свежий по id в момент клика).
+    .section(v-if='files.length')
+      .t-eyebrow.t-muted Чеки и подтверждения
+      BaseCard
+        .files
+          .file-row(v-for='file in files', :key='file.id')
+            button.file-link(
+              type='button',
+              :disabled='openingId === file.id',
+              @click='openFile(file)'
+            )
+              q-icon(name='attach_file', size='16px')
+              span {{ fileLabel(file) }}
+              q-spinner(v-if='openingId === file.id', size='14px')
+            .file-row__meta.t-muted(v-if='uploaderName(file.uploaded_by_username) || file.uploaded_at')
+              span(v-if='uploaderName(file.uploaded_by_username)') {{ uploaderName(file.uploaded_by_username) }}
+              span(v-if='file.uploaded_at') {{ (uploaderName(file.uploaded_by_username) ? ' · ' : '') + formatDate(String(file.uploaded_at)) }}
 
   EmptyState(
     v-else-if='!loading && loaded',
@@ -119,18 +106,20 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
-import { PageHead } from 'src/shared/ui/layout';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
+import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { DataRow } from 'src/shared/ui/domain';
 import { ExpenseProposalDocuments } from 'src/shared/ui/domain/ExpenseProposalDocuments';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { listExpenseWallets } from 'src/shared/lib/expense-wallets';
 import {
   getExpenseProposal,
   getExpenseFilesByProposal,
+  getExpenseFileReadUrl,
   type IExpenseProposalResult,
   type IExpenseFilesByProposalResult,
 } from '../api';
@@ -151,16 +140,6 @@ const loading = ref(false);
 const loaded = ref(false);
 const proposal = ref<IProposal | null>(null);
 const files = ref<IFileRow[]>([]);
-
-const headerTitle = computed(() => {
-  if (!proposal.value) return 'Служебная записка';
-  return `Служебная записка ${truncateHash(proposal.value.proposal_hash)}`;
-});
-
-const headerSubtitle = computed(() => {
-  if (!proposal.value) return 'Цепочка артефактов: заявление → решение совета → чеки';
-  return `Создана ${formatDate(proposal.value.created_at)} · ${proposal.value.username || '—'}`;
-});
 
 function proposalStatusLabel(status?: Zeus.ExpenseProposalStatus | null): string {
   return getExpenseProposalStatusLabel(status);
@@ -194,12 +173,54 @@ function formatAmount(asset?: string | null): string {
   return formatAsset2Digits(asset);
 }
 
-// Документы показываем каноном, только если пришёл их html (rawDocument) —
-// иначе EmptyState «не сформированы».
+type ISignature = NonNullable<
+  NonNullable<NonNullable<IProposal['statement_doc']>['document']>['signatures']
+>[number];
+
+// ФИО пайщика — из сертификата подписанта служебной записки (её подписывает
+// создатель). Доп. запрос аккаунта не нужен — сертификат уже в агрегате.
+const creatorName = computed(() => {
+  const cert = proposal.value?.statement_doc?.document?.signatures?.[0]?.signer_certificate;
+  return (cert ? getNameFromCertificate(cert) : '') || proposal.value?.username || '—';
+});
+
+// Карта «аккаунт → сертификат» из всех подписей расхода (СЗ + протокол) —
+// чтобы показать ФИО того, кто приложил чек, а не имя его аккаунта.
+const signerCerts = computed(() => {
+  const map = new Map<string, ISignature['signer_certificate']>();
+  const collect = (doc: IProposal['statement_doc']): void => {
+    (doc?.document?.signatures ?? []).forEach((s) => {
+      if (s.signer && s.signer_certificate) map.set(s.signer, s.signer_certificate);
+    });
+  };
+  collect(proposal.value?.statement_doc);
+  collect(proposal.value?.decision_doc);
+  return map;
+});
+function uploaderName(username?: string | null): string {
+  if (!username) return '';
+  const cert = signerCerts.value.get(username);
+  return cert ? getNameFromCertificate(cert) : '';
+}
+
+// Документы показываем каноном, только если пришёл их html (rawDocument).
 const hasDocuments = computed(() =>
   Boolean(proposal.value?.statement_doc?.rawDocument?.html)
   || Boolean(proposal.value?.decision_doc?.rawDocument?.html),
 );
+
+const itemsCount = computed(() => proposal.value?.items?.length ?? 0);
+const itemsCountLabel = computed(
+  () => `${itemsCount.value} ${pluralRu(itemsCount.value, 'строка', 'строки', 'строк')}`,
+);
+
+function pluralRu(n: number, one: string, few: string, many: string): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+  return many;
+}
 
 function formatDate(value?: string | null): string {
   if (!value) return '—';
@@ -208,17 +229,26 @@ function formatDate(value?: string | null): string {
   return d.toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-function truncateHash(hash?: string | null): string {
-  if (!hash) return '';
-  if (hash.length <= 16) return hash;
-  return `${hash.slice(0, 8)}…${hash.slice(-6)}`;
+function fileLabel(file: IFileRow): string {
+  if (file.original_filename) return file.original_filename;
+  const date = file.uploaded_at ? new Date(file.uploaded_at).toLocaleString('ru-RU') : '';
+  return `документ от ${date}`;
 }
 
-function formatBytes(bytes: number): string {
-  if (!bytes || bytes <= 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
-  return `${(bytes / 1024 ** i).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+// Списочные запросы файлов отдают короткоживущий read_url — свежую ссылку
+// запрашиваем по id в момент клика, открываем в новой вкладке.
+const openingId = ref<number | null>(null);
+async function openFile(file: IFileRow): Promise<void> {
+  try {
+    openingId.value = file.id;
+    const url = await getExpenseFileReadUrl(file.id);
+    if (!url) throw new Error('Не удалось получить ссылку на файл');
+    window.open(url, '_blank', 'noopener');
+  } catch (e) {
+    FailAlert(e);
+  } finally {
+    openingId.value = null;
+  }
 }
 
 async function load(): Promise<void> {
@@ -257,19 +287,33 @@ onMounted(() => {
 <style lang="scss" scoped>
 .expense-detail {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-4);
 }
 
-.card-header {
+.head-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--p-3);
 }
 
-.summary-grid {
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2);
+}
+
+.summary {
   display: flex;
   flex-direction: column;
   gap: var(--p-1);
+}
+
+.items-head {
+  margin-bottom: var(--p-2);
+  font-size: var(--p-fs-body-sm);
 }
 
 .table-scroll {
@@ -299,8 +343,8 @@ onMounted(() => {
 
 .file-row {
   display: flex;
-  align-items: flex-start;
-  gap: var(--p-3);
+  flex-direction: column;
+  gap: 2px;
   padding: var(--p-2) 0;
   border-bottom: 1px solid var(--p-line);
 }
@@ -309,20 +353,30 @@ onMounted(() => {
   border-bottom: none;
 }
 
-.file-row__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-1);
-  min-width: 0;
-  flex: 1;
-}
-
-.file-row__name {
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-
 .file-row__meta {
   font-size: var(--p-fs-body-sm);
+}
+
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--p-primary);
+  font-size: var(--p-fs-body-sm);
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 }
 </style>

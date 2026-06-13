@@ -18,6 +18,7 @@ export type {
   IGetExpenseFilesByProposalInput,
   IExpenseFilesByProposalResult,
 } from './queries/getExpenseFilesByProposal';
+export { getExpenseFileReadUrl } from './queries/getExpenseFileReadUrl';
 export { generateExpenseProposalStatementDocument } from './mutations/generateExpenseProposalStatementDocument';
 export type { IGenerateExpenseProposalStatementDocumentInput } from './mutations/generateExpenseProposalStatementDocument';
 export { generateExpenseProposalDecisionDocument } from './mutations/generateExpenseProposalDecisionDocument';

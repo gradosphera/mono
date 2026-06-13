@@ -1,17 +1,11 @@
 <template lang="pug">
 .q-pa-md
-  PageHead(
-    eyebrow='Шасси расходов',
-    title='Реестр расходов',
-    subtitle='Общий список служебных записок по расходам кооператива'
-  )
-
   .expenses-registry
     TableSkeleton(
       v-if='loading && !items.length',
       :columns='skeletonColumns',
       :rows='6',
-      min-width='880px'
+      min-width='980px'
     )
 
     .table-wrap(v-else-if='items.length')
@@ -26,6 +20,7 @@
               th.col-num Сумма (план)
               th.col-num Сумма (факт)
               th Статус
+              th.col-chevron
           tbody
             tr.data-row(
               v-for='row in items',
@@ -33,13 +28,23 @@
               @click='openDetail(row.proposal_hash)'
             )
               td.cell-name {{ purposeOf(row) }}
-              td {{ row.username || '—' }}
+              td.cell-payer
+                .cell-payer__fio {{ payerName(row) }}
+                button.cell-payer__acc(
+                  type='button',
+                  title='Скопировать имя аккаунта',
+                  @click.stop='copyAccount(row.username)'
+                )
+                  span.t-mono-sm {{ row.username }}
+                  q-icon(name='content_copy', size='12px')
               td.col-wallet {{ walletLabel(row.source_wallet) }}
               td {{ formatCreatedAt(row.created_at) }}
               td.col-num {{ formatAmount(row.total_planned) }}
               td.col-num {{ formatAmount(row.total_actual) }}
               td
                 BaseBadge(:variant='statusVariant(row.status)') {{ statusLabel(row.status) }}
+              td.col-chevron
+                q-icon(name='chevron_right', size='20px')
 
       .table-foot
         span {{ rangeLabel }}
@@ -63,8 +68,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { copyToClipboard, Notify } from 'quasar';
 import { Zeus } from '@coopenomics/sdk';
-import { PageHead } from 'src/shared/ui/layout';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
@@ -72,6 +77,7 @@ import { TableSkeleton } from 'src/shared/ui/base/TableSkeleton';
 import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { listExpenseWallets } from 'src/shared/lib/expense-wallets';
 import {
   getExpenseProposalsByCooperative,
@@ -103,6 +109,7 @@ const skeletonColumns = computed<TableSkeletonColumn[]>(() => [
   { label: 'Сумма (план)', class: 'col-num', cell: 'text', cellWidth: '110px' },
   { label: 'Сумма (факт)', class: 'col-num', cell: 'text', cellWidth: '110px' },
   { label: 'Статус', cell: 'badge' },
+  { label: '', class: 'col-chevron', cell: 'text', cellWidth: '40px' },
 ]);
 
 // Код кошелька-пула (`w.cap.pgexp`) → человеческое имя из реестра пулов; если
@@ -111,6 +118,24 @@ const walletTitles = new Map(listExpenseWallets().map((e) => [e.wallet, e.title]
 function walletLabel(code?: string | null): string {
   if (!code) return '—';
   return walletTitles.get(code) ?? code;
+}
+
+// ФИО пайщика берём из сертификата подписанта служебной записки (СЗ подписывает
+// её создатель) — так не нужен отдельный запрос аккаунта. Если СЗ ещё не
+// подписана — показываем имя аккаунта.
+function payerName(row: IProposalRow): string {
+  const cert = row.statement_doc?.document?.signatures?.[0]?.signer_certificate;
+  return (cert ? getNameFromCertificate(cert) : '') || row.username || '—';
+}
+
+async function copyAccount(username?: string | null): Promise<void> {
+  if (!username) return;
+  try {
+    await copyToClipboard(username);
+    Notify.create({ type: 'positive', message: 'Имя аккаунта скопировано', timeout: 1200 });
+  } catch {
+    // молча: копирование — вспомогательное действие
+  }
 }
 
 function formatAmount(asset?: string | null): string {
@@ -195,7 +220,7 @@ onMounted(() => {
 
 .table {
   table-layout: fixed;
-  min-width: 1040px;
+  min-width: 1080px;
 }
 
 .col-date {
@@ -219,7 +244,40 @@ onMounted(() => {
   overflow-wrap: anywhere;
 }
 
+/* Пайщик: ФИО первой строкой, имя аккаунта ниже — кликом копируется. */
+.cell-payer__fio {
+  color: var(--p-ink);
+  overflow-wrap: anywhere;
+}
+
+.cell-payer__acc {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1);
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--p-ink-3);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--p-primary);
+  }
+}
+
+/* Колонка-шеврон: подсказывает, что строка открывается. */
+.col-chevron {
+  width: 40px;
+  text-align: center;
+  color: var(--p-ink-3);
+}
+
 .data-row {
   cursor: pointer;
+}
+
+.data-row:hover .col-chevron {
+  color: var(--p-primary);
 }
 </style>
