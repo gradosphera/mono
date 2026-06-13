@@ -205,8 +205,8 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             name: 'capital-program-expenses',
             component: markRaw(ProgramExpensesPage),
             meta: {
-              title: 'Расходы программы',
-              icon: 'fa-solid fa-receipt',
+              title: 'Расходы',
+              icon: 'receipt_long',
               roles: ['chairman', 'member'],
               agreements: agreementsBase,
               requiresAuth: true,
@@ -219,7 +219,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             component: markRaw(ProgramExpensePage),
             meta: {
               title: 'Расход',
-              icon: 'fa-solid fa-receipt',
+              icon: 'receipt_long',
               roles: ['chairman', 'member'],
               agreements: agreementsBase,
               requiresAuth: true,

@@ -93,6 +93,14 @@
               span(v-if='uploaderName(file.uploaded_by_username)') {{ uploaderName(file.uploaded_by_username) }}
               span(v-if='file.uploaded_at') {{ (uploaderName(file.uploaded_by_username) ? ' · ' : '') + formatDate(String(file.uploaded_at)) }}
 
+    //- История состояний — собирается из фактов в данных (даты СЗ, подписи
+    //- заявления/решения, загруженные документы, статус). Тот же виджет, что на
+    //- странице расхода программы Благорост.
+    .section(v-if='timeline.length')
+      .t-eyebrow.t-muted История состояний
+      BaseCard
+        ActivityTimeline(:events='timeline', group-by-date)
+
   EmptyState(
     v-else-if='!loading && loaded',
     title='Расход не найден',
@@ -112,6 +120,8 @@ import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { DataRow } from 'src/shared/ui/domain';
 import { ExpenseProposalDocuments } from 'src/shared/ui/domain/ExpenseProposalDocuments';
+import { ActivityTimeline } from 'src/shared/ui/domain/ActivityTimeline';
+import type { ActivityEvent } from 'src/shared/ui/domain/ActivityTimeline';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
@@ -234,6 +244,85 @@ function fileLabel(file: IFileRow): string {
   const date = file.uploaded_at ? new Date(file.uploaded_at).toLocaleString('ru-RU') : '';
   return `документ от ${date}`;
 }
+
+// История состояний собирается из фактов, которые уже есть в данных: дат СЗ,
+// подписей документов (заявление/решение) и загруженных документов. Отдельной
+// журнальной таблицы у шасси нет — финальные статусы контракт хранит в рабочем
+// состоянии, история действий живёт в парсере.
+function firstSignatureDate(doc: IProposal['statement_doc']): string | null {
+  const signatures = doc?.document?.signatures;
+  if (!signatures?.length) return null;
+  return signatures[0]?.signed_at ?? null;
+}
+
+const timeline = computed<ActivityEvent[]>(() => {
+  const p = proposal.value;
+  if (!p) return [];
+  const events: ActivityEvent[] = [
+    {
+      id: 'created',
+      type: 'create',
+      title: 'Служебная записка создана',
+      actor: creatorName.value,
+      date: p.created_at ?? '',
+    },
+  ];
+
+  const statementSigned = firstSignatureDate(p.statement_doc);
+  if (statementSigned) {
+    events.push({
+      id: 'statement',
+      type: 'sign',
+      title: 'Заявление на расход подписано',
+      actor: creatorName.value,
+      date: statementSigned,
+    });
+  }
+
+  const decisionSigned = firstSignatureDate(p.decision_doc);
+  if (decisionSigned || p.status === Zeus.ExpenseProposalStatus.DECLINED) {
+    const declined = p.status === Zeus.ExpenseProposalStatus.DECLINED;
+    events.push({
+      id: 'decision',
+      type: declined ? 'reject' : 'sign',
+      title: declined
+        ? 'Совет отклонил расход'
+        : 'Совет утвердил расход — протокол решения подписан',
+      date: decisionSigned ?? p.updated_at ?? '',
+    });
+  }
+
+  files.value.forEach((f) => {
+    events.push({
+      id: `file-${f.id}`,
+      type: 'update',
+      title: 'Приложен документ',
+      description: fileLabel(f),
+      date: String(f.uploaded_at ?? p.updated_at ?? ''),
+    });
+  });
+
+  if (p.status === Zeus.ExpenseProposalStatus.REPORT_SUBMITTED) {
+    events.push({
+      id: 'report',
+      type: 'system',
+      title: 'Отчёт по смете подан — ожидает закрытия расхода',
+      date: p.updated_at ?? '',
+    });
+  }
+  if (p.status === Zeus.ExpenseProposalStatus.CLOSED) {
+    events.push({
+      id: 'closed',
+      type: 'system',
+      title: 'Расход закрыт — фактическая сумма капитализирована',
+      date: p.updated_at ?? '',
+    });
+  }
+
+  return events.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
+});
 
 // Списочные запросы файлов отдают короткоживущий read_url — свежую ссылку
 // запрашиваем по id в момент клика, открываем в новой вкладке.
