@@ -52,12 +52,12 @@ padding-top: 30px;
 <h1 class="header">{% trans 'application_exit_individual' %}</h1>
 <p style="text-align: center" class="subheader">{% trans 'of_consumer_cooperative' %} {{ coop.full_name }}<p>
 <p style="text-align: right">{{ meta.created_at }}, {{ coop.city }}</p>
-<p>{% trans 'to_council_of' %} {{ coop.full_name }} {% trans 'from' %} {{ individual.last_name }} {{ individual.first_name }} {{ individual.middle_name }}, {% trans 'birthdate' %} {{ individual.birthdate }}, {% trans 'registration_address' %} {{ individual.full_address }}, {% trans 'phone_and_email_notice', individual.phone, individual.email %}</p>
+<p>{% trans 'to_council_of' %} {{ coop.full_name }} {% trans 'from' %} {{ individual.last_name }} {{ individual.first_name }} {{ individual.middle_name }}, {% trans 'birthdate' %} {{ individual.birthdate }}, {% trans 'registration_address' %} {{ individual.full_address }}, {% trans 'phone_and_email_notice', individual.phone, individual.email %}{% if vars.passport_request == 'yes' %} {% trans 'passport' %} № {{ individual.passport.series }} {{ individual.passport.number }}, {% trans 'passport_code' %} {{ individual.passport.code }}, {% trans 'passport_issued' %} {{ individual.passport.issued_by }} {% trans 'passport_from' %} {{ individual.passport.issued_at }}.{% endif %}</p>
 <p>{% trans 'request_to_exit', coop.full_name, coop.details.ogrn, coop.details.inn, coop.details.kpp %}</p>
 <p>{% trans 'obligation_to_settle_individual' %}</p>
 <div class="signature">
 <img style="max-width: 150px;" src="{{ signature }}"/>
-<p>{% trans 'signature_individual' %}</p>
+<p>{% trans 'signed_electronically' %}</p>
 <p style="text-align: right;">{{ individual.last_name }} {{ individual.first_name }} {{ individual.middle_name }}</p>
 </div>
 
@@ -70,7 +70,7 @@ padding-top: 30px;
 <p>{% trans 'obligation_to_settle_individual' %}</p>
 <div class="signature">
 <img style="max-width: 150px;" src="{{ signature }}"/>
-<p>{% trans 'signature_individual' %}</p>
+<p>{% trans 'signed_electronically' %}</p>
 <p style="text-align: right;">{{ entrepreneur.last_name }} {{ entrepreneur.first_name }} {{ entrepreneur.middle_name }}</p>
 </div>
 
@@ -83,7 +83,7 @@ padding-top: 30px;
 <p>{% trans 'obligation_to_settle_legal_entity' %}</p>
 <div class="signature">
 <img style="max-width: 150px;" src="{{ signature }}"/>
-<p>{% trans 'signature_individual' %}</p>
+<p>{% trans 'signed_electronically' %}</p>
 <p style="text-align: right;">{{ organization.represented_by.last_name }} {{ organization.represented_by.first_name }} {{ organization.represented_by.middle_name }}</p>
 </div>
 
@@ -114,7 +114,11 @@ export const translations = {
     request_to_exit_legal_entity: 'Заявитель, в лице представителя юридического лица — {0} {1} {2} {3}, действующего на основании {4}, в соответствии с Уставом Общества просит вывести {5} из состава пайщиков {6}.',
     obligation_to_settle_individual: 'Обязуюсь погасить все свои обязательства перед Обществом, при наличии таковых, а также получить возврат своих паевых взносов в связи с моим участием в хозяйственной деятельности и целевых потребительских программах Общества, предусмотренном Уставом Общества и его действующих Положений и в соответствии с действующим законодательством РФ.',
     obligation_to_settle_legal_entity: 'Заявитель обязуется погасить все свои обязательства перед Обществом, при наличии таковых, а также получить возврат своих паевых взносов в связи с участием в хозяйственной деятельности и целевых потребительских программах Общества, предусмотренном Уставом Общества и его действующих Положений и в соответствии с действующим законодательством РФ.',
-    signature_individual: 'личная подпись заявителя',
+    signed_electronically: 'Документ подписан электронной подписью.',
+    passport: 'Паспорт',
+    passport_code: 'код подразделения',
+    passport_issued: 'выдан',
+    passport_from: 'от',
   },
 }
 
@@ -140,6 +144,13 @@ export const exampleData = {
     phone: '790343432423',
     email: 'email@gmail.com',
     full_address: 'Советов 3-84',
+    passport: {
+      series: '7712',
+      number: '122112',
+      issued_by: 'отделом УФМС г. Москва',
+      issued_at: '10.05.2010',
+      code: '220-220',
+    },
   },
   entrepreneur: {
     last_name: 'Муравьев',
@@ -176,6 +187,7 @@ export const exampleData = {
   type: 'individual',
   signature: '',
   vars: {
+    passport_request: 'yes',
     participant_exit_application: {
       protocol_number: '10-04-2024',
       protocol_day_month_year: '10 апреля 2024 г.',
