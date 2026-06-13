@@ -25,6 +25,8 @@ export interface AccountBlockchainPort {
   registerBlockchainAccount(candidate: CandidateDomainInterface): Promise<void>;
   // Подача заявления на выход пайщика из кооператива (registrator::exitcoop)
   exitCoop(data: ExitCoopDomainInterface): Promise<void>;
+  // Текущий процесс выхода пайщика (registrator::exits), либо null
+  getExit(coopname: string, username: string): Promise<RegistratorContract.Tables.Exits.IExit | null>;
 }
 
 export const ACCOUNT_BLOCKCHAIN_PORT = Symbol('AccountBlockchainPort');

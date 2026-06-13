@@ -251,6 +251,18 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
     return this.blockchainService.getAccount(username);
   }
 
+  getExit(
+    coopname: string,
+    username: string
+  ): Promise<RegistratorContract.Tables.Exits.IExit | null> {
+    return this.blockchainService.getSingleRow(
+      RegistratorContract.contractName.production,
+      coopname,
+      RegistratorContract.Tables.Exits.tableName,
+      Name.from(username)
+    );
+  }
+
   getParticipantAccount(
     coopname: string,
     username: string

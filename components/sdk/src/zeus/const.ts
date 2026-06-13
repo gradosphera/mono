@@ -650,6 +650,7 @@ export const AllTypesProps: Record<string,any> = {
 	MembershipExitDecisionGenerateDocumentInput:{
 
 	},
+	MembershipExitStatus: "enum" as const,
 	ModerateRequestInput:{
 
 	},
@@ -1677,6 +1678,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		listReportDrafts:{
 			filter:"ListReportDraftsFilterInput"
+		},
+		membershipExit:{
+
 		},
 		membershipExitReturnPreview:{
 
@@ -3574,6 +3578,12 @@ export const ReturnTypes: Record<string,any> = {
 		votes_against:"Int",
 		votes_for:"Int"
 	},
+	MembershipExit:{
+		created_at:"String",
+		exit_hash:"String",
+		quantity:"String",
+		status:"MembershipExitStatus"
+	},
 	MembershipExitResult:{
 		exit_hash:"String"
 	},
@@ -4367,6 +4377,7 @@ export const ReturnTypes: Record<string,any> = {
 		getUserWebPushSubscriptions:"WebPushSubscriptionDto",
 		getWebPushSubscriptionStats:"SubscriptionStatsDto",
 		listReportDrafts:"ReportDraft",
+		membershipExit:"MembershipExit",
 		membershipExitReturnPreview:"MembershipExitReturnPreview",
 		onecoopGetDocuments:"OneCoopDocumentsResponse",
 		process:"ProcessView",

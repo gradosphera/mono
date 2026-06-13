@@ -6422,6 +6422,18 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on MeetQuestionResult']?: Omit<ValueTypes["MeetQuestionResult"], "...on MeetQuestionResult">
 }>;
+	["MembershipExit"]: AliasType<{
+	/** Дата подачи заявления на выход */
+	created_at?:boolean | `@${string}`,
+	/** Хеш процесса выхода */
+	exit_hash?:boolean | `@${string}`,
+	/** Сумма к возврату (фиксируется советом при одобрении; до одобрения — 0) */
+	quantity?:boolean | `@${string}`,
+	/** Статус процесса выхода */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on MembershipExit']?: Omit<ValueTypes["MembershipExit"], "...on MembershipExit">
+}>;
 	["MembershipExitApplicationGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null | Variable<any, string>,
@@ -6529,6 +6541,8 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on MembershipExitReturnPreview']?: Omit<ValueTypes["MembershipExitReturnPreview"], "...on MembershipExitReturnPreview">
 }>;
+	/** Статус процесса выхода пайщика из кооператива */
+["MembershipExitStatus"]:MembershipExitStatus;
 	["MissingRequisiteField"]: AliasType<{
 	key?:boolean | `@${string}`,
 	label?:boolean | `@${string}`,
@@ -8184,6 +8198,7 @@ getUserWebPushSubscriptions?: [{	data: ValueTypes["GetUserSubscriptionsInput"] |
 Требуемые роли: chairman.  */
 	getWebPushSubscriptionStats?:ValueTypes["SubscriptionStatsDto"],
 listReportDrafts?: [{	filter?: ValueTypes["ListReportDraftsFilterInput"] | undefined | null | Variable<any, string>},ValueTypes["ReportDraft"]],
+membershipExit?: [{	coopname: string | Variable<any, string>,	username: string | Variable<any, string>},ValueTypes["MembershipExit"]],
 membershipExitReturnPreview?: [{	coopname: string | Variable<any, string>,	username: string | Variable<any, string>},ValueTypes["MembershipExitReturnPreview"]],
 onecoopGetDocuments?: [{	data: ValueTypes["GetOneCoopDocumentsInput"] | Variable<any, string>},ValueTypes["OneCoopDocumentsResponse"]],
 process?: [{	coopname: string | Variable<any, string>,	hash: string | Variable<any, string>},ValueTypes["ProcessView"]],
@@ -15066,6 +15081,17 @@ export type ResolverInputTypes = {
 	votes_for?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MembershipExit"]: AliasType<{
+	/** Дата подачи заявления на выход */
+	created_at?:boolean | `@${string}`,
+	/** Хеш процесса выхода */
+	exit_hash?:boolean | `@${string}`,
+	/** Сумма к возврату (фиксируется советом при одобрении; до одобрения — 0) */
+	quantity?:boolean | `@${string}`,
+	/** Статус процесса выхода */
+	status?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["MembershipExitApplicationGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -15171,6 +15197,8 @@ export type ResolverInputTypes = {
 	total?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	/** Статус процесса выхода пайщика из кооператива */
+["MembershipExitStatus"]:MembershipExitStatus;
 	["MissingRequisiteField"]: AliasType<{
 	key?:boolean | `@${string}`,
 	label?:boolean | `@${string}`,
@@ -16765,6 +16793,7 @@ getUserWebPushSubscriptions?: [{	data: ResolverInputTypes["GetUserSubscriptionsI
 Требуемые роли: chairman.  */
 	getWebPushSubscriptionStats?:ResolverInputTypes["SubscriptionStatsDto"],
 listReportDrafts?: [{	filter?: ResolverInputTypes["ListReportDraftsFilterInput"] | undefined | null},ResolverInputTypes["ReportDraft"]],
+membershipExit?: [{	coopname: string,	username: string},ResolverInputTypes["MembershipExit"]],
 membershipExitReturnPreview?: [{	coopname: string,	username: string},ResolverInputTypes["MembershipExitReturnPreview"]],
 onecoopGetDocuments?: [{	data: ResolverInputTypes["GetOneCoopDocumentsInput"]},ResolverInputTypes["OneCoopDocumentsResponse"]],
 process?: [{	coopname: string,	hash: string},ResolverInputTypes["ProcessView"]],
@@ -23449,6 +23478,16 @@ export type ModelTypes = {
 	/** Количество голосов за */
 	votes_for: number
 };
+	["MembershipExit"]: {
+		/** Дата подачи заявления на выход */
+	created_at: string,
+	/** Хеш процесса выхода */
+	exit_hash: string,
+	/** Сумма к возврату (фиксируется советом при одобрении; до одобрения — 0) */
+	quantity: string,
+	/** Статус процесса выхода */
+	status: ModelTypes["MembershipExitStatus"]
+};
 	["MembershipExitApplicationGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -23552,6 +23591,7 @@ export type ModelTypes = {
 	/** Итоговая сумма к возврату (минимальный + целевой паевой) */
 	total: string
 };
+	["MembershipExitStatus"]:MembershipExitStatus;
 	["MissingRequisiteField"]: {
 		key: string,
 	label: string,
@@ -25758,6 +25798,8 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	listReportDrafts: Array<ModelTypes["ReportDraft"]>,
+	/** Текущий процесс выхода пайщика из кооператива (статус заявления и планируемая сумма возврата). null — активного выхода нет. */
+	membershipExit?: ModelTypes["MembershipExit"] | undefined | null,
 	/** Предварительный расчёт суммы возврата паевого взноса при выходе пайщика (минимальный + целевой паевой). Ориентир для пайщика; итог фиксирует совет. */
 	membershipExitReturnPreview: ModelTypes["MembershipExitReturnPreview"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
@@ -32691,6 +32733,18 @@ export type GraphQLTypes = {
 	votes_for: number,
 	['...on MeetQuestionResult']: Omit<GraphQLTypes["MeetQuestionResult"], "...on MeetQuestionResult">
 };
+	["MembershipExit"]: {
+	__typename: "MembershipExit",
+	/** Дата подачи заявления на выход */
+	created_at: string,
+	/** Хеш процесса выхода */
+	exit_hash: string,
+	/** Сумма к возврату (фиксируется советом при одобрении; до одобрения — 0) */
+	quantity: string,
+	/** Статус процесса выхода */
+	status: GraphQLTypes["MembershipExitStatus"],
+	['...on MembershipExit']: Omit<GraphQLTypes["MembershipExit"], "...on MembershipExit">
+};
 	["MembershipExitApplicationGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
 	block_num?: number | undefined | null,
@@ -32798,6 +32852,8 @@ export type GraphQLTypes = {
 	total: string,
 	['...on MembershipExitReturnPreview']: Omit<GraphQLTypes["MembershipExitReturnPreview"], "...on MembershipExitReturnPreview">
 };
+	/** Статус процесса выхода пайщика из кооператива */
+["MembershipExitStatus"]: MembershipExitStatus;
 	["MissingRequisiteField"]: {
 	__typename: "MissingRequisiteField",
 	key: string,
@@ -35151,6 +35207,8 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	listReportDrafts: Array<GraphQLTypes["ReportDraft"]>,
+	/** Текущий процесс выхода пайщика из кооператива (статус заявления и планируемая сумма возврата). null — активного выхода нет. */
+	membershipExit?: GraphQLTypes["MembershipExit"] | undefined | null,
 	/** Предварительный расчёт суммы возврата паевого взноса при выходе пайщика (минимальный + целевой паевой). Ориентир для пайщика; итог фиксирует совет. */
 	membershipExitReturnPreview: GraphQLTypes["MembershipExitReturnPreview"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
@@ -37091,6 +37149,11 @@ export enum ManagedRoomKind {
 	MEMBERS = "MEMBERS",
 	SECRETARY = "SECRETARY"
 }
+/** Статус процесса выхода пайщика из кооператива */
+export enum MembershipExitStatus {
+	AUTHORIZED = "AUTHORIZED",
+	PENDING = "PENDING"
+}
 /** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
 export enum NonProjectRoomKind {
 	COUNCIL = "COUNCIL",
@@ -37494,6 +37557,7 @@ type ZEUS_VARIABLES = {
 	["MembershipExitApplicationSignedDocumentInput"]: ValueTypes["MembershipExitApplicationSignedDocumentInput"];
 	["MembershipExitApplicationSignedMetaDocumentInput"]: ValueTypes["MembershipExitApplicationSignedMetaDocumentInput"];
 	["MembershipExitDecisionGenerateDocumentInput"]: ValueTypes["MembershipExitDecisionGenerateDocumentInput"];
+	["MembershipExitStatus"]: ValueTypes["MembershipExitStatus"];
 	["ModerateRequestInput"]: ValueTypes["ModerateRequestInput"];
 	["MoveCapitalIssueToComponentInput"]: ValueTypes["MoveCapitalIssueToComponentInput"];
 	["NonProjectRoomKind"]: ValueTypes["NonProjectRoomKind"];

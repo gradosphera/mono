@@ -10,6 +10,8 @@ import { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-acc
 import { CreateMembershipExitInputDTO } from '../dto/create-membership-exit-input.dto';
 import { MembershipExitResultDTO } from '../dto/membership-exit-result.dto';
 import { MembershipExitReturnPreviewDTO } from '../dto/membership-exit-return-preview.dto';
+import { MembershipExitDTO } from '../dto/membership-exit.dto';
+import { MembershipExitStatus } from '../enums/membership-exit-status.enum';
 
 @Injectable()
 export class MembershipExitService {
@@ -65,6 +67,22 @@ export class MembershipExitService {
     this.logger.log(`Создан процесс выхода из кооператива: ${data.exit_hash} (username=${data.username})`);
 
     return { exit_hash: data.exit_hash };
+  }
+
+  /**
+   * Текущий процесс выхода пайщика (если активен) — для блокировки кабинета и
+   * отображения статуса заявления и планируемой суммы возврата. null — выхода нет.
+   */
+  async getMembershipExit(coopname: string, username: string): Promise<MembershipExitDTO | null> {
+    const exit = await this.accountBlockchainPort.getExit(coopname, username);
+    if (!exit) return null;
+
+    return {
+      exit_hash: exit.exit_hash,
+      status: exit.status as MembershipExitStatus,
+      quantity: exit.quantity,
+      created_at: exit.created_at,
+    };
   }
 
   /**

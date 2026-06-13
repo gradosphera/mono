@@ -14,6 +14,7 @@ import { MembershipExitService } from '../services/membership-exit.service';
 import { CreateMembershipExitInputDTO } from '../dto/create-membership-exit-input.dto';
 import { MembershipExitResultDTO } from '../dto/membership-exit-result.dto';
 import { MembershipExitReturnPreviewDTO } from '../dto/membership-exit-return-preview.dto';
+import { MembershipExitDTO } from '../dto/membership-exit.dto';
 
 /**
  * GraphQL резолвер выхода пайщика из кооператива.
@@ -65,6 +66,25 @@ export class MembershipExitResolver {
     @Args('data', { type: () => CreateMembershipExitInputDTO }) data: CreateMembershipExitInputDTO
   ): Promise<MembershipExitResultDTO> {
     return this.membershipExitService.createMembershipExit(data, currentUser);
+  }
+
+  @Query(() => MembershipExitDTO, {
+    name: 'membershipExit',
+    nullable: true,
+    description:
+      'Текущий процесс выхода пайщика из кооператива (статус заявления и планируемая сумма возврата). null — активного выхода нет.',
+  })
+  @UseGuards(GqlJwtAuthGuard)
+  async membershipExit(
+    @CurrentUser() currentUser: MonoAccountDomainInterface,
+    @Args('coopname', { type: () => String }) coopname: string,
+    @Args('username', { type: () => String }) username: string
+  ): Promise<MembershipExitDTO | null> {
+    const isOperator = currentUser.role === 'chairman' || currentUser.role === 'member';
+    if (!isOperator && username !== currentUser.username) {
+      throw new ForbiddenException('Доступен только собственный статус выхода');
+    }
+    return this.membershipExitService.getMembershipExit(coopname, username);
   }
 
   @Query(() => MembershipExitReturnPreviewDTO, {
