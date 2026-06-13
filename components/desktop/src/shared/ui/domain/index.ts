@@ -10,6 +10,7 @@ export * from './DocumentPreview';
 export * from './DocumentRow';
 export * from './DocumentSignatures';
 export * from './ExpenseCreateDialog';
+export * from './ExpenseProposalDocuments';
 export * from './ExpenseProposalList';
 export * from './FileUploader';
 export * from './FilterBar';

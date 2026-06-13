@@ -31,11 +31,21 @@ q-page.program-expense-page
           DataRow(label='№ служебной записки', :value='shortExpenseId(expense.expense_hash)', mono, copyable)
           DataRow(label='Инициатор', :value='expense.creator_name')
           DataRow(label='Создан', :value='formatDate(expense.created_at)')
-          DataRow(label='Сумма по смете', :value='expense.total_planned')
+          DataRow(label='Сумма по смете', :value='formatAsset2Digits(expense.total_planned)')
           DataRow(
             v-if='hasActual',
             label='Фактически израсходовано',
-            :value='expense.total_actual'
+            :value='formatAsset2Digits(expense.total_actual)'
+          )
+
+      //- Документы расхода — заявление (СЗ) и протокол решения совета. Клик
+      //- открывает документ во всплывающем окне (доменный канон шасси).
+      .section(v-if='hasDocuments')
+        .t-eyebrow.t-muted Документы
+        BaseCard
+          ExpenseProposalDocuments(
+            :statement='proposal?.statement_doc',
+            :decision='proposal?.decision_doc'
           )
 
       .section
@@ -51,8 +61,8 @@ q-page.program-expense-page
               .item__rows
                 DataRow(label='Получатель', :value='item.recipient_name')
                 DataRow(label='Способ оплаты', :value='mechanicsLabel(item.mechanics)')
-                DataRow(label='Сумма (план)', :value='item.planned_amount')
-                DataRow(v-if='itemHasActual(item)', label='Фактически', :value='item.actual_amount')
+                DataRow(label='Сумма (план)', :value='formatAsset2Digits(item.planned_amount)')
+                DataRow(v-if='itemHasActual(item)', label='Фактически', :value='formatAsset2Digits(item.actual_amount)')
                 DataRow(
                   v-if='item.requisite',
                   label='Реквизиты получателя',
@@ -64,7 +74,7 @@ q-page.program-expense-page
                   :value='item.requisite.payment_purpose'
                 )
               .item__files(v-if='item.files.length')
-                .t-sm.t-muted Первичные документы
+                .t-sm.t-muted Подтверждающие документы
                 button.file-link(
                   v-for='file in item.files',
                   :key='file.id',
@@ -122,6 +132,8 @@ import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { DataRow } from 'src/shared/ui/domain/DataRow';
 import { ActivityTimeline } from 'src/shared/ui/domain/ActivityTimeline';
 import type { ActivityEvent } from 'src/shared/ui/domain/ActivityTimeline';
+import { ExpenseProposalDocuments } from 'src/shared/ui/domain/ExpenseProposalDocuments';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { api } from 'app/extensions/capital/entities/ProgramExpense/api';
 import {
   useProgramExpenseStore,
@@ -193,6 +205,14 @@ onUnmounted(() => desktopStore.clearPageTitleOverride());
 
 const hasActual = computed(
   () => parseFloat(expense.value?.total_actual ?? '0') > 0,
+);
+
+// Документы расхода (заявление/протокол) показываем, только когда пришёл их
+// html — иначе открывать нечего и секция не нужна.
+const hasDocuments = computed(
+  () =>
+    Boolean(proposal.value?.statement_doc?.rawDocument?.html) ||
+    Boolean(proposal.value?.decision_doc?.rawDocument?.html),
 );
 
 const isDeclined = computed(
@@ -343,7 +363,7 @@ const timeline = computed<ActivityEvent[]>(() => {
     events.push({
       id: `file-${f.id}`,
       type: 'update',
-      title: `${fileKindLabel(f.kind)}: приложен документ`,
+      title: 'Приложен документ',
       description: fileLabel(f),
       date: f.uploaded_at,
     });

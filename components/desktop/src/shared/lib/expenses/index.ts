@@ -66,7 +66,7 @@ export function itemStatusLabel(
         ? 'Аванс выдан — ожидает отчёта'
         : 'Оплачена';
     case Zeus.ExpenseItemStatus.REPORTED:
-      return 'Отчитана';
+      return 'Отчёт получен';
     case Zeus.ExpenseItemStatus.RETURNED:
       return 'Аванс возвращён';
     case Zeus.ExpenseItemStatus.OVERSPENT:
