@@ -1,6 +1,17 @@
 import type { RegistratorContract, SovietContract } from 'cooptypes';
 import type { BlockchainAccountInterface } from '~/types/shared';
 import type { CandidateDomainInterface } from '../interfaces/candidate-domain.interface';
+import type { ISignedDocumentDomainInterface } from '~/domain/document/interfaces/signed-document-domain.interface';
+
+/**
+ * Входные данные подачи заявления на выход пайщика из кооператива (registrator::exitcoop).
+ */
+export interface ExitCoopDomainInterface {
+  coopname: string;
+  username: string;
+  exit_hash: string;
+  statement: ISignedDocumentDomainInterface;
+}
 
 export interface AccountBlockchainPort {
   getBlockchainAccount(username: string): Promise<BlockchainAccountInterface | null>;
@@ -12,6 +23,8 @@ export interface AccountBlockchainPort {
   getUserAccount(username: string): Promise<RegistratorContract.Tables.Accounts.IAccount | null>;
   addParticipantAccount(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void>;
   registerBlockchainAccount(candidate: CandidateDomainInterface): Promise<void>;
+  // Подача заявления на выход пайщика из кооператива (registrator::exitcoop)
+  exitCoop(data: ExitCoopDomainInterface): Promise<void>;
 }
 
 export const ACCOUNT_BLOCKCHAIN_PORT = Symbol('AccountBlockchainPort');

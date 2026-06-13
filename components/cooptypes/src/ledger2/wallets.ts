@@ -65,6 +65,17 @@ const walletNamesByProgramId = (() => {
 export const MEMBERSHIP_WALLET_NAME = 'w.wal.member'
 
 /**
+ * wallet_name целевого паевого взноса пайщика (program_id=1, ЦК).
+ */
+export const SHARE_WALLET_NAME = 'w.wal.share'
+
+/**
+ * wallet_name минимального паевого взноса пайщика (required_program_id=0 —
+ * вне программ, заполняется при регистрации). Возвращается пайщику при выходе.
+ */
+export const MIN_SHARE_WALLET_NAME = 'w.reg.minshr'
+
+/**
  * Все wallet_name'ы, привязанные к какой-либо программе (program_id > 0).
  * Исключает кошельки с required_program_id == 0 (например, `w.reg.minshr`).
  */

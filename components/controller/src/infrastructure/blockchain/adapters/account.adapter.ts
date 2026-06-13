@@ -211,6 +211,27 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
     };
   }
 
+  async exitCoop(data: import('~/domain/account/interfaces/account-blockchain.port').ExitCoopDomainInterface): Promise<void> {
+    const wif = await this.vaultDomainService.getWif(data.coopname);
+    if (!wif) throw new BadGatewayException('Не найден приватный ключ для совершения операции');
+
+    await this.blockchainService.initialize(data.coopname, wif);
+
+    const exitData: RegistratorContract.Actions.ExitCoop.IExitCoop = {
+      coopname: data.coopname,
+      username: data.username,
+      exit_hash: data.exit_hash,
+      statement: Classes.Document.finalize(data.statement),
+    };
+
+    await this.blockchainService.transact({
+      account: RegistratorContract.contractName.production,
+      name: RegistratorContract.Actions.ExitCoop.actionName,
+      authorization: [{ actor: data.coopname, permission: 'active' }],
+      data: exitData,
+    });
+  }
+
   async addParticipantAccount(data: RegistratorContract.Actions.AddUser.IAddUser): Promise<void> {
     const wif = await this.vaultDomainService.getWif(data.coopname);
 
