@@ -15,10 +15,14 @@
     :title='activeTitle',
     maximized
   )
-    BaseDocument(
-      v-if='activeAggregate',
-      :documentAggregate='activeAggregate'
-    )
+    //- Лист A4 не должен растягиваться на всю ширину макси-диалога —
+    //- центрируем в колонке (канон ComplexDocument/ExpandableDocument).
+    .row.justify-center
+      .col-12.col-md-8
+        BaseDocument(
+          v-if='activeAggregate',
+          :documentAggregate='activeAggregate'
+        )
 </template>
 
 <script setup lang="ts">
