@@ -68,6 +68,10 @@ export interface IVars {
     protocol_number: string
     protocol_day_month_year: string
   }
+  participant_exit_application?: { // Заявление на выход из кооператива
+    protocol_number: string
+    protocol_day_month_year: string
+  }
   coopenomics_agreement?: { // Оферта на подключение кооператива
     protocol_number: string
     protocol_day_month_year: string
