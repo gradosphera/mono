@@ -23,10 +23,9 @@
           .summary-grid
             DataRow(label='Пайщик', :value='proposal.username || "—"')
             DataRow(label='Кооператив', :value='proposal.coopname || "—"')
-            DataRow(label='Источник средств', :value='proposal.source_wallet || "—"')
-            DataRow(label='Действие', :value='proposal.operation_code || "—"')
-            DataRow(label='Сумма (план)', :value='proposal.total_planned || "—"')
-            DataRow(label='Сумма (факт)', :value='proposal.total_actual || "—"')
+            DataRow(label='Кошелёк (пул)', :value='walletLabel(proposal.source_wallet)')
+            DataRow(label='Сумма (план)', :value='formatAmount(proposal.total_planned)')
+            DataRow(label='Сумма (факт)', :value='formatAmount(proposal.total_actual)')
             DataRow(label='Создана', :value='formatDate(proposal.created_at)')
             DataRow(label='Обновлена', :value='formatDate(proposal.updated_at)')
             DataRow(label='Hash')
@@ -52,8 +51,8 @@
                   tr(v-for='item in proposal.items', :key='item.item_hash')
                     td.cell-name {{ item.recipient || '—' }}
                     td {{ mechanicsLabel(item.mechanics) }}
-                    td.col-num {{ item.planned_amount || '—' }}
-                    td.col-num {{ item.actual_amount || '—' }}
+                    td.col-num {{ formatAmount(item.planned_amount) }}
+                    td.col-num {{ formatAmount(item.actual_amount) }}
                     td
                       BaseBadge(:variant='itemStatusVariant(item.status)') {{ itemStatusLabel(item.status) }}
           EmptyState(
@@ -69,19 +68,21 @@
           template(#head)
             .card-header
               .t-section Документы
-          .docs
-            .doc-row(v-if='proposal.statement_doc')
-              .doc-row__label Заявление (2010)
-              .doc-row__hash.t-mono-sm {{ truncateHash(proposal.statement_doc.hash) }}
-            .doc-row(v-else)
-              .doc-row__label Заявление (2010)
-              .doc-row__hash.t-muted Не сформировано
-            .doc-row(v-if='proposal.decision_doc')
-              .doc-row__label Решение совета (2011)
-              .doc-row__hash.t-mono-sm {{ truncateHash(proposal.decision_doc.hash) }}
-            .doc-row(v-else)
-              .doc-row__label Решение совета (2011)
-              .doc-row__hash.t-muted Не сформировано
+          //- Канон шасси: служебная записка + протокол решения совета. Клик по
+          //- строке раскрывает сам документ (BaseDocument: стили + подписи), а не
+          //- голый хеш. Тот же компонент — на странице расхода программы.
+          ExpenseProposalDocuments(
+            v-if='hasDocuments',
+            :statement='proposal.statement_doc',
+            :decision='proposal.decision_doc'
+          )
+          EmptyState(
+            v-else,
+            title='Документы не сформированы',
+            body='Здесь появятся служебная записка и протокол решения совета.'
+          )
+            template(#icon)
+              q-icon(name='description', size='40px')
 
         BaseCard.q-mt-md
           template(#head)
@@ -123,7 +124,10 @@ import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { DataRow } from 'src/shared/ui/domain';
+import { ExpenseProposalDocuments } from 'src/shared/ui/domain/ExpenseProposalDocuments';
 import { FailAlert } from 'src/shared/api';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { listExpenseWallets } from 'src/shared/lib/expense-wallets';
 import {
   getExpenseProposal,
   getExpenseFilesByProposal,
@@ -177,6 +181,25 @@ function itemStatusVariant(status?: Zeus.ExpenseItemStatus | null) {
 function mechanicsLabel(mechanics?: Zeus.ExpenseMechanics | null): string {
   return getExpenseMechanicsLabel(mechanics);
 }
+
+// Код кошелька-пула → человеческое имя из реестра пулов (fallback — сам код).
+const walletTitles = new Map(listExpenseWallets().map((e) => [e.wallet, e.title]));
+function walletLabel(code?: string | null): string {
+  if (!code) return '—';
+  return walletTitles.get(code) ?? code;
+}
+
+function formatAmount(asset?: string | null): string {
+  if (!asset) return '—';
+  return formatAsset2Digits(asset);
+}
+
+// Документы показываем каноном, только если пришёл их html (rawDocument) —
+// иначе EmptyState «не сформированы».
+const hasDocuments = computed(() =>
+  Boolean(proposal.value?.statement_doc?.rawDocument?.html)
+  || Boolean(proposal.value?.decision_doc?.rawDocument?.html),
+);
 
 function formatDate(value?: string | null): string {
   if (!value) return '—';
@@ -268,36 +291,10 @@ onMounted(() => {
   overflow-wrap: anywhere;
 }
 
-.docs,
 .files {
   display: flex;
   flex-direction: column;
   gap: var(--p-3);
-}
-
-.doc-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--p-3);
-  padding: var(--p-2) 0;
-  border-bottom: 1px solid var(--p-line);
-}
-
-.doc-row:last-child {
-  border-bottom: none;
-}
-
-.doc-row__label {
-  color: var(--p-ink);
-}
-
-.doc-row__hash {
-  color: var(--p-ink-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 50%;
 }
 
 .file-row {

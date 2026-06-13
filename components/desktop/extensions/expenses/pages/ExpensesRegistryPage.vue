@@ -19,25 +19,27 @@
         table.table
           thead
             tr
+              th Назначение
               th Пайщик
+              th.col-wallet Кошелёк (пул)
               th.col-date Дата создания
               th.col-num Сумма (план)
               th.col-num Сумма (факт)
               th Статус
-              th Хеш
           tbody
             tr.data-row(
               v-for='row in items',
               :key='row.proposal_hash',
               @click='openDetail(row.proposal_hash)'
             )
-              td.cell-name {{ row.username || '—' }}
+              td.cell-name {{ purposeOf(row) }}
+              td {{ row.username || '—' }}
+              td.col-wallet {{ walletLabel(row.source_wallet) }}
               td {{ formatCreatedAt(row.created_at) }}
-              td.col-num {{ row.total_planned || '—' }}
-              td.col-num {{ row.total_actual || '—' }}
+              td.col-num {{ formatAmount(row.total_planned) }}
+              td.col-num {{ formatAmount(row.total_actual) }}
               td
                 BaseBadge(:variant='statusVariant(row.status)') {{ statusLabel(row.status) }}
-              td.col-hash.t-mono-sm {{ truncateHash(row.proposal_hash) }}
 
       .table-foot
         span {{ rangeLabel }}
@@ -69,6 +71,8 @@ import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { TableSkeleton } from 'src/shared/ui/base/TableSkeleton';
 import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
 import { FailAlert } from 'src/shared/api';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { listExpenseWallets } from 'src/shared/lib/expense-wallets';
 import {
   getExpenseProposalsByCooperative,
   type IExpenseProposalsByCooperativeResult,
@@ -92,13 +96,31 @@ const totalCount = ref(0);
 const PAGE_LIMIT = 25;
 
 const skeletonColumns = computed<TableSkeletonColumn[]>(() => [
+  { label: 'Назначение', cell: 'text' },
   { label: 'Пайщик', cell: 'text' },
+  { label: 'Кошелёк (пул)', class: 'col-wallet', cell: 'text', cellWidth: '200px' },
   { label: 'Дата создания', cell: 'text', cellWidth: '120px' },
   { label: 'Сумма (план)', class: 'col-num', cell: 'text', cellWidth: '110px' },
   { label: 'Сумма (факт)', class: 'col-num', cell: 'text', cellWidth: '110px' },
   { label: 'Статус', cell: 'badge' },
-  { label: 'Хеш', cell: 'text', cellWidth: '140px' },
 ]);
+
+// Код кошелька-пула (`w.cap.pgexp`) → человеческое имя из реестра пулов; если
+// расширение не зарегистрировало пул — показываем сам код, не пустоту.
+const walletTitles = new Map(listExpenseWallets().map((e) => [e.wallet, e.title]));
+function walletLabel(code?: string | null): string {
+  if (!code) return '—';
+  return walletTitles.get(code) ?? code;
+}
+
+function formatAmount(asset?: string | null): string {
+  if (!asset) return '—';
+  return formatAsset2Digits(asset);
+}
+
+function purposeOf(row: IProposalRow): string {
+  return row.items?.[0]?.description || '— без описания —';
+}
 
 const hasMore = computed(() => currentPage.value < totalPages.value);
 
@@ -120,12 +142,6 @@ function formatCreatedAt(createdAt?: string | null): string {
   const date = new Date(createdAt);
   if (Number.isNaN(date.getTime())) return createdAt;
   return date.toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
-}
-
-function truncateHash(hash: string): string {
-  if (!hash) return '';
-  if (hash.length <= 16) return hash;
-  return `${hash.slice(0, 8)}…${hash.slice(-6)}`;
 }
 
 async function loadPage(page = 1): Promise<void> {
@@ -179,7 +195,7 @@ onMounted(() => {
 
 .table {
   table-layout: fixed;
-  min-width: 880px;
+  min-width: 1040px;
 }
 
 .col-date {
@@ -193,9 +209,10 @@ onMounted(() => {
   text-align: right;
 }
 
-.col-hash {
-  width: 160px;
+.col-wallet {
+  width: 200px;
   color: var(--p-ink-2);
+  overflow-wrap: anywhere;
 }
 
 .cell-name {

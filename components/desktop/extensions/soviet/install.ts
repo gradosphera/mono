@@ -7,7 +7,7 @@ import { PaymentsPage } from 'src/pages/Cooperative/Payments';
 import { ListOfMeetsPage } from 'src/pages/Cooperative/ListOfMeets';
 import { MeetDetailsPage } from 'src/pages/Cooperative/MeetDetails';
 import { UnionPageListOfCooperatives } from 'src/pages/Union/ListOfCooperatives';
-import { ExpenseWalletsPage } from 'app/extensions/expenses/pages';
+import { ExpensesRegistryPage } from 'app/extensions/expenses/pages';
 import type { IWorkspaceConfig } from 'src/shared/lib/types/workspace';
 
 export default async function (): Promise<IWorkspaceConfig[]> {
@@ -79,13 +79,16 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
           },
           {
-            // Кошельки-пулы расходов: пулы регистрируют расширения через
-            // registerExpenseWallet в своих install.ts (фабричная сборка).
-            path: 'expense-wallets',
-            name: 'soviet-expense-wallets',
-            component: markRaw(ExpenseWalletsPage),
+            // Реестр расходов кооператива: единая таблица всех расходов по всем
+            // пулам-кошелькам (без фильтра по кошельку — колонка «Кошелёк (пул)»
+            // показывает источник списания). Совет наблюдает; клик по строке
+            // открывает деталь расхода (generic `expenses-detail`). Фильтр по
+            // конкретному пулу — на странице расходов программы (capital).
+            path: 'expenses',
+            name: 'soviet-expenses-registry',
+            component: markRaw(ExpensesRegistryPage),
             meta: {
-              title: 'Расходы',
+              title: 'Реестр расходов',
               icon: 'receipt_long',
               roles: ['chairman', 'member'],
             },

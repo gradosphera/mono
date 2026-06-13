@@ -9,7 +9,7 @@
 1. **Контракт/ledger2** (`cpp/lib/core/ledger2/`): кошелёк-пул (COOPERATIVE) в `wallets.hpp`; 5 операций жизненного цикла (аванс/прямая/отчёт/возврат/перерасход) в `OPERATION_REGISTRY` + одна строка в `EXPENSE_OPERATION_SETS` (`operations.hpp`) — коды операций контракт `expense` выводит из `source_wallet` сам. Зеркала имён — `cooptypes/src/ledger2/{operations,processes}.ts` + локатор `controller/.../process-hash-locator.ts`.
 2. **Создание СЗ**: либо generic-мутация `Mutations.Expense.CreateExpenseProposal`, либо своя обвязка по образцу `capital::createpgexp` (счётчики/резерв пула + inline `expense::createexp` с callback на финализацию).
 3. **Страница стола**: собирается из общих доменных виджетов `ExpenseCreateDialog` (пропы `source-wallet` / `draft-key` / `submit`) + `ExpenseProposalList` — см. `src/shared/ui/domain/ExpenseCreateDialog/README.md`; эталон — `extensions/capital/pages/ProgramExpensesPage` (+ детальная `ProgramExpensePage`).
-4. **Стол совета**: `registerExpenseWallet({ wallet, title, route, ... })` в `install.ts` расширения (`src/shared/lib/expense-wallets`) — пул появится на странице «Расходы» с балансом и проваливанием.
+4. **Стол совета**: `registerExpenseWallet({ wallet, title, route, ... })` в `install.ts` расширения (`src/shared/lib/expense-wallets`) — этим имя пула резолвится в колонке «Кошелёк (пул)» реестра расходов совета (`ExpensesRegistryPage`, маршрут `soviet-expenses-registry`). Реестр показывает ВСЕ расходы кооператива по всем пулам без фильтра; фильтр по конкретному пулу — на странице расходов программы.
 5. **Оплата/отчёты** работают сразу: реестр платежей, панели платёжки кассира (`features/Payment/AttachExpenseProof`) и отчёта пайщика (`features/Payment/ReportExpenseAdvance`), закрытие расхода советом — всё привязано к `proposal_hash`/`item_hash`, не к пулу.
 
 ## Фоновые сервисы (backend)
@@ -51,7 +51,7 @@ Desktop UI для **шасси системы расходов** (MVP-SINGLE) Ц
 
 ## Регистрация в `extensions-registry`
 
-Зарегистрировано в `src/processes/init-installed-extensions/extensions-registry.ts` (ключ `expenses`). Помимо собственного воркспейса, расширение отдаёт страницу `ExpenseWalletsPage` («Расходы» по кошелькам-пулам) — её монтирует стол совета (`extensions/soviet/install.ts`, маршрут `soviet-expense-wallets`).
+Зарегистрировано в `src/processes/init-installed-extensions/extensions-registry.ts` (ключ `expenses`). Помимо собственного воркспейса, расширение отдаёт страницу `ExpensesRegistryPage` (реестр всех расходов кооператива) — её монтирует стол совета как «Реестр расходов» (`extensions/soviet/install.ts`, маршрут `soviet-expenses-registry`). Страница пулов `ExpenseWalletsPage` остаётся в barrel'е, но на столах больше не монтируется (источник пулов — реестр `expense-wallets` для резолва имени кошелька).
 
 ## Канон вёрстки (`/home/admin/.claude/skills/mono-desktop-canon/`)
 
