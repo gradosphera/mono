@@ -32,21 +32,6 @@ class ExpenseProposalDecisionItemInputDTO implements ItemAction {
   @Field()
   @IsString()
   mechanics!: 'ADVANCE' | 'DIRECT';
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  recipient_name?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  requisites?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  payment_purpose?: string;
 }
 
 @InputType('ExpenseProposalDecisionHeaderInput')

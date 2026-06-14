@@ -10,8 +10,13 @@ type Action = Cooperative.Registry.ExpenseProposalStatement.Action;
 type ItemAction = Cooperative.Registry.ExpenseProposalStatement.IExpenseItem;
 type HeaderAction = Cooperative.Registry.ExpenseProposalStatement.IExpenseProposalHeader;
 
+/**
+ * Позиция-вход генерации СЗ-документа. Приватные поля (имя/реквизиты/назначение)
+ * — это вход для фабрики: сервер сохраняет их off-chain в doc_data и публикует
+ * в meta только `doc_data_hash`. На on-chain эти поля НЕ попадают.
+ */
 @InputType('ExpenseProposalItemInput')
-class ExpenseProposalItemInputDTO implements ItemAction {
+class ExpenseProposalItemInputDTO {
   @Field({ description: 'Порядковый номер строки' })
   @IsString()
   number!: string;
@@ -65,6 +70,33 @@ class ExpenseProposalItemInputDTO implements ItemAction {
   recipient_username?: string;
 }
 
+/**
+ * Публичная позиция подписанной meta — ровно то, что публикуется on-chain.
+ * Без имени/реквизитов/назначения платежа (они off-chain в doc_data).
+ */
+@InputType('ExpenseProposalSignedItemInput')
+class ExpenseProposalSignedItemInputDTO implements ItemAction {
+  @Field({ description: 'Порядковый номер строки' })
+  @IsString()
+  number!: string;
+
+  @Field({ description: 'Описание расхода' })
+  @IsString()
+  description!: string;
+
+  @Field({ description: 'Сумма строки' })
+  @IsString()
+  amount!: string;
+
+  @Field({ description: 'Тип получателя (SELF / MEMBER / ORG)' })
+  @IsString()
+  recipient_type!: 'SELF' | 'MEMBER' | 'ORG';
+
+  @Field({ description: 'Способ оплаты (ADVANCE / DIRECT)' })
+  @IsString()
+  mechanics!: 'ADVANCE' | 'DIRECT';
+}
+
 @InputType('ExpenseProposalHeaderInput')
 class ExpenseProposalHeaderInputDTO implements HeaderAction {
   @Field({ description: 'Описание цели расходов' })
@@ -97,8 +129,12 @@ class ExpenseProposalHeaderInputDTO implements HeaderAction {
   fund_name?: string;
 }
 
-@InputType('BaseExpenseProposalStatementMetaDocumentInput')
-class BaseExpenseProposalStatementMetaDocumentInputDTO implements Omit<Action, 'coopname' | 'username' | 'registry_id' | 'block_num' | 'lang' | 'title' | 'generator' | 'version' | 'created_at' | 'timezone' | 'links'> {
+/**
+ * База ВХОДА генерации — богатые позиции (приватные поля уйдут в doc_data на
+ * сервере). `doc_data_hash` здесь нет: его вычисляет сервер при генерации.
+ */
+@InputType('BaseExpenseProposalStatementGenerateMetaDocumentInput')
+class BaseExpenseProposalStatementGenerateMetaDocumentInputDTO {
   @Field({ description: 'Хеш сметы расхода (детерминированный)' })
   @IsString()
   @IsNotEmpty()
@@ -118,12 +154,41 @@ class BaseExpenseProposalStatementMetaDocumentInputDTO implements Omit<Action, '
 }
 
 /**
+ * База ПОДПИСАННОЙ meta — ровно то, что подписывается и едет on-chain:
+ * публичные позиции + `doc_data_hash` (реквизиты off-chain).
+ */
+@InputType('BaseExpenseProposalStatementSignedMetaDocumentInput')
+class BaseExpenseProposalStatementSignedMetaDocumentInputDTO implements Omit<Action, 'coopname' | 'username' | 'registry_id' | 'block_num' | 'lang' | 'title' | 'generator' | 'version' | 'created_at' | 'timezone' | 'links'> {
+  @Field({ description: 'Хеш сметы расхода (детерминированный)' })
+  @IsString()
+  @IsNotEmpty()
+  proposal_hash!: string;
+
+  @Field(() => ExpenseProposalHeaderInputDTO, { description: 'Шапка СЗ' })
+  @ValidateNested()
+  @Type(() => ExpenseProposalHeaderInputDTO)
+  proposal!: ExpenseProposalHeaderInputDTO;
+
+  @Field(() => [ExpenseProposalSignedItemInputDTO], { description: 'Публичные позиции расхода (без реквизитов)' })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ExpenseProposalSignedItemInputDTO)
+  items!: ExpenseProposalSignedItemInputDTO[];
+
+  @Field({ description: 'Идентификатор приватных данных документа off-chain (реквизиты/имя/назначение)' })
+  @IsString()
+  @IsNotEmpty()
+  doc_data_hash!: string;
+}
+
+/**
  * Input генерации документа СЗ-заявления (registry 2010).
  * Backend через factory собирает PDF, возвращает `IGeneratedDocument` (без подписей).
  */
 @InputType('ExpenseProposalStatementGenerateDocumentInput')
 export class ExpenseProposalStatementGenerateDocumentInputDTO extends IntersectionType(
-  BaseExpenseProposalStatementMetaDocumentInputDTO,
+  BaseExpenseProposalStatementGenerateMetaDocumentInputDTO,
   OmitType(GenerateMetaDocumentInputDTO, ['registry_id'] as const)
 ) {
   registry_id!: number;
@@ -131,7 +196,7 @@ export class ExpenseProposalStatementGenerateDocumentInputDTO extends Intersecti
 
 @InputType('ExpenseProposalStatementSignedMetaDocumentInput')
 export class ExpenseProposalStatementSignedMetaDocumentInputDTO extends IntersectionType(
-  BaseExpenseProposalStatementMetaDocumentInputDTO,
+  BaseExpenseProposalStatementSignedMetaDocumentInputDTO,
   MetaDocumentInputDTO
 ) {}
 

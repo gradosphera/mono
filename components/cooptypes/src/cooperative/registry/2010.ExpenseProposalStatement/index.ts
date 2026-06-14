@@ -1,4 +1,4 @@
-import type { IGenerate, IMetaDocument } from '../../document'
+import type { IDocDataRef, IGenerate, IMetaDocument } from '../../document'
 import type { ICommonUser, ICooperativeData, IVars } from '../../model'
 
 export const registry_id = 2010
@@ -6,15 +6,49 @@ export const registry_id = 2010
 export type ExpenseItemRecipientType = 'SELF' | 'MEMBER' | 'ORG'
 export type ExpenseItemPaymentMechanics = 'ADVANCE' | 'DIRECT'
 
+/**
+ * Публичная часть позиции расхода — единственное, что публикуется в meta
+ * документа on-chain. Реквизиты получателя, его имя и назначение платежа
+ * сюда НЕ входят — они приватны (см. {@link IExpensePrivateItem}).
+ */
 export interface IExpenseItem {
   number: string
   description: string
   amount: string
   recipient_type: ExpenseItemRecipientType
   mechanics: ExpenseItemPaymentMechanics
+}
+
+/**
+ * Приватная часть позиции — НЕ публикуется в блокчейн. Имя получателя,
+ * его банковские реквизиты и назначение платежа сохраняются off-chain в
+ * `doc_private_data` фабрики; в meta документа едет только `doc_data_hash`.
+ * Корреляция с публичной позицией — по `number`.
+ */
+export interface IExpensePrivateItem {
+  number: string
   recipient_name?: string
   requisites?: string
   /** Назначение платежа — отдельной строкой после реквизитов (для оплаты по счёту) */
+  payment_purpose?: string
+}
+
+/**
+ * Приватный payload СЗ-сметы целиком (off-chain). Сохраняется в
+ * `DocDataService` фабрики, адресуется публичным `doc_data_hash`.
+ * См. раздел «Document Generation Pattern: doc_data» в архитектуре.
+ */
+export interface PrivateData {
+  items: IExpensePrivateItem[]
+}
+
+/**
+ * Позиция в модели рендера — публичная + приватная части, склеенные фабрикой
+ * по `number` при генерации документа. Шаблон обращается к полям как `item.*`.
+ */
+export interface IExpenseRenderItem extends IExpenseItem {
+  recipient_name?: string
+  requisites?: string
   payment_purpose?: string
 }
 
@@ -29,10 +63,13 @@ export interface IExpenseProposalHeader {
   fund_name?: string
 }
 
-export interface Action extends IGenerate {
+export interface Action extends IGenerate, IDocDataRef {
   proposal_hash: string
   proposal: IExpenseProposalHeader
+  /** Публичные позиции расхода — без реквизитов/имени/назначения (они в doc_data). */
   items: IExpenseItem[]
+  /** sha256 приватного payload (PrivateData) — реквизиты/имя/назначение off-chain. */
+  doc_data_hash: string
 }
 
 export type Meta = IMetaDocument & Action
@@ -46,7 +83,8 @@ export interface Model {
   /** Короткий идентификатор СЗ (первые 16 символов хэша, uppercase) — для шапки документа */
   proposal_short_hash: string
   proposal: IExpenseProposalHeader
-  items: IExpenseItem[]
+  /** Позиции с подмешанной приватной частью (фабрика склеивает по number из doc_data). */
+  items: IExpenseRenderItem[]
 }
 
 export const title = 'Служебная записка-смета о расходах'

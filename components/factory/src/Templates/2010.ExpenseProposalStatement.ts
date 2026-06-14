@@ -5,8 +5,8 @@ import { IMetaJSONSchema } from '../Schema/MetaSchema'
 import {
   CommonUserSchema,
   CooperativeSchema,
-  ExpenseItemSchema,
   ExpenseProposalHeaderSchema,
+  ExpenseRenderItemSchema,
   VarsSchema,
 } from '../Schema'
 
@@ -14,6 +14,7 @@ export const registry_id = Cooperative.Registry.ExpenseProposalStatement.registr
 
 export type Action = Cooperative.Registry.ExpenseProposalStatement.Action
 export type Model = Cooperative.Registry.ExpenseProposalStatement.Model
+export type PrivateData = Cooperative.Registry.ExpenseProposalStatement.PrivateData
 
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
@@ -27,7 +28,7 @@ export const Schema: JSONSchemaType<Model> = {
     proposal: ExpenseProposalHeaderSchema,
     items: {
       type: 'array',
-      items: ExpenseItemSchema,
+      items: ExpenseRenderItemSchema,
     },
   },
   required: ['meta', 'coop', 'user', 'vars', 'proposal_hash', 'proposal_short_hash', 'proposal', 'items'],

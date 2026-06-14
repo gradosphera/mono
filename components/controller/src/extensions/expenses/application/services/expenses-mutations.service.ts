@@ -63,16 +63,17 @@ export class ExpensesMutationsService {
     data: ExpenseProposalStatementGenerateDocumentInputDTO,
     options: Cooperative.Document.IGenerationOptions
   ): Promise<DocumentDomainEntity> {
-    data.registry_id = Cooperative.Registry.ExpenseProposalStatement.registry_id
+    const registry_id = Cooperative.Registry.ExpenseProposalStatement.registry_id
 
     // Фонд списания — параметр шасси, фронт его не передаёт
-    data.proposal = { ...data.proposal, fund_name: EXPENSES_CHASSIS_CONFIG.fundNameDative }
+    const proposal = { ...data.proposal, fund_name: EXPENSES_CHASSIS_CONFIG.fundNameDative }
 
-    // Полные реквизиты получателей подставляет сервер: фронт оперирует только
-    // идентификатором платёжного метода (и видит лишь сокращённое представление).
-    // Служебные поля (payment_method_id / recipient_username) в meta документа
-    // не попадают — items пересобираются на документные поля.
-    data.items = await Promise.all(
+    // Приватная часть позиций — имя/реквизиты/назначение платежа. Полные реквизиты
+    // получателей подставляет сервер по payment_method_id (фронт знает только
+    // сокращённое представление). Эти данные НЕ публикуются в блокчейн: они
+    // сохраняются off-chain в doc_data фабрики, а в meta документа едет только
+    // doc_data_hash. Корреляция с публичной позицией — по number.
+    const privateItems = await Promise.all(
       data.items.map(async (item) => {
         let requisites = item.requisites
         if (item.payment_method_id) {
@@ -81,10 +82,6 @@ export class ExpensesMutationsService {
         }
         return {
           number: item.number,
-          description: item.description,
-          amount: item.amount,
-          recipient_type: item.recipient_type,
-          mechanics: item.mechanics,
           recipient_name: item.recipient_name,
           requisites,
           // Пайщику назначение платежа не вводится — всегда «Аванс под отчёт»
@@ -94,7 +91,30 @@ export class ExpensesMutationsService {
       })
     )
 
-    return this.generator.generateDocument({ data: data as unknown as Cooperative.Registry.ExpenseProposalStatement.Action, options: options || {} })
+    const privatePayload: Cooperative.Registry.ExpenseProposalStatement.PrivateData = { items: privateItems }
+    const { hash: doc_data_hash } = await this.generator.saveDocData(
+      privatePayload as unknown as Record<string, unknown>,
+      registry_id
+    )
+
+    // Публичные позиции — без реквизитов/имени/назначения (только структура и суммы).
+    const items: Cooperative.Registry.ExpenseProposalStatement.IExpenseItem[] = data.items.map((item) => ({
+      number: item.number,
+      description: item.description,
+      amount: item.amount,
+      recipient_type: item.recipient_type,
+      mechanics: item.mechanics,
+    }))
+
+    const action = {
+      ...data,
+      registry_id,
+      proposal,
+      items,
+      doc_data_hash,
+    } as unknown as Cooperative.Registry.ExpenseProposalStatement.Action
+
+    return this.generator.generateDocument({ data: action, options: options || {} })
   }
 
   async generateExpenseProposalDecisionDocument(
