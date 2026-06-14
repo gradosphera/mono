@@ -5512,6 +5512,20 @@ export type ValueTypes = {
 ["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	/** Тип получателя платежа. */
 ["ExpenseRecipientType"]:ExpenseRecipientType;
+	/** Исход отчёта по строке-авансу: закрыто либо ожидается расчёт разницы (возврат/доплата). */
+["ExpenseReportOutcome"]:ExpenseReportOutcome;
+	["ExpenseReportResult"]: AliasType<{
+	/** Исход отчёта. */
+	outcome?:boolean | `@${string}`,
+	/** Сумма разницы к расчёту (asset), при недо-/перерасходе. */
+	settlement_amount?:boolean | `@${string}`,
+	/** Хэш заведённой платёжки расчёта (возврат/доплата). */
+	settlement_payment_hash?:boolean | `@${string}`,
+	/** Транзакция закрытия позиции (только при CLOSED). */
+	transaction?:ValueTypes["Transaction"],
+		__typename?: boolean | `@${string}`,
+	['...on ExpenseReportResult']?: Omit<ValueTypes["ExpenseReportResult"], "...on ExpenseReportResult">
+}>;
 	["ExpenseRequisite"]: AliasType<{
 	/** Имя кооператива. */
 	coopname?:boolean | `@${string}`,
@@ -7037,7 +7051,7 @@ receiveOnRequest?: [{	data: ValueTypes["ReceiveOnRequestInput"] | Variable<any, 
 refresh?: [{	data: ValueTypes["RefreshInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ValueTypes["RegisterAccountInput"] | Variable<any, string>},ValueTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ValueTypes["RegisterParticipantInput"] | Variable<any, string>},ValueTypes["Account"]],
-reportExpenseItem?: [{	data: ValueTypes["ReportExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+reportExpenseItem?: [{	data: ValueTypes["ReportExpenseItemInput"] | Variable<any, string>},ValueTypes["ExpenseReportResult"]],
 resendNotification?: [{	id: string | Variable<any, string>},ValueTypes["Notification"]],
 resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean | `@${string}`],
 	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
@@ -8770,6 +8784,8 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	['...on ReportDraft']?: Omit<ValueTypes["ReportDraft"], "...on ReportDraft">
 }>;
 	["ReportExpenseItemInput"]: {
+	/** Фактически потраченная сумма по чекам (asset, например "800.0000 RUB"). Не указана — равна выданному авансу. */
+	actual_amount?: string | undefined | null | Variable<any, string>,
 	/** Имя кооператива. */
 	coopname: string | Variable<any, string>,
 	/** Хеш строки расхода (item). */
@@ -14573,6 +14589,19 @@ export type ResolverInputTypes = {
 ["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	/** Тип получателя платежа. */
 ["ExpenseRecipientType"]:ExpenseRecipientType;
+	/** Исход отчёта по строке-авансу: закрыто либо ожидается расчёт разницы (возврат/доплата). */
+["ExpenseReportOutcome"]:ExpenseReportOutcome;
+	["ExpenseReportResult"]: AliasType<{
+	/** Исход отчёта. */
+	outcome?:boolean | `@${string}`,
+	/** Сумма разницы к расчёту (asset), при недо-/перерасходе. */
+	settlement_amount?:boolean | `@${string}`,
+	/** Хэш заведённой платёжки расчёта (возврат/доплата). */
+	settlement_payment_hash?:boolean | `@${string}`,
+	/** Транзакция закрытия позиции (только при CLOSED). */
+	transaction?:ResolverInputTypes["Transaction"],
+		__typename?: boolean | `@${string}`
+}>;
 	["ExpenseRequisite"]: AliasType<{
 	/** Имя кооператива. */
 	coopname?:boolean | `@${string}`,
@@ -16058,7 +16087,7 @@ receiveOnRequest?: [{	data: ResolverInputTypes["ReceiveOnRequestInput"]},Resolve
 refresh?: [{	data: ResolverInputTypes["RefreshInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerAccount?: [{	data: ResolverInputTypes["RegisterAccountInput"]},ResolverInputTypes["RegisteredAccount"]],
 registerParticipant?: [{	data: ResolverInputTypes["RegisterParticipantInput"]},ResolverInputTypes["Account"]],
-reportExpenseItem?: [{	data: ResolverInputTypes["ReportExpenseItemInput"]},ResolverInputTypes["Transaction"]],
+reportExpenseItem?: [{	data: ResolverInputTypes["ReportExpenseItemInput"]},ResolverInputTypes["ExpenseReportResult"]],
 resendNotification?: [{	id: string},ResolverInputTypes["Notification"]],
 resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`],
 	/** Откатить собственную незавершённую регистрацию к редактированию данных: снимает заморозку профиля и e-mail, сбрасывает подписанное заявление и непринятую попытку вступительного платежа. Доступно только до отправки регистрации в блокчейн; если взнос уже принят — требуется возврат средств. */
@@ -17719,6 +17748,8 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 		__typename?: boolean | `@${string}`
 }>;
 	["ReportExpenseItemInput"]: {
+	/** Фактически потраченная сумма по чекам (asset, например "800.0000 RUB"). Не указана — равна выданному авансу. */
+	actual_amount?: string | undefined | null,
 	/** Имя кооператива. */
 	coopname: string,
 	/** Хеш строки расхода (item). */
@@ -23370,6 +23401,17 @@ export type ModelTypes = {
 };
 	["ExpenseProposalStatus"]:ExpenseProposalStatus;
 	["ExpenseRecipientType"]:ExpenseRecipientType;
+	["ExpenseReportOutcome"]:ExpenseReportOutcome;
+	["ExpenseReportResult"]: {
+		/** Исход отчёта. */
+	outcome: ModelTypes["ExpenseReportOutcome"],
+	/** Сумма разницы к расчёту (asset), при недо-/перерасходе. */
+	settlement_amount?: string | undefined | null,
+	/** Хэш заведённой платёжки расчёта (возврат/доплата). */
+	settlement_payment_hash?: string | undefined | null,
+	/** Транзакция закрытия позиции (только при CLOSED). */
+	transaction?: ModelTypes["Transaction"] | undefined | null
+};
 	["ExpenseRequisite"]: {
 		/** Имя кооператива. */
 	coopname: string,
@@ -25263,10 +25305,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	registerParticipant: ModelTypes["Account"],
-	/** Закрыть строку расхода чеком (ADVANCE-отчёт пайщика).
+	/** Отчитаться по строке-авансу: при совпадении факта с авансом — закрыть позицию; при недо-/перерасходе — завести платёжку расчёта разницы.
 
 Требуемые роли: chairman, member, user.  */
-	reportExpenseItem: ModelTypes["Transaction"],
+	reportExpenseItem: ModelTypes["ExpenseReportResult"],
 	/** Переотправить уведомление (force-постановка новой строки в очередь доставки)
 
 Требуемые роли: chairman.  */
@@ -25313,7 +25355,7 @@ export type ModelTypes = {
 	startResetKey: boolean,
 	/** Финализировать СЗ-отчёт по смете расхода (все items закрыты — оплата/чек/возврат).
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	submitExpenseReport: ModelTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: ModelTypes["Transaction"],
@@ -27137,6 +27179,8 @@ export type ModelTypes = {
 	year: number
 };
 	["ReportExpenseItemInput"]: {
+	/** Фактически потраченная сумма по чекам (asset, например "800.0000 RUB"). Не указана — равна выданному авансу. */
+	actual_amount?: string | undefined | null,
 	/** Имя кооператива. */
 	coopname: string,
 	/** Хеш строки расхода (item). */
@@ -32967,6 +33011,20 @@ export type GraphQLTypes = {
 ["ExpenseProposalStatus"]: ExpenseProposalStatus;
 	/** Тип получателя платежа. */
 ["ExpenseRecipientType"]: ExpenseRecipientType;
+	/** Исход отчёта по строке-авансу: закрыто либо ожидается расчёт разницы (возврат/доплата). */
+["ExpenseReportOutcome"]: ExpenseReportOutcome;
+	["ExpenseReportResult"]: {
+	__typename: "ExpenseReportResult",
+	/** Исход отчёта. */
+	outcome: GraphQLTypes["ExpenseReportOutcome"],
+	/** Сумма разницы к расчёту (asset), при недо-/перерасходе. */
+	settlement_amount?: string | undefined | null,
+	/** Хэш заведённой платёжки расчёта (возврат/доплата). */
+	settlement_payment_hash?: string | undefined | null,
+	/** Транзакция закрытия позиции (только при CLOSED). */
+	transaction?: GraphQLTypes["Transaction"] | undefined | null,
+	['...on ExpenseReportResult']: Omit<GraphQLTypes["ExpenseReportResult"], "...on ExpenseReportResult">
+};
 	["ExpenseRequisite"]: {
 	__typename: "ExpenseRequisite",
 	/** Имя кооператива. */
@@ -34950,10 +35008,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	registerParticipant: GraphQLTypes["Account"],
-	/** Закрыть строку расхода чеком (ADVANCE-отчёт пайщика).
+	/** Отчитаться по строке-авансу: при совпадении факта с авансом — закрыть позицию; при недо-/перерасходе — завести платёжку расчёта разницы.
 
 Требуемые роли: chairman, member, user.  */
-	reportExpenseItem: GraphQLTypes["Transaction"],
+	reportExpenseItem: GraphQLTypes["ExpenseReportResult"],
 	/** Переотправить уведомление (force-постановка новой строки в очередь доставки)
 
 Требуемые роли: chairman.  */
@@ -35000,7 +35058,7 @@ export type GraphQLTypes = {
 	startResetKey: boolean,
 	/** Финализировать СЗ-отчёт по смете расхода (все items закрыты — оплата/чек/возврат).
 
-Требуемые роли: chairman, member, user.  */
+Требуемые роли: chairman, member.  */
 	submitExpenseReport: GraphQLTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
 	supplyOnRequest: GraphQLTypes["Transaction"],
@@ -36991,7 +37049,9 @@ export type GraphQLTypes = {
 	['...on ReportDraft']: Omit<GraphQLTypes["ReportDraft"], "...on ReportDraft">
 };
 	["ReportExpenseItemInput"]: {
-		/** Имя кооператива. */
+		/** Фактически потраченная сумма по чекам (asset, например "800.0000 RUB"). Не указана — равна выданному авансу. */
+	actual_amount?: string | undefined | null,
+	/** Имя кооператива. */
 	coopname: string,
 	/** Хеш строки расхода (item). */
 	item_hash: string,
@@ -38631,6 +38691,12 @@ export enum ExpenseRecipientType {
 	ORG = "ORG",
 	SELF = "SELF"
 }
+/** Исход отчёта по строке-авансу: закрыто либо ожидается расчёт разницы (возврат/доплата). */
+export enum ExpenseReportOutcome {
+	CLOSED = "CLOSED",
+	OVERSPEND_PENDING = "OVERSPEND_PENDING",
+	RETURN_PENDING = "RETURN_PENDING"
+}
 /** Статус расхода в системе CAPITAL */
 export enum ExpenseStatus {
 	APPROVED = "APPROVED",
@@ -38809,6 +38875,8 @@ export enum PaymentStatus {
 export enum PaymentType {
 	DEPOSIT = "DEPOSIT",
 	EXPENSE = "EXPENSE",
+	EXPENSE_OVERSPEND = "EXPENSE_OVERSPEND",
+	EXPENSE_RETURN = "EXPENSE_RETURN",
 	REGISTRATION = "REGISTRATION",
 	REGISTRATION_REFUND = "REGISTRATION_REFUND",
 	WITHDRAWAL = "WITHDRAWAL"
@@ -39099,6 +39167,7 @@ type ZEUS_VARIABLES = {
 	["ExpenseProposalStatementSignedMetaDocumentInput"]: ValueTypes["ExpenseProposalStatementSignedMetaDocumentInput"];
 	["ExpenseProposalStatus"]: ValueTypes["ExpenseProposalStatus"];
 	["ExpenseRecipientType"]: ValueTypes["ExpenseRecipientType"];
+	["ExpenseReportOutcome"]: ValueTypes["ExpenseReportOutcome"];
 	["ExpenseStatus"]: ValueTypes["ExpenseStatus"];
 	["ExtendedMeetStatus"]: ValueTypes["ExtendedMeetStatus"];
 	["ExtensionInput"]: ValueTypes["ExtensionInput"];

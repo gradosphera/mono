@@ -487,6 +487,7 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	ExpenseProposalStatus: "enum" as const,
 	ExpenseRecipientType: "enum" as const,
+	ExpenseReportOutcome: "enum" as const,
 	ExpenseStatus: "enum" as const,
 	ExtendedMeetStatus: "enum" as const,
 	ExtensionInput:{
@@ -3394,6 +3395,12 @@ export const ReturnTypes: Record<string,any> = {
 		updated_at:"String",
 		username:"String"
 	},
+	ExpenseReportResult:{
+		outcome:"ExpenseReportOutcome",
+		settlement_amount:"String",
+		settlement_payment_hash:"String",
+		transaction:"Transaction"
+	},
 	ExpenseRequisite:{
 		coopname:"String",
 		data:"JSON",
@@ -3961,7 +3968,7 @@ export const ReturnTypes: Record<string,any> = {
 		refresh:"RegisteredAccount",
 		registerAccount:"RegisteredAccount",
 		registerParticipant:"Account",
-		reportExpenseItem:"Transaction",
+		reportExpenseItem:"ExpenseReportResult",
 		resendNotification:"Notification",
 		resetKey:"Boolean",
 		resetRegistration:"Account",

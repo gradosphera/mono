@@ -1,10 +1,8 @@
 <template lang="pug">
 .report-advance(v-if='item')
-  //- Без отдельных кнопок: выбранный файл сразу загружается, по первому чеку
-  //- отчёт уходит автоматически; дополнительные файлы дополняют отчёт.
   template(v-if='isReported || isAwaitingReport')
     .t-sm.t-muted(v-if='isReported') Отчёт по авансу подан — дополнительные документы дополнят его автоматически
-    .t-sm.t-muted(v-else) Аванс получен — приложите чек: отчёт уйдёт сразу после загрузки
+    .t-sm.t-muted(v-else) Выданный аванс: {{ advanceLabel }}. Приложите чеки, укажите фактически потраченную сумму и отчитайтесь.
     .files(v-if='files.length')
       button.file-link(
         v-for='file in files',
@@ -16,14 +14,30 @@
         q-icon(name='attach_file', size='16px')
         span {{ fileLabel(file) }}
         q-spinner(v-if='openingId === file.id', size='14px')
-    FileUploader(
-      v-model='pending',
-      accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
-      :max-size='20 * 1024 * 1024',
-      title='Приложите чек',
-      hint='Изображение или PDF до 20 МБ — отправится сразу',
-      :disabled='uploading || reporting'
-    )
+    template(v-if='isAwaitingReport')
+      FileUploader(
+        v-model='pending',
+        accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
+        :max-size='20 * 1024 * 1024',
+        title='Приложите чек',
+        hint='Изображение или PDF до 20 МБ — добавится сразу',
+        :disabled='uploading || reporting'
+      )
+      AmountInput(
+        v-model='factualAmount',
+        :symbol='advanceSymbol',
+        :precision='advancePrecision',
+        :min='0',
+        label='Фактически потрачено по чекам',
+        :disabled='reporting'
+      )
+      .t-sm.t-warning(v-if='deltaHint') {{ deltaHint }}
+      BaseButton(
+        variant='primary',
+        :loading='reporting',
+        :disabled='!files.length || reporting',
+        @click='submitReport'
+      ) Отчитаться по авансу
 </template>
 
 <script setup lang="ts">
@@ -32,6 +46,9 @@ import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 import { FileUploader } from 'src/shared/ui/domain/FileUploader';
+import { AmountInput } from 'src/shared/ui/domain/AmountInput';
+import { BaseButton } from 'src/shared/ui/base';
+import { formatAsset2Digits } from 'src/shared/lib/utils';
 import {
   attachExpenseProofApi,
   type IExpenseFile,
@@ -54,6 +71,33 @@ const files = ref<IExpenseFile[]>([]);
 const pending = ref<File | null>(null);
 const uploading = ref(false);
 const reporting = ref(false);
+// Фактически потраченная сумма по чекам; null до инициализации выданным авансом.
+const factualAmount = ref<number | null>(null);
+
+// Выданный аванс — это item.actual_amount (проставлен payexp при выдаче), не план:
+// расчёт разницы ведём от реально полученной пайщиком суммы.
+const advance = computed(() => parseAsset(item.value?.actual_amount));
+const advanceSymbol = computed(() => advance.value.symbol);
+const advancePrecision = computed(() => advance.value.precision);
+const advanceLabel = computed(() =>
+  item.value?.actual_amount ? formatAsset2Digits(item.value.actual_amount) : '',
+);
+
+// Подсказка о недо-/перерасходе до отправки отчёта.
+const deltaHint = computed(() => {
+  if (factualAmount.value == null || !item.value) return '';
+  const advanceMinor = Math.round(advance.value.num * 10 ** advance.value.precision);
+  const factualMinor = Math.round(factualAmount.value * 10 ** advance.value.precision);
+  const diffMinor = factualMinor - advanceMinor;
+  if (diffMinor === 0) return '';
+  const diff = Math.abs(diffMinor) / 10 ** advance.value.precision;
+  const diffLabel = formatAsset2Digits(
+    `${diff.toFixed(advance.value.precision)} ${advance.value.symbol}`,
+  );
+  return diffMinor < 0
+    ? `Недорасход ${diffLabel}: будет создана платёжка возврата — её нужно оплатить кооперативу.`
+    : `Перерасход ${diffLabel}: будет создана платёжка доплаты — кооператив выплатит разницу.`;
+});
 
 // Панель — только для аванса под отчёт: по счёту (DIRECT) отчётный документ
 // прикладывает кассир, пайщику отчитываться нечем.
@@ -66,6 +110,11 @@ async function refresh(): Promise<void> {
     item.value =
       found && found.mechanics === Zeus.ExpenseMechanics.ADVANCE ? found : null;
     if (!item.value) return;
+
+    // Префилл фактической суммы выданным авансом — типовой случай «потратил ровно».
+    if (factualAmount.value == null) {
+      factualAmount.value = parseAsset(item.value.actual_amount).num;
+    }
 
     const all = await attachExpenseProofApi.loadExpenseFilesByItem(
       system.info.coopname,
@@ -85,6 +134,15 @@ const isReported = computed(
 const isAwaitingReport = computed(
   () => item.value?.status === Zeus.ExpenseItemStatus.PAID,
 );
+
+// "1000.0000 RUB" → { num, symbol, precision }.
+function parseAsset(asset?: string | null): { num: number; symbol: string; precision: number } {
+  if (!asset) return { num: 0, symbol: '', precision: 0 };
+  const [amountStr, symbol = ''] = asset.split(' ');
+  const dot = amountStr.indexOf('.');
+  const precision = dot >= 0 ? amountStr.length - dot - 1 : 0;
+  return { num: Number.parseFloat(amountStr) || 0, symbol, precision };
+}
 
 function fileLabel(file: IExpenseFile): string {
   if (file.original_filename) return file.original_filename;
@@ -152,14 +210,32 @@ async function upload(): Promise<boolean> {
 }
 
 async function submitReport(): Promise<void> {
+  if (factualAmount.value == null) return;
   try {
     reporting.value = true;
-    await api.reportExpenseItem({
+    // Фактическую сумму отправляем в формате asset, по precision выданного аванса.
+    const actualAmount = `${factualAmount.value.toFixed(advance.value.precision)} ${advance.value.symbol}`;
+    const result = await api.reportExpenseItem({
       coopname: system.info.coopname,
       proposal_hash: props.proposalHash,
       item_hash: props.itemHash,
+      actual_amount: actualAmount,
     });
-    SuccessAlert('Отчёт по авансу подан');
+
+    const settlementLabel = result?.settlement_amount
+      ? formatAsset2Digits(result.settlement_amount)
+      : '';
+    if (result?.outcome === Zeus.ExpenseReportOutcome.RETURN_PENDING) {
+      SuccessAlert(
+        `Заведена платёжка возврата на ${settlementLabel}. Оплатите её кооперативу — после подтверждения кассой отчёт закроется.`,
+      );
+    } else if (result?.outcome === Zeus.ExpenseReportOutcome.OVERSPEND_PENDING) {
+      SuccessAlert(
+        `Заведена платёжка доплаты на ${settlementLabel}. Кооператив выплатит разницу — после подтверждения кассой отчёт закроется.`,
+      );
+    } else {
+      SuccessAlert('Отчёт по авансу принят');
+    }
     await refresh();
     emit('reported');
   } catch (e) {
@@ -169,19 +245,14 @@ async function submitReport(): Promise<void> {
   }
 }
 
-// Выбор файла = отправка: загружаем сразу; первый чек по неотчитанному авансу
-// автоматически подаёт отчёт, последующие файлы дополняют его без лишних кнопок.
+// Выбор файла = загрузка: чек прикладывается сразу. Отчёт (с фактической суммой)
+// пайщик подаёт отдельной кнопкой — иначе не указать недо-/перерасход.
 watch(pending, async (file) => {
   if (!file || uploading.value) return;
-  const wasAwaitingReport = isAwaitingReport.value;
   const uploaded = await upload();
   if (!uploaded) return;
-  if (wasAwaitingReport) {
-    await submitReport();
-  } else {
-    SuccessAlert('Документ приложен к отчёту');
-    await refresh();
-  }
+  SuccessAlert('Документ приложен');
+  await refresh();
 });
 
 onMounted(refresh);
