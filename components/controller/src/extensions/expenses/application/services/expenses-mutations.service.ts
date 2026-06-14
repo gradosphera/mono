@@ -249,7 +249,15 @@ export class ExpensesMutationsService {
     const existing = await this.payments.findByHash(hash)
     if (existing) return existing.hash
 
+    // Реквизиты для платёжки: при недорасходе пайщик платит КООПЕРАТИВУ (его банк),
+    // при перерасходе кооператив платит ПАЙЩИКУ (снимок реквизитов позиции — тот
+    // же метод, что при выдаче аванса). Кассир/пайщик видят их в деталях платежа.
+    const requisite = isUnderspend
+      ? await this.requisiteSnapshots.getCooperativeRequisiteData(coopname)
+      : await this.requisiteSnapshots.getItemRequisiteData(coopname, proposalHash, itemHash)
+
     const now = new Date()
+    const amountStr = amount.toFixed(2)
     const payment: PaymentDomainInterface = {
       id: '',
       coopname,
@@ -261,11 +269,24 @@ export class ExpensesMutationsService {
       type: isUnderspend ? PaymentTypeEnum.EXPENSE_RETURN : PaymentTypeEnum.EXPENSE_OVERSPEND,
       direction: isUnderspend ? PaymentDirectionEnum.INCOMING : PaymentDirectionEnum.OUTGOING,
       status: PaymentStatusEnum.PENDING,
+      // Назначение фиксированное (суть расхода — в описании позиции, поле
+      // blockchain_data.description показывается отдельно как «Что оплачиваем»).
       memo: isUnderspend
-        ? `Возврат неиспользованного аванса под отчёт: ${item.description}`
-        : `Доплата по перерасходу аванса под отчёт: ${item.description}`,
+        ? 'Возврат неиспользованных средств, выданных под аванс под отчёт'
+        : 'Доплата по перерасходу аванса под отчёт',
       secret: generateUniqueHash(),
       payment_method_id: undefined,
+      payment_details: {
+        // Полные реквизиты (банк/СБП) — те же поля, что у платежа выдачи аванса;
+        // деталь платежа рендерит их строками с копированием.
+        data: requisite?.data ?? { requisites: requisite?.requisites ?? '' },
+        amount_plus_fee: amountStr,
+        amount_without_fee: amountStr,
+        fee_amount: '0',
+        fee_percent: 0,
+        fact_fee_percent: 0,
+        tolerance_percent: 0,
+      },
       // proposal_hash + item_hash нужны gateway для returnexp/overspendexp; hash
       // платёжки уникальный (не item_hash) — не пересекается с платежом выдачи.
       blockchain_data: {

@@ -20,7 +20,9 @@
               th.col-sort.col-date(@click='onSort("created_at")') Дата создания {{ sortMark('created_at') }}
               th.col-sort.col-num(@click='onSort("quantity")') Сумма {{ sortMark('quantity') }}
               th Тип платежа
-              th Направление
+              //- «Направление» — относительно кооператива; на личном столе пайщика
+              //- (hideActions) скрываем, чтобы не путать «входящий/исходящий».
+              th(v-if='!hideActions') Направление
               th.col-sort(@click='onSort("status")') Статус {{ sortMark('status') }}
               th.col-action(v-if='!hideActions') Действия
           tbody
@@ -35,9 +37,9 @@
                     q-icon(:name='expanded.get(row.id) ? "expand_more" : "chevron_right"')
                 td.cell-name {{ getShortNameFromCertificate(row.username_certificate) || row.username }}
                 td {{ formatDateToHumanDateTime(row.created_at) }}
-                td.col-num {{ row.quantity }} {{ row.symbol }}
+                td.col-num {{ amountLabel(row) }}
                 td {{ row.type_label }}
-                td
+                td(v-if='!hideActions')
                   span.dir(:class='isIncoming(row.direction) ? "dir--in" : "dir--out"')
                     q-icon.q-mr-xs(:name='getDirectionIcon(row.direction)', size='16px')
                     span {{ row.direction_label }}
@@ -59,7 +61,7 @@
                   span.no-actions(v-else) —
 
               tr.expand-row(v-if='expanded.get(row.id)')
-                td(:colspan='hideActions ? 7 : 8')
+                td(:colspan='hideActions ? 6 : 8')
                   PaymentDetails(:payment='row')
                   //- Оплата расхода по счёту: кассир прикладывает платёжку/квитанцию
                   //- прямо в реестре после подтверждения оплаты.
@@ -74,7 +76,8 @@
                   ReportExpenseAdvancePanel.q-mt-sm(
                     v-else-if='advanceReportRef(row)',
                     :proposal-hash='advanceReportRef(row)?.proposal_hash ?? ""',
-                    :item-hash='advanceReportRef(row)?.item_hash ?? ""'
+                    :item-hash='advanceReportRef(row)?.item_hash ?? ""',
+                    @reported='onReported'
                   )
 
       .table-foot
@@ -102,14 +105,15 @@
           .pay-card__row
             span.pay-card__amount
               q-icon.q-mr-xs(
+                v-if='!hideActions',
                 :name='getDirectionIcon(row.direction)',
                 :class='isIncoming(row.direction) ? "dir--in" : "dir--out"',
                 size='16px'
               )
-              | {{ row.quantity }} {{ row.symbol }}
+              | {{ amountLabel(row) }}
             span.pay-card__type {{ row.type_label }}
           .pay-card__row.pay-card__row--meta
-            span {{ row.direction_label }}
+            span(v-if='!hideActions') {{ row.direction_label }}
             span {{ formatDateToHumanDateTime(row.created_at) }}
         .pay-card__actions(
           v-if='!hideActions && ["EXPIRED", "PENDING", "FAILED"].includes(row.status)',
@@ -169,6 +173,7 @@ import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
 import type { IPayment } from 'src/entities/Payment/model/types';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
+import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { Zeus } from '@coopenomics/sdk';
 
 const props = defineProps({
@@ -211,6 +216,10 @@ const getStatusVariant = (status?: string | null): BaseBadgeVariant => {
 
 const isIncoming = (direction?: string | null): boolean =>
   direction === Zeus.PaymentDirection.INCOMING;
+
+// Сумма — всегда 2 знака после запятой (не сырой on-chain precision=4).
+const amountLabel = (row: IPaymentRow): string =>
+  formatAsset2Digits(`${row.quantity} ${row.symbol}`);
 
 // Платежи, которые кассир не может отклонить — только «Подтвердить»:
 // возврат вступительного/мин.паевого (совет уже отказал в приёме) и оплата
@@ -270,10 +279,11 @@ const skeletonColumns = computed<TableSkeletonColumn[]>(() => {
     { label: 'Дата создания', cell: 'text', cellWidth: '120px' },
     { label: 'Сумма', class: 'col-num', cell: 'text', cellWidth: '64px' },
     { label: 'Тип платежа', cell: 'text' },
-    { label: 'Направление', cell: 'text', cellWidth: '90px' },
     { label: 'Статус', cell: 'badge' },
   ];
+  // «Направление» и «Действия» — только на столе совета (не на личном).
   if (!props.hideActions) {
+    cols.splice(5, 0, { label: 'Направление', cell: 'text', cellWidth: '90px' });
     cols.push({ label: 'Действия', class: 'col-action', cell: 'icon' });
   }
   return cols;
@@ -341,6 +351,18 @@ const loadMore = (): void => {
 const expanded = reactive(new Map<string | number, boolean>());
 const toggleExpand = (id: string | number): void => {
   expanded.set(id, !expanded.get(id));
+};
+
+// После отчёта по авансу с недо-/перерасходом заводится отдельная платёжка
+// расчёта — перезагружаем реестр и сразу раскрываем её (по хэшу), чтобы пайщик
+// увидел реквизиты для оплаты, не догадываясь нажать «развернуть».
+const onReported = async (settlementHash?: string): Promise<void> => {
+  paymentStore.clear();
+  expanded.clear();
+  await loadPayments(1);
+  if (!settlementHash) return;
+  const row = items.value.find((p) => p.hash === settlementHash);
+  if (row) expanded.set(row.id, true);
 };
 
 onMounted(() => {

@@ -31,7 +31,13 @@ describe('ExpensesMutationsService', () => {
   let service: ExpensesMutationsService
   let chain: jest.Mocked<ExpensesBlockchainPort>
   let generator: jest.Mocked<Pick<GeneratorInfrastructureService, 'generateDocument'>>
-  let requisiteSnapshots: { validate: jest.Mock; snapshot: jest.Mock; formatForOwner: jest.Mock }
+  let requisiteSnapshots: {
+    validate: jest.Mock
+    snapshot: jest.Mock
+    formatForOwner: jest.Mock
+    getItemRequisiteData: jest.Mock
+    getCooperativeRequisiteData: jest.Mock
+  }
   let proposals: { findByProposalHash: jest.Mock }
   let payments: { findByHash: jest.Mock; create: jest.Mock }
 
@@ -53,6 +59,8 @@ describe('ExpensesMutationsService', () => {
       validate: jest.fn().mockResolvedValue(undefined),
       snapshot: jest.fn().mockResolvedValue(undefined),
       formatForOwner: jest.fn().mockResolvedValue('Банковский перевод: счёт 40817810000000000000, Банк ВТБ (ПАО)'),
+      getItemRequisiteData: jest.fn().mockResolvedValue({ data: { bank_name: 'ВТБ' }, requisites: 'счёт пайщика' }),
+      getCooperativeRequisiteData: jest.fn().mockResolvedValue({ data: { bank_name: 'Банк кооператива' }, requisites: 'счёт кооператива' }),
     }
     proposals = { findByProposalHash: jest.fn().mockResolvedValue(null) }
     payments = {
@@ -74,9 +82,11 @@ describe('ExpensesMutationsService', () => {
       proposal_hash: '0xabc',
       items: [
         {
+          // Зеркало хранит mechanics/recipient_type числами (ExpenseDomain enum):
+          // ADVANCE=0, MEMBER=1. PAID=1.
           item_hash: '0xdef',
-          mechanics: ExpenseMechanics.ADVANCE,
-          recipient_type: ExpenseRecipientType.MEMBER,
+          mechanics: 0,
+          recipient_type: 1,
           recipient: 'petrov',
           description: 'Закупка кормов',
           planned_amount: asset(advance),
@@ -256,6 +266,9 @@ describe('ExpensesMutationsService', () => {
     expect(payment.username).toBe('petrov')
     expect(payment.quantity).toBe(200)
     expect(payment.blockchain_data).toMatchObject({ proposal_hash: '0xabc', item_hash: '0xdef' })
+    // Недорасход: реквизиты для оплаты — банк кооператива (пайщик возвращает ему).
+    expect(requisiteSnapshots.getCooperativeRequisiteData).toHaveBeenCalledWith('voskhod')
+    expect(payment.payment_details?.data).toMatchObject({ bank_name: 'Банк кооператива' })
   })
 
   it('reportExpenseItem: перерасход → исходящая платёжка EXPENSE_OVERSPEND на разницу, reportexp отложен', async () => {
@@ -275,6 +288,9 @@ describe('ExpensesMutationsService', () => {
     expect(payment.type).toBe(PaymentTypeEnum.EXPENSE_OVERSPEND)
     expect(payment.direction).toBe(PaymentDirectionEnum.OUTGOING)
     expect(payment.quantity).toBe(200)
+    // Перерасход: реквизиты для выплаты — снимок реквизитов пайщика по позиции.
+    expect(requisiteSnapshots.getItemRequisiteData).toHaveBeenCalledWith('voskhod', '0xabc', '0xdef')
+    expect(payment.payment_details?.data).toMatchObject({ bank_name: 'ВТБ' })
   })
 
   it('reportExpenseItem: повторный отчёт по той же позиции платёжку не дублирует (идемпотентность)', async () => {

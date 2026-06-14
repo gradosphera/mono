@@ -58,6 +58,40 @@ export class ExpenseRequisiteSnapshotsService {
     return formatPaymentMethodRequisites(method)
   }
 
+  /**
+   * Снимок реквизитов пайщика по позиции СЗ — куда кассир платит при доплате
+   * перерасхода (тот же платёжный метод, что и при выдаче аванса).
+   */
+  async getItemRequisiteData(
+    coopname: string,
+    proposalHash: string,
+    itemHash: string
+  ): Promise<{ data: Record<string, unknown> | null; requisites: string } | null> {
+    const snapshot = await this.repository.findOne({
+      where: { coopname, proposal_hash: proposalHash.toLowerCase(), item_hash: itemHash.toLowerCase() },
+    })
+    if (!snapshot) return null
+    return { data: snapshot.data ?? null, requisites: snapshot.requisites ?? '' }
+  }
+
+  /**
+   * Банковские реквизиты самого кооператива — куда пайщик возвращает
+   * неиспользованный аванс (недорасход). Берём дефолтный (или первый) платёжный
+   * метод аккаунта кооператива.
+   */
+  async getCooperativeRequisiteData(
+    coopname: string
+  ): Promise<{ data: Record<string, unknown> | null; requisites: string } | null> {
+    const list = await this.paymentMethods.list({ username: coopname, page: 1, limit: 50, sortOrder: 'ASC' })
+    const methods = list.items ?? []
+    const method = methods.find((m) => m.is_default) ?? methods[0]
+    if (!method) return null
+    return {
+      data: method.data as unknown as Record<string, unknown>,
+      requisites: formatPaymentMethodRequisites(method),
+    }
+  }
+
   private async resolve(
     coopname: string,
     items: InterExpenseRequisiteItemInput[]

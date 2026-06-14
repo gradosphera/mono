@@ -5,8 +5,10 @@
     q-icon.q-mr-xs(name='error', size='sm')
     span {{ payment.message || 'нет дополнительной информации' }}
 
-  //- Реквизиты исходящего платежа — компактные строки с копированием (DataRow)
-  template(v-else-if='payment.direction === "OUTGOING" && payment.payment_details')
+  //- Реквизиты платежа — компактные строки с копированием (DataRow). Для любого
+  //- направления: исходящий = реквизиты получателя (кому платит кооператив),
+  //- входящий возврат = реквизиты кооператива (куда платит пайщик).
+  template(v-else-if='payment.payment_details')
     DataRow(v-if='bankData?.bank_name', label='Банк получателя', :value='bankData.bank_name', copyable)
     DataRow(v-if='bankData?.details?.bik', label='БИК', :value='bankData.details.bik', copyable, mono)
     DataRow(v-if='bankData?.account_number', label='Номер счета', :value='bankData.account_number', copyable, mono)
@@ -17,13 +19,13 @@
     //- Оплата расхода: получатель-организация и её реквизиты приходят
     //- свободной строкой из снимка СЗ (не платёжным методом пайщика).
     DataRow(v-if='freeData?.recipient_name', label='Получатель', :value='freeData.recipient_name', copyable)
-    DataRow(v-if='freeData?.requisites', label='Реквизиты получателя', :value='freeData.requisites', copyable, mono)
+    DataRow(v-if='freeData?.requisites', label='Реквизиты', :value='freeData.requisites', copyable, mono)
     DataRow(v-if='expenseDescription', label='Что оплачиваем', :value='expenseDescription')
     DataRow(v-if='payment.memo', label='Назначение платежа', :value='payment.memo', copyable)
     DataRow(
-      v-if='payment.payment_details.amount_without_fee',
+      v-if='amountToPayLabel',
       label='Сумма к переводу',
-      :value='payment.payment_details.amount_without_fee + (bankData?.currency ? " " + bankData.currency : "")',
+      :value='amountToPayLabel',
       copyable,
       mono
     )
@@ -34,17 +36,10 @@
       mono
     )
 
-  //- Blockchain-данные, если нет реквизитов
-  div(v-else-if='payment.blockchain_data')
-    .text-weight-medium.q-mb-sm Дополнительная информация:
-    q-card.q-pa-md.bg-grey-1(flat)
-      .text-caption.text-grey-7.q-mb-xs Данные блокчейна
-      pre.text-body2.q-mb-none.font-mono {{ formatBlockchainData(payment.blockchain_data) }}
-
-  //- Назначение платежа без банковских реквизитов (напр. возврат взноса кассиром):
-  //- даём кассиру скопировать готовый текст назначения в платёжку.
-  template(v-else-if='payment.memo')
-    DataRow(label='Назначение платежа', :value='payment.memo', copyable)
+  //- Назначение платежа без банковских реквизитов: даём скопировать готовый текст.
+  template(v-else-if='payment.memo || expenseDescription')
+    DataRow(v-if='expenseDescription', label='Что оплачиваем', :value='expenseDescription')
+    DataRow(v-if='payment.memo', label='Назначение платежа', :value='payment.memo', copyable)
 
   //- Сообщение по умолчанию
   div(v-else)
@@ -56,6 +51,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { DataRow } from 'src/shared/ui/domain/DataRow';
+import { formatAsset2Digits } from 'src/shared/lib/utils';
 import type { IPayment, IBankAccount, ISbpAccount } from 'src/entities/Payment';
 
 interface Props {
@@ -102,18 +98,13 @@ const expenseDescription = computed(() => {
   return null;
 });
 
-/**
- * Форматирует данные блокчейна для отображения
- */
-const formatBlockchainData = (data: any): string => {
-  if (!data) return '';
-
-  try {
-    return JSON.stringify(data, null, 2);
-  } catch {
-    return String(data);
-  }
-};
+// Сумма к переводу — 2 знака после запятой (как везде в UI), с валютой.
+const amountToPayLabel = computed(() => {
+  const raw = payment.payment_details?.amount_without_fee;
+  if (!raw) return '';
+  const currency = bankData.value?.currency || payment.symbol || '';
+  return formatAsset2Digits(`${raw} ${currency}`.trim());
+});
 </script>
 
 <style lang="scss" scoped>

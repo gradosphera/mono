@@ -26,7 +26,7 @@
       AmountInput(
         v-model='factualAmount',
         :symbol='advanceSymbol',
-        :precision='advancePrecision',
+        :precision='2',
         :min='0',
         label='Фактически потрачено по чекам',
         :disabled='reporting'
@@ -61,7 +61,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'reported'): void;
+  // settlementHash — хэш заведённой платёжки расчёта (возврат/доплата), чтобы
+  // реестр сразу раскрыл её с реквизитами; пусто при простом закрытии (факт==аванс).
+  (e: 'reported', settlementHash?: string): void;
 }>();
 
 const system = useSystemStore();
@@ -78,7 +80,6 @@ const factualAmount = ref<number | null>(null);
 // расчёт разницы ведём от реально полученной пайщиком суммы.
 const advance = computed(() => parseAsset(item.value?.actual_amount));
 const advanceSymbol = computed(() => advance.value.symbol);
-const advancePrecision = computed(() => advance.value.precision);
 const advanceLabel = computed(() =>
   item.value?.actual_amount ? formatAsset2Digits(item.value.actual_amount) : '',
 );
@@ -237,7 +238,7 @@ async function submitReport(): Promise<void> {
       SuccessAlert('Отчёт по авансу принят');
     }
     await refresh();
-    emit('reported');
+    emit('reported', result?.settlement_payment_hash ?? undefined);
   } catch (e) {
     FailAlert(e);
   } finally {
