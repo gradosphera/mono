@@ -42,14 +42,12 @@ q-page.program-expenses-page
       WalletCard(
         program='blagorost',
         title='Пул расходов',
-        subtitle='Оплата программных расходов',
+        subtitle='Кошелёк, с которого оплачиваются программные расходы',
         balance-label='Доступно',
         :balance='expensePool.amount',
         :symbol='expensePool.symbol',
-        :locked-balance='expenseReserved.has ? expenseReserved.amount : undefined',
-        locked-label='Зарезервировано',
         icon='receipt_long',
-        :loading='!configStore.state'
+        :loading='!expenseWallet'
       )
 
   //- Общий виджет шасси: страница только готовит строки из своего запроса.
@@ -79,6 +77,7 @@ import { WalletCard } from 'src/shared/ui/domain/WalletCard';
 import { ExpenseProposalList } from 'src/shared/ui/domain/ExpenseProposalList';
 import type { ExpenseProposalListRow } from 'src/shared/ui/domain/ExpenseProposalList';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
+import { useLedger2Store } from 'src/entities/Ledger2';
 import { useProgramExpenseStore } from 'app/extensions/capital/entities/ProgramExpense/model';
 import { useConfigStore } from 'app/extensions/capital/entities/Config/model';
 import { CreateProgramExpenseDialog } from 'app/extensions/capital/features/ProgramExpense/CreateProgramExpense/ui';
@@ -87,6 +86,7 @@ import { TopupProgramExpensePoolDialog } from 'app/extensions/capital/features/P
 const system = useSystemStore();
 const store = useProgramExpenseStore();
 const configStore = useConfigStore();
+const ledger2Store = useLedger2Store();
 const { isMobile } = useWindowSize();
 
 const coopname = computed(() => system.info.coopname);
@@ -106,13 +106,14 @@ function splitAsset(asset?: string | null): { amount: string; symbol: string } {
 const globalPool = computed(() =>
   splitAsset(configStore.state?.global_available_invest_pool),
 );
-const expensePool = computed(() =>
-  splitAsset(configStore.state?.program_expense_pool),
-);
-const expenseReserved = computed(() => {
-  const reserved = configStore.state?.program_expense_reserved;
-  return { ...splitAsset(reserved), has: parseFloat(reserved ?? '0') > 0 };
-});
+
+// «Доступно» = остаток кошелька, с которого оплата реально списывается при
+// payexp (source_wallet). Раньше показывали счётчик program_expense_pool — он
+// расходится с балансом кошелька (счётчик двигается на резерве, кошелёк — на
+// оплате), из-за чего кассир видел одну сумму, а оплата обламывалась на другой.
+const PROGRAM_EXPENSE_WALLET = 'w.cap.pgexp';
+const expenseWallet = computed(() => ledger2Store.getWalletByName(PROGRAM_EXPENSE_WALLET));
+const expensePool = computed(() => splitAsset(expenseWallet.value?.available));
 
 const loading = ref(false);
 async function refresh(): Promise<void> {
@@ -121,6 +122,7 @@ async function refresh(): Promise<void> {
     await Promise.all([
       store.loadProgramExpenses({ coopname: coopname.value }),
       configStore.loadState({ coopname: coopname.value }),
+      ledger2Store.loadWallets(coopname.value),
     ]);
   } finally {
     loading.value = false;

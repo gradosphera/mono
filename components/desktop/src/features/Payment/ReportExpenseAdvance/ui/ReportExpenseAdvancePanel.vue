@@ -11,8 +11,8 @@
         span Чеки получены от пайщика лично. Укажите фактически потраченную сумму и приложите чек — отчёт уйдёт от его имени.
       .t-sm.t-muted(v-else) Выданный аванс: {{ advanceLabel }}. Укажите фактически потраченную сумму и приложите чек.
 
+    //- Сначала сумма (с ней видна разница), затем чек — и только тогда кнопка.
     template(v-if='isAwaitingReport')
-      //- Сначала сумма (с ней видна разница), затем чек — и только тогда кнопка.
       AmountInput(
         v-model='factualAmount',
         :symbol='advanceSymbol',
@@ -22,14 +22,16 @@
         :disabled='reporting'
       )
       .t-sm.t-warning(v-if='deltaHint') {{ deltaHint }}
-      FileUploader(
-        v-model='pending',
-        accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
-        :max-size='20 * 1024 * 1024',
-        title='Приложите чек',
-        hint='Изображение или PDF до 20 МБ — добавится сразу',
-        :disabled='uploading || reporting'
-      )
+
+    //- Загрузчик доступен и после приёма отчёта — доп. документы дополняют его.
+    FileUploader(
+      v-model='pending',
+      accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
+      :max-size='20 * 1024 * 1024',
+      :title='isAwaitingReport ? "Приложите чек" : "Приложите дополнительный документ"',
+      hint='Изображение или PDF до 20 МБ — добавится сразу',
+      :disabled='uploading || reporting'
+    )
 
     .files(v-if='files.length')
       button.file-link(
