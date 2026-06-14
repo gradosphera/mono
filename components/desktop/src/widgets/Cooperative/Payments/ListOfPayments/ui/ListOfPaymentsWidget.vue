@@ -46,11 +46,14 @@
                 td
                   .cell-status
                     BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
-                    //- Оплата расхода: отметка о приложенной платёжке (статус не трогаем —
-                    //- им управляет реестр; отчитанность видна отдельным значком).
-                    q-icon.proof-icon.proof-icon--ok(v-if='proofState(row) === "attached"', name='receipt_long', size='16px')
+                    //- Статус отчёта по авансу (личный стол пайщика) — отдельная ось
+                    //- рядом со статусом платежа: требуется / подан / принят.
+                    BaseBadge(v-if='reportBadge(row)', :variant='reportBadge(row)?.variant') {{ reportBadge(row)?.label }}
+                    //- Кассирская отметка «платёжка приложена» — только на столе совета
+                    //- (пайщику чужая бухгалтерия не показывается).
+                    q-icon.proof-icon.proof-icon--ok(v-if='!hideActions && proofState(row) === "attached"', name='receipt_long', size='16px')
                       q-tooltip Платёжка приложена
-                    q-icon.proof-icon.proof-icon--missing(v-else-if='proofState(row) === "missing"', name='receipt_long', size='16px')
+                    q-icon.proof-icon.proof-icon--missing(v-else-if='!hideActions && proofState(row) === "missing"', name='receipt_long', size='16px')
                       q-tooltip Платёжка не приложена
                 td.col-action(v-if='!hideActions', @click.stop)
                   .cell-actions(v-if='["EXPIRED", "PENDING", "FAILED"].includes(row.status)')
@@ -63,16 +66,22 @@
               tr.expand-row(v-if='expanded.get(row.id)')
                 td(:colspan='hideActions ? 6 : 8')
                   PaymentDetails(:payment='row')
-                  //- Оплата расхода по счёту: кассир прикладывает платёжку/квитанцию
-                  //- прямо в реестре после подтверждения оплаты.
-                  AttachExpenseProofPanel.q-mt-sm(
-                    v-if='!hideActions && expenseProofRef(row)',
-                    :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
-                    :item-hash='expenseProofRef(row)?.item_hash ?? ""',
-                    @uploaded='onProofUploaded(row)'
-                  )
-                  //- Аванс под отчёт: пайщик-получатель отчитывается чеком прямо
-                  //- из своего реестра платежей (панель сама скрывается для DIRECT).
+                  //- Стол совета: кассир прикладывает платёжку и закрывающие документы;
+                  //- при личной передаче чеков — отчитывается за пайщика (панель
+                  //- отчёта сама скрывается для прямой оплаты организации, DIRECT).
+                  template(v-if='!hideActions && expenseProofRef(row)')
+                    AttachExpenseProofPanel.q-mt-sm(
+                      :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
+                      :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+                      @uploaded='onProofUploaded(row)'
+                    )
+                    ReportExpenseAdvancePanel.q-mt-sm(
+                      :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
+                      :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+                      :on-behalf='true',
+                      @reported='onReported'
+                    )
+                  //- Личный стол: пайщик-получатель отчитывается чеком по своей строке.
                   ReportExpenseAdvancePanel.q-mt-sm(
                     v-else-if='advanceReportRef(row)',
                     :proposal-hash='advanceReportRef(row)?.proposal_hash ?? ""',
@@ -98,9 +107,10 @@
             span.pay-card__name {{ getShortNameFromCertificate(row.username_certificate) || row.username }}
             .cell-status
               BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
-              q-icon.proof-icon.proof-icon--ok(v-if='proofState(row) === "attached"', name='receipt_long', size='16px')
+              BaseBadge(v-if='reportBadge(row)', :variant='reportBadge(row)?.variant') {{ reportBadge(row)?.label }}
+              q-icon.proof-icon.proof-icon--ok(v-if='!hideActions && proofState(row) === "attached"', name='receipt_long', size='16px')
                 q-tooltip Платёжка приложена
-              q-icon.proof-icon.proof-icon--missing(v-else-if='proofState(row) === "missing"', name='receipt_long', size='16px')
+              q-icon.proof-icon.proof-icon--missing(v-else-if='!hideActions && proofState(row) === "missing"', name='receipt_long', size='16px')
                 q-tooltip Платёжка не приложена
           .pay-card__row
             span.pay-card__amount
@@ -123,16 +133,23 @@
           SetOrderRefundedStatusButton(v-if='!isRefundType(row.type)', :id='row.id')
         template(v-if='expanded.get(row.id)')
           PaymentDetails.pay-card__details(:payment='row')
-          AttachExpenseProofPanel.q-mt-sm(
-            v-if='!hideActions && expenseProofRef(row)',
-            :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
-            :item-hash='expenseProofRef(row)?.item_hash ?? ""',
-            @uploaded='onProofUploaded(row)'
-          )
+          template(v-if='!hideActions && expenseProofRef(row)')
+            AttachExpenseProofPanel.q-mt-sm(
+              :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
+              :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+              @uploaded='onProofUploaded(row)'
+            )
+            ReportExpenseAdvancePanel.q-mt-sm(
+              :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
+              :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+              :on-behalf='true',
+              @reported='onReported'
+            )
           ReportExpenseAdvancePanel.q-mt-sm(
             v-else-if='advanceReportRef(row)',
             :proposal-hash='advanceReportRef(row)?.proposal_hash ?? ""',
-            :item-hash='advanceReportRef(row)?.item_hash ?? ""'
+            :item-hash='advanceReportRef(row)?.item_hash ?? ""',
+            @reported='onReported'
           )
 
       .table-foot
@@ -174,6 +191,11 @@ import type { IPayment } from 'src/entities/Payment/model/types';
 import { getShortNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { formatDateToHumanDateTime } from 'src/shared/lib/utils/dates/formatDateToHumanDateTime';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
+import {
+  ExpenseReportState,
+  reportStateLabel,
+  reportStateVariant,
+} from 'src/shared/lib/expenses';
 import { Zeus } from '@coopenomics/sdk';
 
 const props = defineProps({
@@ -254,6 +276,23 @@ const advanceReportRef = (
   if (!props.hideActions) return null;
   if (row.username !== session.username) return null;
   return expenseProofRef(row);
+};
+
+// Статус отчёта по авансу — только на личном столе пайщика и только у платежа
+// выдачи аванса (EXPENSE). Источник — зеркало blockchain_data.report_state;
+// дефолт «Требуется отчёт», пока пайщик не отчитался. Расчётные платёжки
+// (EXPENSE_RETURN/EXPENSE_OVERSPEND) свой отчёт-бейдж не показывают.
+const reportBadge = (
+  row: IPaymentRow,
+): { label: string; variant: BaseBadgeVariant } | null => {
+  if (!props.hideActions) return null;
+  if (row.type !== Zeus.PaymentType.EXPENSE) return null;
+  if (![Zeus.PaymentStatus.PAID, Zeus.PaymentStatus.COMPLETED].includes(row.status)) return null;
+  const data = row.blockchain_data as { proposal_hash?: string; report_state?: string } | null;
+  if (!data?.proposal_hash) return null;
+  const state = (data.report_state as ExpenseReportState) || ExpenseReportState.AWAITING;
+  if (state === ExpenseReportState.NOT_REQUIRED) return null;
+  return { label: reportStateLabel(state), variant: reportStateVariant(state) };
 };
 
 // Отметка отчитанности оплаченного расхода: бэкенд зеркалит число платёжек

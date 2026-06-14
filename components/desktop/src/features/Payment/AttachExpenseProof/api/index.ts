@@ -1,5 +1,5 @@
 import { client } from 'src/shared/api/client';
-import { Mutations, Queries } from '@coopenomics/sdk';
+import { Mutations, Queries, Zeus } from '@coopenomics/sdk';
 
 export type IUploadExpenseFileInput = Mutations.Expense.UploadExpenseFile.IInput['data'];
 export type IExpenseFile =
@@ -25,6 +25,23 @@ async function loadExpenseFilesByItem(
   return result;
 }
 
+// Механика строки расхода (ADVANCE/DIRECT) нужна, чтобы решить, какие документы
+// прикладывает кассир: по авансу — только платёжка, по оплате организации —
+// ещё и закрывающие документы (акт/счёт-фактура/накладная).
+async function loadItemMechanics(
+  proposal_hash: string,
+  item_hash: string,
+): Promise<Zeus.ExpenseMechanics | null> {
+  const { [Queries.Expense.ExpenseProposal.name]: proposal } = await client.Query(
+    Queries.Expense.ExpenseProposal.query,
+    { variables: { proposal_hash } },
+  );
+  const item = proposal?.items?.find(
+    (i) => i.item_hash?.toLowerCase() === item_hash.toLowerCase(),
+  );
+  return item?.mechanics ?? null;
+}
+
 // Списочные запросы файлы отдают без read_url — свежий короткоживущий URL
 // запрашивается по id в момент клика.
 async function getExpenseFileReadUrl(id: number): Promise<string | undefined> {
@@ -35,4 +52,9 @@ async function getExpenseFileReadUrl(id: number): Promise<string | undefined> {
   return result.read_url ?? undefined;
 }
 
-export const api = { uploadExpenseFile, loadExpenseFilesByItem, getExpenseFileReadUrl };
+export const api = {
+  uploadExpenseFile,
+  loadExpenseFilesByItem,
+  loadItemMechanics,
+  getExpenseFileReadUrl,
+};

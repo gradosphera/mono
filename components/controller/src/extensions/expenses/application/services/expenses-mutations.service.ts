@@ -31,6 +31,7 @@ import {
 import type { IExpenseItemBlockchainData } from '../../domain/interfaces/expense-proposal-blockchain.interface'
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum'
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum'
+import { ExpenseReportState } from '../../domain/enums/expense-report-state.enum'
 import { EXPENSES_CHASSIS_CONFIG } from '../../domain/expenses-chassis.config'
 import { ExpenseRequisiteSnapshotsService } from './expense-requisite-snapshots.service'
 
@@ -177,6 +178,7 @@ export class ExpensesMutationsService {
         proposal_hash: input.proposal_hash,
         item_hash: input.item_hash,
       })
+      await this.markAdvanceReportState(input.item_hash, ExpenseReportState.CLOSED)
       return { outcome: ExpenseReportOutcome.CLOSED, transaction: transaction as any }
     }
 
@@ -206,6 +208,7 @@ export class ExpensesMutationsService {
         proposal_hash: input.proposal_hash,
         item_hash: input.item_hash,
       })
+      await this.markAdvanceReportState(input.item_hash, ExpenseReportState.CLOSED)
       return { outcome: ExpenseReportOutcome.CLOSED, transaction: transaction as any }
     }
 
@@ -221,11 +224,28 @@ export class ExpensesMutationsService {
       advance.symbol
     )
 
+    // Отчёт подан, но позиция закроется (reportexp) только после подтверждения
+    // платёжки расчёта кассой — фиксируем промежуточное состояние для реестра.
+    await this.markAdvanceReportState(input.item_hash, ExpenseReportState.SETTLEMENT_PENDING)
+
     return {
       outcome: isUnderspend ? ExpenseReportOutcome.RETURN_PENDING : ExpenseReportOutcome.OVERSPEND_PENDING,
       settlement_amount: diffAsset,
       settlement_payment_hash: paymentHash,
     }
+  }
+
+  /**
+   * Зеркалит состояние отчёта в платёж выдачи аванса (hash платежа = item_hash) —
+   * реестр платежей показывает «Требуется отчёт / подан / принят» рядом со
+   * статусом платежа, не дёргая цепь. Статус платежа при этом не трогаем.
+   */
+  private async markAdvanceReportState(itemHash: string, state: ExpenseReportState): Promise<void> {
+    const payment = await this.payments.findByHash(itemHash.toLowerCase())
+    if (!payment?.id) return
+    await this.payments.update(payment.id, {
+      blockchain_data: { ...(payment.blockchain_data ?? {}), report_state: state },
+    })
   }
 
   /**

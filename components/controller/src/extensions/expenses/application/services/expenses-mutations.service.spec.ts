@@ -14,6 +14,7 @@ import type { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.i
 import type { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum'
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum'
+import { ExpenseReportState } from '../../domain/enums/expense-report-state.enum'
 
 // Символ/precision берём из конфига ноды — тесты расчёта разницы не зависят от
 // того, какой именно root_govern_symbol сконфигурирован в окружении CI.
@@ -39,7 +40,7 @@ describe('ExpensesMutationsService', () => {
     getCooperativeRequisiteData: jest.Mock
   }
   let proposals: { findByProposalHash: jest.Mock }
-  let payments: { findByHash: jest.Mock; create: jest.Mock }
+  let payments: { findByHash: jest.Mock; create: jest.Mock; update: jest.Mock }
 
   const fakeResult = { response: { transaction_id: 'tx_abc' } } as never
 
@@ -66,6 +67,7 @@ describe('ExpensesMutationsService', () => {
     payments = {
       findByHash: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockImplementation((p) => Promise.resolve({ ...p, id: 'pay-1' })),
+      update: jest.fn().mockResolvedValue(undefined),
     }
     service = new ExpensesMutationsService(
       chain,
@@ -235,6 +237,8 @@ describe('ExpensesMutationsService', () => {
 
   it('reportExpenseItem: факт == аванс → CLOSED, платёжка расчёта не заводится', async () => {
     mockProposalWithAdvance(1000)
+    // Платёж выдачи аванса (hash = item_hash) — для зеркалирования report_state.
+    payments.findByHash.mockResolvedValue({ id: 'adv-1', hash: '0xdef', blockchain_data: { proposal_hash: '0xabc' } })
     const result = await service.reportExpenseItem({
       coopname: 'voskhod',
       proposal_hash: '0xabc',
@@ -245,10 +249,19 @@ describe('ExpensesMutationsService', () => {
     expect(result.outcome).toBe(ExpenseReportOutcome.CLOSED)
     expect(chain.reportExp).toHaveBeenCalledTimes(1)
     expect(payments.create).not.toHaveBeenCalled()
+    // Отчёт принят → зеркалим CLOSED в платёж аванса.
+    expect(payments.update).toHaveBeenCalledWith('adv-1', {
+      blockchain_data: { proposal_hash: '0xabc', report_state: ExpenseReportState.CLOSED },
+    })
   })
 
   it('reportExpenseItem: недорасход → входящая платёжка EXPENSE_RETURN на разницу, reportexp отложен', async () => {
     mockProposalWithAdvance(1000)
+    // Платёжка расчёта (хэш settlement) ещё не заведена → null (чтобы create сработал);
+    // платёж выдачи аванса (item_hash '0xdef') существует → для зеркалирования report_state.
+    payments.findByHash.mockImplementation((h: string) =>
+      Promise.resolve(h === '0xdef' ? { id: 'adv-1', hash: '0xdef', blockchain_data: {} } : null),
+    )
     const result = await service.reportExpenseItem({
       coopname: 'voskhod',
       proposal_hash: '0xabc',
@@ -260,6 +273,10 @@ describe('ExpensesMutationsService', () => {
     expect(result.settlement_amount).toBe(asset(200))
     expect(chain.reportExp).not.toHaveBeenCalled()
     expect(payments.create).toHaveBeenCalledTimes(1)
+    // Отчёт подан, ждём расчёт → зеркалим SETTLEMENT_PENDING в платёж аванса.
+    expect(payments.update).toHaveBeenCalledWith('adv-1', {
+      blockchain_data: { report_state: ExpenseReportState.SETTLEMENT_PENDING },
+    })
     const payment = payments.create.mock.calls[0][0]
     expect(payment.type).toBe(PaymentTypeEnum.EXPENSE_RETURN)
     expect(payment.direction).toBe(PaymentDirectionEnum.INCOMING)

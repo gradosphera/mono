@@ -1,6 +1,9 @@
 <template lang="pug">
 .report-advance(v-if='item')
   template(v-if='isReported || isAwaitingReport')
+    .t-sm.t-warning.report-advance__onbehalf(v-if='onBehalf && isAwaitingReport')
+      q-icon(name='assignment_ind', size='16px')
+      span Отчёт за пайщика: чеки получены лично. Приложите их, укажите фактически потраченную пайщиком сумму и отчитайтесь от его имени.
     .t-sm.t-muted(v-if='isReported') Отчёт по авансу подан — дополнительные документы дополнят его автоматически
     .t-sm.t-muted(v-else) Выданный аванс: {{ advanceLabel }}. Приложите чеки, укажите фактически потраченную сумму и отчитайтесь.
     .files(v-if='files.length')
@@ -37,7 +40,7 @@
         :loading='reporting',
         :disabled='!files.length || reporting',
         @click='submitReport'
-      ) Отчитаться по авансу
+      ) {{ onBehalf ? 'Отчитаться за пайщика' : 'Отчитаться по авансу' }}
 </template>
 
 <script setup lang="ts">
@@ -55,10 +58,16 @@ import {
 } from 'src/features/Payment/AttachExpenseProof';
 import { api, type IExpenseProposalItem } from '../api';
 
-const props = defineProps<{
-  proposalHash: string;
-  itemHash: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    proposalHash: string;
+    itemHash: string;
+    // Кассир отчитывается за пайщика (чеки переданы лично) — меняет только подписи,
+    // мутация та же (бэкенд авторизует совет по любой строке).
+    onBehalf?: boolean;
+  }>(),
+  { onBehalf: false },
+);
 
 const emit = defineEmits<{
   // settlementHash — хэш заведённой платёжки расчёта (возврат/доплата), чтобы
@@ -264,6 +273,12 @@ onMounted(refresh);
   display: flex;
   flex-direction: column;
   gap: var(--p-2);
+}
+
+.report-advance__onbehalf {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--p-1);
 }
 
 .files {

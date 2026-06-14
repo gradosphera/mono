@@ -101,8 +101,49 @@ export function fileKindLabel(kind: Zeus.ExpenseFileKind): string {
       return 'Чек';
     case Zeus.ExpenseFileKind.RETURN_PROOF:
       return 'Возврат';
+    case Zeus.ExpenseFileKind.CLOSING_DOC:
+      return 'Закрывающий документ';
     default:
       return 'Файл';
+  }
+}
+
+/**
+ * Состояние отчёта по строке-авансу, зеркалится бэкендом в
+ * `payment.blockchain_data.report_state`. Строки совпадают с серверным enum
+ * `ExpenseReportState` (controller/extensions/expenses/domain/enums) — поле живёт
+ * в JSON-скаляре blockchain_data, а не в типизированной GraphQL-схеме.
+ */
+export enum ExpenseReportState {
+  NOT_REQUIRED = 'NOT_REQUIRED',
+  AWAITING = 'AWAITING',
+  SETTLEMENT_PENDING = 'SETTLEMENT_PENDING',
+  CLOSED = 'CLOSED',
+}
+
+export function reportStateLabel(state: ExpenseReportState): string {
+  switch (state) {
+    case ExpenseReportState.AWAITING:
+      return 'Требуется отчёт';
+    case ExpenseReportState.SETTLEMENT_PENDING:
+      return 'Отчёт подан, ждём расчёт';
+    case ExpenseReportState.CLOSED:
+      return 'Отчёт принят';
+    default:
+      return '';
+  }
+}
+
+export function reportStateVariant(state: ExpenseReportState): ExpenseBadgeVariant {
+  switch (state) {
+    case ExpenseReportState.CLOSED:
+      return 'pos';
+    case ExpenseReportState.SETTLEMENT_PENDING:
+      return 'info';
+    case ExpenseReportState.AWAITING:
+      return 'warn';
+    default:
+      return 'neutral';
   }
 }
 

@@ -10,8 +10,10 @@ import type {
   InterExpenseProposalStatus,
   InterExpenseRequisiteItemInput,
 } from '@coopenomics/inter';
+import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
 import { ExpenseProposalTypeormEntity } from '../entities/expense-proposal.typeorm-entity';
 import { ExpenseProposalStatus } from '../../domain/enums/expense-proposal-status.enum';
+import { ExpenseReportState } from '../../domain/enums/expense-report-state.enum';
 import { ExpenseRequisiteSnapshotsService } from '../../application/services/expense-requisite-snapshots.service';
 import {
   EXPENSES_BLOCKCHAIN_PORT,
@@ -36,6 +38,8 @@ export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPo
     private readonly requisiteSnapshots: ExpenseRequisiteSnapshotsService,
     @Inject(EXPENSES_BLOCKCHAIN_PORT)
     private readonly chain: ExpensesBlockchainPort,
+    @Inject(PAYMENT_REPOSITORY)
+    private readonly payments: PaymentRepository,
   ) {}
 
   async payItem(coopname: string, proposalHash: string, itemHash: string, actualAmount: string): Promise<void> {
@@ -71,6 +75,14 @@ export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPo
       proposal_hash: proposalHash.toLowerCase(),
       item_hash: itemHash.toLowerCase(),
     });
+    // Зеркалим закрытие отчёта в платёж выдачи аванса (hash платежа = item_hash):
+    // реестр платежей показывает «Отчёт принят» сразу после проводки расчёта кассой.
+    const payment = await this.payments.findByHash(itemHash.toLowerCase());
+    if (payment?.id) {
+      await this.payments.update(payment.id, {
+        blockchain_data: { ...(payment.blockchain_data ?? {}), report_state: ExpenseReportState.CLOSED },
+      });
+    }
   }
 
   async validateRequisites(coopname: string, items: InterExpenseRequisiteItemInput[]): Promise<void> {

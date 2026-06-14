@@ -38657,6 +38657,7 @@ export enum DocumentAction {
 }
 /** Тип первичного файла расхода. */
 export enum ExpenseFileKind {
+	CLOSING_DOC = "CLOSING_DOC",
 	PAYMENT_PROOF = "PAYMENT_PROOF",
 	REPORT_FILE = "REPORT_FILE",
 	RETURN_PROOF = "RETURN_PROOF"
