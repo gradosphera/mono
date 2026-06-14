@@ -473,6 +473,9 @@ export const AllTypesProps: Record<string,any> = {
 	ExpenseProposalItemInput:{
 
 	},
+	ExpenseProposalSignedItemInput:{
+
+	},
 	ExpenseProposalStatementGenerateDocumentInput:{
 		items:"ExpenseProposalItemInput",
 		proposal:"ExpenseProposalHeaderInput"
@@ -482,7 +485,7 @@ export const AllTypesProps: Record<string,any> = {
 		signatures:"SignatureInfoInput"
 	},
 	ExpenseProposalStatementSignedMetaDocumentInput:{
-		items:"ExpenseProposalItemInput",
+		items:"ExpenseProposalSignedItemInput",
 		proposal:"ExpenseProposalHeaderInput"
 	},
 	ExpenseProposalStatus: "enum" as const,

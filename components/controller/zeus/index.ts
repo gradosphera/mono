@@ -5395,10 +5395,7 @@ export type ValueTypes = {
 	description: string | Variable<any, string>,
 	mechanics: string | Variable<any, string>,
 	number: string | Variable<any, string>,
-	payment_purpose?: string | undefined | null | Variable<any, string>,
-	recipient_name?: string | undefined | null | Variable<any, string>,
-	recipient_type: string | Variable<any, string>,
-	requisites?: string | undefined | null | Variable<any, string>
+	recipient_type: string | Variable<any, string>
 };
 	["ExpenseProposalHeaderInput"]: {
 	/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
@@ -5435,6 +5432,18 @@ export type ValueTypes = {
 	recipient_username?: string | undefined | null | Variable<any, string>,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null | Variable<any, string>
+};
+	["ExpenseProposalSignedItemInput"]: {
+	/** Сумма строки */
+	amount: string | Variable<any, string>,
+	/** Описание расхода */
+	description: string | Variable<any, string>,
+	/** Способ оплаты (ADVANCE / DIRECT) */
+	mechanics: string | Variable<any, string>,
+	/** Порядковый номер строки */
+	number: string | Variable<any, string>,
+	/** Тип получателя (SELF / MEMBER / ORG) */
+	recipient_type: string | Variable<any, string>
 };
 	["ExpenseProposalStatementGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -5485,10 +5494,12 @@ export type ValueTypes = {
 	coopname: string | Variable<any, string>,
 	/** Дата и время создания документа */
 	created_at: string | Variable<any, string>,
+	/** Идентификатор приватных данных документа off-chain (реквизиты/имя/назначение) */
+	doc_data_hash: string | Variable<any, string>,
 	/** Имя генератора, использованного для создания документа */
 	generator: string | Variable<any, string>,
-	/** Позиции расхода */
-	items: Array<ValueTypes["ExpenseProposalItemInput"]> | Variable<any, string>,
+	/** Публичные позиции расхода (без реквизитов) */
+	items: Array<ValueTypes["ExpenseProposalSignedItemInput"]> | Variable<any, string>,
 	/** Язык документа */
 	lang: string | Variable<any, string>,
 	/** Ссылки, связанные с документом */
@@ -14472,10 +14483,7 @@ export type ResolverInputTypes = {
 	description: string,
 	mechanics: string,
 	number: string,
-	payment_purpose?: string | undefined | null,
-	recipient_name?: string | undefined | null,
-	recipient_type: string,
-	requisites?: string | undefined | null
+	recipient_type: string
 };
 	["ExpenseProposalHeaderInput"]: {
 	/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
@@ -14512,6 +14520,18 @@ export type ResolverInputTypes = {
 	recipient_username?: string | undefined | null,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null
+};
+	["ExpenseProposalSignedItemInput"]: {
+	/** Сумма строки */
+	amount: string,
+	/** Описание расхода */
+	description: string,
+	/** Способ оплаты (ADVANCE / DIRECT) */
+	mechanics: string,
+	/** Порядковый номер строки */
+	number: string,
+	/** Тип получателя (SELF / MEMBER / ORG) */
+	recipient_type: string
 };
 	["ExpenseProposalStatementGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -14562,10 +14582,12 @@ export type ResolverInputTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at: string,
+	/** Идентификатор приватных данных документа off-chain (реквизиты/имя/назначение) */
+	doc_data_hash: string,
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
-	/** Позиции расхода */
-	items: Array<ResolverInputTypes["ExpenseProposalItemInput"]>,
+	/** Публичные позиции расхода (без реквизитов) */
+	items: Array<ResolverInputTypes["ExpenseProposalSignedItemInput"]>,
 	/** Язык документа */
 	lang: string,
 	/** Ссылки, связанные с документом */
@@ -23286,10 +23308,7 @@ export type ModelTypes = {
 	description: string,
 	mechanics: string,
 	number: string,
-	payment_purpose?: string | undefined | null,
-	recipient_name?: string | undefined | null,
-	recipient_type: string,
-	requisites?: string | undefined | null
+	recipient_type: string
 };
 	["ExpenseProposalHeaderInput"]: {
 	/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
@@ -23326,6 +23345,18 @@ export type ModelTypes = {
 	recipient_username?: string | undefined | null,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null
+};
+	["ExpenseProposalSignedItemInput"]: {
+	/** Сумма строки */
+	amount: string,
+	/** Описание расхода */
+	description: string,
+	/** Способ оплаты (ADVANCE / DIRECT) */
+	mechanics: string,
+	/** Порядковый номер строки */
+	number: string,
+	/** Тип получателя (SELF / MEMBER / ORG) */
+	recipient_type: string
 };
 	["ExpenseProposalStatementGenerateDocumentInput"]: {
 	/** Номер блока, на котором был создан документ */
@@ -23376,10 +23407,12 @@ export type ModelTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at: string,
+	/** Идентификатор приватных данных документа off-chain (реквизиты/имя/назначение) */
+	doc_data_hash: string,
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
-	/** Позиции расхода */
-	items: Array<ModelTypes["ExpenseProposalItemInput"]>,
+	/** Публичные позиции расхода (без реквизитов) */
+	items: Array<ModelTypes["ExpenseProposalSignedItemInput"]>,
 	/** Язык документа */
 	lang: string,
 	/** Ссылки, связанные с документом */
@@ -32894,10 +32927,7 @@ export type GraphQLTypes = {
 	description: string,
 	mechanics: string,
 	number: string,
-	payment_purpose?: string | undefined | null,
-	recipient_name?: string | undefined | null,
-	recipient_type: string,
-	requisites?: string | undefined | null
+	recipient_type: string
 };
 	["ExpenseProposalHeaderInput"]: {
 		/** Срок исполнения («в срок до»), формат DD.MM.YYYY */
@@ -32934,6 +32964,18 @@ export type GraphQLTypes = {
 	recipient_username?: string | undefined | null,
 	/** Реквизиты получателя */
 	requisites?: string | undefined | null
+};
+	["ExpenseProposalSignedItemInput"]: {
+		/** Сумма строки */
+	amount: string,
+	/** Описание расхода */
+	description: string,
+	/** Способ оплаты (ADVANCE / DIRECT) */
+	mechanics: string,
+	/** Порядковый номер строки */
+	number: string,
+	/** Тип получателя (SELF / MEMBER / ORG) */
+	recipient_type: string
 };
 	["ExpenseProposalStatementGenerateDocumentInput"]: {
 		/** Номер блока, на котором был создан документ */
@@ -32984,10 +33026,12 @@ export type GraphQLTypes = {
 	coopname: string,
 	/** Дата и время создания документа */
 	created_at: string,
+	/** Идентификатор приватных данных документа off-chain (реквизиты/имя/назначение) */
+	doc_data_hash: string,
 	/** Имя генератора, использованного для создания документа */
 	generator: string,
-	/** Позиции расхода */
-	items: Array<GraphQLTypes["ExpenseProposalItemInput"]>,
+	/** Публичные позиции расхода (без реквизитов) */
+	items: Array<GraphQLTypes["ExpenseProposalSignedItemInput"]>,
 	/** Язык документа */
 	lang: string,
 	/** Ссылки, связанные с документом */
@@ -39163,6 +39207,7 @@ type ZEUS_VARIABLES = {
 	["ExpenseProposalDecisionItemInput"]: ValueTypes["ExpenseProposalDecisionItemInput"];
 	["ExpenseProposalHeaderInput"]: ValueTypes["ExpenseProposalHeaderInput"];
 	["ExpenseProposalItemInput"]: ValueTypes["ExpenseProposalItemInput"];
+	["ExpenseProposalSignedItemInput"]: ValueTypes["ExpenseProposalSignedItemInput"];
 	["ExpenseProposalStatementGenerateDocumentInput"]: ValueTypes["ExpenseProposalStatementGenerateDocumentInput"];
 	["ExpenseProposalStatementSignedDocumentInput"]: ValueTypes["ExpenseProposalStatementSignedDocumentInput"];
 	["ExpenseProposalStatementSignedMetaDocumentInput"]: ValueTypes["ExpenseProposalStatementSignedMetaDocumentInput"];
