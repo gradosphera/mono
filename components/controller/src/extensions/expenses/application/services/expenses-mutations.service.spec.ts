@@ -1,14 +1,25 @@
 import { ExpensesMutationsService } from './expenses-mutations.service'
 import type { ExpensesBlockchainPort } from '../../domain/interfaces/expenses-blockchain.port'
 import type { GeneratorInfrastructureService } from '~/infrastructure/generator/generator.service'
+import type { ExpenseProposalRepository } from '../../domain/repositories/expense-proposal.repository'
+import type { PaymentRepository } from '~/domain/gateway/repositories/payment.repository'
+import { PaymentDirectionEnum, PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum'
+import config from '~/config/config'
 import type { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
 import type { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
+import { ExpenseReportOutcome } from '../dto/report-expense-item.output'
 import type { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
 import type { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input'
 import type { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
 import type { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum'
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum'
+
+// Символ/precision берём из конфига ноды — тесты расчёта разницы не зависят от
+// того, какой именно root_govern_symbol сконфигурирован в окружении CI.
+const SYM = config.blockchain.root_govern_symbol
+const PREC = config.blockchain.root_govern_precision
+const asset = (n: number) => `${n.toFixed(PREC)} ${SYM}`
 
 /**
  * Контракт-тест: backend-mutations пробрасывают payload в `ExpensesBlockchainPort`
@@ -21,6 +32,8 @@ describe('ExpensesMutationsService', () => {
   let chain: jest.Mocked<ExpensesBlockchainPort>
   let generator: jest.Mocked<Pick<GeneratorInfrastructureService, 'generateDocument'>>
   let requisiteSnapshots: { validate: jest.Mock; snapshot: jest.Mock; formatForOwner: jest.Mock }
+  let proposals: { findByProposalHash: jest.Mock }
+  let payments: { findByHash: jest.Mock; create: jest.Mock }
 
   const fakeResult = { response: { transaction_id: 'tx_abc' } } as never
 
@@ -41,12 +54,37 @@ describe('ExpensesMutationsService', () => {
       snapshot: jest.fn().mockResolvedValue(undefined),
       formatForOwner: jest.fn().mockResolvedValue('Банковский перевод: счёт 40817810000000000000, Банк ВТБ (ПАО)'),
     }
+    proposals = { findByProposalHash: jest.fn().mockResolvedValue(null) }
+    payments = {
+      findByHash: jest.fn().mockResolvedValue(null),
+      create: jest.fn().mockImplementation((p) => Promise.resolve({ ...p, id: 'pay-1' })),
+    }
     service = new ExpensesMutationsService(
       chain,
       generator as unknown as GeneratorInfrastructureService,
-      requisiteSnapshots as never
+      requisiteSnapshots as never,
+      proposals as unknown as ExpenseProposalRepository,
+      payments as unknown as PaymentRepository
     )
   })
+
+  // СЗ-зеркало с одной строкой-авансом на пайщика, выданный аванс = 1000.
+  const mockProposalWithAdvance = (advance = 1000) =>
+    proposals.findByProposalHash.mockResolvedValue({
+      proposal_hash: '0xabc',
+      items: [
+        {
+          item_hash: '0xdef',
+          mechanics: ExpenseMechanics.ADVANCE,
+          recipient_type: ExpenseRecipientType.MEMBER,
+          recipient: 'petrov',
+          description: 'Закупка кормов',
+          planned_amount: asset(advance),
+          actual_amount: asset(advance),
+          status: 1,
+        },
+      ],
+    } as never)
 
   const makeSignedDoc = (overrides: Partial<{ hash: string; doc_hash: string; meta_hash: string }> = {}) => ({
     version: '1',
@@ -174,13 +212,84 @@ describe('ExpensesMutationsService', () => {
       item_hash: '0xdef',
     } as ReportExpenseItemInputDTO
 
-    await service.reportExpenseItem(input)
+    const result = await service.reportExpenseItem(input)
 
     expect(chain.reportExp).toHaveBeenCalledWith({
       coopname: 'voskhod',
       proposal_hash: '0xabc',
       item_hash: '0xdef',
     })
+    expect(result.outcome).toBe(ExpenseReportOutcome.CLOSED)
+    expect(payments.create).not.toHaveBeenCalled()
+  })
+
+  it('reportExpenseItem: факт == аванс → CLOSED, платёжка расчёта не заводится', async () => {
+    mockProposalWithAdvance(1000)
+    const result = await service.reportExpenseItem({
+      coopname: 'voskhod',
+      proposal_hash: '0xabc',
+      item_hash: '0xdef',
+      actual_amount: asset(1000),
+    } as ReportExpenseItemInputDTO)
+
+    expect(result.outcome).toBe(ExpenseReportOutcome.CLOSED)
+    expect(chain.reportExp).toHaveBeenCalledTimes(1)
+    expect(payments.create).not.toHaveBeenCalled()
+  })
+
+  it('reportExpenseItem: недорасход → входящая платёжка EXPENSE_RETURN на разницу, reportexp отложен', async () => {
+    mockProposalWithAdvance(1000)
+    const result = await service.reportExpenseItem({
+      coopname: 'voskhod',
+      proposal_hash: '0xabc',
+      item_hash: '0xdef',
+      actual_amount: asset(800),
+    } as ReportExpenseItemInputDTO)
+
+    expect(result.outcome).toBe(ExpenseReportOutcome.RETURN_PENDING)
+    expect(result.settlement_amount).toBe(asset(200))
+    expect(chain.reportExp).not.toHaveBeenCalled()
+    expect(payments.create).toHaveBeenCalledTimes(1)
+    const payment = payments.create.mock.calls[0][0]
+    expect(payment.type).toBe(PaymentTypeEnum.EXPENSE_RETURN)
+    expect(payment.direction).toBe(PaymentDirectionEnum.INCOMING)
+    expect(payment.username).toBe('petrov')
+    expect(payment.quantity).toBe(200)
+    expect(payment.blockchain_data).toMatchObject({ proposal_hash: '0xabc', item_hash: '0xdef' })
+  })
+
+  it('reportExpenseItem: перерасход → исходящая платёжка EXPENSE_OVERSPEND на разницу, reportexp отложен', async () => {
+    mockProposalWithAdvance(1000)
+    const result = await service.reportExpenseItem({
+      coopname: 'voskhod',
+      proposal_hash: '0xabc',
+      item_hash: '0xdef',
+      actual_amount: asset(1200),
+    } as ReportExpenseItemInputDTO)
+
+    expect(result.outcome).toBe(ExpenseReportOutcome.OVERSPEND_PENDING)
+    expect(result.settlement_amount).toBe(asset(200))
+    expect(chain.reportExp).not.toHaveBeenCalled()
+    expect(payments.create).toHaveBeenCalledTimes(1)
+    const payment = payments.create.mock.calls[0][0]
+    expect(payment.type).toBe(PaymentTypeEnum.EXPENSE_OVERSPEND)
+    expect(payment.direction).toBe(PaymentDirectionEnum.OUTGOING)
+    expect(payment.quantity).toBe(200)
+  })
+
+  it('reportExpenseItem: повторный отчёт по той же позиции платёжку не дублирует (идемпотентность)', async () => {
+    mockProposalWithAdvance(1000)
+    payments.findByHash.mockResolvedValue({ hash: 'existing-hash' })
+    const result = await service.reportExpenseItem({
+      coopname: 'voskhod',
+      proposal_hash: '0xabc',
+      item_hash: '0xdef',
+      actual_amount: asset(800),
+    } as ReportExpenseItemInputDTO)
+
+    expect(result.outcome).toBe(ExpenseReportOutcome.RETURN_PENDING)
+    expect(result.settlement_payment_hash).toBe('existing-hash')
+    expect(payments.create).not.toHaveBeenCalled()
   })
 
   it('returnExpenseItem → chain.returnExp({coopname, proposal_hash, item_hash, return_amount})', async () => {

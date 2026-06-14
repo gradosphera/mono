@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import type { TransactResult } from '@wharfkit/session'
 import type { InterExpenseRequisiteItemInput } from '@coopenomics/inter'
 import { Cooperative } from 'cooptypes'
@@ -6,10 +6,17 @@ import { GeneratorInfrastructureService } from '~/infrastructure/generator/gener
 import type { DocumentDomainEntity } from '~/domain/document/entity/document-domain.entity'
 import { ExpenseProposalStatementGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-statement-document.dto'
 import { ExpenseProposalDecisionGenerateDocumentInputDTO } from '~/application/document/documents-dto/expense-proposal-decision-document.dto'
+import { PAYMENT_REPOSITORY, PaymentRepository } from '~/domain/gateway/repositories/payment.repository'
+import type { PaymentDomainInterface } from '~/domain/gateway/interfaces/payment-domain.interface'
+import { PaymentStatusEnum } from '~/domain/gateway/enums/payment-status.enum'
+import { PaymentDirectionEnum, PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum'
+import { QuantityUtils } from '~/shared/utils/quantity.utils'
+import { generateHashFromString, generateUniqueHash } from '~/utils/generate-hash.util'
 import { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input'
 import type { ExpenseItemInputDTO } from '../dto/expense-item.input'
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input'
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input'
+import { ExpenseReportOutcome, ExpenseReportResultDTO } from '../dto/report-expense-item.output'
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input'
 import { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input'
 import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input'
@@ -17,10 +24,18 @@ import {
   EXPENSES_BLOCKCHAIN_PORT,
   ExpensesBlockchainPort,
 } from '../../domain/interfaces/expenses-blockchain.port'
+import {
+  EXPENSE_PROPOSAL_REPOSITORY,
+  ExpenseProposalRepository,
+} from '../../domain/repositories/expense-proposal.repository'
+import type { IExpenseItemBlockchainData } from '../../domain/interfaces/expense-proposal-blockchain.interface'
 import { ExpenseMechanics } from '../../domain/enums/expense-mechanics.enum'
 import { ExpenseRecipientType } from '../../domain/enums/expense-recipient-type.enum'
 import { EXPENSES_CHASSIS_CONFIG } from '../../domain/expenses-chassis.config'
 import { ExpenseRequisiteSnapshotsService } from './expense-requisite-snapshots.service'
+
+/** Зеркало ExpenseDomain::Mechanics::ADVANCE контракта expense. */
+const MECHANICS_ADVANCE = 0
 
 /**
  * Write-сервис расходов.
@@ -36,7 +51,11 @@ export class ExpensesMutationsService {
     @Inject(EXPENSES_BLOCKCHAIN_PORT)
     private readonly chain: ExpensesBlockchainPort,
     private readonly generator: GeneratorInfrastructureService,
-    private readonly requisiteSnapshots: ExpenseRequisiteSnapshotsService
+    private readonly requisiteSnapshots: ExpenseRequisiteSnapshotsService,
+    @Inject(EXPENSE_PROPOSAL_REPOSITORY)
+    private readonly proposals: ExpenseProposalRepository,
+    @Inject(PAYMENT_REPOSITORY)
+    private readonly payments: PaymentRepository
   ) {}
 
   async generateExpenseProposalStatementDocument(
@@ -144,12 +163,124 @@ export class ExpensesMutationsService {
     })
   }
 
-  async reportExpenseItem(input: ReportExpenseItemInputDTO): Promise<TransactResult> {
-    return this.chain.reportExp({
-      coopname: input.coopname,
-      proposal_hash: input.proposal_hash,
-      item_hash: input.item_hash,
-    })
+  /**
+   * Отчёт пайщика по строке-авансу. Если факт совпал с выданным авансом (или не
+   * указан) — закрываем позицию on-chain (`reportexp`). Если факт расходится —
+   * заводим платёжку расчёта разницы (возврат/доплата) и откладываем `reportexp`
+   * до её подтверждения кассиром (контракт принимает returnexp/overspendexp
+   * только пока позиция в статусе PAID, поэтому расчёт обязан пройти ДО закрытия).
+   */
+  async reportExpenseItem(input: ReportExpenseItemInputDTO): Promise<ExpenseReportResultDTO> {
+    if (!input.actual_amount) {
+      const transaction = await this.chain.reportExp({
+        coopname: input.coopname,
+        proposal_hash: input.proposal_hash,
+        item_hash: input.item_hash,
+      })
+      return { outcome: ExpenseReportOutcome.CLOSED, transaction: transaction as any }
+    }
+
+    const proposal = await this.proposals.findByProposalHash(input.proposal_hash)
+    const item = proposal?.items?.find(
+      (i) => i.item_hash?.toLowerCase() === input.item_hash.toLowerCase()
+    )
+    if (!proposal || !item) {
+      throw new NotFoundException('Строка расхода не найдена')
+    }
+    if (item.mechanics !== MECHANICS_ADVANCE) {
+      throw new BadRequestException('Отчёт о фактической сумме применим только к авансу под отчёт')
+    }
+
+    // База расчёта — фактически ВЫДАННЫЙ аванс (item.actual_amount после payexp),
+    // а не план: устойчиво к частичной выдаче аванса кассиром.
+    const advance = parseAssetToMinor(item.actual_amount)
+    const factual = parseAssetToMinor(input.actual_amount)
+    if (advance.symbol !== factual.symbol) {
+      throw new BadRequestException('Символ фактической суммы не совпадает с символом аванса')
+    }
+
+    const deltaMinor = factual.minor - advance.minor
+    if (deltaMinor === 0) {
+      const transaction = await this.chain.reportExp({
+        coopname: input.coopname,
+        proposal_hash: input.proposal_hash,
+        item_hash: input.item_hash,
+      })
+      return { outcome: ExpenseReportOutcome.CLOSED, transaction: transaction as any }
+    }
+
+    const isUnderspend = deltaMinor < 0
+    const diffAmount = Math.abs(deltaMinor) / 10 ** advance.precision
+    const diffAsset = QuantityUtils.formatQuantityForBlockchain(diffAmount, advance.symbol)
+    const paymentHash = await this.createSettlementPayment(
+      input.coopname,
+      input.proposal_hash,
+      item,
+      isUnderspend,
+      diffAmount,
+      advance.symbol
+    )
+
+    return {
+      outcome: isUnderspend ? ExpenseReportOutcome.RETURN_PENDING : ExpenseReportOutcome.OVERSPEND_PENDING,
+      settlement_amount: diffAsset,
+      settlement_payment_hash: paymentHash,
+    }
+  }
+
+  /**
+   * Заводит manual-confirm платёжку расчёта разницы в общем реестре платежей
+   * (как платёж выдачи аванса) — кассир подтверждает по факту движения денег, и
+   * gateway проводит on-chain returnexp/overspendexp + reportexp. Идемпотентно по
+   * детерминированному хэшу: повторный отчёт по той же позиции платёжку не плодит.
+   */
+  private async createSettlementPayment(
+    coopname: string,
+    proposalHash: string,
+    item: IExpenseItemBlockchainData,
+    isUnderspend: boolean,
+    amount: number,
+    symbol: string
+  ): Promise<string> {
+    const itemHash = item.item_hash.toLowerCase()
+    const kind = isUnderspend ? 'return' : 'overspend'
+    const hash = generateHashFromString(`expense-settlement:${coopname}:${itemHash}:${kind}`)
+
+    const existing = await this.payments.findByHash(hash)
+    if (existing) return existing.hash
+
+    const now = new Date()
+    const payment: PaymentDomainInterface = {
+      id: '',
+      coopname,
+      // Позиция-аванс всегда оформлена на пайщика-получателя — расчёт разницы
+      // относится лично к нему (виден в его личном реестре платежей).
+      username: item.recipient,
+      quantity: amount,
+      symbol,
+      type: isUnderspend ? PaymentTypeEnum.EXPENSE_RETURN : PaymentTypeEnum.EXPENSE_OVERSPEND,
+      direction: isUnderspend ? PaymentDirectionEnum.INCOMING : PaymentDirectionEnum.OUTGOING,
+      status: PaymentStatusEnum.PENDING,
+      memo: isUnderspend
+        ? `Возврат неиспользованного аванса под отчёт: ${item.description}`
+        : `Доплата по перерасходу аванса под отчёт: ${item.description}`,
+      secret: generateUniqueHash(),
+      payment_method_id: undefined,
+      // proposal_hash + item_hash нужны gateway для returnexp/overspendexp; hash
+      // платёжки уникальный (не item_hash) — не пересекается с платежом выдачи.
+      blockchain_data: {
+        proposal_hash: proposalHash.toLowerCase(),
+        item_hash: itemHash,
+        description: item.description,
+      },
+      expired_at: undefined,
+      created_at: now,
+      updated_at: now,
+      hash,
+    }
+
+    const created = await this.payments.create(payment)
+    return created.hash
   }
 
   async returnExpenseItem(input: ReturnExpenseItemInputDTO): Promise<TransactResult> {
@@ -176,6 +307,16 @@ export class ExpensesMutationsService {
       proposal_hash: input.proposal_hash,
     })
   }
+}
+
+/**
+ * Парсит asset-строку ("800.0000 RUB") в целые минорные единицы по precision
+ * символа — сравнение/вычитание сумм без ошибок плавающей точки.
+ */
+function parseAssetToMinor(asset: string): { minor: number; symbol: string; precision: number } {
+  const { amount, symbol } = QuantityUtils.parseQuantityString(asset)
+  const precision = QuantityUtils.getPrecisionForSymbol(symbol)
+  return { minor: Math.round(amount * 10 ** precision), symbol, precision }
 }
 
 function toRequisiteItems(proposalHash: string, items: ExpenseItemInputDTO[]): InterExpenseRequisiteItemInput[] {

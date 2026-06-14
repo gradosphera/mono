@@ -23,8 +23,10 @@ import {
  * и реестра платежей (gateway).
  *
  * Adapter — тонкий: читает из локального TypeORM-зеркала proposals + items, проектирует
- * во внешний нейтральный DTO `@coopenomics/inter`. Единственный write — `payItem`
- * (on-chain `expense::payexp` при подтверждении исходящего платежа кассиром).
+ * во внешний нейтральный DTO `@coopenomics/inter`. Write-методы (`payItem` /
+ * `returnItem` / `overspendItem` / `reportItem`) — on-chain действия шасси при
+ * подтверждении кассиром платежей расчёта (payexp / returnexp / overspendexp /
+ * reportexp), под подписью кооператива.
  */
 @Injectable()
 export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPort {
@@ -42,6 +44,32 @@ export class ExpensesInterExpenseChassisAdapter implements InterExpenseChassisPo
       proposal_hash: proposalHash.toLowerCase(),
       item_hash: itemHash.toLowerCase(),
       actual_amount: actualAmount,
+    });
+  }
+
+  async returnItem(coopname: string, proposalHash: string, itemHash: string, returnAmount: string): Promise<void> {
+    await this.chain.returnExp({
+      coopname,
+      proposal_hash: proposalHash.toLowerCase(),
+      item_hash: itemHash.toLowerCase(),
+      return_amount: returnAmount,
+    });
+  }
+
+  async overspendItem(coopname: string, proposalHash: string, itemHash: string, overspendAmount: string): Promise<void> {
+    await this.chain.overspendExp({
+      coopname,
+      proposal_hash: proposalHash.toLowerCase(),
+      item_hash: itemHash.toLowerCase(),
+      overspend_amount: overspendAmount,
+    });
+  }
+
+  async reportItem(coopname: string, proposalHash: string, itemHash: string): Promise<void> {
+    await this.chain.reportExp({
+      coopname,
+      proposal_hash: proposalHash.toLowerCase(),
+      item_hash: itemHash.toLowerCase(),
     });
   }
 

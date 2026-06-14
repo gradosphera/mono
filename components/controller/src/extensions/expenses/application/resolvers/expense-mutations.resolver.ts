@@ -16,6 +16,7 @@ import { ExpensesManagementService } from '../services/expenses-management.servi
 import { CreateExpenseProposalInputDTO } from '../dto/create-expense-proposal.input';
 import { PayExpenseItemInputDTO } from '../dto/pay-expense-item.input';
 import { ReportExpenseItemInputDTO } from '../dto/report-expense-item.input';
+import { ExpenseReportResultDTO } from '../dto/report-expense-item.output';
 import { ReturnExpenseItemInputDTO } from '../dto/return-expense-item.input';
 import { OverspendExpenseItemInputDTO } from '../dto/overspend-expense-item.input';
 import { SubmitExpenseReportInputDTO } from '../dto/submit-expense-report.input';
@@ -118,16 +119,16 @@ export class ExpenseMutationsResolver {
     return this.expensesMutations.payExpenseItem(data);
   }
 
-  @Mutation(() => TransactionDTO, {
+  @Mutation(() => ExpenseReportResultDTO, {
     name: 'reportExpenseItem',
-    description: 'Закрыть строку расхода чеком (ADVANCE-отчёт пайщика).',
+    description: 'Отчитаться по строке-авансу: при совпадении факта с авансом — закрыть позицию; при недо-/перерасходе — завести платёжку расчёта разницы.',
   })
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @AuthRoles(['chairman', 'member', 'user'])
   async reportExpenseItem(
     @Args('data', { type: () => ReportExpenseItemInputDTO }) data: ReportExpenseItemInputDTO,
     @CurrentUser() user: MonoAccountDomainInterface
-  ): Promise<TransactionDTO> {
+  ): Promise<ExpenseReportResultDTO> {
     await this.assertCanReportItem(user, data.proposal_hash, data.item_hash);
     return this.expensesMutations.reportExpenseItem(data);
   }

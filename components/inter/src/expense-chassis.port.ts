@@ -149,4 +149,28 @@ export interface InterExpenseChassisPort {
    * (например "1000.0000 RUB").
    */
   payItem(coopname: string, proposalHash: string, itemHash: string, actualAmount: string): Promise<void>;
+
+  /**
+   * On-chain возврат неиспользованного аванса (`expense::returnexp`) под подписью
+   * кооператива. Вызывается реестром платежей при подтверждении кассиром приёма
+   * ВХОДЯЩЕГО платежа типа EXPENSE_RETURN (пайщик вернул разницу недорасхода).
+   * `returnAmount` — raw asset (модуль разницы факт−аванс, например "200.0000 RUB").
+   */
+  returnItem(coopname: string, proposalHash: string, itemHash: string, returnAmount: string): Promise<void>;
+
+  /**
+   * On-chain доплата при перерасходе (`expense::overspendexp`) под подписью
+   * кооператива. Вызывается реестром платежей при подтверждении кассиром выплаты
+   * ИСХОДЯЩЕГО платежа типа EXPENSE_OVERSPEND (кооператив доплатил перерасход).
+   * `overspendAmount` — raw asset (разница факт−аванс, например "200.0000 RUB").
+   */
+  overspendItem(coopname: string, proposalHash: string, itemHash: string, overspendAmount: string): Promise<void>;
+
+  /**
+   * On-chain закрытие позиции отчётом (`expense::reportexp`) под подписью
+   * кооператива. Вызывается реестром платежей после того, как расчёт разницы
+   * проведён (returnexp/overspendexp), либо напрямую сервисом отчёта, когда факт
+   * совпал с авансом и расчёт разницы не нужен.
+   */
+  reportItem(coopname: string, proposalHash: string, itemHash: string): Promise<void>;
 }
