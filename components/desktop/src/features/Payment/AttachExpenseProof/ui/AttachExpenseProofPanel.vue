@@ -1,8 +1,12 @@
 <template lang="pug">
 .attach-proof
+  .exp-step(v-if='step')
+    .exp-step__num {{ step.number }}
+    .exp-step__title {{ step.title }}
   //- Секция 1 — платёжка/квитанция об исполненной оплате (для любой механики).
   .attach-proof__section
-    .t-sm.t-muted Платёжка об оплате
+    .t-sm.t-muted(v-if='step') Приложите платёжку или квитанцию — это подтверждает, что оплата исполнена.
+    .t-sm.t-muted(v-else) Платёжка об оплате
     .files(v-if='proofFiles.length')
       button.file-link(
         v-for='file in proofFiles',
@@ -58,6 +62,9 @@ import { api, type IExpenseFile } from '../api';
 const props = defineProps<{
   proposalHash: string;
   itemHash: string;
+  // Опциональный заголовок-этап (номер + название) для последовательной подачи
+  // на столе кассира.
+  step?: { number: number | string; title: string };
 }>();
 
 const emit = defineEmits<{
@@ -189,6 +196,31 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--p-3);
+}
+
+.exp-step {
+  display: flex;
+  align-items: center;
+  gap: var(--p-2);
+}
+
+.exp-step__num {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--p-r-pill);
+  background: var(--p-primary-soft);
+  color: var(--p-primary);
+  font-size: var(--p-fs-body-sm);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exp-step__title {
+  font-weight: 600;
+  color: var(--p-ink);
 }
 
 .attach-proof__section {

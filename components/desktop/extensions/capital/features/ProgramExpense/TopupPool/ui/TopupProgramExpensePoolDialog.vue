@@ -5,18 +5,19 @@ BaseDialog(
   size='sm',
   @update:model-value='$emit("update:modelValue", $event)'
 )
-  .form
-    .t-eyebrow.t-muted.q-mb-sm Перевод средств из глобального инвест-пула в пул программных расходов
-    BaseInput(
-      v-model='amount',
-      label='Сумма пополнения',
-      :placeholder='amountPlaceholder',
-      required
-    )
-    .hint Деньги переводятся из свободных инвестиций программы в пул, из которого оплачиваются программные расходы.
+  .topup-form
+    .topup-form__field
+      AmountInput(
+        v-model='amount',
+        label='Сумма пополнения',
+        :symbol='symbol',
+        :precision='precision',
+        :placeholder='placeholder'
+      )
+    .topup-form__note.t-sm.t-muted Деньги переводятся из свободных инвестиций программы в пул, из которого оплачиваются программные расходы.
 
   template(#footer)
-    .footer-bar
+    .topup-form__actions
       BaseButton(variant='ghost', @click='close') Отмена
       BaseButton(
         variant='primary',
@@ -32,7 +33,7 @@ import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
-import { BaseInput } from 'src/shared/ui/base/BaseInput';
+import { AmountInput } from 'src/shared/ui/domain/AmountInput';
 import { useTopupProgramExpensePool } from '../model';
 
 defineProps<{ modelValue: boolean }>();
@@ -44,27 +45,27 @@ const emit = defineEmits<{
 const system = useSystemStore();
 const { submitTopup } = useTopupProgramExpensePool();
 
-const amount = ref('');
+const amount = ref<number | null>(null);
 const submitting = ref(false);
 
-const amountPlaceholder = computed(() => {
-  const symbol = system.info?.symbols?.root_govern_symbol ?? 'RUB';
-  return `10000 (${symbol})`;
-});
+const symbol = computed(() => system.info?.symbols?.root_govern_symbol ?? 'RUB');
+const precision = computed(() => system.info?.symbols?.root_govern_precision ?? 2);
+const placeholder = computed(() => '10000');
 
-const canSubmit = computed(() => amount.value.trim().length > 0);
+const canSubmit = computed(() => amount.value != null && amount.value > 0);
 
 function close(): void {
   emit('update:modelValue', false);
 }
 
 async function submit(): Promise<void> {
+  if (amount.value == null) return;
   try {
     submitting.value = true;
-    await submitTopup(amount.value);
+    await submitTopup(String(amount.value));
     SuccessAlert('Пул пополнен — средства переведены в пул программных расходов');
     emit('topped-up');
-    amount.value = '';
+    amount.value = null;
     close();
   } catch (e) {
     FailAlert(e);
@@ -75,24 +76,23 @@ async function submit(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-.form {
+.topup-form {
   display: flex;
   flex-direction: column;
   gap: var(--p-3);
-  padding: var(--p-4);
 }
 
-.hint {
-  color: var(--p-ink-2);
-  font-size: var(--p-fs-body-sm);
+.topup-form__field {
+  max-width: 240px;
 }
 
-.footer-bar {
+.topup-form__note {
+  margin: 0;
+}
+
+.topup-form__actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--p-2);
-  padding: var(--p-3) var(--p-4);
-  border-top: 1px solid var(--p-line);
-  background: var(--p-canvas);
 }
 </style>

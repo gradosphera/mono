@@ -1,11 +1,36 @@
 <template lang="pug">
 .report-advance(v-if='item')
   template(v-if='isReported || isAwaitingReport')
-    .t-sm.t-warning.report-advance__onbehalf(v-if='onBehalf && isAwaitingReport')
-      q-icon(name='assignment_ind', size='16px')
-      span Отчёт за пайщика: чеки получены лично. Приложите их, укажите фактически потраченную пайщиком сумму и отчитайтесь от его имени.
-    .t-sm.t-muted(v-if='isReported') Отчёт по авансу подан — дополнительные документы дополнят его автоматически
-    .t-sm.t-muted(v-else) Выданный аванс: {{ advanceLabel }}. Приложите чеки, укажите фактически потраченную сумму и отчитайтесь.
+    .exp-step(v-if='step')
+      .exp-step__num {{ step.number }}
+      .exp-step__title {{ step.title }}
+    .t-sm.t-muted(v-if='isReported') Отчёт по авансу подан — дополнительные документы дополнят его автоматически.
+    template(v-else)
+      .t-sm.report-advance__lead(v-if='onBehalf')
+        q-icon(name='assignment_ind', size='16px')
+        span Чеки получены от пайщика лично. Укажите фактически потраченную сумму и приложите чек — отчёт уйдёт от его имени.
+      .t-sm.t-muted(v-else) Выданный аванс: {{ advanceLabel }}. Укажите фактически потраченную сумму и приложите чек.
+
+    template(v-if='isAwaitingReport')
+      //- Сначала сумма (с ней видна разница), затем чек — и только тогда кнопка.
+      AmountInput(
+        v-model='factualAmount',
+        :symbol='advanceSymbol',
+        :precision='2',
+        :min='0',
+        label='Фактически потрачено по чекам',
+        :disabled='reporting'
+      )
+      .t-sm.t-warning(v-if='deltaHint') {{ deltaHint }}
+      FileUploader(
+        v-model='pending',
+        accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
+        :max-size='20 * 1024 * 1024',
+        title='Приложите чек',
+        hint='Изображение или PDF до 20 МБ — добавится сразу',
+        :disabled='uploading || reporting'
+      )
+
     .files(v-if='files.length')
       button.file-link(
         v-for='file in files',
@@ -17,30 +42,14 @@
         q-icon(name='attach_file', size='16px')
         span {{ fileLabel(file) }}
         q-spinner(v-if='openingId === file.id', size='14px')
-    template(v-if='isAwaitingReport')
-      FileUploader(
-        v-model='pending',
-        accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
-        :max-size='20 * 1024 * 1024',
-        title='Приложите чек',
-        hint='Изображение или PDF до 20 МБ — добавится сразу',
-        :disabled='uploading || reporting'
-      )
-      AmountInput(
-        v-model='factualAmount',
-        :symbol='advanceSymbol',
-        :precision='2',
-        :min='0',
-        label='Фактически потрачено по чекам',
-        :disabled='reporting'
-      )
-      .t-sm.t-warning(v-if='deltaHint') {{ deltaHint }}
-      BaseButton(
-        variant='primary',
-        :loading='reporting',
-        :disabled='!files.length || reporting',
-        @click='submitReport'
-      ) {{ onBehalf ? 'Отчитаться за пайщика' : 'Отчитаться по авансу' }}
+
+    BaseButton(
+      v-if='isAwaitingReport',
+      variant='primary',
+      :loading='reporting',
+      :disabled='!files.length || reporting',
+      @click='submitReport'
+    ) {{ onBehalf ? 'Отчитаться за пайщика' : 'Отчитаться по авансу' }}
 </template>
 
 <script setup lang="ts">
@@ -65,8 +74,11 @@ const props = withDefaults(
     // Кассир отчитывается за пайщика (чеки переданы лично) — меняет только подписи,
     // мутация та же (бэкенд авторизует совет по любой строке).
     onBehalf?: boolean;
+    // Опциональный заголовок-этап (номер + название) — показывается только когда
+    // у панели есть контент, поэтому пустых «Этапов» у строк без отчёта не будет.
+    step?: { number: number | string; title: string };
   }>(),
-  { onBehalf: false },
+  { onBehalf: false, step: undefined },
 );
 
 const emit = defineEmits<{
@@ -272,13 +284,39 @@ onMounted(refresh);
 .report-advance {
   display: flex;
   flex-direction: column;
+  gap: var(--p-3);
+}
+
+.exp-step {
+  display: flex;
+  align-items: center;
   gap: var(--p-2);
 }
 
-.report-advance__onbehalf {
+.exp-step__num {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--p-r-pill);
+  background: var(--p-primary-soft);
+  color: var(--p-primary);
+  font-size: var(--p-fs-body-sm);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exp-step__title {
+  font-weight: 600;
+  color: var(--p-ink);
+}
+
+.report-advance__lead {
   display: flex;
   align-items: flex-start;
   gap: var(--p-1);
+  color: var(--p-ink-2);
 }
 
 .files {

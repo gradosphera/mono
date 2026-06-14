@@ -69,16 +69,18 @@
                   //- Стол совета: кассир прикладывает платёжку и закрывающие документы;
                   //- при личной передаче чеков — отчитывается за пайщика (панель
                   //- отчёта сама скрывается для прямой оплаты организации, DIRECT).
-                  template(v-if='!hideActions && expenseProofRef(row)')
-                    AttachExpenseProofPanel.q-mt-sm(
+                  .expense-flow.q-mt-sm(v-if='!hideActions && expenseProofRef(row)')
+                    AttachExpenseProofPanel(
                       :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
                       :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+                      :step='{ number: 1, title: "Подтвердите оплату" }',
                       @uploaded='onProofUploaded(row)'
                     )
-                    ReportExpenseAdvancePanel.q-mt-sm(
+                    ReportExpenseAdvancePanel(
                       :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
                       :item-hash='expenseProofRef(row)?.item_hash ?? ""',
                       :on-behalf='true',
+                      :step='{ number: 2, title: "Отчёт пайщика" }',
                       @reported='onReported'
                     )
                   //- Личный стол: пайщик-получатель отчитывается чеком по своей строке.
@@ -133,16 +135,18 @@
           SetOrderRefundedStatusButton(v-if='!isRefundType(row.type)', :id='row.id')
         template(v-if='expanded.get(row.id)')
           PaymentDetails.pay-card__details(:payment='row')
-          template(v-if='!hideActions && expenseProofRef(row)')
-            AttachExpenseProofPanel.q-mt-sm(
+          .expense-flow.q-mt-sm(v-if='!hideActions && expenseProofRef(row)')
+            AttachExpenseProofPanel(
               :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
               :item-hash='expenseProofRef(row)?.item_hash ?? ""',
+              :step='{ number: 1, title: "Подтвердите оплату" }',
               @uploaded='onProofUploaded(row)'
             )
-            ReportExpenseAdvancePanel.q-mt-sm(
+            ReportExpenseAdvancePanel(
               :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
               :item-hash='expenseProofRef(row)?.item_hash ?? ""',
               :on-behalf='true',
+              :step='{ number: 2, title: "Отчёт пайщика" }',
               @reported='onReported'
             )
           ReportExpenseAdvancePanel.q-mt-sm(
@@ -593,5 +597,18 @@ onMounted(() => {
 .expand-row td {
   padding: 0 20px 16px;
   background: var(--p-surface-2);
+}
+
+/* Последовательные этапы кассира (подтверждение оплаты → отчёт пайщика):
+   разделяем хайрлайном, чтобы видно было «сейчас этот этап, потом следующий». */
+.expense-flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-4);
+}
+
+.expense-flow > * + * {
+  padding-top: var(--p-4);
+  border-top: 1px solid var(--p-line);
 }
 </style>
