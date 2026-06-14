@@ -135,7 +135,7 @@ const listRows = computed<ExpenseProposalListRow[]>(() =>
     expense_hash: item.expense_hash,
     title: item.items[0]?.description ?? '',
     status: item.status,
-    total_planned: item.total_planned,
+    total_planned: formatAsset2Digits(item.total_planned),
     creator_name: item.creator_name || item.creator,
     created_at: item.created_at,
   })),
