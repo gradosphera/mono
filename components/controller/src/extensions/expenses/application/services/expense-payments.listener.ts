@@ -78,9 +78,17 @@ export class ExpensePaymentsListener {
       const payment: PaymentDomainInterface = {
         id: '',
         coopname: entity.coopname,
-        // Аванс — пайщику-получателю (его реквизиты и сертификат); оплата по
-        // счёту — от имени инициатора СЗ, получатель-организация в реквизитах.
-        username: isOrganization ? (entity.username as string) : item.recipient,
+        // Владелец платежа в реестре = тот, к кому платёж относится ЛИЧНО:
+        // аванс под отчёт — пайщик-получатель (платёж виден в его личном реестре,
+        // его реквизиты/сертификат). Оплата организации — это платёж самого
+        // КООПЕРАТИВА (получатель-организация в реквизитах), а НЕ инициатора СЗ:
+        // инициатор лишь предложил расход, деньги идут не к нему — на его столе
+        // пайщика такой платёж появляться не должен. Поэтому org-платёж
+        // принадлежит кооперативу (coopname): в личных реестрах пайщиков он не
+        // виден (там фильтр по username), кассир видит его в общем реестре
+        // платежей кооператива (без фильтра по username). На on-chain payexp это
+        // не влияет — проводка берёт coopname/proposal_hash/item_hash, не username.
+        username: isOrganization ? entity.coopname : item.recipient,
         quantity: amount,
         symbol,
         type: PaymentTypeEnum.EXPENSE,
