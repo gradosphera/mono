@@ -20,7 +20,7 @@ export const expenseAdvanceReportReminderPayloadSchema = z.object({
   coopName: z.string(),
   period: z.string(),
   count: z.number(),
-  link: z.string(), // Основная CTA-ссылка (на сам расход, если он один, иначе на список «Мои авансы»)
+  link: z.string(), // Основная CTA-ссылка (на сам расход, если он один, иначе на личную страницу «Платежи»)
   advances: z.array(advanceItemSchema),
 });
 export type IPayload = z.infer<typeof expenseAdvanceReportReminderPayloadSchema>;

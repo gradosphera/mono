@@ -16,7 +16,7 @@
 
 **Напоминатель об отчёте по авансу под отчёт** — `controller/src/extensions/expenses/application/services/expense-advance-reminder.service.ts`.
 
-`@Interval`-воркер периодически сканирует зеркало расходов кооператива и находит `ADVANCE`-позиции в статусе `PAID` (аванс выдан пайщику, отчёт не подан). По каждому пайщику-получателю шлёт **один агрегированный недельный дайджест** (workflow `Workflows.ExpenseAdvanceReportReminder` в `@coopenomics/notifications`) со ссылками — на сам расход `/:coopname/expenses/:hash`, если он один, иначе на список `/:coopname/expenses/my/advances`. **Только получателю аванса** (`item.recipient`), кассиру/совету ничего; ORG-получатели пропускаются.
+`@Interval`-воркер периодически сканирует зеркало расходов кооператива и находит `ADVANCE`-позиции в статусе `PAID` (аванс выдан пайщику, отчёт не подан). По каждому пайщику-получателю шлёт **один агрегированный недельный дайджест** (workflow `Workflows.ExpenseAdvanceReportReminder` в `@coopenomics/notifications`) со ссылками — на сам расход `/:coopname/expenses/:hash`, если он один, иначе на личную страницу «Платежи» `/:coopname/user/payments`. **Только получателю аванса** (`item.recipient`), кассиру/совету ничего; ORG-получатели пропускаются.
 
 - Троттлинг «раз в неделю» — через идемпотентность Центра уведомлений: поле `period` (ISO-неделя) в payload делает его стабильным внутри недели, повторные тики гасятся, на новой неделе уходит ровно одно письмо. Своя таблица состояния не нужна.
 - Точка отсчёта грейса — `proposal.updated_at` (для `PAID`-не-`REPORTED` item-а это фактически момент выплаты), фолбэк `created_at`.
@@ -36,7 +36,6 @@ Desktop UI для **шасси системы расходов** (MVP-SINGLE) Ц
 | `/:coopname/expenses/admin/approve` | `ExpensesAdminApprovePage` | Очередь «Ждут одобрения председателя» | председатель |
 | `/:coopname/expenses/admin/authorize` | `ExpensesAdminAuthorizePage` | Очередь «На авторизацию совета» | председатель |
 | `/:coopname/expenses/cashier` | `CashierPage` | 4 таба кассира (готово к оплате / ждут отчёта / ждут утверждения / закрыто) | председатель |
-| `/:coopname/expenses/my/advances` | `MyAdvancesPage` | Мои авансы — приложить чек | пайщик |
 | dialog (без маршрута) | `ExpenseProposalCreateDialog` | Форма-конструктор СЗ с массивом items | все |
 
 ## Зависимости (порядок сборки)
@@ -79,7 +78,6 @@ extensions/expenses/
     ├── ExpensesAdminApprovePage.vue             ← /expenses/admin/approve
     ├── ExpensesAdminAuthorizePage.vue           ← /expenses/admin/authorize
     ├── CashierPage.vue                          ← /expenses/cashier
-    ├── MyAdvancesPage.vue                       ← /expenses/my/advances
     └── ExpenseProposalCreateDialog.vue          ← dialog (вызывается из ExpensesRegistryPage)
 ```
 
@@ -116,7 +114,7 @@ Mutations.Capital.CreateProgramExpenseProposal.mutation
 2. **`ExpenseDetailPage`** — `<PageHead>` + статус-чип, секции: проект-карточка → item-table → цепочка артефактов (`<DocumentRow>` 2010/2011 + `<FileUploader>`-показ файлов) → `<VerticalStepper>` lifecycle.
 3. **`ExpensesAdminApprovePage`** / **`ExpensesAdminAuthorizePage`** — canon-таблицы со столбцом действий (одобрить/отклонить/авторизовать/декланировать). Decline-модалка: `<BaseDialog>` с `<BaseInput textarea>` для reason.
 4. **`CashierPage`** — `<PageTabs>` с 4 вкладками; каждая = `BaseTable`. Действие «Оплатил, приложить чек» = `<BaseDialog>` с `<FileUploader>` (multipart → MinIO через `Mutations.Expenses.UploadExpenseFile` → следом `Mutations.Expenses.PayExpenseItem`).
-5. **`MyAdvancesPage`** — `BaseTable` своих `paid AND mechanics=ADVANCE`; действие «Приложить чек» — тот же диалог что в кассире, но с `SubmitExpenseReport` на коммит.
+5. ~~**`MyAdvancesPage`**~~ — УДАЛЕНА (была не подключена ни к одному столу). Авансы пайщика-получателя видны на его личной странице «Платежи» (`/:coopname/user/payments`, `ListOfPaymentsWidget`): строки авансов с панелью `ReportExpenseAdvancePanel` (приложить чек / отчитаться).
 6. **`ExpenseProposalCreateDialog`** — `<BaseDialog>` + `<BaseForm>` с массивом items, добавление/удаление item'ов через `<BaseButton>`. Per-item — `<BaseRadioCard>` для recipient_type {SELF/MEMBER/ORG}, `<BaseSelect>` для mechanics {ADVANCE/DIRECT}, `<AmountInput>` для сумм, `<RequisitesPicker>` (новый компонент в `shared/ui/domain/`) для ADVANCE-получателя.
 
 ## Ссылки

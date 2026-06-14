@@ -6,7 +6,6 @@ import {
   ExpenseDetailPage,
   ExpensesAdminApprovePage,
   CashierPage,
-  MyAdvancesPage,
 } from './pages';
 
 // Шасси расходов — UI scaffold (C28-32). Зарегистрировано в
@@ -63,19 +62,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               title: 'Касса',
               icon: 'payments',
               roles: ['chairman'],
-              agreements: agreementsBase,
-              requiresAuth: true,
-            },
-            children: [],
-          },
-          {
-            path: 'my/advances',
-            name: 'expenses-my-advances',
-            component: markRaw(MyAdvancesPage),
-            meta: {
-              title: 'Мои авансы',
-              icon: 'account_balance_wallet',
-              roles: [],
               agreements: agreementsBase,
               requiresAuth: true,
             },

@@ -117,8 +117,12 @@ export class ExpenseAdvanceReminderService implements OnModuleInit {
 
   private async sendDigest(coopname: string, username: string, advances: OutstandingAdvance[]): Promise<void> {
     const base = `${config.frontend_url}/${coopname}/expenses`;
-    // Один аванс — ведём прямо на расход; несколько — на список «Мои авансы».
-    const link = advances.length === 1 ? `${base}/${advances[0].proposal_hash}` : `${base}/my/advances`;
+    // Один аванс — ведём прямо на сам расход; несколько — на личную страницу
+    // «Платежи» пайщика (там строки авансов с панелью «приложить чек/отчитаться»).
+    const link =
+      advances.length === 1
+        ? `${base}/${advances[0].proposal_hash}`
+        : `${config.frontend_url}/${coopname}/user/payments`;
 
     const payload: Workflows.ExpenseAdvanceReportReminder.IPayload = {
       coopName: coopname,

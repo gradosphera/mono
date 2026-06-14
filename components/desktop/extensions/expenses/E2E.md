@@ -48,8 +48,8 @@
 | 3 | `council[]` | authorize | proposal.status = `authorized` |
 | 4 | `cashier` | `/voskhod/expenses/cashier`, оплатить item(a) → upload файл-платёжка | item(a).status = `paid`, ledger2 op = `o.exp.blgadv` (Дт 08 / Кт 51), notification → master |
 | 5 | `cashier` | оплатить item(b) → файл-платёжка | item(b).status = `paid`, ledger2 op = `o.exp.blgadv`, notification → svetlana |
-| 6 | `master` | login → `/voskhod/expenses/my/advances` → item(a) → «Приложить чек» (FileUploader → MinIO → `reportexp`) | item(a).status = `reported`, ledger2 op = `o.exp.advrpt` (BURN, без проводки) |
-| 7 | `svetlana` | login → `/voskhod/expenses/my/advances` → item(b) → чек → reportexp | item(b).status = `reported`, ledger2 op = `o.exp.advrpt` |
+| 6 | `master` | login → `/voskhod/user/payments` → item(a) → «Приложить чек» (FileUploader → MinIO → `reportexp`) | item(a).status = `reported`, ledger2 op = `o.exp.advrpt` (BURN, без проводки) |
+| 7 | `svetlana` | login → `/voskhod/user/payments` → item(b) → чек → reportexp | item(b).status = `reported`, ledger2 op = `o.exp.advrpt` |
 | 8 | `master` | submitreport | proposal.status = `report_submitted` |
 | 9 | `council[]` | authorize | proposal.status = `closed` |
 
