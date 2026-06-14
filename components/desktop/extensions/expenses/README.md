@@ -36,6 +36,7 @@ Desktop UI для **шасси системы расходов** (MVP-SINGLE) Ц
 | `/:coopname/expenses/admin/approve` | `ExpensesAdminApprovePage` | Очередь «Ждут одобрения председателя» | председатель |
 | `/:coopname/expenses/admin/authorize` | `ExpensesAdminAuthorizePage` | Очередь «На авторизацию совета» | председатель |
 | `/:coopname/expenses/cashier` | `CashierPage` | 4 таба кассира (готово к оплате / ждут отчёта / ждут утверждения / закрыто) | председатель |
+| `/:coopname/expenses/my/advances` | `MyAdvancesPage` | Мои авансы — приложить чек (каркас, пока не выведен) | пайщик |
 | dialog (без маршрута) | `ExpenseProposalCreateDialog` | Форма-конструктор СЗ с массивом items | все |
 
 ## Зависимости (порядок сборки)
@@ -78,6 +79,7 @@ extensions/expenses/
     ├── ExpensesAdminApprovePage.vue             ← /expenses/admin/approve
     ├── ExpensesAdminAuthorizePage.vue           ← /expenses/admin/authorize
     ├── CashierPage.vue                          ← /expenses/cashier
+    ├── MyAdvancesPage.vue                       ← /expenses/my/advances (каркас)
     └── ExpenseProposalCreateDialog.vue          ← dialog (вызывается из ExpensesRegistryPage)
 ```
 
@@ -114,7 +116,7 @@ Mutations.Capital.CreateProgramExpenseProposal.mutation
 2. **`ExpenseDetailPage`** — `<PageHead>` + статус-чип, секции: проект-карточка → item-table → цепочка артефактов (`<DocumentRow>` 2010/2011 + `<FileUploader>`-показ файлов) → `<VerticalStepper>` lifecycle.
 3. **`ExpensesAdminApprovePage`** / **`ExpensesAdminAuthorizePage`** — canon-таблицы со столбцом действий (одобрить/отклонить/авторизовать/декланировать). Decline-модалка: `<BaseDialog>` с `<BaseInput textarea>` для reason.
 4. **`CashierPage`** — `<PageTabs>` с 4 вкладками; каждая = `BaseTable`. Действие «Оплатил, приложить чек» = `<BaseDialog>` с `<FileUploader>` (multipart → MinIO через `Mutations.Expenses.UploadExpenseFile` → следом `Mutations.Expenses.PayExpenseItem`).
-5. ~~**`MyAdvancesPage`**~~ — УДАЛЕНА (была не подключена ни к одному столу). Авансы пайщика-получателя видны на его личной странице «Платежи» (`/:coopname/user/payments`, `ListOfPaymentsWidget`): строки авансов с панелью `ReportExpenseAdvancePanel` (приложить чек / отчитаться).
+5. **`MyAdvancesPage`** — КАРКАС будущего стола кассира (роут `expenses-my-advances`), пока НЕ выведен в меню и ничего на него не ведёт. До сборки стола кассира авансы пайщика-получателя видны на его личной странице «Платежи» (`/:coopname/user/payments`, `ListOfPaymentsWidget`): строки авансов с панелью `ReportExpenseAdvancePanel` (приложить чек / отчитаться). Рабочие ссылки (напоминатель об авансах) ведут туда, а не на эту страницу.
 6. **`ExpenseProposalCreateDialog`** — `<BaseDialog>` + `<BaseForm>` с массивом items, добавление/удаление item'ов через `<BaseButton>`. Per-item — `<BaseRadioCard>` для recipient_type {SELF/MEMBER/ORG}, `<BaseSelect>` для mechanics {ADVANCE/DIRECT}, `<AmountInput>` для сумм, `<RequisitesPicker>` (новый компонент в `shared/ui/domain/`) для ADVANCE-получателя.
 
 ## Ссылки

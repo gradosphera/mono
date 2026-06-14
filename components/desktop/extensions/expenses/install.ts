@@ -6,6 +6,7 @@ import {
   ExpenseDetailPage,
   ExpensesAdminApprovePage,
   CashierPage,
+  MyAdvancesPage,
 } from './pages';
 
 // Шасси расходов — UI scaffold (C28-32). Зарегистрировано в
@@ -27,6 +28,17 @@ export default async function (): Promise<IWorkspaceConfig[]> {
         },
         path: '/:coopname/expenses',
         name: 'expenses',
+        // ВНИМАНИЕ: воркспейс `expenses` пока НЕ привязан ни к одному столу
+        // (меню столов приходит с бэкенда; setRoutes вешает пункт лишь если
+        // воркспейс есть в desktop-конфиге). Поэтому страницы ниже — рабочий
+        // КАРКАС будущего «стола кассира» (касса/одобрение/мои авансы):
+        // открываются только по прямому URL, в навигации их нет, и НИЧЕГО на
+        // них не ведёт намеренно. НЕ удалять как «мёртвый код» — соберём стол
+        // кассира из них позже. Реально используются сейчас только
+        // expenses-registry (монтируется на столе совета как «Реестр расходов»)
+        // и expenses-detail (деталь, куда проваливается реестр). Рабочие ссылки
+        // (напоминатель об авансах и т.п.) ведут на личные «Платежи»
+        // /:coopname/user/payments, НЕ на эти каркасные страницы.
         children: [
           {
             path: '',
@@ -62,6 +74,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               title: 'Касса',
               icon: 'payments',
               roles: ['chairman'],
+              agreements: agreementsBase,
+              requiresAuth: true,
+            },
+            children: [],
+          },
+          {
+            path: 'my/advances',
+            name: 'expenses-my-advances',
+            component: markRaw(MyAdvancesPage),
+            meta: {
+              title: 'Мои авансы',
+              icon: 'account_balance_wallet',
+              roles: [],
               agreements: agreementsBase,
               requiresAuth: true,
             },
