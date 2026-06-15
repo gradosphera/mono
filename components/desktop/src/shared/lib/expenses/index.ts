@@ -151,31 +151,3 @@ export function reportStateVariant(state: ExpenseReportState): ExpenseBadgeVaria
 export function shortExpenseId(hash: string): string {
   return hash.slice(0, 16).toUpperCase();
 }
-
-// sha256-hex строки через Web Crypto — точная копия серверного
-// generateHashFromString (controller/src/utils/generate-hash.util.ts).
-// Нужна, чтобы фронт мог детерминированно вычислить хэши расчётных платёжек.
-export async function sha256Hex(input: string): Promise<string> {
-  const buffer = await crypto.subtle.digest(
-    'SHA-256',
-    new TextEncoder().encode(input),
-  );
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-export type ExpenseSettlementKind = 'return' | 'overspend';
-
-// Хэш расчётной платёжки (возврат недорасхода / доплата перерасхода) —
-// детерминирован из coopname + item_hash + вида расчёта. Должен совпадать с
-// серверным generateHashFromString(`expense-settlement:${coopname}:${itemHash}:${kind}`)
-// (expenses-mutations.service.createSettlementPayment). Хэш платежа ВЫДАЧИ
-// аванса отдельно не считается — он равен самому item_hash позиции.
-export async function settlementPaymentHash(
-  coopname: string,
-  itemHash: string,
-  kind: ExpenseSettlementKind,
-): Promise<string> {
-  return sha256Hex(`expense-settlement:${coopname}:${itemHash.toLowerCase()}:${kind}`);
-}

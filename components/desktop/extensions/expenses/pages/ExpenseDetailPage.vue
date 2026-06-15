@@ -157,7 +157,6 @@ import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { listExpenseWallets } from 'src/shared/lib/expense-wallets';
-import { settlementPaymentHash } from 'src/shared/lib/expenses';
 import { api as paymentApi } from 'src/entities/Payment/api';
 import type { IPayment } from 'src/entities/Payment';
 import {
@@ -258,37 +257,32 @@ function paymentTimelineEvent(pay: IPayment): ActivityEvent {
   };
 }
 
-// Платежи расхода собираем по ДЕТЕРМИНИРОВАННЫМ хэшам, а не по username:
-// у позиции-организации платёж принадлежит кооперативу, у аванса под отчёт —
-// пайщику-получателю, и у каждой позиции свой получатель — единого владельца
-// нет. Хэш платежа выдачи = item_hash; расчётные платёжки (возврат/доплата) —
-// settlementPaymentHash(...). Точечный hash-фильтр gateway не требует листать
-// общий реестр и не требует нового бэкенд-поля proposal_hash.
+// Все платежи расхода — одним запросом по proposal_hash (gateway-фильтр по
+// json-полю blockchain_data.proposal_hash). Связь платёж→расход зашита в данные
+// бэкендом при создании платежа, поэтому фронт ничего не реконструирует и не
+// дублирует серверных формул хэшей: спрашиваем по расходу — получаем все
+// связанные платежи любого типа (выдача/оплата, возврат, доплата).
+const PAYMENT_TYPE_ORDER: Record<string, number> = {
+  [Zeus.PaymentType.EXPENSE]: 0,
+  [Zeus.PaymentType.EXPENSE_RETURN]: 1,
+  [Zeus.PaymentType.EXPENSE_OVERSPEND]: 1,
+};
 async function loadLinkedPayments(): Promise<void> {
   const coopname = route.params.coopname as string;
-  const items = proposal.value?.items ?? [];
-  if (!coopname || !items.length) return;
+  const proposal_hash = proposal.value?.proposal_hash;
+  if (!coopname || !proposal_hash) return;
   try {
     loadingPayments.value = true;
-    const hashes: string[] = [];
-    for (const it of items) {
-      const ih = it.item_hash?.toLowerCase();
-      if (!ih) continue;
-      hashes.push(ih); // платёж выдачи (аванс под отчёт / оплата организации)
-      if (it.mechanics === Zeus.ExpenseMechanics.ADVANCE) {
-        hashes.push(await settlementPaymentHash(coopname, ih, 'return'));
-        hashes.push(await settlementPaymentHash(coopname, ih, 'overspend'));
-      }
-    }
-    const results = await Promise.all(
-      hashes.map((hash) =>
-        paymentApi
-          .loadPayments({ coopname, hash }, { page: 1, limit: 1 })
-          .then((r) => r.items?.[0] ?? null)
-          .catch(() => null),
-      ),
+    const result = await paymentApi.loadPayments(
+      { coopname, proposal_hash },
+      { page: 1, limit: 100 },
     );
-    linkedPayments.value = results.filter((p): p is IPayment => Boolean(p));
+    // Выдача/оплата (EXPENSE) — раньше расчётных платёжек (возврат/доплата).
+    linkedPayments.value = [...(result.items ?? [])].sort(
+      (a, b) =>
+        (PAYMENT_TYPE_ORDER[a.type ?? ''] ?? 9) -
+        (PAYMENT_TYPE_ORDER[b.type ?? ''] ?? 9),
+    );
   } catch (e) {
     FailAlert(e);
   } finally {
