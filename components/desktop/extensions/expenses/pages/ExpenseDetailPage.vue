@@ -1,5 +1,11 @@
 <template lang="pug">
 .q-pa-md
+  //- Canon back-link под шапкой, слева — возврат к реестру расходов (откуда
+  //- проваливаются в деталь). Виден всегда, даже пока расход грузится.
+  button.expense-back(type='button', @click='goBack')
+    q-icon(name='arrow_back', size='18px')
+    span К реестру расходов
+
   q-inner-loading(:showing='loading && !proposal', color='primary')
 
   .expense-detail(v-if='proposal')
@@ -239,6 +245,15 @@ async function loadLinkedPayments(): Promise<void> {
   } finally {
     loadingPayments.value = false;
   }
+}
+
+// Возврат к реестру расходов (back-link под шапкой) — туда, откуда
+// проваливаются в деталь конкретного расхода.
+function goBack(): void {
+  void router.push({
+    name: 'expenses-registry',
+    params: { coopname: route.params.coopname },
+  });
 }
 
 // Клик по платежу → реестр платежей кассира, отфильтрованный по владельцу
@@ -481,6 +496,23 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--p-4);
+}
+
+.expense-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1, 4px);
+  margin-bottom: var(--p-4, 16px);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--p-ink-2);
+  font-size: var(--p-fs-body-sm, 13px);
+  cursor: pointer;
+  transition: color var(--p-dur-fast, 120ms) var(--p-ease-standard);
+}
+.expense-back:hover {
+  color: var(--p-ink);
 }
 
 .head-row {
