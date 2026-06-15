@@ -73,6 +73,29 @@
           template(#icon)
             q-icon(name='list', size='40px')
 
+    //- Платежи по расходу — выдача аванса/оплата организации и, если был
+    //- перерасчёт по чекам, расчётная платёжка (возврат недорасхода или
+    //- доплата перерасхода). Реквизиты «куда уходил платёж», назначение и
+    //- причина отклонения — внутри PaymentDetails. Клик ведёт на реестр
+    //- платежей к этому конкретному платежу.
+    .section(v-if='loadingPayments || linkedPayments.length')
+      .t-eyebrow.t-muted Платежи по расходу
+      BaseCard
+        .t-sm.t-muted(v-if='loadingPayments && !linkedPayments.length') Загрузка платежей…
+        .pay-list(v-else)
+          .pay-item(v-for='pay in linkedPayments', :key='pay.hash')
+            .pay-item__head
+              .pay-item__title
+                q-icon(:name='paymentDirectionIcon(pay)', size='16px')
+                span {{ pay.type_label || pay.type }}
+              .pay-item__amount
+                BaseBadge(:variant='paymentStatusVariant(pay.status)') {{ pay.status_label || pay.status }}
+                span.t-mono {{ formatAmount(paymentAmount(pay)) }}
+            PaymentDetails(:payment='pay')
+            button.pay-item__link(type='button', @click='openInRegistry(pay)')
+              q-icon(name='open_in_new', size='15px')
+              span Открыть в реестре платежей
+
     //- Чеки/подтверждения — кликабельное имя файла открывает документ в новой
     //- вкладке (как на странице расхода программы: read_url короткоживущий,
     //- запрашиваем свежий по id в момент клика).
@@ -112,9 +135,10 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
+import type { BaseBadgeVariant } from 'src/shared/ui/base/BaseBadge';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import { EmptyState } from 'src/shared/ui/base/EmptyState';
@@ -122,10 +146,14 @@ import { DataRow } from 'src/shared/ui/domain';
 import { ExpenseProposalDocuments } from 'src/shared/ui/domain/ExpenseProposalDocuments';
 import { ActivityTimeline } from 'src/shared/ui/domain/ActivityTimeline';
 import type { ActivityEvent } from 'src/shared/ui/domain/ActivityTimeline';
+import { PaymentDetails } from 'src/shared/ui';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { getNameFromCertificate } from 'src/shared/lib/utils/getNameFromCertificate';
 import { listExpenseWallets } from 'src/shared/lib/expense-wallets';
+import { settlementPaymentHash } from 'src/shared/lib/expenses';
+import { api as paymentApi } from 'src/entities/Payment/api';
+import type { IPayment } from 'src/entities/Payment';
 import {
   getExpenseProposal,
   getExpenseFilesByProposal,
@@ -145,11 +173,83 @@ type IProposal = NonNullable<IExpenseProposalResult>;
 type IFileRow = IExpenseFilesByProposalResult[number];
 
 const route = useRoute();
+const router = useRouter();
 
 const loading = ref(false);
 const loaded = ref(false);
 const proposal = ref<IProposal | null>(null);
 const files = ref<IFileRow[]>([]);
+const linkedPayments = ref<IPayment[]>([]);
+const loadingPayments = ref(false);
+
+// Статус платежа → canon-вариант бейджа (как в реестре платежей).
+const paymentStatusVariantMap: Record<string, BaseBadgeVariant> = {
+  [Zeus.PaymentStatus.COMPLETED]: 'pos',
+  [Zeus.PaymentStatus.PAID]: 'info',
+  [Zeus.PaymentStatus.PENDING]: 'warn',
+  [Zeus.PaymentStatus.PROCESSING]: 'warn',
+  [Zeus.PaymentStatus.FAILED]: 'neg',
+  [Zeus.PaymentStatus.CANCELLED]: 'neg',
+  [Zeus.PaymentStatus.REFUNDED]: 'neutral',
+  [Zeus.PaymentStatus.EXPIRED]: 'neutral',
+};
+function paymentStatusVariant(status?: string | null): BaseBadgeVariant {
+  return (status && paymentStatusVariantMap[status]) || 'neutral';
+}
+function paymentDirectionIcon(pay: IPayment): string {
+  return pay.direction === Zeus.PaymentDirection.INCOMING ? 'south_west' : 'north_east';
+}
+function paymentAmount(pay: IPayment): string {
+  return `${pay.quantity ?? ''} ${pay.symbol ?? ''}`.trim();
+}
+
+// Платежи расхода собираем по ДЕТЕРМИНИРОВАННЫМ хэшам, а не по username:
+// у позиции-организации платёж принадлежит кооперативу, у аванса под отчёт —
+// пайщику-получателю, и у каждой позиции свой получатель — единого владельца
+// нет. Хэш платежа выдачи = item_hash; расчётные платёжки (возврат/доплата) —
+// settlementPaymentHash(...). Точечный hash-фильтр gateway не требует листать
+// общий реестр и не требует нового бэкенд-поля proposal_hash.
+async function loadLinkedPayments(): Promise<void> {
+  const coopname = route.params.coopname as string;
+  const items = proposal.value?.items ?? [];
+  if (!coopname || !items.length) return;
+  try {
+    loadingPayments.value = true;
+    const hashes: string[] = [];
+    for (const it of items) {
+      const ih = it.item_hash?.toLowerCase();
+      if (!ih) continue;
+      hashes.push(ih); // платёж выдачи (аванс под отчёт / оплата организации)
+      if (it.mechanics === Zeus.ExpenseMechanics.ADVANCE) {
+        hashes.push(await settlementPaymentHash(coopname, ih, 'return'));
+        hashes.push(await settlementPaymentHash(coopname, ih, 'overspend'));
+      }
+    }
+    const results = await Promise.all(
+      hashes.map((hash) =>
+        paymentApi
+          .loadPayments({ coopname, hash }, { page: 1, limit: 1 })
+          .then((r) => r.items?.[0] ?? null)
+          .catch(() => null),
+      ),
+    );
+    linkedPayments.value = results.filter((p): p is IPayment => Boolean(p));
+  } catch (e) {
+    FailAlert(e);
+  } finally {
+    loadingPayments.value = false;
+  }
+}
+
+// Клик по платежу → реестр платежей кассира, отфильтрованный по владельцу
+// платежа, с фокусом на конкретный платёж (виджет раскроет его по hash).
+function openInRegistry(pay: IPayment): void {
+  void router.push({
+    name: 'payments',
+    params: { coopname: route.params.coopname, username: pay.username },
+    query: { focus: pay.hash },
+  });
+}
 
 function proposalStatusLabel(status?: Zeus.ExpenseProposalStatus | null): string {
   return getExpenseProposalStatusLabel(status);
@@ -360,6 +460,8 @@ async function load(): Promise<void> {
         FailAlert(e);
       }
     }
+
+    if (proposal.value) void loadLinkedPayments();
   } catch (e) {
     FailAlert(e);
   } finally {
@@ -424,6 +526,66 @@ onMounted(() => {
 
 .cell-name {
   overflow-wrap: break-word;
+}
+
+.pay-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-4);
+}
+
+.pay-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-2);
+  padding-bottom: var(--p-3);
+  border-bottom: 1px solid var(--p-line);
+}
+
+.pay-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.pay-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p-3);
+  flex-wrap: wrap;
+}
+
+.pay-item__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-2);
+  font-weight: 600;
+  color: var(--p-ink);
+}
+
+.pay-item__amount {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-2);
+  white-space: nowrap;
+}
+
+.pay-item__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1);
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--p-primary);
+  font-size: var(--p-fs-body-sm);
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .files {

@@ -206,6 +206,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, reactive, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
@@ -244,6 +245,7 @@ const props = defineProps({
   },
 });
 
+const route = useRoute();
 const paymentStore = usePaymentStore();
 const payments = computed(() => paymentStore.payments);
 // Zeus scalar ID не имеет резолвера → IPayment.id типизирован как unknown,
@@ -502,10 +504,29 @@ const openSourcePayment = async (itemHash: string): Promise<void> => {
   el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-onMounted(() => {
+// Пришли из детали расхода по «Открыть в реестре платежей» (?focus=<hash>) —
+// после загрузки тихо раскрываем нужный платёж и прокручиваем к нему. Если он
+// не на текущей странице — молчим (фильтр по :username? обычно укладывает все
+// платежи владельца в одну страницу).
+const focusPaymentByHash = async (hash: string): Promise<void> => {
+  const target = items.value.find(
+    (p) => p.hash?.toLowerCase() === hash.toLowerCase(),
+  );
+  if (!target) return;
+  expanded.set(target.id, true);
+  await nextTick();
+  const el =
+    document.getElementById(`pay-row-${target.id}`) ??
+    document.getElementById(`pay-card-${target.id}`);
+  el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+onMounted(async () => {
   paymentStore.clear();
   expanded.clear();
-  loadPayments();
+  await loadPayments();
+  const focus = route.query.focus;
+  if (typeof focus === 'string' && focus) await focusPaymentByHash(focus);
 });
 </script>
 
