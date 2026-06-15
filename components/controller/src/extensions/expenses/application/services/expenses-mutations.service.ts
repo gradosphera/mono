@@ -192,6 +192,17 @@ export class ExpensesMutationsService {
    * только пока позиция в статусе PAID, поэтому расчёт обязан пройти ДО закрытия).
    */
   async reportExpenseItem(input: ReportExpenseItemInputDTO): Promise<ExpenseReportResultDTO> {
+    // Защита от повторного отчёта. Позиция on-chain остаётся PAID до подтверждения
+    // расчётной платёжки кассой (reportexp отложен), поэтому без этого guard'а
+    // пайщик/кассир могли отчитываться многократно на разные суммы, плодя дубль-
+    // платёжки расчёта (идемпотентность createSettlementPayment — лишь по виду
+    // возврат/доплата, не по факту «отчёт уже подан»). Источник истины —
+    // report_state в зеркале платежа выдачи аванса.
+    const reportState = await this.getAdvanceReportState(input.item_hash)
+    if (reportState === ExpenseReportState.SETTLEMENT_PENDING || reportState === ExpenseReportState.CLOSED) {
+      throw new BadRequestException('Отчёт по этой позиции уже подан — повторный отчёт недоступен')
+    }
+
     if (!input.actual_amount) {
       const transaction = await this.chain.reportExp({
         coopname: input.coopname,
@@ -246,7 +257,11 @@ export class ExpensesMutationsService {
 
     // Отчёт подан, но позиция закроется (reportexp) только после подтверждения
     // платёжки расчёта кассой — фиксируем промежуточное состояние для реестра.
-    await this.markAdvanceReportState(input.item_hash, ExpenseReportState.SETTLEMENT_PENDING)
+    // reported_amount храним рядом, чтобы реестр показывал заявленный факт
+    // (а не выданный аванс) и не предлагал отчитаться повторно.
+    await this.markAdvanceReportState(input.item_hash, ExpenseReportState.SETTLEMENT_PENDING, {
+      reported_amount: input.actual_amount,
+    })
 
     return {
       outcome: isUnderspend ? ExpenseReportOutcome.RETURN_PENDING : ExpenseReportOutcome.OVERSPEND_PENDING,
@@ -260,12 +275,27 @@ export class ExpensesMutationsService {
    * реестр платежей показывает «Требуется отчёт / подан / принят» рядом со
    * статусом платежа, не дёргая цепь. Статус платежа при этом не трогаем.
    */
-  private async markAdvanceReportState(itemHash: string, state: ExpenseReportState): Promise<void> {
+  private async markAdvanceReportState(
+    itemHash: string,
+    state: ExpenseReportState,
+    extra?: Record<string, unknown>
+  ): Promise<void> {
     const payment = await this.payments.findByHash(itemHash.toLowerCase())
     if (!payment?.id) return
     await this.payments.update(payment.id, {
-      blockchain_data: { ...(payment.blockchain_data ?? {}), report_state: state },
+      blockchain_data: { ...(payment.blockchain_data ?? {}), report_state: state, ...(extra ?? {}) },
     })
+  }
+
+  /**
+   * Текущее состояние отчёта по строке-авансу — из зеркала в платеже выдачи
+   * (`blockchain_data.report_state`). AWAITING по умолчанию: отчёт ещё не подан.
+   * Нужен guard'у reportExpenseItem против повторной подачи.
+   */
+  private async getAdvanceReportState(itemHash: string): Promise<ExpenseReportState> {
+    const payment = await this.payments.findByHash(itemHash.toLowerCase())
+    const state = (payment?.blockchain_data as { report_state?: ExpenseReportState } | undefined)?.report_state
+    return state ?? ExpenseReportState.AWAITING
   }
 
   /**

@@ -4,7 +4,11 @@
     .exp-step(v-if='step')
       .exp-step__num {{ step.number }}
       .exp-step__title {{ step.title }}
-    .t-sm.t-muted(v-if='isReported') Отчёт по авансу подан — дополнительные документы дополнят его автоматически.
+    //- Отчёт уже подан — форма недоступна (повторный отчёт запрещён и на бэке),
+    //- остаётся только загрузка дополнительных документов.
+    template(v-if='reportSubmitted')
+      .t-sm.t-muted(v-if='pendingSettlement') Отчёт подан{{ reportedAmountLabel }} — ждём подтверждения расчёта кассой, после него позиция закроется. Дополнительные документы можно приложить ниже.
+      .t-sm.t-muted(v-else) Отчёт по авансу принят — дополнительные документы дополнят его автоматически.
     template(v-else)
       .t-sm.report-advance__lead(v-if='onBehalf')
         q-icon(name='assignment_ind', size='16px')
@@ -12,7 +16,7 @@
       .t-sm.t-muted(v-else) Выданный аванс: {{ advanceLabel }}. Укажите фактически потраченную сумму и приложите чек.
 
     //- Сначала сумма (с ней видна разница), затем чек — и только тогда кнопка.
-    template(v-if='isAwaitingReport')
+    template(v-if='canReport')
       .report-advance__amount
         AmountInput(
           v-model='factualAmount',
@@ -29,7 +33,7 @@
       v-model='pending',
       accept='image/jpeg,image/png,image/webp,image/heic,application/pdf',
       :max-size='20 * 1024 * 1024',
-      :title='isAwaitingReport ? "Приложите чек" : "Приложите дополнительный документ"',
+      :title='canReport ? "Приложите чек" : "Приложите дополнительный документ"',
       hint='Изображение или PDF до 20 МБ — добавится сразу',
       :disabled='uploading || reporting'
     )
@@ -47,7 +51,7 @@
         q-spinner(v-if='openingId === file.id', size='14px')
 
     BaseButton(
-      v-if='isAwaitingReport',
+      v-if='canReport',
       variant='primary',
       :loading='reporting',
       :disabled='!files.length || reporting',
@@ -64,6 +68,7 @@ import { FileUploader } from 'src/shared/ui/domain/FileUploader';
 import { AmountInput } from 'src/shared/ui/domain/AmountInput';
 import { BaseButton } from 'src/shared/ui/base';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
+import { ExpenseReportState } from 'src/shared/lib/expenses';
 import {
   attachExpenseProofApi,
   type IExpenseFile,
@@ -80,8 +85,16 @@ const props = withDefaults(
     // Опциональный заголовок-этап (номер + название) — показывается только когда
     // у панели есть контент, поэтому пустых «Этапов» у строк без отчёта не будет.
     step?: { number: number | string; title: string };
+    // Зеркало blockchain_data.report_state платежа выдачи аванса. Позиция on-chain
+    // остаётся PAID до подтверждения расчёта кассой, поэтому факт «отчёт уже подан»
+    // берём отсюда, а не из item.status — иначе форма остаётся активной и пускает
+    // повторный отчёт.
+    reportState?: string;
+    // Заявленная пайщиком сумма по чекам (при поданном отчёте) — для показа вместо
+    // выданного аванса.
+    reportedAmount?: string;
   }>(),
-  { onBehalf: false, step: undefined },
+  { onBehalf: false, step: undefined, reportState: '', reportedAmount: '' },
 );
 
 const emit = defineEmits<{
@@ -158,6 +171,25 @@ const isReported = computed(
 );
 const isAwaitingReport = computed(
   () => item.value?.status === Zeus.ExpenseItemStatus.PAID,
+);
+
+// Отчёт подан, но позиция ещё не закрыта on-chain — ждём подтверждения расчёта.
+const pendingSettlement = computed(
+  () => props.reportState === ExpenseReportState.SETTLEMENT_PENDING,
+);
+const closedByState = computed(
+  () => props.reportState === ExpenseReportState.CLOSED,
+);
+// Форма отчёта доступна, только пока отчёт не подан: позиция PAID и report_state
+// ещё не SETTLEMENT_PENDING/CLOSED. Иначе — повторный отчёт (запрещён и на бэке).
+const canReport = computed(
+  () => isAwaitingReport.value && !pendingSettlement.value && !closedByState.value,
+);
+const reportSubmitted = computed(
+  () => isReported.value || pendingSettlement.value || closedByState.value,
+);
+const reportedAmountLabel = computed(() =>
+  props.reportedAmount ? ` на ${formatAsset2Digits(props.reportedAmount)}` : '',
 );
 
 // "1000.0000 RUB" → { num, symbol, precision }.

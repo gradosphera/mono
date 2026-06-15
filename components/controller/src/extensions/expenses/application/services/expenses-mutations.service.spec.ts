@@ -273,9 +273,13 @@ describe('ExpensesMutationsService', () => {
     expect(result.settlement_amount).toBe(asset(200))
     expect(chain.reportExp).not.toHaveBeenCalled()
     expect(payments.create).toHaveBeenCalledTimes(1)
-    // Отчёт подан, ждём расчёт → зеркалим SETTLEMENT_PENDING в платёж аванса.
+    // Отчёт подан, ждём расчёт → зеркалим SETTLEMENT_PENDING + заявленный факт
+    // (reported_amount) в платёж аванса; факт нужен реестру вместо выданного аванса.
     expect(payments.update).toHaveBeenCalledWith('adv-1', {
-      blockchain_data: { report_state: ExpenseReportState.SETTLEMENT_PENDING },
+      blockchain_data: {
+        report_state: ExpenseReportState.SETTLEMENT_PENDING,
+        reported_amount: asset(800),
+      },
     })
     const payment = payments.create.mock.calls[0][0]
     expect(payment.type).toBe(PaymentTypeEnum.EXPENSE_RETURN)
@@ -322,6 +326,27 @@ describe('ExpensesMutationsService', () => {
 
     expect(result.outcome).toBe(ExpenseReportOutcome.RETURN_PENDING)
     expect(result.settlement_payment_hash).toBe('existing-hash')
+    expect(payments.create).not.toHaveBeenCalled()
+  })
+
+  it('reportExpenseItem: повторный отчёт после поданного (SETTLEMENT_PENDING) запрещён', async () => {
+    mockProposalWithAdvance(1000)
+    // Платёж аванса уже несёт report_state SETTLEMENT_PENDING — отчёт подан ранее,
+    // позиция on-chain ещё PAID (расчёт не подтверждён). Повторный отчёт обязан
+    // отбиться на бэке, иначе плодятся дубль-платёжки расчёта.
+    payments.findByHash.mockResolvedValue({
+      id: 'adv-1',
+      hash: '0xdef',
+      blockchain_data: { proposal_hash: '0xabc', report_state: ExpenseReportState.SETTLEMENT_PENDING },
+    })
+    await expect(
+      service.reportExpenseItem({
+        coopname: 'voskhod',
+        proposal_hash: '0xabc',
+        item_hash: '0xdef',
+        actual_amount: asset(800),
+      } as ReportExpenseItemInputDTO),
+    ).rejects.toThrow('Отчёт по этой позиции уже подан')
     expect(payments.create).not.toHaveBeenCalled()
   })
 

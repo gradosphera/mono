@@ -82,6 +82,8 @@
                       :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
                       :item-hash='expenseProofRef(row)?.item_hash ?? ""',
                       :on-behalf='true',
+                      :report-state='advanceReportState(row)',
+                      :reported-amount='advanceReportedAmount(row)',
                       :step='{ number: 2, title: "Отчёт пайщика" }',
                       @reported='onReported'
                     )
@@ -90,6 +92,8 @@
                     v-else-if='advanceReportRef(row)',
                     :proposal-hash='advanceReportRef(row)?.proposal_hash ?? ""',
                     :item-hash='advanceReportRef(row)?.item_hash ?? ""',
+                    :report-state='advanceReportState(row)',
+                    :reported-amount='advanceReportedAmount(row)',
                     @reported='onReported'
                   )
 
@@ -147,6 +151,8 @@
               :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
               :item-hash='expenseProofRef(row)?.item_hash ?? ""',
               :on-behalf='true',
+              :report-state='advanceReportState(row)',
+              :reported-amount='advanceReportedAmount(row)',
               :step='{ number: 2, title: "Отчёт пайщика" }',
               @reported='onReported'
             )
@@ -154,6 +160,8 @@
             v-else-if='advanceReportRef(row)',
             :proposal-hash='advanceReportRef(row)?.proposal_hash ?? ""',
             :item-hash='advanceReportRef(row)?.item_hash ?? ""',
+            :report-state='advanceReportState(row)',
+            :reported-amount='advanceReportedAmount(row)',
             @reported='onReported'
           )
 
@@ -299,6 +307,13 @@ const advanceReportRef = (
   if (row.username !== session.username) return null;
   return expenseProofRef(row);
 };
+
+// Зеркало состояния отчёта и заявленной суммы (blockchain_data платежа выдачи
+// аванса) — панель отчёта прячет форму после подачи и показывает заявленный факт.
+const advanceReportState = (row: IPaymentRow): string =>
+  (row.blockchain_data as { report_state?: string } | null)?.report_state ?? '';
+const advanceReportedAmount = (row: IPaymentRow): string =>
+  (row.blockchain_data as { reported_amount?: string } | null)?.reported_amount ?? '';
 
 // Статус отчёта по авансу — только на личном столе пайщика и только у платежа
 // выдачи аванса (EXPENSE). Источник — зеркало blockchain_data.report_state;
