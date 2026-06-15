@@ -4,7 +4,7 @@
     v-if='onLoading && !items.length',
     :columns='skeletonColumns',
     :rows='6',
-    :min-width='hideActions ? "880px" : "1000px"'
+    :min-width='hideActions ? "940px" : "1000px"'
   )
   template(v-else-if='items.length')
     //- Десктоп: канон-таблица. На мобиле скрыта — таблица из 7–8 колонок
@@ -20,9 +20,10 @@
               th.col-sort.col-date(@click='onSort("created_at")') Дата создания {{ sortMark('created_at') }}
               th.col-sort.col-num(@click='onSort("quantity")') Сумма {{ sortMark('quantity') }}
               th Тип платежа
-              //- «Направление» — относительно кооператива; на личном столе пайщика
-              //- (hideActions) скрываем, чтобы не путать «входящий/исходящий».
-              th(v-if='!hideActions') Направление
+              //- «Направление» — относительно того, чей это стол: на столе совета
+              //- относительно кооператива (в/из кооператива), на личном столе
+              //- пайщика относительно пайщика (поступление/списание) — см. displayDirection.
+              th Направление
               th.col-sort(@click='onSort("status")') Статус {{ sortMark('status') }}
               th.col-action(v-if='!hideActions') Действия
           tbody
@@ -39,10 +40,11 @@
                 td {{ formatDateToHumanDateTime(row.created_at) }}
                 td.col-num {{ amountLabel(row) }}
                 td {{ row.type_label }}
-                td(v-if='!hideActions')
-                  span.dir(:class='isIncoming(row.direction) ? "dir--in" : "dir--out"')
-                    q-icon.q-mr-xs(:name='getDirectionIcon(row.direction)', size='16px')
-                    span {{ row.direction_label }}
+                td
+                  span.dir(:class='isIncoming(displayDirection(row)) ? "dir--in" : "dir--out"')
+                    q-icon.q-mr-xs(:name='getDirectionIcon(displayDirection(row))', size='16px')
+                    span {{ directionLabel(row) }}
+                    q-tooltip {{ directionHint(row) }}
                 td
                   .cell-status
                     BaseBadge(:variant='getStatusVariant(row.status)') {{ row.status_label }}
@@ -64,7 +66,7 @@
                   span.no-actions(v-else) —
 
               tr.expand-row(v-if='expanded.get(row.id)')
-                td(:colspan='hideActions ? 6 : 8')
+                td(:colspan='hideActions ? 7 : 8')
                   PaymentDetails(:payment='row')
                   //- Стол совета: кассир прикладывает платёжку и закрывающие документы;
                   //- при личной передаче чеков — отчитывается за пайщика (панель
@@ -117,15 +119,14 @@
           .pay-card__row
             span.pay-card__amount
               q-icon.q-mr-xs(
-                v-if='!hideActions',
-                :name='getDirectionIcon(row.direction)',
-                :class='isIncoming(row.direction) ? "dir--in" : "dir--out"',
+                :name='getDirectionIcon(displayDirection(row))',
+                :class='isIncoming(displayDirection(row)) ? "dir--in" : "dir--out"',
                 size='16px'
               )
               | {{ amountLabel(row) }}
             span.pay-card__type {{ row.type_label }}
           .pay-card__row.pay-card__row--meta
-            span(v-if='!hideActions') {{ row.direction_label }}
+            span {{ directionLabel(row) }}
             span {{ formatDateToHumanDateTime(row.created_at) }}
         .pay-card__actions(
           v-if='!hideActions && ["EXPIRED", "PENDING", "FAILED"].includes(row.status)',
@@ -243,6 +244,23 @@ const getStatusVariant = (status?: string | null): BaseBadgeVariant => {
 const isIncoming = (direction?: string | null): boolean =>
   direction === Zeus.PaymentDirection.INCOMING;
 
+// Направление показываем относительно того, чей это стол. on-chain `direction` —
+// всегда относительно кооператива (INCOMING = деньги в кооператив). Совет
+// (!hideActions) так и видит; на личном столе пайщика (hideActions) перспектива
+// обратная (исходящий из кооператива = поступление пайщику), поэтому инвертируем.
+const displayDirection = (row: IPaymentRow): string | null | undefined =>
+  props.hideActions
+    ? (isIncoming(row.direction) ? Zeus.PaymentDirection.OUTGOING : Zeus.PaymentDirection.INCOMING)
+    : row.direction;
+const directionLabel = (row: IPaymentRow): string =>
+  isIncoming(displayDirection(row)) ? 'Входящий' : 'Исходящий';
+const directionHint = (row: IPaymentRow): string => {
+  const incoming = isIncoming(displayDirection(row));
+  return props.hideActions
+    ? incoming ? 'Поступление вам' : 'Списание с вас'
+    : incoming ? 'В кооператив' : 'Из кооператива';
+};
+
 // Сумма — всегда 2 знака после запятой (не сырой on-chain precision=4).
 const amountLabel = (row: IPaymentRow): string =>
   formatAsset2Digits(`${row.quantity} ${row.symbol}`);
@@ -322,11 +340,11 @@ const skeletonColumns = computed<TableSkeletonColumn[]>(() => {
     { label: 'Дата создания', cell: 'text', cellWidth: '120px' },
     { label: 'Сумма', class: 'col-num', cell: 'text', cellWidth: '64px' },
     { label: 'Тип платежа', cell: 'text' },
+    { label: 'Направление', cell: 'text', cellWidth: '90px' },
     { label: 'Статус', cell: 'badge' },
   ];
-  // «Направление» и «Действия» — только на столе совета (не на личном).
+  // «Действия» — только на столе совета (не на личном столе пайщика).
   if (!props.hideActions) {
-    cols.splice(5, 0, { label: 'Направление', cell: 'text', cellWidth: '90px' });
     cols.push({ label: 'Действия', class: 'col-action', cell: 'icon' });
   }
   return cols;
