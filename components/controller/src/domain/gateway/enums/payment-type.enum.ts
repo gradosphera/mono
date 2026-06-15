@@ -13,6 +13,20 @@ export enum PaymentTypeEnum {
   // Отдельный тип, не WITHDRAWAL — это полный выход с блокировкой аккаунта,
   // а не частичный возврат паевого действующему пайщику.
   MEMBERSHIP_EXIT = 'membership_exit',
+  // Исходящая оплата позиции служебной записки-сметы (шасси expense). Создаётся
+  // автоматически после авторизации СЗ советом; подтверждение кассиром проводит
+  // on-chain оплату expense::payexp по позиции.
+  EXPENSE = 'expense',
+  // Входящий возврат неиспользованного аванса под отчёт (недорасход). Создаётся,
+  // когда пайщик отчитался о факте меньше выданного аванса: он возвращает разницу
+  // на расчётный счёт кооператива; подтверждение кассиром (приём средств)
+  // проводит on-chain expense::returnexp и закрывает позицию expense::reportexp.
+  EXPENSE_RETURN = 'expense_return',
+  // Исходящая доплата при перерасходе аванса под отчёт. Создаётся, когда пайщик
+  // отчитался о факте больше выданного аванса: кооператив доплачивает разницу;
+  // подтверждение кассиром (выплата) проводит on-chain expense::overspendexp и
+  // закрывает позицию expense::reportexp.
+  EXPENSE_OVERSPEND = 'expense_overspend',
 }
 
 /**
@@ -32,6 +46,9 @@ export const PAYMENT_TYPE_LABELS: Record<PaymentTypeEnum, string> = {
   [PaymentTypeEnum.WITHDRAWAL]: 'Возврат паевого взноса',
   [PaymentTypeEnum.REGISTRATION_REFUND]: 'Возврат вступит. и мин.паевого взноса',
   [PaymentTypeEnum.MEMBERSHIP_EXIT]: 'Возврат паевого взноса при выходе из кооператива',
+  [PaymentTypeEnum.EXPENSE]: 'Оплата расхода по служебной записке',
+  [PaymentTypeEnum.EXPENSE_RETURN]: 'Возврат неиспользованного аванса под отчёт',
+  [PaymentTypeEnum.EXPENSE_OVERSPEND]: 'Доплата по перерасходу аванса',
 };
 
 /**
@@ -54,15 +71,17 @@ export const PAYMENT_DIRECTION_LABELS: Record<PaymentDirectionEnum, string> = {
  * Определяет направление платежа по его типу
  */
 export function getPaymentDirection(type: PaymentTypeEnum): PaymentDirectionEnum {
-  const incomingTypes = [PaymentTypeEnum.REGISTRATION, PaymentTypeEnum.DEPOSIT];
-
-  return incomingTypes.includes(type) ? PaymentDirectionEnum.INCOMING : PaymentDirectionEnum.OUTGOING;
+  return INCOMING_PAYMENT_TYPES.includes(type) ? PaymentDirectionEnum.INCOMING : PaymentDirectionEnum.OUTGOING;
 }
 
 /**
  * Входящие типы платежей
  */
-export const INCOMING_PAYMENT_TYPES = [PaymentTypeEnum.REGISTRATION, PaymentTypeEnum.DEPOSIT];
+export const INCOMING_PAYMENT_TYPES = [
+  PaymentTypeEnum.REGISTRATION,
+  PaymentTypeEnum.DEPOSIT,
+  PaymentTypeEnum.EXPENSE_RETURN,
+];
 
 /**
  * Исходящие типы платежей
@@ -71,4 +90,6 @@ export const OUTGOING_PAYMENT_TYPES = [
   PaymentTypeEnum.WITHDRAWAL,
   PaymentTypeEnum.REGISTRATION_REFUND,
   PaymentTypeEnum.MEMBERSHIP_EXIT,
+  PaymentTypeEnum.EXPENSE,
+  PaymentTypeEnum.EXPENSE_OVERSPEND,
 ];
