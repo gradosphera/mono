@@ -94,19 +94,25 @@ export function useMembershipExit() {
   }
 
   /**
-   * Полный процесс подачи заявления на выход:
-   * 1. Генерирует уникальный exit_hash.
-   * 2. Генерирует документ заявления о выходе (200).
-   * 3. Подписывает его приватным ключом пайщика.
-   * 4. Подаёт заявление на выход с тем же exit_hash.
+   * Шаг 1: генерирует документ заявления о выходе (200) — показываем пайщику
+   * перед подписанием («читайте внимательно»).
    */
-  async function processMembershipExit(): Promise<ICreateMembershipExitResult> {
-    const exit_hash = await generateUniqueHash();
-
-    const document = await generateMembershipExitApplication({
+  async function generateApplication(): Promise<IGenerateMembershipExitApplicationResult> {
+    return generateMembershipExitApplication({
       username: session.username,
       skip_save: false,
     });
+  }
+
+  /**
+   * Шаг 2: подписывает показанный документ приватным ключом пайщика и подаёт
+   * заявление. На бэкенде заявление принимается и уходит письмо с подтверждением —
+   * в блокчейн отправится только после перехода по ссылке (confirmExit).
+   */
+  async function submitSignedApplication(
+    document: IGenerateMembershipExitApplicationResult,
+  ): Promise<ICreateMembershipExitResult> {
+    const exit_hash = await generateUniqueHash();
 
     const digitalDocument = new DigitalDocument(document);
     const signedDocument =
@@ -114,18 +120,30 @@ export function useMembershipExit() {
         session.username,
       );
 
-    const result = await createMembershipExit({
+    return createMembershipExit({
       exit_hash,
       statement: signedDocument,
     });
+  }
 
+  /**
+   * Подтверждение выхода по токену из письма — отправляет ранее подписанное
+   * заявление в блокчейн.
+   */
+  async function confirmExit(token: string): Promise<ICreateMembershipExitResult> {
+    const { [Mutations.MembershipExit.ConfirmMembershipExit.name]: result } =
+      await client.Mutation(Mutations.MembershipExit.ConfirmMembershipExit.mutation, {
+        variables: { token },
+      });
     return result;
   }
 
   return {
     generateMembershipExitApplication,
+    generateApplication,
+    submitSignedApplication,
     createMembershipExit,
+    confirmExit,
     getReturnPreview,
-    processMembershipExit,
   };
 }

@@ -1,6 +1,7 @@
 import { ProfilePage } from 'src/pages/User/ProfilePage';
 import { WalletPage } from 'src/pages/User/WalletPage';
 import { MembershipExitPage } from 'src/pages/User/MembershipExitPage';
+import { MembershipExitConfirmPage } from 'src/pages/User/MembershipExitConfirmPage';
 import { ConnectionAgreementPage, InstallationCompletedPage } from 'src/pages/Union/ConnectionAgreement';
 import { UserPaymentMethodsPage } from 'src/pages/User/PaymentMethodsPage';
 import { ContactsPage } from 'src/pages/Contacts';
@@ -54,6 +55,19 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             path: 'membership-exit',
             name: 'membership-exit',
             component: markRaw(MembershipExitPage),
+            children: [],
+          },
+          {
+            meta: {
+              title: 'Подтверждение выхода',
+              icon: 'logout',
+              roles: [],
+              requiresAuth: true,
+              hidden: true,
+            },
+            path: 'membership-exit/confirm',
+            name: 'membership-exit-confirm',
+            component: markRaw(MembershipExitConfirmPage),
             children: [],
           },
           {

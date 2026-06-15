@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { client } from 'src/shared/api/client';
-import { Queries } from '@coopenomics/sdk';
+import { Mutations, Queries, Zeus } from '@coopenomics/sdk';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 
@@ -22,6 +22,26 @@ export function useExitGate() {
 
   // Активный выход → блокируем кабинет.
   const isExitActive = computed(() => !!exitStatus.value);
+
+  // Off-chain фаза: заявление подписано, ждём перехода по ссылке из письма.
+  const isAwaitingConfirmation = computed(
+    () => exitStatus.value?.status === Zeus.MembershipExitStatus.AWAITING_CONFIRMATION,
+  );
+
+  /**
+   * Отмена заявления на выход до подтверждения по email (кнопка на экране ожидания).
+   * После отмены кабинет разблокируется.
+   */
+  async function cancelExit(): Promise<void> {
+    if (!session.username) return;
+    await client.Mutation(Mutations.MembershipExit.CancelMembershipExit.mutation, {
+      variables: {
+        coopname: info.coopname,
+        username: session.username,
+      },
+    });
+    await loadExitStatus();
+  }
 
   /**
    * Загружает текущий статус выхода пайщика (и предрасчёт суммы — для отображения
@@ -97,8 +117,10 @@ export function useExitGate() {
   return {
     exitStatus,
     isExitActive,
+    isAwaitingConfirmation,
     plannedAmount,
     loaded,
     loadExitStatus,
+    cancelExit,
   };
 }
