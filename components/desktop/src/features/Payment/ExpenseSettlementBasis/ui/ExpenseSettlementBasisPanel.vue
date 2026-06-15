@@ -121,7 +121,7 @@ function parseAsset(asset?: string | null): { num: number; symbol: string; preci
 function fileLabel(file: IExpenseFile): string {
   if (file.original_filename) return file.original_filename;
   const date = file.uploaded_at
-    ? new Date(file.uploaded_at).toLocaleString('ru-RU')
+    ? new Date(String(file.uploaded_at)).toLocaleString('ru-RU')
     : '';
   return `Чек от ${date}`;
 }

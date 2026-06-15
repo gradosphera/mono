@@ -89,7 +89,7 @@
       BaseCard
         .t-sm.t-muted(v-if='loadingPayments && !linkedPayments.length') Загрузка платежей…
         .pay-list(v-else)
-          .pay-item(v-for='pay in linkedPayments', :key='pay.hash')
+          .pay-item(v-for='(pay, idx) in linkedPayments', :key='pay.hash ?? idx')
             .pay-item__head
               .pay-item__title
                 q-icon(:name='paymentDirectionIcon(pay)', size='16px')
@@ -275,7 +275,7 @@ async function loadLinkedPayments(): Promise<void> {
     loadingPayments.value = true;
     const result = await paymentApi.loadPayments(
       { coopname, proposal_hash },
-      { page: 1, limit: 100 },
+      { page: 1, limit: 100, sortOrder: 'DESC' },
     );
     // Выдача/оплата (EXPENSE) — раньше расчётных платёжек (возврат/доплата).
     linkedPayments.value = [...(result.items ?? [])].sort(
@@ -399,7 +399,7 @@ function formatDate(value?: string | null): string {
 
 function fileLabel(file: IFileRow): string {
   if (file.original_filename) return file.original_filename;
-  const date = file.uploaded_at ? new Date(file.uploaded_at).toLocaleString('ru-RU') : '';
+  const date = file.uploaded_at ? new Date(String(file.uploaded_at)).toLocaleString('ru-RU') : '';
   return `документ от ${date}`;
 }
 

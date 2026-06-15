@@ -103,7 +103,7 @@ async function refresh(): Promise<void> {
 
 function fileLabel(file: IExpenseFile): string {
   if (file.original_filename) return file.original_filename;
-  const date = file.uploaded_at ? new Date(file.uploaded_at).toLocaleString('ru-RU') : '';
+  const date = file.uploaded_at ? new Date(String(file.uploaded_at)).toLocaleString('ru-RU') : '';
   return `Документ от ${date}`;
 }
 

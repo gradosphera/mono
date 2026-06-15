@@ -289,7 +289,7 @@ function formatDate(iso: string): string {
 function fileLabel(file: IExpenseProposalFile): string {
   if (file.original_filename) return file.original_filename;
   const date = file.uploaded_at
-    ? new Date(file.uploaded_at).toLocaleString('ru-RU')
+    ? new Date(String(file.uploaded_at)).toLocaleString('ru-RU')
     : '';
   return `документ от ${date}`;
 }
@@ -365,7 +365,7 @@ const timeline = computed<ActivityEvent[]>(() => {
       type: 'update',
       title: 'Приложен документ',
       description: fileLabel(f),
-      date: f.uploaded_at,
+      date: String(f.uploaded_at),
     });
   });
 

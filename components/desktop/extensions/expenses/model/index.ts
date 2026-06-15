@@ -16,5 +16,4 @@ export { useExpenseProposalActions } from './useExpenseProposalActions';
 export type {
   ICreateProposalDraft,
   ICreateProposalDraftItem,
-  IAuthorizeProposalDraft,
 } from './useExpenseProposalActions';

@@ -11,7 +11,7 @@ import { useRoute } from 'vue-router';
 import { ListOfPaymentsWidget } from 'src/widgets/Cooperative/Payments';
 
 const route = useRoute();
-const routeUsername = computed(() => (route.params.username as string) || null);
+const routeUsername = computed(() => (route.params.username as string) || undefined);
 </script>
 
 <style lang="scss" scoped>
