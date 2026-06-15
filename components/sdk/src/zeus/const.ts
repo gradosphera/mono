@@ -673,6 +673,9 @@ export const AllTypesProps: Record<string,any> = {
 		authorizeDecision:{
 			data:"AuthorizeDecisionInput"
 		},
+		cancelMembershipExit:{
+
+		},
 		cancelRequest:{
 			data:"CancelRequestInput"
 		},
@@ -964,6 +967,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		confirmAgreement:{
 			data:"ConfirmAgreementInput"
+		},
+		confirmMembershipExit:{
+
 		},
 		confirmReceiveOnRequest:{
 			data:"ConfirmReceiveOnRequestInput"
@@ -3585,7 +3591,8 @@ export const ReturnTypes: Record<string,any> = {
 		status:"MembershipExitStatus"
 	},
 	MembershipExitResult:{
-		exit_hash:"String"
+		exit_hash:"String",
+		status:"MembershipExitStatus"
 	},
 	MembershipExitReturnPreview:{
 		minimum_contribution:"String",
@@ -3620,6 +3627,7 @@ export const ReturnTypes: Record<string,any> = {
 		addPaymentMethod:"PaymentMethod",
 		addTrustedAccount:"Branch",
 		authorizeDecision:"Transaction",
+		cancelMembershipExit:"Boolean",
 		cancelRequest:"Transaction",
 		capitalAddAuthor:"CapitalProject",
 		capitalApproveCommit:"CapitalCommit",
@@ -3711,6 +3719,7 @@ export const ReturnTypes: Record<string,any> = {
 		completeExtensionOnboardingStep:"ExtensionOnboardingState",
 		completeRequest:"Transaction",
 		confirmAgreement:"Transaction",
+		confirmMembershipExit:"MembershipExitResult",
 		confirmReceiveOnRequest:"Transaction",
 		confirmSupplyOnRequest:"Transaction",
 		createAnnualGeneralMeet:"MeetAggregate",

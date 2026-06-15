@@ -4,6 +4,7 @@ import { type ModelTypes, Selector, type ValueTypes } from '../../zeus/index'
 // Сырой селектор для MembershipExitResult
 export const rawMembershipExitResultSelector = {
   exit_hash: true,
+  status: true,
 }
 
 // Валидация селектора

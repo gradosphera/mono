@@ -6447,8 +6447,6 @@ export type ValueTypes = {
 	lang?: string | undefined | null | Variable<any, string>,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null | Variable<any, string>,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null | Variable<any, string>,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
@@ -6488,8 +6486,6 @@ export type ValueTypes = {
 	links: Array<string> | Variable<any, string>,
 	/** ID документа в реестре */
 	registry_id: number | Variable<any, string>,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null | Variable<any, string>,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean | Variable<any, string>,
 	/** Часовой пояс, в котором был создан документ */
@@ -6528,6 +6524,8 @@ export type ValueTypes = {
 	["MembershipExitResult"]: AliasType<{
 	/** Хеш созданного процесса выхода */
 	exit_hash?:boolean | `@${string}`,
+	/** Статус процесса выхода после подачи (ожидает подтверждения по ссылке из письма) */
+	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`,
 	['...on MembershipExitResult']?: Omit<ValueTypes["MembershipExitResult"], "...on MembershipExitResult">
 }>;
@@ -6605,6 +6603,7 @@ addParticipant?: [{	data: ValueTypes["AddParticipantInput"] | Variable<any, stri
 addPaymentMethod?: [{	data: ValueTypes["AddPaymentMethodInput"] | Variable<any, string>},ValueTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ValueTypes["AddTrustedAccountInput"] | Variable<any, string>},ValueTypes["Branch"]],
 authorizeDecision?: [{	data: ValueTypes["AuthorizeDecisionInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+cancelMembershipExit?: [{	coopname: string | Variable<any, string>,	username: string | Variable<any, string>},boolean | `@${string}`],
 cancelRequest?: [{	data: ValueTypes["CancelRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ValueTypes["AddAuthorInput"] | Variable<any, string>},ValueTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ValueTypes["CommitApproveInput"] | Variable<any, string>},ValueTypes["CapitalCommit"]],
@@ -6699,6 +6698,7 @@ completeChairmanGeneralMeetStep?: [{	data: ValueTypes["ChairmanOnboardingGeneral
 completeExtensionOnboardingStep?: [{	data: ValueTypes["CompleteExtensionOnboardingStepInput"] | Variable<any, string>},ValueTypes["ExtensionOnboardingState"]],
 completeRequest?: [{	data: ValueTypes["CompleteRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmAgreement?: [{	data: ValueTypes["ConfirmAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+confirmMembershipExit?: [{	token: string | Variable<any, string>},ValueTypes["MembershipExitResult"]],
 confirmReceiveOnRequest?: [{	data: ValueTypes["ConfirmReceiveOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ValueTypes["ConfirmSupplyOnRequestInput"] | Variable<any, string>},ValueTypes["Transaction"]],
 createAnnualGeneralMeet?: [{	data: ValueTypes["CreateAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
@@ -15105,8 +15105,6 @@ export type ResolverInputTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -15146,8 +15144,6 @@ export type ResolverInputTypes = {
 	links: Array<string>,
 	/** ID документа в реестре */
 	registry_id: number,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -15186,6 +15182,8 @@ export type ResolverInputTypes = {
 	["MembershipExitResult"]: AliasType<{
 	/** Хеш созданного процесса выхода */
 	exit_hash?:boolean | `@${string}`,
+	/** Статус процесса выхода после подачи (ожидает подтверждения по ссылке из письма) */
+	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
 	["MembershipExitReturnPreview"]: AliasType<{
@@ -15259,6 +15257,7 @@ addParticipant?: [{	data: ResolverInputTypes["AddParticipantInput"]},ResolverInp
 addPaymentMethod?: [{	data: ResolverInputTypes["AddPaymentMethodInput"]},ResolverInputTypes["PaymentMethod"]],
 addTrustedAccount?: [{	data: ResolverInputTypes["AddTrustedAccountInput"]},ResolverInputTypes["Branch"]],
 authorizeDecision?: [{	data: ResolverInputTypes["AuthorizeDecisionInput"]},ResolverInputTypes["Transaction"]],
+cancelMembershipExit?: [{	coopname: string,	username: string},boolean | `@${string}`],
 cancelRequest?: [{	data: ResolverInputTypes["CancelRequestInput"]},ResolverInputTypes["Transaction"]],
 capitalAddAuthor?: [{	data: ResolverInputTypes["AddAuthorInput"]},ResolverInputTypes["CapitalProject"]],
 capitalApproveCommit?: [{	data: ResolverInputTypes["CommitApproveInput"]},ResolverInputTypes["CapitalCommit"]],
@@ -15353,6 +15352,7 @@ completeChairmanGeneralMeetStep?: [{	data: ResolverInputTypes["ChairmanOnboardin
 completeExtensionOnboardingStep?: [{	data: ResolverInputTypes["CompleteExtensionOnboardingStepInput"]},ResolverInputTypes["ExtensionOnboardingState"]],
 completeRequest?: [{	data: ResolverInputTypes["CompleteRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmAgreement?: [{	data: ResolverInputTypes["ConfirmAgreementInput"]},ResolverInputTypes["Transaction"]],
+confirmMembershipExit?: [{	token: string},ResolverInputTypes["MembershipExitResult"]],
 confirmReceiveOnRequest?: [{	data: ResolverInputTypes["ConfirmReceiveOnRequestInput"]},ResolverInputTypes["Transaction"]],
 confirmSupplyOnRequest?: [{	data: ResolverInputTypes["ConfirmSupplyOnRequestInput"]},ResolverInputTypes["Transaction"]],
 createAnnualGeneralMeet?: [{	data: ResolverInputTypes["CreateAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
@@ -23501,8 +23501,6 @@ export type ModelTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -23542,8 +23540,6 @@ export type ModelTypes = {
 	links: Array<string>,
 	/** ID документа в реестре */
 	registry_id: number,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -23581,7 +23577,9 @@ export type ModelTypes = {
 };
 	["MembershipExitResult"]: {
 		/** Хеш созданного процесса выхода */
-	exit_hash: string
+	exit_hash: string,
+	/** Статус процесса выхода после подачи (ожидает подтверждения по ссылке из письма) */
+	status: ModelTypes["MembershipExitStatus"]
 };
 	["MembershipExitReturnPreview"]: {
 		/** Минимальный паевой взнос пайщика */
@@ -23661,6 +23659,8 @@ export type ModelTypes = {
 
 Требуемые роли: chairman.  */
 	authorizeDecision: ModelTypes["Transaction"],
+	/** Отменить заявление на выход до подтверждения по email. */
+	cancelMembershipExit: boolean,
 	/** Отменить заявку */
 	cancelRequest: ModelTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -24017,6 +24017,8 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	confirmAgreement: ModelTypes["Transaction"],
+	/** Подтвердить выход из кооператива по ссылке из письма. Проверяет токен и отправляет ранее подписанное заявление в блокчейн. */
+	confirmMembershipExit: ModelTypes["MembershipExitResult"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 	confirmReceiveOnRequest: ModelTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
@@ -27415,10 +27417,7 @@ export type ModelTypes = {
     }
 
 export type GraphQLTypes = {
-    // ------------------------------------------------------;
-	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
-	// ------------------------------------------------------;
-	["AcceptChildOrderInput"]: {
+    ["AcceptChildOrderInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Подписанное заявление на имущественный паевый взнос */
@@ -32758,8 +32757,6 @@ export type GraphQLTypes = {
 	lang?: string | undefined | null,
 	/** Ссылки, связанные с документом */
 	links?: Array<string> | undefined | null,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -32799,8 +32796,6 @@ export type GraphQLTypes = {
 	links: Array<string>,
 	/** ID документа в реестре */
 	registry_id: number,
-	/** Изображение собственноручной подписи (base-64) */
-	signature?: string | undefined | null,
 	/** Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю) */
 	skip_save: boolean,
 	/** Часовой пояс, в котором был создан документ */
@@ -32840,6 +32835,8 @@ export type GraphQLTypes = {
 	__typename: "MembershipExitResult",
 	/** Хеш созданного процесса выхода */
 	exit_hash: string,
+	/** Статус процесса выхода после подачи (ожидает подтверждения по ссылке из письма) */
+	status: GraphQLTypes["MembershipExitStatus"],
 	['...on MembershipExitResult']: Omit<GraphQLTypes["MembershipExitResult"], "...on MembershipExitResult">
 };
 	["MembershipExitReturnPreview"]: {
@@ -32928,6 +32925,8 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman.  */
 	authorizeDecision: GraphQLTypes["Transaction"],
+	/** Отменить заявление на выход до подтверждения по email. */
+	cancelMembershipExit: boolean,
 	/** Отменить заявку */
 	cancelRequest: GraphQLTypes["Transaction"],
 	/** Добавление автора проекта в CAPITAL контракте
@@ -33284,6 +33283,8 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	confirmAgreement: GraphQLTypes["Transaction"],
+	/** Подтвердить выход из кооператива по ссылке из письма. Проверяет токен и отправляет ранее подписанное заявление в блокчейн. */
+	confirmMembershipExit: GraphQLTypes["MembershipExitResult"],
 	/** Подтвердить получение имущества Уполномоченным лицом от Заказчика по новации и акту приёмки-передачи */
 	confirmReceiveOnRequest: GraphQLTypes["Transaction"],
 	/** Подтвердить поставку имущества Поставщиком по заявке Заказчика и акту приёма-передачи */
@@ -37152,6 +37153,7 @@ export enum ManagedRoomKind {
 /** Статус процесса выхода пайщика из кооператива */
 export enum MembershipExitStatus {
 	AUTHORIZED = "AUTHORIZED",
+	AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION",
 	PENDING = "PENDING"
 }
 /** Тип комнаты вне проекта: пайщики, совет, комната секретаря */
