@@ -104,11 +104,21 @@ export class MembershipExitService {
     );
 
     const confirmationUrl = `${config.frontend_url}/${config.coopname}/user/membership-exit/confirm?token=${confirmToken}`;
-    await this.notificationSenderService.sendNotificationToUser(
-      data.username,
-      Workflows.MembershipExitConfirmation.id,
-      { confirmationUrl }
-    );
+    this.logger.debug(`Ссылка подтверждения выхода (${data.username}): ${confirmationUrl}`);
+
+    // Письмо — не критично для приёма заявления: черновик уже сохранён, и если
+    // провайдер писем недоступен, пайщик не теряет заявление (можно отменить).
+    try {
+      await this.notificationSenderService.sendNotificationToUser(
+        data.username,
+        Workflows.MembershipExitConfirmation.id,
+        { confirmationUrl }
+      );
+    } catch (e: any) {
+      this.logger.error(
+        `Не удалось отправить письмо с подтверждением выхода (${data.username}): ${e?.message ?? e}`
+      );
+    }
 
     this.logger.log(
       `Принято заявление на выход (ожидает email-подтверждения): ${data.exit_hash} (username=${data.username})`
