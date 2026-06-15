@@ -68,6 +68,32 @@ export class MembershipExitResolver {
     return this.membershipExitService.createMembershipExit(data, currentUser);
   }
 
+  @Mutation(() => MembershipExitResultDTO, {
+    name: 'confirmMembershipExit',
+    description:
+      'Подтвердить выход из кооператива по ссылке из письма. Проверяет токен и отправляет ранее подписанное заявление в блокчейн.',
+  })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  async confirmMembershipExit(
+    @Args('token', { type: () => String }) token: string
+  ): Promise<MembershipExitResultDTO> {
+    return this.membershipExitService.confirmMembershipExit(token);
+  }
+
+  @Mutation(() => Boolean, {
+    name: 'cancelMembershipExit',
+    description: 'Отменить заявление на выход до подтверждения по email.',
+  })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @UseGuards(GqlJwtAuthGuard)
+  async cancelMembershipExit(
+    @CurrentUser() currentUser: MonoAccountDomainInterface,
+    @Args('coopname', { type: () => String }) coopname: string,
+    @Args('username', { type: () => String }) username: string
+  ): Promise<boolean> {
+    return this.membershipExitService.cancelMembershipExit(coopname, username, currentUser);
+  }
+
   @Query(() => MembershipExitDTO, {
     name: 'membershipExit',
     nullable: true,

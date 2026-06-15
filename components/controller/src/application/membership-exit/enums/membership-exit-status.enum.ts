@@ -4,7 +4,10 @@ import { registerEnumType } from '@nestjs/graphql';
  * Статус процесса выхода пайщика из кооператива (registrator::exits.status).
  */
 export enum MembershipExitStatus {
-  // Заявление подано, ожидает решения совета.
+  // Заявление подписано и принято, но в блокчейн ещё не отправлено —
+  // ожидает подтверждения пайщиком по ссылке из письма (off-chain фаза).
+  AWAITING_CONFIRMATION = 'awaiting_confirmation',
+  // Заявление подано в блокчейн, ожидает решения совета.
   PENDING = 'pending',
   // Совет одобрил, идёт возврат паевого взноса (зарезервирован, исходящий платёж).
   AUTHORIZED = 'authorized',
