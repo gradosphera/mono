@@ -96,6 +96,16 @@
                     :reported-amount='advanceReportedAmount(row)',
                     @reported='onReported'
                   )
+                  //- Расчётная платёжка (возврат/доплата): кассиру/пайщику видно
+                  //- основание — исходный аванс, заявленный факт и документы.
+                  ExpenseSettlementBasisPanel.q-mt-sm(
+                    v-if='settlementRef(row)',
+                    :proposal-hash='settlementRef(row)?.proposal_hash ?? ""',
+                    :item-hash='settlementRef(row)?.item_hash ?? ""',
+                    :settlement-amount='`${row.quantity} ${row.symbol}`',
+                    :is-return='settlementRef(row)?.isReturn ?? false',
+                    :description='settlementRef(row)?.description ?? ""'
+                  )
 
       .table-foot
         span {{ rangeLabel }}
@@ -164,6 +174,14 @@
             :reported-amount='advanceReportedAmount(row)',
             @reported='onReported'
           )
+          ExpenseSettlementBasisPanel.q-mt-sm(
+            v-if='settlementRef(row)',
+            :proposal-hash='settlementRef(row)?.proposal_hash ?? ""',
+            :item-hash='settlementRef(row)?.item_hash ?? ""',
+            :settlement-amount='`${row.quantity} ${row.symbol}`',
+            :is-return='settlementRef(row)?.isReturn ?? false',
+            :description='settlementRef(row)?.description ?? ""'
+          )
 
       .table-foot
         span {{ rangeLabel }}
@@ -192,6 +210,7 @@ import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetO
 import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
 import { AttachExpenseProofPanel } from 'src/features/Payment/AttachExpenseProof';
 import { ReportExpenseAdvancePanel } from 'src/features/Payment/ReportExpenseAdvance';
+import { ExpenseSettlementBasisPanel } from 'src/features/Payment/ExpenseSettlementBasis';
 import { useSessionStore } from 'src/entities/Session';
 import { PaymentDetails } from 'src/shared/ui';
 import { BaseBadge } from 'src/shared/ui/base/BaseBadge';
@@ -314,6 +333,27 @@ const advanceReportState = (row: IPaymentRow): string =>
   (row.blockchain_data as { report_state?: string } | null)?.report_state ?? '';
 const advanceReportedAmount = (row: IPaymentRow): string =>
   (row.blockchain_data as { reported_amount?: string } | null)?.reported_amount ?? '';
+
+// Расчётная платёжка (возврат недорасхода / доплата перерасхода) — ссылка на
+// исходную позицию-аванс, чтобы кассир видел основание (аванс/факт/документы),
+// не выискивая исходный платёж среди сотен строк реестра.
+const settlementRef = (
+  row: IPaymentRow,
+): { proposal_hash: string; item_hash: string; isReturn: boolean; description: string } | null => {
+  const isReturn = row.type === Zeus.PaymentType.EXPENSE_RETURN;
+  const isOverspend = row.type === Zeus.PaymentType.EXPENSE_OVERSPEND;
+  if (!isReturn && !isOverspend) return null;
+  const data = row.blockchain_data as
+    | { proposal_hash?: string; item_hash?: string; description?: string }
+    | null;
+  if (!data?.proposal_hash || !data?.item_hash) return null;
+  return {
+    proposal_hash: data.proposal_hash,
+    item_hash: data.item_hash,
+    isReturn,
+    description: data.description ?? '',
+  };
+};
 
 // Статус отчёта по авансу — только на личном столе пайщика и только у платежа
 // выдачи аванса (EXPENSE). Источник — зеркало blockchain_data.report_state;
