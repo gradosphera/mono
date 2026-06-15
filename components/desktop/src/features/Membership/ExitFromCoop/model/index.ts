@@ -75,6 +75,21 @@ export function useMembershipExit() {
   }
 
   /**
+   * Есть ли у пайщика реквизиты для получения возврата паевого взноса.
+   * Выход блокируется, пока их нет (бэкенд это же проверяет при подаче) — без
+   * реквизитов исходящий платёж возврата некуда будет создать.
+   */
+  async function hasRequisites(): Promise<boolean> {
+    const { [Queries.PaymentMethods.GetPaymentMethods.name]: result } =
+      await client.Query(Queries.PaymentMethods.GetPaymentMethods.query, {
+        variables: {
+          data: { username: session.username, limit: 1, page: 1 },
+        },
+      });
+    return (result?.items?.length ?? 0) > 0;
+  }
+
+  /**
    * Предварительный расчёт суммы возврата паевого взноса при выходе.
    */
   async function getReturnPreview(): Promise<IMembershipExitReturnPreview> {
@@ -145,5 +160,6 @@ export function useMembershipExit() {
     createMembershipExit,
     confirmExit,
     getReturnPreview,
+    hasRequisites,
   };
 }
