@@ -1,5 +1,15 @@
 <template lang="pug">
 .payment-details
+  //- Причина отклонения платежа кассиром (CANCELLED). Кассир пишет её в диалоге
+  //- «Отклонить»; показываем заметным баннером сразу при раскрытии — общий
+  //- компонент рендерится и на столе совета, и на столе пайщика.
+  .banner.banner--neg.q-mb-sm(v-if='payment.status === "CANCELLED"')
+    .banner__icon
+      q-icon(name='block', size='sm')
+    .banner__body
+      .t-sm.t-muted Платёж отклонён. Причина:
+      div {{ payment.message || 'причина не указана' }}
+
   //- Причина ошибки для неуспешных платежей
   .payment-error.text-red-6.q-mb-sm(v-if='payment.status === "FAILED"')
     q-icon.q-mr-xs(name='error', size='sm')
