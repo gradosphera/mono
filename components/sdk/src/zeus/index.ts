@@ -7835,6 +7835,8 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 	direction?: ValueTypes["PaymentDirection"] | undefined | null | Variable<any, string>,
 	/** Хэш платежа */
 	hash?: string | undefined | null | Variable<any, string>,
+	/** Хэш расхода (служебной записки): вернёт все платежи, связанные с этим расходом */
+	proposal_hash?: string | undefined | null | Variable<any, string>,
 	/** Провайдер платежа */
 	provider?: string | undefined | null | Variable<any, string>,
 	/** Статус платежа */
@@ -16843,6 +16845,8 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 	direction?: ResolverInputTypes["PaymentDirection"] | undefined | null,
 	/** Хэш платежа */
 	hash?: string | undefined | null,
+	/** Хэш расхода (служебной записки): вернёт все платежи, связанные с этим расходом */
+	proposal_hash?: string | undefined | null,
 	/** Провайдер платежа */
 	provider?: string | undefined | null,
 	/** Статус платежа */
@@ -26097,6 +26101,8 @@ export type ModelTypes = {
 	direction?: ModelTypes["PaymentDirection"] | undefined | null,
 	/** Хэш платежа */
 	hash?: string | undefined | null,
+	/** Хэш расхода (служебной записки): вернёт все платежи, связанные с этим расходом */
+	proposal_hash?: string | undefined | null,
 	/** Провайдер платежа */
 	provider?: string | undefined | null,
 	/** Статус платежа */
@@ -35894,6 +35900,8 @@ export type GraphQLTypes = {
 	direction?: GraphQLTypes["PaymentDirection"] | undefined | null,
 	/** Хэш платежа */
 	hash?: string | undefined | null,
+	/** Хэш расхода (служебной записки): вернёт все платежи, связанные с этим расходом */
+	proposal_hash?: string | undefined | null,
 	/** Провайдер платежа */
 	provider?: string | undefined | null,
 	/** Статус платежа */
