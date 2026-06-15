@@ -58,11 +58,14 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             children: [],
           },
           {
+            // Подтверждение авторизуется токеном из ссылки (мутация публичная),
+            // поэтому страница доступна БЕЗ входа — иначе навигационный гард
+            // редиректит на login-redirect. requiresAuth:false = исключение из auth-гейта.
             meta: {
               title: 'Подтверждение выхода',
               icon: 'logout',
               roles: [],
-              requiresAuth: true,
+              requiresAuth: false,
               hidden: true,
             },
             path: 'membership-exit/confirm',
