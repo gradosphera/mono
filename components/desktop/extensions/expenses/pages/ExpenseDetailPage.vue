@@ -151,7 +151,7 @@ import { EmptyState } from 'src/shared/ui/base/EmptyState';
 import { DataRow } from 'src/shared/ui/domain';
 import { ExpenseProposalDocuments } from 'src/shared/ui/domain/ExpenseProposalDocuments';
 import { ActivityTimeline } from 'src/shared/ui/domain/ActivityTimeline';
-import type { ActivityEvent } from 'src/shared/ui/domain/ActivityTimeline';
+import type { ActivityEvent, ActivityEventType } from 'src/shared/ui/domain/ActivityTimeline';
 import { PaymentDetails } from 'src/shared/ui';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
@@ -207,6 +207,55 @@ function paymentDirectionIcon(pay: IPayment): string {
 }
 function paymentAmount(pay: IPayment): string {
   return `${pay.quantity ?? ''} ${pay.symbol ?? ''}`.trim();
+}
+
+// Платёж → событие истории состояний. Тип/иконка/текст по текущему статусу:
+// исполнен (деньги ушли), оплачен кассой (ждём цепочку), создан, отклонён.
+function paymentTimelineEvent(pay: IPayment): ActivityEvent {
+  const label = pay.type_label || pay.type || 'Платёж';
+  let type: ActivityEventType = 'transfer';
+  let icon = pay.direction === Zeus.PaymentDirection.INCOMING ? 'south_west' : 'payments';
+  let title = `${label} — создан, ожидает кассу`;
+  switch (pay.status) {
+    case Zeus.PaymentStatus.COMPLETED:
+      type = 'sign';
+      title = `${label} — исполнен`;
+      break;
+    case Zeus.PaymentStatus.PAID:
+      title = `${label} — оплачен кассой, ждём подтверждения`;
+      break;
+    case Zeus.PaymentStatus.CANCELLED:
+      type = 'reject';
+      icon = 'block';
+      title = `${label} — отклонён`;
+      break;
+    case Zeus.PaymentStatus.FAILED:
+      type = 'reject';
+      icon = 'error';
+      title = `${label} — ошибка`;
+      break;
+    case Zeus.PaymentStatus.PENDING:
+    case Zeus.PaymentStatus.PROCESSING:
+      icon = 'schedule';
+      break;
+    default:
+      break;
+  }
+  const reason =
+    pay.status === Zeus.PaymentStatus.CANCELLED || pay.status === Zeus.PaymentStatus.FAILED
+      ? pay.message
+      : '';
+  const description = [formatAmount(paymentAmount(pay)), reason]
+    .filter(Boolean)
+    .join(' · ');
+  return {
+    id: `payment-${pay.hash}`,
+    type,
+    icon,
+    title,
+    description: description || undefined,
+    date: String(pay.updated_at ?? pay.created_at ?? ''),
+  };
 }
 
 // Платежи расхода собираем по ДЕТЕРМИНИРОВАННЫМ хэшам, а не по username:
@@ -415,6 +464,13 @@ const timeline = computed<ActivityEvent[]>(() => {
       description: fileLabel(f),
       date: String(f.uploaded_at ?? p.updated_at ?? ''),
     });
+  });
+
+  // Движения денег по расходу — выдача аванса/оплата организации, возврат
+  // недорасхода, доплата перерасхода, отклонения. Берём из тех же платежей,
+  // что и секция «Платежи по расходу» (linkedPayments) — без отдельного запроса.
+  linkedPayments.value.forEach((pay) => {
+    events.push(paymentTimelineEvent(pay));
   });
 
   if (p.status === Zeus.ExpenseProposalStatus.REPORT_SUBMITTED) {
