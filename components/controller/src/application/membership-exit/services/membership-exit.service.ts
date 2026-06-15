@@ -13,6 +13,7 @@ import { USER_WALLET_REPOSITORY, type UserWalletRepository } from '~/domain/wall
 import { BLOCKCHAIN_PORT, type BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import { USER_DOMAIN_SERVICE, type UserDomainService } from '~/domain/user/services/user-domain.service';
 import { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
+import { PAYMENT_METHOD_REPOSITORY, type PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository';
 import { MembershipExitRequestEntity } from '~/infrastructure/database/typeorm/entities/membership-exit-request.entity';
 import { tokenTypes } from '~/types/token.types';
 import { CreateMembershipExitInputDTO } from '../dto/create-membership-exit-input.dto';
@@ -37,6 +38,8 @@ export class MembershipExitService {
     private readonly blockchainPort: BlockchainPort,
     @Inject(USER_DOMAIN_SERVICE)
     private readonly userDomainService: UserDomainService,
+    @Inject(PAYMENT_METHOD_REPOSITORY)
+    private readonly paymentMethodRepository: PaymentMethodRepository,
     @InjectRepository(MembershipExitRequestEntity)
     private readonly exitRequestRepository: Repository<MembershipExitRequestEntity>
   ) {}
@@ -72,6 +75,21 @@ export class MembershipExitService {
     const isOperator = currentUser.role === 'chairman' || currentUser.role === 'member';
     if (!isOperator && data.username !== currentUser.username) {
       throw new ForbiddenException('Подать заявление на выход можно только за себя');
+    }
+
+    // Гейт реквизитов: выход нельзя запускать, пока у пайщика нет реквизитов для
+    // получения возврата паевого взноса — иначе при одобрении совета исходящий
+    // платёж возврата некуда будет создать (см. MembershipExitAuthorizationListener).
+    const methods = await this.paymentMethodRepository.list({
+      username: data.username,
+      page: 1,
+      limit: 1,
+      sortOrder: 'DESC',
+    });
+    if (!methods || methods.items.length === 0) {
+      throw new BadRequestException(
+        'Для выхода из кооператива установите реквизиты для получения возврата паевого взноса.'
+      );
     }
 
     // Уже идёт выход on-chain?

@@ -263,6 +263,22 @@ export class AccountBlockchainAdapter implements AccountBlockchainPort {
     );
   }
 
+  async getExitByHash(
+    coopname: string,
+    exit_hash: string
+  ): Promise<RegistratorContract.Tables.Exits.IExit | null> {
+    // Таблица exits в scope=coopname мала (одна запись на выходящего пайщика,
+    // удаляется при завершении), поэтому проще выбрать все строки и найти по
+    // exit_hash, чем ходить во вторичный индекс byhash.
+    const rows = await this.blockchainService.getAllRows<RegistratorContract.Tables.Exits.IExit>(
+      RegistratorContract.contractName.production,
+      coopname,
+      RegistratorContract.Tables.Exits.tableName
+    );
+    const target = exit_hash.toLowerCase();
+    return rows.find((r) => String(r.exit_hash).toLowerCase() === target) ?? null;
+  }
+
   getParticipantAccount(
     coopname: string,
     username: string

@@ -2,10 +2,13 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MembershipExitResolver } from './resolvers/membership-exit.resolver';
 import { MembershipExitService } from './services/membership-exit.service';
+import { MembershipExitAuthorizationListener } from './services/membership-exit-authorization.listener';
 import { ParticipantModule } from '../participant/participant.module';
 import { TokenApplicationModule } from '../token/token-application.module';
 import { NotificationModule } from '../notification/notification.module';
+import { SystemModule } from '../system/system.module';
 import { UserDomainModule } from '~/domain/user/user-domain.module';
+import { EventsInfrastructureModule } from '~/infrastructure/events/events.module';
 import { MembershipExitRequestEntity } from '~/infrastructure/database/typeorm/entities/membership-exit-request.entity';
 
 /**
@@ -22,9 +25,11 @@ import { MembershipExitRequestEntity } from '~/infrastructure/database/typeorm/e
     TypeOrmModule.forFeature([MembershipExitRequestEntity]),
     forwardRef(() => TokenApplicationModule),
     forwardRef(() => NotificationModule),
+    SystemModule,
     UserDomainModule,
+    EventsInfrastructureModule,
   ],
-  providers: [MembershipExitResolver, MembershipExitService],
+  providers: [MembershipExitResolver, MembershipExitService, MembershipExitAuthorizationListener],
   exports: [MembershipExitService],
 })
 export class MembershipExitModule {}

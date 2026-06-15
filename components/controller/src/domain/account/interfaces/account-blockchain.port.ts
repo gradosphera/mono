@@ -27,6 +27,9 @@ export interface AccountBlockchainPort {
   exitCoop(data: ExitCoopDomainInterface): Promise<void>;
   // Текущий процесс выхода пайщика (registrator::exits), либо null
   getExit(coopname: string, username: string): Promise<RegistratorContract.Tables.Exits.IExit | null>;
+  // Процесс выхода по exit_hash (registrator::exits): on-chain confirmexit отдаёт
+  // только coopname+exit_hash, username и сумму возврата берём из таблицы по хэшу.
+  getExitByHash(coopname: string, exit_hash: string): Promise<RegistratorContract.Tables.Exits.IExit | null>;
 }
 
 export const ACCOUNT_BLOCKCHAIN_PORT = Symbol('AccountBlockchainPort');
