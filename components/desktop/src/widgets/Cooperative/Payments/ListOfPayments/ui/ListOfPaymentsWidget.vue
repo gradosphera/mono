@@ -28,7 +28,7 @@
               th.col-action(v-if='!hideActions') Действия
           tbody
             template(v-for='row in items', :key='row.id')
-              tr.data-row(@click='toggleExpand(row.id)')
+              tr.data-row(:id='`pay-row-${row.id}`', @click='toggleExpand(row.id)')
                 td.col-toggle
                   button.icon-btn(
                     type='button',
@@ -104,7 +104,8 @@
                     :item-hash='settlementRef(row)?.item_hash ?? ""',
                     :settlement-amount='`${row.quantity} ${row.symbol}`',
                     :is-return='settlementRef(row)?.isReturn ?? false',
-                    :description='settlementRef(row)?.description ?? ""'
+                    :description='settlementRef(row)?.description ?? ""',
+                    @open-source='openSourcePayment'
                   )
 
       .table-foot
@@ -119,7 +120,7 @@
 
     //- Мобайл: карточки вместо таблицы. Видны только на узких экранах.
     .payments-cards.pmt-mobile
-      .pay-card(v-for='row in items', :key='row.id')
+      .pay-card(v-for='row in items', :key='row.id', :id='`pay-card-${row.id}`')
         .pay-card__main(@click='toggleExpand(row.id)')
           .pay-card__row
             span.pay-card__name {{ getShortNameFromCertificate(row.username_certificate) || row.username }}
@@ -180,7 +181,8 @@
             :item-hash='settlementRef(row)?.item_hash ?? ""',
             :settlement-amount='`${row.quantity} ${row.symbol}`',
             :is-return='settlementRef(row)?.isReturn ?? false',
-            :description='settlementRef(row)?.description ?? ""'
+            :description='settlementRef(row)?.description ?? ""',
+            @open-source='openSourcePayment'
           )
 
       .table-foot
@@ -203,7 +205,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, reactive } from 'vue';
+import { onMounted, ref, computed, reactive, nextTick } from 'vue';
 import { FailAlert } from 'src/shared/api';
 import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
@@ -479,6 +481,25 @@ const onReported = async (settlementHash?: string): Promise<void> => {
   if (!settlementHash) return;
   const row = items.value.find((p) => p.hash === settlementHash);
   if (row) expanded.set(row.id, true);
+};
+
+// Кассир жмёт «Основание» в расчётной платёжке (возврат/доплата) → раскрываем
+// платёж выдачи аванса (его hash == item_hash расчётной платёжки) и прокручиваем
+// к нему. Так видно, сколько выдавалось и что в чеке, без поиска строки вручную.
+const openSourcePayment = async (itemHash: string): Promise<void> => {
+  const target = items.value.find(
+    (p) => p.hash?.toLowerCase() === itemHash.toLowerCase(),
+  );
+  if (!target) {
+    FailAlert('Платёж выдачи аванса не найден на текущей странице реестра');
+    return;
+  }
+  expanded.set(target.id, true);
+  await nextTick();
+  const el =
+    document.getElementById(`pay-row-${target.id}`) ??
+    document.getElementById(`pay-card-${target.id}`);
+  el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
 onMounted(() => {

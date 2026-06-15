@@ -6,6 +6,10 @@
     .exp-step__title Основание расчёта
   .t-sm.t-muted Расчёт по авансу под отчёт{{ proposalLabel }}. {{ basisHint }}
 
+  button.settlement-basis__link(type='button', @click='emit("open-source", itemHash)')
+    q-icon(name='open_in_new', size='15px')
+    span Открыть платёж выдачи аванса
+
   .settlement-basis__rows
     DataRow(label='Что оплачивали', :value='descriptionLabel')
     DataRow(label='Выдано авансом', :value='advanceLabel', mono)
@@ -57,6 +61,11 @@ const props = defineProps<{
   isReturn: boolean;
   // Описание расхода из самой платёжки (fallback — из позиции СЗ).
   description?: string;
+}>();
+
+const emit = defineEmits<{
+  // Кассир жмёт «Основание» → реестр раскрывает платёж выдачи аванса (по item_hash).
+  (e: 'open-source', itemHash: string): void;
 }>();
 
 const system = useSystemStore();
@@ -183,6 +192,24 @@ onMounted(load);
 .exp-step__title {
   font-weight: 600;
   color: var(--p-ink);
+}
+
+.settlement-basis__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--p-1);
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--p-primary);
+  font-size: var(--p-fs-body-sm);
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .settlement-basis__rows {
