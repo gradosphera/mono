@@ -312,7 +312,7 @@ export class ExpensesMutationsService {
       // Назначение фиксированное (суть расхода — в описании позиции, поле
       // blockchain_data.description показывается отдельно как «Что оплачиваем»).
       memo: isUnderspend
-        ? 'Возврат неиспользованных средств, выданных под аванс под отчёт'
+        ? 'Возврат неиспользованных средств, выданных авансом под отчёт'
         : 'Доплата по перерасходу аванса под отчёт',
       secret: generateUniqueHash(),
       payment_method_id: undefined,

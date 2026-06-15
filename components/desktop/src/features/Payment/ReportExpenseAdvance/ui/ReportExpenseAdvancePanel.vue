@@ -13,14 +13,15 @@
 
     //- Сначала сумма (с ней видна разница), затем чек — и только тогда кнопка.
     template(v-if='isAwaitingReport')
-      AmountInput(
-        v-model='factualAmount',
-        :symbol='advanceSymbol',
-        :precision='2',
-        :min='0',
-        label='Фактически потрачено по чекам',
-        :disabled='reporting'
-      )
+      .report-advance__amount
+        AmountInput(
+          v-model='factualAmount',
+          :symbol='advanceSymbol',
+          :precision='2',
+          :min='0',
+          label='Фактически потрачено по чекам',
+          :disabled='reporting'
+        )
       .t-sm.t-warning(v-if='deltaHint') {{ deltaHint }}
 
     //- Загрузчик доступен и после приёма отчёта — доп. документы дополняют его.
@@ -319,6 +320,12 @@ onMounted(refresh);
   align-items: flex-start;
   gap: var(--p-1);
   color: var(--p-ink-2);
+}
+
+//- Сумма по чекам — короткое поле (значение выровнено вправо, в узком поле без
+//- разрыва «лейбл … значение»), а не во всю ширину панели.
+.report-advance__amount {
+  max-width: 240px;
 }
 
 .files {
