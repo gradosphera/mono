@@ -67,14 +67,8 @@ describe('ExpensesBlockchainAdapter', () => {
     assertTransactShape(ExpenseContract.Actions.CreateExp.actionName)
   })
 
-  it('authExp → transact(expense, authexp, ...)', async () => {
-    await adapter.authExp({
-      coopname,
-      proposal_hash: '0xabc',
-      decision: fakeDoc2,
-    })
-    assertTransactShape(ExpenseContract.Actions.AuthExp.actionName)
-  })
+  // authexp/declexp исполняет контракт soviet как callbacks решения совета —
+  // в backend-адаптере их нет по дизайну (см. expenses-blockchain.port.ts).
 
   it('payExp → transact(expense, payexp, [{coopname, active}])', async () => {
     await adapter.payExp({
@@ -114,11 +108,6 @@ describe('ExpensesBlockchainAdapter', () => {
   it('closeExp → transact(expense, closeexp, ...)', async () => {
     await adapter.closeExp({ coopname, proposal_hash: '0xabc' })
     assertTransactShape(ExpenseContract.Actions.CloseExp.actionName)
-  })
-
-  it('declineExp → transact(expense, declexp, ...)', async () => {
-    await adapter.declineExp({ coopname, proposal_hash: '0xabc', reason: 'нет' })
-    assertTransactShape(ExpenseContract.Actions.DeclineExp.actionName)
   })
 
   it('бросает 502, если vault не отдал ключ', async () => {
