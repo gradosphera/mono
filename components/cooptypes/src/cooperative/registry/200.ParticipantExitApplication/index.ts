@@ -8,7 +8,6 @@ export const registry_id = 200
  * Интерфейс генерации заявления на выход из состава пайщиков кооператива
  */
 export interface Action extends IGenerate {
-  signature?: string
   skip_save: boolean
 }
 
@@ -23,7 +22,6 @@ export interface Model {
   coop: ICooperativeData
   meta: IMetaDocument
   vars: IVars
-  signature?: string
 }
 
 export const title = 'Заявление на выход из кооператива'
@@ -42,11 +40,6 @@ padding-top: 30px;
 }
 </style>
 <div class="digital-document">
-<div style="text-align: right;">
-<p style="margin: 0px !important">{% trans 'APPROVED' %}</p>
-<p style="margin: 0px !important">{% trans 'approved_by_council' %} {{ coop.short_name }}</p>
-<p style="margin: 0px !important">({% trans 'protocol' %} {{ vars.participant_exit_application.protocol_number }} {% trans 'from' %} {{ vars.participant_exit_application.protocol_day_month_year }})</p>
-</div>
 
 {% if type == 'individual' %}
 <h1 class="header">{% trans 'application_exit_individual' %}</h1>
@@ -56,7 +49,6 @@ padding-top: 30px;
 <p>{% trans 'request_to_exit', coop.full_name, coop.details.ogrn, coop.details.inn, coop.details.kpp %}</p>
 <p>{% trans 'obligation_to_settle_individual' %}</p>
 <div class="signature">
-<img style="max-width: 150px;" src="{{ signature }}"/>
 <p>{% trans 'signed_electronically' %}</p>
 <p style="text-align: right;">{{ individual.last_name }} {{ individual.first_name }} {{ individual.middle_name }}</p>
 </div>
@@ -69,7 +61,6 @@ padding-top: 30px;
 <p>{% trans 'request_to_exit', coop.full_name, coop.details.ogrn, coop.details.inn, coop.details.kpp %}</p>
 <p>{% trans 'obligation_to_settle_individual' %}</p>
 <div class="signature">
-<img style="max-width: 150px;" src="{{ signature }}"/>
 <p>{% trans 'signed_electronically' %}</p>
 <p style="text-align: right;">{{ entrepreneur.last_name }} {{ entrepreneur.first_name }} {{ entrepreneur.middle_name }}</p>
 </div>
@@ -82,7 +73,6 @@ padding-top: 30px;
 <p>{% trans 'request_to_exit_legal_entity', organization.represented_by.position, organization.represented_by.last_name, organization.represented_by.first_name, organization.represented_by.middle_name, organization.represented_by.based_on, organization.full_name, coop.full_name %}</p>
 <p>{% trans 'obligation_to_settle_legal_entity' %}</p>
 <div class="signature">
-<img style="max-width: 150px;" src="{{ signature }}"/>
 <p>{% trans 'signed_electronically' %}</p>
 <p style="text-align: right;">{{ organization.represented_by.last_name }} {{ organization.represented_by.first_name }} {{ organization.represented_by.middle_name }}</p>
 </div>
@@ -92,9 +82,6 @@ padding-top: 30px;
 
 export const translations = {
   ru: {
-    APPROVED: 'ФОРМА УТВЕРЖДЕНА',
-    approved_by_council: 'решением Собрания Совета',
-    protocol: 'Протокол № СС-',
     from: 'от',
     of_consumer_cooperative: 'Потребительского кооператива',
     to_council_of: 'В Совет',
@@ -185,12 +172,7 @@ export const exampleData = {
     email: 'an.mddf@gmail.com',
   },
   type: 'individual',
-  signature: '',
   vars: {
     passport_request: 'yes',
-    participant_exit_application: {
-      protocol_number: '10-04-2024',
-      protocol_day_month_year: '10 апреля 2024 г.',
-    },
   },
 }

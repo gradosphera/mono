@@ -1,5 +1,5 @@
 import { InputType, Field, IntersectionType, OmitType } from '@nestjs/graphql';
-import { IsString, IsBoolean } from 'class-validator';
+import { IsBoolean } from 'class-validator';
 import { Cooperative } from 'cooptypes';
 import { GenerateMetaDocumentInputDTO } from '~/application/document/dto/generate-meta-document-input.dto';
 import { MetaDocumentInputDTO } from '~/application/document/dto/meta-document-input.dto';
@@ -11,10 +11,6 @@ type action = Cooperative.Registry.ParticipantExitApplication.Action;
 
 @InputType(`BaseMembershipExitApplicationMetaDocumentInput`)
 class BaseMembershipExitApplicationMetaDocumentInputDTO implements ExcludeCommonProps<action> {
-  @Field({ description: 'Изображение собственноручной подписи (base-64)', nullable: true })
-  @IsString()
-  signature?: string;
-
   @Field({
     description:
       'Флаг пропуска сохранения документа (используется для предварительной генерации и демонстрации пользователю)',

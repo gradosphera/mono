@@ -61,10 +61,6 @@ export const Schema: JSONSchemaType<Model> = {
       required: [...CooperativeSchema.required],
       additionalProperties: true,
     },
-    signature: {
-      type: 'string',
-      nullable: true,
-    },
     vars: VarsSchema,
     meta: {
       type: 'object',
