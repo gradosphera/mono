@@ -80,13 +80,17 @@ export function useMembershipExit() {
    * реквизитов исходящий платёж возврата некуда будет создать.
    */
   async function hasRequisites(): Promise<boolean> {
-    const { [Queries.PaymentMethods.GetPaymentMethods.name]: result } =
-      await client.Query(Queries.PaymentMethods.GetPaymentMethods.query, {
-        variables: {
-          data: { username: session.username, limit: 1, page: 1 },
-        },
-      });
-    return (result?.items?.length ?? 0) > 0;
+    const response = await client.Query(Queries.PaymentMethods.GetPaymentMethods.query, {
+      variables: {
+        data: { username: session.username, limit: 1, page: 1 },
+      },
+    });
+    const result = response?.[Queries.PaymentMethods.GetPaymentMethods.name];
+    // Блокируем выход ТОЛЬКО при достоверно пустом списке методов. Если ответ
+    // непонятный (null/не массив) — НЕ блокируем: авторитетную проверку сделает
+    // бэкенд при подаче (createMembershipExit). Так исключаем ложный блок.
+    if (!result || !Array.isArray(result.items)) return true;
+    return result.items.length > 0;
   }
 
   /**

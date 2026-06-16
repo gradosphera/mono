@@ -46,18 +46,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             children: [],
           },
           {
-            meta: {
-              title: 'Выход из кооператива',
-              icon: 'logout',
-              roles: [],
-              requiresAuth: true,
-            },
-            path: 'membership-exit',
-            name: 'membership-exit',
-            component: markRaw(MembershipExitPage),
-            children: [],
-          },
-          {
             // Подтверждение авторизуется токеном из ссылки (мутация публичная),
             // поэтому страница доступна БЕЗ входа — иначе навигационный гард
             // редиректит на login-redirect. requiresAuth:false = исключение из auth-гейта.
@@ -202,6 +190,21 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             path: '/:coopname/support',
             name: 'support',
             component: markRaw(SupportTrigger),
+            children: [],
+          },
+          {
+            // Крайний пункт меню. Иконка group_remove (выход из кооператива) —
+            // отлична от двери-logout нижней кнопки «Выйти» (выход из кабинета),
+            // чтобы действия не путались.
+            meta: {
+              title: 'Выход из кооператива',
+              icon: 'group_remove',
+              roles: [],
+              requiresAuth: true,
+            },
+            path: 'membership-exit',
+            name: 'membership-exit',
+            component: markRaw(MembershipExitPage),
             children: [],
           },
         ],

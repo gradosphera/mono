@@ -169,7 +169,13 @@ const handlerSubmit = async (): Promise<void> => {
     SuccessAlert('Заявление подписано. Перейдите по ссылке из письма, чтобы подтвердить выход.');
     clear();
   } catch (e: any) {
-    FailAlert(e);
+    // Авторитетный гейт реквизитов — на бэкенде. Если он отклонил подачу из-за
+    // отсутствия реквизитов, переключаем диалог на экран-баннер с кнопкой.
+    if (JSON.stringify(e ?? '').includes('установите реквизиты')) {
+      requisitesOk.value = false;
+    } else {
+      FailAlert(e);
+    }
   } finally {
     isSubmitting.value = false;
   }
