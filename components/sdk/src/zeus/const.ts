@@ -1370,6 +1370,9 @@ export const AllTypesProps: Record<string,any> = {
 		uploadExpenseFile:{
 			data:"UploadExpenseFileInput"
 		},
+		uploadPaymentProof:{
+			data:"UploadPaymentProofInput"
+		},
 		verifyEmail:{
 			data:"VerifyEmailInputDTO"
 		},
@@ -1427,6 +1430,7 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	PaymentDirection: "enum" as const,
+	PaymentFileKind: "enum" as const,
 	PaymentFiltersInput:{
 		direction:"PaymentDirection",
 		status:"PaymentStatus",
@@ -1822,6 +1826,12 @@ export const AllTypesProps: Record<string,any> = {
 		onecoopGetDocuments:{
 			data:"GetOneCoopDocumentsInput"
 		},
+		paymentFile:{
+
+		},
+		paymentProofs:{
+
+		},
 		process:{
 
 		},
@@ -2120,6 +2130,9 @@ export const AllTypesProps: Record<string,any> = {
 	},
 	UploadExpenseFileInput:{
 		kind:"ExpenseFileKind"
+	},
+	UploadPaymentProofInput:{
+
 	},
 	UserStatus: "enum" as const,
 	VarsInput:{
@@ -4060,6 +4073,7 @@ export const ReturnTypes: Record<string,any> = {
 		updateSettings:"Settings",
 		updateSystem:"SystemInfo",
 		uploadExpenseFile:"ExpenseFile",
+		uploadPaymentProof:"PaymentFile",
 		verifyEmail:"Boolean",
 		voteOnAnnualGeneralMeet:"MeetAggregate",
 		walmoveWallets:"Ledger2AdjustmentResult"
@@ -4340,6 +4354,20 @@ export const ReturnTypes: Record<string,any> = {
 		fee_amount:"String",
 		fee_percent:"Float",
 		tolerance_percent:"Float"
+	},
+	PaymentFile:{
+		checksum_sha256:"String",
+		coopname:"String",
+		id:"Int",
+		kind:"PaymentFileKind",
+		mime_type:"String",
+		original_filename:"String",
+		payment_hash:"String",
+		read_url:"String",
+		size_bytes:"Int",
+		storage_key:"String",
+		uploaded_at:"DateTime",
+		uploaded_by_username:"String"
 	},
 	PaymentMethod:{
 		created_at:"DateTime",
@@ -4656,6 +4684,8 @@ export const ReturnTypes: Record<string,any> = {
 		membershipExit:"MembershipExit",
 		membershipExitReturnPreview:"MembershipExitReturnPreview",
 		onecoopGetDocuments:"OneCoopDocumentsResponse",
+		paymentFile:"PaymentFile",
+		paymentProofs:"PaymentFile",
 		process:"ProcessView",
 		processes:"ProcessSummaryPaginationResult",
 		searchDocuments:"SearchResult",

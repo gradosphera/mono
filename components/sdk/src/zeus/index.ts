@@ -7227,6 +7227,7 @@ updateRequest?: [{	data: ValueTypes["UpdateRequestInput"] | Variable<any, string
 updateSettings?: [{	data: ValueTypes["UpdateSettingsInput"] | Variable<any, string>},ValueTypes["Settings"]],
 updateSystem?: [{	data: ValueTypes["Update"] | Variable<any, string>},ValueTypes["SystemInfo"]],
 uploadExpenseFile?: [{	data: ValueTypes["UploadExpenseFileInput"] | Variable<any, string>},ValueTypes["ExpenseFile"]],
+uploadPaymentProof?: [{	data: ValueTypes["UploadPaymentProofInput"] | Variable<any, string>},ValueTypes["PaymentFile"]],
 verifyEmail?: [{	data: ValueTypes["VerifyEmailInputDTO"] | Variable<any, string>},boolean | `@${string}`],
 voteOnAnnualGeneralMeet?: [{	data: ValueTypes["VoteOnAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},ValueTypes["Ledger2AdjustmentResult"]],
@@ -7964,6 +7965,37 @@ walmoveWallets?: [{	input: ValueTypes["WalmoveInput"] | Variable<any, string>},V
 }>;
 	/** Направление платежа */
 ["PaymentDirection"]:PaymentDirection;
+	/** Запись о файле, приложенном к платежу (чек об оплате). */
+["PaymentFile"]: AliasType<{
+	/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256?:boolean | `@${string}`,
+	/** Имя кооператива (scope). */
+	coopname?:boolean | `@${string}`,
+	/** Внутренний ID записи. */
+	id?:boolean | `@${string}`,
+	/** Назначение файла. */
+	kind?:boolean | `@${string}`,
+	/** MIME-тип содержимого. */
+	mime_type?:boolean | `@${string}`,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?:boolean | `@${string}`,
+	/** Хеш платежа. */
+	payment_hash?:boolean | `@${string}`,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?:boolean | `@${string}`,
+	/** Размер файла в байтах. */
+	size_bytes?:boolean | `@${string}`,
+	/** MinIO-ключ внутри бакета. */
+	storage_key?:boolean | `@${string}`,
+	/** Когда загружено. */
+	uploaded_at?:boolean | `@${string}`,
+	/** Кто загрузил (username). */
+	uploaded_by_username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on PaymentFile']?: Omit<ValueTypes["PaymentFile"], "...on PaymentFile">
+}>;
+	/** Тип файла, приложенного к платежу. */
+["PaymentFileKind"]:PaymentFileKind;
 	["PaymentFiltersInput"]: {
 	/** Название кооператива */
 	coopname?: string | undefined | null | Variable<any, string>,
@@ -8689,6 +8721,8 @@ listReportDrafts?: [{	filter?: ValueTypes["ListReportDraftsFilterInput"] | undef
 membershipExit?: [{	coopname: string | Variable<any, string>,	username: string | Variable<any, string>},ValueTypes["MembershipExit"]],
 membershipExitReturnPreview?: [{	coopname: string | Variable<any, string>,	username: string | Variable<any, string>},ValueTypes["MembershipExitReturnPreview"]],
 onecoopGetDocuments?: [{	data: ValueTypes["GetOneCoopDocumentsInput"] | Variable<any, string>},ValueTypes["OneCoopDocumentsResponse"]],
+paymentFile?: [{	id: number | Variable<any, string>},ValueTypes["PaymentFile"]],
+paymentProofs?: [{	coopname: string | Variable<any, string>,	payment_hash: string | Variable<any, string>},ValueTypes["PaymentFile"]],
 process?: [{	coopname: string | Variable<any, string>,	hash: string | Variable<any, string>},ValueTypes["ProcessView"]],
 processes?: [{	filter: ValueTypes["ProcessesFilter"] | Variable<any, string>,	pagination: ValueTypes["PaginationInput"] | Variable<any, string>},ValueTypes["ProcessSummaryPaginationResult"]],
 searchDocuments?: [{	data: ValueTypes["SearchDocumentsInput"] | Variable<any, string>},ValueTypes["SearchResult"]],
@@ -10212,6 +10246,22 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 	original_filename?: string | undefined | null | Variable<any, string>,
 	/** Хеш сметы расхода. */
 	proposal_hash: string | Variable<any, string>,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number | Variable<any, string>
+};
+	["UploadPaymentProofInput"]: {
+	/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string | Variable<any, string>,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string | Variable<any, string>,
+	/** Имя кооператива. */
+	coopname: string | Variable<any, string>,
+	/** MIME-тип содержимого. */
+	mime_type: string | Variable<any, string>,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null | Variable<any, string>,
+	/** Хеш платежа, к которому прикладывается чек. */
+	payment_hash: string | Variable<any, string>,
 	/** Размер файла в байтах (для серверной валидации). */
 	size_bytes: number | Variable<any, string>
 };
@@ -16411,6 +16461,7 @@ updateRequest?: [{	data: ResolverInputTypes["UpdateRequestInput"]},ResolverInput
 updateSettings?: [{	data: ResolverInputTypes["UpdateSettingsInput"]},ResolverInputTypes["Settings"]],
 updateSystem?: [{	data: ResolverInputTypes["Update"]},ResolverInputTypes["SystemInfo"]],
 uploadExpenseFile?: [{	data: ResolverInputTypes["UploadExpenseFileInput"]},ResolverInputTypes["ExpenseFile"]],
+uploadPaymentProof?: [{	data: ResolverInputTypes["UploadPaymentProofInput"]},ResolverInputTypes["PaymentFile"]],
 verifyEmail?: [{	data: ResolverInputTypes["VerifyEmailInputDTO"]},boolean | `@${string}`],
 voteOnAnnualGeneralMeet?: [{	data: ResolverInputTypes["VoteOnAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputTypes["Ledger2AdjustmentResult"]],
@@ -17109,6 +17160,36 @@ walmoveWallets?: [{	input: ResolverInputTypes["WalmoveInput"]},ResolverInputType
 }>;
 	/** Направление платежа */
 ["PaymentDirection"]:PaymentDirection;
+	/** Запись о файле, приложенном к платежу (чек об оплате). */
+["PaymentFile"]: AliasType<{
+	/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256?:boolean | `@${string}`,
+	/** Имя кооператива (scope). */
+	coopname?:boolean | `@${string}`,
+	/** Внутренний ID записи. */
+	id?:boolean | `@${string}`,
+	/** Назначение файла. */
+	kind?:boolean | `@${string}`,
+	/** MIME-тип содержимого. */
+	mime_type?:boolean | `@${string}`,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?:boolean | `@${string}`,
+	/** Хеш платежа. */
+	payment_hash?:boolean | `@${string}`,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?:boolean | `@${string}`,
+	/** Размер файла в байтах. */
+	size_bytes?:boolean | `@${string}`,
+	/** MinIO-ключ внутри бакета. */
+	storage_key?:boolean | `@${string}`,
+	/** Когда загружено. */
+	uploaded_at?:boolean | `@${string}`,
+	/** Кто загрузил (username). */
+	uploaded_by_username?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	/** Тип файла, приложенного к платежу. */
+["PaymentFileKind"]:PaymentFileKind;
 	["PaymentFiltersInput"]: {
 	/** Название кооператива */
 	coopname?: string | undefined | null,
@@ -17812,6 +17893,8 @@ listReportDrafts?: [{	filter?: ResolverInputTypes["ListReportDraftsFilterInput"]
 membershipExit?: [{	coopname: string,	username: string},ResolverInputTypes["MembershipExit"]],
 membershipExitReturnPreview?: [{	coopname: string,	username: string},ResolverInputTypes["MembershipExitReturnPreview"]],
 onecoopGetDocuments?: [{	data: ResolverInputTypes["GetOneCoopDocumentsInput"]},ResolverInputTypes["OneCoopDocumentsResponse"]],
+paymentFile?: [{	id: number},ResolverInputTypes["PaymentFile"]],
+paymentProofs?: [{	coopname: string,	payment_hash: string},ResolverInputTypes["PaymentFile"]],
 process?: [{	coopname: string,	hash: string},ResolverInputTypes["ProcessView"]],
 processes?: [{	filter: ResolverInputTypes["ProcessesFilter"],	pagination: ResolverInputTypes["PaginationInput"]},ResolverInputTypes["ProcessSummaryPaginationResult"]],
 searchDocuments?: [{	data: ResolverInputTypes["SearchDocumentsInput"]},ResolverInputTypes["SearchResult"]],
@@ -19296,6 +19379,22 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 	original_filename?: string | undefined | null,
 	/** Хеш сметы расхода. */
 	proposal_hash: string,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number
+};
+	["UploadPaymentProofInput"]: {
+	/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null,
+	/** Хеш платежа, к которому прикладывается чек. */
+	payment_hash: string,
 	/** Размер файла в байтах (для серверной валидации). */
 	size_bytes: number
 };
@@ -25843,6 +25942,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	uploadExpenseFile: ModelTypes["ExpenseFile"],
+	/** Приложить чек об оплате к платежу (бакет gateway:files).
+
+Требуемые роли: chairman, member.  */
+	uploadPaymentProof: ModelTypes["PaymentFile"],
 	/** Подтвердить email адрес пользователя */
 	verifyEmail: boolean,
 	/** Голосование на общем собрании пайщиков
@@ -26503,6 +26606,34 @@ export type ModelTypes = {
 	tolerance_percent: number
 };
 	["PaymentDirection"]:PaymentDirection;
+	/** Запись о файле, приложенном к платежу (чек об оплате). */
+["PaymentFile"]: {
+		/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256: string,
+	/** Имя кооператива (scope). */
+	coopname: string,
+	/** Внутренний ID записи. */
+	id: number,
+	/** Назначение файла. */
+	kind: ModelTypes["PaymentFileKind"],
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?: string | undefined | null,
+	/** Хеш платежа. */
+	payment_hash: string,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?: string | undefined | null,
+	/** Размер файла в байтах. */
+	size_bytes: number,
+	/** MinIO-ключ внутри бакета. */
+	storage_key: string,
+	/** Когда загружено. */
+	uploaded_at: ModelTypes["DateTime"],
+	/** Кто загрузил (username). */
+	uploaded_by_username: string
+};
+	["PaymentFileKind"]:PaymentFileKind;
 	["PaymentFiltersInput"]: {
 	/** Название кооператива */
 	coopname?: string | undefined | null,
@@ -27092,7 +27223,7 @@ export type ModelTypes = {
 	capitalResults: ModelTypes["PaginatedCapitalResultsPaginationResult"],
 	/** Получение одного сегмента кооператива по фильтрам */
 	capitalSegment?: ModelTypes["CapitalSegment"] | undefined | null,
-	/** Получение списка се��ментов кооператива с фильтрацией и пагинацией */
+	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
 	capitalSegments: ModelTypes["PaginatedCapitalSegmentsPaginationResult"],
 	/** Получение полного состояния CAPITAL контракта кооператива */
 	capitalState?: ModelTypes["CapitalState"] | undefined | null,
@@ -27394,6 +27525,14 @@ export type ModelTypes = {
 	membershipExitReturnPreview: ModelTypes["MembershipExitReturnPreview"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: ModelTypes["OneCoopDocumentsResponse"],
+	/** Получить запись о файле платежа + свежий короткоживущий read-URL.
+
+Требуемые роли: chairman, member, user.  */
+	paymentFile: ModelTypes["PaymentFile"],
+	/** Список чеков об оплате платежа (без read-URL — запрос отдельно по id).
+
+Требуемые роли: chairman, member, user.  */
+	paymentProofs: Array<ModelTypes["PaymentFile"]>,
 	/** Получить полную картину процесса ledger2 по process_hash
 
 Требуемые роли: chairman, member.  */
@@ -28845,6 +28984,22 @@ export type ModelTypes = {
 	original_filename?: string | undefined | null,
 	/** Хеш сметы расхода. */
 	proposal_hash: string,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number
+};
+	["UploadPaymentProofInput"]: {
+	/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null,
+	/** Хеш платежа, к которому прикладывается чек. */
+	payment_hash: string,
 	/** Размер файла в байтах (для серверной валидации). */
 	size_bytes: number
 };
@@ -35703,6 +35858,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	uploadExpenseFile: GraphQLTypes["ExpenseFile"],
+	/** Приложить чек об оплате к платежу (бакет gateway:files).
+
+Требуемые роли: chairman, member.  */
+	uploadPaymentProof: GraphQLTypes["PaymentFile"],
 	/** Подтвердить email адрес пользователя */
 	verifyEmail: boolean,
 	/** Голосование на общем собрании пайщиков
@@ -36446,6 +36605,37 @@ export type GraphQLTypes = {
 };
 	/** Направление платежа */
 ["PaymentDirection"]: PaymentDirection;
+	/** Запись о файле, приложенном к платежу (чек об оплате). */
+["PaymentFile"]: {
+	__typename: "PaymentFile",
+	/** SHA-256 содержимого, hex-lowercase. */
+	checksum_sha256: string,
+	/** Имя кооператива (scope). */
+	coopname: string,
+	/** Внутренний ID записи. */
+	id: number,
+	/** Назначение файла. */
+	kind: GraphQLTypes["PaymentFileKind"],
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Оригинальное имя загруженного файла. */
+	original_filename?: string | undefined | null,
+	/** Хеш платежа. */
+	payment_hash: string,
+	/** Короткоживущий URL на скачивание (HMAC-signed). */
+	read_url?: string | undefined | null,
+	/** Размер файла в байтах. */
+	size_bytes: number,
+	/** MinIO-ключ внутри бакета. */
+	storage_key: string,
+	/** Когда загружено. */
+	uploaded_at: GraphQLTypes["DateTime"],
+	/** Кто загрузил (username). */
+	uploaded_by_username: string,
+	['...on PaymentFile']: Omit<GraphQLTypes["PaymentFile"], "...on PaymentFile">
+};
+	/** Тип файла, приложенного к платежу. */
+["PaymentFileKind"]: PaymentFileKind;
 	["PaymentFiltersInput"]: {
 		/** Название кооператива */
 	coopname?: string | undefined | null,
@@ -37098,7 +37288,7 @@ export type GraphQLTypes = {
 	capitalResults: GraphQLTypes["PaginatedCapitalResultsPaginationResult"],
 	/** Получение одного сегмента кооператива по фильтрам */
 	capitalSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
-	/** Получение списка се��ментов кооператива с фильтрацией и пагинацией */
+	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
 	capitalSegments: GraphQLTypes["PaginatedCapitalSegmentsPaginationResult"],
 	/** Получение полного состояния CAPITAL контракта кооператива */
 	capitalState?: GraphQLTypes["CapitalState"] | undefined | null,
@@ -37400,6 +37590,14 @@ export type GraphQLTypes = {
 	membershipExitReturnPreview: GraphQLTypes["MembershipExitReturnPreview"],
 	/** Получение документов кооператива для синхронизации с 1С. Требует секретный ключ в заголовке x-onecoop-secret-key. */
 	onecoopGetDocuments: GraphQLTypes["OneCoopDocumentsResponse"],
+	/** Получить запись о файле платежа + свежий короткоживущий read-URL.
+
+Требуемые роли: chairman, member, user.  */
+	paymentFile: GraphQLTypes["PaymentFile"],
+	/** Список чеков об оплате платежа (без read-URL — запрос отдельно по id).
+
+Требуемые роли: chairman, member, user.  */
+	paymentProofs: Array<GraphQLTypes["PaymentFile"]>,
 	/** Получить полную картину процесса ledger2 по process_hash
 
 Требуемые роли: chairman, member.  */
@@ -38938,6 +39136,22 @@ export type GraphQLTypes = {
 	/** Размер файла в байтах (для серверной валидации). */
 	size_bytes: number
 };
+	["UploadPaymentProofInput"]: {
+		/** SHA-256 содержимого, hex-lowercase (64 hex-символа). */
+	checksum_sha256: string,
+	/** Содержимое файла, base64 без префикса data:. */
+	content_base64: string,
+	/** Имя кооператива. */
+	coopname: string,
+	/** MIME-тип содержимого. */
+	mime_type: string,
+	/** Оригинальное имя файла — для отображения и поиска. */
+	original_filename?: string | undefined | null,
+	/** Хеш платежа, к которому прикладывается чек. */
+	payment_hash: string,
+	/** Размер файла в байтах (для серверной валидации). */
+	size_bytes: number
+};
 	["UserAccount"]: {
 	__typename: "UserAccount",
 	/** Метаинформация */
@@ -39476,6 +39690,10 @@ export enum PaymentDirection {
 	INCOMING = "INCOMING",
 	OUTGOING = "OUTGOING"
 }
+/** Тип файла, приложенного к платежу. */
+export enum PaymentFileKind {
+	PAYMENT_PROOF = "PAYMENT_PROOF"
+}
 /** Статус платежа */
 export enum PaymentStatus {
 	AWAITING_AUTHORIZATION = "AWAITING_AUTHORIZATION",
@@ -39885,6 +40103,7 @@ type ZEUS_VARIABLES = {
 	["PassportInput"]: ValueTypes["PassportInput"];
 	["PayExpenseItemInput"]: ValueTypes["PayExpenseItemInput"];
 	["PaymentDirection"]: ValueTypes["PaymentDirection"];
+	["PaymentFileKind"]: ValueTypes["PaymentFileKind"];
 	["PaymentFiltersInput"]: ValueTypes["PaymentFiltersInput"];
 	["PaymentStatus"]: ValueTypes["PaymentStatus"];
 	["PaymentType"]: ValueTypes["PaymentType"];
@@ -40000,6 +40219,7 @@ type ZEUS_VARIABLES = {
 	["UpdateSettingsInput"]: ValueTypes["UpdateSettingsInput"];
 	["UpdateStoryInput"]: ValueTypes["UpdateStoryInput"];
 	["UploadExpenseFileInput"]: ValueTypes["UploadExpenseFileInput"];
+	["UploadPaymentProofInput"]: ValueTypes["UploadPaymentProofInput"];
 	["UserStatus"]: ValueTypes["UserStatus"];
 	["VarsInput"]: ValueTypes["VarsInput"];
 	["VerifyEmailInputDTO"]: ValueTypes["VerifyEmailInputDTO"];

@@ -68,15 +68,19 @@
               tr.expand-row(v-if='expanded.get(row.id)')
                 td(:colspan='hideActions ? 7 : 8')
                   PaymentDetails(:payment='row')
-                  //- Стол совета: кассир прикладывает платёжку и закрывающие документы;
-                  //- при личной передаче чеков — отчитывается за пайщика (панель
-                  //- отчёта сама скрывается для прямой оплаты организации, DIRECT).
+                  //- Чек об оплате — ядро, для любого исходящего платежа (стол кассира).
+                  .q-mt-sm(v-if='!hideActions && paymentProofHash(row)')
+                    AttachPaymentProofPanel(
+                      :payment-hash='paymentProofHash(row) ?? ""',
+                      :step='expenseProofRef(row) ? { number: 1, title: "Подтвердите оплату" } : undefined',
+                      @uploaded='onProofUploaded(row)'
+                    )
+                  //- Расход: закрывающие документы (DIRECT, панель сама скрывается)
+                  //- + отчёт пайщика.
                   .expense-flow.q-mt-sm(v-if='!hideActions && expenseProofRef(row)')
                     AttachExpenseProofPanel(
                       :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
-                      :item-hash='expenseProofRef(row)?.item_hash ?? ""',
-                      :step='{ number: 1, title: "Подтвердите оплату" }',
-                      @uploaded='onProofUploaded(row)'
+                      :item-hash='expenseProofRef(row)?.item_hash ?? ""'
                     )
                     ReportExpenseAdvancePanel(
                       :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
@@ -151,12 +155,17 @@
           SetOrderRefundedStatusButton(v-if='!isRefundType(row.type)', :id='row.id')
         template(v-if='expanded.get(row.id)')
           PaymentDetails.pay-card__details(:payment='row')
+          //- Чек об оплате — ядро, для любого исходящего платежа (стол кассира).
+          .q-mt-sm(v-if='!hideActions && paymentProofHash(row)')
+            AttachPaymentProofPanel(
+              :payment-hash='paymentProofHash(row) ?? ""',
+              :step='expenseProofRef(row) ? { number: 1, title: "Подтвердите оплату" } : undefined',
+              @uploaded='onProofUploaded(row)'
+            )
           .expense-flow.q-mt-sm(v-if='!hideActions && expenseProofRef(row)')
             AttachExpenseProofPanel(
               :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
-              :item-hash='expenseProofRef(row)?.item_hash ?? ""',
-              :step='{ number: 1, title: "Подтвердите оплату" }',
-              @uploaded='onProofUploaded(row)'
+              :item-hash='expenseProofRef(row)?.item_hash ?? ""'
             )
             ReportExpenseAdvancePanel(
               :proposal-hash='expenseProofRef(row)?.proposal_hash ?? ""',
@@ -212,6 +221,7 @@ import { usePaymentStore } from 'src/entities/Payment/model';
 import { SetOrderPaidStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderPaidStatusButton';
 import { SetOrderRefundedStatusButton } from 'src/features/Payment/SetStatus/ui/SetOrderRefundedStatusButton';
 import { AttachExpenseProofPanel } from 'src/features/Payment/AttachExpenseProof';
+import { AttachPaymentProofPanel } from 'src/features/Payment/AttachPaymentProof';
 import { ReportExpenseAdvancePanel } from 'src/features/Payment/ReportExpenseAdvance';
 import { ExpenseSettlementBasisPanel } from 'src/features/Payment/ExpenseSettlementBasis';
 import { useSessionStore } from 'src/entities/Session';
@@ -319,6 +329,15 @@ const expenseProofRef = (
   return { proposal_hash: data.proposal_hash, item_hash: data.item_hash };
 };
 
+// Ядровый «чек об оплате»: любой ИСХОДЯЩИЙ платёж после оплаты (PAID/COMPLETED)
+// сопровождается чеком, привязка по hash платежа. Единый механизм на все
+// исходящие (возврат паевого/withdrawal/registration-refund/аванс расхода).
+const paymentProofHash = (row: IPaymentRow): string | null => {
+  if (row.direction !== Zeus.PaymentDirection.OUTGOING) return null;
+  if (![Zeus.PaymentStatus.PAID, Zeus.PaymentStatus.COMPLETED].includes(row.status)) return null;
+  return row.hash ?? null;
+};
+
 // Личный реестр пайщика (hideActions): получатель аванса под отчёт прикладывает
 // чек и подаёт отчёт по своей позиции. Механику (ADVANCE/DIRECT) панель
 // проверяет сама по данным СЗ и для DIRECT не отображается.
@@ -376,10 +395,11 @@ const reportBadge = (
   return { label: reportStateLabel(state), variant: reportStateVariant(state) };
 };
 
-// Отметка отчитанности оплаченного расхода: бэкенд зеркалит число платёжек
-// в blockchain_data.proof_count при каждой загрузке/удалении файла.
+// Отметка «чек об оплате приложен»: бэкенд зеркалит число чеков в
+// blockchain_data.proof_count при каждой загрузке/удалении файла. Для любого
+// исходящего платежа после оплаты.
 const proofState = (row: IPaymentRow): 'attached' | 'missing' | 'none' => {
-  if (!expenseProofRef(row)) return 'none';
+  if (!paymentProofHash(row)) return 'none';
   const count = (row.blockchain_data as { proof_count?: number } | null)?.proof_count ?? 0;
   return count > 0 ? 'attached' : 'missing';
 };
