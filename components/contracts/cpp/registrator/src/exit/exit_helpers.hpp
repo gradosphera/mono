@@ -35,6 +35,38 @@ inline asset get_user_wallet_available(name coopname, name wallet_name, name use
 }
 
 /**
+ * @brief Консолидация доступного паевого кошелька пайщика на главный
+ * (`w.wal.share`) перед резервом возврата при выходе.
+ *
+ * Главный кошелёк (`w.wal.share`) уже целевой — перенос не нужен. Для остальных
+ * кошельков сета `LEDGER2_EXIT_REFUND_WALLETS` применяется операция переноса на
+ * главный:
+ *   w.reg.minshr → o.reg.mvmin  (MOVE_MINSHARE);
+ *   w.cap.blago  → o.cap.wthcap (WITHDRAW_FROM_CAPITAL).
+ *
+ * Кошелёк сета без операции переноса (новый паевой кошелёк забыли смаппить)
+ * валит транзакцию с явным сообщением — защита от тихой потери средств.
+ */
+inline void consolidate_share_to_main(name coopname, name username, name wallet_name, asset amount, checksum256 exit_hash) {
+  if (wallet_name == ledger2_wallets::SHARE_FUND_PAY) return; // уже на главном паевом
+
+  eosio::name op;
+  if (wallet_name == ledger2_wallets::MIN_SHARE_FUND) {
+    op = operations::registrator::MOVE_MINSHARE;       // w.reg.minshr → w.wal.share
+  } else if (wallet_name == ledger2_wallets::BLAGOROST_FUND) {
+    op = operations::capital::WITHDRAW_FROM_CAPITAL;   // w.cap.blago  → w.wal.share
+  } else {
+    eosio::check(false,
+      std::string{"Нет операции консолидации паевого кошелька "} + wallet_name.to_string() +
+      " на главный при выходе — добавьте маппинг в consolidate_share_to_main");
+  }
+
+  std::string memo = "Консолидация паевого взноса при выходе, кошелёк=" +
+                     wallet_name.to_string() + ", username=" + username.to_string();
+  Ledger2::apply(_registrator, coopname, op, amount, username, exit_hash, memo);
+}
+
+/**
  * @brief Финализация выхода: удаление пайщика из реестра совета и блокировка
  * аккаунта в registrator.
  *

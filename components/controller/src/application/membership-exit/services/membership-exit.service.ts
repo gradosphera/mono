@@ -273,26 +273,38 @@ export class MembershipExitService {
   }
 
   /**
-   * Предварительный расчёт суммы возврата паевого взноса при выходе пайщика —
-   * минимальный (w.reg.minshr) + целевой (w.wal.share) паевой по L3-балансам.
+   * Предварительный расчёт суммы возврата паевого взноса при выходе пайщика.
+   *
+   * Считается обходом сета паевых кошельков Ledger2.EXIT_REFUND_WALLET_NAMES
+   * (w.reg.minshr + w.wal.share + w.cap.blago) по L3-балансам — тот же сет, что
+   * обходит контракт `confirmexit` при одобрении выхода советом, поэтому preview
+   * совпадает с суммой, которую реально вернёт контракт.
    */
   async getReturnPreview(coopname: string, username: string): Promise<MembershipExitReturnPreviewDTO> {
-    const [shareRow, minRow] = await Promise.all([
-      this.userWalletRepository.findByWalletAndUsername(coopname, Ledger2.SHARE_WALLET_NAME, username),
-      this.userWalletRepository.findByWalletAndUsername(coopname, Ledger2.MIN_SHARE_WALLET_NAME, username),
-    ]);
+    const wallets = Ledger2.EXIT_REFUND_WALLET_NAMES;
+    const rows = await Promise.all(
+      wallets.map((wallet) => this.userWalletRepository.findByWalletAndUsername(coopname, wallet, username)),
+    );
 
-    const share = shareRow?.present !== false ? shareRow?.available : undefined;
-    const minimum = minRow?.present !== false ? minRow?.available : undefined;
+    // available учитываем только для существующих (present) кошельков
+    const balances = rows.map((row) => (row?.present !== false ? row?.available : undefined));
 
-    const template = await this.resolveAssetTemplate(coopname, share ?? minimum);
-    const shareAsset = share ?? this.zeroAssetLike(template);
-    const minimumAsset = minimum ?? this.zeroAssetLike(template);
+    const template = await this.resolveAssetTemplate(coopname, balances.find((b) => !!b));
+    const zero = this.zeroAssetLike(template);
+
+    const assets = balances.map((b) => b ?? zero);
+    const total = assets.reduce((acc, a) => this.sumAssets(acc, a), zero);
+
+    // индивидуальные паевые отдаём для информации; фронт показывает total
+    const balanceOf = (wallet: string): string => {
+      const idx = wallets.indexOf(wallet);
+      return idx >= 0 ? assets[idx] : zero;
+    };
 
     return {
-      total: this.sumAssets(shareAsset, minimumAsset),
-      share_contribution: shareAsset,
-      minimum_contribution: minimumAsset,
+      total,
+      share_contribution: balanceOf(Ledger2.SHARE_WALLET_NAME),
+      minimum_contribution: balanceOf(Ledger2.MIN_SHARE_WALLET_NAME),
     };
   }
 

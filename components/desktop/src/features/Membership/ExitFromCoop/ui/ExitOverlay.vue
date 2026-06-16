@@ -25,7 +25,6 @@ BaseDialog(
           :variant='paymentChip.variant',
           size='sm'
         ) {{ paymentChip.label }}
-        span.exit-amount__hint.t-sm.t-faint(v-if='view.plannedHint') Планируемая сумма; итог фиксирует Совет.
       p.exit-note.t-sm.t-muted(v-if='view.canCancel') Пока вы не перешли по ссылке, заявление можно отменить.
 
       //- Футер: действия (отделён бордером внутри AuthCard).
@@ -107,7 +106,6 @@ const view = computed(() => {
       title: 'Вы вышли из кооператива',
       body: 'Возврат паевого взноса оплачен — дождитесь поступления средств на указанные реквизиты. Аккаунт заблокирован. Благодарим за участие в кооперативе.',
       amountLabel: 'Сумма возврата',
-      plannedHint: false,
       canCancel: false,
     };
   }
@@ -117,8 +115,7 @@ const view = computed(() => {
       tone: 'primary',
       title: 'Подтвердите выход по ссылке из письма',
       body: 'Мы отправили письмо на вашу электронную почту — перейдите по ссылке в нём, чтобы подтвердить выход и запустить возврат паевого взноса. Письмо могло попасть в папку «Спам».',
-      amountLabel: 'Планируемая сумма к возврату',
-      plannedHint: false,
+      amountLabel: 'Сумма к возврату',
       canCancel: true,
     };
   }
@@ -129,7 +126,6 @@ const view = computed(() => {
       title: 'Совет одобрил выход',
       body: 'Возврат паевого взноса будет совершён в срок, установленный Уставом кооператива. Аккаунт заблокирован — дождитесь поступления средств.',
       amountLabel: 'Сумма к возврату',
-      plannedHint: false,
       canCancel: false,
     };
   }
@@ -139,7 +135,6 @@ const view = computed(() => {
     title: 'Заявление на рассмотрении Совета',
     body: 'Ваше заявление о выходе передано в Совет кооператива. Кабинет заблокирован на время процедуры — дождитесь решения Совета.',
     amountLabel: 'Сумма к возврату',
-    plannedHint: true,
     canCancel: false,
   };
 });
@@ -237,9 +232,6 @@ const onLogout = async (): Promise<void> => {
 }
 .exit-amount__chip {
   margin-top: var(--p-2);
-}
-.exit-amount__hint {
-  margin-top: var(--p-1);
 }
 
 .exit-note {

@@ -1,10 +1,11 @@
 /**
  * @brief Одобрение советом выхода пайщика из кооператива.
- * Совет одобрил заявление о выходе. Контракт сам вычисляет сумму возврата по
- * L3-балансам ledger2 (минимальный + целевой паевой), консолидирует
- * минимальный паевой на главный (o.reg.mvmin), резервирует сумму возврата
- * (o.wal.wthreq) и создаёт исходящий платёж в gateway. Если возвращать нечего
- * — выход завершается сразу без платежа.
+ * Совет одобрил заявление о выходе. Контракт сам вычисляет сумму возврата:
+ * обходит сет паевых кошельков LEDGER2_EXIT_REFUND_WALLETS (w.reg.minshr +
+ * w.wal.share + w.cap.blago), собирает доступный L3-баланс каждого, консолидирует
+ * на главный паевой (w.wal.share), резервирует всю сумму (o.wal.wthreq) и создаёт
+ * исходящий платёж в gateway. Если возвращать нечего — выход завершается сразу
+ * без платежа.
  * @param coopname Наименование кооператива
  * @param exit_hash Хэш процесса выхода
  * @param authorization Документ-решение совета о выходе
@@ -29,26 +30,24 @@ void registrator::confirmexit(eosio::name coopname, checksum256 exit_hash, docum
   require_recipient(username);
 
   // Контракт сам считает сумму возврата по L3-балансам ledger2 — не доверяем
-  // клиенту. Возвращается минимальный (w.reg.minshr) + целевой (w.wal.share)
-  // паевой взнос пайщика.
-  eosio::asset min_share = Registrator::get_user_wallet_available(coopname, ledger2_wallets::MIN_SHARE_FUND, username);
-  eosio::asset share = Registrator::get_user_wallet_available(coopname, ledger2_wallets::SHARE_FUND_PAY, username);
-  eosio::asset total_return = min_share + share;
+  // клиенту. Обходим сет паевых («боевых») кошельков LEDGER2_EXIT_REFUND_WALLETS
+  // (источник истины — wallets.hpp; он же генерируется в cooptypes для
+  // backend-preview, поэтому расчёт на фронте совпадает с этим): аккумулируем
+  // доступный баланс каждого (>0) и тут же консолидируем его на главный паевой
+  // (w.wal.share), чтобы единым платежом вернуть весь паевой через o.wal.*.
+  eosio::asset total_return = eosio::asset(0, _root_govern_symbol);
+  for (const auto &wallet_name : LEDGER2_EXIT_REFUND_WALLETS) {
+    eosio::asset balance = Registrator::get_user_wallet_available(coopname, wallet_name, username);
+    if (balance.amount <= 0) continue;
+    total_return += balance;
+    Registrator::consolidate_share_to_main(coopname, username, wallet_name, balance, exit_hash);
+  }
 
   exits.modify(e, _soviet, [&](auto &row) {
     row.status = "authorized"_n;
     row.approved_statement = authorization;
     row.quantity = total_return;
   });
-
-  // Консолидируем минимальный паевой на главный (o.reg.mvmin: w.reg.minshr →
-  // w.wal.share), чтобы единым платежом вернуть весь паевой через механику
-  // возврата паевого взноса (o.wal.*).
-  if (min_share.amount > 0) {
-    std::string memo = "Консолидация минимального паевого взноса при выходе, username=" + username.to_string();
-    Ledger2::apply(_registrator, coopname, operations::registrator::MOVE_MINSHARE,
-                   min_share, username, exit_hash, memo);
-  }
 
   if (total_return.amount > 0) {
     // Резервируем сумму возврата: w.wal.share → w.wal.wpend (o.wal.wthreq).

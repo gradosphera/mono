@@ -64,11 +64,10 @@ div
           DocumentHtmlReader(:html='document.html')
 
         //- Итог к возврату — soft-панель под документом, читается как подбивка
-        //- к заявлению (а не «висящий» текст снизу).
+        //- к заявлению (а не «висящий» текст снизу). Сумма авторитетная: собирается
+        //- по сету паевых кошельков (тот же, что обходит контракт при возврате).
         div.exit-summary(v-if='preview')
-          div.exit-summary__text
-            span.exit-summary__label Сумма к возврату
-            span.exit-summary__hint Планируемая сумма; итог фиксирует Совет
+          span.exit-summary__label Сумма к возврату
           span.exit-summary__value {{ formatAsset2Digits(preview.total) }}
 </template>
 
@@ -253,21 +252,11 @@ const handlerSubmit = async (): Promise<void> => {
   background: var(--p-surface-2);
   border-radius: var(--p-r-md);
 }
-.exit-summary__text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--p-1);
-  min-width: 0;
-}
 .exit-summary__label {
   font-size: var(--p-fs-body);
   font-weight: 600;
   color: var(--p-ink);
-}
-.exit-summary__hint {
-  font-size: var(--p-fs-meta);
-  line-height: var(--p-lh-meta);
-  color: var(--p-ink-3);
+  min-width: 0;
 }
 .exit-summary__value {
   font-family: var(--p-mono);
