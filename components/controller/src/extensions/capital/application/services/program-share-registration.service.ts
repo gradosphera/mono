@@ -47,12 +47,12 @@ export class ProgramShareRegistrationService {
   ) {}
 
   /**
-   * Обход участников в статусах active/import, проектов pending/active; при изменении user_shares относительно capital_contributor_shares — regshare.
+   * Обход участников в статусах active/import по active-проектам; при изменении user_shares относительно capital_contributor_shares — regshare.
    */
   async syncProgramSharesForCoop(coopname: string): Promise<void> {
     const projects = await this.findActiveProjects(coopname);
     if (projects.length === 0) {
-      this.logger.debug(`Синхронизация regshare: нет проектов в статусах pending/active для ${coopname}`);
+      this.logger.debug(`Синхронизация regshare: нет active-проектов для ${coopname}`);
       return;
     }
 
@@ -71,7 +71,7 @@ export class ProgramShareRegistrationService {
   /**
    * Точечная синхронизация regshare для одного пайщика — вызывается из listener'а
    * на дельты `ledger2::userwallets[w.cap.blago]`. Не пишет лог, если у пайщика
-   * нет ни одного pending/active проекта.
+   * нет ни одного active-проекта.
    */
   async syncProgramSharesForUser(coopname: string, username: string): Promise<void> {
     const projects = await this.findActiveProjects(coopname);
@@ -114,11 +114,13 @@ export class ProgramShareRegistrationService {
     }
   }
 
+  /**
+   * Только active-проекты: заход долей в pending отключён (решение пользователя
+   * 2026-06-16) — заводим/сверяем доли лишь в активных проектах.
+   */
   private async findActiveProjects(coopname: string): Promise<ProjectDomainEntity[]> {
     return (await this.projectRepository.findAll()).filter(
-      (p) =>
-        p.coopname === coopname &&
-        (p.status === ProjectStatus.PENDING || p.status === ProjectStatus.ACTIVE)
+      (p) => p.coopname === coopname && p.status === ProjectStatus.ACTIVE
     );
   }
 

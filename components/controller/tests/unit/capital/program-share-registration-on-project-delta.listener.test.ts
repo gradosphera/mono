@@ -2,8 +2,8 @@
  * Unit-тесты ProgramShareRegistrationOnProjectDeltaListener.
  *
  * Фокус — гейтинг: доли регистрируются СРАЗУ при появлении проекта в статусе
- * pending|active, и только в своём кооперативе. На present=false, чужой scope и
- * статусы вне pending|active реакции нет (regshare там всё равно отклонится).
+ * active, и только в своём кооперативе. На pending (заводим только в active),
+ * present=false, чужой scope и прочие статусы реакции нет.
  */
 
 import config from '~/config/config';
@@ -25,22 +25,22 @@ function makeDelta(overrides: Partial<IDelta> = {}, value: Record<string, any> =
   return {
     present: true,
     scope: config.coopname,
-    value: { project_hash: PROJECT_HASH, status: ProjectStatus.PENDING, ...value },
+    value: { project_hash: PROJECT_HASH, status: ProjectStatus.ACTIVE, ...value },
     ...overrides,
   } as IDelta;
 }
 
 describe('ProgramShareRegistrationOnProjectDeltaListener', () => {
-  it('pending в своём кооперативе → регистрирует доли по project_hash', async () => {
+  it('active в своём кооперативе → регистрирует доли по project_hash', async () => {
     const service = makeServiceStub();
     await makeListener(service).handleProjectDelta(makeDelta());
     expect(service.syncProgramSharesForProject).toHaveBeenCalledWith(config.coopname, PROJECT_HASH);
   });
 
-  it('active → тоже регистрирует', async () => {
+  it('pending → не реагирует (заводим только в active, при переходе в active придёт новая дельта)', async () => {
     const service = makeServiceStub();
-    await makeListener(service).handleProjectDelta(makeDelta({}, { status: ProjectStatus.ACTIVE }));
-    expect(service.syncProgramSharesForProject).toHaveBeenCalledTimes(1);
+    await makeListener(service).handleProjectDelta(makeDelta({}, { status: ProjectStatus.PENDING }));
+    expect(service.syncProgramSharesForProject).not.toHaveBeenCalled();
   });
 
   it('result → не реагирует (окно закрыто, откат статуса контракт не даёт)', async () => {

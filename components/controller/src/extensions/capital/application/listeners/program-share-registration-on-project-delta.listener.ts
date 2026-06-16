@@ -7,9 +7,11 @@ import { ProjectStatus } from '../../domain/enums/project-status.enum';
 import { ProgramShareRegistrationService } from '../services/program-share-registration.service';
 
 /**
- * Слушатель дельт `capital::projects`. Как только в блокчейне появляется проект
- * (в т.ч. компонент) в статусе pending|active — СРАЗУ регистрирует доли всех
- * активных пайщиков Благороста в нём, не дожидаясь периодического scheduler'а.
+ * Слушатель дельт `capital::projects`. Как только проект (в т.ч. компонент)
+ * оказывается в статусе active — СРАЗУ регистрирует доли всех активных пайщиков
+ * Благороста в нём, не дожидаясь периодического scheduler'а. В pending не
+ * заводим: заход только в активные проекты (решение пользователя 2026-06-16);
+ * при переходе pending→active придёт новая дельта со status=active.
  *
  * Why: окно между созданием проекта и его переводом в `result` может быть
  * минутами. Контракт `regshare` принимает только pending|active, а отката
@@ -39,10 +41,11 @@ export class ProgramShareRegistrationOnProjectDeltaListener {
     const value = delta.value as CapitalContract.Tables.Projects.IProject | undefined;
     if (!value?.project_hash) return;
 
-    // regshare разрешён только для pending|active — на прочих статусах окно уже
-    // закрыто (on-chain-проверка всё равно отклонит), реагировать незачем.
+    // Заводим доли только в active-проектах: pending ещё не готов к заходу
+    // (решение пользователя 2026-06-16). При переходе pending→active придёт
+    // новая дельта со status=active — на ней и зайдём.
     const status = String(value.status);
-    if (status !== ProjectStatus.PENDING && status !== ProjectStatus.ACTIVE) return;
+    if (status !== ProjectStatus.ACTIVE) return;
 
     const project_hash = String(value.project_hash);
     try {
