@@ -1,27 +1,25 @@
 #!/bin/bash
 set -e
 
-# Независимый деплой по окружениям. testnet и main — НЕ паровоз: каждый из них
-# самостоятельный fast-forward-указатель на выбранный релизный тег dev. Можно
-# катить в прод и в тест разным темпом и на разные версии одновременно —
-# расхождений и конфликтов нет, потому что оба указателя живут на ЛИНЕЙНОЙ
-# истории dev (двигаются только вперёд по FF).
+# Деплой в окружение. По умолчанию летит ТЕКУЩИЙ HEAD (твой чекаут) в указанную
+# ветку окружения. testnet и main независимы — каждый двигается своим темпом;
+# только вперёд по fast-forward (живут на линейной истории dev → нет диверджа и
+# конфликтов).
 #
-#   scripts/promote.sh testnet              # последний релиз (тег) → testnet
-#   scripts/promote.sh main                 # последний релиз (тег) → main
-#   scripts/promote.sh main v2026.6.16      # конкретную версию → main
+#   scripts/promote.sh testnet              # текущий HEAD → testnet (staging)
+#   scripts/promote.sh main                 # текущий HEAD → main    (production)
+#   scripts/promote.sh main v2026.6.16      # конкретную версию (тег) → main
 #   scripts/promote.sh main testnet         # ровно то, что сейчас на testnet → main
 #
-# REF по умолчанию — последний релизный тег, достижимый из origin/dev (его вешает
-# scripts/cut-release.sh). Деплой стартует push'ем в ветку с изменением lerna.json
-# (бамп-коммит входит в диапазон FF) — слушает .github/workflows/release.yaml.
+# Деплой (release.yaml) стартует, только если в улетающем коммите есть изменение
+# lerna.json (релизный бамп от scripts/cut-release.sh), которого ещё нет в целевой
+# ветке. Без свежего cut ветка передвинется, но пересборки не будет.
 #
 # Только FF (без --force): сервер отвергнет non-fast-forward — это ГАРД, не баг
-# (в target попал прямой коммит, либо ты пытаешься откатить ветку назад).
-# Откат на более старую версию или редеплой без движения ветки — через
-# workflow_dispatch в release.yaml (inputs: environment + ref), НЕ через этот скрипт.
+# (цель не является предком ref). Откат на старую версию / редеплой без движения
+# ветки — через workflow_dispatch в release.yaml (inputs: environment + ref).
 
-usage() { echo "Использование: $0 <testnet|main> [<версия|ref>]"; }
+usage() { echo "Использование: $0 <testnet|main> [<ref: ветка|тег|sha, по умолчанию HEAD>]"; }
 
 TARGET="$1"
 case "$TARGET" in
@@ -34,14 +32,9 @@ esac
 
 git fetch --tags --force origin
 
-REF="$2"
-if [ -z "$REF" ]; then
-  # Последний релизный тег на линии origin/dev (vYYYY.M.D[-N] от cut-release.sh).
-  REF="$(git describe --tags --abbrev=0 origin/dev)"
-fi
-
-# REF может быть именем ветки (testnet/main/dev), тегом или sha — разрешаем единообразно.
-if git show-ref --verify --quiet "refs/remotes/origin/$REF"; then
+# По умолчанию — текущий HEAD. Второй аргумент: ветка (testnet/main/dev), тег или sha.
+REF="${2:-HEAD}"
+if [ "$REF" != "HEAD" ] && git show-ref --verify --quiet "refs/remotes/origin/$REF"; then
   SRC="origin/$REF"
 else
   SRC="$REF"
@@ -51,10 +44,10 @@ REF_SHA="$(git rev-parse --verify "${SRC}^{commit}")"
 REF_VERSION="$(git show "${REF_SHA}:lerna.json" \
   | sed -nE 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' | head -1)"
 
-echo "Деплой: $REF (v${REF_VERSION}) → $TARGET"
+echo "Деплой: $REF → $TARGET (версия из lerna.json: v${REF_VERSION}, коммит ${REF_SHA:0:9})"
 
-# Server-side fast-forward: двигаем удалённый TARGET на REF. Рабочее дерево не трогаем
-# (никаких checkout/merge). Без --force: сервер отвергнет, если это не fast-forward.
+# Server-side fast-forward: двигаем удалённый TARGET на REF. Рабочее дерево не трогаем.
+# Без --force: сервер отвергнет, если это не fast-forward.
 git push origin "${REF_SHA}:refs/heads/${TARGET}"
 
 if [ "$TARGET" = "main" ]; then
@@ -65,4 +58,4 @@ fi
 
 echo
 echo "Готово. origin/$TARGET = $REF (v${REF_VERSION})."
-echo "CI задеплоит: $ENV_LABEL."
+echo "CI задеплоит: $ENV_LABEL (если в диапазоне есть релизный бамп lerna.json)."
