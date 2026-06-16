@@ -25617,7 +25617,7 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенной повестке
+	/** Сгенерировать протокол решения по предложенно�� повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: ModelTypes["GeneratedDocument"],
@@ -27092,7 +27092,7 @@ export type ModelTypes = {
 	capitalResults: ModelTypes["PaginatedCapitalResultsPaginationResult"],
 	/** Получение одного сегмента кооператива по фильтрам */
 	capitalSegment?: ModelTypes["CapitalSegment"] | undefined | null,
-	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
+	/** Получение списка се��ментов кооператива с фильтрацией и пагинацией */
 	capitalSegments: ModelTypes["PaginatedCapitalSegmentsPaginationResult"],
 	/** Получение полного состояния CAPITAL контракта кооператива */
 	capitalState?: ModelTypes["CapitalState"] | undefined | null,
@@ -35477,7 +35477,7 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенной повестке
+	/** Сгенерировать протокол решения по предложенно�� повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: GraphQLTypes["GeneratedDocument"],
@@ -37098,7 +37098,7 @@ export type GraphQLTypes = {
 	capitalResults: GraphQLTypes["PaginatedCapitalResultsPaginationResult"],
 	/** Получение одного сегмента кооператива по фильтрам */
 	capitalSegment?: GraphQLTypes["CapitalSegment"] | undefined | null,
-	/** Получение списка сегментов кооператива с фильтрацией и пагинацией */
+	/** Получение списка се��ментов кооператива с фильтрацией и пагинацией */
 	capitalSegments: GraphQLTypes["PaginatedCapitalSegmentsPaginationResult"],
 	/** Получение полного состояния CAPITAL контракта кооператива */
 	capitalState?: GraphQLTypes["CapitalState"] | undefined | null,
@@ -39433,6 +39433,7 @@ export enum ManagedRoomKind {
 export enum MembershipExitStatus {
 	AUTHORIZED = "AUTHORIZED",
 	AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION",
+	COMPLETED = "COMPLETED",
 	PENDING = "PENDING"
 }
 /** Тип комнаты вне проекта: пайщики, совет, комната секретаря */

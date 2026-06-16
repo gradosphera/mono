@@ -74,6 +74,13 @@ const isAuthorized = computed(
   () => exitStatus.value?.status === Zeus.MembershipExitStatus.AUTHORIZED,
 );
 
+// Терминал: выход завершён, возврат оплачен, аккаунт заблокирован. Этот экран —
+// и есть защита от повторного выхода: пока он показан, кабинет перекрыт и кнопку
+// «выход из кооператива» не достать (бэкенд и контракт повтор тоже отклоняют).
+const isCompleted = computed(
+  () => exitStatus.value?.status === Zeus.MembershipExitStatus.COMPLETED,
+);
+
 // Статус исходящего платежа возврата → чип у суммы (виден кассиру и пайщику).
 const PAYMENT_CHIPS: Record<string, { label: string; variant: BaseChipVariant }> = {
   [Zeus.PaymentStatus.PENDING]: { label: 'Ожидает оплаты', variant: 'warn' },
@@ -91,8 +98,19 @@ const paymentChip = computed(() =>
   paymentStatus.value ? PAYMENT_CHIPS[paymentStatus.value] ?? null : null,
 );
 
-// Содержимое экрана по фазе выхода: ожидание письма → рассмотрение советом → одобрено.
+// Содержимое экрана по фазе выхода: ожидание письма → рассмотрение → одобрено → завершено.
 const view = computed(() => {
+  if (isCompleted.value) {
+    return {
+      icon: 'check_circle',
+      tone: 'pos',
+      title: 'Вы вышли из кооператива',
+      body: 'Возврат паевого взноса оплачен — дождитесь поступления средств на указанные реквизиты. Аккаунт заблокирован. Благодарим за участие в кооперативе.',
+      amountLabel: 'Сумма возврата',
+      plannedHint: false,
+      canCancel: false,
+    };
+  }
   if (isAwaitingConfirmation.value) {
     return {
       icon: 'mark_email_unread',

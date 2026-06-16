@@ -15,6 +15,7 @@ import { USER_DOMAIN_SERVICE, type UserDomainService } from '~/domain/user/servi
 import { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { PAYMENT_METHOD_REPOSITORY, type PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository';
 import { PAYMENT_REPOSITORY, type PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
+import { PaymentTypeEnum } from '~/domain/gateway/enums/payment-type.enum';
 import { MembershipExitRequestEntity } from '~/infrastructure/database/typeorm/entities/membership-exit-request.entity';
 import { tokenTypes } from '~/types/token.types';
 import { CreateMembershipExitInputDTO } from '../dto/create-membership-exit-input.dto';
@@ -78,6 +79,15 @@ export class MembershipExitService {
     const isOperator = currentUser.role === 'chairman' || currentUser.role === 'member';
     if (!isOperator && data.username !== currentUser.username) {
       throw new ForbiddenException('Подать заявление на выход можно только за себя');
+    }
+
+    // Гард повторного выхода: вышедший пайщик заблокирован on-chain (completexit →
+    // status=blocked + удалён из участников). Контракт exitcoop его уже не пропустит
+    // (get_participant_or_fail), но отсекаем раньше — чтобы не плодить off-chain
+    // черновик и не доводить пайщика до провала на шаге подтверждения по ссылке.
+    const account = await this.accountBlockchainPort.getUserAccount(data.username);
+    if (String(account?.status) === 'blocked') {
+      throw new BadRequestException('Вы уже вышли из кооператива — повторный выход невозможен.');
     }
 
     // Гейт реквизитов: выход нельзя запускать, пока у пайщика нет реквизитов для
@@ -233,6 +243,30 @@ export class MembershipExitService {
         quantity: '',
         created_at: pending.created_at.toISOString(),
       };
+    }
+
+    // Терминальная фаза: выход завершён on-chain. После completexit строка
+    // registrator::exits СТЁРТА (терминал=erase), аккаунт переведён в blocked.
+    // exits-строки уже нет — источник терминального состояния: blocked-аккаунт +
+    // персистентный MEMBERSHIP_EXIT-платёж в gateway (сумма возврата + «оплачено»).
+    // Так кабинет остаётся заблокированным экраном «вы вышли» и после стирания
+    // exits, и при следующих входах (blocked-статус живёт on-chain).
+    const account = await this.accountBlockchainPort.getUserAccount(username);
+    if (String(account?.status) === 'blocked') {
+      const payment = await this.paymentRepository.findLatestByUsernameAndType(
+        username,
+        PaymentTypeEnum.MEMBERSHIP_EXIT
+      );
+      if (payment) {
+        const precision = config.blockchain.root_govern_precision ?? 4;
+        return {
+          exit_hash: payment.hash,
+          status: MembershipExitStatus.COMPLETED,
+          quantity: `${payment.quantity.toFixed(precision)} ${payment.symbol}`,
+          payment_status: payment.status,
+          created_at: (payment.completed_at ?? payment.created_at).toISOString(),
+        };
+      }
     }
 
     return null;

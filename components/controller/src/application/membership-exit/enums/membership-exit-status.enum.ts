@@ -11,6 +11,10 @@ export enum MembershipExitStatus {
   PENDING = 'pending',
   // Совет одобрил, идёт возврат паевого взноса (зарезервирован, исходящий платёж).
   AUTHORIZED = 'authorized',
+  // Выход завершён: возврат оплачен, аккаунт заблокирован, пайщик вышел.
+  // exits-строка на цепи уже стёрта (терминал=erase) — статус восстанавливаем
+  // по blocked-аккаунту и завершённому MEMBERSHIP_EXIT-платежу.
+  COMPLETED = 'completed',
 }
 
 registerEnumType(MembershipExitStatus, {
