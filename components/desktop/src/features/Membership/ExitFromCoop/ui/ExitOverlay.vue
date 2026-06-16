@@ -19,7 +19,7 @@ BaseDialog(
       //- Тело: сумма к возврату + сопутствующие подписи.
       div.exit-amount(v-if='plannedAmount')
         span.exit-amount__label.t-eyebrow.t-faint {{ view.amountLabel }}
-        span.exit-amount__value {{ plannedAmount }}
+        span.exit-amount__value {{ formatAsset2Digits(plannedAmount) }}
         BaseChip.exit-amount__chip(
           v-if='paymentChip',
           :variant='paymentChip.variant',
@@ -59,6 +59,7 @@ import { BaseButton } from 'src/shared/ui/base/BaseButton';
 import { BaseChip } from 'src/shared/ui/base/BaseChip';
 import type { BaseChipVariant } from 'src/shared/ui/base/BaseChip/BaseChip.types';
 import { AuthCard } from 'src/shared/ui/domain/AuthCard';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { useLogoutUser } from 'src/features/User/Logout/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useExitGate } from '../model';

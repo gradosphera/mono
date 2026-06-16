@@ -65,8 +65,7 @@ div
 
         div.q-mt-md(v-if='preview')
           div.text-body2.text-grey-7 Сумма к возврату
-          div.t-mono.text-h6 {{ preview.total }}
-          div.text-caption.text-grey-6.q-mt-xs Целевой паевой {{ preview.share_contribution }} + минимальный {{ preview.minimum_contribution }}. Итог фиксирует Совет.
+          div.t-mono.text-h6 {{ formatAsset2Digits(preview.total) }}
 </template>
 
 <script setup lang="ts">
@@ -77,6 +76,7 @@ import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseBanner } from 'src/shared/ui/base/BaseBanner';
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
 import { Form } from 'src/shared/ui/Form';
+import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { useWalletStore } from 'src/entities/Wallet';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import {
