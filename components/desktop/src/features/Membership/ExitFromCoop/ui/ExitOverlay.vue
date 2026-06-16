@@ -7,71 +7,77 @@ BaseDialog(
   :close-on-backdrop='false',
   :close-on-escape='false'
 )
-  //- Фаза 1: заявление подписано, ждём подтверждения по ссылке из письма.
-  div.row.justify-center(v-if='isAwaitingConfirmation')
-    div.col-12.col-md-7.text-center.q-pt-xl
-      q-icon(name='mark_email_unread', size='64px', color='primary')
+  div.exit-overlay
+    //- Фаза 1: заявление подписано, ждём подтверждения по ссылке из письма.
+    EmptyState(
+      v-if='isAwaitingConfirmation',
+      title='Подтвердите выход по ссылке из письма',
+      body='Мы отправили письмо на вашу электронную почту — перейдите по ссылке в нём, чтобы подтвердить выход и запустить возврат паевого взноса. Письмо могло попасть в папку «Спам».'
+    )
+      template(#icon)
+        q-icon(name='mark_email_unread', size='22px', color='primary')
+      template(#action)
+        div.exit-overlay__panel
+          div.exit-overlay__amount(v-if='plannedAmount')
+            div.text-overline.text-grey-6 Планируемая сумма к возврату
+            div.t-mono.text-h4 {{ plannedAmount }}
+          div.text-caption.text-grey-6 Пока вы не перешли по ссылке, заявление можно отменить.
+          div.exit-overlay__actions
+            BaseButton(variant='secondary', :loading='cancelling', @click='onCancel')
+              | Отменить выход
+            BaseButton(variant='ghost', :loading='loggingOut', @click='onLogout')
+              template(#icon-left)
+                q-icon(name='logout', size='18px')
+              | Выйти из личного кабинета
 
-      div.text-h5.q-mt-md Подтвердите выход по ссылке из письма
-
-      p.text-body1.text-grey-7.q-mt-sm
-        | Процесс выхода запущен. Мы отправили письмо на вашу электронную почту —
-        | перейдите по ссылке в нём, чтобы подтвердить выход и запустить процедуру
-        | возврата паевого взноса. Письмо могло попасть в папку «Спам».
-
-      p.text-body2.text-grey-6.q-mt-sm
-        | Пока вы не перешли по ссылке, заявление не отправлено и его можно отменить.
-
-      div.exit-overlay__amount.q-mt-lg(v-if='plannedAmount')
-        div.text-overline.text-grey-6 Планируемая сумма к возврату
-        div.t-mono.text-h4 {{ plannedAmount }}
-
-      div.q-mt-xl
-        BaseButton(
-          variant='secondary',
-          label='Отменить выход',
-          :loading='cancelling',
-          @click='onCancel'
+    //- Фаза 2-3: заявление отправлено в блокчейн — рассмотрение советом / одобрено.
+    EmptyState(
+      v-else-if='exitStatus',
+      :title='isAuthorized ? "Совет одобрил выход" : "Заявление на рассмотрении Совета"',
+      :body='isAuthorized ? "Возврат паевого взноса будет совершён в срок, установленный Уставом кооператива. Аккаунт заблокирован — дождитесь поступления средств." : "Ваше заявление о выходе передано в Совет кооператива. Кабинет заблокирован на время процедуры — дождитесь решения Совета."'
+    )
+      template(#icon)
+        q-icon(
+          :name='isAuthorized ? "payments" : "hourglass_top"',
+          size='22px',
+          :color='isAuthorized ? "positive" : "primary"'
         )
-
-  //- Фаза 2-3: заявление отправлено в блокчейн — рассмотрение советом / одобрено.
-  div.row.justify-center(v-else-if='exitStatus')
-    div.col-12.col-md-7.text-center.q-pt-xl
-      q-icon(
-        :name='isAuthorized ? "payments" : "hourglass_top"',
-        size='64px',
-        :color='isAuthorized ? "positive" : "primary"'
-      )
-
-      div.text-h5.q-mt-md {{ isAuthorized ? 'Совет одобрил выход' : 'Заявление на рассмотрении Совета' }}
-
-      p.text-body1.text-grey-7.q-mt-sm(v-if='isAuthorized')
-        | Возврат паевого взноса будет совершён в срок, установленный Уставом кооператива. Аккаунт заблокирован — дождитесь поступления средств.
-      p.text-body1.text-grey-7.q-mt-sm(v-else)
-        | Ваше заявление о выходе передано в Совет кооператива. Кабинет заблокирован на время процедуры — дождитесь решения Совета.
-
-      div.exit-overlay__amount.q-mt-xl(v-if='plannedAmount')
-        div.text-overline.text-grey-6 Сумма к возврату
-        div.t-mono.text-h4 {{ plannedAmount }}
-        div.text-caption.text-grey-6.q-mt-xs(v-if='!isAuthorized') Планируемая сумма; итог фиксирует Совет.
+      template(#action)
+        div.exit-overlay__panel
+          div.exit-overlay__amount(v-if='plannedAmount')
+            div.text-overline.text-grey-6 Сумма к возврату
+            div.t-mono.text-h4 {{ plannedAmount }}
+            div.text-caption.text-grey-6.q-mt-xs(v-if='!isAuthorized') Планируемая сумма; итог фиксирует Совет.
+          div.exit-overlay__actions
+            BaseButton(variant='secondary', :loading='loggingOut', @click='onLogout')
+              template(#icon-left)
+                q-icon(name='logout', size='18px')
+              | Выйти из личного кабинета
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
+import { EmptyState } from 'src/shared/ui/base/EmptyState';
+import { useLogoutUser } from 'src/features/User/Logout/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useExitGate } from '../model';
 
-const { exitStatus, isExitActive, isAwaitingConfirmation, plannedAmount, cancelExit } =
+const route = useRoute();
+const router = useRouter();
+const { exitStatus, isExitActive, isAwaitingConfirmation, plannedAmount, cancelExit, loadExitStatus } =
   useExitGate();
+const { logout } = useLogoutUser();
 
 const isAuthorized = computed(
   () => exitStatus.value?.status === Zeus.MembershipExitStatus.AUTHORIZED,
 );
 
 const cancelling = ref(false);
+const loggingOut = ref(false);
 
 const onCancel = async (): Promise<void> => {
   cancelling.value = true;
@@ -84,14 +90,53 @@ const onCancel = async (): Promise<void> => {
     cancelling.value = false;
   }
 };
+
+// Выход из личного кабинета (logout). Аккаунт при активном выходе заблокирован,
+// поэтому из кабинета не выйти иначе — даём кнопку прямо на оверлее. После входа
+// заявление снова покажется: статус выхода живёт на цепи (registrator::exits).
+const onLogout = async (): Promise<void> => {
+  loggingOut.value = true;
+  try {
+    await logout();
+    // Сессия закрыта → loadExitStatus обнулит gate, оверлей закроется.
+    await loadExitStatus();
+    await router.push({ name: 'signin', params: { coopname: route.params.coopname } });
+  } catch (e: any) {
+    FailAlert('Ошибка при выходе: ' + (e?.message ?? e));
+  } finally {
+    loggingOut.value = false;
+  }
+};
 </script>
 
 <style scoped lang="scss">
+.exit-overlay {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exit-overlay__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--p-4);
+  margin-top: var(--p-2);
+}
+
 .exit-overlay__amount {
   padding: var(--p-5);
   border: 1px solid var(--p-line);
   border-radius: var(--p-r-lg);
-  display: inline-block;
   min-width: 240px;
+  text-align: center;
+}
+
+.exit-overlay__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-3);
+  justify-content: center;
 }
 </style>
