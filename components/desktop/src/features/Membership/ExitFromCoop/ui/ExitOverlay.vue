@@ -20,6 +20,11 @@ BaseDialog(
       div.exit-amount(v-if='plannedAmount')
         span.exit-amount__label.t-eyebrow.t-faint {{ view.amountLabel }}
         span.exit-amount__value {{ plannedAmount }}
+        BaseChip.exit-amount__chip(
+          v-if='paymentChip',
+          :variant='paymentChip.variant',
+          size='sm'
+        ) {{ paymentChip.label }}
         span.exit-amount__hint.t-sm.t-faint(v-if='view.plannedHint') Планируемая сумма; итог фиксирует Совет.
       p.exit-note.t-sm.t-muted(v-if='view.canCancel') Пока вы не перешли по ссылке, заявление можно отменить.
 
@@ -51,6 +56,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
+import { BaseChip } from 'src/shared/ui/base/BaseChip';
+import type { BaseChipVariant } from 'src/shared/ui/base/BaseChip/BaseChip.types';
 import { AuthCard } from 'src/shared/ui/domain/AuthCard';
 import { useLogoutUser } from 'src/features/User/Logout/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
@@ -58,12 +65,29 @@ import { useExitGate } from '../model';
 
 const route = useRoute();
 const router = useRouter();
-const { exitStatus, isExitActive, isAwaitingConfirmation, plannedAmount, cancelExit, loadExitStatus } =
+const { exitStatus, isExitActive, isAwaitingConfirmation, paymentStatus, plannedAmount, cancelExit, loadExitStatus } =
   useExitGate();
 const { logout } = useLogoutUser();
 
 const isAuthorized = computed(
   () => exitStatus.value?.status === Zeus.MembershipExitStatus.AUTHORIZED,
+);
+
+// Статус исходящего платежа возврата → чип у суммы (виден кассиру и пайщику).
+const PAYMENT_CHIPS: Record<string, { label: string; variant: BaseChipVariant }> = {
+  [Zeus.PaymentStatus.PENDING]: { label: 'Ожидает оплаты', variant: 'warn' },
+  [Zeus.PaymentStatus.PROCESSING]: { label: 'Оплачивается', variant: 'info' },
+  [Zeus.PaymentStatus.PAID]: { label: 'Оплачивается', variant: 'info' },
+  [Zeus.PaymentStatus.COMPLETED]: { label: 'Оплачено', variant: 'pos' },
+  [Zeus.PaymentStatus.FAILED]: { label: 'Ошибка выплаты', variant: 'neg' },
+  [Zeus.PaymentStatus.EXPIRED]: { label: 'Истёк', variant: 'neg' },
+  [Zeus.PaymentStatus.CANCELLED]: { label: 'Отменён', variant: 'neutral' },
+  [Zeus.PaymentStatus.REFUNDED]: { label: 'Отклонён', variant: 'neutral' },
+  [Zeus.PaymentStatus.AWAITING_AUTHORIZATION]: { label: 'Ожидает решения Совета', variant: 'neutral' },
+};
+
+const paymentChip = computed(() =>
+  paymentStatus.value ? PAYMENT_CHIPS[paymentStatus.value] ?? null : null,
 );
 
 // Содержимое экрана по фазе выхода: ожидание письма → рассмотрение советом → одобрено.
@@ -191,6 +215,9 @@ const onLogout = async (): Promise<void> => {
   font-weight: 600;
   color: var(--p-ink);
   font-feature-settings: 'ss01', 'ss02';
+}
+.exit-amount__chip {
+  margin-top: var(--p-2);
 }
 .exit-amount__hint {
   margin-top: var(--p-1);

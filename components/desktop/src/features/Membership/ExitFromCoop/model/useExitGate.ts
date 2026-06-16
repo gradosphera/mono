@@ -28,6 +28,10 @@ export function useExitGate() {
     () => exitStatus.value?.status === Zeus.MembershipExitStatus.AWAITING_CONFIRMATION,
   );
 
+  // Статус исходящего платежа возврата (после одобрения советом) — null, пока
+  // платёж не заведён в реестр кассира.
+  const paymentStatus = computed(() => exitStatus.value?.payment_status ?? null);
+
   /**
    * Отмена заявления на выход до подтверждения по email (кнопка на экране ожидания).
    * После отмены кабинет разблокируется.
@@ -118,6 +122,7 @@ export function useExitGate() {
     exitStatus,
     isExitActive,
     isAwaitingConfirmation,
+    paymentStatus,
     plannedAmount,
     loaded,
     loadExitStatus,
