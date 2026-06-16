@@ -3821,6 +3821,7 @@ export const ReturnTypes: Record<string,any> = {
 	MembershipExit:{
 		created_at:"String",
 		exit_hash:"String",
+		payment_status:"PaymentStatus",
 		quantity:"String",
 		status:"MembershipExitStatus"
 	},

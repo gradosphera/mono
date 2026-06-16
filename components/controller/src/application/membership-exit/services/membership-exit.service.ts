@@ -14,6 +14,7 @@ import { BLOCKCHAIN_PORT, type BlockchainPort } from '~/domain/common/ports/bloc
 import { USER_DOMAIN_SERVICE, type UserDomainService } from '~/domain/user/services/user-domain.service';
 import { MonoAccountDomainInterface } from '~/domain/account/interfaces/mono-account-domain.interface';
 import { PAYMENT_METHOD_REPOSITORY, type PaymentMethodRepository } from '~/domain/common/repositories/payment-method.repository';
+import { PAYMENT_REPOSITORY, type PaymentRepository } from '~/domain/gateway/repositories/payment.repository';
 import { MembershipExitRequestEntity } from '~/infrastructure/database/typeorm/entities/membership-exit-request.entity';
 import { tokenTypes } from '~/types/token.types';
 import { CreateMembershipExitInputDTO } from '../dto/create-membership-exit-input.dto';
@@ -40,6 +41,8 @@ export class MembershipExitService {
     private readonly userDomainService: UserDomainService,
     @Inject(PAYMENT_METHOD_REPOSITORY)
     private readonly paymentMethodRepository: PaymentMethodRepository,
+    @Inject(PAYMENT_REPOSITORY)
+    private readonly paymentRepository: PaymentRepository,
     @InjectRepository(MembershipExitRequestEntity)
     private readonly exitRequestRepository: Repository<MembershipExitRequestEntity>
   ) {}
@@ -209,10 +212,14 @@ export class MembershipExitService {
   async getMembershipExit(coopname: string, username: string): Promise<MembershipExitDTO | null> {
     const exit = await this.accountBlockchainPort.getExit(coopname, username);
     if (exit) {
+      // Статус исходящего платежа возврата (заводится при одобрении советом —
+      // см. MembershipExitAuthorizationListener). hash платежа = exit_hash.
+      const payment = await this.paymentRepository.findByHash(exit.exit_hash);
       return {
         exit_hash: exit.exit_hash,
         status: exit.status as MembershipExitStatus,
         quantity: exit.quantity,
+        payment_status: payment?.status,
         created_at: exit.created_at,
       };
     }

@@ -6,6 +6,7 @@ export const rawMembershipExitSelector = {
   exit_hash: true,
   status: true,
   quantity: true,
+  payment_status: true,
   created_at: true,
 }
 
