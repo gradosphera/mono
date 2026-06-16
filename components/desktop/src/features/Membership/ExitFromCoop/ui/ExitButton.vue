@@ -209,10 +209,10 @@ const handlerSubmit = async (): Promise<void> => {
   border-radius: var(--p-r-md);
   padding: var(--p-4);
 }
-/* Документ приходит из backend с Quasar text-h*/inline-стилями (заголовок 3rem,
-   line-height 4.5rem). Прижимаем заголовок и типографику к канону — иначе
-   title распирает диалог. Приём как в ReadStatement.vue (:deep + !important,
-   чтобы перебить глобальные правила DocumentHtmlReader). */
+/* Документ приходит из backend с Quasar text-h-классами и inline-стилями
+   (заголовок 3rem, line-height 4.5rem). Прижимаем заголовок и типографику к
+   канону — иначе title распирает диалог. Приём как в ReadStatement.vue
+   (deep + important, чтобы перебить глобальные правила DocumentHtmlReader). */
 .exit-doc :deep(.statement h1),
 .exit-doc :deep(.statement .text-h1),
 .exit-doc :deep(.statement .text-h2) {
