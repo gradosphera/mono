@@ -62,8 +62,9 @@ export class ProgramShareRegistrationService {
         (c.status === ContributorStatus.ACTIVE || c.status === ContributorStatus.IMPORT)
     );
 
+    const projectHashes = projects.map((p) => p.project_hash);
     for (const contributor of contributors) {
-      await this.syncContributor(coopname, contributor, projects);
+      await this.syncContributor(coopname, contributor, projectHashes);
     }
   }
 
@@ -84,7 +85,33 @@ export class ProgramShareRegistrationService {
     );
     if (!contributor) return;
 
-    await this.syncContributor(coopname, contributor, projects);
+    await this.syncContributor(coopname, contributor, projects.map((p) => p.project_hash));
+  }
+
+  /**
+   * Точечная регистрация долей всех активных пайщиков в один проект — вызывается
+   * из listener'а на дельты `capital::projects` сразу при появлении проекта.
+   *
+   * Why: между созданием проекта и его переводом в `result` может пройти меньше
+   * минуты; контракт `regshare` принимает только статусы pending|active, а откат
+   * `result → active` не предусмотрен — значит пайщики, не успевшие попасть в
+   * проект до закрытия окна, теряют долю в нём безвозвратно (инцидент voskhod,
+   * компонент 011bcd92…, 2026-06-16). Реакция на событие закрывает окно, не
+   * дожидаясь периодического scheduler'а.
+   *
+   * Переиспользует тот же `syncContributor`, что и обход по расписанию.
+   */
+  async syncProgramSharesForProject(coopname: string, project_hash: string): Promise<void> {
+    const contributors = (await this.contributorRepository.findAll()).filter(
+      (c) =>
+        c.coopname === coopname &&
+        (c.status === ContributorStatus.ACTIVE || c.status === ContributorStatus.IMPORT)
+    );
+    if (contributors.length === 0) return;
+
+    for (const contributor of contributors) {
+      await this.syncContributor(coopname, contributor, [project_hash]);
+    }
   }
 
   private async findActiveProjects(coopname: string): Promise<ProjectDomainEntity[]> {
@@ -98,7 +125,7 @@ export class ProgramShareRegistrationService {
   private async syncContributor(
     coopname: string,
     contributor: ContributorDomainEntity,
-    projects: ProjectDomainEntity[]
+    projectHashes: string[]
   ): Promise<void> {
     const programId = getProgramId(ProgramType.BLAGOROST);
 
@@ -124,10 +151,10 @@ export class ProgramShareRegistrationService {
     const targetParsed = AssetUtils.parseAsset(targetShares);
     if (!targetParsed.symbol) return;
 
-    for (const project of projects) {
+    for (const projectHash of projectHashes) {
       const segment = await this.capitalBlockchainPort.getSegmentByProjectUser(
         coopname,
-        project.project_hash,
+        projectHash,
         contributor.username
       );
 
@@ -139,19 +166,19 @@ export class ProgramShareRegistrationService {
       try {
         await this.capitalBlockchainPort.registerShare({
           coopname,
-          project_hash: project.project_hash,
+          project_hash: projectHash,
           username: contributor.username,
           user_shares: targetShares,
         });
         this.logger.log(
-          `regshare: ${contributor.username} → проект ${project.project_hash}, user_shares=${targetShares} (было ${registeredStr})`
+          `regshare: ${contributor.username} → проект ${projectHash}, user_shares=${targetShares} (было ${registeredStr})`
         );
         await delay(REGSHARE_TX_GAP_MS);
       } catch (error: unknown) {
         const message = error instanceof HttpApiError ? error.message : error instanceof Error ? error.message : String(error);
         const stack = error instanceof Error ? error.stack : undefined;
         this.logger.warn(
-          `regshare не выполнен: coop=${coopname} project=${project.project_hash} user=${contributor.username}: ${message}`,
+          `regshare не выполнен: coop=${coopname} project=${projectHash} user=${contributor.username}: ${message}`,
           stack
         );
       }
