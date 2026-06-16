@@ -63,9 +63,13 @@ div
         div.exit-doc.q-mt-md(v-if='document')
           DocumentHtmlReader(:html='document.html')
 
-        div.q-mt-md(v-if='preview')
-          div.text-body2.text-grey-7 Сумма к возврату
-          div.t-mono.text-h6 {{ formatAsset2Digits(preview.total) }}
+        //- Итог к возврату — soft-панель под документом, читается как подбивка
+        //- к заявлению (а не «висящий» текст снизу).
+        div.exit-summary(v-if='preview')
+          div.exit-summary__text
+            span.exit-summary__label Сумма к возврату
+            span.exit-summary__hint Планируемая сумма; итог фиксирует Совет
+          span.exit-summary__value {{ formatAsset2Digits(preview.total) }}
 </template>
 
 <script setup lang="ts">
@@ -204,5 +208,73 @@ const handlerSubmit = async (): Promise<void> => {
   border: 1px solid var(--p-line);
   border-radius: var(--p-r-md);
   padding: var(--p-4);
+}
+/* Документ приходит из backend с Quasar text-h*/inline-стилями (заголовок 3rem,
+   line-height 4.5rem). Прижимаем заголовок и типографику к канону — иначе
+   title распирает диалог. Приём как в ReadStatement.vue (:deep + !important,
+   чтобы перебить глобальные правила DocumentHtmlReader). */
+.exit-doc :deep(.statement h1),
+.exit-doc :deep(.statement .text-h1),
+.exit-doc :deep(.statement .text-h2) {
+  font-size: var(--p-fs-h2) !important;
+  line-height: var(--p-lh-h2) !important;
+  letter-spacing: var(--p-ls-h2) !important;
+  font-weight: 600 !important;
+  color: var(--p-ink) !important;
+  text-align: center !important;
+  margin: var(--p-2) 0 var(--p-4) !important;
+}
+.exit-doc :deep(.statement h2),
+.exit-doc :deep(.statement h3),
+.exit-doc :deep(.statement h4),
+.exit-doc :deep(.statement .text-h3),
+.exit-doc :deep(.statement .text-h4),
+.exit-doc :deep(.statement .text-h5),
+.exit-doc :deep(.statement .text-h6) {
+  font-size: var(--p-fs-body) !important;
+  line-height: var(--p-lh-body) !important;
+  letter-spacing: 0 !important;
+  font-weight: 600 !important;
+  color: var(--p-ink) !important;
+  margin: var(--p-4) 0 var(--p-1) !important;
+}
+.exit-doc :deep(.statement p) {
+  font-size: var(--p-fs-body) !important;
+  line-height: var(--p-lh-body) !important;
+}
+
+.exit-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p-4);
+  margin-top: var(--p-4);
+  padding: var(--p-4) var(--p-5);
+  background: var(--p-surface-2);
+  border-radius: var(--p-r-md);
+}
+.exit-summary__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-1);
+  min-width: 0;
+}
+.exit-summary__label {
+  font-size: var(--p-fs-body);
+  font-weight: 600;
+  color: var(--p-ink);
+}
+.exit-summary__hint {
+  font-size: var(--p-fs-meta);
+  line-height: var(--p-lh-meta);
+  color: var(--p-ink-3);
+}
+.exit-summary__value {
+  font-family: var(--p-mono);
+  font-size: var(--p-fs-h2);
+  font-weight: 600;
+  color: var(--p-ink);
+  font-feature-settings: 'tnum' 1;
+  white-space: nowrap;
 }
 </style>
