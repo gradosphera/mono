@@ -76,7 +76,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
           {
             meta: {
               title: 'Подключение',
-              icon: 'fas fa-link',
+              icon: 'link',
               roles: ['user'],
               conditions: 'isCoop === true && coopname === "voskhod"',
               requiresAuth: true,
@@ -103,7 +103,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
           {
             meta: {
               title: 'Реквизиты',
-              icon: 'fas fa-link',
+              icon: 'account_balance',
               roles: ['user', 'member', 'chairman'],
               requiresAuth: true,
             },
