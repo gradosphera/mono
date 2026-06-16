@@ -8,51 +8,41 @@ BaseDialog(
   :close-on-escape='false'
 )
   div.exit-overlay
-    //- Фаза 1: заявление подписано, ждём подтверждения по ссылке из письма.
-    EmptyState(
-      v-if='isAwaitingConfirmation',
-      title='Подтвердите выход по ссылке из письма',
-      body='Мы отправили письмо на вашу электронную почту — перейдите по ссылке в нём, чтобы подтвердить выход и запустить возврат паевого взноса. Письмо могло попасть в папку «Спам».'
-    )
-      template(#icon)
-        q-icon(name='mark_email_unread', size='22px', color='primary')
-      template(#action)
-        div.exit-overlay__panel
-          div.exit-overlay__amount(v-if='plannedAmount')
-            div.text-overline.text-grey-6 Планируемая сумма к возврату
-            div.t-mono.text-h4 {{ plannedAmount }}
-          div.text-caption.text-grey-6 Пока вы не перешли по ссылке, заявление можно отменить.
-          div.exit-overlay__actions
-            BaseButton(variant='secondary', :loading='cancelling', @click='onCancel')
-              | Отменить выход
-            BaseButton(variant='ghost', :loading='loggingOut', @click='onLogout')
-              template(#icon-left)
-                q-icon(name='logout', size='18px')
-              | Выйти из личного кабинета
+    AuthCard(v-if='exitStatus', :max-width='440')
+      //- Шапка карточки: иконка статуса в soft-плитке + заголовок + пояснение.
+      template(#head)
+        div.exit-head__icon(:class='`exit-head__icon--${view.tone}`')
+          q-icon(:name='view.icon', size='28px')
+        h2.exit-head__title {{ view.title }}
+        p.exit-head__text {{ view.body }}
 
-    //- Фаза 2-3: заявление отправлено в блокчейн — рассмотрение советом / одобрено.
-    EmptyState(
-      v-else-if='exitStatus',
-      :title='isAuthorized ? "Совет одобрил выход" : "Заявление на рассмотрении Совета"',
-      :body='isAuthorized ? "Возврат паевого взноса будет совершён в срок, установленный Уставом кооператива. Аккаунт заблокирован — дождитесь поступления средств." : "Ваше заявление о выходе передано в Совет кооператива. Кабинет заблокирован на время процедуры — дождитесь решения Совета."'
-    )
-      template(#icon)
-        q-icon(
-          :name='isAuthorized ? "payments" : "hourglass_top"',
-          size='22px',
-          :color='isAuthorized ? "positive" : "primary"'
-        )
-      template(#action)
-        div.exit-overlay__panel
-          div.exit-overlay__amount(v-if='plannedAmount')
-            div.text-overline.text-grey-6 Сумма к возврату
-            div.t-mono.text-h4 {{ plannedAmount }}
-            div.text-caption.text-grey-6.q-mt-xs(v-if='!isAuthorized') Планируемая сумма; итог фиксирует Совет.
-          div.exit-overlay__actions
-            BaseButton(variant='secondary', :loading='loggingOut', @click='onLogout')
-              template(#icon-left)
-                q-icon(name='logout', size='18px')
-              | Выйти из личного кабинета
+      //- Тело: сумма к возврату + сопутствующие подписи.
+      div.exit-amount(v-if='plannedAmount')
+        span.exit-amount__label.t-eyebrow.t-faint {{ view.amountLabel }}
+        span.exit-amount__value {{ plannedAmount }}
+        span.exit-amount__hint.t-sm.t-faint(v-if='view.plannedHint') Планируемая сумма; итог фиксирует Совет.
+      p.exit-note.t-sm.t-muted(v-if='view.canCancel') Пока вы не перешли по ссылке, заявление можно отменить.
+
+      //- Футер: действия (отделён бордером внутри AuthCard).
+      template(#footer)
+        div.exit-actions
+          BaseButton(
+            v-if='view.canCancel',
+            variant='secondary',
+            :block='true',
+            :loading='cancelling',
+            @click='onCancel'
+          )
+            | Отменить выход
+          BaseButton(
+            variant='ghost',
+            :block='true',
+            :loading='loggingOut',
+            @click='onLogout'
+          )
+            template(#icon-left)
+              q-icon(name='logout', size='18px')
+            | Выйти из личного кабинета
 </template>
 
 <script setup lang="ts">
@@ -61,7 +51,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { Zeus } from '@coopenomics/sdk';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
-import { EmptyState } from 'src/shared/ui/base/EmptyState';
+import { AuthCard } from 'src/shared/ui/domain/AuthCard';
 import { useLogoutUser } from 'src/features/User/Logout/model';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useExitGate } from '../model';
@@ -75,6 +65,41 @@ const { logout } = useLogoutUser();
 const isAuthorized = computed(
   () => exitStatus.value?.status === Zeus.MembershipExitStatus.AUTHORIZED,
 );
+
+// Содержимое экрана по фазе выхода: ожидание письма → рассмотрение советом → одобрено.
+const view = computed(() => {
+  if (isAwaitingConfirmation.value) {
+    return {
+      icon: 'mark_email_unread',
+      tone: 'primary',
+      title: 'Подтвердите выход по ссылке из письма',
+      body: 'Мы отправили письмо на вашу электронную почту — перейдите по ссылке в нём, чтобы подтвердить выход и запустить возврат паевого взноса. Письмо могло попасть в папку «Спам».',
+      amountLabel: 'Планируемая сумма к возврату',
+      plannedHint: false,
+      canCancel: true,
+    };
+  }
+  if (isAuthorized.value) {
+    return {
+      icon: 'payments',
+      tone: 'pos',
+      title: 'Совет одобрил выход',
+      body: 'Возврат паевого взноса будет совершён в срок, установленный Уставом кооператива. Аккаунт заблокирован — дождитесь поступления средств.',
+      amountLabel: 'Сумма к возврату',
+      plannedHint: false,
+      canCancel: false,
+    };
+  }
+  return {
+    icon: 'hourglass_top',
+    tone: 'primary',
+    title: 'Заявление на рассмотрении Совета',
+    body: 'Ваше заявление о выходе передано в Совет кооператива. Кабинет заблокирован на время процедуры — дождитесь решения Совета.',
+    amountLabel: 'Сумма к возврату',
+    plannedHint: true,
+    canCancel: false,
+  };
+});
 
 const cancelling = ref(false);
 const loggingOut = ref(false);
@@ -91,14 +116,13 @@ const onCancel = async (): Promise<void> => {
   }
 };
 
-// Выход из личного кабинета (logout). Аккаунт при активном выходе заблокирован,
-// поэтому из кабинета не выйти иначе — даём кнопку прямо на оверлее. После входа
-// заявление снова покажется: статус выхода живёт на цепи (registrator::exits).
+// Выход из личного кабинета (logout). При активном выходе аккаунт заблокирован,
+// иначе из сессии не выйти. После logout gate обнуляется и редирект на вход;
+// при повторном входе экран выхода снова покажется (статус живёт on-chain).
 const onLogout = async (): Promise<void> => {
   loggingOut.value = true;
   try {
     await logout();
-    // Сессия закрыта → loadExitStatus обнулит gate, оверлей закроется.
     await loadExitStatus();
     await router.push({ name: 'signin', params: { coopname: route.params.coopname } });
   } catch (e: any) {
@@ -111,32 +135,76 @@ const onLogout = async (): Promise<void> => {
 
 <style scoped lang="scss">
 .exit-overlay {
-  min-height: 60vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--p-4);
 }
 
-.exit-overlay__panel {
+.exit-head__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--p-r-lg);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--p-3);
+}
+.exit-head__icon--primary {
+  background: var(--p-primary-soft);
+  color: var(--p-primary);
+}
+.exit-head__icon--pos {
+  background: var(--p-pos-soft);
+  color: var(--p-pos);
+}
+
+.exit-head__title {
+  margin: 0;
+  font-size: var(--p-fs-h2);
+  line-height: var(--p-lh-h2);
+  letter-spacing: var(--p-ls-h2);
+  font-weight: 600;
+  color: var(--p-ink);
+}
+.exit-head__text {
+  margin: var(--p-2) 0 0;
+  font-size: var(--p-fs-body-sm);
+  line-height: var(--p-lh-body-sm);
+  color: var(--p-ink-2);
+}
+
+.exit-amount {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--p-4);
-  margin-top: var(--p-2);
+  gap: var(--p-1);
+  padding: var(--p-4) var(--p-5);
+  background: var(--p-surface-2);
+  border-radius: var(--p-r-md);
+  text-align: center;
+}
+.exit-amount__value {
+  font-family: var(--p-mono);
+  font-size: var(--p-fs-h1);
+  line-height: var(--p-lh-h1);
+  font-weight: 600;
+  color: var(--p-ink);
+  font-feature-settings: 'ss01', 'ss02';
+}
+.exit-amount__hint {
+  margin-top: var(--p-1);
 }
 
-.exit-overlay__amount {
-  padding: var(--p-5);
-  border: 1px solid var(--p-line);
-  border-radius: var(--p-r-lg);
-  min-width: 240px;
+.exit-note {
+  margin: var(--p-3) 0 0;
   text-align: center;
 }
 
-.exit-overlay__actions {
+.exit-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--p-3);
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--p-2);
+  width: 100%;
 }
 </style>
