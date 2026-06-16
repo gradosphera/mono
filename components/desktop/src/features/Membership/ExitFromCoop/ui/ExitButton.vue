@@ -19,9 +19,9 @@ div
     @update:model-value='(v) => !v && clear()'
   )
     //- Проверка реквизитов
-    div.q-pa-md.flex.items-center(v-if='checkingRequisites')
-      q-spinner(size='24px', color='primary')
-      span.q-ml-sm.text-grey-7 Проверка реквизитов…
+    div.exit-loading(v-if='checkingRequisites')
+      q-spinner(size='32px', color='primary')
+      span.exit-loading__text Проверяем реквизиты…
 
     //- Нет реквизитов — выход заблокирован, ведём на страницу реквизитов
     div(v-else-if='requisitesOk === false')
@@ -42,7 +42,7 @@ div
       v-else,
       :handler-submit='handlerSubmit',
       :is-submitting='isSubmitting',
-      :disabled='!document || loadingDoc',
+      :disabled='!document || loading',
       :button-cancel-txt='"Отменить"',
       :button-submit-txt='"Подписать и подать заявление"',
       @cancel='clear'
@@ -54,19 +54,19 @@ div
           p.q-mb-sm Внимательно прочитайте заявление. Выход из кооператива — необратимое действие.
           p.q-mb-none После подписания и подтверждения по ссылке из письма кабинет блокируется и запускается процесс выхода: получение решения Совета и возврат паевого взноса в срок, установленный Уставом кооператива.
 
-      div.q-mt-md(v-if='loadingDoc')
-        q-spinner(size='24px', color='primary')
-        span.q-ml-sm.text-grey-7 Формирование заявления…
-      div.exit-doc.q-mt-md(v-else-if='document')
-        DocumentHtmlReader(:html='document.html')
+      //- Единый лоадер на подготовку заявления и расчёт суммы (грузим параллельно).
+      div.exit-loading(v-if='loading')
+        q-spinner(size='32px', color='primary')
+        span.exit-loading__text Готовим заявление и сумму к возврату…
 
-      div.q-mt-md(v-if='loadingPreview')
-        q-spinner(size='20px', color='primary')
-        span.q-ml-sm.text-grey-7 Расчёт суммы к возврату…
-      div.q-mt-md(v-else-if='preview')
-        div.text-body2.text-grey-7 Сумма к возврату
-        div.t-mono.text-h6 {{ preview.total }}
-        div.text-caption.text-grey-6.q-mt-xs Целевой паевой {{ preview.share_contribution }} + минимальный {{ preview.minimum_contribution }}. Итог фиксирует Совет.
+      template(v-else)
+        div.exit-doc.q-mt-md(v-if='document')
+          DocumentHtmlReader(:html='document.html')
+
+        div.q-mt-md(v-if='preview')
+          div.text-body2.text-grey-7 Сумма к возврату
+          div.t-mono.text-h6 {{ preview.total }}
+          div.text-caption.text-grey-6.q-mt-xs Целевой паевой {{ preview.share_contribution }} + минимальный {{ preview.minimum_contribution }}. Итог фиксирует Совет.
 </template>
 
 <script setup lang="ts">
@@ -105,8 +105,7 @@ const { loadExitStatus } = useExitGate();
 const isSubmitting = ref(false);
 const checkingRequisites = ref(false);
 const requisitesOk = ref<boolean | null>(null);
-const loadingDoc = ref(false);
-const loadingPreview = ref(false);
+const loading = ref(false);
 const document = ref<IGenerateMembershipExitApplicationResult | null>(null);
 const preview = ref<IMembershipExitReturnPreview | null>(null);
 
@@ -126,22 +125,24 @@ watch(showDialog, async (opened) => {
   }
   if (!requisitesOk.value) return;
 
-  loadingDoc.value = true;
-  loadingPreview.value = true;
+  // Заявление и сумму готовим параллельно под одним лоадером, показываем вместе.
+  loading.value = true;
   try {
-    document.value = await generateApplication();
-  } catch (error) {
-    console.error('Ошибка формирования заявления о выходе:', error);
-    FailAlert('Не удалось сформировать заявление о выходе');
+    const [doc, prev] = await Promise.allSettled([generateApplication(), getReturnPreview()]);
+    if (doc.status === 'fulfilled') {
+      document.value = doc.value;
+    } else {
+      console.error('Ошибка формирования заявления о выходе:', doc.reason);
+      FailAlert('Не удалось сформировать заявление о выходе');
+    }
+    if (prev.status === 'fulfilled') {
+      preview.value = prev.value;
+    } else {
+      // Сумма — некритично: документ можно подписать и без предрасчёта.
+      console.error('Ошибка расчёта суммы возврата:', prev.reason);
+    }
   } finally {
-    loadingDoc.value = false;
-  }
-  try {
-    preview.value = await getReturnPreview();
-  } catch (error) {
-    console.error('Ошибка расчёта суммы возврата:', error);
-  } finally {
-    loadingPreview.value = false;
+    loading.value = false;
   }
 });
 
@@ -150,6 +151,7 @@ const clear = (): void => {
   isSubmitting.value = false;
   checkingRequisites.value = false;
   requisitesOk.value = null;
+  loading.value = false;
   document.value = null;
   preview.value = null;
 };
@@ -183,6 +185,19 @@ const handlerSubmit = async (): Promise<void> => {
 </script>
 
 <style scoped lang="scss">
+.exit-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--p-3);
+  padding: var(--p-8) var(--p-4);
+}
+.exit-loading__text {
+  font-size: var(--p-fs-body-sm);
+  color: var(--p-ink-2);
+}
+
 .exit-doc {
   max-height: 50vh;
   overflow-y: auto;
