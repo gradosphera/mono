@@ -180,6 +180,20 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             },
           },
           {
+            // Предпоследний пункт: выход из кооператива (не путать с «Выйти из
+            // кабинета» в RailUserCard). Иконка group_remove — не logout.
+            meta: {
+              title: 'Выход из кооператива',
+              icon: 'group_remove',
+              roles: [],
+              requiresAuth: true,
+            },
+            path: 'membership-exit',
+            name: 'membership-exit',
+            component: markRaw(MembershipExitPage),
+            children: [],
+          },
+          {
             meta: {
               title: 'Поддержка',
               icon: 'fa-solid fa-headset',
@@ -190,21 +204,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
             path: '/:coopname/support',
             name: 'support',
             component: markRaw(SupportTrigger),
-            children: [],
-          },
-          {
-            // Крайний пункт меню. Иконка group_remove (выход из кооператива) —
-            // отлична от двери-logout нижней кнопки «Выйти» (выход из кабинета),
-            // чтобы действия не путались.
-            meta: {
-              title: 'Выход из кооператива',
-              icon: 'group_remove',
-              roles: [],
-              requiresAuth: true,
-            },
-            path: 'membership-exit',
-            name: 'membership-exit',
-            component: markRaw(MembershipExitPage),
             children: [],
           },
         ],

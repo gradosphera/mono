@@ -2,15 +2,15 @@
 div
   BaseButton(
     v-if='walletStore.isWalletAgreementSigned',
-    variant='danger',
+    :variant='variant',
     :size='micro ? "sm" : "md"',
-    aria-label='Выход из кооператива',
+    :aria-label='label',
     @click='open'
   )
     template(#icon-left)
-      q-icon(name='logout', size='18px')
-    span(v-if='!micro').q-ml-sm Выход из кооператива
-    q-tooltip(v-if='micro') Выход из кооператива
+      q-icon(:name='icon', size='18px')
+    span(v-if='!micro').q-ml-sm {{ label }}
+    q-tooltip(v-if='micro') {{ label }}
 
   BaseDialog(
     v-model='showDialog',
@@ -90,12 +90,20 @@ import {
   type IGenerateMembershipExitApplicationResult,
 } from '../model';
 
+import type { BaseButtonVariant } from 'src/shared/ui/base/BaseButton/BaseButton.types';
+
 interface Props {
   micro?: boolean;
+  label?: string;
+  variant?: BaseButtonVariant;
+  icon?: string;
 }
 
 withDefaults(defineProps<Props>(), {
   micro: false,
+  label: 'Выход из кооператива',
+  variant: 'danger',
+  icon: 'logout',
 });
 
 const route = useRoute();
