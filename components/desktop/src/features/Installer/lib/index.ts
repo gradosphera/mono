@@ -1,1 +1,5 @@
-export { getMinSovietMembersCount } from './minSovietMembers';
+export {
+  getMinSovietMembersCount,
+  getSovietMembersProgressHint,
+  getSovietContinueBlockedTooltip,
+} from './minSovietMembers';

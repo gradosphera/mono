@@ -1,5 +1,8 @@
 <template lang="pug">
 .set-soviet(v-if='installStore')
+  p.set-soviet__requirement(v-if='minSovietMembers > 1')
+    | В составе совета — минимум {{ minSovietMembers }}&nbsp;человека: председатель и члены совета.
+
   .soviet-member(v-for='(member, index) in installStore.soviet', :key='member.id')
     .soviet-member__head
       span.soviet-member__role
@@ -29,6 +32,8 @@
           :rules='[val => notEmpty(val), val => validEmail(val)]'
         )
 
+  p.set-soviet__progress(v-if='progressHint') {{ progressHint }}
+
   .set-soviet__actions
     BaseButton(variant='ghost', @click='back')
       q-icon(name='arrow_back', size='16px')
@@ -37,18 +42,29 @@
       BaseButton(variant='secondary', @click='add')
         q-icon(name='add', size='16px')
         span.q-ml-sm Добавить члена совета
-      BaseButton(variant='primary', :loading='loading', @click='next')
-        span.q-mr-sm Продолжить
-        q-icon(name='arrow_forward', size='16px')
+      span.set-soviet__continue-wrap
+        q-tooltip(v-if='!canContinue') {{ continueBlockedTooltip }}
+        BaseButton(
+          variant='primary',
+          :loading='loading',
+          :disabled='!canContinue',
+          @click='next'
+        )
+          span.q-mr-sm Продолжить
+          q-icon(name='arrow_forward', size='16px')
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 import { IndividualDataForm } from 'src/shared/ui/UserDataForm/IndividualDataForm';
 import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
 import { FailAlert } from 'src/shared/api';
-import { getMinSovietMembersCount } from '../../lib';
+import {
+  getMinSovietMembersCount,
+  getSovietMembersProgressHint,
+  getSovietContinueBlockedTooltip,
+} from '../../lib';
 import { notEmpty } from 'src/shared/lib/utils';
 import { validEmail } from 'src/shared/lib/utils/validEmailRule';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
@@ -57,6 +73,13 @@ const installStore = useInstallCooperativeStore();
 const minSovietMembers = getMinSovietMembersCount();
 
 installStore.is_finish = false;
+
+const sovietCount = computed(() => installStore.soviet.length);
+const canContinue = computed(() => sovietCount.value >= minSovietMembers);
+const progressHint = computed(() => getSovietMembersProgressHint(sovietCount.value, minSovietMembers));
+const continueBlockedTooltip = computed(() =>
+  getSovietContinueBlockedTooltip(sovietCount.value, minSovietMembers),
+);
 
 const add = () => {
   let role: 'chairman' | 'member' = 'chairman';
@@ -76,24 +99,15 @@ const back = () => {
   installStore.current_step = 'init';
 };
 
-const MIN_SOVIET_MEMBERS = minSovietMembers;
-
 const next = async () => {
-  try {
-    if (installStore.soviet.length < MIN_SOVIET_MEMBERS) {
-      FailAlert(
-        MIN_SOVIET_MEMBERS === 1
-          ? 'Необходимо добавить хотя бы одного члена совета'
-          : `Необходимо добавить не менее ${MIN_SOVIET_MEMBERS} членов совета (председатель и члены совета)`,
-      );
-      return;
-    }
+  if (!canContinue.value) return;
 
+  try {
     loading.value = true;
     installStore.current_step = 'vars';
-    loading.value = false;
   } catch (e: any) {
     FailAlert(e);
+  } finally {
     loading.value = false;
   }
 };
@@ -110,6 +124,18 @@ if (installStore.soviet.length == 0) {
   display: flex;
   flex-direction: column;
   gap: var(--p-4, 16px);
+}
+
+.set-soviet__requirement,
+.set-soviet__progress {
+  margin: 0;
+  font-size: var(--p-fs-body-sm, 13px);
+  line-height: var(--p-lh-body, 1.55);
+  color: var(--p-ink-2);
+}
+
+.set-soviet__progress {
+  color: var(--p-warn, var(--p-ink-2));
 }
 
 .soviet-member {
@@ -142,5 +168,8 @@ if (installStore.soviet.length == 0) {
   align-items: center;
   gap: var(--p-2, 8px);
   flex-wrap: wrap;
+}
+.set-soviet__continue-wrap {
+  display: inline-flex;
 }
 </style>
