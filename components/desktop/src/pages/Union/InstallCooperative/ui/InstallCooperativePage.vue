@@ -26,9 +26,7 @@
 
           //- ---------- Шаг 3: члены совета ----------
           .install-step(v-else-if='step.key === "soviet"')
-            p.install-step__intro
-              | Введите данные председателя и членов совета. Каждому будет создан
-              | аккаунт пайщика и отправлено приглашение на электронную почту.
+            p.install-step__intro {{ sovietStepIntro }}
             SetSovietForm
 
           //- ---------- Шаг 4: переменные документов ----------
@@ -60,10 +58,17 @@ import { useSystemStore } from 'src/entities/System/model';
 import { VerticalStepper } from 'src/shared/ui/domain/VerticalStepper';
 import type { StepperStep } from 'src/shared/ui/domain/VerticalStepper';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
+import { getMinSovietMembersCount } from 'src/features/Installer/lib';
 
 const router = useRouter();
 const systemStore = useSystemStore();
 const installStore = useInstallCooperativeStore();
+const minSovietMembers = getMinSovietMembersCount();
+
+const sovietStepIntro =
+  minSovietMembers === 1
+    ? 'Введите данные председателя. Будет создан аккаунт пайщика и отправлено приглашение на электронную почту.'
+    : 'Введите данные председателя и не менее двух членов совета (всего минимум 3 человека). Каждому будет создан аккаунт пайщика и отправлено приглашение на электронную почту.';
 
 const steps: StepperStep[] = [
   { key: 'key', label: 'Ключ установки', description: 'Ключ, выданный при регистрации пайщиком' },

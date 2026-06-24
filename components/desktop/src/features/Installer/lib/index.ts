@@ -1,0 +1,1 @@
+export { getMinSovietMembersCount } from './minSovietMembers';

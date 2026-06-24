@@ -43,16 +43,18 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue';
 import { useInstallCooperativeStore } from 'src/entities/Installer/model';
 import { IndividualDataForm } from 'src/shared/ui/UserDataForm/IndividualDataForm';
 import type { IIndividualData } from 'src/shared/lib/types/user/IUserData';
 import { FailAlert } from 'src/shared/api';
-import { ref } from 'vue';
-import { validEmail } from 'src/shared/lib/utils/validEmailRule';
+import { getMinSovietMembersCount } from '../../lib';
 import { notEmpty } from 'src/shared/lib/utils';
+import { validEmail } from 'src/shared/lib/utils/validEmailRule';
 import { BaseButton } from 'src/shared/ui/base/BaseButton';
 
 const installStore = useInstallCooperativeStore();
+const minSovietMembers = getMinSovietMembersCount();
 
 installStore.is_finish = false;
 
@@ -74,10 +76,16 @@ const back = () => {
   installStore.current_step = 'init';
 };
 
+const MIN_SOVIET_MEMBERS = minSovietMembers;
+
 const next = async () => {
   try {
-    if (installStore.soviet.length === 0) {
-      FailAlert('Необходимо добавить хотя бы одного члена совета');
+    if (installStore.soviet.length < MIN_SOVIET_MEMBERS) {
+      FailAlert(
+        MIN_SOVIET_MEMBERS === 1
+          ? 'Необходимо добавить хотя бы одного члена совета'
+          : `Необходимо добавить не менее ${MIN_SOVIET_MEMBERS} членов совета (председатель и члены совета)`,
+      );
       return;
     }
 
@@ -90,8 +98,11 @@ const next = async () => {
   }
 };
 
-if (installStore.soviet.length == 0)
-  add();
+if (installStore.soviet.length == 0) {
+  for (let i = 0; i < minSovietMembers; i++) {
+    add();
+  }
+}
 </script>
 
 <style scoped lang="scss">
