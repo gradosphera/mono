@@ -1,6 +1,11 @@
 <template lang="pug">
 .extension-install
-  q-form(ref='formRef')
+  q-form(:ref='setFormRef')
+    CapitalProgramDocumentParametersWidget(
+      v-if='extensionName === "capital"'
+      :config='config'
+      @update:config='$emit("update:config", $event)'
+    )
     BaseCard(v-if='schema && !isEmpty', title='Настройки')
       ZodForm(
         :schema='schema',
@@ -17,8 +22,10 @@ import { computed } from 'vue';
 import { ZodForm } from 'src/shared/ui/ZodForm';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
+import { CapitalProgramDocumentParametersWidget } from 'app/extensions/capital/features/Onboarding';
 
 interface Props {
+  extensionName?: string;
   schema?: any;
   config: any;
   formRef?: any;
@@ -27,6 +34,12 @@ interface Props {
 const props = defineProps<Props>();
 
 const isEmpty = computed(() => isExtensionSchemaEmpty(props.schema));
+
+const setFormRef = (element: any) => {
+  if (props.formRef && 'value' in props.formRef) {
+    props.formRef.value = element;
+  }
+};
 </script>
 
 <style scoped lang="scss">

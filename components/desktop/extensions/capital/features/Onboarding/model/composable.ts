@@ -31,6 +31,7 @@ export const useCapitalOnboarding = () => {
     'blagorost_program': 998,
     'blagorost_offer_template': 999,
   };
+  const capitalProgramDocDataRegistryIds = new Set([994, 995, 998, 999]);
 
   // Генерация документа для шага
   const generateDocument = async (step: ICouncilOnboardingStep): Promise<GeneratedDocument> => {
@@ -42,12 +43,18 @@ export const useCapitalOnboarding = () => {
         throw new Error(`Неизвестный шаг онбординга: ${step.id}`);
       }
 
+      const docDataHash = (onboardingState.value as any)?.capital_program_doc_data_hash;
+      if (capitalProgramDocDataRegistryIds.has(registry_id) && !docDataHash) {
+        throw new Error('Параметры документов ЦПП не заполнены: переустановите или обновите настройки расширения capital');
+      }
+
       const generateDocInput: Mutations.Documents.GenerateDocument.IInput = {
         input: {
           data: {
             coopname: systemStore.info?.coopname || '',
             username: sessionStore.username,
             registry_id,
+            ...(docDataHash && capitalProgramDocDataRegistryIds.has(registry_id) ? { doc_data_hash: docDataHash } : {}),
           },
         },
       };

@@ -68,6 +68,9 @@ export class CapitalOnboardingStateDTO {
   @Field(() => String, { nullable: true })
   onboarding_blagorost_offer_template_hash?: string | null;
 
+  @Field(() => String, { nullable: true })
+  capital_program_doc_data_hash?: string | null;
+
   @Field(() => String)
   onboarding_init_at!: string;
 

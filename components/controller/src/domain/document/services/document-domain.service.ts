@@ -22,6 +22,26 @@ export class DocumentDomainService {
   ) {}
 
   public async generateDocument(data: GenerateDocumentDomainInterfaceWithOptions): Promise<DocumentDomainEntity> {
+    const documentData = data.data as Cooperative.Document.IGenerate & {
+      doc_data?: Record<string, unknown>;
+      doc_data_hash?: string;
+    };
+
+    if (documentData.doc_data) {
+      const { doc_data, ...publicDocumentData } = documentData;
+      const { hash } = documentData.doc_data_hash
+        ? { hash: documentData.doc_data_hash }
+        : await this.saveDocData(doc_data, documentData.registry_id);
+
+      return await this.generatorInfrastructureService.generateDocument({
+        ...data,
+        data: {
+          ...publicDocumentData,
+          doc_data_hash: hash,
+        } as Cooperative.Document.IGenerate,
+      });
+    }
+
     return await this.generatorInfrastructureService.generateDocument(data);
   }
 

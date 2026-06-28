@@ -40,6 +40,7 @@ export const defaultConfig = {
   onboarding_generator_offer_template_done: false,
   onboarding_blagorost_provision_done: false,
   onboarding_blagorost_offer_template_done: false,
+  capital_program_doc_data_hash: '',
   /** Ветка для выборки коммитов (FR3 / PRD); URL репозитория — на проекте/компоненте (PRD §6.2.1). */
   github_sync_branch: 'dev',
   /** Интервал polling GitHub API в минутах (FR2); 0 — периодический опрос отключён. */
@@ -253,6 +254,10 @@ export const Schema = z.object({
     .boolean()
     .default(defaultConfig.onboarding_blagorost_offer_template_done)
     .describe(describeField({ label: 'Шаг предложения Благорост выполнен', visible: false })),
+  capital_program_doc_data_hash: z
+    .string()
+    .default(defaultConfig.capital_program_doc_data_hash)
+    .describe(describeField({ label: 'PrivateData документов ЦПП', visible: false })),
 
 });
 

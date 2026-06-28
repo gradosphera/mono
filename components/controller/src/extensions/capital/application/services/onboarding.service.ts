@@ -125,6 +125,7 @@ export class CapitalOnboardingService {
       onboarding_blagorost_provision_hash: pluginConfig.onboarding_blagorost_provision_hash || null,
       blagorost_offer_template_done: !!pluginConfig.onboarding_blagorost_offer_template_done,
       onboarding_blagorost_offer_template_hash: pluginConfig.onboarding_blagorost_offer_template_hash || null,
+      capital_program_doc_data_hash: pluginConfig.capital_program_doc_data_hash || null,
       onboarding_init_at: pluginConfig.onboarding_init_at || '',
       onboarding_expire_at: pluginConfig.onboarding_expire_at || '',
     };
