@@ -4,6 +4,8 @@ import { Generator } from '../src'
 import { testDocumentGeneration } from './utils/testDocument'
 import { generator, mongoUri } from './utils'
 
+const capitalProgramDocDataHashes = new Map<number, string>()
+
 beforeAll(async () => {
   await generator.connect(mongoUri)
 
@@ -44,6 +46,34 @@ beforeAll(async () => {
   for (const data of udatas) {
     await generator.save('udata', { ...commonUdata, ...data })
   }
+
+  const capitalProgramPrivateData = {
+    approval_protocol_number: '1',
+    approval_protocol_day: '15',
+    approval_protocol_month: 'января',
+    approval_protocol_year: '26',
+    cooperative_name: 'ВОСХОД',
+    cooperative_short_name: 'ПК',
+    cooperative_quoted_name: '«ВОСХОД»',
+    website: 'https://цифровой-кооператив.рф',
+    chairman_full_name: 'Муравьев Алексей Николаевич',
+    generator_program_purpose: 'развитию информационной экосистемы взаимодействия физических и юридических лиц, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении потребительских обществ (кооперативов) под названием “Кооперативная Экономика”',
+    eoap_definition: 'информационная экосистема, интегрируемая в социально-экономическую среду Российской Федерации, состоящая из комплекса программных продуктов на базе технологии распределенного реестра, обеспечивающих широкое экономическое и социальное взаимодействие физических и юридических лиц, включая нерезидентов различных юрисдикций и организационно-правовых форм, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении потребительских кооперативов (обществ) под названием “Кооперативная Экономика”',
+    generator_task_goal: 'центра привлечения и интеграции передовых инновационных цифровых разработок, а также экономических и социальных методов и решений',
+    idea_unit_cost: '50',
+    idea_unit_cost_words: 'пятьдесят',
+    blagorost_goal_expansion: 'вследствие увеличения количества Участников информационной кооперативной экосистемы - ЕОАП - для расширения и повышения социальной эффективности их экономического взаимодействия в некоммерческом формате',
+    blagorost_task_expansion: 'расширение участников ЕОАП - информационной кооперативной экосистемы как центра экономического взаимодействия в некоммерческом формате',
+    blagorost_task_development: 'развитие ЕОАП как центра привлечения и интеграции инновационных цифровых разработок, а также экономических и социальных методов и решений',
+    return_source_description: 'аппаратно-программная сеть узлов распределенного реестра в формате «СМЭВ+SWIFT», построенная на принципах самоорганизации и самофинансирования деятельности технологической инфраструктуры ЕОАП, обеспечивающей консенсус ее распределенных узлов по формированию базового продукта ЕОАП - полного цикла документооборота по синхронному взаимодействию пайщиков и кооперативов - участников экосистемы ЕОАП - через использование цифровых контрактов, с одновременным выполнением функций нотариата и учета финансовых и юридических событий',
+    return_additional_source: 'взносы пользователей ЕОАП, его отдельных программных продуктов и приложений, переданных Обществу или создаваемых в рамках Общества, которые интегрируются в ЕОАП',
+    offer_template_number: '______',
+  }
+
+  for (const registry_id of [994, 995, 996, 998, 999, 1000]) {
+    const { hash } = await generator.saveDocData({ ...capitalProgramPrivateData, registry_id }, registry_id)
+    capitalProgramDocDataHashes.set(registry_id, hash)
+  }
 })
 
 describe('тест генератора документов с registry_id >= 1000', async () => {
@@ -54,6 +84,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHashes.get(994),
     })
   })
 
@@ -63,6 +94,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHashes.get(995),
     })
   })
 
@@ -72,6 +104,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHashes.get(996),
     })
   })
 
@@ -92,6 +125,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHashes.get(998),
     })
   })
   it('генерируем шаблон оферты Благорост', async () => {
@@ -100,6 +134,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHashes.get(999),
     })
   })
 
@@ -110,6 +145,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHashes.get(1000),
     })
   })
 

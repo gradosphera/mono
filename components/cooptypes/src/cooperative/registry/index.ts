@@ -80,3 +80,5 @@ export * as AnnualGeneralMeetingSovietDecision from './301.AnnualGeneralMeetingS
 export * as AnnualGeneralMeetingNotification from './302.AnnualGeneralMeetingNotification'
 export * as AnnualGeneralMeetingVotingBallot from './303.AnnualGeneralMeetingVotingBallot'
 export * as AnnualGeneralMeetingDecision from './304.AnnualGeneralMeetingDecision'
+
+export * from './capitalProgramPrivateData'

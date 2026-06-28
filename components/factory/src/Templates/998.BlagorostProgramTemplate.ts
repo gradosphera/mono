@@ -18,16 +18,22 @@ export interface Model {
   vars: IVars
 }
 
+const CapitalProgramPrivateDataSchema = {
+  type: 'object',
+  additionalProperties: { type: 'string' },
+} as const
+
 // Схема для сверки
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
   properties: {
     meta: IMetaJSONSchema,
     vars: VarsSchema,
+    doc_data: CapitalProgramPrivateDataSchema,
   },
-  required: ['meta', 'vars'],
+  required: ['meta', 'vars', 'doc_data'],
   additionalProperties: true,
-}
+} as any
 
 export const Template: ITemplate<Model> = {
   title: Cooperative.Registry.BlagorostProgramTemplate.title,

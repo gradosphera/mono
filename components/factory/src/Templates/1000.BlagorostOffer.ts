@@ -19,11 +19,12 @@ export const Schema: JSONSchemaType<Model> = {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
     vars: VarsSchema,
+    doc_data: CapitalProgramPrivateDataSchema,
     common_user: CommonUserSchema,
     blagorost_agreement_number: { type: 'string' },
     blagorost_agreement_created_at: { type: 'string' },
   },
-  required: ['meta', 'coop', 'vars', 'common_user', 'blagorost_agreement_number', 'blagorost_agreement_created_at'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'blagorost_agreement_number', 'blagorost_agreement_created_at', 'doc_data'],
   additionalProperties: true,
 } as any
 

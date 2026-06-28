@@ -12,6 +12,11 @@ export type Action = Cooperative.Registry.GeneratorOfferTemplate.Action
 // Модель данных
 export type Model = Cooperative.Registry.GeneratorOfferTemplate.Model
 
+const CapitalProgramPrivateDataSchema = {
+  type: 'object',
+  additionalProperties: { type: 'string' },
+} as const
+
 // Схема для сверки
 export const Schema: JSONSchemaType<Model> = {
   type: 'object',
@@ -19,11 +24,12 @@ export const Schema: JSONSchemaType<Model> = {
     meta: IMetaJSONSchema,
     coop: CooperativeSchema,
     vars: VarsSchema,
+    doc_data: CapitalProgramPrivateDataSchema,
     common_user: CommonUserSchema,
   },
-  required: ['meta', 'coop', 'vars', 'common_user'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'doc_data'],
   additionalProperties: true,
-}
+} as any
 
 export const Template: ITemplate<Model> = {
   title: Cooperative.Registry.GeneratorOfferTemplate.title,
