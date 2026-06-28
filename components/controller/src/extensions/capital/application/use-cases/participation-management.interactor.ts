@@ -334,7 +334,8 @@ export class ParticipationManagementInteractor {
     }
 
     // Извлекаем appendix_hash из метаданных документа
-    const appendix_hash = (document.meta as any).appendix_hash;
+    const documentMeta: Record<string, unknown> = document.meta;
+    const appendix_hash = typeof documentMeta.appendix_hash === 'string' ? documentMeta.appendix_hash : undefined;
 
     //TODO: адаптировать или документ или код ниже к parent_appendix_hash
     if (!appendix_hash) {

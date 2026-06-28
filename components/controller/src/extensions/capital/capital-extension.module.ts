@@ -582,8 +582,10 @@ export class CapitalPlugin extends BaseExtModule {
       } else {
         this.logger.log('Конфигурация контракта CAPITAL уже актуальна');
       }
-    } catch (error: any) {
-      this.logger.error(`Не удалось синхронизировать конфигурацию с контрактом CAPITAL: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Не удалось синхронизировать конфигурацию с контрактом CAPITAL: ${message}`, stack);
       // Не бросаем ошибку, чтобы не блокировать запуск модуля
     }
 
@@ -591,10 +593,12 @@ export class CapitalPlugin extends BaseExtModule {
     try {
       await this.syncInteractor.initializeSync();
       this.logger.log('Синхронизация благороста с блокчейном инициализирована');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Не удалось инициализировать синхронизацию благороста с блокчейном: ${error.message}`,
-        error.stack
+        `Не удалось инициализировать синхронизацию благороста с блокчейном: ${message}`,
+        stack
       );
       // Не бросаем ошибку, чтобы не блокировать запуск модуля
     }

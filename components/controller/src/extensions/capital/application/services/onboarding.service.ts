@@ -29,6 +29,10 @@ type OnboardingHashKey =
   | 'onboarding_blagorost_provision_hash'
   | 'onboarding_blagorost_offer_template_hash';
 
+type CapitalOnboardingConfig = IConfig &
+  Partial<Record<OnboardingFlagKey, boolean>> &
+  Partial<Record<OnboardingHashKey | 'onboarding_init_at' | 'onboarding_expire_at' | 'capital_program_doc_data_hash', string>>;
+
 @Injectable()
 export class CapitalOnboardingService {
   constructor(
@@ -88,10 +92,40 @@ export class CapitalOnboardingService {
     }
   }
 
-  private async loadPlugin(): Promise<ExtensionDomainEntity<IConfig & Record<string, any>>> {
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+  }
+
+  private getMetaString(meta: unknown, key: string): string | undefined {
+    if (!this.isRecord(meta)) return undefined;
+    const value = meta[key];
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  private isSignatureInfo(value: unknown): value is ISignedDocumentDomainInterface['signatures'][number] {
+    if (!this.isRecord(value)) return false;
+
+    return (
+      typeof value.id === 'number' &&
+      typeof value.signed_hash === 'string' &&
+      typeof value.signer === 'string' &&
+      typeof value.public_key === 'string' &&
+      typeof value.signature === 'string' &&
+      typeof value.signed_at === 'string' &&
+      typeof value.meta === 'string'
+    );
+  }
+
+  private getMetaSignatures(meta: unknown): ISignedDocumentDomainInterface['signatures'] {
+    if (!this.isRecord(meta)) return [];
+    const value = meta.signatures;
+    return Array.isArray(value) ? value.filter((item) => this.isSignatureInfo(item)) : [];
+  }
+
+  private async loadPlugin(): Promise<ExtensionDomainEntity<CapitalOnboardingConfig>> {
     const plugin = await this.extensionRepository.findByName('capital');
     if (!plugin) throw new Error('Конфигурация расширения capital не найдена');
-    const pluginConfig = { ...plugin.config } as IConfig & Record<string, any>;
+    const pluginConfig: CapitalOnboardingConfig = { ...plugin.config };
 
     let needUpdate = false;
     if (!pluginConfig.onboarding_init_at) {
@@ -113,7 +147,7 @@ export class CapitalOnboardingService {
     return { ...plugin, config: pluginConfig };
   }
 
-  private buildState(pluginConfig: IConfig & Record<string, any>): CapitalOnboardingStateDTO {
+  private buildState(pluginConfig: CapitalOnboardingConfig): CapitalOnboardingStateDTO {
     return {
       generator_program_template_done: !!pluginConfig.onboarding_generator_program_template_done,
       onboarding_generator_program_template_hash: pluginConfig.onboarding_generator_program_template_hash || null,
@@ -142,7 +176,7 @@ export class CapitalOnboardingService {
     const hashKey = this.mapStepToHash(data.step);
     const normalizedTitle = data.title?.trim().substring(0, 200) || undefined;
 
-    if ((plugin.config as any)[flagKey]) {
+    if (plugin.config[flagKey]) {
       return this.buildState(plugin.config);
     }
     const project_id = uuid();
@@ -169,12 +203,12 @@ export class CapitalOnboardingService {
 
     // Публикуем проект решения в блокчейн сразу после генерации
     const documentForPublish: ISignedDocumentDomainInterface = {
-      version: (generatedDoc.meta as any)?.version || '1.0',
+      version: this.getMetaString(generatedDoc.meta, 'version') || '1.0',
       hash: generatedDoc.hash,
-      doc_hash: (generatedDoc.meta as any)?.doc_hash || generatedDoc.hash,
-      meta_hash: (generatedDoc.meta as any)?.meta_hash || generatedDoc.hash,
+      doc_hash: this.getMetaString(generatedDoc.meta, 'doc_hash') || generatedDoc.hash,
+      meta_hash: this.getMetaString(generatedDoc.meta, 'meta_hash') || generatedDoc.hash,
       meta: generatedDoc.meta,
-      signatures: (generatedDoc.meta as any)?.signatures || [],
+      signatures: this.getMetaSignatures(generatedDoc.meta),
     };
 
     await this.freeDecisionPort.publishProjectOfFreeDecision({

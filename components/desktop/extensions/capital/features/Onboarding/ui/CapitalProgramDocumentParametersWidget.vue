@@ -149,13 +149,21 @@ type FieldDefinition = {
   type?: 'text' | 'textarea';
 };
 
+type CapitalProgramConfig = Record<string, unknown> & {
+  capital_program_doc_data_hash?: string | null;
+};
+
+type GeneratedPreviewDocument = NonNullable<
+  Mutations.Documents.GenerateDocument.IOutput[typeof Mutations.Documents.GenerateDocument.name]
+>;
+
 interface Props {
-  config: Record<string, any>;
+  config: CapitalProgramConfig;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  (event: 'update:config', value: Record<string, any>): void;
+  (event: 'update:config', value: CapitalProgramConfig): void;
 }>();
 
 const system = useSystemStore();
@@ -236,7 +244,7 @@ const allFields = computed(() => [
 
 watch(
   () => system.info,
-  (info: any) => {
+  (info) => {
     if (!info) return;
     form.cooperative_name ||= String(info.coopname || '').toUpperCase();
     form.cooperative_short_name ||= 'ПК';
@@ -259,7 +267,17 @@ function validatePayload(payload: CapitalProgramPrivateData): string[] {
     .map(({ label }) => label);
 }
 
-async function generateDocument(registry_id: number, payload: CapitalProgramPrivateData) {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function getDocDataHash(doc: GeneratedPreviewDocument): string | null {
+  if (!isRecord(doc.meta)) return null;
+  const hash = doc.meta.doc_data_hash;
+  return typeof hash === 'string' && hash.length > 0 ? hash : null;
+}
+
+async function generateDocument(registry_id: number, payload: CapitalProgramPrivateData): Promise<GeneratedPreviewDocument> {
   const { [Mutations.Documents.GenerateDocument.name]: result } = await client.Mutation(
     Mutations.Documents.GenerateDocument.mutation,
     {
@@ -277,6 +295,10 @@ async function generateDocument(registry_id: number, payload: CapitalProgramPriv
       },
     }
   );
+
+  if (!result) {
+    throw new Error('Документ не был сгенерирован');
+  }
 
   return result;
 }
@@ -297,14 +319,14 @@ async function generatePreview() {
     ]);
 
     const docDataHash = docs
-      .map((doc: any) => doc?.meta?.doc_data_hash)
+      .map(getDocDataHash)
       .find((hash: unknown): hash is string => typeof hash === 'string' && hash.length > 0);
 
     if (!docDataHash) {
       throw new Error('Генератор не вернул doc_data_hash');
     }
 
-    previewDocuments.value = docs.map((doc: any, index) => ({
+    previewDocuments.value = docs.map((doc, index) => ({
       registry_id: index === 0 ? 994 : 998,
       title: doc.full_title,
       html: doc.html,

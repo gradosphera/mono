@@ -13,6 +13,8 @@ interface GeneratedDocument {
   full_title: string;
 }
 
+type CapitalOnboardingStepId = Mutations.Capital.CompleteOnboardingStep.IInput['data']['step'];
+
 export const useCapitalOnboarding = () => {
   const systemStore = useSystemStore();
   const sessionStore = useSessionStore();
@@ -24,7 +26,7 @@ export const useCapitalOnboarding = () => {
   const currentGeneratedDoc = ref<GeneratedDocument | null>(null);
 
   // Маппинг шагов на registry_id
-  const stepToRegistryId: Record<string, number> = {
+  const stepToRegistryId: Record<CapitalOnboardingStepId, number> = {
     'generator_program_template': 994,
     'generation_contract_template': 997,
     'generator_offer_template': 995,
@@ -33,17 +35,20 @@ export const useCapitalOnboarding = () => {
   };
   const capitalProgramDocDataRegistryIds = new Set([994, 995, 998, 999]);
 
+  const isCapitalOnboardingStepId = (stepId: string): stepId is CapitalOnboardingStepId => {
+    return stepId in stepToRegistryId;
+  };
+
   // Генерация документа для шага
   const generateDocument = async (step: ICouncilOnboardingStep): Promise<GeneratedDocument> => {
     try {
       generatingDocument.value = true;
-      const registry_id = stepToRegistryId[step.id];
-
-      if (!registry_id) {
+      if (!isCapitalOnboardingStepId(step.id)) {
         throw new Error(`Неизвестный шаг онбординга: ${step.id}`);
       }
 
-      const docDataHash = (onboardingState.value as any)?.capital_program_doc_data_hash;
+      const registry_id = stepToRegistryId[step.id];
+      const docDataHash = onboardingState.value?.capital_program_doc_data_hash;
       if (capitalProgramDocDataRegistryIds.has(registry_id) && !docDataHash) {
         throw new Error('Параметры документов ЦПП не заполнены: переустановите или обновите настройки расширения capital');
       }
@@ -196,9 +201,13 @@ export const useCapitalOnboarding = () => {
         await handleStepClick(step);
       }
 
+      if (!isCapitalOnboardingStepId(step.id)) {
+        throw new Error(`Неизвестный шаг онбординга: ${step.id}`);
+      }
+
       // Подготавливаем данные для отправки
       const stepData: Mutations.Capital.CompleteOnboardingStep.IInput['data'] = {
-        step: step.id as any,
+        step: step.id,
         title: step.title,
         question: step.question,
         decision: currentGeneratedDoc.value?.html || step.decisionPrefix || step.decision,

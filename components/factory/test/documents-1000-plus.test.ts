@@ -1,6 +1,7 @@
 import { beforeAll, describe, it, vi } from 'vitest'
 import { Cooperative } from 'cooptypes'
 import { Generator } from '../src'
+import type { Numbers } from '../src'
 import { testDocumentGeneration } from './utils/testDocument'
 import { generator, mongoUri } from './utils'
 
@@ -11,7 +12,7 @@ beforeAll(async () => {
 
   // Подменяем метод getApprovedDecision для фабрики акта взноса результатов (1042)
   // Это позволит тесту найти "принятое решение" без обращения к реальному API
-  const factory1042 = (generator as any).factories['1042']
+  const factory1042 = generator.factories[1042 as Numbers]
   if (factory1042) {
     vi.spyOn(factory1042, 'getApprovedDecision').mockImplementation(async () => {
       return {

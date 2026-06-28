@@ -20,4 +20,4 @@ const onboardingStateFields = {
 // Проверка валидности
 const _validate: MakeAllFieldsRequired<ValueTypes['CapitalOnboardingState']> = onboardingStateFields
 
-export const capitalOnboardingStateSelector = Selector('CapitalOnboardingState')(onboardingStateFields as any)
+export const capitalOnboardingStateSelector = Selector('CapitalOnboardingState')(onboardingStateFields)

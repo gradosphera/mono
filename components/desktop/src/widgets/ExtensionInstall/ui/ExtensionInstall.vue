@@ -19,23 +19,29 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
+import type { ComponentPublicInstance } from 'vue';
 import { ZodForm } from 'src/shared/ui/ZodForm';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
 import { CapitalProgramDocumentParametersWidget } from 'app/extensions/capital/features/Onboarding';
 
+type ExtensionInstallConfig = Record<string, unknown>;
+type ExtensionInstallFormRef = {
+  value: Element | ComponentPublicInstance | null | undefined;
+};
+
 interface Props {
   extensionName?: string;
-  schema?: any;
-  config: any;
-  formRef?: any;
+  schema?: unknown;
+  config: ExtensionInstallConfig;
+  formRef?: ExtensionInstallFormRef;
 }
 
 const props = defineProps<Props>();
 
 const isEmpty = computed(() => isExtensionSchemaEmpty(props.schema));
 
-const setFormRef = (element: any) => {
+const setFormRef = (element: Element | ComponentPublicInstance | null) => {
   if (props.formRef && 'value' in props.formRef) {
     props.formRef.value = element;
   }
