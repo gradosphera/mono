@@ -5,7 +5,7 @@ import type { Numbers } from '../src'
 import { testDocumentGeneration } from './utils/testDocument'
 import { generator, mongoUri } from './utils'
 
-const capitalProgramDocDataHashes = new Map<number, string>()
+let capitalProgramDocDataHash = ''
 
 beforeAll(async () => {
   await generator.connect(mongoUri)
@@ -71,10 +71,8 @@ beforeAll(async () => {
     offer_template_number: '______',
   }
 
-  for (const registry_id of [994, 995, 996, 998, 999, 1000]) {
-    const { hash } = await generator.saveDocData({ ...capitalProgramPrivateData, registry_id }, registry_id)
-    capitalProgramDocDataHashes.set(registry_id, hash)
-  }
+  const { hash } = await generator.saveDocData(capitalProgramPrivateData, 994)
+  capitalProgramDocDataHash = hash
 })
 
 describe('тест генератора документов с registry_id >= 1000', async () => {
@@ -85,7 +83,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      doc_data_hash: capitalProgramDocDataHashes.get(994),
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -95,7 +93,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      doc_data_hash: capitalProgramDocDataHashes.get(995),
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -105,7 +103,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      doc_data_hash: capitalProgramDocDataHashes.get(996),
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -126,7 +124,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      doc_data_hash: capitalProgramDocDataHashes.get(998),
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
   it('генерируем шаблон оферты Благорост', async () => {
@@ -135,7 +133,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      doc_data_hash: capitalProgramDocDataHashes.get(999),
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -146,7 +144,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
-      doc_data_hash: capitalProgramDocDataHashes.get(1000),
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 

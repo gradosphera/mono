@@ -1,95 +1,80 @@
 <template lang="pug">
 BaseCard(title='Параметры документов ЦПП')
-  .text-body2.text-grey-7.q-mb-md
+  p.capital-doc-params__intro.t-body2
     | Заполните поля, которые будут подставлены в положения и оферты программ «ГЕНЕРАТОР» и «БЛАГОРОСТ».
     |  Перед установкой расширения сформируйте предпросмотр документов: так параметры сохранятся в PrivateData, а в config попадёт только hash.
 
-  q-input(
+  BaseInput(
     :model-value='config?.capital_program_doc_data_hash || ""'
     label='Hash PrivateData документов'
     hint='Появится после формирования предпросмотра'
-    :rules='[validateSavedHash]'
     readonly
-    outlined
-    dense
+    mono
   )
 
-  q-banner(v-if='config?.capital_program_doc_data_hash' dense rounded class='bg-green-1 text-green-9 q-mb-md')
+  BaseBanner(v-if='config?.capital_program_doc_data_hash' variant='pos')
     | Параметры сохранены. Hash: {{ config.capital_program_doc_data_hash }}
 
   q-expansion-item(default-opened label='Протокол и кооператив' icon='description')
     .row.q-col-gutter-md.q-mt-sm
       .col-12.col-md-3(v-for='field in protocolFields' :key='field.key')
-        q-input(
+        BaseInput(
           v-model='form[field.key]'
           :label='field.label'
-          :type='field.type || "text"'
-          :rules='requiredRules'
-          outlined
-          dense
+          :error='fieldErrors[field.key]'
         )
       .col-12.col-md-6(v-for='field in cooperativeFields' :key='field.key')
-        q-input(
+        BaseInput(
           v-model='form[field.key]'
           :label='field.label'
-          :type='field.type || "text"'
-          :rules='requiredRules'
-          outlined
-          dense
+          :error='fieldErrors[field.key]'
         )
 
   q-expansion-item(label='Программа ГЕНЕРАТОР' icon='bolt')
-    .q-mt-sm
-      q-input.q-mb-md(
+    .capital-doc-params__section
+      BaseInput(
         v-for='field in generatorFields'
         :key='field.key'
         v-model='form[field.key]'
         :label='field.label'
         :type='field.type || "textarea"'
-        :rules='requiredRules'
-        outlined
-        autogrow
+        :autogrow='field.type !== "text"'
+        :error='fieldErrors[field.key]'
       )
 
   q-expansion-item(label='Программа БЛАГОРОСТ' icon='eco')
-    .q-mt-sm
-      q-input.q-mb-md(
+    .capital-doc-params__section
+      BaseInput(
         v-for='field in blagorostFields'
         :key='field.key'
         v-model='form[field.key]'
         :label='field.label'
-        :type='field.type || "textarea"'
-        :rules='requiredRules'
-        outlined
+        type='textarea'
         autogrow
+        :error='fieldErrors[field.key]'
       )
 
   q-expansion-item(label='Возврат, источники и оферты' icon='article')
-    .q-mt-sm
-      q-input.q-mb-md(
+    .capital-doc-params__section
+      BaseInput(
         v-for='field in returnFields'
         :key='field.key'
         v-model='form[field.key]'
         :label='field.label'
         :type='field.type || "textarea"'
-        :rules='requiredRules'
-        outlined
-        autogrow
+        :autogrow='field.type !== "text"'
+        :error='fieldErrors[field.key]'
       )
 
-  .row.items-center.justify-between.q-mt-lg
-    .text-caption.text-grey-7
+  .capital-doc-params__footer
+    p.capital-doc-params__hint.t-caption
       | Предпросмотр генерирует документы без публикации и сохраняет PrivateData по hash.
-    q-btn(
-      color='primary'
-      label='Сформировать предпросмотр'
-      :loading='isGenerating'
-      @click='generatePreview'
-    )
+    BaseButton(:loading='isGenerating' @click='generatePreview')
+      | Сформировать предпросмотр
 
   BaseDialog(v-model='previewOpen' title='Предпросмотр положений ЦПП' size='xl')
-    q-card-section(v-if='previewDocuments.length')
-      q-tabs(v-model='activePreviewTab' dense align='left' class='text-primary')
+    .capital-doc-params__preview(v-if='previewDocuments.length')
+      q-tabs(v-model='activePreviewTab' dense align='left' class='capital-doc-params__tabs')
         q-tab(
           v-for='doc in previewDocuments'
           :key='doc.registry_id'
@@ -105,8 +90,9 @@ BaseCard(title='Параметры документов ЦПП')
         )
           .doc-preview
             DocumentHtmlReader(:html='doc.html' :sanitize='false')
-    q-card-actions(align='right')
-      q-btn(flat label='Закрыть' @click='previewOpen = false')
+    template(#footer)
+      BaseButton(variant='ghost' @click='previewOpen = false')
+        | Закрыть
 </template>
 
 <script setup lang="ts">
@@ -116,8 +102,7 @@ import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { client } from 'src/shared/api/client';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
-import { BaseCard } from 'src/shared/ui/base/BaseCard';
-import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
+import { BaseBanner, BaseButton, BaseCard, BaseDialog, BaseInput } from 'src/shared/ui/base';
 import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
 
 type CapitalProgramPrivateData = {
@@ -172,18 +157,15 @@ const isGenerating = ref(false);
 const previewOpen = ref(false);
 const activePreviewTab = ref('994');
 const previewDocuments = ref<Array<{ registry_id: number; title: string; html: string; hash: string }>>([]);
+const fieldErrors = reactive<Partial<Record<keyof CapitalProgramPrivateData, string>>>({});
 
-const requiredRules = [(value: string) => !!String(value || '').trim() || 'Заполните поле'];
-const validateSavedHash = (value: string) => !!String(value || '').trim() || 'Сформируйте предпросмотр и сохраните параметры документов';
-
-const form = reactive<CapitalProgramPrivateData>({
+const form = reactive<Omit<CapitalProgramPrivateData, 'cooperative_quoted_name'>>({
   approval_protocol_number: '',
   approval_protocol_day: '',
   approval_protocol_month: '',
   approval_protocol_year: '',
   cooperative_name: '',
   cooperative_short_name: '',
-  cooperative_quoted_name: '',
   website: '',
   chairman_full_name: '',
   generator_program_purpose: '',
@@ -208,8 +190,7 @@ const protocolFields: FieldDefinition[] = [
 
 const cooperativeFields: FieldDefinition[] = [
   { key: 'cooperative_name', label: 'Наименование кооператива' },
-  { key: 'cooperative_short_name', label: 'Краткое наименование' },
-  { key: 'cooperative_quoted_name', label: 'Наименование в кавычках' },
+  { key: 'cooperative_short_name', label: 'Краткое наименование (ПК)' },
   { key: 'website', label: 'Сайт' },
   { key: 'chairman_full_name', label: 'ФИО председателя' },
 ];
@@ -248,7 +229,6 @@ watch(
     if (!info) return;
     form.cooperative_name ||= String(info.coopname || '').toUpperCase();
     form.cooperative_short_name ||= 'ПК';
-    form.cooperative_quoted_name ||= form.cooperative_name ? `«${form.cooperative_name}»` : '';
     form.website ||= info.website || info.contacts?.website || '';
     form.chairman_full_name ||= info.chairman?.full_name || info.chairman_full_name || '';
   },
@@ -256,15 +236,34 @@ watch(
 );
 
 function getPayload(): CapitalProgramPrivateData {
-  return Object.fromEntries(
-    allFields.value.map(({ key }) => [key, String(form[key] || '').trim()])
-  ) as CapitalProgramPrivateData;
+  const cooperativeName = String(form.cooperative_name || '').trim();
+  return {
+    ...Object.fromEntries(
+      allFields.value.map(({ key }) => [key, String(form[key] || '').trim()])
+    ) as Omit<CapitalProgramPrivateData, 'cooperative_quoted_name'>,
+    cooperative_quoted_name: cooperativeName ? `«${cooperativeName}»` : '',
+  };
 }
 
 function validatePayload(payload: CapitalProgramPrivateData): string[] {
   return allFields.value
     .filter(({ key }) => !payload[key])
     .map(({ label }) => label);
+}
+
+function clearFieldErrors(): void {
+  for (const key of Object.keys(fieldErrors) as Array<keyof CapitalProgramPrivateData>) {
+    delete fieldErrors[key];
+  }
+}
+
+function setFieldErrors(missingLabels: string[]): void {
+  clearFieldErrors();
+  for (const { key, label } of allFields.value) {
+    if (missingLabels.includes(label)) {
+      fieldErrors[key] = 'Заполните поле';
+    }
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -307,9 +306,12 @@ async function generatePreview() {
   const payload = getPayload();
   const missing = validatePayload(payload);
   if (missing.length) {
+    setFieldErrors(missing);
     FailAlert(`Заполните параметры документов: ${missing.join(', ')}`);
     return;
   }
+
+  clearFieldErrors();
 
   try {
     isGenerating.value = true;
@@ -348,9 +350,38 @@ async function generatePreview() {
 </script>
 
 <style scoped lang="scss">
+.capital-doc-params__intro {
+  margin: 0 0 var(--p-4);
+  color: var(--p-ink-secondary);
+}
+
+.capital-doc-params__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-3);
+  margin-top: var(--p-2);
+}
+
+.capital-doc-params__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p-4);
+  margin-top: var(--p-6);
+}
+
+.capital-doc-params__hint {
+  margin: 0;
+  color: var(--p-ink-secondary);
+}
+
+.capital-doc-params__tabs {
+  color: var(--p-primary);
+}
+
 .doc-preview :deep([data-doc-param]) {
-  background: rgba(255, 193, 7, 0.25);
-  border-radius: 4px;
+  background: var(--p-warn-soft);
+  border-radius: var(--p-r-sm);
   padding: 0 2px;
 }
 </style>
