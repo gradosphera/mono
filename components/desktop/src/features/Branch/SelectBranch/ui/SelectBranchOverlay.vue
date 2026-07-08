@@ -13,11 +13,14 @@ BaseDialog(
       div(v-if="step === 1")
         p.q-mt-lg
           | Кооператив перешёл на двухэтапную систему управления на основании общего собрания уполномоченных председателей кооперативных участков...
+        Loader(v-if="branchesLoading" text="Загружаем список кооперативных участков...")
         Form(
+          v-else
           :handler-submit="next"
           :is-submitting="isSubmitting"
           :showSubmit="!isLoading"
           :showCancel="false"
+          :disabled="!selectedBranch"
           :button-submit-txt="'Продолжить'"
         )
           BranchSelector(
@@ -53,6 +56,7 @@ BaseDialog(
     document,
     isSubmitting,
     isLoading,
+    branchesLoading,
     next,
     back,
     sign
