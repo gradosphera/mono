@@ -60,15 +60,22 @@ export function useSelectBranchProcess() {
   )
 
   const next = async () => {
-    isLoading.value = true
-    document.value = await digitalDocument.generate<Cooperative.Registry.SelectBranchStatement.Action>({
-      registry_id: Cooperative.Registry.SelectBranchStatement.registry_id,
-      coopname: system.info.coopname,
-      username: session.username,
-      braname: selectedBranch.value,
-    })
-    isLoading.value = false
-    step.value++
+    if (!selectedBranch.value || isLoading.value) return
+
+    try {
+      isLoading.value = true
+      document.value = await digitalDocument.generate<Cooperative.Registry.SelectBranchStatement.Action>({
+        registry_id: Cooperative.Registry.SelectBranchStatement.registry_id,
+        coopname: system.info.coopname,
+        username: session.username,
+        braname: selectedBranch.value,
+      })
+      step.value++
+    } catch (e: unknown) {
+      FailAlert(e)
+    } finally {
+      isLoading.value = false
+    }
   }
 
   const back = () => {

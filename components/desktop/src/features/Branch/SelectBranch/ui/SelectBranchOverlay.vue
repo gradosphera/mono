@@ -14,7 +14,7 @@ BaseDialog(
         p.q-mt-lg
           | Кооператив перешёл на двухэтапную систему управления на основании общего собрания уполномоченных председателей кооперативных участков...
         Loader(v-if="branchesLoading" text="Загружаем список кооперативных участков...")
-        Form(
+        Form#select-branch-form(
           v-else
           :handler-submit="next"
           :is-submitting="isSubmitting"
@@ -34,10 +34,10 @@ BaseDialog(
     .select-branch-overlay__actions(v-if="step === 1 && !branchesLoading")
       BaseButton(
         variant='primary',
-        :block='true',
-        :loading='isSubmitting',
-        :disabled='!selectedBranch',
-        @click='next'
+        type='submit',
+        form='select-branch-form',
+        :loading='isLoading',
+        :disabled='!selectedBranch || isLoading',
       ) Продолжить
     .select-branch-overlay__actions(v-else-if="step === 2 && !isLoading")
       BaseButton(variant='ghost', @click='back') назад
