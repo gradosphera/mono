@@ -79,6 +79,9 @@ const maxWidthBySize: Record<BaseDialogSize, string> = {
   flex: 1 1 auto;
   overflow: auto;
 }
+.base-dialog--maximized .base-dialog__foot {
+  flex-shrink: 0;
+}
 .base-dialog__head {
   display: flex;
   align-items: center;
