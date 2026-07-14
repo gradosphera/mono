@@ -29,7 +29,6 @@ export class Factory extends DocFactory<GeneratorProgramTemplate.Action> {
       coop,
       vars,
       doc_data,
-      approval: Cooperative.Registry.resolveCapitalApprovalHeader(vars.generator_program),
     }
 
     await this.validate(combinedData, template.model)

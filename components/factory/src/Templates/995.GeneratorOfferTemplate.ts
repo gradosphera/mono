@@ -2,7 +2,7 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
-import { CapitalApprovalHeaderSchema, CapitalProgramPrivateDataSchema } from '../Schema/CapitalProgramPrivateDataSchema'
+import { CapitalProgramPrivateDataSchema } from '../Schema/CapitalProgramPrivateDataSchema'
 import { CommonUserSchema, CooperativeSchema, VarsSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.GeneratorOfferTemplate.registry_id
@@ -19,9 +19,8 @@ export const Schema: JSONSchemaType<Model> = {
     vars: VarsSchema,
     doc_data: CapitalProgramPrivateDataSchema,
     common_user: CommonUserSchema,
-    approval: CapitalApprovalHeaderSchema,
   },
-  required: ['meta', 'coop', 'vars', 'common_user', 'doc_data', 'approval'],
+  required: ['meta', 'coop', 'vars', 'common_user', 'doc_data'],
   additionalProperties: true,
 }
 

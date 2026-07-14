@@ -34,7 +34,6 @@ export class Factory extends DocFactory<BlagorostOfferTemplate.Action> {
       coop,
       vars,
       doc_data,
-      approval: Cooperative.Registry.resolveCapitalApprovalHeader(vars.blagorost_offer_template),
     }
 
     await this.validate(combinedData, template.model)

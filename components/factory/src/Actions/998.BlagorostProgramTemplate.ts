@@ -29,7 +29,6 @@ export class Factory extends DocFactory<BlagorostProgramTemplate.Action> {
       coop,
       vars,
       doc_data,
-      approval: Cooperative.Registry.resolveCapitalApprovalHeader(vars.blagorost_program),
     }
 
     await this.validate(combinedData, template.model)

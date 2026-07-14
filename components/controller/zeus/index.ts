@@ -7206,6 +7206,7 @@ resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean
 	resetRegistration?:ValueTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 returnExpenseItem?: [{	data: ValueTypes["ReturnExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+saveCapitalProgramDocDataHash?: [{	data: ValueTypes["SaveCapitalProgramDocDataInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
 saveReportDraft?: [{	input: ValueTypes["SaveReportDraftInput"] | Variable<any, string>},ValueTypes["ReportDraft"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 sendAgreement?: [{	data: ValueTypes["SendAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -9460,6 +9461,9 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 };
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]:RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string | Variable<any, string>
+};
 	["SaveReportDraftInput"]: {
 	editedFields: Array<string> | Variable<any, string>,
 	editsJson: string | Variable<any, string>,
@@ -16441,6 +16445,7 @@ resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`]
 	resetRegistration?:ResolverInputTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 returnExpenseItem?: [{	data: ResolverInputTypes["ReturnExpenseItemInput"]},ResolverInputTypes["Transaction"]],
+saveCapitalProgramDocDataHash?: [{	data: ResolverInputTypes["SaveCapitalProgramDocDataInput"]},ResolverInputTypes["CapitalOnboardingState"]],
 saveReportDraft?: [{	input: ResolverInputTypes["SaveReportDraftInput"]},ResolverInputTypes["ReportDraft"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
 sendAgreement?: [{	data: ResolverInputTypes["SendAgreementInput"]},ResolverInputTypes["Transaction"]],
@@ -18611,6 +18616,9 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 };
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]:RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string
+};
 	["SaveReportDraftInput"]: {
 	editedFields: Array<string>,
 	editsJson: string,
@@ -25873,6 +25881,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	returnExpenseItem: ModelTypes["Transaction"],
+	/** Сохранить hash PrivateData параметров документов ЦПП
+
+Требуемые роли: chairman.  */
+	saveCapitalProgramDocDataHash: ModelTypes["CapitalOnboardingState"],
 	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
 
 Требуемые роли: chairman.  */
@@ -28238,6 +28250,9 @@ export type ModelTypes = {
 	return_amount: string
 };
 	["RoomMessageKind"]:RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string
+};
 	["SaveReportDraftInput"]: {
 	editedFields: Array<string>,
 	editsJson: string,
@@ -35793,6 +35808,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	returnExpenseItem: GraphQLTypes["Transaction"],
+	/** Сохранить hash PrivateData параметров документов ЦПП
+
+Требуемые роли: chairman.  */
+	saveCapitalProgramDocDataHash: GraphQLTypes["CapitalOnboardingState"],
 	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
 
 Требуемые роли: chairman.  */
@@ -38353,6 +38372,9 @@ export type GraphQLTypes = {
 };
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]: RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+		doc_data_hash: string
+};
 	["SaveReportDraftInput"]: {
 		editedFields: Array<string>,
 	editsJson: string,
@@ -40172,6 +40194,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
 	["ReturnExpenseItemInput"]: ValueTypes["ReturnExpenseItemInput"];
 	["RoomMessageKind"]: ValueTypes["RoomMessageKind"];
+	["SaveCapitalProgramDocDataInput"]: ValueTypes["SaveCapitalProgramDocDataInput"];
 	["SaveReportDraftInput"]: ValueTypes["SaveReportDraftInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
 	["SearchDocumentsInput"]: ValueTypes["SearchDocumentsInput"];

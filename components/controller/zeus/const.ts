@@ -1304,6 +1304,9 @@ export const AllTypesProps: Record<string,any> = {
 		returnExpenseItem:{
 			data:"ReturnExpenseItemInput"
 		},
+		saveCapitalProgramDocDataHash:{
+			data:"SaveCapitalProgramDocDataInput"
+		},
 		saveReportDraft:{
 			input:"SaveReportDraftInput"
 		},
@@ -1959,6 +1962,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	RoomMessageKind: "enum" as const,
+	SaveCapitalProgramDocDataInput:{
+
+	},
 	SaveReportDraftInput:{
 		reportType:"ReportType"
 	},
@@ -4052,6 +4058,7 @@ export const ReturnTypes: Record<string,any> = {
 		resetRegistration:"Account",
 		restartAnnualGeneralMeet:"MeetAggregate",
 		returnExpenseItem:"Transaction",
+		saveCapitalProgramDocDataHash:"CapitalOnboardingState",
 		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
 		sendAgreement:"Transaction",

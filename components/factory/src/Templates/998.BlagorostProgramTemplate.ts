@@ -2,7 +2,7 @@ import type { JSONSchemaType } from 'ajv'
 import { Cooperative } from 'cooptypes'
 import type { ITemplate } from '../Interfaces'
 import { IMetaJSONSchema } from '../Schema/MetaSchema'
-import { CapitalApprovalHeaderSchema, CapitalProgramPrivateDataSchema } from '../Schema/CapitalProgramPrivateDataSchema'
+import { CapitalProgramPrivateDataSchema } from '../Schema/CapitalProgramPrivateDataSchema'
 import { CooperativeSchema, VarsSchema } from '../Schema'
 
 export const registry_id = Cooperative.Registry.BlagorostProgramTemplate.registry_id
@@ -18,9 +18,8 @@ export const Schema: JSONSchemaType<Model> = {
     coop: CooperativeSchema,
     vars: VarsSchema,
     doc_data: CapitalProgramPrivateDataSchema,
-    approval: CapitalApprovalHeaderSchema,
   },
-  required: ['meta', 'coop', 'vars', 'doc_data', 'approval'],
+  required: ['meta', 'coop', 'vars', 'doc_data'],
   additionalProperties: true,
 }
 

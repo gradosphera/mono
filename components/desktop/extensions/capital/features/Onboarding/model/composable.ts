@@ -15,15 +15,15 @@ interface GeneratedDocument {
 
 type CapitalOnboardingStepId = Mutations.Capital.CompleteOnboardingStep.IInput['data']['step'];
 
+const onboardingState = ref<CapitalOnboardingState | null>(null);
+const loading = ref(false);
+const submitting = ref(false);
+const generatingDocument = ref(false);
+const currentGeneratedDoc = ref<GeneratedDocument | null>(null);
+
 export const useCapitalOnboarding = () => {
   const systemStore = useSystemStore();
   const sessionStore = useSessionStore();
-
-  const onboardingState = ref<CapitalOnboardingState | null>(null);
-  const loading = ref(false);
-  const submitting = ref(false);
-  const generatingDocument = ref(false);
-  const currentGeneratedDoc = ref<GeneratedDocument | null>(null);
 
   // Маппинг шагов на registry_id
   const stepToRegistryId: Record<CapitalOnboardingStepId, number> = {
@@ -161,6 +161,10 @@ export const useCapitalOnboarding = () => {
     return stepsConfig.value.every(step => step.status === 'completed');
   });
 
+  const hasPendingCouncilDecisions = computed(() =>
+    stepsConfig.value.some((step) => step.status === 'in_progress'),
+  );
+
   const docDataHash = computed(() => onboardingState.value?.capital_program_doc_data_hash || null);
   const isDocParamsReady = computed(() => Boolean(docDataHash.value));
 
@@ -171,17 +175,26 @@ export const useCapitalOnboarding = () => {
     completionMessage: 'Все необходимые документы для работы с программой утверждены.',
   }));
 
-  const loadState = async () => {
+  const loadState = async (options?: { silent?: boolean }) => {
+    const silent = options?.silent ?? false;
     try {
-      loading.value = true;
+      if (!silent) {
+        loading.value = true;
+      }
       await systemStore.loadSystemInfo();
       onboardingState.value = await api.loadOnboardingState();
     } catch (error) {
-      FailAlert(error);
+      if (!silent) {
+        FailAlert(error);
+      }
     } finally {
-      loading.value = false;
+      if (!silent) {
+        loading.value = false;
+      }
     }
   };
+
+  const refreshState = () => loadState({ silent: true });
 
   const handleStepClick = async (step: ICouncilOnboardingStep) => {
     try {
@@ -238,9 +251,11 @@ export const useCapitalOnboarding = () => {
     generatingDocument,
     currentGeneratedDoc,
     isOnboardingCompleted,
+    hasPendingCouncilDecisions,
     docDataHash,
     isDocParamsReady,
     loadState,
+    refreshState,
     handleStepClick,
     handleStepSubmit,
     handleDocParamsSaved,

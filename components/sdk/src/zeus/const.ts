@@ -169,9 +169,6 @@ export const AllTypesProps: Record<string,any> = {
 		event_types:"LogEventType"
 	},
 	CapitalOnboardingStep: "enum" as const,
-	SaveCapitalProgramDocDataInput:{
-		doc_data_hash:"String"
-	},
 	CapitalOnboardingStepInput:{
 		step:"CapitalOnboardingStep"
 	},
@@ -1022,9 +1019,6 @@ export const AllTypesProps: Record<string,any> = {
 		completeCapitalOnboardingStep:{
 			data:"CapitalOnboardingStepInput"
 		},
-		saveCapitalProgramDocDataHash:{
-			data:"SaveCapitalProgramDocDataInput"
-		},
 		completeChairmanAgendaStep:{
 			data:"ChairmanOnboardingAgendaInput"
 		},
@@ -1309,6 +1303,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		returnExpenseItem:{
 			data:"ReturnExpenseItemInput"
+		},
+		saveCapitalProgramDocDataHash:{
+			data:"SaveCapitalProgramDocDataInput"
 		},
 		saveReportDraft:{
 			input:"SaveReportDraftInput"
@@ -1965,6 +1962,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	RoomMessageKind: "enum" as const,
+	SaveCapitalProgramDocDataInput:{
+
+	},
 	SaveReportDraftInput:{
 		reportType:"ReportType"
 	},
@@ -4058,6 +4058,7 @@ export const ReturnTypes: Record<string,any> = {
 		resetRegistration:"Account",
 		restartAnnualGeneralMeet:"MeetAggregate",
 		returnExpenseItem:"Transaction",
+		saveCapitalProgramDocDataHash:"CapitalOnboardingState",
 		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
 		sendAgreement:"Transaction",
