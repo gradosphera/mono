@@ -50,7 +50,7 @@ export const useCapitalOnboarding = () => {
       const registry_id = stepToRegistryId[step.id];
       const docDataHash = onboardingState.value?.capital_program_doc_data_hash;
       if (capitalProgramDocDataRegistryIds.has(registry_id) && !docDataHash) {
-        throw new Error('Параметры документов ЦПП не заполнены: переустановите или обновите настройки расширения capital');
+        throw new Error('Сначала заполните параметры документов ЦПП и сформируйте предпросмотр');
       }
 
       const generateDocInput: Mutations.Documents.GenerateDocument.IInput = {
@@ -158,9 +158,11 @@ export const useCapitalOnboarding = () => {
   });
 
   const isOnboardingCompleted = computed(() => {
-    console.log(stepsConfig.value);
     return stepsConfig.value.every(step => step.status === 'completed');
   });
+
+  const docDataHash = computed(() => onboardingState.value?.capital_program_doc_data_hash || null);
+  const isDocParamsReady = computed(() => Boolean(docDataHash.value));
 
   const config = computed<ICouncilOnboardingConfig>(() => ({
     steps: stepsConfig.value,
@@ -225,6 +227,10 @@ export const useCapitalOnboarding = () => {
     }
   };
 
+  const handleDocParamsSaved = async () => {
+    onboardingState.value = await api.loadOnboardingState();
+  };
+
   return {
     config,
     loading,
@@ -232,8 +238,11 @@ export const useCapitalOnboarding = () => {
     generatingDocument,
     currentGeneratedDoc,
     isOnboardingCompleted,
+    docDataHash,
+    isDocParamsReady,
     loadState,
     handleStepClick,
     handleStepSubmit,
+    handleDocParamsSaved,
   };
 };

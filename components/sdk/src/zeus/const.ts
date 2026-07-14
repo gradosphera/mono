@@ -169,6 +169,9 @@ export const AllTypesProps: Record<string,any> = {
 		event_types:"LogEventType"
 	},
 	CapitalOnboardingStep: "enum" as const,
+	SaveCapitalProgramDocDataInput:{
+		doc_data_hash:"String"
+	},
 	CapitalOnboardingStepInput:{
 		step:"CapitalOnboardingStep"
 	},
@@ -1018,6 +1021,9 @@ export const AllTypesProps: Record<string,any> = {
 		},
 		completeCapitalOnboardingStep:{
 			data:"CapitalOnboardingStepInput"
+		},
+		saveCapitalProgramDocDataHash:{
+			data:"SaveCapitalProgramDocDataInput"
 		},
 		completeChairmanAgendaStep:{
 			data:"ChairmanOnboardingAgendaInput"
@@ -2791,6 +2797,7 @@ export const ReturnTypes: Record<string,any> = {
 	CapitalOnboardingState:{
 		blagorost_offer_template_done:"Boolean",
 		blagorost_provision_done:"Boolean",
+		capital_program_doc_data_hash:"String",
 		generation_contract_template_done:"Boolean",
 		generator_offer_template_done:"Boolean",
 		generator_program_template_done:"Boolean",

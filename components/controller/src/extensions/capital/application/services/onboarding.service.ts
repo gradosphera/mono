@@ -170,6 +170,23 @@ export class CapitalOnboardingService {
     return this.buildState(plugin.config);
   }
 
+  public async saveProgramDocDataHash(docDataHash: string): Promise<CapitalOnboardingStateDTO> {
+    const plugin = await this.loadPlugin();
+    const normalizedHash = docDataHash.trim();
+
+    if (!normalizedHash) {
+      throw new Error('Hash PrivateData документов ЦПП не может быть пустым');
+    }
+
+    const updatedConfig = {
+      ...plugin.config,
+      capital_program_doc_data_hash: normalizedHash,
+    };
+
+    await this.extensionRepository.update({ ...plugin, config: updatedConfig });
+    return this.buildState(updatedConfig);
+  }
+
   public async completeStep(data: CapitalOnboardingStepInputDTO, username: string): Promise<CapitalOnboardingStateDTO> {
     const plugin = await this.loadPlugin();
     const flagKey = this.mapStepToFlag(data.step);

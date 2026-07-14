@@ -3009,6 +3009,7 @@ export type ValueTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
+	capital_program_doc_data_hash?:boolean | `@${string}`,
 	generation_contract_template_done?:boolean | `@${string}`,
 	generator_offer_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
@@ -3023,6 +3024,9 @@ export type ValueTypes = {
 	['...on CapitalOnboardingState']?: Omit<ValueTypes["CapitalOnboardingState"], "...on CapitalOnboardingState">
 }>;
 	["CapitalOnboardingStep"]:CapitalOnboardingStep;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string | Variable<any, string>
+};
 	["CapitalOnboardingStepInput"]: {
 	decision: string | Variable<any, string>,
 	question: string | Variable<any, string>,
@@ -7117,6 +7121,7 @@ chatcoopRemoveSecretaryRoom?: [{	data: ValueTypes["RemoveSecretaryRoomInput"] | 
 chatcoopUpdateCalendarEvent?: [{	data: ValueTypes["UpdateChatCoopCalendarEventInput"] | Variable<any, string>},ValueTypes["ChatCoopCalendarEvent"]],
 chatcoopUpdateTranscriptionMemo?: [{	data: ValueTypes["UpdateCallTranscriptionMemoInput"] | Variable<any, string>},ValueTypes["CallTranscription"]],
 completeCapitalOnboardingStep?: [{	data: ValueTypes["CapitalOnboardingStepInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
+saveCapitalProgramDocDataHash?: [{	data: ValueTypes["SaveCapitalProgramDocDataInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ValueTypes["ChairmanOnboardingAgendaInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ValueTypes["ChairmanOnboardingGeneralMeetInput"] | Variable<any, string>},ValueTypes["ChairmanOnboardingState"]],
 completeExtensionOnboardingStep?: [{	data: ValueTypes["CompleteExtensionOnboardingStepInput"] | Variable<any, string>},ValueTypes["ExtensionOnboardingState"]],
@@ -12342,6 +12347,7 @@ export type ResolverInputTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
+	capital_program_doc_data_hash?:boolean | `@${string}`,
 	generation_contract_template_done?:boolean | `@${string}`,
 	generator_offer_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
@@ -12355,6 +12361,9 @@ export type ResolverInputTypes = {
 		__typename?: boolean | `@${string}`
 }>;
 	["CapitalOnboardingStep"]:CapitalOnboardingStep;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string | Variable<any, string>
+};
 	["CapitalOnboardingStepInput"]: {
 	decision: string,
 	question: string,
@@ -16351,6 +16360,7 @@ chatcoopRemoveSecretaryRoom?: [{	data: ResolverInputTypes["RemoveSecretaryRoomIn
 chatcoopUpdateCalendarEvent?: [{	data: ResolverInputTypes["UpdateChatCoopCalendarEventInput"]},ResolverInputTypes["ChatCoopCalendarEvent"]],
 chatcoopUpdateTranscriptionMemo?: [{	data: ResolverInputTypes["UpdateCallTranscriptionMemoInput"]},ResolverInputTypes["CallTranscription"]],
 completeCapitalOnboardingStep?: [{	data: ResolverInputTypes["CapitalOnboardingStepInput"]},ResolverInputTypes["CapitalOnboardingState"]],
+saveCapitalProgramDocDataHash?: [{	data: ResolverInputTypes["SaveCapitalProgramDocDataInput"]},ResolverInputTypes["CapitalOnboardingState"]],
 completeChairmanAgendaStep?: [{	data: ResolverInputTypes["ChairmanOnboardingAgendaInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
 completeChairmanGeneralMeetStep?: [{	data: ResolverInputTypes["ChairmanOnboardingGeneralMeetInput"]},ResolverInputTypes["ChairmanOnboardingState"]],
 completeExtensionOnboardingStep?: [{	data: ResolverInputTypes["CompleteExtensionOnboardingStepInput"]},ResolverInputTypes["ExtensionOnboardingState"]],
@@ -21418,6 +21428,7 @@ export type ModelTypes = {
 	["CapitalOnboardingState"]: {
 		blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
+	capital_program_doc_data_hash?: string | undefined | null,
 	generation_contract_template_done: boolean,
 	generator_offer_template_done: boolean,
 	generator_program_template_done: boolean,
@@ -21430,6 +21441,9 @@ export type ModelTypes = {
 	onboarding_init_at: string
 };
 	["CapitalOnboardingStep"]:CapitalOnboardingStep;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string
+};
 	["CapitalOnboardingStepInput"]: {
 	decision: string,
 	question: string,
@@ -25716,7 +25730,7 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенно�� повестке
+	/** Сгенерировать протокол решения по предложенной повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: ModelTypes["GeneratedDocument"],
@@ -29210,7 +29224,10 @@ export type ModelTypes = {
     }
 
 export type GraphQLTypes = {
-    ["AcceptChildOrderInput"]: {
+    // ------------------------------------------------------;
+	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
+	// ------------------------------------------------------;
+	["AcceptChildOrderInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Подписанное заявление на имущественный паевый взнос */
@@ -31113,6 +31130,7 @@ export type GraphQLTypes = {
 	__typename: "CapitalOnboardingState",
 	blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
+	capital_program_doc_data_hash?: string | undefined | null,
 	generation_contract_template_done: boolean,
 	generator_offer_template_done: boolean,
 	generator_program_template_done: boolean,
@@ -35632,7 +35650,7 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенно�� повестке
+	/** Сгенерировать протокол решения по предложенной повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: GraphQLTypes["GeneratedDocument"],

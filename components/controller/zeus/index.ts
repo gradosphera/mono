@@ -3009,6 +3009,7 @@ export type ValueTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
+	capital_program_doc_data_hash?:boolean | `@${string}`,
 	generation_contract_template_done?:boolean | `@${string}`,
 	generator_offer_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
@@ -12342,6 +12343,7 @@ export type ResolverInputTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
+	capital_program_doc_data_hash?:boolean | `@${string}`,
 	generation_contract_template_done?:boolean | `@${string}`,
 	generator_offer_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
@@ -21418,6 +21420,7 @@ export type ModelTypes = {
 	["CapitalOnboardingState"]: {
 		blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
+	capital_program_doc_data_hash?: string | undefined | null,
 	generation_contract_template_done: boolean,
 	generator_offer_template_done: boolean,
 	generator_program_template_done: boolean,
@@ -25716,7 +25719,7 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенно�� повестке
+	/** Сгенерировать протокол решения по предложенной повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: ModelTypes["GeneratedDocument"],
@@ -29210,7 +29213,10 @@ export type ModelTypes = {
     }
 
 export type GraphQLTypes = {
-    ["AcceptChildOrderInput"]: {
+    // ------------------------------------------------------;
+	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
+	// ------------------------------------------------------;
+	["AcceptChildOrderInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Подписанное заявление на имущественный паевый взнос */
@@ -31113,6 +31119,7 @@ export type GraphQLTypes = {
 	__typename: "CapitalOnboardingState",
 	blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
+	capital_program_doc_data_hash?: string | undefined | null,
 	generation_contract_template_done: boolean,
 	generator_offer_template_done: boolean,
 	generator_program_template_done: boolean,
@@ -35632,7 +35639,7 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенно�� повестке
+	/** Сгенерировать протокол решения по предложенной повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: GraphQLTypes["GeneratedDocument"],

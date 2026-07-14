@@ -1,46 +1,50 @@
 <template lang="pug">
 div
-  // Показываем лоадер пока данные загружаются
   WindowLoader(
     v-if="loading"
     text="Загрузка данных онбординга..."
   )
-  // Показываем шаги если онбординг не завершен и данные загружены
-  q-card(v-else-if="!isOnboardingCompleted" flat)
-    q-card-section.row.items-center.justify-between
-      div
-        div.text-h5 Адаптация к работе с программой "Благорост"
+  template(v-else-if="!isOnboardingCompleted")
+    CapitalProgramDocumentParametersWidget(
+      :doc-data-hash='docDataHash'
+      @saved='handleDocParamsSaved'
+    )
 
-    q-separator
-    q-card-section
-      q-list(separator)
-        q-item(v-for="(step, index) in config?.steps || []" :key="step.id")
-          q-item-section
-            div.row.items-center.q-gutter-sm
-              q-icon(
-                :name="getIcon(step)"
-                :color="getIconColor(step)"
-                size="22px"
+    q-card(v-if='isDocParamsReady' flat class='q-mt-md')
+      q-card-section.row.items-center.justify-between
+        div
+          div.text-h5 Адаптация к работе с программой "Благорост"
+
+      q-separator
+      q-card-section
+        q-list(separator)
+          q-item(v-for="(step, index) in config?.steps || []" :key="step.id")
+            q-item-section
+              div.row.items-center.q-gutter-sm
+                q-icon(
+                  :name="getIcon(step)"
+                  :color="getIconColor(step)"
+                  size="22px"
+                )
+                div.text-subtitle1 {{ index + 1 }}. {{ step.title }}
+              div.text-caption.text-grey-7 {{ step.description }}
+              q-chip(
+                v-if="step.status === 'in_progress'"
+                dense
+                color="amber"
+                text-color="black"
+                icon="hourglass_top"
+                class="q-mt-xs"
+              ) Ожидаем решение совета
+            q-item-section(side)
+              q-btn(
+                v-if="showAction(index)"
+                :disable="submitting || generatingDocument"
+                :loading="generatingDocument && currentStepId === step.id"
+                color="primary"
+                label="Объявить собрание совета"
+                @click="() => openDialog(step)"
               )
-              div.text-subtitle1 {{ index + 1 }}. {{ step.title }}
-            div.text-caption.text-grey-7 {{ step.description }}
-            q-chip(
-              v-if="step.status === 'in_progress'"
-              dense
-              color="amber"
-              text-color="black"
-              icon="hourglass_top"
-              class="q-mt-xs"
-            ) Ожидаем решение совета
-          q-item-section(side)
-            q-btn(
-              v-if="showAction(index)"
-              :disable="submitting || generatingDocument"
-              :loading="generatingDocument && currentStepId === step.id"
-              color="primary"
-              label="Объявить собрание совета"
-              @click="() => openDialog(step)"
-            )
 
     BaseDialog(
       v-model="dialogOpen",
@@ -87,6 +91,7 @@ import { DocumentHtmlReader } from 'src/shared/ui/DocumentHtmlReader';
 import { BaseDialog } from 'src/shared/ui/base/BaseDialog';
 import { WindowLoader, Loader } from 'src/shared/ui/Loader';
 import type { ICouncilOnboardingStep } from 'src/shared/ui/CouncilOnboarding';
+import CapitalProgramDocumentParametersWidget from './CapitalProgramDocumentParametersWidget.vue';
 import { useCapitalOnboarding } from '../model';
 
 const {
@@ -96,9 +101,12 @@ const {
   generatingDocument,
   currentGeneratedDoc,
   isOnboardingCompleted,
+  docDataHash,
+  isDocParamsReady,
   loadState,
   handleStepClick,
   handleStepSubmit,
+  handleDocParamsSaved,
 } = useCapitalOnboarding();
 
 const dialogOpen = ref(false);

@@ -1,13 +1,4 @@
 export interface CapitalProgramPrivateData {
-  approval_protocol_number: string
-  approval_protocol_day: string
-  approval_protocol_month: string
-  approval_protocol_year: string
-  cooperative_name: string
-  cooperative_short_name: string
-  cooperative_quoted_name: string
-  website: string
-  chairman_full_name: string
   generator_program_purpose: string
   eoap_definition: string
   generator_task_goal: string
@@ -18,19 +9,19 @@ export interface CapitalProgramPrivateData {
   blagorost_task_development: string
   return_source_description: string
   return_additional_source: string
-  offer_template_number: string
+}
+
+export interface CapitalApprovalHeader {
+  protocol_number: string
+  protocol_day_month_year: string
+}
+
+export const CAPITAL_APPROVAL_PLACEHOLDER: CapitalApprovalHeader = {
+  protocol_number: '______',
+  protocol_day_month_year: '«___» __________ 20__ г.',
 }
 
 export const capitalProgramPrivateDataRequiredFields = [
-  'approval_protocol_number',
-  'approval_protocol_day',
-  'approval_protocol_month',
-  'approval_protocol_year',
-  'cooperative_name',
-  'cooperative_short_name',
-  'cooperative_quoted_name',
-  'website',
-  'chairman_full_name',
   'generator_program_purpose',
   'eoap_definition',
   'generator_task_goal',
@@ -41,8 +32,19 @@ export const capitalProgramPrivateDataRequiredFields = [
   'blagorost_task_development',
   'return_source_description',
   'return_additional_source',
-  'offer_template_number',
 ] as const
+
+export function resolveCapitalApprovalHeader(
+  decision?: { protocol_number?: string; protocol_day_month_year?: string } | null,
+): CapitalApprovalHeader {
+  const protocol_number = decision?.protocol_number?.trim()
+  const protocol_day_month_year = decision?.protocol_day_month_year?.trim()
+
+  return {
+    protocol_number: protocol_number || CAPITAL_APPROVAL_PLACEHOLDER.protocol_number,
+    protocol_day_month_year: protocol_day_month_year || CAPITAL_APPROVAL_PLACEHOLDER.protocol_day_month_year,
+  }
+}
 
 export function requireCapitalProgramPrivateData(
   payload: CapitalProgramPrivateData | null | undefined,

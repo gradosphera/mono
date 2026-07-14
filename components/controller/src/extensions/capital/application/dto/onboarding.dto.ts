@@ -36,6 +36,14 @@ export class CapitalOnboardingStepInputDTO {
   decision!: string;
 }
 
+@InputType('SaveCapitalProgramDocDataInput')
+export class SaveCapitalProgramDocDataInputDTO {
+  @Field(() => String)
+  @IsString()
+  @IsNotEmpty()
+  doc_data_hash!: string;
+}
+
 @ObjectType('CapitalOnboardingState')
 export class CapitalOnboardingStateDTO {
   @Field(() => Boolean)

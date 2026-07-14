@@ -37,6 +37,7 @@ export class Factory extends DocFactory<GeneratorOfferTemplate.Action> {
       vars,
       common_user,
       doc_data,
+      approval: Cooperative.Registry.resolveCapitalApprovalHeader(vars.generator_offer_template),
     }
 
     await this.validate(combinedData, template.model)

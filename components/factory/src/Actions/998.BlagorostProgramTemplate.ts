@@ -12,18 +12,25 @@ export class Factory extends DocFactory<BlagorostProgramTemplate.Action> {
   }
 
   async generateDocument(data: BlagorostProgramTemplate.Action, options?: IGenerationOptions): Promise<IGeneratedDocument> {
-    const { template, vars, docData } = await this.resolveParallel({
+    const { template, vars, coop, docData } = await this.resolveParallel({
       template: () => process.env.SOURCE === 'local'
         ? Promise.resolve(BlagorostProgramTemplate.Template as ITemplate<BlagorostProgramTemplate.Model>)
         : this.getTemplate<BlagorostProgramTemplate.Model>(DraftContract.contractName.production, BlagorostProgramTemplate.registry_id, data.block_num),
       vars: () => this.getVars(data.coopname),
+      coop: () => this.getCooperative(data.coopname),
       docData: () => this.loadDocData<BlagorostProgramTemplate.Model['doc_data']>(data),
     })
 
     const meta: IMetaDocument = await this.getMeta({ title: template.title, ...data })
     const doc_data = Cooperative.Registry.requireCapitalProgramPrivateData(docData, BlagorostProgramTemplate.registry_id)
 
-    const combinedData: BlagorostProgramTemplate.Model = { meta, vars, doc_data }
+    const combinedData: BlagorostProgramTemplate.Model = {
+      meta,
+      coop,
+      vars,
+      doc_data,
+      approval: Cooperative.Registry.resolveCapitalApprovalHeader(vars.blagorost_program),
+    }
 
     await this.validate(combinedData, template.model)
 

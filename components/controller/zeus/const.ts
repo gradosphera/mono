@@ -2791,6 +2791,7 @@ export const ReturnTypes: Record<string,any> = {
 	CapitalOnboardingState:{
 		blagorost_offer_template_done:"Boolean",
 		blagorost_provision_done:"Boolean",
+		capital_program_doc_data_hash:"String",
 		generation_contract_template_done:"Boolean",
 		generator_offer_template_done:"Boolean",
 		generator_program_template_done:"Boolean",
