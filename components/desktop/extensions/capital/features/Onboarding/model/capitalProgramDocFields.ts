@@ -5,6 +5,7 @@ export type EditableFieldKey =
   | 'idea_unit_cost'
   | 'idea_unit_cost_words'
   | 'blagorost_goal_expansion'
+  | 'blagorost_goal_reason'
   | 'blagorost_task_expansion'
   | 'blagorost_task_development'
   | 'return_source_description'
@@ -23,6 +24,8 @@ export const FIELD_LABELS: Record<EditableFieldKey, string> = {
   idea_unit_cost_words: 'Та же стоимость Идеи прописью',
   blagorost_goal_expansion:
     'Зачем расширять участие в Платформе: какая потребность участников закрывается при росте сообщества',
+  blagorost_goal_reason:
+    'Причина роста числа участников: за счёт чего расширяется сообщество и на что это влияет',
   blagorost_task_expansion:
     'Задача расширения: как описывается рост числа участников Платформы и их взаимодействия',
   blagorost_task_development:
@@ -43,6 +46,7 @@ export const GENERATOR_DOC_FIELDS: EditableFieldKey[] = [
 
 export const BLAGOROST_DOC_FIELDS: EditableFieldKey[] = [
   'blagorost_goal_expansion',
+  'blagorost_goal_reason',
   'blagorost_task_expansion',
   'blagorost_task_development',
   'return_source_description',

@@ -5,6 +5,7 @@ export interface CapitalProgramPrivateData {
   idea_unit_cost: string
   idea_unit_cost_words: string
   blagorost_goal_expansion: string
+  blagorost_goal_reason: string
   blagorost_task_expansion: string
   blagorost_task_development: string
   return_source_description: string
@@ -28,6 +29,7 @@ export const capitalProgramPrivateDataRequiredFields = [
   'idea_unit_cost',
   'idea_unit_cost_words',
   'blagorost_goal_expansion',
+  'blagorost_goal_reason',
   'blagorost_task_expansion',
   'blagorost_task_development',
   'return_source_description',

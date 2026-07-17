@@ -20,6 +20,7 @@ export const CapitalProgramPrivateDataSchema: JSONSchemaType<Cooperative.Registr
     idea_unit_cost: { type: 'string' },
     idea_unit_cost_words: { type: 'string' },
     blagorost_goal_expansion: { type: 'string' },
+    blagorost_goal_reason: { type: 'string' },
     blagorost_task_expansion: { type: 'string' },
     blagorost_task_development: { type: 'string' },
     return_source_description: { type: 'string' },
