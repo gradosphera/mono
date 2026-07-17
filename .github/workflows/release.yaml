@@ -390,6 +390,18 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lerna run build
+
+      # schema.gql не коммитится и не создаётся ничем в этом job'е, а
+      # @coopenomics/sdk's prepublishOnly (pnpm run docs → generate-index-comments.ts)
+      # читает components/controller/schema.gql и падает ENOENT без него — валя весь
+      # lerna publish (атомарный) молча с 30 мая. Скрипт изолированный (GraphQLSchemaBuilderModule,
+      # без TypeORM/Mongo/Redis) — не требует БД, но типизация controller'а резолвится через
+      # dist соседних workspace-пакетов (cooptypes/factory/notifications/inter) — ОБЯЗАТЕЛЬНО
+      # после `lerna run build`, иначе ts-node падает на их устаревших dist-типах.
+      - name: Generate controller schema.gql (required by sdk prepublishOnly)
+        working-directory: components/controller
+        run: pnpm run generate-schema
+
       - run: pnpm lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
