@@ -181,7 +181,7 @@ const wizardSteps = computed<StepperStep[]>(() => [
   })),
 ]);
 
-const wizardStepOrder = computed(() => [
+const wizardStepOrder = computed<string[]>(() => [
   ...DOC_WIZARD_STEP_ORDER,
   ...COUNCIL_STEP_GROUP_ORDER,
 ]);
@@ -438,6 +438,13 @@ onMounted(async () => {
   restoreDraftFromStorage();
   setWizardStepKey(normalizeWizardStepKey(activeWizardStep.value));
   syncWizardStepWithCouncilProgress();
+
+  if (isDocWizardStep(activeWizardStep.value)) {
+    const registryId = getRegistryIdForDocWizardStep(activeWizardStep.value);
+    if (registryId != null) {
+      void ensurePreview(registryId);
+    }
+  }
 
   if (shouldPollCouncilState.value) {
     startCouncilPoll();
