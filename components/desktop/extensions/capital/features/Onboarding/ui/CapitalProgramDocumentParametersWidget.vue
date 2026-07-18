@@ -224,7 +224,7 @@ async function saveParams() {
       throw new Error('Не удалось получить хеш параметров документов');
     }
 
-    await api.saveProgramDocDataHash(hash);
+    await api.saveProgramDocDataHash({ doc_data_hash: hash });
 
     savedHash.value = hash;
     emit('saved', hash);

@@ -22,11 +22,13 @@ const completeStep = async (
   return state;
 };
 
-const saveProgramDocDataHash = async (doc_data_hash: string) => {
+const saveProgramDocDataHash = async (
+  data: Mutations.Capital.SaveCapitalProgramDocDataHash.IInput['data'],
+) => {
   const { [Mutations.Capital.SaveCapitalProgramDocDataHash.name]: state } = await client.Mutation(
     Mutations.Capital.SaveCapitalProgramDocDataHash.mutation,
     {
-      variables: { data: { doc_data_hash } },
+      variables: { data },
     },
   );
   return state;
