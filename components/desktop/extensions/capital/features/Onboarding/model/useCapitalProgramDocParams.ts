@@ -37,7 +37,7 @@ function createEmptyForm(): Record<EditableFieldKey, string> {
   return Object.fromEntries(ALL_DOC_FIELDS.map((key) => [key, ''])) as Record<EditableFieldKey, string>;
 }
 
-export function useCapitalProgramDocParams(options?: { onSaved?: (hash: string) => void }) {
+export function useCapitalProgramDocParams(options?: { onSaved?: (hash: string) => void | Promise<void> }) {
   const $q = useQuasar();
   const systemStore = useSystemStore();
   const sessionStore = useSessionStore();
@@ -172,7 +172,7 @@ export function useCapitalProgramDocParams(options?: { onSaved?: (hash: string) 
 
       savedHash.value = hash;
       persistDraftToStorage();
-      options?.onSaved?.(hash);
+      await options?.onSaved?.(hash);
 
       $q.notify({
         type: 'positive',

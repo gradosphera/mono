@@ -150,9 +150,7 @@ const {
   saveParams,
   setWizardStepKey,
 } = useCapitalProgramDocParams({
-  onSaved: () => {
-    void handleDocParamsSaved();
-  },
+  onSaved: () => handleDocParamsSaved(),
 });
 
 const activeWizardStep = wizardStepKey;
