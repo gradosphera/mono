@@ -10,7 +10,6 @@
       "@scarf/scarf",
       "core-js",
       "cpu-features",
-      "electron",
       "esbuild",
       "libxmljs2",
       "msgpackr-extract",

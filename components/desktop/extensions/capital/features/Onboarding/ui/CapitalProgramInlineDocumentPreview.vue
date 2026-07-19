@@ -65,7 +65,8 @@ function restoreFocus(root: HTMLElement) {
 }
 
 function cleanupEditors(root: HTMLElement) {
-  root.querySelectorAll('textarea.capital-doc-param-inline').forEach((textarea) => {
+  root.querySelectorAll('textarea.capital-doc-param-inline').forEach((node) => {
+    const textarea = node as HTMLTextAreaElement;
     const handler = listeners.get(textarea);
     if (handler) {
       textarea.removeEventListener('input', handler);

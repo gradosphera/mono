@@ -1,6 +1,6 @@
 import { computed, reactive, ref } from 'vue';
 import { useQuasar } from 'quasar';
-import type { CapitalProgramPrivateData } from 'cooptypes';
+import type { Cooperative } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { api as documentApi } from 'src/shared/lib/document/api';
@@ -80,10 +80,10 @@ export function useCapitalProgramDocParams(options?: { onSaved?: (hash: string) 
     wizardStepKey.value = draft.wizardStepKey ?? DOC_WIZARD_STEP_GENERATOR;
   }
 
-  function getPreviewPayload(): CapitalProgramPrivateData {
+  function getPreviewPayload(): Cooperative.Registry.CapitalProgramPrivateData {
     return Object.fromEntries(
       ALL_DOC_FIELDS.map((key) => [key, String(form[key] ?? '').trim() || PREVIEW_PLACEHOLDER]),
-    ) as CapitalProgramPrivateData;
+    ) as Record<EditableFieldKey, string>;
   }
 
   function getMissingCount(registryId: number): number {

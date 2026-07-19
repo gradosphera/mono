@@ -55,7 +55,7 @@ BaseCard.capital-doc-params(title='Параметры документов ЦП�
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import type { CapitalProgramPrivateData } from 'cooptypes';
+import type { Cooperative } from 'cooptypes';
 import { useSystemStore } from 'src/entities/System/model';
 import { useSessionStore } from 'src/entities/Session';
 import { BaseButton, BaseCard } from 'src/shared/ui/base';
@@ -119,7 +119,7 @@ function restoreDraftFromStorage() {
   Object.assign(form, draft.form);
   savedHash.value = draft.savedHash;
   Object.assign(previews, draft.previews);
-  activeTab.value = draft.activeTab;
+  activeTab.value = draft.activeTab ?? 994;
 }
 
 function persistDraftToStorage() {
@@ -147,10 +147,10 @@ function getMissingCount(registryId: number): number {
   return fields.filter((key) => !String(form[key] ?? '').trim()).length;
 }
 
-function getPreviewPayload(): CapitalProgramPrivateData {
+function getPreviewPayload(): Cooperative.Registry.CapitalProgramPrivateData {
   return Object.fromEntries(
     ALL_DOC_FIELDS.map((key) => [key, String(form[key] ?? '').trim() || PREVIEW_PLACEHOLDER]),
-  ) as CapitalProgramPrivateData;
+  ) as Record<EditableFieldKey, string>;
 }
 
 function getDocDataHashFromResult(result: Awaited<ReturnType<typeof documentApi.generateDocument>>): string {

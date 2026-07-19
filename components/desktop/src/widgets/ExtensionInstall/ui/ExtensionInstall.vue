@@ -18,6 +18,7 @@ import type { ComponentPublicInstance } from 'vue';
 import { ZodForm } from 'src/shared/ui/ZodForm';
 import { BaseCard } from 'src/shared/ui/base/BaseCard';
 import { isExtensionSchemaEmpty } from 'src/shared/lib/utils';
+import type { IExtensionConfigSchema } from 'src/entities/Extension/model';
 
 type ExtensionInstallConfig = Record<string, unknown>;
 type ExtensionInstallFormRef = {
@@ -26,7 +27,7 @@ type ExtensionInstallFormRef = {
 
 interface Props {
   extensionName?: string;
-  schema?: unknown;
+  schema?: IExtensionConfigSchema;
   config: ExtensionInstallConfig;
   formRef?: ExtensionInstallFormRef;
 }
