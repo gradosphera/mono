@@ -1304,6 +1304,9 @@ export const AllTypesProps: Record<string,any> = {
 		returnExpenseItem:{
 			data:"ReturnExpenseItemInput"
 		},
+		saveCapitalProgramDocDataHash:{
+			data:"SaveCapitalProgramDocDataInput"
+		},
 		saveReportDraft:{
 			input:"SaveReportDraftInput"
 		},
@@ -1959,6 +1962,9 @@ export const AllTypesProps: Record<string,any> = {
 
 	},
 	RoomMessageKind: "enum" as const,
+	SaveCapitalProgramDocDataInput:{
+
+	},
 	SaveReportDraftInput:{
 		reportType:"ReportType"
 	},
@@ -2791,6 +2797,7 @@ export const ReturnTypes: Record<string,any> = {
 	CapitalOnboardingState:{
 		blagorost_offer_template_done:"Boolean",
 		blagorost_provision_done:"Boolean",
+		capital_program_doc_data_hash:"String",
 		generation_contract_template_done:"Boolean",
 		generator_offer_template_done:"Boolean",
 		generator_program_template_done:"Boolean",
@@ -4051,6 +4058,7 @@ export const ReturnTypes: Record<string,any> = {
 		resetRegistration:"Account",
 		restartAnnualGeneralMeet:"MeetAggregate",
 		returnExpenseItem:"Transaction",
+		saveCapitalProgramDocDataHash:"CapitalOnboardingState",
 		saveReportDraft:"ReportDraft",
 		selectBranch:"Boolean",
 		sendAgreement:"Transaction",

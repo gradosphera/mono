@@ -3009,6 +3009,7 @@ export type ValueTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
+	capital_program_doc_data_hash?:boolean | `@${string}`,
 	generation_contract_template_done?:boolean | `@${string}`,
 	generator_offer_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
@@ -7205,6 +7206,7 @@ resetKey?: [{	data: ValueTypes["ResetKeyInput"] | Variable<any, string>},boolean
 	resetRegistration?:ValueTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ValueTypes["RestartAnnualGeneralMeetInput"] | Variable<any, string>},ValueTypes["MeetAggregate"]],
 returnExpenseItem?: [{	data: ValueTypes["ReturnExpenseItemInput"] | Variable<any, string>},ValueTypes["Transaction"]],
+saveCapitalProgramDocDataHash?: [{	data: ValueTypes["SaveCapitalProgramDocDataInput"] | Variable<any, string>},ValueTypes["CapitalOnboardingState"]],
 saveReportDraft?: [{	input: ValueTypes["SaveReportDraftInput"] | Variable<any, string>},ValueTypes["ReportDraft"]],
 selectBranch?: [{	data: ValueTypes["SelectBranchInput"] | Variable<any, string>},boolean | `@${string}`],
 sendAgreement?: [{	data: ValueTypes["SendAgreementInput"] | Variable<any, string>},ValueTypes["Transaction"]],
@@ -9459,6 +9461,9 @@ validateReportEdits?: [{	editsJson: string | Variable<any, string>,	reportType: 
 };
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]:RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string | Variable<any, string>
+};
 	["SaveReportDraftInput"]: {
 	editedFields: Array<string> | Variable<any, string>,
 	editsJson: string | Variable<any, string>,
@@ -12342,6 +12347,7 @@ export type ResolverInputTypes = {
 	["CapitalOnboardingState"]: AliasType<{
 	blagorost_offer_template_done?:boolean | `@${string}`,
 	blagorost_provision_done?:boolean | `@${string}`,
+	capital_program_doc_data_hash?:boolean | `@${string}`,
 	generation_contract_template_done?:boolean | `@${string}`,
 	generator_offer_template_done?:boolean | `@${string}`,
 	generator_program_template_done?:boolean | `@${string}`,
@@ -16439,6 +16445,7 @@ resetKey?: [{	data: ResolverInputTypes["ResetKeyInput"]},boolean | `@${string}`]
 	resetRegistration?:ResolverInputTypes["Account"],
 restartAnnualGeneralMeet?: [{	data: ResolverInputTypes["RestartAnnualGeneralMeetInput"]},ResolverInputTypes["MeetAggregate"]],
 returnExpenseItem?: [{	data: ResolverInputTypes["ReturnExpenseItemInput"]},ResolverInputTypes["Transaction"]],
+saveCapitalProgramDocDataHash?: [{	data: ResolverInputTypes["SaveCapitalProgramDocDataInput"]},ResolverInputTypes["CapitalOnboardingState"]],
 saveReportDraft?: [{	input: ResolverInputTypes["SaveReportDraftInput"]},ResolverInputTypes["ReportDraft"]],
 selectBranch?: [{	data: ResolverInputTypes["SelectBranchInput"]},boolean | `@${string}`],
 sendAgreement?: [{	data: ResolverInputTypes["SendAgreementInput"]},ResolverInputTypes["Transaction"]],
@@ -18609,6 +18616,9 @@ validateReportEdits?: [{	editsJson: string,	reportType: ResolverInputTypes["Repo
 };
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]:RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string
+};
 	["SaveReportDraftInput"]: {
 	editedFields: Array<string>,
 	editsJson: string,
@@ -21418,6 +21428,7 @@ export type ModelTypes = {
 	["CapitalOnboardingState"]: {
 		blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
+	capital_program_doc_data_hash?: string | undefined | null,
 	generation_contract_template_done: boolean,
 	generator_offer_template_done: boolean,
 	generator_program_template_done: boolean,
@@ -25716,7 +25727,7 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: ModelTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенно�� повестке
+	/** Сгенерировать протокол решения по предложенной повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: ModelTypes["GeneratedDocument"],
@@ -25870,6 +25881,10 @@ export type ModelTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	returnExpenseItem: ModelTypes["Transaction"],
+	/** Сохранить hash PrivateData параметров документов ЦПП
+
+Требуемые роли: chairman.  */
+	saveCapitalProgramDocDataHash: ModelTypes["CapitalOnboardingState"],
 	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
 
 Требуемые роли: chairman.  */
@@ -28235,6 +28250,9 @@ export type ModelTypes = {
 	return_amount: string
 };
 	["RoomMessageKind"]:RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+	doc_data_hash: string
+};
 	["SaveReportDraftInput"]: {
 	editedFields: Array<string>,
 	editsJson: string,
@@ -29210,7 +29228,10 @@ export type ModelTypes = {
     }
 
 export type GraphQLTypes = {
-    ["AcceptChildOrderInput"]: {
+    // ------------------------------------------------------;
+	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
+	// ------------------------------------------------------;
+	["AcceptChildOrderInput"]: {
 		/** Имя аккаунта кооператива */
 	coopname: string,
 	/** Подписанное заявление на имущественный паевый взнос */
@@ -31113,6 +31134,7 @@ export type GraphQLTypes = {
 	__typename: "CapitalOnboardingState",
 	blagorost_offer_template_done: boolean,
 	blagorost_provision_done: boolean,
+	capital_program_doc_data_hash?: string | undefined | null,
 	generation_contract_template_done: boolean,
 	generator_offer_template_done: boolean,
 	generator_program_template_done: boolean,
@@ -35632,7 +35654,7 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member.  */
 	generateExpenseProposalStatementDocument: GraphQLTypes["GeneratedDocument"],
-	/** Сгенерировать протокол решения по предложенно�� повестке
+	/** Сгенерировать протокол решения по предложенной повестке
 
 Требуемые роли: chairman, member.  */
 	generateFreeDecision: GraphQLTypes["GeneratedDocument"],
@@ -35786,6 +35808,10 @@ export type GraphQLTypes = {
 
 Требуемые роли: chairman, member, user.  */
 	returnExpenseItem: GraphQLTypes["Transaction"],
+	/** Сохранить hash PrivateData параметров документов ЦПП
+
+Требуемые роли: chairman.  */
+	saveCapitalProgramDocDataHash: GraphQLTypes["CapitalOnboardingState"],
 	/** Сохранить/обновить черновик формы отчёта (upsert по owner+type+year+period)
 
 Требуемые роли: chairman.  */
@@ -38346,6 +38372,9 @@ export type GraphQLTypes = {
 };
 	/** Тип сообщения в истории комнаты Matrix (текст или расшифрованное аудио) */
 ["RoomMessageKind"]: RoomMessageKind;
+	["SaveCapitalProgramDocDataInput"]: {
+		doc_data_hash: string
+};
 	["SaveReportDraftInput"]: {
 		editedFields: Array<string>,
 	editsJson: string,
@@ -40165,6 +40194,7 @@ type ZEUS_VARIABLES = {
 	["ReturnByMoneySignedMetaDocumentInput"]: ValueTypes["ReturnByMoneySignedMetaDocumentInput"];
 	["ReturnExpenseItemInput"]: ValueTypes["ReturnExpenseItemInput"];
 	["RoomMessageKind"]: ValueTypes["RoomMessageKind"];
+	["SaveCapitalProgramDocDataInput"]: ValueTypes["SaveCapitalProgramDocDataInput"];
 	["SaveReportDraftInput"]: ValueTypes["SaveReportDraftInput"];
 	["SbpDataInput"]: ValueTypes["SbpDataInput"];
 	["SearchDocumentsInput"]: ValueTypes["SearchDocumentsInput"];

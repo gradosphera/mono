@@ -1,15 +1,18 @@
 import { beforeAll, describe, it, vi } from 'vitest'
 import { Cooperative } from 'cooptypes'
 import { Generator } from '../src'
+import type { Numbers } from '../src'
 import { testDocumentGeneration } from './utils/testDocument'
 import { generator, mongoUri } from './utils'
+
+let capitalProgramDocDataHash = ''
 
 beforeAll(async () => {
   await generator.connect(mongoUri)
 
   // Подменяем метод getApprovedDecision для фабрики акта взноса результатов (1042)
   // Это позволит тесту найти "принятое решение" без обращения к реальному API
-  const factory1042 = (generator as any).factories['1042']
+  const factory1042 = generator.factories[1042 as Numbers]
   if (factory1042) {
     vi.spyOn(factory1042, 'getApprovedDecision').mockImplementation(async () => {
       return {
@@ -44,6 +47,34 @@ beforeAll(async () => {
   for (const data of udatas) {
     await generator.save('udata', { ...commonUdata, ...data })
   }
+
+    const capitalProgramPrivateData = {
+    generator_program_purpose:
+      "развитию информационной экосистемы взаимодействия физических и юридических лиц, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении потребительских обществ (кооперативов) – под названием “Кооперативная Экономика”, с целью самоорганизации и интеграции в социально-экономическую среду Российской Федерации., на основе международных кооперативных принципов и законодательства Российской Федерации",
+    eoap_definition:
+      "информационная экосистема, интегрируемая в социально-экономическую среду Российской Федерации, состоящая из комплекса программных продуктов  на базе технологии распределенного реестра, обеспечивающих широкое экономическое и социальное взаимодействие физических и юридических лиц, включая нерезидентов различных юрисдикций и организационно-правовых форм, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении потребительских кооперативов (обществ) под названием “Кооперативная Экономика”",
+    generator_task_goal:
+      "центра привлечения и интеграции передовых инновационных цифровых разработок, а также экономических и социальных методов и решений",
+    idea_unit_cost:
+      "50",
+    idea_unit_cost_words:
+      "пятьдесят",
+    blagorost_goal_expansion:
+      "развитии информационной экосистемы взаимодействия физических и юридических лиц, на основе международных кооперативных принципов и законодательства Российской Федерации в отношении потребительских обществ (кооперативов) – под названием “Кооперативная Экономика”, с целью самоорганизации и интеграции в социально-экономическую среду Российской Федерации",
+    blagorost_goal_reason:
+      "вследствие увеличения количества Участников информационной кооперативной экосистемы - ЕОАП - для расширения и повышения социальной эффективности их экономического взаимодействия в некоммерческом формате",
+    blagorost_task_expansion:
+      "расширение участников ЕОАП - информационной кооперативной экосистемы  как центра экономического взаимодействия в некоммерческом формате",
+    blagorost_task_development:
+      "развитие ЕОАП  как центра привлечения и интеграции инновационных цифровых разработок, а также экономических и социальных методов и решений",
+    return_source_description:
+      "аппаратно-программная сеть узлов распределенного реестра в формате «СМЭВ+SWIFT», построенная на принципах самоорганизации и самофинансирования деятельности технологической инфраструктуры ЕОАП, обеспечивающей консенсус ее распределенных узлов по формированию базового продукта ЕОАП  - полного цикла документооборота по синхронному взаимодействию пайщиков и кооперативов - участников экосистемы ЕАОП -  через использование цифровых контрактов, с одновременным выполнением функций нотариата и учета финансовых и юридических событий (подробнее на  Сайте)",
+    return_additional_source:
+      "взносы пользователей  ЕОАП, его отдельных программных продуктов и приложений, переданных Обществу или создаваемых в рамках Общества, которые интегрируются в ЕОАП"
+  }
+
+  const { hash } = await generator.saveDocData(capitalProgramPrivateData, 994)
+  capitalProgramDocDataHash = hash
 })
 
 describe('тест генератора документов с registry_id >= 1000', async () => {
@@ -54,6 +85,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -63,6 +95,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -72,6 +105,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -92,6 +126,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
   it('генерируем шаблон оферты Благорост', async () => {
@@ -100,6 +135,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 
@@ -110,6 +146,7 @@ describe('тест генератора документов с registry_id >= 1
       coopname: 'voskhod',
       username: 'ant',
       lang: 'ru',
+      doc_data_hash: capitalProgramDocDataHash,
     })
   })
 

@@ -80,7 +80,7 @@ static constexpr eosio::name _wallet_program = "wallet"_n; ///< Главный �
 static constexpr eosio::name _marketplace_program = "marketplace"_n; ///< Кошелёк программы "Маркетплейс"
 
 static constexpr eosio::name _source_program = "generator"_n; ///< Кошелёк для генерации по договору УХД
-static constexpr eosio::name _capital_program = "blagorost"_n; ///< Кошелёк программы "Благорост"
+static constexpr eosio::name _capital_program = "capital"_n; ///< Кошелёк программы "Благорост"
 
 
 static const std::set<eosio::name> soviet_actions = {
