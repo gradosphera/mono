@@ -321,11 +321,17 @@ export class DocumentPackageV1Aggregator {
     const sovietDocument = sovietAgreement?.results?.[0]?.data?.document;
     if (sovietDocument) return sovietDocument;
 
+    // wallet::signagree не делает require_recipient(coopname) (в отличие от
+    // Soviet::make_complete_document), поэтому explorer индексирует его только
+    // с receiver='wallet' — фильтр по receiver=coopname здесь всегда возвращал
+    // 0 строк, и программные оферты (capital: Благорост/Генератор, program_id>0)
+    // молча пропадали из links повестки. Скоуп по кооперативу берём из
+    // data.coopname — единственного надёжного поля в самом payload действия.
     const walletAgreement = await getActions(`${process.env.SIMPLE_EXPLORER_API}/get-actions`, {
       filter: JSON.stringify({
         account: WalletContract.contractName.production,
         name: WalletContract.Actions.SignAgreement.actionName,
-        receiver: process.env.COOPNAME,
+        'data.coopname': process.env.COOPNAME,
         'data.document.doc_hash': docHashFilter,
       }),
       page: 1,
