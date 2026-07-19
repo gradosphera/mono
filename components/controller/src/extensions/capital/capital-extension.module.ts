@@ -654,7 +654,25 @@ export class CapitalPlugin extends BaseExtModule {
     // Если L1 ещё не завершён — реестр остаётся пустым, SignUp не предлагает
     // программы capital (раздел 4.1 req 44 проекта 13).
     try {
-      const registered = registerCapitalInAgreementRegistry(this.agreementRegistrationPort, extensionConfig as IConfig);
+      // Резолвер читает конфиг заново на каждую генерацию: совет может
+      // пересохранить параметры ЦПП (новый hash) без перезапуска расширения,
+      // а спека в реестре регистрируется один раз на initialize.
+      const resolveCapitalProgramDocDataHash = async (): Promise<string | undefined> => {
+        const ext = await this.extensionRepository.findByName(this.name);
+        const hash = ext?.config?.capital_program_doc_data_hash?.trim();
+        if (!hash) {
+          throw new Error(
+            'Параметры документов ЦПП не заполнены: отсутствует capital_program_doc_data_hash в конфигурации capital'
+          );
+        }
+        return hash;
+      };
+
+      const registered = registerCapitalInAgreementRegistry(
+        this.agreementRegistrationPort,
+        extensionConfig as IConfig,
+        resolveCapitalProgramDocDataHash
+      );
       if (registered) {
         this.logger.log('[CAPITAL.REGISTRY] зарегистрировано 2 оферты + 2 программы capital');
       } else {
