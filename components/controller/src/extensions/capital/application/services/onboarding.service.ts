@@ -127,21 +127,24 @@ export class CapitalOnboardingService {
     if (!plugin) throw new Error('Конфигурация расширения capital не найдена');
     const pluginConfig: CapitalOnboardingConfig = { ...plugin.config };
 
-    let needUpdate = false;
+    const patch: Partial<CapitalOnboardingConfig> = {};
     if (!pluginConfig.onboarding_init_at) {
       pluginConfig.onboarding_init_at = new Date().toISOString();
-      needUpdate = true;
+      patch.onboarding_init_at = pluginConfig.onboarding_init_at;
     }
 
     if (!pluginConfig.onboarding_expire_at) {
       const start = new Date(pluginConfig.onboarding_init_at);
       pluginConfig.onboarding_expire_at = computeOnboardingExpiresAt(start);
-      needUpdate = true;
+      patch.onboarding_expire_at = pluginConfig.onboarding_expire_at;
     }
 
-    if (needUpdate) {
-      await this.extensionRepository.update({ ...plugin, config: pluginConfig });
-      return { ...plugin, config: pluginConfig };
+    if (Object.keys(patch).length > 0) {
+      // Точечный merge только изменившихся полей — полная перезапись config
+      // целиком (как раньше) конкурирует с параллельными записями других шагов
+      // онбординга (флаги, хэши) и теряет их изменения (lost update).
+      const updated = await this.extensionRepository.patchConfig('capital', patch);
+      return { ...plugin, config: updated.config };
     }
 
     return { ...plugin, config: pluginConfig };
@@ -171,20 +174,18 @@ export class CapitalOnboardingService {
   }
 
   public async saveProgramDocDataHash(docDataHash: string): Promise<CapitalOnboardingStateDTO> {
-    const plugin = await this.loadPlugin();
+    await this.loadPlugin();
     const normalizedHash = docDataHash.trim();
 
     if (!normalizedHash) {
       throw new Error('Hash PrivateData документов ЦПП не может быть пустым');
     }
 
-    const updatedConfig = {
-      ...plugin.config,
+    const updated = await this.extensionRepository.patchConfig('capital', {
       capital_program_doc_data_hash: normalizedHash,
-    };
+    } as Partial<CapitalOnboardingConfig>);
 
-    await this.extensionRepository.update({ ...plugin, config: updatedConfig });
-    return this.buildState(updatedConfig);
+    return this.buildState(updated.config as CapitalOnboardingConfig);
   }
 
   public async completeStep(data: CapitalOnboardingStepInputDTO, username: string): Promise<CapitalOnboardingStateDTO> {
@@ -235,12 +236,12 @@ export class CapitalOnboardingService {
       document: documentForPublish,
     });
 
-    // Сохраняем hash в конфиге для отображения на фронтенде
-    const updatedConfig = {
-      ...plugin.config,
+    // Сохраняем hash в конфиге для отображения на фронтенде — точечный merge
+    // (не полная перезапись config), чтобы не потерять конкурентно записанные
+    // флаги/хэши других шагов онбординга (lost update на общем jsonb-блобе).
+    const updated = await this.extensionRepository.patchConfig('capital', {
       [hashKey]: generatedDoc.hash,
-    };
-    await this.extensionRepository.update({ ...plugin, config: updatedConfig });
+    } as Partial<CapitalOnboardingConfig>);
 
     // Регистрируем правило отслеживания в фабрике
     const varsField = this.mapStepToVarsField(data.step);
@@ -256,6 +257,6 @@ export class CapitalOnboardingService {
       },
     });
 
-    return this.buildState(updatedConfig);
+    return this.buildState(updated.config as CapitalOnboardingConfig);
   }
 }
