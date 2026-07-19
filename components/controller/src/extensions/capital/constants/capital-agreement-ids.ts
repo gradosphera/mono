@@ -23,10 +23,13 @@ export const GENERATOR_OFFER_AGREEMENT_ID = 'generator_offer';
 export const BLAGOROST_OFFER_AGREEMENT_ID = 'blagorost_offer';
 
 export const GENERATOR_AGREEMENT_TYPE = 'generator';
-// On-chain имя оферты Благорост в `soviet::coagreements` — 'capital' (program_id=4).
-// Контроллер обязан слать sndagreement/signagree с этим значением, иначе
-// `get_coagreement_or_fail` падает с «Соглашение указанного типа не найдено».
-export const BLAGOROST_AGREEMENT_TYPE = 'capital';
+// On-chain имя оферты Благорост в `soviet::coagreements` — 'blagorost' (program_id=4),
+// как сеет boot/src/init/cooperative.ts createPrograms() при генезисе кооператива.
+// Значение здесь ОБЯЗАНО совпадать буквально — иначе account.adapter.ts не находит
+// coagreement по type, программный signagree подменяется на sndagreement и
+// `get_coagreement_or_fail` падает с «Соглашение указанного типа не найдено»
+// (воспроизведено 2026-07-19: регистрация участника Благорост падала на приёме платежа).
+export const BLAGOROST_AGREEMENT_TYPE = 'blagorost';
 
 export const GENERATION_PROGRAM_KEY = 'GENERATION';
 export const CAPITALIZATION_PROGRAM_KEY = 'CAPITALIZATION';

@@ -88,7 +88,7 @@ describe('registerCapitalInAgreementRegistry', () => {
       expect.objectContaining({
         id: 'blagorost_offer',
         registry_id: Cooperative.Registry.BlagorostOffer.registry_id,
-        agreement_type: 'capital',
+        agreement_type: 'blagorost',
         extension_name: 'capital',
         // Пусто — оферта подтягивается через программу CAPITALIZATION,
         // не как дефолтная для individual (см. 8847a5c0939).
