@@ -72,6 +72,9 @@ export default {
     try {
       mongo = await mongoose.createConnection(config.mongoose.url).asPromise();
       const db = mongo.db;
+      if (!db) {
+        throw new Error('Подключение к MongoDB установлено, но db не инициализирована');
+      }
       const collection = db.collection(COLLECTION_NAME);
       await collection.createIndex({ hash: 1 }, { unique: true });
       await collection.updateOne(
