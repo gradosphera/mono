@@ -180,7 +180,6 @@
       :error='errFor("signer.pfrRegNumber")'
       :error-message='msgFor("signer.pfrRegNumber")'
       maxlength='14'
-      hint='XXX-XXX-XXXXXX — именно этот номер попадает в файл ЕФС-1, а не рег. номер СФР'
       dense filled
     )
 

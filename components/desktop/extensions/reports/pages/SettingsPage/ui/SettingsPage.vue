@@ -78,7 +78,6 @@ q-form.settings-page(@submit.prevent='save' @validation-error='onValidationError
           :max-length='14'
           :pattern='PFR_REG_PATTERN'
           pattern-message='Формат: XXX-XXX-XXXXXX (12 цифр с тире)'
-          hint='Этот номер (а не рег. номер СФР) попадает в имя файла и в ЕФС-1 — его сверяют внешние бухгалтерские системы при приёме отчёта'
           required
           @update:value='v => (manualInput.pfrRegNumber = v)'
         )
