@@ -200,7 +200,7 @@ export class ZeroReportSignerEditsInputDTO {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  @Matches(SFR_REG_NUMBER_PATTERN, { message: 'Рег.номер СФР — XXX-XXX-XXXXXX' })
+  @Matches(SFR_REG_NUMBER_PATTERN, { message: 'Рег.номер СФР — XXX-XXX-XXXXXX или 10 цифр' })
   sfrRegNumber!: string | null;
 
   @Field(() => String, { nullable: true })

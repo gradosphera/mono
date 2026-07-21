@@ -162,8 +162,8 @@
       :rules='[reportRules.sfrRegNumber()]'
       :error='errFor("signer.sfrRegNumber")'
       :error-message='msgFor("signer.sfrRegNumber")'
-      mask='###-###-######'
-      hint='XXX-XXX-XXXXXX — обязателен для ЕФС-1'
+      maxlength='14'
+      hint='XXX-XXX-XXXXXX или 10 цифр — обязателен для ЕФС-1'
       dense filled
     )
 

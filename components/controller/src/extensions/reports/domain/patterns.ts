@@ -43,8 +43,9 @@ export const OKPO_PATTERN = /^\d{8}(\d{2})?$/;
 // СНИЛС: XXX-XXX-XXX YY (с пробелом/тире) или 11 цифр подряд.
 export const SNILS_PATTERN = /^(\d{3}-\d{3}-\d{3} \d{2}|\d{11})$/;
 
-// Регистрационный номер СФР: XXX-XXX-XXXXXX (3-3-6).
-export const SFR_REG_NUMBER_PATTERN = /^\d{3}-\d{3}-\d{6}$/;
+// Регистрационный номер СФР: действующий XXX-XXX-XXXXXX (3-3-6, 12 цифр)
+// или прежний — 10 цифр без разделителей (ТипРегНомерОбщ в XSD ЕФС-1).
+export const SFR_REG_NUMBER_PATTERN = /^(\d{3}-\d{3}-\d{6}|\d{10})$/;
 
 /** Дата в формате `DD.MM.YYYY` (XSD `xs:date`-совместимый ФНС-формат). */
 export const DATE_DDMMYYYY_PATTERN = /^\d{2}\.\d{2}\.\d{4}$/;

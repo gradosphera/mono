@@ -1,6 +1,7 @@
 import { ObjectType, Field, InputType, registerEnumType } from '@nestjs/graphql';
 import { IsOptional, IsString, IsIn, Matches, MaxLength } from 'class-validator';
 import { ReportType } from '../../domain/enums/report-type.enum';
+import { SFR_REG_NUMBER_PATTERN } from '../../domain/patterns';
 
 export enum RequisiteSource {
   DATABASE = 'database',
@@ -65,7 +66,7 @@ export class ReportRequisitesViewDTO {
  *   ОКТМО   — `\d{8}` или `\d{11}`
  *   ОКПО    — `\d{8}` или `\d{10}`
  *   СНИЛС   — `\d{3}-\d{3}-\d{3} \d{2}` (14 симв.) или 11 цифр подряд
- *   РегНом СФР — `\d{3}-\d{3}-\d{6}` (14 симв. с тире)
+ *   РегНом СФР — `\d{3}-\d{3}-\d{6}` (14 симв. с тире) или 10 цифр подряд
  */
 @InputType('UpdateReportRequisitesInput')
 export class UpdateReportRequisitesInputDTO {
@@ -99,10 +100,10 @@ export class UpdateReportRequisitesInputDTO {
   @Matches(/^\d{8}(\d{2})?$/, { message: 'ОКПО — 8 или 10 цифр' })
   okpo?: string | null;
 
-  @Field(() => String, { nullable: true, description: 'Рег. номер СФР — XXX-XXX-XXXXXX' })
+  @Field(() => String, { nullable: true, description: 'Рег. номер СФР — XXX-XXX-XXXXXX или 10 цифр' })
   @IsOptional()
   @IsString()
-  @Matches(/^\d{3}-\d{3}-\d{6}$/, { message: 'Рег. номер СФР — XXX-XXX-XXXXXX (14 симв.)' })
+  @Matches(SFR_REG_NUMBER_PATTERN, { message: 'Рег. номер СФР — XXX-XXX-XXXXXX или 10 цифр' })
   sfrRegNumber?: string | null;
 
   @Field(() => String, { nullable: true })

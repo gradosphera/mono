@@ -37,7 +37,7 @@ q-form.settings-page(@submit.prevent='save' @validation-error='onValidationError
           :value='manualInput[f.key]'
           :placeholder='f.placeholder'
           :mask='f.mask'
-          :digits-dots-only='f.digitsDotsOnly'
+          :digits-extra-chars='f.digitsExtraChars'
           :max-length='f.maxLength'
           :exact-lengths='f.exactLengths'
           :pattern='f.pattern'
@@ -60,10 +60,11 @@ q-form.settings-page(@submit.prevent='save' @validation-error='onValidationError
           id='field-sfrRegNumber'
           label='Рег. номер СФР'
           :value='manualInput.sfrRegNumber'
-          placeholder='XXX-XXX-XXXXXX'
-          mask='###-###-######'
+          placeholder='XXX-XXX-XXXXXX или 10 цифр'
+          digits-extra-chars='-'
+          :max-length='14'
           :pattern='SFR_REG_PATTERN'
-          pattern-message='Формат: XXX-XXX-XXXXXX (12 цифр)'
+          pattern-message='Формат: XXX-XXX-XXXXXX (12 цифр) или 10 цифр без разделителей'
           required
           @update:value='v => (manualInput.sfrRegNumber = v)'
         )
@@ -202,7 +203,7 @@ interface ClassifierField {
   label: string
   placeholder?: string
   mask?: string
-  digitsDotsOnly?: boolean
+  digitsExtraChars?: string
   maxLength?: number
   exactLengths?: number[]
   pattern?: RegExp
@@ -212,13 +213,13 @@ interface ClassifierField {
 // Placeholder'ы — правило ввода (кол-во цифр), а не конкретные примеры.
 // Для цифровых полей фиксированной/короткой длины — используем Quasar-mask
 // (`#` = только цифра, буквы блокируются на keypress нативно).
-// Для ОКВЭД (цифры + точка переменной длины) — digitsDotsOnly с @keydown-блокером.
+// Для ОКВЭД (цифры + точка переменной длины) — digitsExtraChars='.' с @keydown-блокером.
 const classifierFields: ClassifierField[] = [
   {
     key: 'okved',
     label: 'ОКВЭД',
     placeholder: 'XX.XX или XX.XX.XX',
-    digitsDotsOnly: true,
+    digitsExtraChars: '.',
     maxLength: 8,
     pattern: /^\d{2}(\.\d{1,2}){0,2}$/,
     patternMessage: 'Формат: XX.XX или XX.XX.XX',
@@ -265,7 +266,7 @@ const signerTypeOptions = [
 // пользователь прожал пару цифр и нажал «Сохранить»: mask не мешает
 // сохранить частичный ввод, паттерн-правило блокирует.
 const SNILS_PATTERN = /^\d{3}-\d{3}-\d{3} \d{2}$/
-const SFR_REG_PATTERN = /^\d{3}-\d{3}-\d{6}$/
+const SFR_REG_PATTERN = /^(\d{3}-\d{3}-\d{6}|\d{10})$/
 
 function getValue(key: keyof IReportRequisitesView): string {
   const v = requisites.value?.[key] as any

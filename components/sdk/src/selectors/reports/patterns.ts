@@ -41,8 +41,8 @@ export const OKPO_PATTERN = /^\d{8}(\d{2})?$/;
 /** СНИЛС: XXX-XXX-XXX YY или 11 цифр подряд. */
 export const SNILS_PATTERN = /^(\d{3}-\d{3}-\d{3} \d{2}|\d{11})$/;
 
-/** Регистрационный номер СФР: XXX-XXX-XXXXXX (3-3-6). */
-export const SFR_REG_NUMBER_PATTERN = /^\d{3}-\d{3}-\d{6}$/;
+/** Регистрационный номер СФР: действующий XXX-XXX-XXXXXX (3-3-6, 12 цифр) или прежний — 10 цифр без разделителей. */
+export const SFR_REG_NUMBER_PATTERN = /^(\d{3}-\d{3}-\d{6}|\d{10})$/;
 
 /** Дата в формате DD.MM.YYYY (ФНС). */
 export const DATE_DDMMYYYY_PATTERN = /^\d{2}\.\d{2}\.\d{4}$/;
@@ -70,7 +70,7 @@ export const reportRules = {
   okopf: (message = 'ОКОПФ — 5 цифр') => (v: unknown) => OKOPF_PATTERN.test(String(v ?? '')) || message,
   okpo: (message = 'ОКПО — 8 или 10 цифр') => (v: unknown) => OKPO_PATTERN.test(String(v ?? '')) || message,
   snils: (message = 'СНИЛС — XXX-XXX-XXX YY или 11 цифр') => (v: unknown) => SNILS_PATTERN.test(String(v ?? '')) || message,
-  sfrRegNumber: (message = 'Рег. номер СФР — XXX-XXX-XXXXXX') => (v: unknown) => SFR_REG_NUMBER_PATTERN.test(String(v ?? '')) || message,
+  sfrRegNumber: (message = 'Рег. номер СФР — XXX-XXX-XXXXXX или 10 цифр') => (v: unknown) => SFR_REG_NUMBER_PATTERN.test(String(v ?? '')) || message,
   dateDdMmYyyy: (message = 'Дата — DD.MM.YYYY') => (v: unknown) => DATE_DDMMYYYY_PATTERN.test(String(v ?? '')) || message,
   kbk: (message = 'КБК — 20 цифр') => (v: unknown) => KBK_PATTERN.test(String(v ?? '')) || message,
   /** Непустая строка длиной от `min` до `max` символов. */
