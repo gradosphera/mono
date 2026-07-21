@@ -66,12 +66,11 @@ export class Fss4Generator implements IReportGenerator {
     const edits = input as ZeroReportEditsShape;
     const fileName = edits.header.idFile;
     const errors: string[] = [];
-    if (!edits.signer.sfrRegNumber) {
-      errors.push('Для ЕФС-1 обязателен рег. номер страхователя в СФР (поле signer.sfrRegNumber)');
-    }
     if (!edits.signer.pfrRegNumber) {
-      // pfrRegNumber, а не sfrRegNumber, идёт в <ЕФС8:РегНомер> и в имя
-      // файла — см. комментарий у strah.ele('ЕФС8:РегНомер') ниже.
+      // В документ идёт только pfrRegNumber (см. strah.ele('ЕФС8:РегНомер')
+      // ниже) — sfrRegNumber в ЕФС-1 не используется вовсе, поэтому не
+      // проверяем его здесь, хотя в реквизитах кооператива оно и остаётся
+      // обязательным полем (может понадобиться другим формам/интеграциям).
       errors.push('Для ЕФС-1 обязателен рег. номер страхователя в ПФР (поле signer.pfrRegNumber)');
     }
     if (errors.length) {

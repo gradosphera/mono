@@ -565,7 +565,7 @@ describe('ЕФС-1 (Fss4Generator, СФР)', () => {
     expect(gen.reportType).toBe(ReportType.FSS4);
   });
 
-  it('генерирует XML при переданном sfrRegNumber', () => {
+  it('генерирует XML при переданном pfrRegNumber', () => {
     const result = gen.generate(withPeriod(1));
     expect(result.isValid).toBe(true);
     expect(result.xml).toContain('<?xml');
@@ -573,13 +573,12 @@ describe('ЕФС-1 (Fss4Generator, СФР)', () => {
     expect(result.xml).toContain('<ЭДСФР');
   });
 
-  it('возвращает ошибку без sfrRegNumber', () => {
+  it('генерируется без sfrRegNumber — ЕФС-1 его не использует', () => {
     const result = gen.generate({
       ...withPeriod(1),
       signer: { ...zeroBaseEdits.signer, sfrRegNumber: null },
     });
-    expect(result.isValid).toBe(false);
-    expect(result.errors.join('|')).toContain('sfrRegNumber');
+    expect(result.isValid).toBe(true);
   });
 
   it('возвращает ошибку без pfrRegNumber', () => {
