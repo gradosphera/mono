@@ -491,6 +491,7 @@ interface ZeroReportEdits {
     repDoc: string | null
     snils: string | null
     sfrRegNumber: string | null
+    pfrRegNumber: string | null
     chairmanPosition: string | null
   }
 }

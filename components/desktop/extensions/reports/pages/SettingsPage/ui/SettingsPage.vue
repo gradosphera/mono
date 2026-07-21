@@ -46,11 +46,11 @@ q-form.settings-page(@submit.prevent='save' @validation-error='onValidationError
           @update:value='v => (manualInput[f.key] = v)'
         )
 
-  //- СФР (ЕФС-1)
+  //- СФР/ПФР (ЕФС-1)
   q-card.q-mt-md(flat)
     q-card-section.q-py-sm
-      .text-h6 СФР (для ЕФС-1)
-      .text-caption.t-muted Регистрационный номер СФР и должность председателя
+      .text-h6 СФР/ПФР (для ЕФС-1)
+      .text-caption.t-muted Регистрационные номера страхователя и должность председателя
 
     q-separator
 
@@ -60,13 +60,27 @@ q-form.settings-page(@submit.prevent='save' @validation-error='onValidationError
           id='field-sfrRegNumber'
           label='Рег. номер СФР'
           :value='manualInput.sfrRegNumber'
-          placeholder='XXX-XXX-XXXXXX или 10 цифр'
-          digits-extra-chars='-'
-          :max-length='14'
+          placeholder='10 цифр'
+          mask='##########'
+          :max-length='10'
+          :exact-lengths='[10]'
           :pattern='SFR_REG_PATTERN'
-          pattern-message='Формат: XXX-XXX-XXXXXX (12 цифр) или 10 цифр без разделителей'
+          pattern-message='Формат: 10 цифр без разделителей'
           required
           @update:value='v => (manualInput.sfrRegNumber = v)'
+        )
+        RequisiteField.col-md-6.col-12(
+          id='field-pfrRegNumber'
+          label='Рег. номер ПФР'
+          :value='manualInput.pfrRegNumber'
+          placeholder='XXX-XXX-XXXXXX'
+          mask='###-###-######'
+          :max-length='14'
+          :pattern='PFR_REG_PATTERN'
+          pattern-message='Формат: XXX-XXX-XXXXXX (12 цифр с тире)'
+          hint='Этот номер (а не рег. номер СФР) попадает в имя файла и в ЕФС-1 — его сверяют внешние бухгалтерские системы при приёме отчёта'
+          required
+          @update:value='v => (manualInput.pfrRegNumber = v)'
         )
         RequisiteField.col-md-6.col-12(
           id='field-chairmanPosition'
@@ -164,6 +178,7 @@ type ManualKey =
   | 'oktmo'
   | 'okpo'
   | 'sfrRegNumber'
+  | 'pfrRegNumber'
   | 'chairmanPosition'
   | 'signerSnils'
   | 'signerRepDoc'
@@ -177,6 +192,7 @@ const manualInput = reactive<Record<ManualKey, string>>({
   oktmo: '',
   okpo: '',
   sfrRegNumber: '',
+  pfrRegNumber: '',
   chairmanPosition: '',
   signerSnils: '',
   signerRepDoc: '',
@@ -266,7 +282,8 @@ const signerTypeOptions = [
 // пользователь прожал пару цифр и нажал «Сохранить»: mask не мешает
 // сохранить частичный ввод, паттерн-правило блокирует.
 const SNILS_PATTERN = /^\d{3}-\d{3}-\d{3} \d{2}$/
-const SFR_REG_PATTERN = /^(\d{3}-\d{3}-\d{6}|\d{10})$/
+const SFR_REG_PATTERN = /^\d{10}$/
+const PFR_REG_PATTERN = /^\d{3}-\d{3}-\d{6}$/
 
 function getValue(key: keyof IReportRequisitesView): string {
   const v = requisites.value?.[key] as any

@@ -68,6 +68,13 @@ export class Fss4Generator implements IReportGenerator {
     const errors: string[] = [];
     if (!edits.signer.sfrRegNumber) {
       errors.push('Для ЕФС-1 обязателен рег. номер страхователя в СФР (поле signer.sfrRegNumber)');
+    }
+    if (!edits.signer.pfrRegNumber) {
+      // pfrRegNumber, а не sfrRegNumber, идёт в <ЕФС8:РегНомер> и в имя
+      // файла — см. комментарий у strah.ele('ЕФС8:РегНомер') ниже.
+      errors.push('Для ЕФС-1 обязателен рег. номер страхователя в ПФР (поле signer.pfrRegNumber)');
+    }
+    if (errors.length) {
       return { reportType: this.reportType, xml: '', fileName, errors, isValid: false };
     }
     try {
@@ -100,8 +107,13 @@ export class Fss4Generator implements IReportGenerator {
     const efs1 = edsfr.ele('ЕФС-1');
 
     const strah = efs1.ele('Страхователь');
-    // sfrRegNumber гарантированно определён — guard в generate() выше.
-    strah.ele('ЕФС8:РегНомер').txt(signer.sfrRegNumber ?? '').up();
+    // Тег «Действующий регистрационный номер страхователя» (см. XSD
+    // efs-types.xsd/ТипСтрахователь) — сюда идёт номер ПФР, а не СФР:
+    // сторонние бухгалтерские системы (СБИС и др.) при приёме ЕФС-1 сверяют
+    // рег. номер отправителя в имени файла и в этом теге со своим профилем
+    // организации, где обычно заведён именно старый номер ПФР (XXX-XXX-XXXXXX).
+    // pfrRegNumber гарантированно определён — guard в generate() выше.
+    strah.ele('ЕФС8:РегНомер').txt(signer.pfrRegNumber ?? '').up();
     strah.ele('ЕФС8:Наименование').txt(organization.orgName).up();
     strah.ele('УТ8:ИНН').txt(organization.inn).up();
     strah.ele('УТ8:КПП').txt(organization.kpp).up();

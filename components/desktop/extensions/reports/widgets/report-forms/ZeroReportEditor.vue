@@ -166,8 +166,21 @@
       :rules='[reportRules.sfrRegNumber()]'
       :error='errFor("signer.sfrRegNumber")'
       :error-message='msgFor("signer.sfrRegNumber")'
+      maxlength='10'
+      hint='10 цифр — обязателен для ЕФС-1'
+      dense filled
+    )
+
+    q-input(
+      v-if='needs.sfrExtras'
+      label='Регистрационный номер ПФР'
+      :model-value='editsValue.signer.pfrRegNumber || ""'
+      @update:model-value='v => updateField("signer.pfrRegNumber", v || null)'
+      :rules='[reportRules.pfrRegNumber()]'
+      :error='errFor("signer.pfrRegNumber")'
+      :error-message='msgFor("signer.pfrRegNumber")'
       maxlength='14'
-      hint='XXX-XXX-XXXXXX или 10 цифр — обязателен для ЕФС-1'
+      hint='XXX-XXX-XXXXXX — именно этот номер попадает в файл ЕФС-1, а не рег. номер СФР'
       dense filled
     )
 
@@ -219,6 +232,7 @@ interface ZeroReportEdits {
     repDoc: string | null
     snils: string | null
     sfrRegNumber: string | null
+    pfrRegNumber: string | null
     chairmanPosition: string | null
   }
 }

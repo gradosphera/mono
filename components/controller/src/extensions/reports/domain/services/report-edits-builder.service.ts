@@ -203,7 +203,12 @@ export class ReportEditsBuilderService {
 
     return {
       header: {
-        idFile: this.generateGenericFileName(reportType, merged.inn.value ?? '', merged.kpp.value ?? ''),
+        idFile: this.generateGenericFileName(
+          reportType,
+          merged.inn.value ?? '',
+          merged.kpp.value ?? '',
+          merged.pfrRegNumber.value,
+        ),
         versProgram: 'Платформа отчётности кооператива 1.0',
         docDate: formatDate(new Date()),
         reportYear: year,
@@ -230,6 +235,7 @@ export class ReportEditsBuilderService {
         repDoc: merged.signerRepDoc.value,
         snils: merged.signerSnils.value,
         sfrRegNumber: merged.sfrRegNumber.value,
+        pfrRegNumber: merged.pfrRegNumber.value,
         chairmanPosition:
           merged.chairmanPosition.value || merged.chairmanPositionFromOrg.value,
       },
@@ -243,7 +249,12 @@ export class ReportEditsBuilderService {
     return 1;
   }
 
-  private generateGenericFileName(reportType: ReportType, inn: string, kpp: string): string {
+  private generateGenericFileName(
+    reportType: ReportType,
+    inn: string,
+    kpp: string,
+    pfrRegNumber?: string | null,
+  ): string {
     // Префикс = первые два underscore-сегмента имени XSD (например,
     // 'NO_NDFL6.2_1_231_...xsd' → 'NO_NDFL6.2', 'UT_UVISCHSUMNAL_...xsd' →
     // 'UT_UVISCHSUMNAL') — это и есть код формата в имени файла по формату
@@ -259,7 +270,12 @@ export class ReportEditsBuilderService {
     const tax = kpp.substring(0, 4);
     const uuid = randomUUID();
     if (reportType === ReportType.FSS4) {
-      return `СФР_0000000000_ЕФС-1_${dateStr}_${uuid}`;
+      // Сегмент отправителя в имени файла — рег. номер ПФР организации, не
+      // заглушка из нулей: сторонние бухгалтерские системы (СБИС и др.)
+      // сверяют этот сегмент со своим профилем организации и отклоняют файл,
+      // если он не совпадает ни с известным им номером ПФР, ни с номером
+      // СФР. См. также <ЕФС8:РегНомер> в fss4.generator.ts — то же значение.
+      return `СФР_${pfrRegNumber || '0000000000'}_ЕФС-1_${dateStr}_${uuid}`;
     }
     return `${prefix}_${tax}_${tax}_${unit}_${dateStr}_${uuid}`;
   }
