@@ -244,11 +244,15 @@ export class ReportEditsBuilderService {
   }
 
   private generateGenericFileName(reportType: ReportType, inn: string, kpp: string): string {
-    // Упрощённый префикс по типу отчёта — точный формат имени зависит от
-    // формы (NO_NDFL6.2_..., СФР_..._ЕФС-1_...), но для предварительного
-    // idFile достаточно. Генератор сам перезапишет его при необходимости.
+    // Префикс = первые два underscore-сегмента имени XSD (например,
+    // 'NO_NDFL6.2_1_231_...xsd' → 'NO_NDFL6.2', 'UT_UVISCHSUMNAL_...xsd' →
+    // 'UT_UVISCHSUMNAL') — это и есть код формата в имени файла по формату
+    // ФНС/СФР. Брать только первый сегмент нельзя: для всех форм с 'NO_'
+    // в начале он всегда равен 'NO' и код формы (NDFL6.2/RASCHSV/PERSSVFL/
+    // USN) терялся — импорт стороннего ПО (Сбер и др.) отклонял файл как
+    // нераспознанный по имени.
     const xsd = REPORT_CONFIG[reportType]?.xsdFile ?? 'REPORT';
-    const prefix = xsd.split('_')[0] ?? 'REPORT';
+    const prefix = xsd.split('_').slice(0, 2).join('_') || 'REPORT';
     const now = new Date();
     const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
     const unit = `${inn}${kpp}`;
