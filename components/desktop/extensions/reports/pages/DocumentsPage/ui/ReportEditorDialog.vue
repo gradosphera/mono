@@ -141,7 +141,6 @@ q-dialog(
             :loading='isGenerating'
             @click='downloadXml'
             no-caps
-            stack
           )
             q-tooltip Сохраняет черновик, генерирует XML, валидирует XSD и скачивает файл
           q-btn.q-mb-sm(
@@ -152,7 +151,6 @@ q-dialog(
             :loading='pdfLoading'
             @click='downloadPdf'
             no-caps
-            stack
           )
             q-tooltip(v-if='!hasPdfPaperView') PDF-экспорт для {{ reportTitle }} пока не поддерживается
             q-tooltip(v-else) Заполненный отчёт в PDF (из бумажного вида)
@@ -167,7 +165,6 @@ q-dialog(
             :disable='isLoading'
             @click='regenerate'
             no-caps
-            stack
           )
             q-tooltip Подтянуть актуальные данные из реестра; ваши правки сохраняются
 
@@ -179,7 +176,6 @@ q-dialog(
             label='Удалить черновик'
             @click='clearDraft'
             no-caps
-            stack
           )
             q-tooltip Вернуть форму к дефолтам
 
@@ -207,7 +203,6 @@ q-dialog(
             :loading='markLoading'
             @click='clearMark'
             no-caps
-            stack
           )
             q-tooltip Вернуть обычный статус периода
 
@@ -222,7 +217,6 @@ q-dialog(
             :loading='markLoading'
             @click='clearMark'
             no-caps
-            stack
           )
             q-tooltip Вернуть обычный статус периода
 
@@ -235,7 +229,6 @@ q-dialog(
             :loading='markLoading'
             @click='markSubmittedExternally'
             no-caps
-            stack
           )
             q-tooltip Если отчёт уже сдан в бумаге / через стороннюю систему. В архив XML не попадает, но ячейка станет зелёной.
           q-btn(
@@ -246,7 +239,6 @@ q-dialog(
             :loading='markLoading'
             @click='markNotRequired'
             no-caps
-            stack
           )
             q-tooltip Отметить, что этот период сдавать не нужно — ячейка станет серой
 
