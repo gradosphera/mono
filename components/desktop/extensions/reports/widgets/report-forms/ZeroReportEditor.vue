@@ -9,6 +9,8 @@
         type='number'
         :model-value='editsValue.header.reportYear'
         @update:model-value='v => updateField("header.reportYear", clampInt(v, 2000, 2100))'
+        :error='errFor("header.reportYear")'
+        :error-message='msgFor("header.reportYear")'
         dense filled
       )
       q-input(
@@ -17,6 +19,8 @@
         type='number'
         :model-value='editsValue.header.period'
         @update:model-value='v => updateField("header.period", clampInt(v, 1, periodKind === "quarter" ? 4 : 12))'
+        :error='errFor("header.period")'
+        :error-message='msgFor("header.period")'
         dense filled
       )
       q-input(

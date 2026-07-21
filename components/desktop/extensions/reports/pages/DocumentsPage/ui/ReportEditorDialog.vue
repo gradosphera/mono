@@ -116,6 +116,21 @@ q-dialog(
             span(v-if='isValid') Форма валидна
             span(v-else) Ошибок: {{ errorsCount }}
 
+          //- Явный список ошибок полей — страховка на случай, если конкретное
+          //- поле формы не подсвечивается инлайн (не все секции формы ещё
+          //- подключены к fieldErrors). Без этого списка счётчик показывал
+          //- «Ошибок: N» без единой подсказки, где именно искать.
+          q-list.error-list.q-mb-sm(
+            v-if='!isValid && fieldErrorEntries.length'
+            dense bordered separator
+          )
+            q-item(v-for='err in fieldErrorEntries' :key='err.key' dense)
+              q-item-section(avatar top)
+                q-icon(name='fa-solid fa-circle-exclamation' color='negative' size='14px')
+              q-item-section
+                q-item-label.text-caption.text-weight-medium {{ err.label }}
+                q-item-label(caption) {{ err.message }}
+
           .text-subtitle2.q-mb-sm Действия
 
           q-btn.q-mb-sm(
@@ -513,6 +528,34 @@ const errorsCount = computed(() => {
   return count
 })
 
+// Человекочитаемые названия секций формы — для расшифровки JSONPath из
+// серверной ошибки валидации (см. error-list ниже).
+const FIELD_SECTION_LABELS: Record<string, string> = {
+  header: 'Шапка',
+  organization: 'Организация',
+  signer: 'Подписант',
+  balance: 'Баланс',
+  notes: 'Пояснения',
+}
+
+function humanizeFieldPath(path: string): string {
+  const [section, ...rest] = path.split('.')
+  const sectionLabel = FIELD_SECTION_LABELS[section] ?? section
+  return rest.length ? `${sectionLabel} → ${rest.join(' → ')}` : sectionLabel
+}
+
+interface FieldErrorEntry { key: string; label: string; message: string }
+
+const fieldErrorEntries = computed<FieldErrorEntry[]>(() => {
+  const out: FieldErrorEntry[] = []
+  for (const [path, messages] of Object.entries(fieldErrors.value)) {
+    messages.forEach((message, i) => {
+      out.push({ key: `${path}#${i}`, label: humanizeFieldPath(path), message })
+    })
+  }
+  return out
+})
+
 const saveStatusColor = computed(() => {
   if (isSaving.value) return 'orange'
   if (hasDraft.value) return 'positive'
@@ -836,6 +879,22 @@ function goToRequisites(): void {
   &.bad {
     background: var(--p-neg-soft);
     color: var(--p-neg);
+  }
+}
+
+.error-list {
+  background: var(--p-surface-1, #fff);
+  border-color: var(--p-neg-soft);
+  max-height: 220px;
+  overflow-y: auto;
+
+  :deep(.q-item) {
+    min-height: unset;
+    padding: 6px 8px;
+  }
+
+  :deep(.q-item__label--caption) {
+    color: var(--p-ink-2);
   }
 }
 
