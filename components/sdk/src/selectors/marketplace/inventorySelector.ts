@@ -6,6 +6,8 @@ const rawInventorySelector = {
   coopname: true,
   barcode_value: true,
   barcode_format: true,
+  offer_id: true,
+  category_id: true,
   order_id: true,
   shipment_id: true,
   braname: true,

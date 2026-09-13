@@ -407,6 +407,10 @@ export function toMarketplaceOrderCreateTxSnapshotDTO(
  * найдены — поля остаются null, клиент показывает запасной вид.
  */
 export interface MarketplaceOrderDisplayFields {
+  /** Предложение заказа — по нему открывается карточка имущества со склада. */
+  offer_id?: string | null;
+  /** Категория предложения — фильтр склада по разделам каталога. */
+  category_id?: number | null;
   product_name?: string | null;
   image_url?: string | null;
   unit_of_measure?: MarketplaceUnitOfMeasureEnum | null;

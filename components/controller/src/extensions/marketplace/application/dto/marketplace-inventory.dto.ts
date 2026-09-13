@@ -1,4 +1,4 @@
-import { Field, Float, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, Float, Int, InputType, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -139,6 +139,19 @@ export class MarketplaceInventoryItemDTO {
     description: 'Адрес пункта выдачи (КУ), где лежит имущество.',
   })
   delivery_point_address!: string | null;
+
+  @Field(() => String, {
+    nullable: true,
+    description:
+      'Предложение, по которому имущество попало на склад (из заказа). По нему открывается карточка предложения со склада.',
+  })
+  offer_id!: string | null;
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'Категория предложения — для фильтра склада по разделам каталога.',
+  })
+  category_id!: number | null;
 
   @Field(() => String, {
     nullable: true,
@@ -377,6 +390,8 @@ export function toMarketplaceInventoryItemDTO(
   dto.package_size = null;
   dto.delivery_point_name = null;
   dto.delivery_point_address = null;
+  dto.offer_id = null;
+  dto.category_id = null;
   dto.container_id = e.container_id;
   dto.cell_id = e.cell_id;
   dto.received_at = e.received_at;

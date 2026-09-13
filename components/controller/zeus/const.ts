@@ -3776,6 +3776,10 @@ export const AllTypesProps: Record<string,any> = {
 }
 
 export const ReturnTypes: Record<string,any> = {
+	auth:{
+		roles:"String",
+		self:"String"
+	},
 	AccessGrant:{
 		action:"String",
 		resource:"String"
@@ -6135,6 +6139,7 @@ export const ReturnTypes: Record<string,any> = {
 		barcode_format:"MarketplaceBarcodeFormat",
 		barcode_value:"String",
 		braname:"String",
+		category_id:"Int",
 		cell_id:"String",
 		container_id:"String",
 		coopname:"String",
@@ -6145,6 +6150,7 @@ export const ReturnTypes: Record<string,any> = {
 		id:"String",
 		labeled_at:"DateTime",
 		labeled_by_operator_account:"String",
+		offer_id:"String",
 		order_id:"String",
 		orderer_account_snapshot:"String",
 		orderer_name:"String",

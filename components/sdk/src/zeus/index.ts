@@ -9798,6 +9798,8 @@ export type ValueTypes = {
 	barcode_value?:boolean | `@${string}`,
 	/** КУ-получатель имущества. */
 	braname?:boolean | `@${string}`,
+	/** Категория предложения — для фильтра склада по разделам каталога. */
+	category_id?:boolean | `@${string}`,
 	/** Ячейка, если имущество лежит на складе напрямую. Ячейку позиции, лежащей в боксе, определяет сам бокс. */
 	cell_id?:boolean | `@${string}`,
 	/** Бокс, в котором лежит позиция. Пусто — позиция лежит в ячейке либо без места. */
@@ -9816,6 +9818,8 @@ export type ValueTypes = {
 	labeled_at?:boolean | `@${string}`,
 	/** Оператор КУ, наклеивший штрих-код (если позиция промаркирована). */
 	labeled_by_operator_account?:boolean | `@${string}`,
+	/** Предложение, по которому имущество попало на склад (из заказа). По нему открывается карточка предложения со склада. */
+	offer_id?:boolean | `@${string}`,
 	/** Заказ, к которому относится позиция. */
 	order_id?:boolean | `@${string}`,
 	/** Заказчик — печатается на наклейке. */
@@ -25427,6 +25431,8 @@ export type ResolverInputTypes = {
 	barcode_value?:boolean | `@${string}`,
 	/** КУ-получатель имущества. */
 	braname?:boolean | `@${string}`,
+	/** Категория предложения — для фильтра склада по разделам каталога. */
+	category_id?:boolean | `@${string}`,
 	/** Ячейка, если имущество лежит на складе напрямую. Ячейку позиции, лежащей в боксе, определяет сам бокс. */
 	cell_id?:boolean | `@${string}`,
 	/** Бокс, в котором лежит позиция. Пусто — позиция лежит в ячейке либо без места. */
@@ -25445,6 +25451,8 @@ export type ResolverInputTypes = {
 	labeled_at?:boolean | `@${string}`,
 	/** Оператор КУ, наклеивший штрих-код (если позиция промаркирована). */
 	labeled_by_operator_account?:boolean | `@${string}`,
+	/** Предложение, по которому имущество попало на склад (из заказа). По нему открывается карточка предложения со склада. */
+	offer_id?:boolean | `@${string}`,
 	/** Заказ, к которому относится позиция. */
 	order_id?:boolean | `@${string}`,
 	/** Заказчик — печатается на наклейке. */
@@ -40550,6 +40558,8 @@ export type ModelTypes = {
 	barcode_value?: string | undefined | null,
 	/** КУ-получатель имущества. */
 	braname: string,
+	/** Категория предложения — для фильтра склада по разделам каталога. */
+	category_id?: number | undefined | null,
 	/** Ячейка, если имущество лежит на складе напрямую. Ячейку позиции, лежащей в боксе, определяет сам бокс. */
 	cell_id?: string | undefined | null,
 	/** Бокс, в котором лежит позиция. Пусто — позиция лежит в ячейке либо без места. */
@@ -40568,6 +40578,8 @@ export type ModelTypes = {
 	labeled_at?: ModelTypes["DateTime"] | undefined | null,
 	/** Оператор КУ, наклеивший штрих-код (если позиция промаркирована). */
 	labeled_by_operator_account?: string | undefined | null,
+	/** Предложение, по которому имущество попало на склад (из заказа). По нему открывается карточка предложения со склада. */
+	offer_id?: string | undefined | null,
 	/** Заказ, к которому относится позиция. */
 	order_id: string,
 	/** Заказчик — печатается на наклейке. */
@@ -48346,10 +48358,7 @@ export type ModelTypes = {
     }
 
 export type GraphQLTypes = {
-    // ------------------------------------------------------;
-	// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY);
-	// ------------------------------------------------------;
-	["AccessGrant"]: {
+    ["AccessGrant"]: {
 	__typename: "AccessGrant",
 	/** Действие (например, read / confirm / manage) */
 	action: string,
@@ -57042,6 +57051,8 @@ export type GraphQLTypes = {
 	barcode_value?: string | undefined | null,
 	/** КУ-получатель имущества. */
 	braname: string,
+	/** Категория предложения — для фильтра склада по разделам каталога. */
+	category_id?: number | undefined | null,
 	/** Ячейка, если имущество лежит на складе напрямую. Ячейку позиции, лежащей в боксе, определяет сам бокс. */
 	cell_id?: string | undefined | null,
 	/** Бокс, в котором лежит позиция. Пусто — позиция лежит в ячейке либо без места. */
@@ -57060,6 +57071,8 @@ export type GraphQLTypes = {
 	labeled_at?: GraphQLTypes["DateTime"] | undefined | null,
 	/** Оператор КУ, наклеивший штрих-код (если позиция промаркирована). */
 	labeled_by_operator_account?: string | undefined | null,
+	/** Предложение, по которому имущество попало на склад (из заказа). По нему открывается карточка предложения со склада. */
+	offer_id?: string | undefined | null,
 	/** Заказ, к которому относится позиция. */
 	order_id: string,
 	/** Заказчик — печатается на наклейке. */
