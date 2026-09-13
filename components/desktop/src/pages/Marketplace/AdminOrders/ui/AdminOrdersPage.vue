@@ -7,7 +7,6 @@
  * стола. Строка открывает страницу заказа этого же стола.
  */
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 import { PageHint, StatusFilterButton } from 'src/shared/ui/domain';
@@ -18,14 +17,15 @@ import {
 } from 'src/widgets/Marketplace/OrdersRegistryTable';
 import { useHeaderActions } from 'src/shared/hooks';
 import { OrderRegistryOverlay } from 'src/widgets/Marketplace/OrderRegistryOverlay';
+import { OfferRegistryOverlay } from 'src/widgets/Marketplace/OfferRegistryOverlay';
 import { useQueryOverlay } from 'src/shared/lib/navigation';
 import { fetchAllOrders } from '../api';
 import type { AdminOrderView } from '../types';
 
 const { info } = useSystemStore();
-const router = useRouter();
 const { registerAction } = useHeaderActions();
 const orderOverlay = useQueryOverlay('order');
+const offerOverlay = useQueryOverlay('offer');
 
 const items = ref<AdminOrderView[]>([]);
 const loading = ref(false);
@@ -79,14 +79,10 @@ function goToOrder(orderId: string): void {
   orderOverlay.open(orderId);
 }
 
-// Переход на карточку предложения (имущества) на столе администратора —
-// readonly-карточка, без перехода в каталог/на стол заказчика.
+// Предложение (имущество) открывается таким же оверлеем, как и заказ:
+// readonly-карточка поверх реестра, без ухода со страницы.
 function goToOffer(offerId: string): void {
-  void router.push({
-    name: 'marketplace-admin-offer-detail',
-    params: { coopname: info.coopname, offerId },
-    query: { from: 'orders' },
-  });
+  offerOverlay.open(offerId);
 }
 
 onMounted(() => {
@@ -125,6 +121,8 @@ q-page.admin-orders
     full-page-route-name="marketplace-admin-order-detail",
     @offer-click="goToOffer"
   )
+
+  OfferRegistryOverlay(:coopname="info.coopname", from="orders")
 </template>
 
 <style scoped lang="scss">

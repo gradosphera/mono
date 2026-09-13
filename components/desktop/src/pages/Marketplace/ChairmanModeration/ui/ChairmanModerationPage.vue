@@ -2,8 +2,10 @@
 import { computed, onMounted, ref } from 'vue';
 import { useFirstLoad } from 'src/shared/lib/composables';
 import { debounce } from 'quasar';
-import { useRoute, useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
+import { useSystemStore } from 'src/entities/System/model';
+import { useQueryOverlay } from 'src/shared/lib/navigation';
+import { OfferRegistryOverlay } from 'src/widgets/Marketplace/OfferRegistryOverlay';
 import { fetchCategories } from '../../MarketplaceCatalog/api';
 import { marketplaceOfferImageUrls } from 'src/shared/lib/utils';
 import {
@@ -38,8 +40,8 @@ import {
 
 const PAGE_SIZE = 24;
 
-const route = useRoute();
-const router = useRouter();
+const { info } = useSystemStore();
+const offerOverlay = useQueryOverlay('offer');
 
 const items = ref<MarketplacePendingOfferView[]>([]);
 const total = ref(0);
@@ -96,14 +98,12 @@ function toCatalogOffer(offer: MarketplacePendingOfferView): CatalogOffer {
   };
 }
 
-// Клик по карточке → полная карточка предложения на столе администратора
-// (read-only маршрут, без перехода на стол заказчика). Модератор видит полное
-// описание, участки поставки с объёмами и гарантию — то, что в карточке скрыто.
+// Клик по карточке → карточка предложения оверлеем поверх очереди: очередь и
+// прокрутка ленты остаются на месте, решение принимается прямо в оверлее.
+// Модератор видит полное описание, участки поставки с объёмами и гарантию —
+// то, что в карточке скрыто; полная страница — по кнопке в оверлее.
 function goToDetail(offer: MarketplacePendingOfferView): void {
-  void router.push({
-    name: 'marketplace-admin-offer-detail',
-    params: { coopname: String(route.params.coopname ?? ''), offerId: offer.id },
-  });
+  offerOverlay.open(offer.id);
 }
 
 async function loadCategories(): Promise<void> {
@@ -219,6 +219,8 @@ q-page.moderation(role="region", aria-label="Модерация предложе
     template(#loading)
       .row.justify-center.q-my-md
         q-spinner(color="primary", size="2em")
+
+  OfferRegistryOverlay(:coopname="info.coopname", moderatable, @moderated="reloadLive")
 </template>
 
 <style scoped lang="scss">

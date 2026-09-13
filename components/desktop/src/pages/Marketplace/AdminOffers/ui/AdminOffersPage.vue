@@ -8,7 +8,6 @@
  * ведёт переход «Открыть предложение» из реестра заказов.
  */
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { MarketplaceSaleForm, marketplaceQuantityLabel } from 'src/shared/lib/consts/marketplace-units';
@@ -21,13 +20,15 @@ import { EntityIdBadge } from 'src/shared/ui';
 import { useOfferModeration } from 'src/features/Marketplace/OfferModeration';
 import { PageHint, StatusFilterButton } from 'src/shared/ui/domain';
 import { useHeaderActions } from 'src/shared/hooks';
+import { OfferRegistryOverlay } from 'src/widgets/Marketplace/OfferRegistryOverlay';
+import { useQueryOverlay } from 'src/shared/lib/navigation';
 import { fetchAllOffers } from '../api';
 import type { AdminOfferView, AdminOfferStatusView } from '../types';
 
 const { info } = useSystemStore();
 const { registerAction } = useHeaderActions();
-const router = useRouter();
 const { fioCache, enrichFio } = useFioCache();
+const offerOverlay = useQueryOverlay('offer');
 
 const items = ref<AdminOfferView[]>([]);
 const loading = ref(false);
@@ -122,13 +123,11 @@ function editWarranty(o: AdminOfferView): void {
   confirmSetWarranty({ id: o.id, product_name: o.product_name || 'Предложение' }, o.warranty_days ?? 0);
 }
 
+// Предложение открывается оверлеем поверх реестра: страница пагинации и
+// фильтр статусов остаются на месте, полная страница — по кнопке в оверлее.
 function goToOffer(o: AdminOfferView): void {
   if (!o.id) return;
-  void router.push({
-    name: 'marketplace-admin-offer-detail',
-    params: { coopname: info.coopname, offerId: o.id },
-    query: { from: 'offers' },
-  });
+  offerOverlay.open(o.id);
 }
 
 let lastRequestId = 0;
@@ -255,6 +254,13 @@ q-page.admin-offers(role="region", aria-label="Реестр предложени
           )
             template(#icon)
               q-icon(name="storefront", size="48px")
+
+  OfferRegistryOverlay(
+    :coopname="info.coopname",
+    moderatable,
+    from="offers",
+    @moderated="load"
+  )
 </template>
 
 <style scoped lang="scss">
