@@ -64,4 +64,10 @@ export interface BaseTableProps<T = Record<string, unknown>> {
   selection?: 'multiple' | 'single' | 'none';
   /** Выбранные строки, `v-model:selected`. */
   selected?: T[];
+  /**
+   * Строка открывает сущность по нажатию: курсор-указатель на всей строке и
+   * событие `row-click`. Куда вести, знает экран — таблица отдаёт только
+   * строку. Без этого признака нажатие по строке ничего не делает.
+   */
+  clickableRows?: boolean;
 }

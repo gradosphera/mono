@@ -862,13 +862,16 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               children: [],
             },
             {
-              // Эпик 9 / Story 9.2: admin-стол сводного склада кооператива.
+              // Эпик 9 / Story 9.2: admin-стол склада кооператива — что лежит
+              // на пунктах выдачи. «Сводный склад» переименован в «Склад»
+              // (решение владельца 13.09.2026): сводный он и так, а слово
+              // только удлиняло пункт меню.
               path: 'warehouse-summary',
               name: 'marketplace-warehouse-summary',
               component: markRaw(AdminWarehouseSummaryPage),
               meta: {
-                title: 'Сводный склад',
-                icon: 'fa-solid fa-warehouse',
+                title: 'Склад',
+                icon: 'warehouse',
                 requires: 'Order:read:all',
                 requiresAuth: true,
                 agreements: agreementsBase,

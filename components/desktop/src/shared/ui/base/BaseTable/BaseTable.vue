@@ -17,8 +17,10 @@
       'base-table--sticky': stickyHeader,
       'base-table--skeleton': skeleton,
       'base-table--selectable': selectionMode !== 'none',
+      'base-table--clickable': clickableRows && !skeleton,
     }"
     :style="tableStyle"
+    @row-click="onRowClick"
   >
     <template
       v-for="col in columns"
@@ -77,7 +79,18 @@ const props = withDefaults(defineProps<BaseTableProps<T>>(), {
 
 const emit = defineEmits<{
   'update:selected': [rows: T[]];
+  'row-click': [row: T];
 }>();
+
+/**
+ * Нажатие по строке. Каркас не кликается (там пустышки), и без признака
+ * `clickableRows` событие не уходит: половина реестров строкой ничего не
+ * открывает, и случайный переход там был бы сюрпризом.
+ */
+function onRowClick(_evt: Event, row: T): void {
+  if (!props.clickableRows || skeleton.value) return;
+  emit('row-click', row);
+}
 
 const rowKeyName = computed(() => (props.rowKey as string | undefined) ?? 'id');
 
@@ -213,6 +226,11 @@ const tableStyle = computed(() => ({
   // Каркас: строки не кликаются и не подсвечиваются.
   &--skeleton :deep(tbody tr) {
     pointer-events: none;
+  }
+
+  // Строка открывает сущность — курсор показывает это до нажатия.
+  &--clickable :deep(tbody tr) {
+    cursor: pointer;
   }
 
   // Колонка галочек. При `table-layout: fixed` колонка без явной ширины
