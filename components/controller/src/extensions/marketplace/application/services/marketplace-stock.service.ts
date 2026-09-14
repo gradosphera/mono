@@ -9,10 +9,15 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { createHash } from 'crypto';
-import type { MarketContract } from 'cooptypes';
 import { computeStockOrderHash } from '../shared/order-hash.util';
 import { toQuantityAsset } from '../shared/quantity.util';
-import { resolveSaleUnit } from '../shared/packaging.util';
+import {
+  packageDeltaOfOrder,
+  packageDeltaOfSaleUnit,
+  releasePackagesForPositions,
+  resolveSaleUnit,
+  saleUnitShortfall,
+} from '../shared/packaging.util';
 import { LOGGER_PORT, type ILoggerPort } from '@coopenomics/innercoop';
 import {
   MARKETPLACE_ASSET_CONFIG,
@@ -92,23 +97,8 @@ export interface MarketplaceStockOrderCreateInput {
   package_id?: string | null;
   /** Грань «заказ заказчика» — общий id строк одного оформления/предложения. */
   checkout_id?: string | null;
-  /** Предвычисленный order_hash из заявления о конвертации (см. order-create). */
+  /** Предвычисленный order_hash из превью оформления / бандла (см. order-create). */
   order_hash?: string;
-  /**
-   * Подписанное заказчиком заявление о конвертации паевого взноса в членский
-   * (registry 1110). Заказ из остатка фондируется из членских средств; если
-   * членских не хватает, перед заказом выполняется отдельное действие `convert`
-   * на сумму `convert_amount` с этим заявлением. Опционально: при замене
-   * непоставленного высвобожденные средства уже в членском — конвертация не
-   * нужна, заявление не передаётся.
-   */
-  convert_statement?: MarketContract.Actions.Convert.IConvert['convert_statement'] | null;
-  /**
-   * Сумма конвертации (asset «X.XXXX RUB», тело + членский взнос строки) —
-   * обязательна вместе с `convert_statement`; столько паевого переводится в
-   * членский кошелёк перед заказом из остатка.
-   */
-  convert_amount?: string | null;
 }
 
 export interface MarketplaceStockOrderCreateResult {
@@ -243,6 +233,10 @@ export class MarketplaceStockService {
         : [];
       const receivedPackageSizes = this.resolveReceivedPackageSizes([...group, ...alreadyPublished]);
       const availablePackages = this.filterReceivedPackages(origin.packages, receivedPackageSizes);
+      // Остаток по упаковкам: сколько упаковок каждого содержимого лежит в
+      // этой публикации — позиции склада знают размер упаковки, а не её
+      // идентификатор в каталоге.
+      const packageCounts = MarketplaceStockService.packageCountsBySize(group);
 
       if (!coopOffer) {
         const normalizedPrice = this.normalizePrice(price);
@@ -265,7 +259,11 @@ export class MarketplaceStockService {
           // (считает исключительно из packages[].price) молча игнорирует
           // уценку кооператива.
           sale_form: origin.sale_form,
-          packages: this.scalePackagePrices(availablePackages, origin.price_per_unit, normalizedPrice),
+          packages: MarketplaceStockService.withStockCounts(
+            this.scalePackagePrices(availablePackages, origin.price_per_unit, normalizedPrice),
+            packageCounts,
+            []
+          ),
           quantity_available: qty,
           unlimited_flag: false,
           // Исполнение мгновенное со склада этого КУ — доставка только сюда.
@@ -294,7 +292,11 @@ export class MarketplaceStockService {
           // позиции), повторная публикация должна ЛЕЧИТЬ устаревший
           // sale_form/packages, а не консервировать его навсегда.
           sale_form: origin.sale_form,
-          packages: this.scalePackagePrices(availablePackages, origin.price_per_unit, targetPrice),
+          packages: MarketplaceStockService.withStockCounts(
+            this.scalePackagePrices(availablePackages, origin.price_per_unit, targetPrice),
+            packageCounts,
+            coopOffer.packages ?? []
+          ),
           ...(input.price_per_unit ? { price_per_unit: targetPrice } : {}),
           ...(input.warranty_days !== undefined && input.warranty_days !== null
             ? { warranty_days: input.warranty_days }
@@ -321,6 +323,41 @@ export class MarketplaceStockService {
       );
     }
     return touched;
+  }
+
+  /** Число упаковок каждого содержимого среди позиций: остаток упаковок кооператива. */
+  private static packageCountsBySize(positions: MarketplaceInventoryDomainEntity[]): Map<number, number> {
+    const counts = new Map<number, number>();
+    for (const p of positions) {
+      const size = p.package_size ?? 0;
+      if (!(size > 0)) continue;
+      counts.set(size, (counts.get(size) ?? 0) + Math.round(p.quantity_per_label / size));
+    }
+    return counts;
+  }
+
+  /**
+   * Остаток упаковок предложения кооператива: к уже опубликованному (по
+   * идентификатору упаковки) прибавляются упаковки этой публикации по
+   * содержимому. Счётчики упаковок исходного предложения поставщика сюда не
+   * переносятся — это его остаток, не кооператива; заблокированное и
+   * выданное берутся из уже опубликованного предложения остатка.
+   */
+  private static withStockCounts(
+    packages: MarketplaceOfferPackage[],
+    counts: Map<number, number>,
+    existing: MarketplaceOfferPackage[]
+  ): MarketplaceOfferPackage[] {
+    return packages.map((p) => {
+      const prev = existing.find((e) => e.id === p.id);
+      const added = [...counts.entries()].find(([size]) => Math.abs(size - p.size) < 1e-9)?.[1] ?? 0;
+      return {
+        ...p,
+        quantity_available: (prev?.quantity_available ?? 0) + added,
+        quantity_blocked: prev?.quantity_blocked ?? 0,
+        quantity_consumed: prev?.quantity_consumed ?? 0,
+      };
+    });
   }
 
   /**
@@ -378,20 +415,22 @@ export class MarketplaceStockService {
     if (published.length === 0) return 0;
 
     // Сначала уменьшаем счётчики офферов, затем отвязываем позиции.
-    const byOffer = new Map<string, number>();
+    const byOffer = new Map<string, MarketplaceInventoryDomainEntity[]>();
     for (const p of published) {
-      byOffer.set(p.published_offer_id!, (byOffer.get(p.published_offer_id!) ?? 0) + p.quantity_per_label);
+      byOffer.set(p.published_offer_id!, [...(byOffer.get(p.published_offer_id!) ?? []), p]);
     }
     const affected = await this.inventoryRepo.setPublication(
       input.coopname,
       published.map((p) => p.id),
       null
     );
-    for (const [offer_id, qty] of byOffer) {
+    for (const [offer_id, rows] of byOffer) {
       const offer = await this.offerRepo.findById(offer_id);
       if (!offer) continue;
+      const qty = rows.reduce((sum, p) => sum + p.quantity_per_label, 0);
       await this.offerRepo.applyUpdate(offer_id, {
         quantity_available: Math.max(0, offer.quantity_available - qty),
+        packages: releasePackagesForPositions(offer.packages ?? [], rows),
       });
       this.eventBus.emit(MARKETPLACE_OFFER_APPROVED_EVENT, {
         offer_id,
@@ -404,30 +443,6 @@ export class MarketplaceStockService {
       `Остаток: снято с публикации ${affected} позиций (оператор ${input.operator_account}).`
     );
     return affected;
-  }
-
-  /**
-   * Конвертация паевого взноса в членский кошелёк «Стола заказов» (chain
-   * `convert`). Пополняет членские средства под заказы из остатка — одним
-   * действием на весь дефицит принятия. Заявление о конвертации публикуется в
-   * реестр документов контрактом.
-   */
-  async convertToMember(input: {
-    coopname: string;
-    orderer: string;
-    amount: string;
-    convert_statement: MarketContract.Actions.Convert.IConvert['convert_statement'];
-  }): Promise<void> {
-    try {
-      await this.chainPort.convert({
-        coopname: input.coopname,
-        orderer: input.orderer,
-        amount: input.amount,
-        convert_statement: input.convert_statement,
-      });
-    } catch (error: any) {
-      rethrowChainError(error);
-    }
   }
 
   /**
@@ -452,11 +467,13 @@ export class MarketplaceStockService {
     }
     // Эпик 18: способ отпуска → базовое количество/цена/упаковка (как в order-create).
     const resolved = resolveSaleUnit(offer, input.quantity, input.package_id);
-    if (offer.quantity_available < resolved.baseQuantity) {
+    const shortfall = saleUnitShortfall(offer, resolved);
+    if (shortfall) {
       throw new BadRequestException(
-        `На складе доступно только ${offer.quantity_available} ед.; нельзя заказать ${resolved.baseQuantity}.`
+        `На складе доступно только ${shortfall.available} ${shortfall.unitLabel}; нельзя заказать ${shortfall.requested}.`
       );
     }
+    const packageDelta = packageDeltaOfSaleUnit(resolved);
 
     const order_hash =
       input.order_hash ?? computeStockOrderHash(input.coopname, input.orderer_account, offer.id);
@@ -468,26 +485,12 @@ export class MarketplaceStockService {
     const package_size_asset = toQuantityAsset(resolved.packageSize, offer.unit_of_measure);
     const warranty_period_secs = offer.warranty_days * 86_400;
 
-    // Заказ из остатка фондируется из членского кошелька. Если передано
-    // Заявление о конвертации — сперва пополняем членский с паевого на сумму
-    // строки (тело + взнос) отдельным действием `convert`; иначе средства уже
-    // в членском (замена непоставленного — высвобождены отменой), конвертации нет.
-    if (input.convert_statement) {
-      if (!input.convert_amount) {
-        throw new BadRequestException(
-          'Не указана сумма конвертации для заказа из остатка с паевого.'
-        );
-      }
-      await this.chainPort.convert({
-        coopname: input.coopname,
-        orderer: input.orderer_account,
-        amount: input.convert_amount,
-        convert_statement: input.convert_statement,
-      });
-    }
+    // Паевая модель: внутренний членский кошелёк первым (взнос и тело), остаток
+    // тела — со свободного паевого «Стола заказов»; недостающее пайщик перевёл
+    // заранее действием convert. При нехватке контракт откажет с суммами.
 
     // Optimistic counter ДО chain submit (как в createOrder поставщика).
-    await this.offerCounters.onOrderBlocked(offer.id, resolved.baseQuantity);
+    await this.offerCounters.onOrderBlocked(offer.id, resolved.baseQuantity, packageDelta);
 
     let txHash: string;
     try {
@@ -513,7 +516,7 @@ export class MarketplaceStockService {
         error.stack
       );
       try {
-        await this.offerCounters.onOrderRolledBack(offer.id, resolved.baseQuantity);
+        await this.offerCounters.onOrderRolledBack(offer.id, resolved.baseQuantity, packageDelta);
       } catch (compErr: any) {
         this.logger.error(
           `createStockOrder: compensating onOrderRolledBack упал (offer=${offer.id}): ${compErr.message}. РУЧНОЙ ФИКС counter!`
@@ -541,6 +544,7 @@ export class MarketplaceStockService {
       unit_of_measure: offer.unit_of_measure,
       price_per_unit: resolved.unitPrice,
       package_size: resolved.packageSize,
+      package_id: resolved.packageId,
       total_cost,
       cycle_id: null,
       checkout_id: input.checkout_id ?? null,
@@ -566,7 +570,7 @@ export class MarketplaceStockService {
           orderer: input.orderer_account,
           order_hash,
         });
-        await this.offerCounters.onOrderUnblocked(offer.id, resolved.baseQuantity);
+        await this.offerCounters.onOrderUnblocked(offer.id, resolved.baseQuantity, packageDelta);
         await this.orderRepo.applyStatusTransition(order.id, 'CANCELLED_BY_ORDERER', 'Недостаточно свободного остатка на складе');
       } catch (compErr: any) {
         this.logger.error(
@@ -619,7 +623,7 @@ export class MarketplaceStockService {
     }
 
     try {
-      await this.offerCounters.onOrderUnblocked(order.offer_id, order.quantity);
+      await this.offerCounters.onOrderUnblocked(order.offer_id, order.quantity, packageDeltaOfOrder(order));
     } catch (counterErr: any) {
       this.logger.warn(
         `cancelStockOrder: counter onOrderUnblocked упал (offer=${order.offer_id}): ${counterErr.message} — продолжаю`

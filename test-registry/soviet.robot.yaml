@@ -315,3 +315,44 @@ cases:
     test: components/controller/tests/unit/soviet-robot/robot-registry.service.test.ts
     status: passing
 
+  # ── Порт для других расширений (Стол заказов, компонент 68) ──────────────
+
+  - id: sov.rob.happy.91
+    level: backend
+    kind: happy
+    scenario: >
+      Стол заказов зовёт робота напрямую по номеру решения сразу после
+      постановки повестки (`SOVIET_ROBOT_PORT.requestDecision`).
+    expect: >
+      запись журнала одна (та же, что от события повестки); голоса и протокол
+      дожимаются повторными проходами без ожидания тика сторожа; ответ
+      «authorized» с транзакцией протокола
+    test: components/controller/tests/unit/soviet-robot/soviet-robot-innercoop.adapter.test.ts
+    status: passing
+
+  - id: sov.rob.side.91
+    level: backend
+    kind: side
+    scenario: >
+      Робот выключен, кворума делегировавших нет, председатель не делегировал
+      протокол либо попытки исчерпаны.
+    expect: >
+      ответ «manual» / «pending» / «failed» с причиной; инициатор уходит в
+      режим ожидания решения людей, у стойки не ждёт
+    test: components/controller/tests/unit/soviet-robot/soviet-robot-innercoop.adapter.test.ts
+    status: passing
+
+
+  - id: sov.rob.side.92
+    level: backend
+    kind: side
+    scenario: >
+      Робот только что отдал голоса, протокол собирается раньше, чем парсер
+      положил их в историю действий: фабрика отвечает «голоса за решение не
+      найдены». Та же ошибка не проходит за отведённые сборки; иная ошибка генерации.
+    expect: >
+      протокол пересобирается в том же проходе с короткой паузой и решение
+      исполняется без отсрочки и без ответа «pending» инициатору; если индекс не
+      догнал или ошибка другая — обычная ошибка с отсрочкой повтора
+    test: components/controller/tests/unit/soviet-robot/robot-decision.service.test.ts
+    status: written   # прогон не подтверждён локально — гоняет CI

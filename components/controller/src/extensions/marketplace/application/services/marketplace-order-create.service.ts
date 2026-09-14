@@ -2,14 +2,12 @@ import { rethrowChainError } from '@coopenomics/extension-kit';
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { createHash } from 'crypto';
-import type { MarketContract } from 'cooptypes';
 import { LOGGER_PORT, type ILoggerPort,
-  type InnerTransactResult,
 } from '@coopenomics/innercoop';
 import { computeOrderHash } from '../shared/order-hash.util';
 import { toQuantityAsset } from '../shared/quantity.util';
 import { calcCostAmount } from '../shared/cost.util';
-import { resolveSaleUnit } from '../shared/packaging.util';
+import { packageDeltaOfSaleUnit, resolveSaleUnit, saleUnitShortfall } from '../shared/packaging.util';
 import {
   MARKETPLACE_NEW_ORDER_FOR_SUPPLIER_EVENT,
   type MarketplaceNewOrderForSupplierEvent,
@@ -72,18 +70,10 @@ export interface MarketplaceOrderCreateInputDto {
    */
   checkout_id?: string | null;
   /**
-   * Предвычисленный order_hash из подписываемого заявления о конвертации:
-   * заявление подписывается клиентом ДО chain submit и несёт order_hash в
-   * мете, поэтому hash рождается на этапе превью (checkout signable
-   * payloads), а не здесь. Без него генерируется на месте.
+   * Предвычисленный order_hash (из превью оформления корзины) — чтобы клиент
+   * и бэкенд говорили об одном заказе. Без него генерируется на месте.
    */
   order_hash?: string;
-  /**
-   * Подписанное заказчиком заявление о конвертации паевого взноса в
-   * членский (registry 1110) — обязательный параметр
-   * `marketplace::createorder`; контракт публикует его в реестр документов.
-   */
-  convert_statement: MarketContract.Actions.CreateOrder.ICreateOrder['convert_statement'];
 }
 
 export interface MarketplaceOrderCreateResult {
@@ -173,11 +163,14 @@ export class MarketplaceOrderCreateService {
     // По мере — quantity как базовое количество; упаковкой — quantity как число
     // упаковок, базовое = число × содержимое, цена — за упаковку.
     const resolved = resolveSaleUnit(offer, input.quantity, input.package_id);
-    if (!offer.unlimited_flag && offer.quantity_available < resolved.baseQuantity) {
+    // Нехватка проверяется по выбранной упаковке, а не по котлу базовых единиц.
+    const shortfall = saleUnitShortfall(offer, resolved);
+    if (shortfall) {
       throw new BadRequestException(
-        `Доступно только ${offer.quantity_available} ед.; нельзя заказать ${resolved.baseQuantity}.`
+        `Доступно только ${shortfall.available} ${shortfall.unitLabel}; нельзя заказать ${shortfall.requested}.`
       );
     }
+    const packageDelta = packageDeltaOfSaleUnit(resolved);
 
     // ── 2. Вычисление производных полей Order'а ─────────────────────
     const order_hash =
@@ -191,7 +184,7 @@ export class MarketplaceOrderCreateService {
     const warranty_period_secs = offer.warranty_days * 86_400;
 
     // ── 3. Optimistic counter (синхронно ДО chain submit) ──────────
-    const offerBeforeBlock = await this.offerCounters.onOrderBlocked(offer.id, resolved.baseQuantity);
+    const offerBeforeBlock = await this.offerCounters.onOrderBlocked(offer.id, resolved.baseQuantity, packageDelta);
     this.logger.debug(
       `MarketplaceOrderCreateService: counter onOrderBlocked OK (offer=${offer.id}, qty=${resolved.baseQuantity}, available=${offerBeforeBlock.quantity_available}, blocked=${offerBeforeBlock.quantity_blocked})`
     );
@@ -212,7 +205,6 @@ export class MarketplaceOrderCreateService {
         package_size: package_size_asset,
         warranty_period_secs,
         batch_hash: MarketplaceOrderCreateService.ZERO_HASH,
-        convert_statement: input.convert_statement,
       });
       const result = this.normalizeTxResult(tx);
       txHash = result.tx_hash;
@@ -223,7 +215,7 @@ export class MarketplaceOrderCreateService {
         error.stack
       );
       try {
-        await this.offerCounters.onOrderRolledBack(offer.id, resolved.baseQuantity);
+        await this.offerCounters.onOrderRolledBack(offer.id, resolved.baseQuantity, packageDelta);
       } catch (compErr: any) {
         // Counter rollback fail на compensating-path — критическая
         // несогласованность; alert + manual reconciliation.
@@ -256,6 +248,7 @@ export class MarketplaceOrderCreateService {
       unit_of_measure: offer.unit_of_measure,
       price_per_unit: resolved.unitPrice,
       package_size: resolved.packageSize,
+      package_id: resolved.packageId,
       total_cost: locked_amount,
       cycle_id: null,
       checkout_id: input.checkout_id ?? null,

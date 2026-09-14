@@ -9,6 +9,7 @@ import config from '~/config/config';
 import { BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import type { ActiveKeysQuorum, EndorsementRecord, ServedCooperative } from '~/domain/common/ports/blockchain.port';
 import { RpcPool } from './rpc-pool.service';
+import { retryOnChainExhaustion } from './chain-retry';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import type { BlockchainAccountInterface } from '~/types/shared';
@@ -131,11 +132,30 @@ export class BlockchainService implements BlockchainPort {
   }
 
   public async transact(actionOrActions: any | any[], broadcast = true): Promise<TransactResult> {
-    if (Array.isArray(actionOrActions)) {
-      return this.sendActions(actionOrActions, broadcast);
-    } else {
-      return this.sendAction(actionOrActions, broadcast);
-    }
+    // Сессия фиксируется в момент вызова, до первого await. Сервис — одиночка,
+    // и вызывающие делают `initialize(); transact()` подряд; пока здесь
+    // ждётся ABI, параллельный запрос с другим подписантом успевал вызвать
+    // `initialize()` и подменить ключ, которым уйдёт эта транзакция.
+    const session = this.session;
+
+    // Единственная на весь бэкенд отправка в цепь — здесь же и повтор для
+    // транзакций, срезанных лимитами CPU/NET на пике нагрузки (chain-retry.ts).
+    // Такая транзакция в блок не попадает, поэтому повтор дублей не даёт, а
+    // пайщик вместо красной ошибки получает обычный ответ со второй попытки.
+    return retryOnChainExhaustion(
+      () =>
+        Array.isArray(actionOrActions)
+          ? this.sendActions(session, actionOrActions, broadcast)
+          : this.sendAction(session, actionOrActions, broadcast),
+      {
+        attempts: config.blockchain.txRetryAttempts,
+        delayMs: config.blockchain.txRetryDelayMs,
+        onRetry: ({ attempt, attempts, delayMs, reason }) =>
+          this.logger.warn(
+            `Транзакция не уложилась в лимит цепи (${reason}) — повтор ${attempt}/${attempts} через ${delayMs}мс`
+          ),
+      }
+    );
   }
 
   private async formActionFromAbi(action: any): Promise<any> {
@@ -143,19 +163,19 @@ export class BlockchainService implements BlockchainPort {
     return Action.from(action, abi);
   }
 
-  private async sendAction(action: any, broadcast = true): Promise<TransactResult> {
+  private async sendAction(session: Session, action: any, broadcast = true): Promise<TransactResult> {
     const formedAction = await this.formActionFromAbi(action);
-    return await this.session.transact({ action: formedAction }, { broadcast });
+    return await session.transact({ action: formedAction }, { broadcast });
   }
 
-  private async sendActions(actions: any[], broadcast = true): Promise<TransactResult> {
+  private async sendActions(session: Session, actions: any[], broadcast = true): Promise<TransactResult> {
     const data: Action[] = [];
     for (const action of actions) {
       const formedAction = await this.formActionFromAbi(action);
       data.push(formedAction);
     }
 
-    return await this.session.transact({ actions: data }, { broadcast });
+    return await session.transact({ actions: data }, { broadcast });
   }
 
   public async getAllRows<T = any>(code: string, scope: string, tableName: string): Promise<any[]> {

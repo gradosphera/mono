@@ -135,6 +135,10 @@ services:
     # См. coopback: пишем от хостового ant (uid 1000), HOME=/tmp.
     user: "1000:1000"
     environment:
+      # Адреса для SSR-сервера внутри сети стенда (в браузер не попадают):
+      # по публичному имени шлюз отвечает контейнеру 403, и SSR рендерил гостя.
+      SSR_BACKEND_URL: http://nginx/backend
+      SSR_CHAIN_URL: http://nginx/api
       HOME: /tmp
     ports:
       - "127.0.0.1:${DESKTOP_HOST_PORT:-2999}:2999"

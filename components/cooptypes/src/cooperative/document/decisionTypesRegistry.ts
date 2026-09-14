@@ -5,6 +5,8 @@ import {
   DecisionOfParticipantApplication, // 501
   DecisionOfParticipantExit, // 201
   FreeDecision,
+  MarketplaceReturnCancelDecision, // 1117
+  MarketplaceShareReturnDecision, // 1114
   MarketplaceWriteoffProtocol, // 1107
   ResultContributionDecision, // 1041
   ReturnByMoneyDecision, // 901
@@ -115,6 +117,20 @@ export const decisionTypesRegistry: Record<string, IDecisionTypeInfo> = {
     title: 'Списание скоропорта',
     description: 'Проект списания скоропортящегося имущества со склада участка.',
     protocol_registry_id: MarketplaceWriteoffProtocol.registry_id,
+    extension: 'market',
+  },
+  mktissue: {
+    type: 'mktissue',
+    title: 'Выдача имущества пайщику',
+    description: 'Заявление пайщика о возврате паевого взноса имуществом: совет разрешает выдать заказ со Стола заказов.',
+    protocol_registry_id: MarketplaceShareReturnDecision.registry_id,
+    extension: 'market',
+  },
+  mktretrn: {
+    type: 'mktretrn',
+    title: 'Отмена сделки по гарантийному возврату',
+    description: 'Заявление оператора кооперативного участка об отмене сделки: имущество принято на участке по рекламации пайщика, совет отменяет сделку и восстанавливает паевой и членский взносы.',
+    protocol_registry_id: MarketplaceReturnCancelDecision.registry_id,
     extension: 'market',
   },
   createresult: {

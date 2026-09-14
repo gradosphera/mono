@@ -128,14 +128,14 @@ jobs:
       # уехали две ошибки компилятора — в factory (документ собирался без
       # обязательного поля модели) и в sdk (селектор спрашивал у схемы
       # несуществующее поле).
-      #
-      # cooptypes и boot пока не подключены: в них лежит старый долг
-      # (недогенерированные интерфейсы капитала и отсутствующие @types), из-за
-      # которого прогон был бы красным с первого дня. Долг вычищен в ветке
-      # паевой модели Стола заказов — подключить их этими же двумя строками
-      # сразу после её слияния.
+      - name: tsc --noEmit (cooptypes)
+        run: pnpm --filter cooptypes run typecheck
+
       - name: tsc --noEmit (factory)
         run: pnpm --filter @coopenomics/factory run typecheck
 
       - name: tsc --noEmit (sdk)
         run: pnpm --filter @coopenomics/sdk run typecheck
+
+      - name: tsc --noEmit (boot)
+        run: pnpm --filter @coopenomics/boot run typecheck

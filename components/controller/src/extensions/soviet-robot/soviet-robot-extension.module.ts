@@ -22,6 +22,7 @@ import { RobotDecisionService } from './application/services/robot-decision.serv
 import { RobotWatchdogService } from './application/services/robot-watchdog.service';
 import { RobotEventsService } from './application/services/robot-events.service';
 import { RobotDesktopGrantsProvider } from './application/desktop/robot-desktop-grants.provider';
+import { SovietRobotInnercoopAdapter } from './application/adapters/soviet-robot-innercoop.adapter';
 import { SovietRobotResolver } from './application/resolvers/soviet-robot.resolver';
 import { ROBOT_EXTENSION_NAME } from './domain/constants';
 
@@ -32,6 +33,8 @@ function describeField(description: DeserializedDescriptionOfExtension): string 
 export const defaultConfig = {
   max_attempts: 5,
   retry_backoff_sec: 5,
+  index_lag_attempts: 10,
+  index_lag_pause_ms: 300,
 };
 
 export const Schema = z.object({
@@ -57,6 +60,29 @@ export const Schema = z.object({
         rules: ['val >= 1'],
         prepend: 'Через',
         append: 'секунд',
+      })
+    ),
+  index_lag_attempts: z
+    .number()
+    .default(defaultConfig.index_lag_attempts)
+    .describe(
+      describeField({
+        label: 'Сборок протокола, пока голоса не видны в истории',
+        note: 'Голоса робота попадают в историю действий с небольшой задержкой; протокол собирается повторно в том же проходе',
+        rules: ['val >= 1'],
+        prepend: 'Не больше',
+        append: 'раз',
+      })
+    ),
+  index_lag_pause_ms: z
+    .number()
+    .default(defaultConfig.index_lag_pause_ms)
+    .describe(
+      describeField({
+        label: 'Пауза между такими сборками (в миллисекундах)',
+        rules: ['val >= 0'],
+        prepend: 'Через',
+        append: 'мс',
       })
     ),
 });
@@ -105,8 +131,10 @@ export class SovietRobotExtension extends BaseExtensionModule {
     RobotEventsService,
     RobotDesktopGrantsProvider,
     SovietRobotResolver,
+    // Порт для других расширений (Стол заказов): прямой вызов «реши сейчас».
+    SovietRobotInnercoopAdapter,
   ],
-  exports: [SovietRobotExtension, RobotRegistryService, RobotKeyService],
+  exports: [SovietRobotExtension, RobotRegistryService, RobotKeyService, SovietRobotInnercoopAdapter],
 })
 export class SovietRobotExtensionModule {
   constructor(private readonly robotExtension: SovietRobotExtension) {}

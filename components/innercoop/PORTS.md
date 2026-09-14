@@ -33,7 +33,7 @@
 | `FILE_STORAGE_PORT` | `IFileStoragePort` (1)<br><sub>core-ports/file-storage.port.ts</sub> | — | expenses, marketplace | Универсальное файловое хранилище контура кооператива. |
 | `FREE_DECISION_PORT` | `IFreeDecisionPort` (3)<br><sub>core-ports/free-decision.port.ts</sub> | `FreeDecisionAdapter` | capital, chairman | Свободные решения совета: расширение заводит проект решения, получает его документ и публикует в цепь. |
 | `INTEGRATION_SETTINGS_PORT` | `IIntegrationSettingsPort` (1)<br><sub>core-ports/integration-settings.port.ts</sub> | `IntegrationSettingsInnercoopAdapter` | capital, cardcoop, chatcoop, marketplace | Доступы к внешним службам: мессенджер, распознавание речи, видеосвязь, геокодер, хостинг репозиториев. |
-| `LEDGER2_HISTORY_PORT` | `ILedger2HistoryPort` (2)<br><sub>core-ports/ledger2-history.port.ts</sub> | `Ledger2InnercoopHistoryAdapter` | marketplace, reports | Ledger2 (ядро): read-only контракт истории операций/движений по кошельку из журнала `blockchain_actions`. |
+| `LEDGER2_HISTORY_PORT` | `ILedger2HistoryPort` (3)<br><sub>core-ports/ledger2-history.port.ts</sub> | `Ledger2InnercoopHistoryAdapter` | marketplace, reports | Ledger2 (ядро): read-only контракт истории операций/движений по кошельку из журнала `blockchain_actions`. |
 | `LOGGER_PORT` | `ILoggerPort` (6)<br><sub>core-ports/logger.port.ts</sub> | `WinstonLoggerService` | builtin, capital, cardcoop, chairman, chatcoop, expenses, ku, marketplace, participant, powerup, qrpay, reports, sberpoll, soviet-robot, yookassa | Журналирование контура кооператива. |
 | `MEET_PORT` | `IMeetPort` (3)<br><sub>core-ports/meet.port.ts</sub> | `MeetDataAdapter` | chairman, participant | Собрания пайщиков: перечислить и получить по идентификатору. |
 | `MESSAGE_CHANNEL_PORT` | `IMessageChannelPort` (2)<br><sub>core-ports/message-channel.port.ts</sub> | `RedisService` | sberpoll, yookassa | Именованный канал сообщений контура кооператива: публикация и подписка. |
@@ -72,6 +72,7 @@
 | `MATRIX_ROOM_MESSAGING_PORT` | `IMatrixRoomMessagingPort` (4)<br><sub>cross-plugin-ports/matrix-room-messaging.port.ts</sub> | `ChatcoopInnercoopMatrixRoomMessagingAdapter` | capital* | Отправка сообщений в Matrix (Client-Server API) от имени сервисной учётки. |
 | `PROJECT_CAPITAL_CLEARANCE_PORT` | `IProjectCapitalClearancePort` (2)<br><sub>cross-plugin-ports/project-capital-clearance.port.ts</sub> | `CapitalInnercoopProjectCapitalClearanceAdapter` | chatcoop* | Допуск к проекту Capital (подтверждённый appendix / makeClearance). |
 | `PROJECT_COMMUNICATION_ARTIFACTS_PORT` | `IProjectCommunicationArtifactsPort` (8)<br><sub>cross-plugin-ports/project-communication-artifacts.port.ts</sub> | `ChatcoopInnercoopProjectCommunicationArtifactsAdapter` | capital*, chatcoop* | Сообщения Matrix в истории (текст и расшифрованное аудио). |
+| `SOVIET_ROBOT_PORT` | `ISovietRobotPort` (2)<br><sub>cross-plugin-ports/soviet-robot.port.ts</sub> | `SovietRobotInnercoopAdapter` | marketplace* | Робот решений совета (расширение `soviet-robot`): прямой рычаг для расширений, которые ставят повестку и ждут решение здесь и сейчас. |
 
 ## Хуки
 
@@ -82,4 +83,4 @@
 | `DESKTOP_GRANTS_REGISTRY_PORT` | `IDesktopGrantsRegistryPort` (1)<br><sub>hooks/desktop-grants.hook.ts</sub> | `ExtensionGrantsRegistry` | marketplace, soviet-robot | Права пайщика на рабочем столе расширения. |
 | `REGISTRATION_DOCUMENT_PARAMETERS_REGISTRY_PORT` | `IRegistrationDocumentParametersRegistryPort` (2)<br><sub>hooks/registration-document-parameters.hook.ts</sub> | `RegistrationDocumentParametersRegistry` | capital, marketplace | Параметры оферты, которые расширение выдаёт вступающему пайщику. |
 
-Всего портов: 50.
+Всего портов: 51.
