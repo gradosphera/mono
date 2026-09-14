@@ -6,8 +6,20 @@
       .text-caption.text-grey-7 ID процесса:
       EntityIdBadge(:rawId='processHash' copy-on-click)
 
+  //- Загрузка: каркас на местах документов, операций и проводок. Спиннер
+  //- крутился у левого края под шапкой — по нему не видно ни что грузится, ни
+  //- сколько там будет содержимого (канон: скелетон, не спиннер).
   template(v-if='loading')
-    q-spinner(size='sm')
+    BaseCard.q-mb-md(variant='flat', title='Документы')
+      CardListSkeleton(:count='2')
+
+    .row.q-col-gutter-md
+      .col-12
+        BaseCard(variant='flat', title='Операции')
+          TableSkeleton(:columns='OP_SKELETON_COLUMNS', :rows='4')
+      .col-12
+        BaseCard(variant='flat', title='Проводки')
+          TableSkeleton(:columns='PST_SKELETON_COLUMNS', :rows='3')
   template(v-else)
     //- Документы процесса (наименование / дата / подписанты). Открываются во
     //- всплывающем окне без переадресации — агрегат уже загружен в getProcess.
@@ -121,6 +133,8 @@ import { useRouter } from 'vue-router'
 import { copyToClipboard } from 'quasar'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { EntityIdBadge } from 'src/shared/ui'
+import { BaseCard, CardListSkeleton, TableSkeleton } from 'src/shared/ui/base'
+import type { TableSkeletonColumn } from 'src/shared/ui/base'
 import { DocumentRow, type DocumentRowDoc } from 'src/shared/ui/domain/DocumentRow'
 import { DocumentViewerDialog } from 'src/shared/ui/domain/DocumentViewerDialog'
 import type { IDocumentAggregate } from 'src/entities/Document/model'
@@ -184,6 +198,23 @@ const pstColumns = [
   { name: 'debit', align: 'center' as const, label: 'Дебет', field: 'debitAccountId' },
   { name: 'credit', align: 'center' as const, label: 'Кредит', field: 'creditAccountId' },
   { name: 'amount', align: 'right' as const, label: 'Сумма', field: 'quantity' },
+]
+
+// Каркас повторяет шапки тех же таблиц: при подстановке данных заголовки и
+// колонки остаются на месте, содержимое просто заполняет готовую сетку.
+const OP_SKELETON_COLUMNS: TableSkeletonColumn[] = [
+  { label: 'Дата', width: '150px' },
+  { label: '№ операции', width: '120px', cell: 'badge' },
+  { label: 'Операция', cell: 'badge' },
+  { label: 'Сумма', width: '120px', class: 'col-num' },
+]
+
+const PST_SKELETON_COLUMNS: TableSkeletonColumn[] = [
+  { label: 'Дата', width: '150px' },
+  { label: '№ проводки', width: '120px', cell: 'badge' },
+  { label: 'Дебет', width: '90px', cell: 'badge' },
+  { label: 'Кредит', width: '90px', cell: 'badge' },
+  { label: 'Сумма', width: '120px', class: 'col-num' },
 ]
 
 function formatDate(d: string | Date | null | undefined): string {

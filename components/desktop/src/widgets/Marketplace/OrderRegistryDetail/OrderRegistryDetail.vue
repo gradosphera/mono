@@ -14,7 +14,7 @@ import { computed, ref, watch } from 'vue';
 import { FailAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { marketplaceOrderSaleUnit } from 'src/shared/lib/consts/marketplace-units';
-import { BaseBadge, BaseButton, BaseCard, EmptyState } from 'src/shared/ui/base';
+import { BaseBadge, BaseButton, BaseCard, CardListSkeleton, EmptyState } from 'src/shared/ui/base';
 import { EntityIdBadge } from 'src/shared/ui';
 import { ActivityTimeline, DataRow, type ActivityEvent } from 'src/shared/ui/domain';
 import { ProcessDetailCard } from 'src/widgets/Process/ProcessDetailCard';
@@ -135,8 +135,9 @@ function goToOffer(): void {
 
 <template lang="pug">
 .order-registry-detail(role="region", aria-label="Заказ")
-  q-inner-loading(:showing="loading && !order")
-    q-spinner(color="primary", size="2em")
+  //- Канон: каркас, а не спиннер поверх пустоты — по кружку не видно, что
+  //- именно грузится и сколько там будет содержимого.
+  CardListSkeleton(v-if="loading && !order", :count="2")
 
   EmptyState(
     v-if="notFound && !loading",
