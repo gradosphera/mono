@@ -240,15 +240,19 @@ function onClick() {
   &__media {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    background: var(--mp-surface-1);
+    // Квадрат вместо 4:3 — компромисс между вертикальными и горизонтальными
+    // снимками: и те и другие помещаются целиком, не мельчая.
+    aspect-ratio: 1 / 1;
+    background: var(--p-surface-2);
     overflow: hidden;
 
     // img живёт внутри дочернего OfferGallery — достаём через :deep.
+    // Целиком, а не с обрезкой: на срезанном низу оставались вес и надпись с
+    // упаковки, ради которых фото и делали.
     :deep(img) {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       transition: transform .4s ease;
     }
   }
@@ -412,7 +416,7 @@ function onClick() {
   .mp-catalog-offer-card {
     &__title { font-size: 14px; }
     &__price { font-size: 16px; }
-    &__media { aspect-ratio: 16 / 10; }
+    &__media { aspect-ratio: 1 / 1; }
   }
 }
 
