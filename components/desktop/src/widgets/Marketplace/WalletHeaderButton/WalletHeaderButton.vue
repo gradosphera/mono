@@ -17,9 +17,10 @@ import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
  * свободный паевой Стола заказов, которого в каталоге не видно вовсе.
  *
  * Поэтому баланс стола заказов живёт прямо в шапке каталога, рядом с
- * корзиной, а по нажатию открывается окно с обоими кошельками и взносом.
- * Главный паевой кошелёк на своём месте (стол пайщика) — здесь он показан
- * справочно, чтобы было видно, из чего оплачивается заказ.
+ * корзиной, а по нажатию открывается окно с разбивкой по кошелькам и взносом.
+ * В шапке стоит общая сумма всех трёх кошельков — человеку важно, на что он
+ * вообще может рассчитывать, а не в каком кошельке это лежит; деление по
+ * кошелькам ждёт его в окне.
  */
 
 const props = defineProps<{ coopname: string }>();
@@ -53,6 +54,29 @@ function walletLocked(walletName: string): string | undefined {
 }
 
 const marketAmount = computed(() => walletAmount(MARKET_WALLET));
+
+/** Доступное на кошельке числом — для суммирования, а не для показа. */
+function walletValue(walletName: string): number {
+  const row = walletStore.user_wallets.find((w) => w.wallet_name === walletName);
+  return Number.parseFloat(row?.available ?? '0') || 0;
+}
+
+/**
+ * В шапке — всё, чем заказчик может расплатиться: свободный паевой и членский
+ * Стола заказов вместе с главным паевым. Прежде там стоял один свободный
+ * паевой, и у человека с двадцатью тысячами на главном кошельке в каталоге
+ * висел ноль (жалоба 2026-09-14). Из чего сложилась сумма — видно в окне,
+ * которое кнопка и открывает.
+ */
+const totalAmount = computed(() =>
+  formatAsset2Digits(
+    `${(
+      walletValue(MARKET_WALLET) +
+      walletValue(MEMBER_WALLET) +
+      walletValue(SHARE_WALLET)
+    ).toFixed(4)} ${symbol.value}`,
+  ),
+);
 
 async function loadWallets(): Promise<void> {
   if (!session.username) return;
@@ -88,7 +112,7 @@ Teleport(to="#header-actions-host", defer)
   )
     template(#icon-left)
       q-icon(name="account_balance_wallet", size="16px")
-    | {{ marketAmount }} {{ symbol }}
+    | {{ totalAmount }}
 
 BaseDialog(v-model="dialogOpen", title="Кошелёк Стола заказов", size="sm")
   //- Сумма — отдельной строкой под названием (`stacked`): в узком окне длинные
