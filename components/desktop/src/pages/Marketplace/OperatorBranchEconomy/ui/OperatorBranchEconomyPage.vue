@@ -144,6 +144,20 @@ function goToOrder(orderId: string): void {
   orderOverlay.open(orderId)
 }
 
+/**
+ * Заказ стоит не за каждым движением: взносы и распределения приходят и без
+ * него. Поэтому нажатие работает построчно — там, где заказ есть, а не кнопкой
+ * в ячейке назначения: кнопка отнимала место у текста и заставляла целиться в
+ * неё вместо строки.
+ */
+function hasOrder(row: WalletHistoryRow): boolean {
+  return Boolean(row.order_id)
+}
+
+function openHistoryOrder(row: WalletHistoryRow): void {
+  if (row.order_id) goToOrder(row.order_id)
+}
+
 function assetAmount(asset: string): number {
   return Number.parseFloat(asset?.split(' ')[0] ?? '0') || 0
 }
@@ -634,7 +648,9 @@ q-page.economy
           :rows='walletHistory',
           row-key='global_sequence',
           :loading='firstLoad',
-          min-width='900px'
+          min-width='900px',
+          :clickable-rows='hasOrder',
+          @row-click='openHistoryOrder'
         )
           template(#cell-date='{ row }')
             span.t-mono {{ formatDateToLocalTimezone(row.created_at, 'DD.MM.YYYY HH:mm') }}
@@ -643,17 +659,7 @@ q-page.economy
           template(#cell-amount='{ row }')
             span.t-mono {{ formatProcessAmount(row.quantity) }}
           template(#cell-memo='{ row }')
-            .economy__memo
-              span {{ row.memo || '—' }}
-              BaseButton(
-                v-if='row.order_id',
-                variant='ghost',
-                size='sm',
-                @click='goToOrder(row.order_id)'
-              )
-                template(#icon-left)
-                  q-icon(name='open_in_new', size='14px')
-                | Заказ
+            | {{ row.memo || '—' }}
 
         .banner.banner--info(v-else)
           q-icon.banner__icon(name='info', size='18px')

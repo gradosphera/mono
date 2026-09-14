@@ -16,8 +16,8 @@
       'base-table--sticky': stickyHeader,
       'base-table--skeleton': skeleton,
       'base-table--selectable': selectionMode !== 'none',
-      'base-table--clickable': clickableRows && !skeleton,
     }"
+    :table-row-class-fn="rowClassFn"
     :style="tableStyle"
     @row-click="onRowClick"
   >
@@ -89,8 +89,24 @@ const emit = defineEmits<{
 /** Элементы строки, у которых своё действие: нажатие по ним сущность не открывает. */
 const OWN_ACTION_SELECTOR = '.q-checkbox, .q-btn, .q-menu, .q-toggle, a, input, .q-table--col-auto-width';
 
+/**
+ * Открывается ли эта строка. Признак бывает общим на таблицу (реестр, где
+ * каждая строка ведёт на свою сущность) и построчным (лента, где переход есть
+ * только у части записей).
+ */
+function isRowClickable(row: T): boolean {
+  if (skeleton.value) return false;
+  const rule = props.clickableRows;
+  return typeof rule === 'function' ? rule(row) : rule === true;
+}
+
+/** Курсор-указатель достаётся только тем строкам, которые действительно открываются. */
+function rowClassFn(row: T): string {
+  return isRowClickable(row) ? 'base-table__row--click' : '';
+}
+
 function onRowClick(evt: Event, row: T): void {
-  if (!props.clickableRows || skeleton.value) return;
+  if (!isRowClickable(row)) return;
   // Галочка выбора, кнопка действий и всплывающее меню внутри строки — сами по
   // себе действия. Открывать по ним ещё и сущность значит делать два дела на
   // одно нажатие: отметил бокс к печати — и получил панель поверх списка.
@@ -258,7 +274,7 @@ const tableStyle = computed(() => ({
   // строки под курсором одна на все таблицы платформы и живёт в каноне
   // (`quasar-canon.css`): иначе одни реестры выделяются зелёным, другие серым,
   // и разница читается как разница в поведении, которой нет.
-  &--clickable :deep(tbody tr) {
+  :deep(tbody tr.base-table__row--click) {
     cursor: pointer;
   }
 
