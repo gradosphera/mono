@@ -13,6 +13,7 @@
 import { computed, ref, watch } from 'vue';
 import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
+import { useDesktopStore } from 'src/entities/Desktop';
 import { BaseBadge, BaseButton, BaseCard, EmptyState } from 'src/shared/ui/base';
 import type { BaseBadgeVariant } from 'src/shared/ui/base';
 import { EntityIdBadge } from 'src/shared/ui';
@@ -47,6 +48,17 @@ const emit = defineEmits<{
 }>();
 
 const system = useSystemStore();
+const desktop = useDesktopStore();
+
+/**
+ * Действия модератора в карточке — по праву председателя, а не по тому, с
+ * какого экрана её открыли: гарантийный срок правят и из реестра предложений,
+ * и из очереди модерации, и со склада, куда карточка приходит по позиции.
+ * Признак `moderatable` оставлен для экранов, которые включают действия явно.
+ */
+const canModerateOffers = computed(
+  () => props.moderatable || desktop.hasGrant('market-admin', 'Offer:moderate'),
+);
 
 const offer = ref<MarketplaceOfferDetailView | null>(null);
 const categoryNames = ref<Record<number, string>>({});
@@ -206,7 +218,7 @@ function editWarranty(): void {
 }
 
 const canModerate = computed(
-  () => props.moderatable && offer.value?.status === 'PENDING_MODERATION',
+  () => canModerateOffers.value && offer.value?.status === 'PENDING_MODERATION',
 );
 </script>
 
@@ -286,7 +298,7 @@ const canModerate = computed(
         //- Срок задаёт модератор при одобрении и меняет здесь же: это свойство
         //- предложения, а не строки реестра.
         BaseButton(
-          v-if='moderatable',
+          v-if='canModerateOffers',
           variant='ghost',
           size='sm',
           :loading='isSettingWarranty(offer.id)',
