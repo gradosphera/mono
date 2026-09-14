@@ -6,7 +6,10 @@ DetailsDrawer(
   @update:model-value='(v) => !v && overlay.close()'
 )
   template(#actions)
+    //- Полная страница предложения живёт на столе администратора: там, где её
+    //- нет (стол ПВЗ), кнопка вела бы в недоступный маршрут.
     BaseButton(
+      v-if='showFullPage',
       variant='ghost',
       size='sm',
       aria-label='Открыть предложение на отдельной странице',
@@ -48,8 +51,10 @@ const props = withDefaults(
     moderatable?: boolean;
     /** Откуда открыт оверлей — подпись кнопки «назад» на полной странице. */
     from?: string;
+    /** Показывать переход на полную страницу предложения (стол администратора). */
+    showFullPage?: boolean;
   }>(),
-  { moderatable: false },
+  { moderatable: false, showFullPage: true },
 );
 
 const emit = defineEmits<{

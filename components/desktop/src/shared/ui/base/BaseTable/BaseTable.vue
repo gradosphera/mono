@@ -87,7 +87,8 @@ const emit = defineEmits<{
  * открывает, и случайный переход там был бы сюрпризом.
  */
 /** Элементы строки, у которых своё действие: нажатие по ним сущность не открывает. */
-const OWN_ACTION_SELECTOR = '.q-checkbox, .q-btn, .q-menu, .q-toggle, a, input, .q-table--col-auto-width';
+const OWN_ACTION_SELECTOR =
+  '.q-checkbox, .q-btn, .q-menu, .q-toggle, .q-field, a, input, .q-table--col-auto-width';
 
 /**
  * Открывается ли эта строка. Признак бывает общим на таблицу (реестр, где

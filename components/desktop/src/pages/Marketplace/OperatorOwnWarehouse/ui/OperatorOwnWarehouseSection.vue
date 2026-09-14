@@ -23,6 +23,8 @@ import { AccountBadge, PageHint } from 'src/shared/ui/domain'
 import { formatDateToLocalTimezone } from 'src/shared/lib/utils/dates'
 import { marketplaceOrderSaleUnit } from 'src/shared/lib/consts/marketplace-units'
 import { useMarketplaceRealtime } from 'src/shared/lib/marketplace'
+import { useQueryOverlay } from 'src/shared/lib/navigation'
+import { OfferRegistryOverlay } from 'src/widgets/Marketplace/OfferRegistryOverlay'
 import { CoopStockSection } from 'src/widgets/Marketplace/CoopStockSection'
 import {
   buildPlacementOptions,
@@ -54,6 +56,8 @@ const route = useRoute()
 const store = useOperatorBranchStore()
 const storage = useMarketplaceStorageStore()
 const coopname = computed(() => String(route.params.coopname ?? ''))
+/** Предложение открывается оверлеем поверх склада — адрес держит `?offer=`. */
+const offerOverlay = useQueryOverlay('offer')
 const braname = computed(() => store.activeBraname ?? '')
 
 const containersEnabled = computed(() => store.warehouseSettings.containers_enabled)
@@ -129,7 +133,7 @@ watch(
 
 const columns = computed<BaseTableColumn<MarketplaceInventoryItemView>[]>(() => [
   { key: 'place', label: 'Место', width: '240px', field: (row) => placeLabel(row) },
-  { key: 'product', label: 'Товар', width: '240px', sortable: true, field: 'product_name_snapshot' },
+  { key: 'product', label: 'Имущество', width: '240px', sortable: true, field: 'product_name_snapshot' },
   { key: 'orderer', label: 'Заказчик', width: '200px', sortable: true, field: (row) => ordererName(row) },
   { key: 'qty', label: 'Кол-во', width: '130px', numeric: true, nowrap: true },
   { key: 'barcode', label: 'Штрих-код', width: '150px' },
@@ -137,6 +141,18 @@ const columns = computed<BaseTableColumn<MarketplaceInventoryItemView>[]>(() => 
   { key: 'expiry', label: 'Годен до', width: '120px', nowrap: true, sortable: true, field: (row) => timeOf(row.expiry_date) },
   { key: 'received', label: 'Принято', width: '160px', nowrap: true, sortable: true, field: (row) => timeOf(row.received_at) },
 ])
+
+// Строка открывает предложение, по которому имущество попало на участок: с него
+// видно поставщика, цену, упаковку и условия — иначе по одному наименованию
+// непонятно, что именно выдаётся (жалоба 2026-09-14). Карточка та же, что в
+// реестре предложений стола администратора.
+function hasOffer(row: MarketplaceInventoryItemView): boolean {
+  return Boolean(row.offer_id)
+}
+
+function openOffer(row: MarketplaceInventoryItemView): void {
+  if (row.offer_id) offerOverlay.open(String(row.offer_id))
+}
 
 /** Дата в миллисекундах для сортировки; пусто — в конец списка. */
 function timeOf(value: unknown): number {
@@ -363,7 +379,7 @@ function isExpired(value: unknown): boolean {
       BaseInput.warehouse__search.field-flush(
         v-model='search',
         type='search',
-        placeholder='Поиск: заказчик, товар, бокс, адрес, штрих-код',
+        placeholder='Поиск: заказчик, имущество, бокс, адрес, штрих-код',
         clearable
       )
 
@@ -377,7 +393,9 @@ function isExpired(value: unknown): boolean {
         :loading='loading',
         min-width='1380px',
         sort-by='received',
-        descending
+        descending,
+        :clickable-rows='hasOffer',
+        @row-click='openOffer'
       )
         //- Место — выбор из заведённых боксов и ячеек прямо в строке. Когда
         //- адресное хранение выключено, показываем прочерк: места просто нет.
@@ -438,6 +456,10 @@ function isExpired(value: unknown): boolean {
     //- Остаток кооператива (requirement 76): обезличенные позиции после
     //- недовыдач/отказов — публикация в каталог предложением от кооператива.
     CoopStockSection(v-else-if='activeTab === "stock"', @count='(n) => (coopStockCount = n)')
+
+  //- Карточка предложения — та же, что в реестре предложений стола
+  //- администратора: одна на все реестры стола.
+  OfferRegistryOverlay(:coopname='coopname', from='warehouse', :show-full-page='false')
 </template>
 
 <style scoped lang="scss">

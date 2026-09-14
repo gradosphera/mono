@@ -81,7 +81,9 @@ const counts = ref<Record<'warehouse' | 'stock' | 'writeoffs' | 'containers', nu
 const tabs = computed<PageTab[]>(() => {
   const list: PageTab[] = [
     { key: 'labeling', label: 'Раскладка и маркировка' },
-    { key: 'warehouse', label: 'Склад', count: counts.value.warehouse ?? undefined },
+    // Раздел называется «Имущество», а не «Склад»: страница целиком про склад,
+    // и вкладка с тем же словом внутри неё ничего не различала.
+    { key: 'warehouse', label: 'Имущество', count: counts.value.warehouse ?? undefined },
     { key: 'stock', label: 'Остатки', count: counts.value.stock ?? undefined },
   ]
   if (writeoffsAllowed.value) {
