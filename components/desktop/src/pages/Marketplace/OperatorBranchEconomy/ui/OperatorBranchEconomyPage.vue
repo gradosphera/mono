@@ -978,7 +978,8 @@ q-page.economy
   //- Заказ из движения кошелька — оверлеем поверх экономики (`?order=<id>`).
   OrderRegistryOverlay(
     :coopname='coopname',
-    full-page-route-name='marketplace-pvz-order-detail'
+    full-page-route-name='marketplace-pvz-order-detail',
+    from='economy'
   )
 </template>
 
