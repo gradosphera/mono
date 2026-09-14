@@ -131,6 +131,15 @@ function isGeocodePending(row: IssuancePointRow): boolean {
   )
 }
 
+/**
+ * Ключ строки. Строки каркаса загрузки — пустышки без участка, поэтому лезть
+ * в `branch` напрямую нельзя: таблица зовёт ключ и для них, и страница падала
+ * целиком (белый экран на «Пунктах выдачи», 14.09.2026).
+ */
+function pointRowKey(row: IssuancePointRow): string {
+  return row.branch?.braname ?? ''
+}
+
 const columns: BaseTableColumn<IssuancePointRow>[] = [
   { key: 'ku', label: 'Участок', width: '240px', sortable: true, field: (row) => branchName(row) },
   { key: 'city', label: 'Город', width: '140px', sortable: true, field: (row) => row.branch.city ?? '' },
@@ -250,7 +259,7 @@ q-page.admin-pvz
     v-if='loading || rows.length',
     :columns='columns',
     :rows='rows',
-    :row-key='(row: IssuancePointRow) => row.branch.braname',
+    :row-key='pointRowKey',
     hover,
     :loading='loading',
     min-width='1230px',

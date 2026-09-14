@@ -99,6 +99,9 @@ function onRowClick(_evt: Event, row: T): void {
 type QTableRowKey = NonNullable<QTableProps['rowKey']>;
 
 const rowKeyName = computed<QTableRowKey>(() => {
+  // На каркасе ключ берём по имени поля-пустышки: функция ключа экрана ждёт
+  // настоящую строку и на пустышке падает.
+  if (skeleton.value) return skeletonKeyName.value;
   const key = props.rowKey;
   if (typeof key === 'function') return key as QTableRowKey;
   return key === undefined ? 'id' : String(key);
@@ -169,8 +172,12 @@ const quasarColumns = computed<QTableProps['columns']>(() =>
       name: col.key,
       label: col.label,
       align: col.align ?? (col.numeric ? 'right' : 'left'),
-      field:
-        typeof col.field === 'function'
+      // На каркасе значения не считаем: строки там — пустышки без доменных
+      // полей, а функция колонки лезет в них как в настоящие данные и роняет
+      // экран целиком (белый экран «Пунктов выдачи», 14.09.2026).
+      field: skeleton.value
+        ? () => ''
+        : typeof col.field === 'function'
           ? (col.field as (row: unknown) => unknown)
           : ((col.field as string) ?? col.key),
       // Каркас не сортируется: сортировать пустышки бессмысленно.

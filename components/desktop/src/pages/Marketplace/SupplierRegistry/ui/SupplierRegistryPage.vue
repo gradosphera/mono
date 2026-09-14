@@ -78,7 +78,16 @@ async function resolveSupplierNames(): Promise<void> {
   );
 }
 
-const columns: BaseTableColumn<MarketplaceSupplierView>[] = [
+/**
+ * Колонка решений появляется, только когда есть что решать: одобрить или
+ * отклонить можно лишь заявку, и у прочих строк там стоял один прочерк на всю
+ * ширину колонки (жалоба владельца 14.09.2026).
+ */
+const hasPendingRequests = computed(
+  () => isChairman.value && items.value.some((row) => row.status === 'PENDING'),
+);
+
+const columns = computed<BaseTableColumn<MarketplaceSupplierView>[]>(() => [
   {
     key: 'member',
     label: 'Поставщик',
@@ -89,8 +98,10 @@ const columns: BaseTableColumn<MarketplaceSupplierView>[] = [
   { key: 'model', label: 'Модель', width: '200px', sortable: true, field: 'model' },
   { key: 'contract', label: 'Договор', width: '220px' },
   { key: 'status', label: 'Статус', width: '170px', sortable: true, field: 'status' },
-  { key: 'actions', label: 'Действия', width: '230px' },
-];
+  ...(hasPendingRequests.value
+    ? [{ key: 'actions', label: 'Решение', width: '230px' } as BaseTableColumn<MarketplaceSupplierView>]
+    : []),
+]);
 
 const addOpen = ref(false);
 const addMember = ref('');
@@ -195,7 +206,7 @@ q-page.mp-role-admin.supplier-registry(role="region", aria-label="Реестр �
     row-key="id",
     hover,
     :loading="loading",
-    min-width="1100px",
+    :min-width="hasPendingRequests ? '1100px' : '880px'",
     sort-by="member",
     clickable-rows,
     @row-click="(row) => supplierOverlay.open(row.member_account)"
@@ -212,7 +223,7 @@ q-page.mp-role-admin.supplier-registry(role="region", aria-label="Реестр �
     template(#cell-status="{ row }")
       BaseBadge(:variant="SUPPLIER_STATUS_VARIANT[row.status] || 'neutral'") {{ SUPPLIER_STATUS_LABEL[row.status] || row.status }}
     template(#cell-actions="{ row }")
-      .cell-actions(v-if="isChairman && row.status === 'PENDING'", @click.stop)
+      .cell-actions(v-if="row.status === 'PENDING'", @click.stop)
         BaseButton(
           variant="primary",
           size="sm",
@@ -225,7 +236,6 @@ q-page.mp-role-admin.supplier-registry(role="region", aria-label="Реестр �
           :disabled="acting === row.member_account",
           @click="onReject(row)"
         ) Отклонить
-      span.no-actions(v-else) —
 
   EmptyState(
     v-else,

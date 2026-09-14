@@ -422,65 +422,64 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
         | Напечатать выбранное ({{ selectedContainers.length }})
 
     //- ─────────────────────────── Боксы ───────────────────────────
-    template
-      EmptyState(
-        v-if='!firstLoad && !storage.activeTypes.length',
-        title='Типы боксов ещё не заведены',
-        body='Габариты и объём задаёт тип тары, а он общий на весь кооператив: типы заводит председатель на столе администратора, в разделе «Боксы кооператива». Как только тип появится, здесь можно будет завести партию боксов.'
-      )
-        template(#icon)
-          q-icon(name='straighten', size='48px')
+    EmptyState(
+      v-if='!firstLoad && !storage.activeTypes.length',
+      title='Типы боксов ещё не заведены',
+      body='Габариты и объём задаёт тип тары, а он общий на весь кооператив: типы заводит председатель на столе администратора, в разделе «Боксы кооператива». Как только тип появится, здесь можно будет завести партию боксов.'
+    )
+      template(#icon)
+        q-icon(name='straighten', size='48px')
 
-      BaseTable(
-        v-else-if='firstLoad || storage.activeContainers.length',
-        :columns='containerColumns',
-        :rows='storage.activeContainers',
-        row-key='id',
-        hover,
-        sticky-header,
-        selection='multiple',
-        v-model:selected='selectedContainers',
-        :loading='loading',
-        min-width='980px',
-        sort-by='code'
-      )
-        template(#cell-code='{ row }')
-          span.containers__code {{ row.code }}
-          .containers__sub(v-if='row.label') {{ row.label }}
-        template(#cell-cell='{ row }')
-          span(v-if='row.cell_id') {{ cellCodeOf(row) }}
-          BaseBadge(v-else, variant='neutral') Без адреса
-        template(#cell-contents='{ row }')
-          span.containers__contents {{ contentsOf(row) }}
-        template(#cell-actions='{ row }')
-          .containers__row-actions
-            BaseButton(variant='ghost', size='sm', icon-only, aria-label='Действия с боксом')
-              template(#icon-left)
-                q-icon(name='more_vert', size='18px')
-                q-menu(anchor='bottom right', self='top right')
-                  q-list(dense, style='min-width: 220px')
-                    q-item(v-if='cellsEnabled', clickable, v-close-popup, @click='openPlace(row)')
-                      q-item-section(avatar)
-                        q-icon(name='grid_view', size='18px')
-                      q-item-section {{ row.cell_id ? 'Переставить в ячейку…' : 'Поставить в ячейку…' }}
-                    q-item(v-if='!itemsOf(row).length', clickable, v-close-popup, @click='retire(row)')
-                      q-item-section(avatar)
-                        q-icon(name='archive', size='18px')
-                      q-item-section Вывести из оборота
-                    q-item(v-else, disable)
-                      q-item-section(avatar)
-                        q-icon(name='info', size='18px')
-                      q-item-section Непустой бокс не выводится
-        template(#footer)
-          span Боксов: {{ storage.activeContainers.length }} · суммарный объём {{ totalVolume }}
+    BaseTable(
+      v-else-if='firstLoad || storage.activeContainers.length',
+      :columns='containerColumns',
+      :rows='storage.activeContainers',
+      row-key='id',
+      hover,
+      sticky-header,
+      selection='multiple',
+      v-model:selected='selectedContainers',
+      :loading='loading',
+      min-width='980px',
+      sort-by='code'
+    )
+      template(#cell-code='{ row }')
+        span.containers__code {{ row.code }}
+        .containers__sub(v-if='row.label') {{ row.label }}
+      template(#cell-cell='{ row }')
+        span(v-if='row.cell_id') {{ cellCodeOf(row) }}
+        BaseBadge(v-else, variant='neutral') Без адреса
+      template(#cell-contents='{ row }')
+        span.containers__contents {{ contentsOf(row) }}
+      template(#cell-actions='{ row }')
+        .containers__row-actions
+          BaseButton(variant='ghost', size='sm', icon-only, aria-label='Действия с боксом')
+            template(#icon-left)
+              q-icon(name='more_vert', size='18px')
+              q-menu(anchor='bottom right', self='top right')
+                q-list(dense, style='min-width: 220px')
+                  q-item(v-if='cellsEnabled', clickable, v-close-popup, @click='openPlace(row)')
+                    q-item-section(avatar)
+                      q-icon(name='grid_view', size='18px')
+                    q-item-section {{ row.cell_id ? 'Переставить в ячейку…' : 'Поставить в ячейку…' }}
+                  q-item(v-if='!itemsOf(row).length', clickable, v-close-popup, @click='retire(row)')
+                    q-item-section(avatar)
+                      q-icon(name='archive', size='18px')
+                    q-item-section Вывести из оборота
+                  q-item(v-else, disable)
+                    q-item-section(avatar)
+                      q-icon(name='info', size='18px')
+                    q-item-section Непустой бокс не выводится
+      template(#footer)
+        span Боксов: {{ storage.activeContainers.length }} · суммарный объём {{ totalVolume }}
 
-      EmptyState(
-        v-else,
-        title='Боксов пока нет',
-        body='Заведите партию боксов — коды и QR-этикетки система выдаст сама.'
-      )
-        template(#icon)
-          q-icon(name='inbox', size='48px')
+    EmptyState(
+      v-else,
+      title='Боксов пока нет',
+      body='Заведите партию боксов — коды и QR-этикетки система выдаст сама.'
+    )
+      template(#icon)
+        q-icon(name='inbox', size='48px')
 
   //- ─────────────────────── Диалог: партия боксов ───────────────────────
   BaseDialog(v-model='batchOpen', title='Завести боксы', size='sm')
