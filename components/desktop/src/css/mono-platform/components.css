@@ -479,7 +479,7 @@ body {
 }
 .table tbody tr:last-child td { border-bottom: 0; }
 .table tbody tr { transition: background var(--p-dur-fast); }
-.table tbody tr:hover { background: var(--p-surface-2); }
+.table tbody tr:hover { background: var(--p-primary-soft); }
 .table .col-num { text-align: right; font-variant-numeric: tabular-nums; }
 .table .col-action { width: 1%; text-align: right; }
 .table .doc-type {

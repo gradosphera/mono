@@ -86,8 +86,16 @@ const emit = defineEmits<{
  * `clickableRows` событие не уходит: половина реестров строкой ничего не
  * открывает, и случайный переход там был бы сюрпризом.
  */
-function onRowClick(_evt: Event, row: T): void {
+/** Элементы строки, у которых своё действие: нажатие по ним сущность не открывает. */
+const OWN_ACTION_SELECTOR = '.q-checkbox, .q-btn, .q-menu, .q-toggle, a, input, .q-table--col-auto-width';
+
+function onRowClick(evt: Event, row: T): void {
   if (!props.clickableRows || skeleton.value) return;
+  // Галочка выбора, кнопка действий и всплывающее меню внутри строки — сами по
+  // себе действия. Открывать по ним ещё и сущность значит делать два дела на
+  // одно нажатие: отметил бокс к печати — и получил панель поверх списка.
+  const target = evt.target as Element | null;
+  if (target?.closest?.(OWN_ACTION_SELECTOR)) return;
   emit('row-click', row);
 }
 
@@ -246,20 +254,12 @@ const tableStyle = computed(() => ({
     pointer-events: none;
   }
 
-  // Строка открывает сущность — курсор и подсветка показывают это до нажатия.
-  // Подсветка живёт здесь, а не отдельным признаком `hover`: выделять строку,
-  // которая ничего не открывает, значит обещать действие, которого нет.
-  // Мягкий акцент, а не серый: `--p-surface-2` (#f7f7f8) почти совпадает с
-  // фоном страницы `--p-canvas` (#f4f4f5), и строка под курсором проваливалась
-  // в подложку вместо того, чтобы выделяться.
-  &--clickable {
-    :deep(tbody tr) {
-      cursor: pointer;
-    }
-
-    :deep(tbody tr:hover) {
-      background: var(--p-primary-soft);
-    }
+  // Строка открывает сущность — курсор показывает это до нажатия. Подсветка
+  // строки под курсором одна на все таблицы платформы и живёт в каноне
+  // (`quasar-canon.css`): иначе одни реестры выделяются зелёным, другие серым,
+  // и разница читается как разница в поведении, которой нет.
+  &--clickable :deep(tbody tr) {
+    cursor: pointer;
   }
 
   // Колонка галочек. При `table-layout: fixed` колонка без явной ширины

@@ -15,6 +15,7 @@ import {
 } from 'src/shared/ui/base'
 import type { BaseSelectOption, BaseTableColumn } from 'src/shared/ui/base'
 import { PageHint } from 'src/shared/ui/domain'
+import { ContainerContentsDrawer } from 'src/widgets/Marketplace/ContainerContentsDrawer'
 import { useOperatorBranchStore } from 'src/entities/OperatorBranch'
 import {
   containerLabel,
@@ -105,6 +106,26 @@ const itemsByContainer = computed(() => {
 function itemsOf(container: MarketplaceContainerView): MarketplaceInventoryItemView[] {
   return itemsByContainer.value.get(container.id) ?? []
 }
+
+// ─── Содержимое бокса ───
+// Колонка отвечает «сколько позиций», а оператору нужно «что именно лежит»:
+// строка открывает боковую панель с составом. Позиции склада участка уже
+// загружены вместе с боксами, поэтому панель ничего не дозапрашивает.
+const openedContainer = ref<MarketplaceContainerView | null>(null)
+const contentsOpen = ref(false)
+
+function openContainer(container: MarketplaceContainerView): void {
+  openedContainer.value = container
+  contentsOpen.value = true
+}
+
+const openedItems = computed(() =>
+  openedContainer.value ? itemsOf(openedContainer.value) : [],
+)
+
+/** Участок, где стоит бокс: наименование и адрес отдельной строкой под ним. */
+const branchName = computed(() => branchStore.activeBranch?.name ?? '')
+const branchAddress = computed(() => branchStore.activeBranch?.address ?? '')
 
 /** Что лежит в боксе — короткой строкой, чтобы не открывать бокс ради состава. */
 function contentsOf(container: MarketplaceContainerView): string {
@@ -441,7 +462,9 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
       v-model:selected='selectedContainers',
       :loading='loading',
       min-width='980px',
-      sort-by='code'
+      sort-by='code',
+      clickable-rows,
+      @row-click='openContainer'
     )
       template(#cell-code='{ row }')
         span.containers__code {{ row.code }}
@@ -480,6 +503,17 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
     )
       template(#icon)
         q-icon(name='inbox', size='48px')
+
+  ContainerContentsDrawer(
+    v-model='contentsOpen',
+    :container='openedContainer',
+    :items='openedItems',
+    :branch-name='branchName',
+    :branch-address='branchAddress',
+    :type-name='openedContainer ? typeNameOf(openedContainer) : ""',
+    :volume='openedContainer ? volumeOf(openedContainer) : ""',
+    :cell-code='openedContainer ? cellCodeOf(openedContainer) : ""'
+  )
 
   //- ─────────────────────── Диалог: партия боксов ───────────────────────
   BaseDialog(v-model='batchOpen', title='Завести боксы', size='sm')
