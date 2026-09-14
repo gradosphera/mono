@@ -7,7 +7,6 @@ import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 import { BaseButton, BaseBadge, EmptyState } from 'src/shared/ui/base';
 import { OfferGallery } from 'src/widgets/Marketplace/OfferGallery';
-import { CartHeaderButton } from 'src/widgets/Marketplace/CartHeaderButton';
 import { marketplaceOrderUnitLabel } from 'src/shared/lib/consts';
 import { MarketplaceSaleForm } from 'src/shared/lib/consts/marketplace-units';
 import { marketplaceOfferImageUrls } from 'src/shared/lib/utils';
@@ -257,7 +256,6 @@ onMounted(async () => {
 <template lang="pug">
 q-page.offer-detail(role="region", aria-label="Описание предложения")
   //- Корзина в шапке — тот же header-виджет, что в каталоге (вне режима модерации).
-  CartHeaderButton(v-if="!readonly", :coopname="coopname")
 
   .offer-detail__back
     BaseButton(variant="ghost", size="sm", @click="goBack")

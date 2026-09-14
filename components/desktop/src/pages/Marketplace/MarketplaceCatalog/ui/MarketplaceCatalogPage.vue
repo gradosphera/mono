@@ -19,7 +19,6 @@ import {
 import { BaseButton, EmptyState } from 'src/shared/ui/base';
 import { PageTabs, type PageTab } from 'src/shared/ui/layout';
 import { KUHeaderBar } from 'src/widgets/Marketplace/KUHeaderBar';
-import { CartHeaderButton } from 'src/widgets/Marketplace/CartHeaderButton';
 import { WalletHeaderButton } from 'src/widgets/Marketplace/WalletHeaderButton';
 import { useMarketplaceCartStore } from 'src/entities/MarketplaceCart';
 import { marketplaceOfferImageUrls } from 'src/shared/lib/utils';
@@ -377,9 +376,8 @@ q-page.catalog(role="region", aria-label="Каталог Стола заказо
   //- приходилось уходить на стол пайщика).
   WalletHeaderButton(:coopname="coopname")
 
-  //- Индикатор корзины в шапке стола (Story 16.1) — общий header-виджет,
-  //- переиспользуется и на странице предложения.
-  CartHeaderButton(:coopname="coopname")
+  //- Корзина из шапки убрана: число позиций показывает пункт меню «Корзина»,
+  //- туда заказчик и идёт (решение владельца 14.09.2026).
 
   //- Бар пункта выдачи (КУ всегда на виду). Инфо-баннер убран — назначение
   //- каталога очевидно из контекста.
