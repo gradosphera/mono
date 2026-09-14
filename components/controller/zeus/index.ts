@@ -10573,6 +10573,55 @@ export type ValueTypes = {
 		__typename?: boolean | `@${string}`,
 	['...on MarketplaceOrderStatusChangedEvent']?: Omit<ValueTypes["MarketplaceOrderStatusChangedEvent"], "...on MarketplaceOrderStatusChangedEvent">
 }>;
+	["MarketplaceOutgoingPaymentCoreRecord"]: AliasType<{
+	/** Когда кассир провёл платёж. */
+	completed_at?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	/** Назначение платежа для платёжного поручения. */
+	memo?:boolean | `@${string}`,
+	/** Комментарий кассира — например причина отказа. */
+	message?:boolean | `@${string}`,
+	/** Сумма платежа. */
+	quantity?:boolean | `@${string}`,
+	/** Статус платежа в реестре кассира. */
+	status?:boolean | `@${string}`,
+	symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on MarketplaceOutgoingPaymentCoreRecord']?: Omit<ValueTypes["MarketplaceOutgoingPaymentCoreRecord"], "...on MarketplaceOutgoingPaymentCoreRecord">
+}>;
+	["MarketplaceOutgoingPaymentDetail"]: AliasType<{
+	/** Платёж в общем реестре кооператива. Null — выплата ещё не заведена кассиру. */
+	core_payment?:ValueTypes["MarketplaceOutgoingPaymentCoreRecord"],
+	/** Заказ, за который платят. Null — заказ не найден (удалён или ещё не доехал). */
+	order?:ValueTypes["MarketplaceOutgoingPaymentOrderSummary"],
+	payment?:ValueTypes["MarketplaceOutgoingPaymentRequest"],
+		__typename?: boolean | `@${string}`,
+	['...on MarketplaceOutgoingPaymentDetail']?: Omit<ValueTypes["MarketplaceOutgoingPaymentDetail"], "...on MarketplaceOutgoingPaymentDetail">
+}>;
+	["MarketplaceOutgoingPaymentOrderSummary"]: AliasType<{
+	/** Принятая стоимость после приёмки, если отличается. */
+	accepted_cost?:boolean | `@${string}`,
+	/** Участок доставки — наименование. */
+	delivery_point_name?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	/** Заказчик — отображаемое имя. */
+	orderer_name?:boolean | `@${string}`,
+	/** Цена за единицу на момент заказа. */
+	price_per_unit?:boolean | `@${string}`,
+	/** Наименование товара из предложения. */
+	product_name?:boolean | `@${string}`,
+	/** Заказанный объём. */
+	quantity?:boolean | `@${string}`,
+	/** Текущий статус заказа. */
+	status?:boolean | `@${string}`,
+	/** Полная стоимость заказа. */
+	total_cost?:boolean | `@${string}`,
+	/** Единица измерения объёма. */
+	unit_of_measure?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on MarketplaceOutgoingPaymentOrderSummary']?: Omit<ValueTypes["MarketplaceOutgoingPaymentOrderSummary"], "...on MarketplaceOutgoingPaymentOrderSummary">
+}>;
 	["MarketplaceOutgoingPaymentRequest"]: AliasType<{
 	/** Сумма платежа (numeric с 4 знаками). */
 	amount?:boolean | `@${string}`,
@@ -14522,6 +14571,7 @@ marketplaceGetCoopRequests?: [{	data: ValueTypes["GetCoopRequestsInput"] | Varia
 	marketplaceGetEconomyConfig?:ValueTypes["MarketplaceEconomyConfig"],
 marketplaceGetOffer?: [{	id: string | Variable<any, string>},ValueTypes["MarketplaceOffer"]],
 marketplaceGetOrder?: [{	input: ValueTypes["MarketplaceGetOrderInput"] | Variable<any, string>},ValueTypes["MarketplaceOrder"]],
+marketplaceGetOutgoingPayment?: [{	id: string | Variable<any, string>},ValueTypes["MarketplaceOutgoingPaymentDetail"]],
 	/** Персональные членские средства текущего пайщика, распределённые ему как доверенному кооперативного участка. */
 	marketplaceGetPersonalEconomy?:ValueTypes["MarketplacePersonalEconomy"],
 marketplaceGetPersonalWalletHistory?: [{	options?: ValueTypes["PaginationInput"] | undefined | null | Variable<any, string>},ValueTypes["MarketplaceBranchWalletHistoryPaginationResult"]],
@@ -26122,6 +26172,52 @@ export type ResolverInputTypes = {
 	status?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["MarketplaceOutgoingPaymentCoreRecord"]: AliasType<{
+	/** Когда кассир провёл платёж. */
+	completed_at?:boolean | `@${string}`,
+	created_at?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	/** Назначение платежа для платёжного поручения. */
+	memo?:boolean | `@${string}`,
+	/** Комментарий кассира — например причина отказа. */
+	message?:boolean | `@${string}`,
+	/** Сумма платежа. */
+	quantity?:boolean | `@${string}`,
+	/** Статус платежа в реестре кассира. */
+	status?:boolean | `@${string}`,
+	symbol?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["MarketplaceOutgoingPaymentDetail"]: AliasType<{
+	/** Платёж в общем реестре кооператива. Null — выплата ещё не заведена кассиру. */
+	core_payment?:ResolverInputTypes["MarketplaceOutgoingPaymentCoreRecord"],
+	/** Заказ, за который платят. Null — заказ не найден (удалён или ещё не доехал). */
+	order?:ResolverInputTypes["MarketplaceOutgoingPaymentOrderSummary"],
+	payment?:ResolverInputTypes["MarketplaceOutgoingPaymentRequest"],
+		__typename?: boolean | `@${string}`
+}>;
+	["MarketplaceOutgoingPaymentOrderSummary"]: AliasType<{
+	/** Принятая стоимость после приёмки, если отличается. */
+	accepted_cost?:boolean | `@${string}`,
+	/** Участок доставки — наименование. */
+	delivery_point_name?:boolean | `@${string}`,
+	id?:boolean | `@${string}`,
+	/** Заказчик — отображаемое имя. */
+	orderer_name?:boolean | `@${string}`,
+	/** Цена за единицу на момент заказа. */
+	price_per_unit?:boolean | `@${string}`,
+	/** Наименование товара из предложения. */
+	product_name?:boolean | `@${string}`,
+	/** Заказанный объём. */
+	quantity?:boolean | `@${string}`,
+	/** Текущий статус заказа. */
+	status?:boolean | `@${string}`,
+	/** Полная стоимость заказа. */
+	total_cost?:boolean | `@${string}`,
+	/** Единица измерения объёма. */
+	unit_of_measure?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
 	["MarketplaceOutgoingPaymentRequest"]: AliasType<{
 	/** Сумма платежа (numeric с 4 знаками). */
 	amount?:boolean | `@${string}`,
@@ -29937,6 +30033,7 @@ marketplaceGetCoopRequests?: [{	data: ResolverInputTypes["GetCoopRequestsInput"]
 	marketplaceGetEconomyConfig?:ResolverInputTypes["MarketplaceEconomyConfig"],
 marketplaceGetOffer?: [{	id: string},ResolverInputTypes["MarketplaceOffer"]],
 marketplaceGetOrder?: [{	input: ResolverInputTypes["MarketplaceGetOrderInput"]},ResolverInputTypes["MarketplaceOrder"]],
+marketplaceGetOutgoingPayment?: [{	id: string},ResolverInputTypes["MarketplaceOutgoingPaymentDetail"]],
 	/** Персональные членские средства текущего пайщика, распределённые ему как доверенному кооперативного участка. */
 	marketplaceGetPersonalEconomy?:ResolverInputTypes["MarketplacePersonalEconomy"],
 marketplaceGetPersonalWalletHistory?: [{	options?: ResolverInputTypes["PaginationInput"] | undefined | null},ResolverInputTypes["MarketplaceBranchWalletHistoryPaginationResult"]],
@@ -41155,6 +41252,49 @@ export type ModelTypes = {
 	/** Новый статус заказа. */
 	status: ModelTypes["MarketplaceOrderStatus"]
 };
+	["MarketplaceOutgoingPaymentCoreRecord"]: {
+		/** Когда кассир провёл платёж. */
+	completed_at?: ModelTypes["DateTime"] | undefined | null,
+	created_at: ModelTypes["DateTime"],
+	id?: string | undefined | null,
+	/** Назначение платежа для платёжного поручения. */
+	memo?: string | undefined | null,
+	/** Комментарий кассира — например причина отказа. */
+	message?: string | undefined | null,
+	/** Сумма платежа. */
+	quantity: number,
+	/** Статус платежа в реестре кассира. */
+	status: ModelTypes["PaymentStatus"],
+	symbol: string
+};
+	["MarketplaceOutgoingPaymentDetail"]: {
+		/** Платёж в общем реестре кооператива. Null — выплата ещё не заведена кассиру. */
+	core_payment?: ModelTypes["MarketplaceOutgoingPaymentCoreRecord"] | undefined | null,
+	/** Заказ, за который платят. Null — заказ не найден (удалён или ещё не доехал). */
+	order?: ModelTypes["MarketplaceOutgoingPaymentOrderSummary"] | undefined | null,
+	payment: ModelTypes["MarketplaceOutgoingPaymentRequest"]
+};
+	["MarketplaceOutgoingPaymentOrderSummary"]: {
+		/** Принятая стоимость после приёмки, если отличается. */
+	accepted_cost?: string | undefined | null,
+	/** Участок доставки — наименование. */
+	delivery_point_name?: string | undefined | null,
+	id: string,
+	/** Заказчик — отображаемое имя. */
+	orderer_name?: string | undefined | null,
+	/** Цена за единицу на момент заказа. */
+	price_per_unit: string,
+	/** Наименование товара из предложения. */
+	product_name?: string | undefined | null,
+	/** Заказанный объём. */
+	quantity: number,
+	/** Текущий статус заказа. */
+	status: ModelTypes["MarketplaceOrderStatus"],
+	/** Полная стоимость заказа. */
+	total_cost: string,
+	/** Единица измерения объёма. */
+	unit_of_measure?: string | undefined | null
+};
 	["MarketplaceOutgoingPaymentRequest"]: {
 		/** Сумма платежа (numeric с 4 знаками). */
 	amount: string,
@@ -45268,6 +45408,8 @@ export type ModelTypes = {
 	marketplaceGetOffer?: ModelTypes["MarketplaceOffer"] | undefined | null,
 	/** Получить один заказ по его идентификатору (доступ зависит от роли). */
 	marketplaceGetOrder: ModelTypes["MarketplaceOrder"],
+	/** Разворот одной выплаты: сама выплата, оплаченный заказ и запись в реестре кассира. Null — выплаты с таким идентификатором в кооперативе нет. */
+	marketplaceGetOutgoingPayment?: ModelTypes["MarketplaceOutgoingPaymentDetail"] | undefined | null,
 	/** Персональные членские средства текущего пайщика, распределённые ему как доверенному кооперативного участка. */
 	marketplaceGetPersonalEconomy: ModelTypes["MarketplacePersonalEconomy"],
 	/** Движения по персональному кошельку членских средств текущего пайщика: переводы в Стол заказов и завершённая материальная помощь. */
@@ -57025,6 +57167,55 @@ export type GraphQLTypes = {
 	status: GraphQLTypes["MarketplaceOrderStatus"],
 	['...on MarketplaceOrderStatusChangedEvent']: Omit<GraphQLTypes["MarketplaceOrderStatusChangedEvent"], "...on MarketplaceOrderStatusChangedEvent">
 };
+	["MarketplaceOutgoingPaymentCoreRecord"]: {
+	__typename: "MarketplaceOutgoingPaymentCoreRecord",
+	/** Когда кассир провёл платёж. */
+	completed_at?: GraphQLTypes["DateTime"] | undefined | null,
+	created_at: GraphQLTypes["DateTime"],
+	id?: string | undefined | null,
+	/** Назначение платежа для платёжного поручения. */
+	memo?: string | undefined | null,
+	/** Комментарий кассира — например причина отказа. */
+	message?: string | undefined | null,
+	/** Сумма платежа. */
+	quantity: number,
+	/** Статус платежа в реестре кассира. */
+	status: GraphQLTypes["PaymentStatus"],
+	symbol: string,
+	['...on MarketplaceOutgoingPaymentCoreRecord']: Omit<GraphQLTypes["MarketplaceOutgoingPaymentCoreRecord"], "...on MarketplaceOutgoingPaymentCoreRecord">
+};
+	["MarketplaceOutgoingPaymentDetail"]: {
+	__typename: "MarketplaceOutgoingPaymentDetail",
+	/** Платёж в общем реестре кооператива. Null — выплата ещё не заведена кассиру. */
+	core_payment?: GraphQLTypes["MarketplaceOutgoingPaymentCoreRecord"] | undefined | null,
+	/** Заказ, за который платят. Null — заказ не найден (удалён или ещё не доехал). */
+	order?: GraphQLTypes["MarketplaceOutgoingPaymentOrderSummary"] | undefined | null,
+	payment: GraphQLTypes["MarketplaceOutgoingPaymentRequest"],
+	['...on MarketplaceOutgoingPaymentDetail']: Omit<GraphQLTypes["MarketplaceOutgoingPaymentDetail"], "...on MarketplaceOutgoingPaymentDetail">
+};
+	["MarketplaceOutgoingPaymentOrderSummary"]: {
+	__typename: "MarketplaceOutgoingPaymentOrderSummary",
+	/** Принятая стоимость после приёмки, если отличается. */
+	accepted_cost?: string | undefined | null,
+	/** Участок доставки — наименование. */
+	delivery_point_name?: string | undefined | null,
+	id: string,
+	/** Заказчик — отображаемое имя. */
+	orderer_name?: string | undefined | null,
+	/** Цена за единицу на момент заказа. */
+	price_per_unit: string,
+	/** Наименование товара из предложения. */
+	product_name?: string | undefined | null,
+	/** Заказанный объём. */
+	quantity: number,
+	/** Текущий статус заказа. */
+	status: GraphQLTypes["MarketplaceOrderStatus"],
+	/** Полная стоимость заказа. */
+	total_cost: string,
+	/** Единица измерения объёма. */
+	unit_of_measure?: string | undefined | null,
+	['...on MarketplaceOutgoingPaymentOrderSummary']: Omit<GraphQLTypes["MarketplaceOutgoingPaymentOrderSummary"], "...on MarketplaceOutgoingPaymentOrderSummary">
+};
 	["MarketplaceOutgoingPaymentRequest"]: {
 	__typename: "MarketplaceOutgoingPaymentRequest",
 	/** Сумма платежа (numeric с 4 знаками). */
@@ -61458,6 +61649,8 @@ export type GraphQLTypes = {
 	marketplaceGetOffer?: GraphQLTypes["MarketplaceOffer"] | undefined | null,
 	/** Получить один заказ по его идентификатору (доступ зависит от роли). */
 	marketplaceGetOrder: GraphQLTypes["MarketplaceOrder"],
+	/** Разворот одной выплаты: сама выплата, оплаченный заказ и запись в реестре кассира. Null — выплаты с таким идентификатором в кооперативе нет. */
+	marketplaceGetOutgoingPayment?: GraphQLTypes["MarketplaceOutgoingPaymentDetail"] | undefined | null,
 	/** Персональные членские средства текущего пайщика, распределённые ему как доверенному кооперативного участка. */
 	marketplaceGetPersonalEconomy: GraphQLTypes["MarketplacePersonalEconomy"],
 	/** Движения по персональному кошельку членских средств текущего пайщика: переводы в Стол заказов и завершённая материальная помощь. */

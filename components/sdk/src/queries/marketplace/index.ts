@@ -49,6 +49,8 @@ export * as ListAplReceptionsAsSupplier from './listAplReceptionsAsSupplier'
 export * as ListOutgoingPaymentsAsSupplier from './listOutgoingPaymentsAsSupplier'
 /** Лента выплат поставщикам по кооперативу для совета (Payment:read:all) */
 export * as ListOutgoingPayments from './listOutgoingPayments'
+/** Разворот одной выплаты: заказ, за который платят, и запись в реестре кассира */
+export * as GetOutgoingPayment from './getOutgoingPayment'
 /** Эпик 5: подписные документы Document2 для поставщика (FR45 / 598-15) */
 export * as AplReceptionSupplierSignablePayloads from './aplReceptionSupplierSignablePayloads'
 /** Эпик 5: подписные документы Document2 для председателя КУ (FR45 / 598-15) */

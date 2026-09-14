@@ -3,77 +3,71 @@
  * Эпик 5 / Story 5.x: read-only лента выплат поставщикам по всему кооперативу
  * для совета. Backend: marketplaceListOutgoingPayments (Payment:read:all).
  * Поставщик показывается человеческим именем (ФИО или наименование
- * организации), по нему же идёт поиск; статусы фильтруются чипами.
- * Подтверждение/отказ выплат делает кассир кооператива — здесь только обзор.
+ * организации), по нему же идёт поиск. Состояние выплаты — кнопкой фильтра в
+ * шапке (канон: действия и отборы страницы живут в топбаре). Строка
+ * раскрывает разворот выплаты: за что платили и чем оплата подтверждена.
+ * Подтверждение и отказ выплат делает кассир кооператива — здесь только обзор.
  */
-import type { QTableProps } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
 import { FailAlert } from 'src/shared/api';
+import { useFirstLoad } from 'src/shared/lib/composables';
+import { useQueryOverlay } from 'src/shared/lib/navigation';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
-import { BaseBadge, BaseButton, BaseInput, EmptyState } from 'src/shared/ui/base';
-import type { BaseBadgeVariant } from 'src/shared/ui/base';
-import { PageHint } from 'src/shared/ui/domain';
+import { useHeaderActions } from 'src/shared/hooks';
+import { BaseBadge, BaseTable, EmptyState } from 'src/shared/ui/base';
+import type { BaseTableColumn } from 'src/shared/ui/base';
+import { FilterBar, PageHint, StatusFilterButton } from 'src/shared/ui/domain';
 import { listOutgoingPayments, type MarketplaceOutgoingPaymentView } from '../api';
+import { PAYOUT_STATUS_FILTERS, statusLabel, statusVariant } from '../lib/payoutStatus';
+import PayoutDetailOverlay from './PayoutDetailOverlay.vue';
+import RefreshPayoutsButton from './RefreshPayoutsButton.vue';
+
+const { registerAction } = useHeaderActions();
+const payoutOverlay = useQueryOverlay('payout');
 
 const items = ref<MarketplaceOutgoingPaymentView[]>([]);
-const loading = ref(false);
-// clearable у BaseInput при очистке кладёт null — держим это в типе.
-const supplierFilter = ref<string | null>('');
+// true до первого запроса: иначе первый кадр показывает «выплат нет» вместо
+// каркаса, и первая загрузка неотличима от пустой ленты.
+const loading = ref(true);
+const firstLoad = useFirstLoad(loading);
+const supplierSearch = ref('');
 const statusFilter = ref<string[]>([]);
 
-const PAYMENT_STATUS_LABEL: Record<string, string> = {
-  PENDING: 'Ожидает оплаты',
-  COMPLETED: 'Оплачено',
-  DECLINED: 'Отклонено',
-};
-
-function statusLabel(v: string): string {
-  return PAYMENT_STATUS_LABEL[v] ?? v;
-}
-
-function statusVariant(v: string): BaseBadgeVariant {
-  switch (v) {
-    case 'COMPLETED':
-      return 'pos';
-    case 'DECLINED':
-      return 'neg';
-    case 'PENDING':
-      return 'warn';
-    default:
-      return 'neutral';
-  }
-}
-
-const statusOptions = Object.entries(PAYMENT_STATUS_LABEL).map(([value, label]) => ({
-  label,
-  value,
-}));
-
-function toggleStatus(value: string): void {
-  statusFilter.value = statusFilter.value.includes(value)
-    ? statusFilter.value.filter((s) => s !== value)
-    : [...statusFilter.value, value];
-}
-
-const columns: QTableProps['columns'] = [
-  { name: 'created_at', label: 'Дата', field: 'created_at', align: 'left', sortable: true, format: formatDate },
+const columns: BaseTableColumn<MarketplaceOutgoingPaymentView>[] = [
   {
-    name: 'payee',
+    key: 'created_at',
+    label: 'Дата',
+    field: (row) => formatDate(row.created_at),
+    width: '180px',
+    nowrap: true,
+    sortable: true,
+    sort: (_a, _b, rowA, rowB) => compareDates(rowA.created_at, rowB.created_at),
+  },
+  {
+    key: 'payee',
     label: 'Поставщик',
     // ФИО физлица/ИП или наименование организации; логин аккаунта — запасной
     // вариант, если имя в профиле ещё не заполнено.
-    field: (row: MarketplaceOutgoingPaymentView) => row.payee_name ?? row.payee_account,
-    align: 'left',
+    field: (row) => row.payee_name ?? row.payee_account,
     sortable: true,
   },
-  { name: 'amount', label: 'Сумма', field: 'amount', align: 'right', sortable: true, format: (v: string) => formatAsset2Digits(String(v)) },
-  { name: 'symbol', label: 'Валюта', field: 'symbol', align: 'center' },
-  { name: 'status', label: 'Статус', field: 'status', align: 'left', sortable: true, format: (v: string) => statusLabel(v) },
-  { name: 'purpose', label: 'Назначение', field: 'purpose', align: 'left' },
+  {
+    key: 'amount',
+    label: 'Сумма',
+    field: (row) => `${formatAsset2Digits(String(row.amount))} ${row.symbol}`,
+    numeric: true,
+    nowrap: true,
+    width: '160px',
+    sortable: true,
+    sort: (_a, _b, rowA, rowB) =>
+      Number.parseFloat(String(rowA.amount)) - Number.parseFloat(String(rowB.amount)),
+  },
+  { key: 'status', label: 'Статус', width: '160px', sortable: true, field: (row) => row.status },
+  { key: 'purpose', label: 'Назначение', field: (row) => row.purpose },
 ];
 
 const filteredRows = computed(() => {
-  const query = (supplierFilter.value ?? '').trim().toLowerCase();
+  const query = supplierSearch.value.trim().toLowerCase();
   return items.value.filter((r) => {
     if (statusFilter.value.length && !statusFilter.value.includes(r.status)) return false;
     if (!query) return true;
@@ -82,6 +76,18 @@ const filteredRows = computed(() => {
     return (r.payee_name ?? '').toLowerCase().includes(query);
   });
 });
+
+const isEmpty = computed(() => !firstLoad.value && !filteredRows.value.length);
+
+function compareDates(a: unknown, b: unknown): number {
+  return new Date(String(a)).getTime() - new Date(String(b)).getTime();
+}
+
+function formatDate(value: unknown): string {
+  if (value === null || value === undefined) return '—';
+  const parsed = new Date(String(value));
+  return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString('ru-RU');
+}
 
 async function load(): Promise<void> {
   loading.value = true;
@@ -94,13 +100,34 @@ async function load(): Promise<void> {
   }
 }
 
-function formatDate(value: unknown): string {
-  if (value === null || value === undefined) return '—';
-  const parsed = new Date(String(value));
-  return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString('ru-RU');
+function onStatusFilterUpdate(value: string[]): void {
+  statusFilter.value = value;
+}
+
+function openPayout(row: MarketplaceOutgoingPaymentView): void {
+  payoutOverlay.open(row.id);
 }
 
 onMounted(() => {
+  // Отбор по состоянию и обновление ленты — в шапке: чипы и кнопка «Обновить»
+  // над таблицей занимали строку, прыгали по ширине поля поиска и оставляли
+  // ленту без единой линии фильтров.
+  registerAction({
+    id: 'mp-board-payouts-filter',
+    component: StatusFilterButton,
+    props: {
+      options: PAYOUT_STATUS_FILTERS,
+      selected: statusFilter,
+      onChange: onStatusFilterUpdate,
+    },
+    order: 1,
+  });
+  registerAction({
+    id: 'mp-board-payouts-refresh',
+    component: RefreshPayoutsButton,
+    props: { onClick: () => void load(), loading },
+    order: 2,
+  });
   void load();
 });
 </script>
@@ -108,54 +135,40 @@ onMounted(() => {
 <template lang="pug">
 q-page.board-payouts(role="region", aria-label="Выплаты поставщикам")
   PageHint(storage-key="mp:board-payouts:banner-dismissed")
-    | Лента выплат поставщикам по всему кооперативу. Подтверждение и отказ выплат выполняет кассир кооператива — для совета это обзор только для чтения.
+    | Лента выплат поставщикам по всему кооперативу. Подтверждение и отказ выплат выполняет кассир кооператива — для совета это обзор только для чтения. Откройте выплату, чтобы увидеть, за какой заказ платили и чем оплата подтверждена.
 
-  .board-payouts__filters
-    BaseInput.board-payouts__supplier(
-      v-model="supplierFilter",
-      label="Поставщик",
-      placeholder="ФИО или наименование организации",
-      clearable,
-      @keyup.enter="load"
-    )
-    BaseButton(variant="primary", :loading="loading", @click="load")
-      template(#icon-left)
-        q-icon(name="refresh", size="18px")
-      | Обновить
-
-  .board-payouts__chips(role="group", aria-label="Фильтр по статусу")
-    .chip(
-      v-for="opt in statusOptions",
-      :key="opt.value",
-      :class="statusFilter.includes(opt.value) ? 'chip--accent' : 'chip--neutral'",
-      role="button",
-      tabindex="0",
-      @click="toggleStatus(opt.value)",
-      @keydown.enter="toggleStatus(opt.value)"
-    ) {{ opt.label }}
-
-  q-table.board-payouts__table(
-    :rows="filteredRows",
-    :columns="columns",
-    row-key="id",
-    flat,
-    bordered,
-    :loading="loading",
-    :pagination="{ rowsPerPage: 25, sortBy: 'created_at', descending: true }",
-    :rows-per-page-options="[25, 50, 100, 0]",
-    binary-state-sort
+  FilterBar(
+    :search="supplierSearch",
+    search-placeholder="Поставщик — ФИО или наименование организации",
+    hide-reset,
+    @update:search="(v) => (supplierSearch = v)"
   )
-    template(#body-cell-status="props")
-      q-td(:props="props")
-        BaseBadge(:variant="statusVariant(props.row.status)") {{ statusLabel(props.row.status) }}
-    template(#no-data)
-      .board-payouts__nodata
-        EmptyState(
-          title="Выплат нет",
-          body="Выплат по выбранным фильтрам не найдено."
-        )
-          template(#icon)
-            q-icon(name="payments", size="48px")
+
+  BaseTable(
+    v-if="!isEmpty",
+    :columns="columns",
+    :rows="filteredRows",
+    row-key="id",
+    hover,
+    clickable-rows,
+    :loading="loading",
+    sort-by="created_at",
+    descending,
+    min-width="880px",
+    @row-click="openPayout"
+  )
+    template(#cell-status="{ row }")
+      BaseBadge(:variant="statusVariant(row.status)") {{ statusLabel(row.status) }}
+
+  EmptyState(
+    v-if="isEmpty",
+    title="Выплат нет",
+    body="Выплат по выбранным фильтрам не найдено."
+  )
+    template(#icon)
+      q-icon(name="payments", size="48px")
+
+  PayoutDetailOverlay
 </template>
 
 <style scoped lang="scss">
@@ -164,38 +177,6 @@ q-page.board-payouts(role="region", aria-label="Выплаты поставщи�
   display: flex;
   flex-direction: column;
   gap: var(--p-4, 16px);
-
-  // #no-data слот q-table выравнивает контент влево — центрируем EmptyState.
-  &__nodata {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  &__filters {
-    display: flex;
-    gap: var(--p-3, 12px);
-    align-items: flex-end;
-    flex-wrap: wrap;
-  }
-
-  &__supplier {
-    flex: 1 1 320px;
-    min-width: 240px;
-  }
-
-  &__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--p-2, 8px);
-
-    .chip {
-      cursor: pointer;
-      user-select: none;
-      height: 28px;
-      padding: 0 12px;
-    }
-  }
 }
 
 @media (max-width: 768px) {

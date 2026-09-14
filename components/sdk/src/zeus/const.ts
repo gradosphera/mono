@@ -3117,6 +3117,9 @@ export const AllTypesProps: Record<string,any> = {
 		marketplaceGetOrder:{
 			input:"MarketplaceGetOrderInput"
 		},
+		marketplaceGetOutgoingPayment:{
+
+		},
 		marketplaceGetPersonalWalletHistory:{
 			options:"PaginationInput"
 		},
@@ -6436,6 +6439,33 @@ export const ReturnTypes: Record<string,any> = {
 		previous_status:"MarketplaceOrderStatus",
 		status:"MarketplaceOrderStatus"
 	},
+	MarketplaceOutgoingPaymentCoreRecord:{
+		completed_at:"DateTime",
+		created_at:"DateTime",
+		id:"String",
+		memo:"String",
+		message:"String",
+		quantity:"Float",
+		status:"PaymentStatus",
+		symbol:"String"
+	},
+	MarketplaceOutgoingPaymentDetail:{
+		core_payment:"MarketplaceOutgoingPaymentCoreRecord",
+		order:"MarketplaceOutgoingPaymentOrderSummary",
+		payment:"MarketplaceOutgoingPaymentRequest"
+	},
+	MarketplaceOutgoingPaymentOrderSummary:{
+		accepted_cost:"String",
+		delivery_point_name:"String",
+		id:"String",
+		orderer_name:"String",
+		price_per_unit:"String",
+		product_name:"String",
+		quantity:"Float",
+		status:"MarketplaceOrderStatus",
+		total_cost:"String",
+		unit_of_measure:"String"
+	},
 	MarketplaceOutgoingPaymentRequest:{
 		amount:"String",
 		apl_reception_id:"String",
@@ -8150,6 +8180,7 @@ export const ReturnTypes: Record<string,any> = {
 		marketplaceGetEconomyConfig:"MarketplaceEconomyConfig",
 		marketplaceGetOffer:"MarketplaceOffer",
 		marketplaceGetOrder:"MarketplaceOrder",
+		marketplaceGetOutgoingPayment:"MarketplaceOutgoingPaymentDetail",
 		marketplaceGetPersonalEconomy:"MarketplacePersonalEconomy",
 		marketplaceGetPersonalWalletHistory:"MarketplaceBranchWalletHistoryPaginationResult",
 		marketplaceGetProductTypeById:"MarketplaceProductType",
