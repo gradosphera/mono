@@ -290,23 +290,22 @@ const canModerate = computed(
         .t-h3 Предложение
       DataRow(label='Поставщик', :value='supplierTitle')
       DataRow(label='Срок годности', :value='formatDays(offer.shelf_life_days, "Без срока годности")')
-      .offer-registry-detail__warranty
-        DataRow.offer-registry-detail__warranty-row(
-          label='Гарантийный срок возврата',
-          :value='formatDays(offer.warranty_days, "Без гарантийного срока возврата")'
-        )
-        //- Срок задаёт модератор при одобрении и меняет здесь же: это свойство
-        //- предложения, а не строки реестра.
-        BaseButton(
-          v-if='canModerateOffers',
-          variant='ghost',
-          size='sm',
-          :loading='isSettingWarranty(offer.id)',
-          @click='editWarranty'
-        )
-          template(#icon-left)
-            q-icon(name='event_repeat', size='16px')
-          | Изменить
+      //- Кнопка живёт в колонке значения той же строки: строки карточки стоят
+      //- одной сеткой, и собственная обёртка вокруг строки сбивала бы её
+      //- значение относительно соседних.
+      DataRow(label='Гарантийный срок возврата')
+        template(#value-override)
+          span {{ formatDays(offer.warranty_days, 'Без гарантийного срока возврата') }}
+          BaseButton(
+            v-if='canModerateOffers',
+            variant='ghost',
+            size='sm',
+            :loading='isSettingWarranty(offer.id)',
+            @click='editWarranty'
+          )
+            template(#icon-left)
+              q-icon(name='event_repeat', size='16px')
+            | Изменить
 
     BaseCard.offer-registry-detail__card(v-if='packageRows.length')
       template(#head)
@@ -410,19 +409,6 @@ const canModerate = computed(
     display: flex;
     gap: var(--p-2, 8px);
     margin-top: var(--p-2, 8px);
-  }
-
-  // Строка срока и кнопка правки идут одной строкой: кнопка относится к этому
-  // сроку, а не к карточке целиком.
-  &__warranty {
-    display: flex;
-    align-items: center;
-    gap: var(--p-3, 12px);
-  }
-
-  &__warranty-row {
-    flex: 1 1 auto;
-    min-width: 0;
   }
 
   &__desc {
