@@ -23,7 +23,10 @@ import { listWriteoffPendingConfirmations } from 'src/pages/Marketplace/PvzWrite
  * разделы рядом, за один клик.
  */
 
-const SECTIONS = ['labeling', 'warehouse', 'stock', 'writeoffs', 'containers', 'types'] as const
+// Типы боксов уехали на стол администратора (решение владельца 14.09.2026):
+// габариты тары общие на весь кооператив, участок только берёт готовый тип
+// при заведении боксов. Здесь остались сами боксы участка.
+const SECTIONS = ['labeling', 'warehouse', 'stock', 'writeoffs', 'containers'] as const
 type WarehouseSection = (typeof SECTIONS)[number]
 
 const DEFAULT_SECTION: WarehouseSection = 'labeling'
@@ -35,9 +38,11 @@ const desktop = useDesktopStore()
 /** Раздел живёт в адресе: ссылку на нужную вкладку можно послать коллеге. */
 const activeSection = computed<WarehouseSection>(() => {
   const raw = String(route.params.section ?? '')
-  return (SECTIONS as readonly string[]).includes(raw)
-    ? (raw as WarehouseSection)
-    : DEFAULT_SECTION
+  if ((SECTIONS as readonly string[]).includes(raw)) return raw as WarehouseSection
+  // Ссылка на прежний раздел типов тары ведёт к боксам: сам справочник уехал
+  // на стол администратора, но старые закладки не должны падать на раскладку.
+  if (raw === 'types') return 'containers'
+  return DEFAULT_SECTION
 })
 
 // Боксы — контур необязательный: когда кооператив его не включил, backend не
@@ -52,7 +57,7 @@ const writeoffsAllowed = computed(() =>
   desktop.hasGrant('market-pvz', 'Writeoff:read:own-KU'),
 )
 
-const counts = ref({ warehouse: 0, stock: 0, writeoffs: 0, containers: 0, types: 0 })
+const counts = ref({ warehouse: 0, stock: 0, writeoffs: 0, containers: 0 })
 
 const tabs = computed<PageTab[]>(() => {
   const list: PageTab[] = [
@@ -64,10 +69,7 @@ const tabs = computed<PageTab[]>(() => {
     list.push({ key: 'writeoffs', label: 'Списание', count: counts.value.writeoffs })
   }
   if (containersAllowed.value) {
-    list.push(
-      { key: 'containers', label: 'Боксы', count: counts.value.containers },
-      { key: 'types', label: 'Типы боксов', count: counts.value.types },
-    )
+    list.push({ key: 'containers', label: 'Боксы', count: counts.value.containers })
   }
   return list
 })
@@ -82,9 +84,7 @@ function onSelectTab(tab: PageTab): void {
 // Право на раздел может отозваться, пока оператор в нём стоит, — тогда
 // возвращаем его на раскладку, чтобы он не смотрел в пустой экран.
 watch([containersAllowed, writeoffsAllowed, activeSection], ([containers, writeoffs, section]) => {
-  const lost =
-    (!containers && (section === 'containers' || section === 'types')) ||
-    (!writeoffs && section === 'writeoffs')
+  const lost = (!containers && section === 'containers') || (!writeoffs && section === 'writeoffs')
   if (!lost) return
   void router.replace({
     name: 'marketplace-pvz-warehouse',
@@ -96,7 +96,7 @@ function onWarehouseCounts(value: { warehouse: number; stock: number }): void {
   counts.value = { ...counts.value, ...value }
 }
 
-function onContainerCounts(value: { containers: number; types: number }): void {
+function onContainerCounts(value: { containers: number }): void {
   counts.value = { ...counts.value, ...value }
 }
 
@@ -147,11 +147,7 @@ q-page.wh-desk(role='region', aria-label='Склад участка')
 
   PvzWriteoffsSection(v-else-if='activeSection === "writeoffs"', @count='onWriteoffCount')
 
-  OperatorContainersSection(
-    v-else,
-    :section='activeSection === "types" ? "types" : "containers"',
-    @counts='onContainerCounts'
-  )
+  OperatorContainersSection(v-else, @counts='onContainerCounts')
 </template>
 
 <style scoped lang="scss">

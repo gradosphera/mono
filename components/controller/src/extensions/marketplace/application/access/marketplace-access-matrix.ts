@@ -139,7 +139,10 @@ export const marketplaceAccessMatrix: Record<MarketplaceRole, Record<string, str
     // Эпик 19: администратор видит топологию складов всех участков.
     StorageCell: ['read:all'],
     // Эпик 19: сводный реестр боксов кооператива с объёмом и заполненностью.
-    Container: ['read:all', 'read:own-KU'],
+    // `manage:types` — справочник типов тары: габариты и объём общие на весь
+    // кооператив (решение владельца 14.09.2026), поэтому типы заводит
+    // председатель, а участки только выбирают из них при заведении боксов.
+    Container: ['read:all', 'read:own-KU', 'manage:types'],
     Shipment: ['read:all'],
     Payment: ['read:all'],
     SupplierClaim: ['read:all'],

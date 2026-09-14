@@ -18,14 +18,12 @@ import { PageHint } from 'src/shared/ui/domain'
 import { useOperatorBranchStore } from 'src/entities/OperatorBranch'
 import {
   containerLabel,
-  createContainerType,
   createContainers,
   formatVolumeM3,
   moveContainer,
   updateContainer,
   useMarketplaceStorageStore,
   volumeM3Of,
-  type MarketplaceContainerTypeView,
   type MarketplaceContainerView,
 } from 'src/entities/MarketplaceStorage'
 import { listInventory, type MarketplaceInventoryItemView } from 'src/entities/MarketplaceInventory'
@@ -45,17 +43,14 @@ import {
  * ячейкам и выводит из оборота пустые.
  *
  * Габариты задаёт ТИП бокса, а не отдельный бокс: тара закупается одинаковыми
- * партиями, а объём нужен агрегатом — чтобы в следующем эпике посчитать, сколько
- * машины займёт перевозка боксов между участками.
+ * партиями, а объём нужен агрегатом — чтобы посчитать, сколько машины займёт
+ * перевозка боксов между участками. Сами типы — общий справочник кооператива и
+ * живут на столе администратора («Боксы кооператива» → «Типы боксов»): участок
+ * выбирает готовый тип, а не заводит свой (решение владельца 14.09.2026).
  */
 
-const props = defineProps<{
-  /** Какой справочник показывать: сами боксы или их типы. */
-  section: 'containers' | 'types'
-}>()
-
 const emit = defineEmits<{
-  (e: 'counts', value: { containers: number; types: number }): void
+  (e: 'counts', value: { containers: number }): void
 }>()
 
 const route = useRoute()
@@ -79,13 +74,11 @@ const firstLoad = useFirstLoad(loading)
  */
 const selectedContainers = ref<MarketplaceContainerView[]>([])
 
-const activeTab = computed(() => props.section)
-
-// Счётчики боксов и типов считает эта секция, а показывает их полоса разделов
-// на странице-обёртке.
+// Счётчик боксов считает эта секция, а показывает его полоса разделов на
+// странице-обёртке.
 watch(
-  [() => storage.activeContainers.length, () => storage.activeTypes.length],
-  ([containers, types]) => emit('counts', { containers, types }),
+  () => storage.activeContainers.length,
+  (containers) => emit('counts', { containers }),
   { immediate: true },
 )
 
@@ -197,29 +190,6 @@ const containerColumns = computed<BaseTableColumn<MarketplaceContainerView>[]>((
   { key: 'actions', label: '', width: '56px', align: 'right' },
 ])
 
-const typeColumns = computed<BaseTableColumn<MarketplaceContainerTypeView>[]>(() => [
-  { key: 'name', label: 'Название', sortable: true, field: 'name' },
-  { key: 'dims', label: 'Габариты, см', width: '200px', nowrap: true },
-  {
-    key: 'volume',
-    label: 'Объём',
-    width: '110px',
-    numeric: true,
-    nowrap: true,
-    sortable: true,
-    field: (row) => volumeM3Of(row.volume_m3),
-  },
-  { key: 'weight', label: 'Макс. вес', width: '120px', nowrap: true },
-  {
-    key: 'boxes',
-    label: 'Боксов',
-    width: '100px',
-    numeric: true,
-    sortable: true,
-    field: (row) =>
-      storage.activeContainers.filter((c) => c.container_type_id === row.id).length,
-  },
-])
 
 /**
  * Пересобрать выбор на свежих строках: после перезагрузки в `selectedContainers`
@@ -343,66 +313,6 @@ async function submitBatch(): Promise<void> {
   }
 }
 
-// ─── Завести тип боксов ───
-const typeOpen = ref(false)
-const typeSaving = ref(false)
-interface ContainerTypeForm {
-  name: string
-  length_cm: number | null
-  width_cm: number | null
-  height_cm: number | null
-  max_weight_kg: string
-}
-
-function emptyTypeForm(): ContainerTypeForm {
-  return { name: '', length_cm: null, width_cm: null, height_cm: null, max_weight_kg: '' }
-}
-
-const typeForm = ref<ContainerTypeForm>(emptyTypeForm())
-
-const typeValid = computed(
-  () =>
-    typeForm.value.name.trim().length > 0 &&
-    Number(typeForm.value.length_cm) > 0 &&
-    Number(typeForm.value.width_cm) > 0 &&
-    Number(typeForm.value.height_cm) > 0,
-)
-
-/** Объём считает бэкенд, но оператор должен видеть его до сохранения. */
-const typeVolumePreview = computed(() => {
-  const l = Number(typeForm.value.length_cm)
-  const w = Number(typeForm.value.width_cm)
-  const h = Number(typeForm.value.height_cm)
-  if (!(l > 0 && w > 0 && h > 0)) return ''
-  return formatVolumeM3(String((l * w * h) / 1_000_000))
-})
-
-function openType(): void {
-  typeForm.value = emptyTypeForm()
-  typeOpen.value = true
-}
-
-async function submitType(): Promise<void> {
-  if (!typeValid.value) return
-  typeSaving.value = true
-  try {
-    await createContainerType({
-      name: typeForm.value.name.trim(),
-      length_cm: Math.trunc(Number(typeForm.value.length_cm)),
-      width_cm: Math.trunc(Number(typeForm.value.width_cm)),
-      height_cm: Math.trunc(Number(typeForm.value.height_cm)),
-      max_weight_kg: typeForm.value.max_weight_kg.trim() || null,
-    })
-    SuccessAlert('Тип боксов заведён')
-    typeOpen.value = false
-    await load()
-  } catch (e) {
-    FailAlert(e, 'Не удалось завести тип боксов')
-  } finally {
-    typeSaving.value = false
-  }
-}
-
 // ─── Поставить бокс в ячейку / снять с адреса ───
 const placeOpen = ref(false)
 const placeTarget = ref<MarketplaceContainerView | null>(null)
@@ -468,7 +378,6 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
     Teleport(to='#header-actions-host', defer)
       .containers__head-actions
         BaseButton(
-          v-if='activeTab === "containers"',
           variant='secondary',
           size='sm',
           :loading='printing',
@@ -479,7 +388,6 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
             q-icon(name='print', size='16px')
           | Печать всех QR
         BaseButton(
-          v-if='activeTab === "containers"',
           variant='primary',
           size='sm',
           :disabled='!storage.activeTypes.length',
@@ -488,29 +396,16 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
           template(#icon-left)
             q-icon(name='add', size='16px')
           | Завести боксы
-        BaseButton(v-else, variant='primary', size='sm', @click='openType')
-          template(#icon-left)
-            q-icon(name='add', size='16px')
-          | Тип боксов
 
-    //- Своя подсказка на каждый раздел: боксы и их типы — разные сущности.
-    PageHint(
-      v-if='activeTab === "containers"',
-      storage-key='mp:operator-containers:banner-dismissed'
-    )
+    PageHint(storage-key='mp:operator-containers:banner-dismissed')
       | Бокс — тара со своим QR-кодом: имущество кладётся в бокс, а бокс стоит в
       | ячейке склада или просто в углу — адрес не обязателен. Заведите боксы
       | партией, наклейте на них напечатанные QR — и при закрывающей подписи
       | приёмки достаточно будет отсканировать бокс, чтобы принятое легло на место.
 
-    PageHint(v-else, storage-key='mp:operator-container-types:banner-dismissed')
-      | Тип задаёт габариты и объём тары, а не отдельный бокс: коробки закупают
-      | одинаковыми партиями. Объём нужен агрегатом — по нему считается, сколько
-      | места займёт перевозка боксов между участками.
-
     //- Печать отмеченного стоит над таблицей, а не в шапке страницы: действие
     //- относится к текущему выбору в таблице, а не к разделу целиком.
-    .containers__bulk(v-if='activeTab === "containers" && selectedContainers.length')
+    .containers__bulk(v-if='selectedContainers.length')
       BaseButton(
         variant='primary',
         size='sm',
@@ -522,11 +417,11 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
         | Напечатать выбранное ({{ selectedContainers.length }})
 
     //- ─────────────────────────── Боксы ───────────────────────────
-    template(v-if='activeTab === "containers"')
+    template
       EmptyState(
         v-if='!firstLoad && !storage.activeTypes.length',
-        title='Сначала заведите тип боксов',
-        body='Габариты и объём задаёт тип, а не отдельный бокс: тару закупают одинаковыми партиями, а объём нужен агрегатом для расчёта перевозки.'
+        title='Типы боксов ещё не заведены',
+        body='Габариты и объём задаёт тип тары, а он общий на весь кооператив: типы заводит председатель на столе администратора, в разделе «Боксы кооператива». Как только тип появится, здесь можно будет завести партию боксов.'
       )
         template(#icon)
           q-icon(name='straighten', size='48px')
@@ -582,34 +477,6 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
         template(#icon)
           q-icon(name='inbox', size='48px')
 
-    //- ────────────────────────── Типы боксов ──────────────────────
-    template(v-else)
-      BaseTable(
-        v-if='firstLoad || storage.activeTypes.length',
-        :columns='typeColumns',
-        :rows='storage.activeTypes',
-        row-key='id',
-        hover,
-        :loading='loading',
-        :skeleton-rows='4',
-        min-width='720px',
-        sort-by='name'
-      )
-        template(#cell-dims='{ row }')
-          | {{ row.length_cm }} × {{ row.width_cm }} × {{ row.height_cm }}
-        template(#cell-volume='{ row }')
-          | {{ formatVolumeM3(row.volume_m3) }}
-        template(#cell-weight='{ row }')
-          | {{ row.max_weight_kg ? `${row.max_weight_kg} кг` : '—' }}
-
-      EmptyState(
-        v-else,
-        title='Типы боксов не заведены',
-        body='Тип задаёт габариты и объём тары. Заведите его первым — дальше боксы создаются партиями одного типа.'
-      )
-        template(#icon)
-          q-icon(name='straighten', size='48px')
-
   //- ─────────────────────── Диалог: партия боксов ───────────────────────
   BaseDialog(v-model='batchOpen', title='Завести боксы', size='sm')
     .containers__form
@@ -622,24 +489,6 @@ async function retire(container: MarketplaceContainerView): Promise<void> {
     template(#footer)
       BaseButton(variant='ghost', size='sm', :disabled='batchSaving', @click='batchOpen = false') Отмена
       BaseButton(variant='primary', size='sm', :loading='batchSaving', :disabled='!batchValid', @click='submitBatch') Завести
-
-  //- ─────────────────────── Диалог: тип боксов ───────────────────────
-  BaseDialog(v-model='typeOpen', title='Тип боксов', size='sm')
-    .containers__form
-      .containers__note
-        | Габариты задаются в сантиметрах — так тару меряют на месте. По ним
-        | считается объём в кубометрах: он показывает, какая машина увезёт
-        | партию боксов между участками.
-      BaseInput(v-model='typeForm.name', label='Название', placeholder='Ящик 60×40×30')
-      .containers__dims
-        BaseInput(v-model.number='typeForm.length_cm', type='number', label='Длина, см')
-        BaseInput(v-model.number='typeForm.width_cm', type='number', label='Ширина, см')
-        BaseInput(v-model.number='typeForm.height_cm', type='number', label='Высота, см')
-      BaseInput(v-model='typeForm.max_weight_kg', label='Предельный вес, кг', placeholder='Необязательно')
-      .containers__note(v-if='typeVolumePreview') Полезный объём: {{ typeVolumePreview }}
-    template(#footer)
-      BaseButton(variant='ghost', size='sm', :disabled='typeSaving', @click='typeOpen = false') Отмена
-      BaseButton(variant='primary', size='sm', :loading='typeSaving', :disabled='!typeValid', @click='submitType') Завести
 
   //- ─────────────────────── Диалог: поставить в ячейку ───────────────────────
   BaseDialog(v-model='placeOpen', title='Место бокса', size='sm')
