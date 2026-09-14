@@ -145,6 +145,12 @@ const envVarsSchema = z.object({
   // Сколько узлов опрашивать для M-of-N консенсуса при обновлении кэша ключей
   // (Story 9.7). <2 здоровых узлов — консенсус не проверяется (single-node).
   BLOCKCHAIN_RPC_QUORUM_SIZE: z.coerce.number().default(2),
+  // Повтор транзакции, срезанной лимитами CPU/NET цепи (см. chain-retry.ts):
+  // сколько раз переотправлять после первой отправки. 0 — повторов нет.
+  BLOCKCHAIN_TX_RETRY_ATTEMPTS: z.coerce.number().default(3),
+  // Пауза перед первым повтором, дальше удваивается (500/1000/2000мс): «не влезли
+  // в блок» рассасывается за интервал блока, а ответа ждёт живой пайщик.
+  BLOCKCHAIN_TX_RETRY_DELAY_MS: z.coerce.number().default(500),
   // Интервал блока цепи (мс) — для оценки времени LIB-блока, когда узел не отдаёт
   // last_irreversible_block_time напрямую (Story 9.6).
   BLOCKCHAIN_BLOCK_INTERVAL_MS: z.coerce.number().default(500),
@@ -490,6 +496,8 @@ export default {
     rpcHealthCheckIntervalMs: envVars.data.BLOCKCHAIN_RPC_HEALTHCHECK_INTERVAL_MS,
     rpcTimeoutMs: envVars.data.BLOCKCHAIN_RPC_TIMEOUT_MS,
     rpcQuorumSize: envVars.data.BLOCKCHAIN_RPC_QUORUM_SIZE,
+    txRetryAttempts: envVars.data.BLOCKCHAIN_TX_RETRY_ATTEMPTS,
+    txRetryDelayMs: envVars.data.BLOCKCHAIN_TX_RETRY_DELAY_MS,
     blockIntervalMs: envVars.data.BLOCKCHAIN_BLOCK_INTERVAL_MS,
     finalityMarginMs: envVars.data.BLOCKCHAIN_FINALITY_MARGIN_MS,
     id: envVars.data.CHAIN_ID,

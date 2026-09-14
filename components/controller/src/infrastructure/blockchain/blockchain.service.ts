@@ -9,6 +9,7 @@ import config from '~/config/config';
 import { BlockchainPort } from '~/domain/common/ports/blockchain.port';
 import type { ActiveKeysQuorum, EndorsementRecord, ServedCooperative } from '~/domain/common/ports/blockchain.port';
 import { RpcPool } from './rpc-pool.service';
+import { retryOnChainExhaustion } from './chain-retry';
 import { WinstonLoggerService } from '~/application/logger/logger-app.service';
 import type { GetInfoResult } from '~/types/shared/blockchain.types';
 import type { BlockchainAccountInterface } from '~/types/shared';
@@ -136,11 +137,25 @@ export class BlockchainService implements BlockchainPort {
     // ждётся ABI, параллельный запрос с другим подписантом успевал вызвать
     // `initialize()` и подменить ключ, которым уйдёт эта транзакция.
     const session = this.session;
-    if (Array.isArray(actionOrActions)) {
-      return this.sendActions(session, actionOrActions, broadcast);
-    } else {
-      return this.sendAction(session, actionOrActions, broadcast);
-    }
+
+    // Единственная на весь бэкенд отправка в цепь — здесь же и повтор для
+    // транзакций, срезанных лимитами CPU/NET на пике нагрузки (chain-retry.ts).
+    // Такая транзакция в блок не попадает, поэтому повтор дублей не даёт, а
+    // пайщик вместо красной ошибки получает обычный ответ со второй попытки.
+    return retryOnChainExhaustion(
+      () =>
+        Array.isArray(actionOrActions)
+          ? this.sendActions(session, actionOrActions, broadcast)
+          : this.sendAction(session, actionOrActions, broadcast),
+      {
+        attempts: config.blockchain.txRetryAttempts,
+        delayMs: config.blockchain.txRetryDelayMs,
+        onRetry: ({ attempt, attempts, delayMs, reason }) =>
+          this.logger.warn(
+            `Транзакция не уложилась в лимит цепи (${reason}) — повтор ${attempt}/${attempts} через ${delayMs}мс`
+          ),
+      }
+    );
   }
 
   private async formActionFromAbi(action: any): Promise<any> {
