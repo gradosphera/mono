@@ -1,5 +1,5 @@
 import { Inject, Injectable, UseGuards } from '@nestjs/common';
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { GqlJwtAuthGuard, platformSettings } from '@coopenomics/extension-kit';
 import { CurrentMarketplaceMember } from '../decorators/current-marketplace-member.decorator';
 import { RequireMarketplaceAccess } from '../decorators/marketplace-access.decorator';
@@ -17,6 +17,7 @@ import {
   type MarketplaceOutgoingPaymentRequestDomainRepository,
 } from '../../domain/repositories/marketplace-outgoing-payment-request.repository';
 import type { MarketplaceOutgoingPaymentRequestStatus } from '../../domain/entities/marketplace-outgoing-payment-request.types';
+import { MarketplaceOrderDisplayService } from '../services/marketplace-order-display.service';
 
 /**
  * Story 5.6 / 5.7 + 598-16 (L12): резолвер истории выплат поставщику
@@ -67,5 +68,28 @@ export class MarketplaceOutgoingPaymentResolver {
       statuses: filter?.statuses as MarketplaceOutgoingPaymentRequestStatus[] | undefined,
     });
     return list.map(toMarketplaceOutgoingPaymentRequestDTO);
+  }
+}
+
+/**
+ * Отображаемое имя получателя выплаты (`payee_name`): ФИО физлица/ИП или
+ * наименование организации — живьём из аккаунта на бэкенде, тем же способом,
+ * что и `supplier_name` у оферты. Лента выплат показывает человека, а не
+ * системный логин аккаунта.
+ */
+@Resolver(() => MarketplaceOutgoingPaymentRequestDTO)
+@Injectable()
+export class MarketplaceOutgoingPaymentFieldsResolver {
+  constructor(private readonly displayService: MarketplaceOrderDisplayService) {}
+
+  @ResolveField('payee_name', () => String, {
+    nullable: true,
+    description:
+      'Отображаемое имя получателя выплаты (ФИО физлица/ИП или наименование организации).',
+  })
+  async payeeName(
+    @Parent() payment: MarketplaceOutgoingPaymentRequestDTO
+  ): Promise<string | null> {
+    return this.displayService.resolveAccountName(payment.payee_account);
   }
 }

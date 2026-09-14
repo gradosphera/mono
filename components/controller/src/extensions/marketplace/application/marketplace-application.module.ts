@@ -131,7 +131,10 @@ import {
   MarketplaceAidCouncilSyncService,
   MARKETPLACE_AID_COUNCIL_SYNC_SERVICE,
 } from './services/marketplace-aid-council-sync.service';
-import { MarketplaceOutgoingPaymentResolver } from './resolvers/marketplace-outgoing-payment.resolver';
+import {
+  MarketplaceOutgoingPaymentFieldsResolver,
+  MarketplaceOutgoingPaymentResolver,
+} from './resolvers/marketplace-outgoing-payment.resolver';
 import { MarketplaceSupplierSettingsResolver } from './resolvers/marketplace-supplier-settings.resolver';
 import {
   MarketplaceSupplierSettingsService,
@@ -268,6 +271,7 @@ import { MarketplaceRealtimeBridge } from './realtime/marketplace-realtime.bridg
     MarketplaceEconomyResolver,
     MarketplaceAplReceptionResolver,
     MarketplaceOutgoingPaymentResolver,
+    MarketplaceOutgoingPaymentFieldsResolver,
     MarketplaceSupplierSettingsResolver,
     MarketplaceIssuanceResolver,
     MarketplaceReturnClaimResolver,
@@ -558,6 +562,7 @@ import { MarketplaceRealtimeBridge } from './realtime/marketplace-realtime.bridg
     MarketplaceWarehouseSettingsService,
     MarketplaceAplReceptionResolver,
     MarketplaceOutgoingPaymentResolver,
+    MarketplaceOutgoingPaymentFieldsResolver,
     MarketplaceIssuanceResolver,
     MarketplaceReturnClaimResolver,
     MarketplaceSupplierClaimResolver,

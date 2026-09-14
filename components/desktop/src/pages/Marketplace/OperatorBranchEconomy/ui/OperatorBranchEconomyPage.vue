@@ -13,6 +13,12 @@ import { AmountInput, PageHint, WalletCard } from 'src/shared/ui/domain'
 import { ExpenseCreateDialog, type ExpenseCreatePayload } from 'src/shared/ui/domain/ExpenseCreateDialog'
 import { PaymentMethodSelect } from 'src/shared/ui/domain/PaymentMethodSelect'
 import { PageTabs, type PageTab } from 'src/shared/ui/layout'
+import { TurnoverTop } from 'src/widgets/Marketplace/TurnoverTop'
+import { listInventory, type MarketplaceInventoryItemView } from 'src/entities/MarketplaceInventory'
+import {
+  fetchOrdersForTurnover,
+  type MarketplaceOrderListView,
+} from 'src/entities/MarketplaceOrder'
 import { formatDateToLocalTimezone } from 'src/shared/lib/utils/dates'
 import { formatAsset2Digits } from 'src/shared/lib/utils'
 import { operationLabel, formatProcessAmount } from 'src/shared/lib/ledger2'
@@ -85,14 +91,44 @@ const personalWalletHistory = ref<MarketplacePersonalWalletHistoryView['items']>
 
 // ─── Табы страницы (requirement — переверстка без изменения логики) ───
 
-const activeKey = ref<'wallet' | 'expenses' | 'distribution' | 'personal'>('wallet')
+const activeKey = ref<'wallet' | 'turnover' | 'expenses' | 'distribution' | 'personal'>('wallet')
 
 const tabs = computed<PageTab[]>(() => [
   { key: 'wallet', label: 'Кошелёк участка' },
+  { key: 'turnover', label: 'Оборот' },
   { key: 'expenses', label: 'Плановые расходы', count: plans.value.length || undefined },
   { key: 'distribution', label: 'Распределение', count: economy.value?.weights.length || undefined },
   { key: 'personal', label: 'Мои средства' },
 ])
+
+// ─── Оборот участка ───
+// Тот же раздел, что на «Экономике» кооператива, только данные своего участка:
+// сколько имущества принято на склад и на какую сумму, сколько выдано
+// пайщикам и сколько участок заработал наценкой.
+const turnoverPeriodDays = ref<number>(30)
+const turnoverInventory = ref<MarketplaceInventoryItemView[]>([])
+const turnoverOrders = ref<MarketplaceOrderListView[]>([])
+const turnoverLoading = ref(true)
+
+/** Сколько исполненных заказов забираем под свод: хвост старше периода не нужен. */
+const TURNOVER_ORDERS_LIMIT = 500
+
+async function loadTurnover(): Promise<void> {
+  if (!braname.value) return
+  turnoverLoading.value = true
+  try {
+    const [inventoryRows, orderRows] = await Promise.all([
+      listInventory({ braname: braname.value }),
+      fetchOrdersForTurnover({ braname: braname.value, limit: TURNOVER_ORDERS_LIMIT }),
+    ])
+    turnoverInventory.value = inventoryRows
+    turnoverOrders.value = orderRows
+  } catch (e) {
+    FailAlert(e, 'Не удалось загрузить оборот участка')
+  } finally {
+    turnoverLoading.value = false
+  }
+}
 
 function onSelectTab(tab: PageTab): void {
   activeKey.value = tab.key as typeof activeKey.value
@@ -173,9 +209,13 @@ async function loadAll(): Promise<void> {
 onMounted(async () => {
   await store.ensureLoaded(coopname.value)
   void loadAll()
+  void loadTurnover()
 })
 
-watch(braname, () => void loadAll())
+watch(braname, () => {
+  void loadAll()
+  void loadTurnover()
+})
 
 // ─── Ручное распределение из общего кошелька (председатель КУ) ───
 
@@ -603,6 +643,17 @@ q-page.economy
           .banner__body Движений по общему кошельку пока не было.
 
     //- Плановые расходы участка
+    //- Оборот участка: тот же раздел, что на «Экономике» кооператива. Колонка
+    //- пункта выдачи не нужна — участок здесь один.
+    template(v-if='activeKey === "turnover"')
+      TurnoverTop(
+        v-model='turnoverPeriodDays',
+        :inventory='turnoverInventory',
+        :orders='turnoverOrders',
+        :loading='turnoverLoading',
+        :show-branch='false'
+      )
+
     template(v-if='activeKey === "expenses"')
       .economy__cards
         WalletCard(

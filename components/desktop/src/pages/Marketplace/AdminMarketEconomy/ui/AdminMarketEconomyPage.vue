@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
-import { BaseButton, BaseDialog, BaseSelect, BaseTable, EmptyState } from 'src/shared/ui/base'
-import type { BaseTableColumn } from 'src/shared/ui/base'
+import { BaseButton, BaseDialog } from 'src/shared/ui/base'
 import { AmountInput, PageHint } from 'src/shared/ui/domain'
-import { marketplaceOrderUnitLabel } from 'src/shared/lib/consts/marketplace-units'
+import { TurnoverTop } from 'src/widgets/Marketplace/TurnoverTop'
 import { listInventory, type MarketplaceInventoryItemView } from 'src/entities/MarketplaceInventory'
+import {
+  fetchOrdersForTurnover,
+  type MarketplaceOrderListView,
+} from 'src/entities/MarketplaceOrder'
 import { getEconomyConfig, setMembershipFee } from '../api'
 
 /**
@@ -61,89 +64,34 @@ async function onSave(): Promise<void> {
 }
 
 // ─── Топ позиций по обороту ───
-// Оборот считается по приёмке на склад: это единственное событие склада с
-// собственной датой, и именно оно отвечает на вопрос «сколько имущества
-// прошло через кооператив за период». Раньше рейтинг висел на складе без
-// периода вовсе — «15 единиц» ни о чём не говорили.
-
-const TURNOVER_PERIODS = [
-  { label: 'За 7 дней', value: 7 },
-  { label: 'За 30 дней', value: 30 },
-  { label: 'За 90 дней', value: 90 },
-  { label: 'За всё время', value: 0 },
-]
-
-const TOP_LIMIT = 10
+// Оборот считает общий раздел (виджет TurnoverTop) — тот же, что на
+// «Экономике участка»: приход по приёмкам склада, выдача по исполненным
+// заказам. Страница отвечает только за то, чьи данные в него положить: здесь
+// это весь кооператив.
 
 const periodDays = ref<number>(30)
 const inventory = ref<MarketplaceInventoryItemView[]>([])
+const orders = ref<MarketplaceOrderListView[]>([])
 const turnoverLoading = ref(true)
+
+/** Сколько исполненных заказов забираем под свод: хвост старше периода не нужен. */
+const TURNOVER_ORDERS_LIMIT = 500
 
 async function loadTurnover(): Promise<void> {
   turnoverLoading.value = true
   try {
-    inventory.value = await listInventory()
+    const [inventoryRows, orderRows] = await Promise.all([
+      listInventory(),
+      fetchOrdersForTurnover({ limit: TURNOVER_ORDERS_LIMIT }),
+    ])
+    inventory.value = inventoryRows
+    orders.value = orderRows
   } catch (e) {
-    FailAlert(e, 'Не удалось загрузить оборот склада')
+    FailAlert(e, 'Не удалось загрузить оборот')
   } finally {
     turnoverLoading.value = false
   }
 }
-
-const periodLabel = computed(
-  () => TURNOVER_PERIODS.find((p) => p.value === periodDays.value)?.label.toLowerCase() ?? '',
-)
-
-/** Дата приёмки в миллисекундах; пусто и мусор — null. */
-function receivedAt(row: MarketplaceInventoryItemView): number | null {
-  const raw = row.received_at ?? row.created_at
-  if (raw === null || raw === undefined) return null
-  const t = new Date(String(raw)).getTime()
-  return Number.isFinite(t) ? t : null
-}
-
-interface TurnoverRow {
-  key: string
-  rank: number
-  title: string
-  pvz: string
-  pvzAddress: string | null
-  quantity: number
-  unit: string
-}
-
-const turnoverRows = computed<TurnoverRow[]>(() => {
-  const since = periodDays.value > 0 ? Date.now() - periodDays.value * 86_400_000 : null
-  const map = new Map<string, { title: string; pvz: string; pvzAddress: string | null; unit: string; quantity: number }>()
-  for (const row of inventory.value) {
-    if (since !== null) {
-      const at = receivedAt(row)
-      if (at === null || at < since) continue
-    }
-    const key = `${row.braname}::${row.offer_id ?? row.product_name_snapshot}`
-    const bucket = map.get(key) ?? {
-      title: row.product_name_snapshot,
-      pvz: row.delivery_point_name?.trim() || row.braname,
-      pvzAddress: row.delivery_point_address ?? null,
-      unit: marketplaceOrderUnitLabel(row.unit_of_measure),
-      quantity: 0,
-    }
-    bucket.quantity += row.quantity_per_label
-    map.set(key, bucket)
-  }
-  return [...map.entries()]
-    .map(([key, b]) => ({ key, ...b }))
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, TOP_LIMIT)
-    .map((b, i) => ({ ...b, rank: i + 1 }))
-})
-
-const turnoverColumns: BaseTableColumn<TurnoverRow>[] = [
-  { key: 'rank', label: '№', width: '56px', numeric: true },
-  { key: 'title', label: 'Позиция', width: '280px' },
-  { key: 'pvz', label: 'Пункт выдачи', width: '280px' },
-  { key: 'quantity', label: 'Принято, ед.', width: '140px', numeric: true },
-]
 
 onMounted(() => {
   void load()
@@ -178,40 +126,12 @@ q-page.admin-economy
         q-icon(name='edit', size='16px')
       | Изменить
 
-  section.admin-economy__section
-    .admin-economy__section-head
-      .t-h3 Топ позиций по обороту
-      BaseSelect.admin-economy__period(
-        v-model='periodDays',
-        :options='TURNOVER_PERIODS',
-        label='Период'
-      )
-    .admin-economy__section-note
-      | Оборот — имущество, принятое на склады пунктов выдачи {{ periodLabel }}.
-      | Считается по дате приёмки кооперативом.
-
-    BaseTable(
-      v-if='turnoverLoading || turnoverRows.length',
-      :columns='turnoverColumns',
-      :rows='turnoverRows',
-      row-key='key',
-      :loading='turnoverLoading',
-      min-width='760px'
-    )
-      template(#cell-pvz='{ row }')
-        .admin-economy__pvz
-          span.admin-economy__pvz-name {{ row.pvz }}
-          span.admin-economy__pvz-addr(v-if='row.pvzAddress') {{ row.pvzAddress }}
-      template(#cell-quantity='{ row }')
-        strong {{ row.quantity }} {{ row.unit }}
-
-    EmptyState(
-      v-else,
-      title='Оборота за период нет',
-      body='Здесь появится рейтинг позиций по объёму, прошедшему через пункты выдачи. Выберите период подлиннее, если приёмок давно не было.'
-    )
-      template(#icon)
-        q-icon(name='leaderboard', size='48px')
+  TurnoverTop(
+    v-model='periodDays',
+    :inventory='inventory',
+    :orders='orders',
+    :loading='turnoverLoading'
+  )
 
   BaseDialog(v-model='dialogOpen', title='Наценка', size='sm')
     p.admin-economy__dialog-hint

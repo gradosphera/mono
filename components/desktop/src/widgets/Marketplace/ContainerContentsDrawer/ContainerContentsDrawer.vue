@@ -17,7 +17,7 @@ import type { BaseBadgeVariant, BaseTableColumn } from 'src/shared/ui/base'
 import { DataRow, DetailsDrawer } from 'src/shared/ui/domain'
 import { formatDateToLocalTimezone } from 'src/shared/lib/utils/dates'
 import { marketplaceOrderSaleUnit } from 'src/shared/lib/consts/marketplace-units'
-import { formatVolumeM3, type MarketplaceContainerView } from 'src/entities/MarketplaceStorage'
+import type { MarketplaceContainerView } from 'src/entities/MarketplaceStorage'
 import type { MarketplaceInventoryItemView } from 'src/entities/MarketplaceInventory'
 
 const props = defineProps<{

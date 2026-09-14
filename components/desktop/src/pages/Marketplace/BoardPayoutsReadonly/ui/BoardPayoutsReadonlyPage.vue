@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 /**
  * Эпик 5 / Story 5.x: read-only лента выплат поставщикам по всему кооперативу
- * для совета. Backend: marketplaceListOutgoingPayments (Payment:read:all) с
- * опциональными фильтрами по поставщику и статусам. Подтверждение/отказ
- * выплат делает кассир кооператива — здесь только обзор.
+ * для совета. Backend: marketplaceListOutgoingPayments (Payment:read:all).
+ * Поставщик показывается человеческим именем (ФИО или наименование
+ * организации), по нему же идёт поиск; статусы фильтруются чипами.
+ * Подтверждение/отказ выплат делает кассир кооператива — здесь только обзор.
  */
 import type { QTableProps } from 'quasar';
 import { computed, onMounted, ref } from 'vue';
@@ -55,7 +56,15 @@ function toggleStatus(value: string): void {
 
 const columns: QTableProps['columns'] = [
   { name: 'created_at', label: 'Дата', field: 'created_at', align: 'left', sortable: true, format: formatDate },
-  { name: 'payee', label: 'Поставщик', field: 'payee_account', align: 'left', sortable: true },
+  {
+    name: 'payee',
+    label: 'Поставщик',
+    // ФИО физлица/ИП или наименование организации; логин аккаунта — запасной
+    // вариант, если имя в профиле ещё не заполнено.
+    field: (row: MarketplaceOutgoingPaymentView) => row.payee_name ?? row.payee_account,
+    align: 'left',
+    sortable: true,
+  },
   { name: 'amount', label: 'Сумма', field: 'amount', align: 'right', sortable: true, format: (v: string) => formatAsset2Digits(String(v)) },
   { name: 'symbol', label: 'Валюта', field: 'symbol', align: 'center' },
   { name: 'status', label: 'Статус', field: 'status', align: 'left', sortable: true, format: (v: string) => statusLabel(v) },
@@ -63,25 +72,20 @@ const columns: QTableProps['columns'] = [
 ];
 
 const filteredRows = computed(() => {
-  if (!statusFilter.value.length) return items.value;
-  return items.value.filter((r) => statusFilter.value.includes(r.status));
-});
-
-const totals = computed(() => {
-  const byStatus: Record<string, number> = {};
-  for (const r of items.value) {
-    byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
-  }
-  return byStatus;
+  const query = supplierFilter.value.trim().toLowerCase();
+  return items.value.filter((r) => {
+    if (statusFilter.value.length && !statusFilter.value.includes(r.status)) return false;
+    if (!query) return true;
+    // Ищем по человеческому имени получателя — по логину аккаунта совет
+    // поставщика не опознаёт.
+    return (r.payee_name ?? '').toLowerCase().includes(query);
+  });
 });
 
 async function load(): Promise<void> {
   loading.value = true;
   try {
-    const supplier = supplierFilter.value.trim();
-    items.value = await listOutgoingPayments(
-      supplier ? { supplier_account: supplier } : undefined,
-    );
+    items.value = await listOutgoingPayments();
   } catch (e) {
     FailAlert(e, 'Не удалось загрузить ленту выплат');
   } finally {
@@ -101,22 +105,22 @@ onMounted(() => {
 </script>
 
 <template lang="pug">
-q-page.board-payouts(role="region", aria-label="Выплаты поставщикам — совет")
+q-page.board-payouts(role="region", aria-label="Выплаты поставщикам")
   PageHint(storage-key="mp:board-payouts:banner-dismissed")
     | Лента выплат поставщикам по всему кооперативу. Подтверждение и отказ выплат выполняет кассир кооператива — для совета это обзор только для чтения.
 
   .board-payouts__filters
     BaseInput.board-payouts__supplier(
       v-model="supplierFilter",
-      label="Поставщик (account)",
-      placeholder="Пусто — все поставщики кооператива",
+      label="Поставщик",
+      placeholder="ФИО или наименование организации",
       clearable,
       @keyup.enter="load"
     )
     BaseButton(variant="primary", :loading="loading", @click="load")
       template(#icon-left)
-        q-icon(name="search", size="18px")
-      | Применить
+        q-icon(name="refresh", size="18px")
+      | Обновить
 
   .board-payouts__chips(role="group", aria-label="Фильтр по статусу")
     .chip(
@@ -128,12 +132,6 @@ q-page.board-payouts(role="region", aria-label="Выплаты поставщи�
       @click="toggleStatus(opt.value)",
       @keydown.enter="toggleStatus(opt.value)"
     ) {{ opt.label }}
-
-  .board-payouts__stats(v-if="items.length")
-    .kpi(v-for="(count, status) in totals", :key="status")
-      .kpi__head
-        span.kpi__eyebrow {{ statusLabel(status) }}
-      .kpi__val {{ count }}
 
   q-table.board-payouts__table(
     :rows="filteredRows",
@@ -196,12 +194,6 @@ q-page.board-payouts(role="region", aria-label="Выплаты поставщи�
       height: 28px;
       padding: 0 12px;
     }
-  }
-
-  &__stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: var(--p-3, 12px);
   }
 }
 

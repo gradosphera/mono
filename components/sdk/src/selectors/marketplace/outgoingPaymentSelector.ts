@@ -8,6 +8,7 @@ const rawOutgoingPaymentSelector = {
   order_id: true,
   apl_reception_id: true,
   payee_account: true,
+  payee_name: true,
   amount: true,
   symbol: true,
   purpose: true,

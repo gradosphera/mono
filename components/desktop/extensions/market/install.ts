@@ -902,7 +902,7 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               name: 'marketplace-board-payouts',
               component: markRaw(BoardPayoutsReadonlyPage),
               meta: {
-                title: 'Выплаты — совет',
+                title: 'Выплаты поставщикам',
                 icon: 'fa-solid fa-coins',
                 requires: 'Order:read:all',
                 requiresAuth: true,
