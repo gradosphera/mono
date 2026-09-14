@@ -330,29 +330,25 @@ q-page.boxreg(role='region', aria-label='Боксы кооператива')
         q-icon(name='add', size='16px')
       | Тип боксов
 
-  PageTabs(:tabs='tabs', :active-key='tab', @select='onSelectTab')
-
-  //- Своя подсказка на каждый раздел: боксы и их типы — разные сущности.
-  PageHint(v-if='tab === "containers"', storage-key='mp:admin-containers:banner-dismissed')
+  //- Канон: одна подсказка на страницу, над полосой разделов. Оба раздела —
+  //- про одну и ту же тару, поэтому и текст один.
+  PageHint(storage-key='mp:admin-containers:banner-dismissed')
     | Вся тара кооператива: где стоит бокс, какого он типа и чем занят. Объём
     | суммируется по текущей выборке — по нему считается, сколько места займёт
     | перевозка боксов между участками. Сами боксы заводит участок на своём
-    | столе — здесь они видны все разом.
+    | столе, а типы тары — общие: габариты задаются здесь один раз на весь
+    | кооператив, и участок при заведении боксов выбирает готовый тип.
 
-  PageHint(v-else, storage-key='mp:admin-container-types:banner-dismissed')
-    | Тип задаёт габариты и объём тары, а не отдельный бокс: коробки закупают
-    | одинаковыми партиями. Справочник общий на весь кооператив — по одной
-    | линейке считается перевозка боксов между участками, а участок при
-    | заведении боксов выбирает готовый тип.
+  PageTabs(:tabs='tabs', :active-key='tab', @select='onSelectTab')
 
   template(v-if='tab === "containers"')
     .boxreg__filters
-    BaseInput.boxreg__search.field-flush(
-      v-model='search',
-      type='search',
-      placeholder='Поиск: код бокса, адрес, тип, участок',
-      clearable
-    )
+      BaseInput.boxreg__search.field-flush(
+        v-model='search',
+        type='search',
+        placeholder='Поиск: код бокса, адрес, тип, участок',
+        clearable
+      )
       BaseSelect.boxreg__branch.field-flush(
         v-model='branchFilter',
         :options='branchOptions',
