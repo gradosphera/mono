@@ -542,11 +542,13 @@ q-page.offer-detail(role="region", aria-label="Описание предложе
   }
 
   &__point-name {
-    color: var(--p-ink-1);
+    color: var(--p-ink);
   }
 
   &__point-vol {
-    color: var(--p-ink-3);
+    // Цена и остаток — такие же данные, как название тары, а не сноска:
+    // на тёмной теме самый бледный оттенок читался с трудом.
+    color: var(--p-ink-2);
     flex-shrink: 0;
   }
 }
