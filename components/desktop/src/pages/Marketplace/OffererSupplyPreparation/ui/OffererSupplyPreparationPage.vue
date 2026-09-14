@@ -5,8 +5,8 @@ import { debounce } from 'quasar';
 import { useRoute } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { useSessionStore } from 'src/entities/Session';
-import { BaseBadge, BaseButton, BaseDialog, EmptyState, TableSkeleton } from 'src/shared/ui/base';
-import type { BaseBadgeVariant, TableSkeletonColumn } from 'src/shared/ui/base';
+import { BaseBadge, BaseButton, BaseDialog, BaseTable, EmptyState } from 'src/shared/ui/base';
+import type { BaseBadgeVariant, BaseTableColumn } from 'src/shared/ui/base';
 import { PageHint } from 'src/shared/ui/domain';
 import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
 import { useMarketplaceKUDetailsStore } from 'src/entities/MarketplaceKUDetails';
@@ -112,11 +112,14 @@ function openDetails(row: MarketplaceShipmentView): void {
 const ttnDialogOpen = ref(false);
 const ttnData = ref<TTNData | null>(null);
 
+/**
+ * Накладная есть у всякой партии, которую везёт экспедитор, и нужна она не
+ * только до отгрузки: по ней сверяются при приёмке и к ней возвращаются
+ * потом. Поэтому смотреть и печатать её можно на любом статусе — состав
+ * берётся из заказов партии, которые стол грузит целиком.
+ */
 function canPrintTtn(row: MarketplaceShipmentView): boolean {
-  return (
-    isExpeditor(row.delivery_variant) &&
-    (row.status === 'SUPPLY_PREPARED' || row.status === 'RECEPTION_IN_PROGRESS')
-  );
+  return isExpeditor(row.delivery_variant);
 }
 
 function openTtn(row: MarketplaceShipmentView): void {
@@ -178,14 +181,16 @@ function nextStep(row: MarketplaceShipmentView): string {
   }
 }
 
-// Колонки скелетона повторяют шапку реальной таблицы — каркас не дёргается.
-const skeletonColumns: TableSkeletonColumn[] = [
-  { label: 'Цикл', class: 'col-id', cell: 'badge' },
-  { label: 'КУ', cell: 'text' },
-  { label: 'Вариант', cell: 'text', cellWidth: '120px' },
-  { label: 'Статус', cell: 'badge' },
-  { label: 'Сумма', class: 'col-num', cell: 'text', cellWidth: '80px' },
-  { label: 'ТТН', cell: 'text', cellWidth: '90px' },
+// Ширины подобраны так, чтобы накладная помещалась на экран без прокрутки
+// вбок: участок и статус ужаты, «следующий шаг» переехал в панель партии —
+// длинной фразой он и раздувал колонку статуса.
+const columns: BaseTableColumn<MarketplaceShipmentView>[] = [
+  { key: 'cycle', label: 'Партия', width: '130px' },
+  { key: 'ku', label: 'Пункт выдачи', width: '210px', sortable: true, field: (row) => kuName(row.braname) },
+  { key: 'variant', label: 'Доставка', width: '150px', sortable: true, field: (row) => deliveryVariantLabel(row.delivery_variant) },
+  { key: 'status', label: 'Статус', width: '160px', sortable: true, field: 'status' },
+  { key: 'amount', label: 'Сумма', width: '130px', numeric: true, sortable: true, field: (row) => Number.parseFloat(row.total_amount) || 0 },
+  { key: 'ttn', label: 'Накладная', width: '150px' },
 ];
 
 async function load(): Promise<void> {
@@ -246,62 +251,48 @@ q-page.offerer-supply
 
   PageHint(storage-key='mp:offerer-supply:banner-dismissed')
     | Нажмите «Сформировать партию» в шапке: выберите способ доставки (самовывоз
-    | или экспедитор по ТТН), кооперативный участок и перенесите в партию заказы,
-    | которые реально грузите. Невыбранное останется акцептованным для следующей
-    | партии. Сформированные партии и их следующий шаг — ниже.
+    | или экспедитор по накладной), пункт выдачи и перенесите в партию заказы,
+    | которые реально грузите. Невыбранное останется принятым и дождётся
+    | следующей партии. Нажмите на партию в списке, чтобы увидеть её состав,
+    | реквизиты доставки и что делать дальше.
 
-  TableSkeleton(
-    v-if='firstLoad',
-    :columns='skeletonColumns',
-    :rows='6',
-    min-width="1140px"
+  BaseTable(
+    v-if='firstLoad || shipments.length',
+    :columns='columns',
+    :rows='shipments',
+    row-key='id',
+    :loading='loading',
+    min-width='930px',
+    sort-by='ku',
+    clickable-rows,
+    @row-click='openDetails'
   )
-
-  //- Сформированные партии — основной список стола.
-  template(v-if='shipments.length')
-    .offerer-supply__section-title Сформированные партии
-    .table-wrap
-      .table-scroll
-        table.table
-          thead
-            tr
-              th.col-id Цикл
-              th.col-ku КУ
-              th.col-variant Вариант
-              th.col-status Статус
-              th.col-num Сумма
-              th.col-ttn ТТН
-          tbody
-            tr.offerer-supply__row(
-              v-for='row in shipments',
-              :key='row.id',
-              @click='openDetails(row)'
-            )
-              td.col-id(@click.stop)
-                EntityIdBadge(
-                  v-if='row.cycle_id',
-                  :raw-id='String(row.cycle_id).slice(0, 8)',
-                  :copy-value='row.cycle_id',
-                  copy-on-click
-                )
-                span(v-else) —
-              td.col-ku
-                .offerer-supply__ku-text
-                  .offerer-supply__ku-name {{ kuName(row.braname) }}
-                  .offerer-supply__ku-addr(v-if='kuAddr(row.braname)') {{ kuAddr(row.braname) }}
-              td.col-variant {{ deliveryVariantLabel(row.delivery_variant) }}
-              td.col-status
-                BaseBadge(:variant='statusOf(row.status).variant') {{ statusOf(row.status).label }}
-                .offerer-supply__next(v-if='nextStep(row)') {{ nextStep(row) }}
-              td.col-num {{ formatAsset2Digits(row.total_amount) }} ₽
-              td.col-ttn
-                .offerer-supply__ttn-cell(v-if='canPrintTtn(row)')
-                  span.offerer-supply__ttn-num(v-if='row.ttn_number') {{ row.ttn_number }}
-                  BaseButton(variant='ghost', size='sm', @click.stop='openTtn(row)')
-                    template(#icon-left)
-                      q-icon(name='print', size='16px')
-                    | ТТН
-                span(v-else) {{ row.ttn_number || '—' }}
+    template(#cell-cycle='{ row }')
+      EntityIdBadge(
+        v-if='row.cycle_id',
+        :raw-id='String(row.cycle_id).slice(0, 8)',
+        :copy-value='row.cycle_id',
+        copy-on-click
+      )
+      span(v-else) —
+    template(#cell-ku='{ row }')
+      .offerer-supply__ku-text
+        .offerer-supply__ku-name {{ kuName(row.braname) }}
+        .offerer-supply__ku-addr(v-if='kuAddr(row.braname)') {{ kuAddr(row.braname) }}
+    template(#cell-variant='{ row }')
+      | {{ deliveryVariantLabel(row.delivery_variant) }}
+    template(#cell-status='{ row }')
+      BaseBadge(:variant='statusOf(row.status).variant') {{ statusOf(row.status).label }}
+    template(#cell-amount='{ row }')
+      | {{ formatAsset2Digits(row.total_amount) }} ₽
+    template(#cell-ttn='{ row }')
+      .offerer-supply__ttn-cell(v-if='canPrintTtn(row)')
+        span.offerer-supply__ttn-num(v-if='row.ttn_number') {{ row.ttn_number }}
+        BaseButton(variant='ghost', size='sm', @click.stop='openTtn(row)')
+          template(#icon-left)
+            q-icon(name='print', size='16px')
+          | Открыть
+      span(v-else) —
 
   //- Placeholder держит центр пустой области (flex-grow), как на других столах.
   .offerer-supply__empty(v-if='showEmpty')
@@ -360,12 +351,6 @@ q-page.offerer-supply
     justify-content: flex-end;
   }
 
-  &__section-title {
-    font-size: var(--p-fs-h3, 15px);
-    font-weight: 600;
-    color: var(--p-ink);
-    margin-top: var(--p-2, 8px);
-  }
 
   &__formation {
     display: grid;
@@ -411,9 +396,6 @@ q-page.offerer-supply
   }
 
   // Строка открывает партию — курсор показывает это до нажатия.
-  &__row {
-    cursor: pointer;
-  }
 
   &__ku-text {
     flex: 1 1 auto;
@@ -448,12 +430,6 @@ q-page.offerer-supply
   }
 
   // Подсказка «следующий шаг» под бейджем статуса — мелкая, второстепенная.
-  &__next {
-    margin-top: var(--p-1, 4px);
-    font-size: var(--p-fs-body-sm, 13px);
-    line-height: 1.3;
-    color: var(--p-ink-3);
-  }
 
   &__ttn-cell {
     display: flex;
@@ -477,35 +453,6 @@ q-page.offerer-supply
 .table-scroll {
   overflow-x: auto;
 }
-// Глобальный канон (.table{min-width:0!important}) снимает локальный min-width —
-// без !important колонка КУ без явной ширины схлопывалась в буквы-столбиком.
-// Сумма ширин = min-width: при нехватке места скролл в .table-scroll, не сжатие.
-.table {
-  table-layout: fixed !important;
-  min-width: 1140px !important;
-}
-.col-id {
-  width: 150px;
-  font-family: var(--font-mono);
-}
-.col-ku {
-  width: 280px;
-}
-.col-variant {
-  width: 160px;
-}
-.col-status {
-  width: 280px;
-}
-.col-num {
-  width: 120px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.col-ttn {
-  width: 150px;
-}
-
 @media (max-width: 768px) {
   .offerer-supply {
     padding: var(--p-4, 16px);
