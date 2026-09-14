@@ -10,8 +10,8 @@ import type { BaseBadgeVariant, TableSkeletonColumn } from 'src/shared/ui/base';
 import { PageHint } from 'src/shared/ui/domain';
 import { EntityIdBadge } from 'src/shared/ui/EntityIdBadge';
 import { useMarketplaceKUDetailsStore } from 'src/entities/MarketplaceKUDetails';
-import { HandoffCodeDialog } from 'src/widgets/Marketplace/HandoffCode';
-import { HandoffTokenKind, useMarketplaceRealtime } from 'src/shared/lib/marketplace';
+import { useMarketplaceRealtime } from 'src/shared/lib/marketplace';
+import { ShipmentDetailsDrawer } from 'src/widgets/Marketplace/ShipmentDetailsDrawer';
 import { formatAsset2Digits } from 'src/shared/lib/utils';
 import { TTNPrintPreview, type TTNData } from 'src/widgets/Marketplace/TTNPrintPreview';
 import { listShipments, type MarketplaceShipmentView } from '../api';
@@ -62,6 +62,8 @@ const shipments = ref<MarketplaceShipmentView[]>([]);
 const acceptedOrders = ref<MarketplaceOrderView[]>([]);
 // Заказы сформированных партий (статус SUPPLY_PREPARED) — источник состава ТТН.
 const preparedOrders = ref<MarketplaceOrderView[]>([]);
+// Заказы стола целиком — из них панель партии отбирает её состав по shipment_id.
+const shipmentOrders = ref<MarketplaceOrderView[]>([]);
 // true до первого запроса: иначе первый кадр до загрузки показывает пустое
 // состояние вместо скелетона, и первая загрузка неотличима от пустого списка.
 const loading = ref(true);
@@ -93,11 +95,17 @@ const emptyState = computed(() =>
 // Диалог формирования партии — глобальный, открывается из шапки.
 const dialogOpen = ref(false);
 
-// Story 14.3: один account-bound код на весь стол. Поставщик показывает его
-// оператору приёмки — тот резолвит аккаунт против ленты своего КУ и принимает
-// разом всё привезённое. Тот же код вынесен явным пунктом меню «Отгрузить
-// партию»; здесь — быстрый доступ диалогом из шапки (общий HandoffCodeDialog).
-const myCodeDialogOpen = ref(false);
+// Партия открывается боковой панелью: в таблице видны только цикл, участок и
+// сумма, а понять, что и кому едет, по ним нельзя. Код передачи на ПВЗ из
+// шапки убран — он живёт отдельным пунктом меню «Отгрузить партию», и здесь
+// только мешал главному действию стола (решение владельца 14.09.2026).
+const detailsShipment = ref<MarketplaceShipmentView | null>(null);
+const detailsOpen = ref(false);
+
+function openDetails(row: MarketplaceShipmentView): void {
+  detailsShipment.value = row;
+  detailsOpen.value = true;
+}
 
 // Печать ТТН — только для Варианта Б (экспедитор), пока партия не принята:
 // состав берётся из заказов SUPPLY_PREPARED этой партии.
@@ -183,15 +191,21 @@ const skeletonColumns: TableSkeletonColumn[] = [
 async function load(): Promise<void> {
   loading.value = true;
   try {
-    const [shipmentsResult, ordersResult, preparedResult] = await Promise.all([
+    const [shipmentsResult, ordersResult, shipmentOrdersResult] = await Promise.all([
       listShipments(),
       fetchSupplierOrders({ statuses: ['ACCEPTED'], limit: PAGE_SIZE }),
-      fetchSupplierOrders({ statuses: ['SUPPLY_PREPARED'], limit: PAGE_SIZE }),
+      // Заказы, попавшие в партии: собранные к отгрузке нужны для ТТН, а
+      // принятые кооперативом и выданные — чтобы состав открытой партии не
+      // пропадал после приёмки на участке.
+      fetchSupplierOrders({ limit: PAGE_SIZE }),
       kuStore.load({ coopname: coopname.value, onlyActive: false }),
     ]);
     shipments.value = shipmentsResult;
     acceptedOrders.value = ordersResult.items;
-    preparedOrders.value = preparedResult.items;
+    shipmentOrders.value = shipmentOrdersResult.items;
+    preparedOrders.value = shipmentOrdersResult.items.filter(
+      (o) => o.status === 'SUPPLY_PREPARED',
+    );
   } catch (e) {
     FailAlert(e, 'Не удалось загрузить партии');
   } finally {
@@ -229,10 +243,6 @@ q-page.offerer-supply
       template(#icon-left)
         q-icon(name='local_shipping', size='16px')
       | Сформировать партию
-    BaseButton(variant='secondary', size='sm', :disabled='!session.username', @click='myCodeDialogOpen = true')
-      template(#icon-left)
-        q-icon(name='qr_code_2', size='16px')
-      | Мой код для ПВЗ
 
   PageHint(storage-key='mp:offerer-supply:banner-dismissed')
     | Нажмите «Сформировать партию» в шапке: выберите способ доставки (самовывоз
@@ -262,8 +272,12 @@ q-page.offerer-supply
               th.col-num Сумма
               th.col-ttn ТТН
           tbody
-            tr(v-for='row in shipments', :key='row.id')
-              td.col-id
+            tr.offerer-supply__row(
+              v-for='row in shipments',
+              :key='row.id',
+              @click='openDetails(row)'
+            )
+              td.col-id(@click.stop)
                 EntityIdBadge(
                   v-if='row.cycle_id',
                   :raw-id='String(row.cycle_id).slice(0, 8)',
@@ -283,7 +297,7 @@ q-page.offerer-supply
               td.col-ttn
                 .offerer-supply__ttn-cell(v-if='canPrintTtn(row)')
                   span.offerer-supply__ttn-num(v-if='row.ttn_number') {{ row.ttn_number }}
-                  BaseButton(variant='ghost', size='sm', @click='openTtn(row)')
+                  BaseButton(variant='ghost', size='sm', @click.stop='openTtn(row)')
                     template(#icon-left)
                       q-icon(name='print', size='16px')
                     | ТТН
@@ -304,7 +318,20 @@ q-page.offerer-supply
     @created='onCreated'
   )
 
-  HandoffCodeDialog(v-model='myCodeDialogOpen', :coopname='coopname', :kind='HandoffTokenKind.Pickup')
+  ShipmentDetailsDrawer(
+    v-model='detailsOpen',
+    :shipment='detailsShipment',
+    :orders='shipmentOrders',
+    :loading='loading',
+    :branch-name='detailsShipment ? kuName(detailsShipment.braname) : ""',
+    :branch-address='detailsShipment ? kuAddr(detailsShipment.braname) : ""',
+    :status-label='detailsShipment ? statusOf(detailsShipment.status).label : ""',
+    :status-variant='detailsShipment ? statusOf(detailsShipment.status).variant : "neutral"',
+    :delivery-label='detailsShipment ? deliveryVariantLabel(detailsShipment.delivery_variant) : ""',
+    :next-step='detailsShipment ? nextStep(detailsShipment) : ""',
+    :can-print-ttn='detailsShipment ? canPrintTtn(detailsShipment) : false',
+    @print-ttn='openTtn'
+  )
 
   BaseDialog(v-model='ttnDialogOpen', title='Товарно-транспортная накладная', maximized)
     TTNPrintPreview(v-if='ttnData', :data='ttnData')
@@ -381,6 +408,11 @@ q-page.offerer-supply
     color: var(--p-ink-3);
     margin-top: 1px;
     flex-shrink: 0;
+  }
+
+  // Строка открывает партию — курсор показывает это до нажатия.
+  &__row {
+    cursor: pointer;
   }
 
   &__ku-text {
