@@ -78,10 +78,26 @@ function backToModeration(): void {
 
 // Диалоги + мутации модерации — общий feature-композабл (DRY с лентой
 // «Модерация»). После решения возвращаемся в очередь модерации.
-const { isApproving, isRejecting, confirmApprove, confirmReject } = useOfferModeration({
-  onApproved: backToModeration,
-  onRejected: backToModeration,
-});
+const { isApproving, isRejecting, isSettingWarranty, confirmApprove, confirmReject, confirmSetWarranty } =
+  useOfferModeration({
+    onApproved: backToModeration,
+    onRejected: backToModeration,
+    onWarrantyChanged: () => void load(),
+  });
+
+/**
+ * Гарантийный срок возврата задаёт модератор — здесь же, на карточке
+ * предложения. В реестре он жил отдельной кнопкой в строке и мешал ей
+ * открываться (решение владельца 14.09.2026).
+ */
+function editWarranty(): void {
+  const o = offer.value;
+  if (!o) return;
+  confirmSetWarranty(
+    { id: o.id, product_name: o.product_name, shelf_life_days: o.shelf_life_days },
+    o.warranty_days ?? 0,
+  );
+}
 
 const offer = ref<MarketplaceOfferDetailView | null>(null);
 // true до первого запроса: иначе первый кадр до загрузки показывает пустое
@@ -333,7 +349,20 @@ q-page.offer-detail(role="region", aria-label="Описание предложе
 
     section.offer-detail__section
       .offer-detail__section-head Гарантийный срок возврата
-      .offer-detail__desc {{ offer.warranty_days > 0 ? `${offer.warranty_days} дн.` : 'Без гарантийного срока возврата' }}
+      .offer-detail__warranty
+        .offer-detail__desc {{ offer.warranty_days > 0 ? `${offer.warranty_days} дн.` : 'Без гарантийного срока возврата' }}
+        //- Правка срока — только на столе администратора: у заказчика карточка
+        //- читающая.
+        BaseButton(
+          v-if="readonly",
+          variant="secondary",
+          size="sm",
+          :loading="isSettingWarranty(offer.id)",
+          @click="editWarranty"
+        )
+          template(#icon-left)
+            q-icon(name="event_repeat", size="16px")
+          | Изменить
 
   AddToCartDialog(
     v-if="!readonly",
@@ -349,6 +378,14 @@ q-page.offer-detail(role="region", aria-label="Описание предложе
   display: flex;
   flex-direction: column;
   gap: var(--p-4, 16px);
+
+  // Срок и кнопка правки — одной строкой: кнопка относится к сроку.
+  &__warranty {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--p-3, 12px);
+  }
 
   &__noku-hint {
     margin-top: var(--p-2, 8px);

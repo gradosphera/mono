@@ -14,10 +14,9 @@ import { MarketplaceSaleForm, marketplaceQuantityLabel } from 'src/shared/lib/co
 import { applyMembershipFee, getMembershipFeePercent, marketplacePackageStockLabel } from 'src/shared/lib/marketplace';
 import { useSystemStore } from 'src/entities/System/model';
 import { useFioCache } from 'src/shared/lib/account/useFioCache';
-import { BaseBadge, BaseButton, BaseTable, EmptyState, TablePager } from 'src/shared/ui/base';
+import { BaseBadge, BaseTable, EmptyState, TablePager } from 'src/shared/ui/base';
 import type { BaseBadgeVariant, BaseTableColumn } from 'src/shared/ui/base';
 import { EntityIdBadge } from 'src/shared/ui';
-import { useOfferModeration } from 'src/features/Marketplace/OfferModeration';
 import { PageHint, StatusFilterButton } from 'src/shared/ui/domain';
 import { useHeaderActions } from 'src/shared/hooks';
 import { OfferRegistryOverlay } from 'src/widgets/Marketplace/OfferRegistryOverlay';
@@ -71,7 +70,6 @@ const columns: BaseTableColumn<AdminOfferView>[] = [
   { key: 'shelf_life', label: 'Срок годности', width: '130px', numeric: true },
   { key: 'warranty', label: 'Гарантии', width: '130px', numeric: true },
   { key: 'created', label: 'Создано', width: '150px', nowrap: true },
-  { key: 'actions', label: '', width: '230px' },
 ];
 
 function onStatusFilterUpdate(value: string[]): void {
@@ -114,17 +112,6 @@ function formatDate(d: unknown): string {
     : parsed.toLocaleString('ru-RU', {
         day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
       });
-}
-
-// Редактирование гарантийного срока возврата предложения — операция модератора
-// (председателя). Срок годности (скоропорт) правит поставщик в своей форме.
-const { confirmSetWarranty, isSettingWarranty } = useOfferModeration({
-  onWarrantyChanged: () => void load(),
-});
-
-function editWarranty(o: AdminOfferView): void {
-  if (!o.id) return;
-  confirmSetWarranty({ id: o.id, product_name: o.product_name || 'Предложение' }, o.warranty_days ?? 0);
 }
 
 // Предложение открывается оверлеем поверх реестра: страница пагинации и
@@ -199,7 +186,7 @@ q-page.admin-offers(role="region", aria-label="Реестр предложени
     :rows="items",
     row-key="id",
     :loading="loading",
-    min-width="1620px",
+    min-width="1390px",
     clickable-rows,
     @row-click="goToOffer"
   )
@@ -224,21 +211,6 @@ q-page.admin-offers(role="region", aria-label="Реестр предложени
       | {{ formatWarranty(row.warranty_days) }}
     template(#cell-created="{ row }")
       | {{ formatDate(row.created_at) }}
-    template(#cell-actions="{ row }")
-      .admin-offers__row-actions(@click.stop)
-        BaseButton(
-          variant="secondary",
-          size="sm",
-          :loading="isSettingWarranty(row.id)",
-          @click="editWarranty(row)"
-        )
-          template(#icon-left)
-            q-icon(name="event_repeat", size="16px")
-          | Гарант. срок
-        BaseButton(variant="secondary", size="sm", @click="goToOffer(row)")
-          template(#icon-left)
-            q-icon(name="open_in_new", size="16px")
-          | Открыть
     template(#footer)
       TablePager(
         label="Предложения",
@@ -271,11 +243,6 @@ q-page.admin-offers(role="region", aria-label="Реестр предложени
   flex-direction: column;
   gap: var(--p-4, 16px);
 
-  &__row-actions {
-    display: inline-flex;
-    gap: var(--p-2, 8px);
-    justify-content: flex-end;
-  }
 }
 
 .font-monospace {

@@ -177,16 +177,33 @@ function formatDays(days: number | null | undefined, empty: string): string {
 
 // Решения модератора — тот же общий композабл, что и на ленте «Модерация» и
 // на полной странице предложения: диалог подтверждения и мутация одни на всех.
-const { isApproving, isRejecting, confirmApprove, confirmReject } = useOfferModeration({
-  onApproved: () => {
-    void load();
-    emit('moderated');
-  },
-  onRejected: () => {
-    void load();
-    emit('moderated');
-  },
-});
+// Сюда же переехало изменение гарантийного срока: оно относится к самому
+// предложению, и в реестре отдельной кнопкой в строке только мешало
+// (решение владельца 14.09.2026).
+const { isApproving, isRejecting, isSettingWarranty, confirmApprove, confirmReject, confirmSetWarranty } =
+  useOfferModeration({
+    onApproved: () => {
+      void load();
+      emit('moderated');
+    },
+    onRejected: () => {
+      void load();
+      emit('moderated');
+    },
+    onWarrantyChanged: () => {
+      void load();
+      emit('moderated');
+    },
+  });
+
+function editWarranty(): void {
+  const o = offer.value;
+  if (!o) return;
+  confirmSetWarranty(
+    { id: o.id, product_name: o.product_name, shelf_life_days: o.shelf_life_days },
+    o.warranty_days ?? 0,
+  );
+}
 
 const canModerate = computed(
   () => props.moderatable && offer.value?.status === 'PENDING_MODERATION',
@@ -261,10 +278,23 @@ const canModerate = computed(
         .t-h3 Предложение
       DataRow(label='Поставщик', :value='supplierTitle')
       DataRow(label='Срок годности', :value='formatDays(offer.shelf_life_days, "Без срока годности")')
-      DataRow(
-        label='Гарантийный срок возврата',
-        :value='formatDays(offer.warranty_days, "Без гарантийного срока возврата")'
-      )
+      .offer-registry-detail__warranty
+        DataRow.offer-registry-detail__warranty-row(
+          label='Гарантийный срок возврата',
+          :value='formatDays(offer.warranty_days, "Без гарантийного срока возврата")'
+        )
+        //- Срок задаёт модератор при одобрении и меняет здесь же: это свойство
+        //- предложения, а не строки реестра.
+        BaseButton(
+          v-if='moderatable',
+          variant='ghost',
+          size='sm',
+          :loading='isSettingWarranty(offer.id)',
+          @click='editWarranty'
+        )
+          template(#icon-left)
+            q-icon(name='event_repeat', size='16px')
+          | Изменить
 
     BaseCard.offer-registry-detail__card(v-if='packageRows.length')
       template(#head)
@@ -368,6 +398,19 @@ const canModerate = computed(
     display: flex;
     gap: var(--p-2, 8px);
     margin-top: var(--p-2, 8px);
+  }
+
+  // Строка срока и кнопка правки идут одной строкой: кнопка относится к этому
+  // сроку, а не к карточке целиком.
+  &__warranty {
+    display: flex;
+    align-items: center;
+    gap: var(--p-3, 12px);
+  }
+
+  &__warranty-row {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   &__desc {
