@@ -102,6 +102,110 @@ function emptyRow(key: string): TurnoverRow {
   };
 }
 
+/** Попадает ли событие в период; `sinceMs` = null — период не ограничен. */
+function withinPeriod(at: number | null, sinceMs: number | null): boolean {
+  return sinceMs === null || (at !== null && at >= sinceMs);
+}
+
+/** Ключ свода: позиция на конкретном участке. Без предложения — по наименованию. */
+function turnoverKey(braname: string, offerId: string | null | undefined, title: string): string {
+  return `${braname}::${offerId ?? title}`;
+}
+
+/** Наименование участка для показа; пусто — служебное имя участка. */
+function branchNameOf(name: string | null | undefined, braname: string): string {
+  return name?.trim() || braname;
+}
+
+/**
+ * Сколько единиц реально выдано. Факт выдачи важнее заказанного: при
+ * недопоставке выдано меньше, и оборотом прошло именно выданное.
+ */
+function issuedUnitsOf(order: TurnoverOrder): number {
+  return order.issuance_fact?.actual_quantity ?? order.quantity;
+}
+
+/** Сумма выданного: по факту выдачи, а без факта — по стоимости заказа. */
+function issuedAmountOf(order: TurnoverOrder): number {
+  return order.issuance_fact
+    ? toNumber(order.issuance_fact.fact_cost)
+    : toNumber(order.total_cost);
+}
+
+/** Общие реквизиты позиции: заполняются первым, кто их принёс — приход или выдача. */
+function fillMeta(
+  row: TurnoverRow,
+  meta: {
+    title: string;
+    branchName: string;
+    branchAddress?: string | null;
+    unitOfMeasure?: string | null;
+    packageSize?: number | null;
+  },
+): void {
+  row.title ||= meta.title;
+  row.branchName ||= meta.branchName;
+  row.branchAddress ??= meta.branchAddress ?? null;
+  row.unitOfMeasure ??= meta.unitOfMeasure ?? null;
+  row.packageSize ??= meta.packageSize ?? null;
+}
+
+/** Приход: что и на какую сумму принято на склады за период. */
+function addInventory(
+  map: Map<string, TurnoverRow>,
+  inventory: TurnoverInventoryItem[],
+  sinceMs: number | null,
+): void {
+  for (const item of inventory) {
+    const at = timeOf(item.received_at) ?? timeOf(item.created_at);
+    if (!withinPeriod(at, sinceMs)) continue;
+
+    const key = turnoverKey(item.braname, item.offer_id, item.product_name_snapshot);
+    const row = map.get(key) ?? emptyRow(key);
+    fillMeta(row, {
+      title: item.product_name_snapshot,
+      branchName: branchNameOf(item.delivery_point_name, item.braname),
+      branchAddress: item.delivery_point_address,
+      unitOfMeasure: item.unit_of_measure,
+      packageSize: item.package_size,
+    });
+    row.acceptedUnits += item.quantity_per_label;
+    row.acceptedAmount += marketplaceLineCost(
+      item.quantity_per_label,
+      item.arrival_price,
+      item.package_size,
+    );
+    map.set(key, row);
+  }
+}
+
+/** Выдача: что и на какую сумму получили пайщики за период, и наценка с этого. */
+function addOrders(
+  map: Map<string, TurnoverRow>,
+  orders: TurnoverOrder[],
+  sinceMs: number | null,
+): void {
+  for (const order of orders) {
+    if (order.status !== ORDER_RECEIVED) continue;
+    if (!withinPeriod(timeOf(order.received_at), sinceMs)) continue;
+
+    const title = order.product_name || 'Товар по предложению';
+    const key = turnoverKey(order.delivery_braname, order.offer_id, title);
+    const row = map.get(key) ?? emptyRow(key);
+    fillMeta(row, {
+      title,
+      branchName: branchNameOf(order.delivery_point_name, order.delivery_braname),
+      branchAddress: order.delivery_point_address,
+      unitOfMeasure: order.unit_of_measure,
+      packageSize: order.package_size,
+    });
+    row.issuedUnits += issuedUnitsOf(order);
+    row.issuedAmount += issuedAmountOf(order);
+    row.feeAmount += toNumber(order.membership_fee);
+    map.set(key, row);
+  }
+}
+
 /**
  * Свод оборота по парам «позиция × пункт выдачи».
  *
@@ -113,48 +217,8 @@ export function buildTurnover(
   sinceMs: number | null,
 ): { rows: TurnoverRow[]; totals: TurnoverTotals } {
   const map = new Map<string, TurnoverRow>();
-
-  for (const item of inventory) {
-    const at = timeOf(item.received_at) ?? timeOf(item.created_at);
-    if (sinceMs !== null && (at === null || at < sinceMs)) continue;
-
-    const key = `${item.braname}::${item.offer_id ?? item.product_name_snapshot}`;
-    const row = map.get(key) ?? emptyRow(key);
-    row.title ||= item.product_name_snapshot;
-    row.branchName ||= item.delivery_point_name?.trim() || item.braname;
-    row.branchAddress ??= item.delivery_point_address ?? null;
-    row.unitOfMeasure ??= item.unit_of_measure ?? null;
-    row.packageSize ??= item.package_size ?? null;
-    row.acceptedUnits += item.quantity_per_label;
-    row.acceptedAmount += marketplaceLineCost(
-      item.quantity_per_label,
-      item.arrival_price,
-      item.package_size,
-    );
-    map.set(key, row);
-  }
-
-  for (const order of orders) {
-    if (order.status !== ORDER_RECEIVED) continue;
-    const at = timeOf(order.received_at);
-    if (sinceMs !== null && (at === null || at < sinceMs)) continue;
-
-    const key = `${order.delivery_braname}::${order.offer_id ?? order.product_name ?? ''}`;
-    const row = map.get(key) ?? emptyRow(key);
-    row.title ||= order.product_name ?? 'Товар по предложению';
-    row.branchName ||= order.delivery_point_name?.trim() || order.delivery_braname;
-    row.branchAddress ??= order.delivery_point_address ?? null;
-    row.unitOfMeasure ??= order.unit_of_measure ?? null;
-    row.packageSize ??= order.package_size ?? null;
-    // Факт выдачи важнее заказанного: при недопоставке выдано меньше, и
-    // оборотом прошло именно выданное.
-    row.issuedUnits += order.issuance_fact?.actual_quantity ?? order.quantity;
-    row.issuedAmount += order.issuance_fact
-      ? toNumber(order.issuance_fact.fact_cost)
-      : toNumber(order.total_cost);
-    row.feeAmount += toNumber(order.membership_fee);
-    map.set(key, row);
-  }
+  addInventory(map, inventory, sinceMs);
+  addOrders(map, orders, sinceMs);
 
   const rows = [...map.values()].sort(
     (a, b) => b.issuedAmount + b.acceptedAmount - (a.issuedAmount + a.acceptedAmount),
