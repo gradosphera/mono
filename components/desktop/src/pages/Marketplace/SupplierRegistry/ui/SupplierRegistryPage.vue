@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
-import { useFirstLoad } from 'src/shared/lib/composables';
 import { Zeus } from '@coopenomics/sdk';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { useSessionStore } from 'src/entities/Session/model';
-import { BaseBadge, BaseButton, BaseInput, BaseDialog, EmptyState } from 'src/shared/ui/base';
-import { TableSkeleton } from 'src/shared/ui/base/TableSkeleton';
-import type { TableSkeletonColumn } from 'src/shared/ui/base/TableSkeleton';
+import {
+  BaseBadge,
+  BaseButton,
+  BaseInput,
+  BaseDialog,
+  BaseTable,
+  EmptyState,
+} from 'src/shared/ui/base';
+import type { BaseTableColumn } from 'src/shared/ui/base';
 import { IdentityCell, PageHint } from 'src/shared/ui/domain';
 import { useHeaderActions } from 'src/shared/hooks';
 import AddSupplierButton from './AddSupplierButton.vue';
@@ -42,8 +47,6 @@ const items = ref<MarketplaceSupplierView[]>([]);
 // true до первого запроса: иначе первый кадр до загрузки показывает пустое
 // состояние вместо скелетона, и первая загрузка неотличима от пустого списка.
 const loading = ref(true);
-/** Скелетон — только на первой загрузке; дочитка обновляет молча. */
-const firstLoad = useFirstLoad(loading);
 const acting = ref<string | null>(null);
 const supplierOverlay = useQueryOverlay('supplier');
 
@@ -75,12 +78,18 @@ async function resolveSupplierNames(): Promise<void> {
   );
 }
 
-const skeletonColumns: TableSkeletonColumn[] = [
-  { label: 'Поставщик' },
-  { label: 'Модель' },
-  { label: 'Договор' },
-  { label: 'Статус', cell: 'badge' },
-  { label: 'Действия', class: 'col-action', cell: 'icon' },
+const columns: BaseTableColumn<MarketplaceSupplierView>[] = [
+  {
+    key: 'member',
+    label: 'Поставщик',
+    width: '280px',
+    sortable: true,
+    field: (row) => supplierName(row.member_account) || row.member_account,
+  },
+  { key: 'model', label: 'Модель', width: '200px', sortable: true, field: 'model' },
+  { key: 'contract', label: 'Договор', width: '220px' },
+  { key: 'status', label: 'Статус', width: '170px', sortable: true, field: 'status' },
+  { key: 'actions', label: 'Действия', width: '230px' },
 ];
 
 const addOpen = ref(false);
@@ -179,56 +188,44 @@ q-page.mp-role-admin.supplier-registry(role="region", aria-label="Реестр �
     | Все поставщики действуют по договору. Заявку пайщика одобряет председатель;
     | администратор может добавить поставщика напрямую.
 
-  TableSkeleton(
-    v-if="firstLoad",
-    :columns="skeletonColumns",
-    :rows="5",
-    min-width="760px"
+  BaseTable(
+    v-if="loading || items.length",
+    :columns="columns",
+    :rows="items",
+    row-key="id",
+    hover,
+    :loading="loading",
+    min-width="1100px",
+    sort-by="member",
+    clickable-rows,
+    @row-click="(row) => supplierOverlay.open(row.member_account)"
   )
-
-  .table-wrap(v-else-if="items.length")
-    .table-scroll
-      table.table.table--actions
-        thead
-          tr
-            th Поставщик
-            th Модель
-            th Договор
-            th Статус
-            th.col-action Действия
-        tbody
-          tr.data-row(
-            v-for="row in items",
-            :key="row.id",
-            role="button",
-            tabindex="0",
-            @click="supplierOverlay.open(row.member_account)",
-            @keydown.enter="supplierOverlay.open(row.member_account)"
-          )
-            td
-              IdentityCell(
-                :account-name="row.member_account",
-                :full-name="supplierName(row.member_account)"
-              )
-            td {{ SUPPLIER_MODEL_LABEL[row.model] || row.model }}
-            td {{ contractLabel(row) }}
-            td
-              BaseBadge(:variant="SUPPLIER_STATUS_VARIANT[row.status] || 'neutral'") {{ SUPPLIER_STATUS_LABEL[row.status] || row.status }}
-            td.col-action(@click.stop)
-              .cell-actions(v-if="isChairman && row.status === 'PENDING'")
-                BaseButton(
-                  variant="primary",
-                  size="sm",
-                  :loading="acting === row.member_account",
-                  @click="onApprove(row)"
-                ) Одобрить
-                BaseButton(
-                  variant="ghost",
-                  size="sm",
-                  :disabled="acting === row.member_account",
-                  @click="onReject(row)"
-                ) Отклонить
-              span.no-actions(v-else) —
+    template(#cell-member="{ row }")
+      IdentityCell(
+        :account-name="row.member_account",
+        :full-name="supplierName(row.member_account)"
+      )
+    template(#cell-model="{ row }")
+      | {{ SUPPLIER_MODEL_LABEL[row.model] || row.model }}
+    template(#cell-contract="{ row }")
+      | {{ contractLabel(row) }}
+    template(#cell-status="{ row }")
+      BaseBadge(:variant="SUPPLIER_STATUS_VARIANT[row.status] || 'neutral'") {{ SUPPLIER_STATUS_LABEL[row.status] || row.status }}
+    template(#cell-actions="{ row }")
+      .cell-actions(v-if="isChairman && row.status === 'PENDING'", @click.stop)
+        BaseButton(
+          variant="primary",
+          size="sm",
+          :loading="acting === row.member_account",
+          @click="onApprove(row)"
+        ) Одобрить
+        BaseButton(
+          variant="ghost",
+          size="sm",
+          :disabled="acting === row.member_account",
+          @click="onReject(row)"
+        ) Отклонить
+      span.no-actions(v-else) —
 
   EmptyState(
     v-else,
