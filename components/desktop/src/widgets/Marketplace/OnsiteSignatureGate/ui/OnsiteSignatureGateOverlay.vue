@@ -49,14 +49,20 @@ const {
 // пайщик нажал одну кнопку и смотрит, как дело движется. Карточка акта с
 // кнопкой вернётся только там, где подпись сама не прошла.
 const FLOW_STEPS: StepperStep[] = [
-  { key: 'statements', label: 'Заявления о выдаче', description: 'Подписываются вашим ключом' },
-  { key: 'council', label: 'Решение совета', description: 'Заявления ушли совету — у стойки он решает за секунды' },
-  { key: 'act', label: 'Акт приёма-передачи', description: 'Устройство подписывает акт само' },
+  { key: 'statements', label: 'Заявления о выдаче', description: 'Подписаны вашим ключом' },
+  { key: 'council', label: 'Решение совета', description: 'Совет согласовывает выдачу' },
+  { key: 'act', label: 'Акт приёма-передачи', description: 'Подписан вашим ключом' },
+  // Четвёртый шаг был не показан, и после трёх галочек окно «зависало» на
+  // несколько секунд без объяснения (жалоба 2026-09-14). На деле в этот момент
+  // дело уже у оператора: он закрывает выдачу своей подписью и отдаёт
+  // имущество. Шаг показываем явно, чтобы ожидание было осмысленным.
+  { key: 'handout', label: 'Выдача у стойки', description: 'Оператор закрывает выдачу и передаёт имущество' },
 ];
 const flowStep = computed(() => activeFlow.value?.step ?? null);
 const flowActiveKey = computed(() => {
   const step = flowStep.value;
-  if (step === 'done') return 'act';
+  // Акт подписан — дело перешло к оператору, на нём и стоим.
+  if (step === 'done') return 'handout';
   if (step === 'pending' || step === 'declined') return 'council';
   return step ?? 'statements';
 });
@@ -77,12 +83,17 @@ const flowCompleted = computed<string[]>(() => {
 const flowErrored = computed<string[]>(() => (flowStep.value === 'declined' ? ['council'] : []));
 /** Поток ещё идёт — под активным шагом бежит полоса. */
 const flowRunning = computed(() =>
-  flowStep.value === 'statements' || flowStep.value === 'council' || flowStep.value === 'act',
+  flowStep.value === 'statements' ||
+  flowStep.value === 'council' ||
+  flowStep.value === 'act' ||
+  // На последнем шаге ждём человека за стойкой — полоса показывает, что
+  // окно не замерло, а дело идёт.
+  flowStep.value === 'done',
 );
 const flowTitle = computed(() => {
   switch (flowStep.value) {
     case 'done':
-      return 'Готово — забирайте';
+      return 'Подписано — подойдите к стойке';
     case 'pending':
       return 'Решение совета рассматривается';
     case 'declined':
@@ -97,13 +108,13 @@ const flowSub = computed(() => {
     case 'statements':
       return 'Подписываем заявления о возврате паевого взноса имуществом';
     case 'council':
-      return 'Ждём решение совета';
+      return 'Совет рассматривает заявления';
     case 'act':
       return flow.total > 1
         ? `Подписываем акт: ${flow.signedActs} из ${flow.total}`
         : 'Подписываем акт приёма-передачи';
     case 'done':
-      return 'Акт подписан. Оператор закроет выдачу и передаст имущество';
+      return 'Остался последний шаг: оператор закроет выдачу своей подписью';
     case 'pending':
       return 'Решение ушло к людям — делать ничего не нужно, мы сообщим, когда оно будет принято';
     case 'declined':
@@ -265,8 +276,8 @@ BaseDialog(
   //- Идёт получение: одна панель с ходом дела, без карточек и кнопок.
   .onsite-gate(v-if='activeFlow')
     p.onsite-gate__lead
-      | Вы нажали одну кнопку — дальше всё происходит само. Окно закроется,
-      | как только акт будет подписан.
+      | Заявления и акт подписываются вашим ключом без дополнительных нажатий.
+      | Последний шаг за оператором: он закроет выдачу и передаст имущество.
 
     BaseCard.onsite-gate__card
       template(#head)
