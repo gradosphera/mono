@@ -3,8 +3,15 @@ import { computed, onMounted, ref } from 'vue';
 import { useFirstLoad } from 'src/shared/lib/composables';
 import { Dialog, Notify, debounce } from 'quasar';
 import { SuccessAlert, FailAlert } from 'src/shared/api';
-import { BaseBadge, BaseButton, BaseInput, BaseDialog, EmptyState, TableSkeleton } from 'src/shared/ui/base';
-import type { TableSkeletonColumn } from 'src/shared/ui/base';
+import {
+  BaseBadge,
+  BaseButton,
+  BaseInput,
+  BaseDialog,
+  BaseTable,
+  EmptyState,
+} from 'src/shared/ui/base';
+import type { BaseTableColumn } from 'src/shared/ui/base';
 import { PageHint } from 'src/shared/ui/domain';
 import { useMarketplaceRealtime } from 'src/shared/lib/marketplace';
 import {
@@ -55,11 +62,11 @@ function isEnabled(cat: MarketplaceCoopCategoryView): boolean {
 
 const enabledCount = computed(() => categories.value.filter((c) => isEnabled(c)).length);
 
-const skeletonColumns: TableSkeletonColumn[] = [
-  { label: 'Категория', cell: 'text' },
-  { label: 'Вид', class: 'col-kind', cell: 'badge' },
-  { label: 'Доступна', class: 'col-toggle', cell: 'text', cellWidth: '64px' },
-  { label: '', class: 'col-actions', cell: 'text', cellWidth: '48px' },
+const columns: BaseTableColumn<MarketplaceCoopCategoryView>[] = [
+  { key: 'name', label: 'Категория', width: '320px', sortable: true, field: 'display_name' },
+  { key: 'kind', label: 'Вид', width: '140px', sortable: true, field: 'mvp_baseline' },
+  { key: 'enabled', label: 'Доступна', width: '120px' },
+  { key: 'actions', label: '', width: '80px' },
 ];
 
 async function load(): Promise<void> {
@@ -179,46 +186,39 @@ q-page.categories(role='region', aria-label='Категории кооперат
     span(v-if='isOpenCatalog') Открыт весь каталог — доступны все категории ({{ categories.length }})
     span(v-else) Доступно категорий: {{ enabledCount }} из {{ categories.length }}
 
-  TableSkeleton(
-    v-if='firstLoad',
-    :columns='skeletonColumns',
-    :rows='6',
-    min-width='560px'
+  BaseTable(
+    v-if='loading || categories.length',
+    :columns='columns',
+    :rows='categories',
+    row-key='id',
+    hover,
+    :loading='loading',
+    :skeleton-rows='6',
+    min-width='660px',
+    sort-by='name'
   )
-
-  .table-wrap(v-else-if='categories.length')
-    .table-scroll
-      table.table
-        thead
-          tr
-            th.col-name Категория
-            th.col-kind Вид
-            th.col-toggle Доступна
-            th.col-actions
-        tbody
-          tr(v-for='cat in categories', :key='cat.id')
-            td.col-name.categories__name {{ cat.display_name }}
-            td.col-kind
-              BaseBadge(:variant='cat.mvp_baseline ? "neutral" : "info"')
-                | {{ cat.mvp_baseline ? 'Базовая' : 'Своя' }}
-            td.col-toggle
-              q-toggle(
-                :model-value='isEnabled(cat)',
-                color='primary',
-                :disable='savingId === cat.id',
-                @update:model-value='(v) => toggle(cat, v)'
-              )
-            td.col-actions
-              //- Удалить можно только собственную категорию; базовая — без действия.
-              button.icon-btn(
-                v-if='!cat.mvp_baseline',
-                type='button',
-                aria-label='Удалить категорию',
-                @click='onRemove(cat)'
-              )
-                q-icon(name='delete', size='18px')
-
-    .table-foot
+    template(#cell-name='{ row }')
+      .categories__name {{ row.display_name }}
+    template(#cell-kind='{ row }')
+      BaseBadge(:variant='row.mvp_baseline ? "neutral" : "info"')
+        | {{ row.mvp_baseline ? 'Базовая' : 'Своя' }}
+    template(#cell-enabled='{ row }')
+      q-toggle(
+        :model-value='isEnabled(row)',
+        color='primary',
+        :disable='savingId === row.id',
+        @update:model-value='(v) => toggle(row, v)'
+      )
+    template(#cell-actions='{ row }')
+      //- Удалить можно только собственную категорию; базовая — без действия.
+      button.icon-btn(
+        v-if='!row.mvp_baseline',
+        type='button',
+        aria-label='Удалить категорию',
+        @click='onRemove(row)'
+      )
+        q-icon(name='delete', size='18px')
+    template(#footer)
       span Категорий: {{ categories.length }}
 
   EmptyState(
