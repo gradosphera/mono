@@ -7,8 +7,8 @@ import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session'
 import { OperatorBranchBar, useOperatorBranchStore } from 'src/entities/OperatorBranch'
 import { DigitalDocument } from 'src/shared/lib/document'
-import { BaseBadge, BaseButton, BaseCard, BaseDialog, BaseInput, BaseSelect, EmptyState, TableSkeleton } from 'src/shared/ui/base'
-import type { BaseBadgeVariant, TableSkeletonColumn } from 'src/shared/ui/base'
+import { BaseBadge, BaseButton, BaseCard, BaseDialog, BaseInput, BaseSelect, BaseTable, EmptyState } from 'src/shared/ui/base'
+import type { BaseBadgeVariant, BaseTableColumn } from 'src/shared/ui/base'
 import { AmountInput, PageHint, WalletCard } from 'src/shared/ui/domain'
 import { ExpenseCreateDialog, type ExpenseCreatePayload } from 'src/shared/ui/domain/ExpenseCreateDialog'
 import { PaymentMethodSelect } from 'src/shared/ui/domain/PaymentMethodSelect'
@@ -246,21 +246,25 @@ async function onDistribute(): Promise<void> {
 
 // ─── Движения по общему кошельку (ledger2 через inter-порт) ───
 
-const historyColumns = computed<TableSkeletonColumn[]>(() => [
-  { label: 'Дата' },
-  { label: 'Операция' },
-  { label: 'Сумма', class: 'col-num' },
-  { label: 'Назначение' },
-])
+type WalletHistoryRow = MarketplaceBranchWalletHistoryView['items'][number]
+
+const historyColumns: BaseTableColumn<WalletHistoryRow>[] = [
+  { key: 'date', label: 'Дата', width: '170px', nowrap: true },
+  { key: 'operation', label: 'Операция', width: '260px' },
+  { key: 'amount', label: 'Сумма', width: '150px', numeric: true },
+  { key: 'memo', label: 'Назначение', width: '320px' },
+]
 
 // ─── Плановые расходы участка (оффчейн-реестр; резерв 30 дней) ───
 
-const planColumns = computed<TableSkeletonColumn[]>(() => [
-  { label: 'Назначение' },
-  { label: 'Сумма', class: 'col-num' },
-  { label: 'Срок' },
-  { label: 'Реквизиты' },
-  ...(store.isOperator ? [{ label: '', class: 'col-action', cell: 'icon' as const }] : []),
+const planColumns = computed<BaseTableColumn<ExpensePlanView>[]>(() => [
+  { key: 'title', label: 'Назначение', width: '260px', sortable: true, field: 'title' },
+  { key: 'amount', label: 'Сумма', width: '150px', numeric: true },
+  { key: 'due', label: 'Срок', width: '190px' },
+  { key: 'payto', label: 'Реквизиты', width: '240px', field: 'pay_to' },
+  ...(store.isOperator
+    ? [{ key: 'actions', label: '', width: '220px' } as BaseTableColumn<ExpensePlanView>]
+    : []),
 ])
 
 // Приоритетов у расхода нет: всё, что заведено в реестр, подлежит оплате.
@@ -398,13 +402,26 @@ async function onDeletePlan(plan: ExpensePlanView): Promise<void> {
 
 // ─── Веса участников (председатель КУ) ───
 
-const weightColumns = computed<TableSkeletonColumn[]>(() => [
-  { label: 'Участник' },
-  { label: 'Вес', class: 'col-num' },
-  { label: 'Доля', class: 'col-num' },
-  { label: 'На кошельке', class: 'col-num' },
-  ...(isBranchTrustee.value ? [{ label: '', class: 'col-action', cell: 'icon' as const }] : []),
+type BranchWeightRow = NonNullable<typeof economy.value>['weights'][number]
+
+const weightColumns = computed<BaseTableColumn<BranchWeightRow>[]>(() => [
+  { key: 'member', label: 'Участник', width: '260px' },
+  { key: 'weight', label: 'Вес', width: '130px', numeric: true },
+  { key: 'share', label: 'Доля', width: '120px', numeric: true },
+  { key: 'balance', label: 'На кошельке', width: '160px', numeric: true },
+  ...(isBranchTrustee.value
+    ? [{ key: 'actions', label: '', width: '110px' } as BaseTableColumn<BranchWeightRow>]
+    : []),
 ])
+
+type PersonalHistoryRow = MarketplacePersonalWalletHistoryView['items'][number]
+
+const personalHistoryColumns: BaseTableColumn<PersonalHistoryRow>[] = [
+  { key: 'date', label: 'Дата', width: '170px', nowrap: true },
+  { key: 'operation', label: 'Операция', width: '280px' },
+  { key: 'amount', label: 'Сумма', width: '150px', numeric: true },
+  { key: 'status', label: 'Статус', width: '140px' },
+]
 
 // Кандидаты в распределение — операторы участка, ещё не имеющие веса.
 const weightCandidates = computed(() => {
@@ -611,35 +628,34 @@ q-page.economy
       .economy__section
         .economy__section-title Движения по кошельку
 
-        TableSkeleton(v-if='firstLoad', :columns='historyColumns')
+        BaseTable(
+          v-if='firstLoad || walletHistory.length',
+          :columns='historyColumns',
+          :rows='walletHistory',
+          row-key='global_sequence',
+          :loading='firstLoad',
+          min-width='900px'
+        )
+          template(#cell-date='{ row }')
+            span.t-mono {{ formatDateToLocalTimezone(row.created_at, 'DD.MM.YYYY HH:mm') }}
+          template(#cell-operation='{ row }')
+            | {{ operationLabel({ operationCode: row.operation_code, action: 'apply' }) }}
+          template(#cell-amount='{ row }')
+            span.t-mono {{ formatProcessAmount(row.quantity) }}
+          template(#cell-memo='{ row }')
+            .economy__memo
+              span {{ row.memo || '—' }}
+              BaseButton(
+                v-if='row.order_id',
+                variant='ghost',
+                size='sm',
+                @click='goToOrder(row.order_id)'
+              )
+                template(#icon-left)
+                  q-icon(name='open_in_new', size='14px')
+                | Заказ
 
-        .table-wrap(v-if='walletHistory.length')
-          .table-scroll
-            table.table
-              thead
-                tr
-                  th Дата
-                  th Операция
-                  th.col-num Сумма
-                  th Назначение
-              tbody
-                tr(v-for='op in walletHistory', :key='op.global_sequence')
-                  td.t-mono {{ formatDateToLocalTimezone(op.created_at, 'DD.MM.YYYY HH:mm') }}
-                  td {{ operationLabel({ operationCode: op.operation_code, action: 'apply' }) }}
-                  td.col-num.t-mono {{ formatProcessAmount(op.quantity) }}
-                  td.economy__memo
-                    span {{ op.memo || '—' }}
-                    BaseButton(
-                      v-if='op.order_id',
-                      variant='ghost',
-                      size='sm',
-                      @click='goToOrder(op.order_id)'
-                    )
-                      template(#icon-left)
-                        q-icon(name='open_in_new', size='14px')
-                      | Заказ
-
-        .banner.banner--info(v-else-if='!firstLoad')
+        .banner.banner--info(v-else)
           q-icon.banner__icon(name='info', size='18px')
           .banner__body Движений по общему кошельку пока не было.
 
@@ -677,29 +693,27 @@ q-page.economy
         )
 
       .economy__section
-        TableSkeleton(v-if='firstLoad', :columns='planColumns')
-
-        .table-wrap(v-if='plans.length')
-          .table-scroll
-            table.table
-              thead
-                tr
-                  th Назначение
-                  th.col-num Сумма
-                  th Срок
-                  th Реквизиты
-                  th.col-action(v-if='store.isOperator')
-              tbody
-                tr(v-for='plan in plans', :key='plan.id')
-                  td.economy__name {{ plan.title }}
-                  td.col-num.t-mono {{ formatAsset2Digits(plan.amount) }}
-                  td
-                    .economy__due(:class='{ "economy__due--overdue": isPlanOverdue(plan) }') {{ planDueLabel(plan) }}
-                    .economy__due-note(v-if='planRecurrenceLabel(plan)')
-                      q-icon(name='autorenew', size='14px')
-                      | {{ planRecurrenceLabel(plan) }}
-                  td.economy__payto {{ plan.pay_to }}
-                  td.col-action(v-if='store.isOperator')
+        BaseTable(
+          v-if='firstLoad || plans.length',
+          :columns='planColumns',
+          :rows='plans',
+          row-key='id',
+          :loading='firstLoad',
+          min-width='960px',
+          sort-by='title'
+        )
+          template(#cell-title='{ row: plan }')
+            .economy__name {{ plan.title }}
+          template(#cell-amount='{ row: plan }')
+            span.t-mono {{ formatAsset2Digits(plan.amount) }}
+          template(#cell-due='{ row: plan }')
+            .economy__due(:class='{ "economy__due--overdue": isPlanOverdue(plan) }') {{ planDueLabel(plan) }}
+            .economy__due-note(v-if='planRecurrenceLabel(plan)')
+              q-icon(name='autorenew', size='14px')
+              | {{ planRecurrenceLabel(plan) }}
+          template(#cell-payto='{ row: plan }')
+            .economy__payto {{ plan.pay_to }}
+          template(#cell-actions='{ row: plan }')
                     .economy__row-actions
                       BaseBadge(v-if='plan.paid_at', variant='pos') Оплачен
                       BaseBadge(v-else-if='plan.proposal_hash', variant='info') На рассмотрении совета
@@ -723,7 +737,7 @@ q-page.economy
                                 q-item-section Удалить расход
 
         EmptyState(
-          v-else-if='economy && !plans.length',
+          v-else-if='economy',
           title='Плановых расходов нет',
           body='Весь общий кошелёк доступен распределению. Добавьте предстоящую трату участка, чтобы система удерживала под неё резерв.'
         )
@@ -733,46 +747,43 @@ q-page.economy
     //- Распределение членских взносов — участники (веса) + ручная команда «Распределить»
     template(v-if='activeKey === "distribution"')
       .economy__section
-        TableSkeleton(v-if='firstLoad', :columns='weightColumns')
+        BaseTable(
+          v-if='firstLoad || (economy && economy.weights.length)',
+          :columns='weightColumns',
+          :rows='economy ? economy.weights : []',
+          row-key='username',
+          :loading='firstLoad',
+          min-width='830px'
+        )
+          template(#cell-member='{ row: w }')
+            .economy__name {{ nameByUsername[w.username] || w.username }}
+          template(#cell-weight='{ row: w }')
+            input.economy__weight-input(
+              v-if='isBranchTrustee',
+              type='number',
+              min='1',
+              :value='editWeights[w.username] ?? w.weight',
+              @input='onWeightInput(w.username, $event)',
+              @change='onUpdateWeight(w.username)'
+            )
+            template(v-else) {{ w.weight }}
+          template(#cell-share='{ row: w }')
+            | {{ w.share_percent.toFixed(1) }} %
+          template(#cell-balance='{ row: w }')
+            span.t-mono {{ formatAsset2Digits(w.personal_balance) }}
+          template(#cell-actions='{ row: w }')
+            BaseButton(
+              variant='ghost',
+              icon-only,
+              size='sm',
+              aria-label='Исключить из распределения',
+              :disabled='weightSaving',
+              @click='onDeleteWeight(w.username)'
+            )
+              template(#icon-left)
+                q-icon(name='person_remove', size='18px')
 
-        .table-wrap(v-if='economy && economy.weights.length')
-          .table-scroll
-            table.table
-              thead
-                tr
-                  th Участник
-                  th.col-num Вес
-                  th.col-num Доля
-                  th.col-num На кошельке
-                  th.col-action(v-if='isBranchTrustee')
-              tbody
-                tr(v-for='w in economy.weights', :key='w.username')
-                  td.economy__name {{ nameByUsername[w.username] || w.username }}
-                  td.col-num
-                    template(v-if='isBranchTrustee')
-                      input.economy__weight-input(
-                        type='number',
-                        min='1',
-                        :value='editWeights[w.username] ?? w.weight',
-                        @input='onWeightInput(w.username, $event)',
-                        @change='onUpdateWeight(w.username)'
-                      )
-                    template(v-else) {{ w.weight }}
-                  td.col-num {{ w.share_percent.toFixed(1) }} %
-                  td.col-num.t-mono {{ formatAsset2Digits(w.personal_balance) }}
-                  td.col-action(v-if='isBranchTrustee')
-                    BaseButton(
-                      variant='ghost',
-                      icon-only,
-                      size='sm',
-                      aria-label='Исключить из распределения',
-                      :disabled='weightSaving',
-                      @click='onDeleteWeight(w.username)'
-                    )
-                      template(#icon-left)
-                        q-icon(name='person_remove', size='18px')
-
-        .banner.banner--info(v-else-if='economy && !economy.weights.length')
+        .banner.banner--info(v-else-if='economy')
           q-icon.banner__icon(name='info', size='18px')
           .banner__body
             | Веса распределения не настроены. Назначьте веса участникам, чтобы
@@ -831,22 +842,20 @@ q-page.economy
       //- Список однородный, поэтому таблица, как у общего кошелька участка.
       .economy__section(v-if='personalWalletHistory.length')
         .economy__section-title История
-        .table-wrap
-          .table-scroll
-            table.table
-              thead
-                tr
-                  th Дата
-                  th Операция
-                  th.col-num Сумма
-                  th.col-action Статус
-              tbody
-                tr(v-for='op in personalWalletHistory', :key='op.global_sequence')
-                  td.t-mono {{ formatDateToLocalTimezone(op.created_at, 'DD.MM.YYYY HH:mm') }}
-                  td {{ operationLabel({ operationCode: op.operation_code, action: 'apply' }) }}
-                  td.col-num.t-mono {{ formatProcessAmount(op.quantity) }}
-                  td.col-action
-                    BaseBadge(variant='pos') Выполнено
+        BaseTable(
+          :columns='personalHistoryColumns',
+          :rows='personalWalletHistory',
+          row-key='global_sequence',
+          min-width='780px'
+        )
+          template(#cell-date='{ row: op }')
+            span.t-mono {{ formatDateToLocalTimezone(op.created_at, 'DD.MM.YYYY HH:mm') }}
+          template(#cell-operation='{ row: op }')
+            | {{ operationLabel({ operationCode: op.operation_code, action: 'apply' }) }}
+          template(#cell-amount='{ row: op }')
+            span.t-mono {{ formatProcessAmount(op.quantity) }}
+          template(#cell-status)
+            BaseBadge(variant='pos') Выполнено
 
       EmptyState(
         v-if='!firstLoad && !aids.length && !personalWalletHistory.length',
