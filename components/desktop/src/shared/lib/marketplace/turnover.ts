@@ -150,7 +150,7 @@ function fillMeta(
   row.packageSize ??= meta.packageSize ?? null;
 }
 
-/** Приход: что и на какую сумму принято на склады за период. */
+/** Приход: что и на какую сумму принято на склад за период. */
 function addInventory(
   map: Map<string, TurnoverRow>,
   inventory: TurnoverInventoryItem[],

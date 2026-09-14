@@ -24,9 +24,12 @@
             @open='openDoc(d)'
           )
 
+    //- Операции и проводки — каждая на всю ширину, одна под другой: рядом в две
+    //- колонки обе таблицы обрезались по горизонтали, и ни номер операции, ни
+    //- пара счетов целиком не читались (особенно в оверлее заказа).
     .row.q-col-gutter-md
       //- Операции процесса (apply + корректировки)
-      .col-12.col-md-6
+      .col-12
         q-card(flat bordered)
           q-card-section.q-pb-none
             .text-subtitle2 Операции
@@ -63,7 +66,7 @@
                 q-td.text-right.font-monospace(:props='cp') {{ formatProcessAmount(cp.row.quantity) }}
 
       //- Проводки процесса (Дт → Кт парами)
-      .col-12.col-md-6
+      .col-12
         q-card(flat bordered)
           q-card-section.q-pb-none
             .text-subtitle2 Проводки

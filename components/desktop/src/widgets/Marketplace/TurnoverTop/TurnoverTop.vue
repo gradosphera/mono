@@ -87,7 +87,7 @@ function units(value: number, row: TurnoverRow): string {
 const totals = computed(() => [
   {
     key: 'accepted',
-    label: 'Принято на склады',
+    label: 'Принято на склад',
     value: money(turnover.value.totals.acceptedAmount),
   },
   { key: 'issued', label: 'Выдано пайщикам', value: money(turnover.value.totals.issuedAmount) },
