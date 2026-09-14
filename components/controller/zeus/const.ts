@@ -6448,6 +6448,7 @@ export const ReturnTypes: Record<string,any> = {
 		order_hash:"String",
 		order_id:"String",
 		payee_account:"String",
+		payee_name:"String",
 		payout_destination:"String",
 		payout_tx_hash:"String",
 		purpose:"String",

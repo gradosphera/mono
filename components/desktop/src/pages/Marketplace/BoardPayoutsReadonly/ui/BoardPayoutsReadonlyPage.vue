@@ -17,7 +17,8 @@ import { listOutgoingPayments, type MarketplaceOutgoingPaymentView } from '../ap
 
 const items = ref<MarketplaceOutgoingPaymentView[]>([]);
 const loading = ref(false);
-const supplierFilter = ref<string>('');
+// clearable у BaseInput при очистке кладёт null — держим это в типе.
+const supplierFilter = ref<string | null>('');
 const statusFilter = ref<string[]>([]);
 
 const PAYMENT_STATUS_LABEL: Record<string, string> = {
@@ -72,7 +73,7 @@ const columns: QTableProps['columns'] = [
 ];
 
 const filteredRows = computed(() => {
-  const query = supplierFilter.value.trim().toLowerCase();
+  const query = (supplierFilter.value ?? '').trim().toLowerCase();
   return items.value.filter((r) => {
     if (statusFilter.value.length && !statusFilter.value.includes(r.status)) return false;
     if (!query) return true;
