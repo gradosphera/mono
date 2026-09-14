@@ -30,8 +30,12 @@ export interface BaseTableColumn<T = Record<string, unknown>> {
 export interface BaseTableProps<T = Record<string, unknown>> {
   columns: BaseTableColumn<T>[];
   rows: T[];
-  /** Уникальный ключ строки */
-  rowKey?: keyof T;
+  /**
+   * Уникальный ключ строки: имя поля либо функция, когда ключ составной
+   * (например «наименование + причина» у позиций списания, где своего
+   * идентификатора у строки нет).
+   */
+  rowKey?: keyof T | ((row: T) => string);
   /**
    * Оставлен для совместимости вызовов и ни на что не влияет: отклик строки на
    * наведение включает `clickableRows`. Подсветка — обещание, что по строке

@@ -91,7 +91,12 @@ function onRowClick(_evt: Event, row: T): void {
   emit('row-click', row);
 }
 
-const rowKeyName = computed(() => (props.rowKey as string | undefined) ?? 'id');
+const rowKeyName = computed(() => props.rowKey ?? 'id');
+
+/** Имя поля-ключа для строк-пустышек каркаса: функции там подставлять нечего. */
+const skeletonKeyName = computed(() =>
+  typeof props.rowKey === 'string' ? props.rowKey : 'id',
+);
 
 const selectedRows = computed<T[]>({
   get: () => props.selected ?? [],
@@ -118,7 +123,7 @@ const selectionMode = computed(() => (skeleton.value ? 'none' : props.selection)
 const skeletonPlaceholders = computed(
   () =>
     Array.from({ length: props.skeletonRows }, (_, i) => ({
-      [rowKeyName.value]: `__skel-${i}`,
+      [skeletonKeyName.value]: `__skel-${i}`,
     })) as unknown as T[],
 );
 
