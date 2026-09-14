@@ -243,7 +243,7 @@ q-page.warehouse-summary(role='region', aria-label='Склад кооперат�
 
   WarehouseSummaryGrid(:rows='warehouseRows', :loading='loading', @row-click='onRowClick')
 
-  OfferRegistryOverlay(:coopname='info.coopname')
+  OfferRegistryOverlay(:coopname='info.coopname', from='warehouse')
 </template>
 
 <style scoped lang="scss">

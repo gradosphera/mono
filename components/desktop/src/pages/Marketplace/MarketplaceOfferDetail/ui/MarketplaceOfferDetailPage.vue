@@ -45,17 +45,23 @@ const offerId = computed(() => String(route.params.offerId ?? ''));
 const readonly = computed(() => route.meta?.readonly === true);
 
 // Откуда пришли (query `from`) — чтобы «назад» называлась и вела туда же, где
-// заказчик был: из корзины → «В корзину», из модерации → «К модерации», иначе
-// дефолт «К каталогу». Реальный переход — router.back() (история совпадает с
-// реферрером), это лишь корректные подпись и fallback-маршрут.
+// человек был. Карточку открывают с пяти экранов: корзина заказчика и четыре
+// реестра стола администратора (предложения, заказы, модерация, склад).
+// Реальный переход — router.back() (история совпадает с реферрером), это
+// корректные подпись и запасной маршрут.
+const BACK_TARGETS: Record<string, { label: string; name: string }> = {
+  cart: { label: 'В корзину', name: 'marketplace-cart' },
+  orders: { label: 'К реестру заказов', name: 'marketplace-admin-orders' },
+  offers: { label: 'К реестру предложений', name: 'marketplace-admin-offers' },
+  moderation: { label: 'К модерации', name: 'marketplace-moderation' },
+  warehouse: { label: 'К складу', name: 'marketplace-warehouse-summary' },
+};
+
 const backTarget = computed<{ label: string; name: string }>(() => {
-  if (route.query.from === 'cart') return { label: 'В корзину', name: 'marketplace-cart' };
-  // Стол администратора: карточку открывают из разных реестров — подпись и
-  // fallback-маршрут «назад» зависят от того, откуда пришли (query `from`).
-  if (route.query.from === 'orders')
-    return { label: 'К реестру заказов', name: 'marketplace-admin-orders' };
-  if (route.query.from === 'offers')
-    return { label: 'К реестру предложений', name: 'marketplace-admin-offers' };
+  const from = BACK_TARGETS[String(route.query.from ?? '')];
+  if (from) return from;
+  // Без пометки: на столе администратора карточку исторически открывала
+  // только модерация, у заказчика — каталог.
   if (readonly.value) return { label: 'К модерации', name: 'marketplace-moderation' };
   return { label: 'К каталогу', name: 'marketplace-catalog' };
 });

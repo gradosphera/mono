@@ -220,7 +220,12 @@ q-page.moderation(role="region", aria-label="Модерация предложе
       .row.justify-center.q-my-md
         q-spinner(color="primary", size="2em")
 
-  OfferRegistryOverlay(:coopname="info.coopname", moderatable, @moderated="reloadLive")
+  OfferRegistryOverlay(
+    :coopname="info.coopname",
+    moderatable,
+    from="moderation",
+    @moderated="reloadLive"
+  )
 </template>
 
 <style scoped lang="scss">
