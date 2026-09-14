@@ -403,7 +403,7 @@ export class MarketplaceCheckoutService {
     if (needed > available) {
       throw new BadRequestException(
         `Недостаточно средств на ${walletLabel} для оформления: нужно ${this.economyService.unitsToAsset(needed)}, доступно ${this.economyService.unitsToAsset(available)}. ` +
-          'Заказ не запущен — пополните паевой взнос или уберите часть позиций.'
+          'Заказ не запущен — пополните главный кошелёк или уберите часть позиций.'
       );
     }
   }

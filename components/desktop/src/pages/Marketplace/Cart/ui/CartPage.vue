@@ -377,8 +377,8 @@ q-page.mp-cart.mp-role-orderer(role="region", aria-label="Корзина Сто�
     .mp-cart__insufficient
       p.mp-cart__insufficient-text {{ insufficientMessage }}
       p.mp-cart__insufficient-hint
-        | Внесите паевой взнос — деньги попадут в кошелёк, и заказ можно будет
-        | оформить тем же составом. Корзина сохранится.
+        | Внесите паевой взнос — деньги попадут в главный кошелёк, и заказ можно
+        | будет оформить тем же составом. Корзина сохранится.
     template(#footer)
       BaseButton(variant="ghost", @click="insufficientOpen = false") Закрыть
       DepositButton
