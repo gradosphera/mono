@@ -185,6 +185,9 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 requiresAuth: true,
                 agreements: agreementsBase,
                 hidden: true,
+                // Меню подсвечивает раздел, из которого страница открыта: она
+                // сиблинг реестра, и без этого подсветка гасла целиком.
+                menuKey: 'marketplace-catalog',
               },
               children: [],
             },
@@ -270,6 +273,9 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 requiresAuth: true,
                 agreements: agreementsBase,
                 hidden: true,
+                // Меню подсвечивает раздел, из которого страница открыта: она
+                // сиблинг реестра, и без этого подсветка гасла целиком.
+                menuKey: 'marketplace-my-orders',
               },
               children: [],
             },
@@ -443,6 +449,9 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 requires: 'Offer:create:own',
                 requiresAuth: true,
                 hidden: true,
+                // Меню подсвечивает раздел, из которого страница открыта: она
+                // сиблинг реестра, и без этого подсветка гасла целиком.
+                menuKey: 'marketplace-supplier-claims',
                 agreements: agreementsBase,
               },
               children: [],
@@ -575,6 +584,9 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 requiresAuth: true,
                 agreements: agreementsBase,
                 hidden: true,
+                // Меню подсвечивает раздел, из которого страница открыта: она
+                // сиблинг реестра, и без этого подсветка гасла целиком.
+                menuKey: 'marketplace-pvz-returns',
               },
               children: [],
             },
@@ -647,6 +659,9 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 requiresAuth: true,
                 agreements: agreementsBase,
                 hidden: true,
+                // Меню подсвечивает раздел, из которого страница открыта: она
+                // сиблинг реестра, и без этого подсветка гасла целиком.
+                menuKey: 'marketplace-pvz-orders',
               },
               children: [],
             },
@@ -726,6 +741,9 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 requiresAuth: true,
                 agreements: agreementsBase,
                 hidden: true,
+                // Меню подсвечивает раздел, из которого страница открыта: она
+                // сиблинг реестра, и без этого подсветка гасла целиком.
+                menuKey: 'marketplace-admin-orders',
               },
               children: [],
             },
@@ -779,6 +797,9 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 requiresAuth: true,
                 agreements: agreementsBase,
                 hidden: true,
+                // Меню подсвечивает раздел, из которого страница открыта: она
+                // сиблинг реестра, и без этого подсветка гасла целиком.
+                menuKey: 'marketplace-admin-offers',
                 readonly: true,
               },
               children: [],

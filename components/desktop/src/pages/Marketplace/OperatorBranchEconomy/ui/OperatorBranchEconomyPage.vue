@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useFirstLoad } from 'src/shared/lib/composables'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { Zeus } from '@coopenomics/sdk'
 import { FailAlert, SuccessAlert } from 'src/shared/api'
 import { useSessionStore } from 'src/entities/Session'
@@ -14,6 +14,8 @@ import { ExpenseCreateDialog, type ExpenseCreatePayload } from 'src/shared/ui/do
 import { PaymentMethodSelect } from 'src/shared/ui/domain/PaymentMethodSelect'
 import { PageTabs, type PageTab } from 'src/shared/ui/layout'
 import { TurnoverTop } from 'src/widgets/Marketplace/TurnoverTop'
+import { OrderRegistryOverlay } from 'src/widgets/Marketplace/OrderRegistryOverlay'
+import { useQueryOverlay } from 'src/shared/lib/navigation'
 import { listInventory, type MarketplaceInventoryItemView } from 'src/entities/MarketplaceInventory'
 import {
   fetchOrdersForTurnover,
@@ -68,7 +70,7 @@ import {
  */
 
 const route = useRoute()
-const router = useRouter()
+const orderOverlay = useQueryOverlay('order')
 const session = useSessionStore()
 const store = useOperatorBranchStore()
 
@@ -134,13 +136,12 @@ function onSelectTab(tab: PageTab): void {
   activeKey.value = tab.key as typeof activeKey.value
 }
 
-// Переход из движения кошелька прямо на страницу заказа участка — там
-// состояние, документы и операции процесса поставки.
+// Заказ из движения кошелька раскрывается оверлеем прямо здесь: экономика
+// остаётся на месте со своей вкладкой и прокруткой, а на полную страницу
+// уводит кнопка «Открыть заказ» внутри оверлея — уход по нажатию на ссылку
+// сбрасывал оператора на другой раздел, и было непонятно, где он оказался.
 function goToOrder(orderId: string): void {
-  void router.push({
-    name: 'marketplace-pvz-order-detail',
-    params: { coopname: coopname.value, orderId },
-  })
+  orderOverlay.open(orderId)
 }
 
 function assetAmount(asset: string): number {
@@ -973,6 +974,12 @@ q-page.economy
         :disabled='getFundsTotal <= 0 || getFundsOverBalance',
         @click='onGetFunds'
       ) Получить
+
+  //- Заказ из движения кошелька — оверлеем поверх экономики (`?order=<id>`).
+  OrderRegistryOverlay(
+    :coopname='coopname',
+    full-page-route-name='marketplace-pvz-order-detail'
+  )
 </template>
 
 <style scoped lang="scss">

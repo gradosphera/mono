@@ -126,6 +126,13 @@ interface MenuMeta {
   conditions?: string;
   hidden?: boolean;
   action?: string;
+  /**
+   * Раздел, которому принадлежит скрытая страница: имя маршрута пункта меню.
+   * Страница заказа или предложения живёт отдельным маршрутом рядом с реестром,
+   * а не внутри него, поэтому по `matched` меню её разделу не находит и гасит
+   * подсветку целиком — оператор видел пустое меню и не понимал, где он.
+   */
+  menuKey?: string;
 }
 
 const filteredRoutes = computed<RouteRecordRaw[]>(() => {
@@ -165,6 +172,14 @@ const activeKey = computed<string | undefined>(() => {
   for (const r of filteredRoutes.value) {
     if (r.name === currentName) return String(r.name);
     if (current.matched.some((m) => m.name === r.name)) return String(r.name);
+  }
+
+  // Скрытая страница раздела (карточка заказа, предложения, возврата) — она
+  // сиблинг реестра, а не его потомок, поэтому подсвечиваем раздел по явному
+  // указанию `menuKey`.
+  const menuKey = (current.meta as MenuMeta | undefined)?.menuKey;
+  if (menuKey && filteredRoutes.value.some((r) => String(r.name) === menuKey)) {
+    return menuKey;
   }
   return undefined;
 });
