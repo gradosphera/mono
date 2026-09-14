@@ -91,7 +91,18 @@ function onRowClick(_evt: Event, row: T): void {
   emit('row-click', row);
 }
 
-const rowKeyName = computed(() => props.rowKey ?? 'id');
+/**
+ * Ключ строки в том виде, в каком его ждёт q-table: имя поля строкой либо
+ * функция. `keyof T` шире (символы и числа тоже ключи), поэтому имя приводим
+ * к строке явно — иначе типы обёртки и Quasar не сходятся.
+ */
+type QTableRowKey = NonNullable<QTableProps['rowKey']>;
+
+const rowKeyName = computed<QTableRowKey>(() => {
+  const key = props.rowKey;
+  if (typeof key === 'function') return key as QTableRowKey;
+  return key === undefined ? 'id' : String(key);
+});
 
 /** Имя поля-ключа для строк-пустышек каркаса: функции там подставлять нечего. */
 const skeletonKeyName = computed(() =>
