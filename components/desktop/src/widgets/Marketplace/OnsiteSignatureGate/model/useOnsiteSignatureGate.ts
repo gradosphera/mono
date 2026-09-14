@@ -133,9 +133,23 @@ function setFlow(patch: Partial<IssuanceFlow>): void {
   issuanceFlow.value = { ...issuanceFlow.value, ...patch };
 }
 
-/** Итог показан — поток закрывается сам, вместе с ним и гейт, если задач нет. */
+/**
+ * Итог показан — поток закрывается.
+ *
+ * Успех закрываем немедленно: заказчику с этого момента делать нечего, а
+ * лишние две с половиной секунды на последней галочке читались как зависание
+ * («всё выполнено, а окно висит» — жалоба 2026-09-14). Что подписано и сколько,
+ * скажет тост.
+ *
+ * Нерешённое и отказ задерживаем: их надо успеть прочитать, тост может уйти
+ * мимо внимания.
+ */
 function finishFlow(step: 'done' | 'pending' | 'declined'): void {
   setFlow({ step });
+  if (step === 'done') {
+    issuanceFlow.value = null;
+    return;
+  }
   flowResultTimer = setTimeout(() => {
     flowResultTimer = null;
     issuanceFlow.value = null;
