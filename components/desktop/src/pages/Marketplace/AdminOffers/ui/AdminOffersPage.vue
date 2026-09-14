@@ -14,8 +14,8 @@ import { MarketplaceSaleForm, marketplaceQuantityLabel } from 'src/shared/lib/co
 import { applyMembershipFee, getMembershipFeePercent, marketplacePackageStockLabel } from 'src/shared/lib/marketplace';
 import { useSystemStore } from 'src/entities/System/model';
 import { useFioCache } from 'src/shared/lib/account/useFioCache';
-import { BaseBadge, BaseButton, EmptyState } from 'src/shared/ui/base';
-import type { BaseBadgeVariant } from 'src/shared/ui/base';
+import { BaseBadge, BaseButton, BaseTable, EmptyState, TablePager } from 'src/shared/ui/base';
+import type { BaseBadgeVariant, BaseTableColumn } from 'src/shared/ui/base';
 import { EntityIdBadge } from 'src/shared/ui';
 import { useOfferModeration } from 'src/features/Marketplace/OfferModeration';
 import { PageHint, StatusFilterButton } from 'src/shared/ui/domain';
@@ -57,17 +57,21 @@ function statusVariant(s: string): BaseBadgeVariant {
   return OFFER_STATUS[s]?.variant ?? 'neutral';
 }
 
-const columns = [
-  { name: 'status', align: 'left' as const, label: 'Статус', field: 'status' },
-  { name: 'offer', align: 'left' as const, label: 'Предложение', field: 'id' },
-  { name: 'product', align: 'left' as const, label: 'Товар', field: 'product_name' },
-  { name: 'supplier', align: 'left' as const, label: 'Поставщик', field: 'supplier_account' },
-  { name: 'price', align: 'right' as const, label: 'Цена', field: 'price_per_unit' },
-  { name: 'available', align: 'right' as const, label: 'Доступно', field: 'quantity_available' },
-  { name: 'shelf_life', align: 'right' as const, label: 'Срок годности', field: 'shelf_life_days' },
-  { name: 'warranty', align: 'right' as const, label: 'Гарантийный срок возврата', field: 'warranty_days' },
-  { name: 'created', align: 'left' as const, label: 'Создано', field: 'created_at' },
-  { name: 'actions', align: 'right' as const, label: '', field: 'id' },
+// Сортировки в колонках нет: страница реестра серверная, и щелчок по
+// заголовку отсортировал бы только текущие пятьдесят строк, притворившись
+// сортировкой всего реестра. «Гарантийный срок возврата» ужат до «Гарантии» —
+// полным именем он раздувал колонку вдвое против своего содержимого.
+const columns: BaseTableColumn<AdminOfferView>[] = [
+  { key: 'status', label: 'Статус', width: '170px' },
+  { key: 'offer', label: 'Предложение', width: '130px' },
+  { key: 'product', label: 'Товар', width: '220px' },
+  { key: 'supplier', label: 'Поставщик', width: '190px' },
+  { key: 'price', label: 'Цена', width: '120px', numeric: true },
+  { key: 'available', label: 'Доступно', width: '150px', numeric: true },
+  { key: 'shelf_life', label: 'Срок годности', width: '130px', numeric: true },
+  { key: 'warranty', label: 'Гарантии', width: '130px', numeric: true },
+  { key: 'created', label: 'Создано', width: '150px', nowrap: true },
+  { key: 'actions', label: '', width: '230px' },
 ];
 
 function onStatusFilterUpdate(value: string[]): void {
@@ -158,12 +162,8 @@ async function load(): Promise<void> {
   }
 }
 
-function onRequest(props: { pagination: { page: number; rowsPerPage: number; rowsNumber?: number } }): void {
-  pagination.value = {
-    page: props.pagination.page,
-    rowsPerPage: props.pagination.rowsPerPage,
-    rowsNumber: props.pagination.rowsNumber ?? pagination.value.rowsNumber,
-  };
+function goToPage(page: number): void {
+  pagination.value = { ...pagination.value, page };
   void load();
 }
 
@@ -193,67 +193,68 @@ q-page.admin-offers(role="region", aria-label="Реестр предложени
   PageHint(storage-key="mp:admin-offers:banner-dismissed")
     | Все предложения поставщиков кооператива любого статуса — опубликованные, снятые, отклонённые и ждущие модерации. Нажмите на предложение, чтобы открыть его карточку. Модерация ждущих решения — на отдельной странице.
 
-  q-card.q-mt-md(flat)
-    q-table.full-height(
-      flat,
-      :rows="items",
-      :columns="columns",
-      row-key="id",
-      :loading="loading",
-      v-model:pagination="pagination",
-      :rows-per-page-options="[25, 50, 100, 200]",
-      no-data-label="Предложения не найдены",
-      @request="onRequest",
-      @row-click="(_evt, row) => goToOffer(row)"
-    )
-      template(#body-cell-status="props")
-        q-td(:props="props")
-          BaseBadge(:variant="statusVariant(props.row.status)") {{ statusLabel(props.row.status) }}
-      template(#body-cell-offer="props")
-        q-td(:props="props")
-          EntityIdBadge(:rawId="shortId(props.row.id)", copy-on-click)
-      template(#body-cell-product="props")
-        q-td(:props="props") {{ props.row.product_name || 'Товар по предложению' }}
-      template(#body-cell-supplier="props")
-        q-td(:props="props") {{ supplierTitle(props.row) }}
-      template(#body-cell-price="props")
-        q-td.text-right.font-monospace(:props="props") {{ formatPrice(props.row.price_per_unit) }}
-      template(#body-cell-available="props")
-        q-td.text-right(:props="props") {{ props.row.unlimited_flag ? '∞' : availableLabel(props.row) }}
-      template(#body-cell-shelf_life="props")
-        q-td.text-right(:props="props") {{ formatShelfLife(props.row.shelf_life_days) }}
-      template(#body-cell-warranty="props")
-        q-td.text-right(:props="props") {{ formatWarranty(props.row.warranty_days) }}
-      template(#body-cell-created="props")
-        q-td(:props="props") {{ formatDate(props.row.created_at) }}
-      template(#body-cell-actions="props")
-        q-td.text-right(:props="props", @click.stop)
-          .admin-offers__row-actions
-            BaseButton(
-              variant="secondary",
-              size="sm",
-              :loading="isSettingWarranty(props.row.id)",
-              @click="editWarranty(props.row)"
-            )
-              template(#icon-left)
-                q-icon(name="event_repeat", size="16px")
-              | Гарант. срок
-            BaseButton(
-              variant="secondary",
-              size="sm",
-              @click="goToOffer(props.row)"
-            )
-              template(#icon-left)
-                q-icon(name="open_in_new", size="16px")
-              | Открыть
-      template(#no-data)
-        .admin-offers__nodata
-          EmptyState(
-            title="Предложений нет",
-            body="Предложений по выбранным фильтрам не найдено."
-          )
-            template(#icon)
-              q-icon(name="storefront", size="48px")
+  BaseTable(
+    v-if="loading || items.length",
+    :columns="columns",
+    :rows="items",
+    row-key="id",
+    :loading="loading",
+    min-width="1620px",
+    clickable-rows,
+    @row-click="goToOffer"
+  )
+    template(#cell-status="{ row }")
+      BaseBadge(:variant="statusVariant(row.status)") {{ statusLabel(row.status) }}
+    template(#cell-offer="{ row }")
+      //- Нажатие по идентификатору копирует его и карточку не открывает:
+      //- для карточки нажимается вся строка.
+      span(@click.stop)
+        EntityIdBadge(:rawId="shortId(row.id)", copy-on-click)
+    template(#cell-product="{ row }")
+      | {{ row.product_name || 'Товар по предложению' }}
+    template(#cell-supplier="{ row }")
+      | {{ supplierTitle(row) }}
+    template(#cell-price="{ row }")
+      | {{ formatPrice(row.price_per_unit) }}
+    template(#cell-available="{ row }")
+      | {{ row.unlimited_flag ? '∞' : availableLabel(row) }}
+    template(#cell-shelf_life="{ row }")
+      | {{ formatShelfLife(row.shelf_life_days) }}
+    template(#cell-warranty="{ row }")
+      | {{ formatWarranty(row.warranty_days) }}
+    template(#cell-created="{ row }")
+      | {{ formatDate(row.created_at) }}
+    template(#cell-actions="{ row }")
+      .admin-offers__row-actions(@click.stop)
+        BaseButton(
+          variant="secondary",
+          size="sm",
+          :loading="isSettingWarranty(row.id)",
+          @click="editWarranty(row)"
+        )
+          template(#icon-left)
+            q-icon(name="event_repeat", size="16px")
+          | Гарант. срок
+        BaseButton(variant="secondary", size="sm", @click="goToOffer(row)")
+          template(#icon-left)
+            q-icon(name="open_in_new", size="16px")
+          | Открыть
+    template(#footer)
+      TablePager(
+        label="Предложения",
+        :page="pagination.page",
+        :rows-per-page="pagination.rowsPerPage",
+        :rows-number="pagination.rowsNumber",
+        @update:page="goToPage"
+      )
+
+  EmptyState(
+    v-else,
+    title="Предложений нет",
+    body="Предложений по выбранным фильтрам не найдено."
+  )
+    template(#icon)
+      q-icon(name="storefront", size="48px")
 
   OfferRegistryOverlay(
     :coopname="info.coopname",
@@ -270,21 +271,10 @@ q-page.admin-offers(role="region", aria-label="Реестр предложени
   flex-direction: column;
   gap: var(--p-4, 16px);
 
-  &__nodata {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
   &__row-actions {
     display: inline-flex;
     gap: var(--p-2, 8px);
     justify-content: flex-end;
-  }
-
-  // Строки кликабельны (ведут на карточку) — курсор-указатель как аффорданс.
-  :deep(.q-table tbody tr) {
-    cursor: pointer;
   }
 }
 

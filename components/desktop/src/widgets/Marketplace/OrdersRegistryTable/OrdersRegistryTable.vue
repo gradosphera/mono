@@ -12,10 +12,9 @@
  * состояние, документы и операции читаются с одного экрана, на него можно
  * дать ссылку из «Экономики участка» и вернуться назад.
  */
-import { computed } from 'vue';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { marketplaceOrderSaleUnit } from 'src/shared/lib/consts/marketplace-units';
-import { BaseBadge, BaseButton, BaseTable, EmptyState } from 'src/shared/ui/base';
+import { BaseBadge, BaseTable, EmptyState, TablePager } from 'src/shared/ui/base';
 import type { BaseTableColumn } from 'src/shared/ui/base';
 import { EntityIdBadge } from 'src/shared/ui';
 import { orderStatusDisplay } from 'src/widgets/Marketplace/OrderCard';
@@ -41,14 +40,18 @@ const emit = defineEmits<{
 // Сортировки в колонках нет намеренно: страница реестра серверная, и щелчок
 // по заголовку отсортировал бы только текущие пятьдесят строк, притворившись
 // сортировкой всего реестра.
+// Сумма стоит третьей, сразу за состоянием и номером: в хвосте строки она
+// уезжала за край и терялась, хотя в реестре это первое, о чём спрашивают.
+// Состоянию хватает 150px — подписи в него укладываются, а высвобожденное
+// место уходит товару и участникам сделки.
 const columns: BaseTableColumn<OrderRegistryView>[] = [
-  { key: 'status', label: 'Статус', width: '190px' },
-  { key: 'order', label: 'Заказ', width: '120px' },
-  { key: 'product', label: 'Товар', width: '220px' },
-  { key: 'orderer', label: 'Заказчик', width: '180px' },
-  { key: 'supplier', label: 'Поставщик', width: '180px' },
-  { key: 'quantity', label: 'Кол-во', width: '120px', numeric: true },
+  { key: 'status', label: 'Статус', width: '150px' },
+  { key: 'order', label: 'Заказ', width: '110px' },
   { key: 'total', label: 'Сумма', width: '130px', numeric: true },
+  { key: 'product', label: 'Товар', width: '220px' },
+  { key: 'quantity', label: 'Кол-во', width: '110px', numeric: true },
+  { key: 'orderer', label: 'Заказчик', width: '170px' },
+  { key: 'supplier', label: 'Поставщик', width: '170px' },
   { key: 'created', label: 'Создан', width: '150px', nowrap: true },
 ];
 
@@ -100,20 +103,8 @@ function openOrder(o: OrderRegistryView): void {
   emit('order-click', o.id);
 }
 
-// Реестр листается страницами на бэкенде, поэтому подвал свой: канонная
-// таблица показывает строки, которые ей дали, а какая это страница и сколько
-// их всего — знает только вызывающий экран.
-const pageFrom = computed(() =>
-  props.pagination.rowsNumber === 0
-    ? 0
-    : (props.pagination.page - 1) * props.pagination.rowsPerPage + 1,
-);
-const pageTo = computed(() =>
-  Math.min(props.pagination.page * props.pagination.rowsPerPage, props.pagination.rowsNumber),
-);
-const hasPrev = computed(() => props.pagination.page > 1);
-const hasNext = computed(() => pageTo.value < props.pagination.rowsNumber);
-
+// Реестр листается страницами на бэкенде: подвал показывает диапазон и
+// переключает страницы, а строки по-прежнему приносит экран.
 function goToPage(page: number): void {
   emit('request', {
     pagination: {
@@ -133,7 +124,7 @@ function goToPage(page: number): void {
     :rows="props.items",
     row-key="id",
     :loading="props.loading",
-    min-width="1290px",
+    min-width="1210px",
     clickable-rows,
     @row-click="openOrder"
   )
@@ -165,30 +156,14 @@ function goToPage(page: number): void {
     template(#cell-created="{ row }")
       | {{ formatDate(row.created_at) }}
 
-    //- Постраничность серверная: подвал показывает диапазон и листает,
-    //- а строки приносит экран.
     template(#footer)
-      .orders-registry__foot
-        span Заказы {{ pageFrom }}–{{ pageTo }} из {{ props.pagination.rowsNumber }}
-        .orders-registry__pager
-          BaseButton(
-            variant="ghost",
-            size="sm",
-            :disabled="!hasPrev",
-            @click="goToPage(props.pagination.page - 1)"
-          )
-            template(#icon-left)
-              q-icon(name="chevron_left", size="18px")
-            | Назад
-          BaseButton(
-            variant="ghost",
-            size="sm",
-            :disabled="!hasNext",
-            @click="goToPage(props.pagination.page + 1)"
-          )
-            | Вперёд
-            template(#icon-right)
-              q-icon(name="chevron_right", size="18px")
+      TablePager(
+        label="Заказы",
+        :page="props.pagination.page",
+        :rows-per-page="props.pagination.rowsPerPage",
+        :rows-number="props.pagination.rowsNumber",
+        @update:page="goToPage"
+      )
 
   EmptyState(
     v-else,
@@ -218,18 +193,5 @@ function goToPage(page: number): void {
     cursor: pointer;
   }
 
-  &__foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--p-3, 12px);
-    width: 100%;
-  }
-
-  &__pager {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--p-2, 8px);
-  }
 }
 </style>
