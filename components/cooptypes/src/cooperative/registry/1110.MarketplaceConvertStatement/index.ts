@@ -112,6 +112,6 @@ export const exampleData = {
   user: { full_name_or_short_name: 'Иванов Иван Иванович' },
   program: { name: 'СТОЛ ЗАКАЗОВ' },
   order_hash: '0000abcd...',
-  amount: '910.0000 RUB',
-  membership_fee: '210.0000 RUB',
+  amount: '910.00 RUB',
+  membership_fee: '210.00 RUB',
 }

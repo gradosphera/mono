@@ -52,10 +52,13 @@ export class Factory extends DocFactory<MarketplaceConvertStatement.Action> {
       user,
       program,
       order_hash: data.order_hash,
-      amount: data.amount,
+      // Суммы в тексте заявления — в читаемом виде, как в остальных документах:
+      // цепь отдаёт «1300.0000 RUB», и пайщик читал в заявлении четыре знака
+      // после точки вместо привычных копеек (жалоба 2026-09-14).
+      amount: this.formatAsset(data.amount),
       // Членский взнос выделен отдельной суммой прямо в тексте заявления —
       // без него схема модели не проходит проверку, а фраза печатается пустой.
-      membership_fee: data.membership_fee,
+      membership_fee: this.formatAsset(data.membership_fee),
     }
 
     await this.validate(combinedData, template.model)
