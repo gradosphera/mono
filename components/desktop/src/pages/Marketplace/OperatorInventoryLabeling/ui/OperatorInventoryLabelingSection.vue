@@ -1396,16 +1396,19 @@ onMounted(async () => {
     gap: var(--p-2, 8px);
   }
 
+  // Строка фильтров стоит на тех же колонках, что и раскладка под ней: поиск
+  // ровно над «Поступило», переключатель — над картой. Поле шире колонки
+  // читалось как сбой вёрстки — край поиска не совпадал ни с чем.
   &__filters {
     display: flex;
     align-items: center;
-    gap: var(--p-4, 16px);
+    gap: var(--p-3, 12px);
     flex-wrap: wrap;
   }
 
   &__search {
-    max-width: 420px;
-    width: 100%;
+    flex: 0 0 300px;
+    max-width: 100%;
   }
 
   // Слева — «Поступило» фиксированной ширины, справа — сетка на всё остальное.
@@ -1918,7 +1921,8 @@ onMounted(async () => {
   .place {
     padding: var(--p-4, 16px);
 
-    &__inbox {
+    &__inbox,
+    &__search {
       flex-basis: 100%;
     }
   }
