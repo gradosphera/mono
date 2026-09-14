@@ -13,7 +13,6 @@
     binary-state-sort
     class="base-table"
     :class="{
-      'base-table--hover': hover && !skeleton,
       'base-table--sticky': stickyHeader,
       'base-table--skeleton': skeleton,
       'base-table--selectable': selectionMode !== 'none',
@@ -212,13 +211,6 @@ const tableStyle = computed(() => ({
     overflow-wrap: anywhere;
   }
 
-  // Подсветка строки — мягким акцентом, а не серым: `--p-surface-2` (#f7f7f8)
-  // почти совпадает с фоном страницы `--p-canvas` (#f4f4f5), и строка под
-  // курсором визуально проваливалась в подложку вместо того, чтобы выделяться.
-  &--hover :deep(tbody tr:hover) {
-    background: var(--p-primary-soft);
-  }
-
   &--sticky :deep(thead tr th) {
     position: sticky;
     top: 0;
@@ -231,9 +223,20 @@ const tableStyle = computed(() => ({
     pointer-events: none;
   }
 
-  // Строка открывает сущность — курсор показывает это до нажатия.
-  &--clickable :deep(tbody tr) {
-    cursor: pointer;
+  // Строка открывает сущность — курсор и подсветка показывают это до нажатия.
+  // Подсветка живёт здесь, а не отдельным признаком `hover`: выделять строку,
+  // которая ничего не открывает, значит обещать действие, которого нет.
+  // Мягкий акцент, а не серый: `--p-surface-2` (#f7f7f8) почти совпадает с
+  // фоном страницы `--p-canvas` (#f4f4f5), и строка под курсором проваливалась
+  // в подложку вместо того, чтобы выделяться.
+  &--clickable {
+    :deep(tbody tr) {
+      cursor: pointer;
+    }
+
+    :deep(tbody tr:hover) {
+      background: var(--p-primary-soft);
+    }
   }
 
   // Колонка галочек. При `table-layout: fixed` колонка без явной ширины
