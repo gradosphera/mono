@@ -53,8 +53,6 @@ function walletLocked(walletName: string): string | undefined {
   return formatAsset2Digits(row.blocked).split(' ')[0];
 }
 
-const marketAmount = computed(() => walletAmount(MARKET_WALLET));
-
 /** Доступное на кошельке числом — для суммирования, а не для показа. */
 function walletValue(walletName: string): number {
   const row = walletStore.user_wallets.find((w) => w.wallet_name === walletName);
@@ -62,21 +60,56 @@ function walletValue(walletName: string): number {
 }
 
 /**
+ * Кошельки стола — одним списком: из него рисуются карточки в окне и по нему же
+ * считается сумма в шапке. Раздельные описания разъезжаются — сумма начинает
+ * жить своей жизнью от той разбивки, которую человек видит рядом.
+ */
+const WALLET_CARDS = [
+  {
+    name: MARKET_WALLET,
+    icon: 'savings',
+    title: 'Свободный паевой Стола заказов',
+    subtitle: 'Паевой взнос после выдачи и отказов',
+    neutral: false,
+    showLocked: true,
+  },
+  {
+    name: MEMBER_WALLET,
+    icon: 'card_membership',
+    title: 'Членский взнос Стола заказов',
+    subtitle: 'Зачитывается в счёт взноса участка по следующему заказу',
+    neutral: false,
+    showLocked: false,
+  },
+  {
+    name: SHARE_WALLET,
+    icon: 'account_balance_wallet',
+    title: 'Главный паевой кошелёк',
+    subtitle: 'Отсюда паевой взнос резервируется под заказ',
+    neutral: true,
+    showLocked: false,
+  },
+] as const;
+
+const walletCards = computed(() =>
+  WALLET_CARDS.map((card) => ({
+    ...card,
+    balance: walletAmount(card.name),
+    locked: card.showLocked ? walletLocked(card.name) : undefined,
+  })),
+);
+
+/**
  * В шапке — всё, чем заказчик может расплатиться: свободный паевой и членский
  * Стола заказов вместе с главным паевым. Прежде там стоял один свободный
- * паевой, и у человека с двадцатью тысячами на главном кошельке в каталоге
- * висел ноль (жалоба 2026-09-14). Из чего сложилась сумма — видно в окне,
- * которое кнопка и открывает.
+ * паевой, и у человека с деньгами на главном кошельке в каталоге висел ноль
+ * (жалоба 2026-09-14). Из чего сложилась сумма — видно в окне, которое кнопка
+ * и открывает.
  */
-const totalAmount = computed(() =>
-  formatAsset2Digits(
-    `${(
-      walletValue(MARKET_WALLET) +
-      walletValue(MEMBER_WALLET) +
-      walletValue(SHARE_WALLET)
-    ).toFixed(4)} ${symbol.value}`,
-  ),
-);
+const totalAmount = computed(() => {
+  const sum = WALLET_CARDS.reduce((acc, card) => acc + walletValue(card.name), 0);
+  return formatAsset2Digits(`${sum.toFixed(4)} ${symbol.value}`);
+});
 
 async function loadWallets(): Promise<void> {
   if (!session.username) return;
@@ -120,35 +153,17 @@ BaseDialog(v-model="dialogOpen", title="Кошелёк Стола заказов
   //- по-разному — одна в две строки с суммой сбоку, другая с суммой внизу.
   .mp-wallet
     WalletCard(
+      v-for="card in walletCards",
+      :key="card.name",
       compact,
       stacked,
-      icon="savings",
-      title="Свободный паевой Стола заказов",
-      subtitle="Паевой взнос после выдачи и отказов",
-      :balance="marketAmount",
+      :neutral="card.neutral",
+      :icon="card.icon",
+      :title="card.title",
+      :subtitle="card.subtitle",
+      :balance="card.balance",
       :symbol="symbol",
-      :locked-balance="walletLocked(MARKET_WALLET)",
-      :loading="loading"
-    )
-    WalletCard(
-      compact,
-      stacked,
-      icon="card_membership",
-      title="Членский взнос Стола заказов",
-      subtitle="Зачитывается в счёт взноса участка по следующему заказу",
-      :balance="walletAmount(MEMBER_WALLET)",
-      :symbol="symbol",
-      :loading="loading"
-    )
-    WalletCard(
-      compact,
-      stacked,
-      neutral,
-      icon="account_balance_wallet",
-      title="Главный паевой кошелёк",
-      subtitle="Отсюда паевой взнос резервируется под заказ",
-      :balance="walletAmount(SHARE_WALLET)",
-      :symbol="symbol",
+      :locked-balance="card.locked",
       :loading="loading"
     )
     .mp-wallet__hint
@@ -175,3 +190,4 @@ BaseDialog(v-model="dialogOpen", title="Кошелёк Стола заказов
   }
 }
 </style>
+

@@ -52,12 +52,15 @@
       <!-- Отпуск упаковкой: в чём приедет товар и сколько какой упаковки
            осталось. Одно число в базовых единицах тут ничего не говорит —
            заказчик берёт упаковку, а не литр. -->
-      <ul v-if="packageRows.length" class="mp-catalog-offer-card__packages">
-        <li v-for="row in packageRows" :key="row.id" class="mp-catalog-offer-card__package">
+      <ul v-if="visiblePackages.length" class="mp-catalog-offer-card__packages">
+        <li v-for="row in visiblePackages" :key="row.id" class="mp-catalog-offer-card__package">
           <span class="mp-catalog-offer-card__package-name">{{ row.label }}</span>
           <span class="mp-catalog-offer-card__package-value">
             {{ formatPrice(row.price) }}<template v-if="row.remain"> · {{ row.remain }}</template>
           </span>
+        </li>
+        <li v-if="hiddenPackages" class="mp-catalog-offer-card__package mp-catalog-offer-card__package--more">
+          и ещё {{ hiddenPackages }} {{ hiddenPackages === 1 ? 'упаковка' : 'упаковки' }}
         </li>
       </ul>
 
@@ -202,6 +205,15 @@ const packageRows = computed(() =>
   })),
 )
 
+/**
+ * В карточке показываем не больше трёх упаковок: пять вариантов растянули бы
+ * её на полэкрана, а соседние карточки в ряду тянутся за самой высокой.
+ * Полный список — на странице предложения, туда и ведёт нажатие.
+ */
+const PACKAGES_MAX = 3
+const visiblePackages = computed(() => packageRows.value.slice(0, PACKAGES_MAX))
+const hiddenPackages = computed(() => Math.max(0, packageRows.value.length - PACKAGES_MAX))
+
 function formatPrice(v: number | string) {
   const n = typeof v === 'number' ? v : Number(v)
   if (Number.isNaN(n)) return String(v)
@@ -220,6 +232,10 @@ function onClick() {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  // Карточка занимает ячейку сетки целиком, а действия прижаты к низу: иначе
+  // соседи в ряду расходятся по высоте от одной лишней строки описания, и
+  // кнопки «В корзину» стоят на разных уровнях (жалоба 2026-09-14).
+  height: 100%;
 
   &__media {
     position: relative;
@@ -275,6 +291,9 @@ function onClick() {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    // Место под две строки держится всегда: короткое название иначе поднимает
+    // цену выше, чем у соседа, и ряд читается как ступеньки.
+    min-height: calc(15px * 1.35 * 2);
   }
 
   &__supplier {
@@ -346,6 +365,11 @@ function onClick() {
     overflow-wrap: anywhere;
   }
 
+  &__package--more {
+    color: var(--p-ink-3);
+    font-size: var(--p-fs-meta, 12px);
+  }
+
   &__package-value {
     flex: 0 0 auto;
     color: var(--p-ink-3);
@@ -379,6 +403,7 @@ function onClick() {
   &__actions {
     padding: 0 var(--mp-space-md) var(--mp-space-md);
     gap: var(--mp-space-sm);
+    margin-top: auto;
   }
 }
 
