@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import { useSystemStore } from 'src/entities/System/model';
 import { BaseButton, BaseBadge, EmptyState } from 'src/shared/ui/base';
+import { DataRow } from 'src/shared/ui/domain';
 import { OfferGallery } from 'src/widgets/Marketplace/OfferGallery';
 import { marketplaceOrderUnitLabel } from 'src/shared/lib/consts';
 import { MarketplaceSaleForm } from 'src/shared/lib/consts/marketplace-units';
@@ -312,6 +313,41 @@ q-page.offer-detail(role="region", aria-label="Описание предложе
       .offer-detail__price {{ priceLabel }}
       .offer-detail__fee-note(v-if="referenceNote") {{ referenceNote }}
 
+      //- Условия сделки стоят рядом с ценой, до кнопки: куда привезут, сколько
+      //- живёт товар и сколько есть на возврат — это решается до «В корзину»,
+      //- а не после описания в подвале страницы (решение владельца 14.09.2026).
+      .offer-detail__facts
+        //- Один участок читается строкой «Участок поставки — РОМАШКА, от 10 кг».
+        //- Несколько — списком под общим заголовком, иначе непонятно, что за
+        //- названия идут подряд.
+        .offer-detail__facts-head(v-if="deliveryPoints.length > 1") Участки поставки
+        DataRow(
+          v-for="p in deliveryPoints",
+          :key="p.key",
+          :label="deliveryPoints.length > 1 ? p.name : 'Участок поставки'",
+          :value="deliveryPoints.length > 1 ? p.volume : `${p.name} — ${p.volume}`"
+        )
+        DataRow(
+          label="Срок годности",
+          :value="offer.shelf_life_days > 0 ? `${offer.shelf_life_days} дн.` : 'Без срока годности'"
+        )
+        DataRow(label="Гарантийный срок возврата")
+          template(#value-override)
+            .offer-detail__warranty
+              span {{ offer.warranty_days > 0 ? `${offer.warranty_days} дн.` : 'Без гарантийного срока возврата' }}
+              //- Правка срока — только на столе администратора: у заказчика
+              //- карточка читающая.
+              BaseButton(
+                v-if="readonly",
+                variant="secondary",
+                size="sm",
+                :loading="isSettingWarranty(offer.id)",
+                @click="editWarranty"
+              )
+                template(#icon-left)
+                  q-icon(name="event_repeat", size="16px")
+                | Изменить
+
       BaseButton(
         v-if="!readonly",
         variant="primary",
@@ -352,33 +388,6 @@ q-page.offer-detail(role="region", aria-label="Описание предложе
           span.offer-detail__point-name {{ row.name }}
           span.offer-detail__point-vol {{ row.price }} · {{ row.stock }}
 
-    section.offer-detail__section(v-if="deliveryPoints.length")
-      .offer-detail__section-head Участки поставки
-      ul.offer-detail__points
-        li.offer-detail__point(v-for="p in deliveryPoints", :key="p.key")
-          span.offer-detail__point-name {{ p.name }}
-          span.offer-detail__point-vol {{ p.volume }}
-
-    section.offer-detail__section
-      .offer-detail__section-head Срок годности
-      .offer-detail__desc {{ offer.shelf_life_days > 0 ? `${offer.shelf_life_days} дн.` : 'Без срока годности' }}
-
-    section.offer-detail__section
-      .offer-detail__section-head Гарантийный срок возврата
-      .offer-detail__warranty
-        .offer-detail__desc {{ offer.warranty_days > 0 ? `${offer.warranty_days} дн.` : 'Без гарантийного срока возврата' }}
-        //- Правка срока — только на столе администратора: у заказчика карточка
-        //- читающая.
-        BaseButton(
-          v-if="readonly",
-          variant="secondary",
-          size="sm",
-          :loading="isSettingWarranty(offer.id)",
-          @click="editWarranty"
-        )
-          template(#icon-left)
-            q-icon(name="event_repeat", size="16px")
-          | Изменить
 
   AddToCartDialog(
     v-if="!readonly",
@@ -396,6 +405,22 @@ q-page.offer-detail(role="region", aria-label="Описание предложе
   gap: var(--p-4, 16px);
 
   // Срок и кнопка правки — одной строкой: кнопка относится к сроку.
+  &__facts {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--p-line);
+    border-bottom: 1px solid var(--p-line);
+    margin: var(--p-2, 8px) 0;
+  }
+
+  &__facts-head {
+    font-size: var(--p-fs-meta, 12px);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--p-ink-3);
+    padding: var(--p-3, 12px) 0 0;
+  }
+
   &__warranty {
     display: flex;
     align-items: center;
