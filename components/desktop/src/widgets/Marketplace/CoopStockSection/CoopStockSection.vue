@@ -8,9 +8,9 @@ import {
   BaseCard,
   BaseDialog,
   BaseInput,
+  BaseTable,
   EmptyState,
-  TableSkeleton,
-  type TableSkeletonColumn,
+  type BaseTableColumn,
 } from 'src/shared/ui/base';
 import { FailAlert, SuccessAlert } from 'src/shared/api';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
@@ -43,13 +43,16 @@ const firstLoad = useFirstLoad(loading);
 const selected = ref<Set<string>>(new Set());
 watch(items, (v) => emit('count', v.length), { immediate: true });
 
-const skeletonColumns: TableSkeletonColumn[] = [
-  { cell: 'icon', width: '40px' },
-  { label: 'Товар', cell: 'text' },
-  { label: 'Кол-во', class: 'num', cell: 'text', cellWidth: '80px' },
-  { label: 'Цена прибытия', class: 'num', cell: 'text', cellWidth: '100px' },
-  { label: 'Годен до', cell: 'text', cellWidth: '100px' },
-  { label: 'Состояние', cell: 'badge' },
+// Выбор ведём своей колонкой, а не галочками таблицы: зарезервированную под
+// заказ позицию выбирать нельзя, и встроенный выбор таблицы такого различия
+// не делает.
+const columns: BaseTableColumn<MarketplaceInventoryItemView>[] = [
+  { key: 'pick', label: '', width: '56px' },
+  { key: 'product', label: 'Товар', width: '280px', sortable: true, field: 'product_name_snapshot' },
+  { key: 'quantity', label: 'Кол-во', width: '130px', numeric: true },
+  { key: 'price', label: 'Цена прибытия', width: '160px', numeric: true },
+  { key: 'expiry', label: 'Годен до', width: '130px', nowrap: true },
+  { key: 'state', label: 'Состояние', width: '170px' },
 ];
 
 const publishDialogOpen = ref(false);
@@ -167,14 +170,8 @@ async function unpublishSelected(): Promise<void> {
 </script>
 
 <template lang="pug">
-TableSkeleton(
-  v-if='firstLoad',
-  :columns='skeletonColumns',
-  :rows='4'
-)
-
 EmptyState(
-  v-else-if='!items.length',
+  v-if='!firstLoad && !items.length',
   title='Остатков нет',
   body='Здесь появятся обезличенные позиции склада после недовыдач и отказов от получения.'
 )
@@ -202,35 +199,33 @@ BaseCard.coop-stock(v-else)
         @click='openPublishDialog'
       ) Опубликовать ({{ selectedFree.length }})
 
-  .table-wrap
-    .table-scroll
-      table.table
-        thead
-          tr
-            th
-            th Товар
-            th.num Кол-во
-            th.num Цена прибытия
-            th Годен до
-            th Состояние
-        tbody
-          tr(v-for='i in items', :key='i.id')
-            td
-              q-checkbox(
-                :model-value='selected.has(i.id)',
-                :disable='stateOf(i) === "reserved"',
-                dense,
-                @update:model-value='toggle(i.id)'
-              )
-            td
-              | {{ i.product_name_snapshot }}
-              BaseBadge.q-ml-sm(v-if='isWarrantyReturn(i)', variant='warn', size='sm') Гарантийный возврат
-            td.num {{ quantityLabel(i) }}
-            td.num {{ i.arrival_price ? formatAsset2Digits(i.arrival_price) + ' ₽' : '—' }}
-            td {{ expiryLabel(i) }}
-            td
-              BaseBadge(:variant='STATE_BADGE[stateOf(i)].variant', size='sm')
-                | {{ STATE_BADGE[stateOf(i)].label }}
+  BaseTable(
+    :columns='columns',
+    :rows='items',
+    row-key='id',
+    hover,
+    min-width='930px',
+    sort-by='product'
+  )
+    template(#cell-pick='{ row }')
+      q-checkbox(
+        :model-value='selected.has(row.id)',
+        :disable='stateOf(row) === "reserved"',
+        dense,
+        @update:model-value='toggle(row.id)'
+      )
+    template(#cell-product='{ row }')
+      | {{ row.product_name_snapshot }}
+      BaseBadge.q-ml-sm(v-if='isWarrantyReturn(row)', variant='warn', size='sm') Гарантийный возврат
+    template(#cell-quantity='{ row }')
+      | {{ quantityLabel(row) }}
+    template(#cell-price='{ row }')
+      | {{ row.arrival_price ? formatAsset2Digits(row.arrival_price) + ' ₽' : '—' }}
+    template(#cell-expiry='{ row }')
+      | {{ expiryLabel(row) }}
+    template(#cell-state='{ row }')
+      BaseBadge(:variant='STATE_BADGE[stateOf(row)].variant', size='sm')
+        | {{ STATE_BADGE[stateOf(row)].label }}
 
 BaseDialog(
   v-model='publishDialogOpen',
