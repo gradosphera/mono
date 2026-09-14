@@ -3621,6 +3621,9 @@ export const AllTypesProps: Record<string,any> = {
 	Subscription:{
 		marketplaceEvents:{
 			input:"MarketplaceEventsInput"
+		},
+		walletEvents:{
+			input:"WalletEventsInput"
 		}
 	},
 	SystemStatus: "enum" as const,
@@ -3747,6 +3750,9 @@ export const AllTypesProps: Record<string,any> = {
 	VoteOnKuDecisionInput:{
 		ballot:"BranchMeetingBallotSignedDocumentInput",
 		votes:"KuVoteItemInput"
+	},
+	WalletEventsInput:{
+
 	},
 	WalmoveInput:{
 
@@ -8593,7 +8599,8 @@ export const ReturnTypes: Record<string,any> = {
 	},
 	Subscription:{
 		marketplaceEvents:"MarketplaceEvent",
-		nodeSyncState:"NodeSyncState"
+		nodeSyncState:"NodeSyncState",
+		walletEvents:"WalletChangedEvent"
 	},
 	SubscriptionStatsDto:{
 		active:"Int",
@@ -8737,6 +8744,11 @@ export const ReturnTypes: Record<string,any> = {
 	WaitWeight:{
 		wait_sec:"Int",
 		weight:"Int"
+	},
+	WalletChangedEvent:{
+		coopname:"String",
+		username:"String",
+		wallet_name:"String"
 	},
 	WebPushSubscriptionDto:{
 		authKey:"String",

@@ -16060,6 +16060,7 @@ verificationReviews?: [{	data?: ValueTypes["VerificationReviewsInput"] | undefin
 marketplaceEvents?: [{	input: ValueTypes["MarketplaceEventsInput"] | Variable<any, string>},ValueTypes["MarketplaceEvent"]],
 	/** Ход догона цепи узлом кооператива */
 	nodeSyncState?:ValueTypes["NodeSyncState"],
+walletEvents?: [{	input: ValueTypes["WalletEventsInput"] | Variable<any, string>},ValueTypes["WalletChangedEvent"]],
 		__typename?: boolean | `@${string}`,
 	['...on Subscription']?: Omit<ValueTypes["Subscription"], "...on Subscription">
 }>;
@@ -16743,6 +16744,19 @@ marketplaceEvents?: [{	input: ValueTypes["MarketplaceEventsInput"] | Variable<an
 		__typename?: boolean | `@${string}`,
 	['...on WaitWeight']?: Omit<ValueTypes["WaitWeight"], "...on WaitWeight">
 }>;
+	["WalletChangedEvent"]: AliasType<{
+	coopname?:boolean | `@${string}`,
+	/** Пайщик, чей кошелёк изменился. */
+	username?:boolean | `@${string}`,
+	/** Имя кошелька в ledger2 — например «w.wal.share» у главного паевого. */
+	wallet_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`,
+	['...on WalletChangedEvent']?: Omit<ValueTypes["WalletChangedEvent"], "...on WalletChangedEvent">
+}>;
+	["WalletEventsInput"]: {
+	/** Кооператив; сверяется с кооперативом узла. */
+	coopname: string | Variable<any, string>
+};
 	["WalmoveInput"]: {
 	coopname: string | Variable<any, string>,
 	/** eosio::name кошелька-источника (w.<contract>.<waltype>) */
@@ -31480,6 +31494,7 @@ verificationReviews?: [{	data?: ResolverInputTypes["VerificationReviewsInput"] |
 marketplaceEvents?: [{	input: ResolverInputTypes["MarketplaceEventsInput"]},ResolverInputTypes["MarketplaceEvent"]],
 	/** Ход догона цепи узлом кооператива */
 	nodeSyncState?:ResolverInputTypes["NodeSyncState"],
+walletEvents?: [{	input: ResolverInputTypes["WalletEventsInput"]},ResolverInputTypes["WalletChangedEvent"]],
 		__typename?: boolean | `@${string}`
 }>;
 	["SubscriptionStatsDto"]: AliasType<{
@@ -32146,6 +32161,18 @@ marketplaceEvents?: [{	input: ResolverInputTypes["MarketplaceEventsInput"]},Reso
 	weight?:boolean | `@${string}`,
 		__typename?: boolean | `@${string}`
 }>;
+	["WalletChangedEvent"]: AliasType<{
+	coopname?:boolean | `@${string}`,
+	/** Пайщик, чей кошелёк изменился. */
+	username?:boolean | `@${string}`,
+	/** Имя кошелька в ledger2 — например «w.wal.share» у главного паевого. */
+	wallet_name?:boolean | `@${string}`,
+		__typename?: boolean | `@${string}`
+}>;
+	["WalletEventsInput"]: {
+	/** Кооператив; сверяется с кооперативом узла. */
+	coopname: string
+};
 	["WalmoveInput"]: {
 	coopname: string,
 	/** eosio::name кошелька-источника (w.<contract>.<waltype>) */
@@ -46871,7 +46898,9 @@ export type ModelTypes = {
 		/** Поток событий пайщика в Столе заказов: личные и каталог. */
 	marketplaceEvents: ModelTypes["MarketplaceEvent"],
 	/** Ход догона цепи узлом кооператива */
-	nodeSyncState: ModelTypes["NodeSyncState"]
+	nodeSyncState: ModelTypes["NodeSyncState"],
+	/** Изменения кошельков пайщика: сигнал к дочитке остатка. */
+	walletEvents: ModelTypes["WalletChangedEvent"]
 };
 	["SubscriptionStatsDto"]: {
 		/** Количество активных подписок */
@@ -47510,6 +47539,17 @@ export type ModelTypes = {
 	wait_sec: number,
 	/** Вес */
 	weight: number
+};
+	["WalletChangedEvent"]: {
+		coopname: string,
+	/** Пайщик, чей кошелёк изменился. */
+	username: string,
+	/** Имя кошелька в ledger2 — например «w.wal.share» у главного паевого. */
+	wallet_name: string
+};
+	["WalletEventsInput"]: {
+	/** Кооператив; сверяется с кооперативом узла. */
+	coopname: string
 };
 	["WalmoveInput"]: {
 	coopname: string,
@@ -63210,6 +63250,8 @@ export type GraphQLTypes = {
 	marketplaceEvents: GraphQLTypes["MarketplaceEvent"],
 	/** Ход догона цепи узлом кооператива */
 	nodeSyncState: GraphQLTypes["NodeSyncState"],
+	/** Изменения кошельков пайщика: сигнал к дочитке остатка. */
+	walletEvents: GraphQLTypes["WalletChangedEvent"],
 	['...on Subscription']: Omit<GraphQLTypes["Subscription"], "...on Subscription">
 };
 	["SubscriptionStatsDto"]: {
@@ -63892,6 +63934,19 @@ export type GraphQLTypes = {
 	/** Вес */
 	weight: number,
 	['...on WaitWeight']: Omit<GraphQLTypes["WaitWeight"], "...on WaitWeight">
+};
+	["WalletChangedEvent"]: {
+	__typename: "WalletChangedEvent",
+	coopname: string,
+	/** Пайщик, чей кошелёк изменился. */
+	username: string,
+	/** Имя кошелька в ledger2 — например «w.wal.share» у главного паевого. */
+	wallet_name: string,
+	['...on WalletChangedEvent']: Omit<GraphQLTypes["WalletChangedEvent"], "...on WalletChangedEvent">
+};
+	["WalletEventsInput"]: {
+		/** Кооператив; сверяется с кооперативом узла. */
+	coopname: string
 };
 	["WalmoveInput"]: {
 		coopname: string,
@@ -65739,6 +65794,7 @@ type ZEUS_VARIABLES = {
 	["VoteItemInput"]: ValueTypes["VoteItemInput"];
 	["VoteOnAnnualGeneralMeetInput"]: ValueTypes["VoteOnAnnualGeneralMeetInput"];
 	["VoteOnKuDecisionInput"]: ValueTypes["VoteOnKuDecisionInput"];
+	["WalletEventsInput"]: ValueTypes["WalletEventsInput"];
 	["WalmoveInput"]: ValueTypes["WalmoveInput"];
 	["WaveLabel"]: ValueTypes["WaveLabel"];
 	["WavePhase"]: ValueTypes["WavePhase"];
