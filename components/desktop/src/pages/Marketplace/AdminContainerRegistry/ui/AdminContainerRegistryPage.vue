@@ -16,6 +16,7 @@ import {
 import type { BaseSelectOption, BaseTableColumn } from 'src/shared/ui/base'
 import { PageHint } from 'src/shared/ui/domain'
 import { PageTabs, type PageTab } from 'src/shared/ui/layout'
+import { ContainerContentsDrawer } from 'src/widgets/Marketplace/ContainerContentsDrawer'
 import { useMarketplaceRealtime } from 'src/shared/lib/marketplace'
 import { useDesktopStore } from 'src/entities/Desktop'
 import { useMarketplaceKUDetailsStore } from 'src/entities/MarketplaceKUDetails'
@@ -31,7 +32,11 @@ import {
   type MarketplaceContainerView,
   type MarketplaceStorageCellView,
 } from 'src/entities/MarketplaceStorage'
-import { listInventory, type MarketplaceInventoryItemView } from 'src/entities/MarketplaceInventory'
+import {
+  isOnWarehouse,
+  listInventory,
+  type MarketplaceInventoryItemView,
+} from 'src/entities/MarketplaceInventory'
 
 /**
  * Стол администратора: тара всего кооператива.
@@ -85,20 +90,53 @@ const typeById = computed(
   () => new Map(types.value.map((t) => [t.id, t] as const)),
 )
 
+// ─── Содержимое бокса ───
+// Реестр отвечает «сколько позиций», а смотрящему нужно «что именно лежит»:
+// строка открывает боковую панель с составом. Позиции склада уже загружены
+// вместе с реестром, поэтому панель ничего не дозапрашивает.
+const openedContainer = ref<MarketplaceContainerView | null>(null)
+const contentsOpen = ref(false)
+
+function openContainer(container: MarketplaceContainerView): void {
+  openedContainer.value = container
+  contentsOpen.value = true
+}
+
+// В боксе лежит только то, что на складе: выданное и списанное покидает
+// участок и место за собой не держит.
+const openedItems = computed(() =>
+  openedContainer.value
+    ? inventory.value.filter(
+        (i) => i.container_id === openedContainer.value?.id && isOnWarehouse(i.status),
+      )
+    : [],
+)
+
 /** Сколько позиций лежит в каждом боксе — считается из склада, не с бэкенда. */
 const countByContainer = computed(() => {
   const map = new Map<string, number>()
   for (const item of inventory.value) {
-    if (!item.container_id) continue
+    if (!item.container_id || !isOnWarehouse(item.status)) continue
     map.set(item.container_id, (map.get(item.container_id) ?? 0) + 1)
   }
   return map
 })
 
-/** Человеческое имя участка вместо служебного кода. */
+/**
+ * Наименование участка вместо служебного кода. Адрес идёт отдельной строкой
+ * под наименованием (как на складе): адрес отвечает «куда ехать», а называют
+ * участок по организации — «РОМАШКА», а не «Москва, ул. Мира д.1».
+ */
 function branchName(braname: string): string {
   const details = kuStore.details.find((d) => d.coreBraname === braname)
-  return details?.addressFull || braname
+  return details?.name?.trim() || details?.addressFull || braname
+}
+
+function branchAddress(braname: string): string {
+  const details = kuStore.details.find((d) => d.coreBraname === braname)
+  const address = details?.addressFull?.trim() ?? ''
+  // Адрес не дублируем, когда он же и подставлен вместо наименования.
+  return address && address !== branchName(braname) ? address : ''
 }
 
 const branchOptions = computed<BaseSelectOption[]>(() => {
@@ -365,8 +403,14 @@ q-page.boxreg(role='region', aria-label='Боксы кооператива')
       :loading='loading',
       :skeleton-rows='8',
       min-width='900px',
-      sort-by='branch'
+      sort-by='branch',
+      clickable-rows,
+      @row-click='openContainer'
     )
+      template(#cell-branch='{ row }')
+        .boxreg__branch-cell
+          span.boxreg__branch-name {{ branchName(row.braname) }}
+          span.boxreg__sub(v-if='branchAddress(row.braname)') {{ branchAddress(row.braname) }}
       template(#cell-code='{ row }')
         span.boxreg__code {{ row.code }}
         .boxreg__sub(v-if='row.label') {{ row.label }}
@@ -415,6 +459,17 @@ q-page.boxreg(role='region', aria-label='Боксы кооператива')
     )
       template(#icon)
         q-icon(name='straighten', size='48px')
+
+  ContainerContentsDrawer(
+    v-model='contentsOpen',
+    :container='openedContainer',
+    :items='openedItems',
+    :branch-name='openedContainer ? branchName(openedContainer.braname) : ""',
+    :branch-address='openedContainer ? branchAddress(openedContainer.braname) : ""',
+    :type-name='openedContainer ? typeNameOf(openedContainer) : ""',
+    :volume='openedContainer ? volumeOf(openedContainer) : ""',
+    :cell-code='openedContainer ? cellCodeOf(openedContainer) : ""'
+  )
 
   //- ─────────────────────── Диалог: тип боксов ───────────────────────
   BaseDialog(v-model='typeOpen', title='Тип боксов', size='sm')
@@ -468,6 +523,17 @@ q-page.boxreg(role='region', aria-label='Боксы кооператива')
     font-family: var(--p-mono);
     font-weight: 600;
     color: var(--p-ink);
+  }
+
+  &__branch-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__branch-name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
   }
 
   &__sub {

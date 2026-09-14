@@ -26,7 +26,11 @@ import {
   volumeM3Of,
   type MarketplaceContainerView,
 } from 'src/entities/MarketplaceStorage'
-import { listInventory, type MarketplaceInventoryItemView } from 'src/entities/MarketplaceInventory'
+import {
+  isOnWarehouse,
+  listInventory,
+  type MarketplaceInventoryItemView,
+} from 'src/entities/MarketplaceInventory'
 import {
   HandoffTokenKind,
   encodeHandoffToken,
@@ -89,7 +93,8 @@ watch(
 const itemsByContainer = computed(() => {
   const map = new Map<string, MarketplaceInventoryItemView[]>()
   for (const item of inventory.value) {
-    if (!item.container_id) continue
+    // Выданное и списанное бокс уже покинуло — занятым он от этого не считается.
+    if (!item.container_id || !isOnWarehouse(item.status)) continue
     const list = map.get(item.container_id)
     if (list) list.push(item)
     else map.set(item.container_id, [item])

@@ -33,6 +33,7 @@ import {
   useMarketplaceStorageStore,
 } from 'src/entities/MarketplaceStorage'
 import {
+  MARKETPLACE_ON_WAREHOUSE_STATUSES,
   assignInventoryPlacement,
   generateInventoryLabel,
   listInventory,
@@ -75,13 +76,9 @@ const coopStockCount = ref(0)
 
 // Склад — это «что сейчас физически лежит на складе», не история движений.
 // Выданное пайщику и списанное уже не на складе — им место в будущей истории
-// заказов, не здесь. Поэтому фильтр не выбирается оператором, а зашит: только
-// 3 состояния, которые вообще бывают «на складе».
-const ON_WAREHOUSE_STATUSES = [
-  Zeus.MarketplaceInventoryStatus.RECEIVED,
-  Zeus.MarketplaceInventoryStatus.LABELED,
-  Zeus.MarketplaceInventoryStatus.RETURNED,
-]
+// заказов, не здесь. Поэтому фильтр не выбирается оператором, а зашит общим
+// списком состояний склада (по нему же считается занятость боксов).
+const ON_WAREHOUSE_STATUSES = [...MARKETPLACE_ON_WAREHOUSE_STATUSES]
 
 // Имя заказчика для показа: ФИО (резолвится бэкендом), иначе — аккаунт.
 function ordererName(row: MarketplaceInventoryItemView): string {

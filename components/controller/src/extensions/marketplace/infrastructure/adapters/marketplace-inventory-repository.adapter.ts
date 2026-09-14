@@ -23,6 +23,23 @@ import { MarketplaceUnitsOfMeasure } from '../../domain/entities/marketplace-off
 import { MarketplaceInventoryEntity } from '../entities/marketplace-inventory.entity';
 import { MarketplaceInventoryMapper } from '../mappers/marketplace-inventory.mapper';
 
+/**
+ * Позиция, покинувшая склад (выдана пайщику или списана), теряет место
+ * хранения: бокс и ячейка отвечают на вопрос «где это лежит СЕЙЧАС», а
+ * выданного на участке уже нет. Пока место оставалось на месте, бокс числился
+ * занятым выданным имуществом: реестр тары показывал «2 поз.» у пустой
+ * коробки, а вывести её из оборота не давал непустой состав (жалоба владельца
+ * 14.09.2026).
+ */
+function LEFT_WAREHOUSE_PLACEMENT(
+  status: MarketplaceInventoryStatus
+): { container_id: null; cell_id: null } | Record<string, never> {
+  const left =
+    status === MarketplaceInventoryStatuses.ISSUED ||
+    status === MarketplaceInventoryStatuses.WRITTEN_OFF;
+  return left ? { container_id: null, cell_id: null } : {};
+}
+
 @Injectable()
 export class MarketplaceInventoryRepositoryAdapter implements MarketplaceInventoryDomainRepository {
   constructor(
@@ -225,7 +242,7 @@ export class MarketplaceInventoryRepositoryAdapter implements MarketplaceInvento
     id: string,
     newStatus: MarketplaceInventoryStatus
   ): Promise<MarketplaceInventoryDomainEntity> {
-    await this.repo.update({ id }, { status: newStatus });
+    await this.repo.update({ id }, { status: newStatus, ...LEFT_WAREHOUSE_PLACEMENT(newStatus) });
     const row = await this.repo.findOneOrFail({ where: { id } });
     return this.mapper.toDomain(row);
   }
@@ -241,7 +258,7 @@ export class MarketplaceInventoryRepositoryAdapter implements MarketplaceInvento
           MarketplaceInventoryStatuses.LABELED,
         ]),
       },
-      { status: MarketplaceInventoryStatuses.ISSUED }
+      { status: MarketplaceInventoryStatuses.ISSUED, container_id: null, cell_id: null }
     );
     return res.affected ?? 0;
   }
@@ -359,6 +376,8 @@ export class MarketplaceInventoryRepositoryAdapter implements MarketplaceInvento
           remainingToIssue -= row.quantity_per_label;
           await em.update(MarketplaceInventoryEntity, { id: row.id }, {
             status: MarketplaceInventoryStatuses.ISSUED,
+            container_id: null,
+            cell_id: null,
           });
         } else if (remainingToIssue > 0) {
           // Пограничная позиция: выданная часть остаётся адресной (ISSUED),
@@ -367,6 +386,8 @@ export class MarketplaceInventoryRepositoryAdapter implements MarketplaceInvento
           await em.update(MarketplaceInventoryEntity, { id: row.id }, {
             status: MarketplaceInventoryStatuses.ISSUED,
             quantity_per_label: remainingToIssue,
+            container_id: null,
+            cell_id: null,
           });
           await em.insert(MarketplaceInventoryEntity, this.buildStockSplitRow(row, stockQty, arrival_price));
           detached += stockQty;
@@ -488,6 +509,8 @@ export class MarketplaceInventoryRepositoryAdapter implements MarketplaceInvento
           issuedArrivalCost += arrivalOf(row) * row.quantity_per_label;
           await em.update(MarketplaceInventoryEntity, { id: row.id }, {
             status: MarketplaceInventoryStatuses.ISSUED,
+            container_id: null,
+            cell_id: null,
           });
         } else if (remainingToIssue > 0) {
           const releaseQty = row.quantity_per_label - remainingToIssue;
@@ -495,6 +518,8 @@ export class MarketplaceInventoryRepositoryAdapter implements MarketplaceInvento
           await em.update(MarketplaceInventoryEntity, { id: row.id }, {
             status: MarketplaceInventoryStatuses.ISSUED,
             quantity_per_label: remainingToIssue,
+            container_id: null,
+            cell_id: null,
           });
           // Невыданная часть возвращается в свободный опубликованный остаток.
           await em.insert(MarketplaceInventoryEntity, {
