@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { FailAlert } from 'src/shared/api';
 import {
   useMarketplaceRealtime,
-  marketplaceCardPackages,
+  marketplaceAvailablePackages,
   offerCardUnitCost,
   offerCardUnitLabel,
 } from 'src/shared/lib/marketplace';
@@ -132,15 +132,31 @@ function referencePriceNote(_offer: MarketplaceOfferView): string | undefined {
 function toCatalogOffer(offer: MarketplaceOfferView): CatalogOffer {
   const isEmpty = !offer.unlimited_flag && offer.quantity_available <= 0;
   const status: CatalogOfferStatus = isEmpty ? 'sold-out' : 'published';
+  // Заказчику показываем только ту тару, которую он может взять: пустая
+  // упаковка в карточке обещает товар, а в окне «В корзину» упирается в
+  // «Доступно: 0». Крупная цена тоже считается по доступной таре — иначе
+  // карточка называет цену литровой бутылки, которой на складе нет.
+  const availableOffer = {
+    ...offer,
+    packages: marketplaceAvailablePackages(offer.packages, offer.unlimited_flag),
+  };
+  // Основная доступная тара задаёт и цену, и остаток: карточка говорит «130 ₽
+  // за упак. 0,5 л — 90 упак.», а весь перечень тары заказчик выбирает в окне
+  // «В корзину» или на странице предложения (решение владельца 14.09.2026).
+  const mainPackage =
+    availableOffer.packages.find((p) => p.is_default) ?? availableOffer.packages[0] ?? null;
   return {
     id: offer.id,
     title: offer.product_name,
     description: offer.description ?? undefined,
     images: marketplaceOfferImageUrls(offer.images),
-    remainUnits: offer.unlimited_flag ? undefined : offer.quantity_available,
-    unitCost: offerCardUnitCost(offer),
-    unitLabel: offerCardUnitLabel(offer),
-    packages: marketplaceCardPackages(offer.packages, offer.unit_of_measure, offer.unlimited_flag),
+    remainUnits: offer.unlimited_flag
+      ? undefined
+      : mainPackage
+        ? mainPackage.quantity_available
+        : offer.quantity_available,
+    unitCost: offerCardUnitCost(availableOffer),
+    unitLabel: offerCardUnitLabel(availableOffer),
     referenceNote: referencePriceNote(offer),
     status,
     category: categoryNameById.value[offer.category_id] ?? undefined,
@@ -151,7 +167,14 @@ function toCatalogOffer(offer: MarketplaceOfferView): CatalogOffer {
 }
 
 function canOrder(offer: MarketplaceOfferView): boolean {
-  return offer.unlimited_flag || offer.quantity_available > 0;
+  if (offer.unlimited_flag) return true;
+  if (offer.quantity_available <= 0) return false;
+  // Отпуск упаковкой: остаток ведётся на каждой таре, и общий котёл литров
+  // ничего не решает — если свободных упаковок нет, заказывать нечего.
+  if (offer.packages?.length) {
+    return marketplaceAvailablePackages(offer.packages, false).length > 0;
+  }
+  return true;
 }
 
 async function loadCategories(): Promise<void> {

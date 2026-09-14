@@ -59,6 +59,7 @@ export {
   type MarketplaceRealtimeOptions,
 } from './marketplace-realtime';
 export {
+  marketplaceAvailablePackages,
   marketplaceCardPackages,
   marketplacePackageLabel,
   marketplacePackageStockLabel,

@@ -14,6 +14,7 @@ import {
   useMarketplaceRealtime,
   getMembershipFeePercent,
   applyMembershipFee,
+  marketplaceAvailablePackages,
   marketplacePackageStockLabel,
 } from 'src/shared/lib/marketplace';
 import { useMarketplaceCartStore } from 'src/entities/MarketplaceCart';
@@ -129,9 +130,16 @@ const isPackaged = computed(
 const isEmpty = computed(
   () => !!offer.value && !offer.value.unlimited_flag && offer.value.quantity_available <= 0,
 );
-const canOrder = computed(
-  () => !!offer.value && (offer.value.unlimited_flag || offer.value.quantity_available > 0),
-);
+const canOrder = computed(() => {
+  const o = offer.value;
+  if (!o) return false;
+  if (o.unlimited_flag) return true;
+  if (o.quantity_available <= 0) return false;
+  // Отпуск упаковкой: пока нет свободной тары, брать нечего — общий остаток
+  // в литрах тут ничего не решает.
+  if (o.packages?.length) return marketplaceAvailablePackages(o.packages, false).length > 0;
+  return true;
+});
 const stockLabel = computed(() => {
   if (!offer.value) return '';
   if (offer.value.unlimited_flag) return 'Без ограничения остатка';
@@ -149,9 +157,17 @@ const stockLabel = computed(() => {
 const feePercent = ref(0);
 // Цена — за единицу отпуска: при отпуске упаковкой это цена за упаковку, а
 // не за литр. Основная упаковка задаёт цену, которую заказчик видит первой.
-const defaultPackage = computed(
-  () => offer.value?.packages?.find((p) => p.is_default) ?? offer.value?.packages?.[0] ?? null,
+// Цену показываем по той таре, которую можно взять: иначе страница называет
+// цену литровой бутылки, которой на складе нет (жалоба 2026-09-14).
+const availablePackages = computed(() =>
+  marketplaceAvailablePackages(offer.value?.packages, Boolean(offer.value?.unlimited_flag)),
 );
+const defaultPackage = computed(() => {
+  const list = availablePackages.value.length
+    ? availablePackages.value
+    : offer.value?.packages ?? [];
+  return list.find((p) => p.is_default) ?? list[0] ?? null;
+});
 const saleUnitLabel = computed(() => {
   const pkg = defaultPackage.value;
   if (!isPackaged.value || !pkg) return unitShort.value;
@@ -183,7 +199,9 @@ const packageRows = computed(() =>
     price: `${applyMembershipFee(Number(p.price), feePercent.value).toLocaleString('ru-RU')} ${system.governSymbol}`,
     stock: offer.value?.unlimited_flag
       ? 'без ограничения'
-      : `${p.quantity_available} упак.`,
+      : p.quantity_available > 0
+        ? `${p.quantity_available} упак.`
+        : 'нет в наличии',
   })),
 );
 // Цена всегда задаётся за базовую единицу (Эпик 17) — справочный пересчёт из
