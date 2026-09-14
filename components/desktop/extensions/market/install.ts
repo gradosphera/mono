@@ -730,17 +730,15 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               children: [],
             },
             {
-              // Реестр поставщиков: модель работы, договор (номер + дата),
-              // статус допуска. Администратор видит реестр и добавляет поставщика
-              // напрямую (`Supplier:manage`); одобрение/отклонение заявок —
-              // действие председателя (кнопки в строке видны только ему).
-              path: 'suppliers',
-              name: 'marketplace-suppliers',
-              component: markRaw(SupplierRegistryPage),
+              // Эпик 3 / Story 3.6: admin-стол модерации offer'ов. Виден совету
+              // и председателю (`Order:read:all` есть у board_readonly и admin).
+              path: 'moderation',
+              name: 'marketplace-moderation',
+              component: markRaw(ChairmanModerationPage),
               meta: {
-                title: 'Реестр поставщиков',
-                icon: 'storefront',
-                requires: 'Supplier:manage',
+                title: 'Модерация',
+                icon: 'fa-solid fa-clipboard-check',
+                requires: 'Order:read:all',
                 requiresAuth: true,
                 agreements: agreementsBase,
               },
@@ -759,21 +757,6 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 title: 'Реестр предложений',
                 icon: 'sell',
                 requires: 'Offer:read:all',
-                requiresAuth: true,
-                agreements: agreementsBase,
-              },
-              children: [],
-            },
-            {
-              // Эпик 3 / Story 3.6: admin-стол модерации offer'ов. Виден совету
-              // и председателю (`Order:read:all` есть у board_readonly и admin).
-              path: 'moderation',
-              name: 'marketplace-moderation',
-              component: markRaw(ChairmanModerationPage),
-              meta: {
-                title: 'Модерация',
-                icon: 'fa-solid fa-clipboard-check',
-                requires: 'Order:read:all',
                 requiresAuth: true,
                 agreements: agreementsBase,
               },
@@ -801,61 +784,17 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               children: [],
             },
             {
-              // Эпик 3 / Story 3.x: chairman-настройка whitelist'а категорий.
-              // Только председатель (`Whitelist:manage` есть лишь у admin).
-              path: 'economy',
-              name: 'marketplace-admin-economy',
-              component: markRaw(AdminMarketEconomyPage),
+              // Реестр поставщиков: модель работы, договор (номер + дата),
+              // статус допуска. Администратор видит реестр и добавляет поставщика
+              // напрямую (`Supplier:manage`); одобрение/отклонение заявок —
+              // действие председателя (кнопки в строке видны только ему).
+              path: 'suppliers',
+              name: 'marketplace-suppliers',
+              component: markRaw(SupplierRegistryPage),
               meta: {
-                title: 'Экономика',
-                icon: 'percent',
-                requires: 'Economy:set-fee',
-                requiresAuth: true,
-                agreements: agreementsBase,
-              },
-              children: [],
-            },
-            {
-              path: 'category-whitelist',
-              name: 'marketplace-category-whitelist',
-              component: markRaw(ChairmanCategoryWhitelistPage),
-              meta: {
-                title: 'Доступные категории',
-                icon: 'fa-solid fa-filter',
-                requires: 'Whitelist:manage',
-                requiresAuth: true,
-                agreements: agreementsBase,
-              },
-              children: [],
-            },
-            {
-              // Эпик 2: admin-стол «Пункты выдачи заказов». Председатель
-              // подключает кооперативные участки (core) как ПВЗ Стола заказов
-              // (адрес/контакты/режим работы + геокодинг) и управляет их
-              // статусом. Видна совету и председателю (`Order:read:all`);
-              // управляющие действия внутри — только председателю (isChairman),
-              // что совпадает с бэкенд-авторизацией мутаций (chairman-only).
-              path: 'issuance-points',
-              name: 'marketplace-issuance-points',
-              component: markRaw(AdminIssuancePointsPage),
-              meta: {
-                title: 'Пункты выдачи заказов',
-                icon: 'pin_drop',
-                requires: 'Order:read:all',
-                requiresAuth: true,
-                agreements: agreementsBase,
-              },
-              children: [],
-            },
-            {
-              // Эпик 8 / Story 8.7: admin-стол списания скоропорта.
-              path: 'writeoffs',
-              name: 'marketplace-writeoffs',
-              component: markRaw(AdminWriteoffsPage),
-              meta: {
-                title: 'Списания скоропорта',
-                icon: 'fa-solid fa-trash-can-arrow-up',
-                requires: 'Order:read:all',
+                title: 'Реестр поставщиков',
+                icon: 'storefront',
+                requires: 'Supplier:manage',
                 requiresAuth: true,
                 agreements: agreementsBase,
               },
@@ -897,6 +836,35 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               children: [],
             },
             {
+              // Эпик 8 / Story 8.7: admin-стол списания скоропорта.
+              path: 'writeoffs',
+              name: 'marketplace-writeoffs',
+              component: markRaw(AdminWriteoffsPage),
+              meta: {
+                title: 'Списания скоропорта',
+                icon: 'fa-solid fa-trash-can-arrow-up',
+                requires: 'Order:read:all',
+                requiresAuth: true,
+                agreements: agreementsBase,
+              },
+              children: [],
+            },
+            {
+              // Эпик 3 / Story 3.x: chairman-настройка whitelist'а категорий.
+              // Только председатель (`Whitelist:manage` есть лишь у admin).
+              path: 'economy',
+              name: 'marketplace-admin-economy',
+              component: markRaw(AdminMarketEconomyPage),
+              meta: {
+                title: 'Экономика',
+                icon: 'percent',
+                requires: 'Economy:set-fee',
+                requiresAuth: true,
+                agreements: agreementsBase,
+              },
+              children: [],
+            },
+            {
               // Эпик 5 / Story 5.x: read-only лента выплат поставщикам для совета.
               path: 'payouts',
               name: 'marketplace-board-payouts',
@@ -905,6 +873,38 @@ export default async function (): Promise<IWorkspaceConfig[]> {
                 title: 'Выплаты поставщикам',
                 icon: 'fa-solid fa-coins',
                 requires: 'Order:read:all',
+                requiresAuth: true,
+                agreements: agreementsBase,
+              },
+              children: [],
+            },
+            {
+              // Эпик 2: admin-стол «Пункты выдачи заказов». Председатель
+              // подключает кооперативные участки (core) как ПВЗ Стола заказов
+              // (адрес/контакты/режим работы + геокодинг) и управляет их
+              // статусом. Видна совету и председателю (`Order:read:all`);
+              // управляющие действия внутри — только председателю (isChairman),
+              // что совпадает с бэкенд-авторизацией мутаций (chairman-only).
+              path: 'issuance-points',
+              name: 'marketplace-issuance-points',
+              component: markRaw(AdminIssuancePointsPage),
+              meta: {
+                title: 'Пункты выдачи заказов',
+                icon: 'pin_drop',
+                requires: 'Order:read:all',
+                requiresAuth: true,
+                agreements: agreementsBase,
+              },
+              children: [],
+            },
+            {
+              path: 'category-whitelist',
+              name: 'marketplace-category-whitelist',
+              component: markRaw(ChairmanCategoryWhitelistPage),
+              meta: {
+                title: 'Доступные категории',
+                icon: 'fa-solid fa-filter',
+                requires: 'Whitelist:manage',
                 requiresAuth: true,
                 agreements: agreementsBase,
               },
@@ -945,8 +945,10 @@ export default async function (): Promise<IWorkspaceConfig[]> {
               component: markRaw(OnboardingCoopAcceptCppPage),
               meta: {
                 title: 'Подключение ЦПП',
-                icon: 'fa-solid fa-handshake',
-                requires: 'Extension:configure',
+                icon: 'handshake',
+                // Маркер видимости выдаётся только пока ЦПП не принята
+                // Советом: после подключения страница из меню уходит.
+                requires: 'Onboarding:coop',
                 requiresAuth: true,
                 agreements: agreementsBase,
               },
