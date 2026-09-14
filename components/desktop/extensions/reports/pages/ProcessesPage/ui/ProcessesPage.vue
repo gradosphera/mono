@@ -88,7 +88,6 @@ div.processes-page
               :color='processChipBg(props.row.processType)'
               :text-color='processChipText(props.row.processType)'
             ) {{ processTypeLabel(props.row.processType) }}
-            .processes-registry__memo(v-if='props.row.memo') {{ props.row.memo }}
           q-td
             EntityIdBadge(
               :rawId='shortHash(props.row.processHash)'
@@ -136,7 +135,6 @@ div.processes-page
               .col
                 .text-caption.text-grey-6 {{ formatDate(props.row.lastSeenAt) }}
                 .text-body2.text-weight-medium {{ processTypeLabel(props.row.processType) }}
-                .processes-registry__memo(v-if='props.row.memo') {{ props.row.memo }}
               .col-auto.text-body2.font-monospace(v-if='props.row.amount') {{ formatProcessAmount(props.row.amount) }}
               .col-12.text-caption.text-grey-7
                 | {{ isBranch(props.row.username) ? 'Участок' : 'Пайщик' }}: {{ subjectName(props.row.username) }}
@@ -386,17 +384,6 @@ onMounted(async () => {
 }
 @media (max-width: 768px) {
   .processes-page { padding: var(--p-4, 16px); }
-}
-/* Назначение главной операции — второй строкой под типом: по нему различаются
-   нитки одного типа у одного пайщика (заказ № 0 и заказ № 1). Ячейки q-table
-   не переносят текст, поэтому перенос и предел ширины задаются здесь. */
-.processes-registry__memo {
-  margin-top: var(--p-1);
-  max-width: calc(var(--p-10) * 5);
-  font-size: var(--p-fs-caption);
-  line-height: var(--p-lh-body-sm);
-  color: var(--p-ink-3);
-  white-space: normal;
 }
 .font-monospace {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
