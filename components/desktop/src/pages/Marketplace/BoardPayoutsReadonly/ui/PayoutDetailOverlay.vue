@@ -94,6 +94,7 @@ DetailsDrawer(
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { FailAlert } from 'src/shared/api';
+import { marketplaceQuantityLabel } from 'src/shared/lib/consts';
 import { formatAsset2Digits } from 'src/shared/lib/utils/formatAsset2Digits';
 import { useQueryOverlay } from 'src/shared/lib/navigation';
 import { paymentStatusLabel } from 'src/shared/lib/payment';
@@ -131,8 +132,10 @@ async function load(id: string): Promise<void> {
     detail.value = await getOutgoingPayment(id);
     const d = detail.value;
     amountLabel.value = d ? `${formatAsset2Digits(String(d.payment.amount))} ${d.payment.symbol}` : '';
+    // Единица — русской подписью из общего справочника marketplace: сырое
+    // значение enum'а («liter») в карточке читается как чужой текст.
     volumeLabel.value = d?.order
-      ? `${d.order.quantity} ${d.order.unit_of_measure ?? ''}`.trim()
+      ? marketplaceQuantityLabel(d.order.quantity, d.order.unit_of_measure)
       : '';
     hasWithheld.value = !!d && Number.parseFloat(String(d.payment.withheld_amount)) > 0;
   } catch (e) {

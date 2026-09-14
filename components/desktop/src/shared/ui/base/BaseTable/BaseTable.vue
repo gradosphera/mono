@@ -212,8 +212,11 @@ const tableStyle = computed(() => ({
     overflow-wrap: anywhere;
   }
 
+  // Подсветка строки — мягким акцентом, а не серым: `--p-surface-2` (#f7f7f8)
+  // почти совпадает с фоном страницы `--p-canvas` (#f4f4f5), и строка под
+  // курсором визуально проваливалась в подложку вместо того, чтобы выделяться.
   &--hover :deep(tbody tr:hover) {
-    background: var(--p-surface-2);
+    background: var(--p-primary-soft);
   }
 
   &--sticky :deep(thead tr th) {
