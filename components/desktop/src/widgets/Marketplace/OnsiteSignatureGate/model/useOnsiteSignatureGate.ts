@@ -370,15 +370,17 @@ async function signProposal(task: MarketplaceStockProposalView): Promise<void> {
     const pending = sagas.length - authorized.length - declined.length;
     if (actsSigned === sagas.length) {
       finishFlow('done');
-      SuccessAlert(`Совет согласовал, акт подписан по ${actsSigned} позиц. Оператор закроет выдачу — забирайте.`);
+      SuccessAlert(
+        `Совет согласовал выдачу, акт подписан по ${actsSigned} позиц. Имущество можно забирать.`,
+      );
     } else if (pending > 0) {
       finishFlow('pending');
       SuccessAlert(
-        `Заявления поданы (${sagas.length} позиц.). Решение совета ещё рассматривается — делать ничего не нужно, мы сообщим, когда оно будет принято.`,
+        `Заявления поданы: ${sagas.length} позиц. Совет ещё не принял решение. Мы сообщим, как только оно будет принято.`,
       );
     } else if (declined.length) {
       finishFlow('declined');
-      FailAlert(new Error('Совет не согласовал выдачу — паевой взнос остался на Столе заказов.'));
+      FailAlert(new Error('Совет отказал в выдаче. Паевой взнос остался на Столе заказов.'));
     } else {
       abortFlow();
     }
@@ -421,7 +423,9 @@ async function autoSignAuthorizedActs(): Promise<void> {
     autoSigning.add(saga.order_id);
     try {
       await signActFor(saga.order_id, global.username);
-      SuccessAlert(`Совет согласовал выдачу по заказу ${saga.order_id.slice(0, 8)} — акт подписан, имущество выдаст оператор участка.`);
+      SuccessAlert(
+        `Совет согласовал выдачу по заказу ${saga.order_id.slice(0, 8)}. Акт подписан, имущество выдаст оператор участка.`,
+      );
     } catch (error) {
       // Не алертим: акт выпадает из автоподписи и остаётся в гейте кнопкой —
       // пайщик подпишет вручную.
@@ -478,13 +482,13 @@ async function signSaga(task: MarketplaceIssuanceSagaView): Promise<void> {
         await signActFor(task.order_id, global.username);
         setFlow({ signedActs: 1 });
         finishFlow('done');
-        SuccessAlert('Совет согласовал, акт подписан. Оператор закроет выдачу — забирайте.');
+        SuccessAlert('Совет согласовал выдачу, акт подписан. Имущество можно забирать.');
       } else if (saga.stage === Zeus.MarketplaceIssuanceSagaStage.DECLINED) {
         finishFlow('declined');
-        FailAlert(new Error('Совет не согласовал выдачу — паевой взнос остался на Столе заказов.'));
+        FailAlert(new Error('Совет отказал в выдаче. Паевой взнос остался на Столе заказов.'));
       } else {
         finishFlow('pending');
-        SuccessAlert('Заявление подано. Решение совета рассматривается — мы сообщим, когда оно будет принято.');
+        SuccessAlert('Заявление подано. Совет ещё не принял решение — мы сообщим, как только оно будет принято.');
       }
     } else {
       await signActFor(task.order_id, global.username);

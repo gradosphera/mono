@@ -84,11 +84,11 @@ const flowRunning = computed(() =>
 const flowTitle = computed(() => {
   switch (flowStep.value) {
     case 'done':
-      return 'Готово — забирайте';
+      return 'Документы подписаны';
     case 'pending':
-      return 'Решение совета рассматривается';
+      return 'Совет ещё не принял решение';
     case 'declined':
-      return 'Совет не согласовал выдачу';
+      return 'Совет отказал в выдаче';
     default:
       return 'Получение в пункте выдачи';
   }
@@ -105,9 +105,9 @@ const flowSub = computed(() => {
         ? `Подписываем акт: ${flow.signedActs} из ${flow.total}`
         : 'Подписываем акт приёма-передачи';
     case 'done':
-      return 'Всё подписано';
+      return 'Имущество можно забирать';
     case 'pending':
-      return 'Решение ушло к людям — делать ничего не нужно, мы сообщим, когда оно будет принято';
+      return 'Мы сообщим, как только решение будет принято. Делать ничего не нужно';
     case 'declined':
       return 'Паевой взнос остался на Столе заказов';
     default:
