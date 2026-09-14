@@ -13,6 +13,7 @@ import { BaseCard, BaseButton, BaseChip, BaseDialog, EmptyState } from 'src/shar
 import { DepositButton } from 'src/features/Wallet/DepositToWallet';
 import { KUHeaderBar } from 'src/widgets/Marketplace/KUHeaderBar';
 import { marketplaceOrderUnitLabel } from 'src/shared/lib/consts';
+import { formatAssetsInText } from 'src/shared/lib/utils/formatAsset2Digits';
 import {
   useMarketplaceRealtime,
   getMembershipFeePercent,
@@ -186,7 +187,11 @@ async function onCheckout(): Promise<void> {
     });
   } catch (e) {
     if (isInsufficientFunds(e)) {
-      insufficientMessage.value = e instanceof Error ? e.message : String(e);
+      // Суммы в тексте ошибки приходят из цепи в сыром виде «1300.0000 RUB» —
+      // прогоняем через тот же форматтер, что и тосты ошибок.
+      insufficientMessage.value = formatAssetsInText(
+        e instanceof Error ? e.message : String(e),
+      );
       insufficientOpen.value = true;
       return;
     }
