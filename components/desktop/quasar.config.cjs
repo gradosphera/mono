@@ -49,7 +49,9 @@ module.exports = configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['widget', 'coopid', 'init', 'axios', 'sentry', 'network', 'chatwoot', 'theme', 'ui', 'haptics', 'pwa-update'],
+    // `hmr-guard` идёт первым: он должен встать раньше, чем страница начнёт
+    // грузить остальное, иначе первые же сообщения об обновлении пройдут мимо.
+    boot: ['hmr-guard', 'widget', 'coopid', 'init', 'axios', 'sentry', 'network', 'chatwoot', 'theme', 'ui', 'haptics', 'pwa-update'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: [
